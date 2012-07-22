@@ -18,4 +18,5 @@ require 'flipper'
 Logger.new(log_path.join('test.log'))
 
 RSpec.configure do |c|
+
 end
