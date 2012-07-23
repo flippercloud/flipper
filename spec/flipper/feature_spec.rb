@@ -1,20 +1,28 @@
 require 'helper'
 require 'flipper/feature'
+require 'adapter/memory'
 
 describe Flipper::Feature do
-  subject do
-    Flipper::Feature.new(:search)
+  subject {
+    Flipper::Feature.new(:search, adapter)
+  }
+
+  let(:adapter) {
+    Adapter[:memory].new({})
+  }
+
+  before do
+    adapter.clear
   end
 
-  it "initializes with name" do
-    feature = Flipper::Feature.new(:search)
+  it "initializes with name and adapter" do
+    feature = Flipper::Feature.new(:search, adapter)
     feature.should be_instance_of(Flipper::Feature)
   end
 
   describe "#enabled?" do
     it "defaults to false" do
-      feature = Flipper::Feature.new(:search)
-      feature.enabled?.should be_false
+      subject.enabled?.should be_false
     end
   end
 

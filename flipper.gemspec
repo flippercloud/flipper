@@ -16,4 +16,5 @@ Gem::Specification.new do |gem|
   gem.version       = Flipper::VERSION
 
   gem.add_dependency 'mongo', '~> 1.6'
+  gem.add_dependency 'adapter', '~> 0.5'
 end
