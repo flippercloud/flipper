@@ -4,27 +4,27 @@ Feature flipper for any adapter.
 
 ## Usage
 
+```ruby
+require 'adapter/memory'
 
-    require 'adapter/memory'
+adapter = Adapter[:memory].new({})
+search = Flipper::Feature.new(:search, adapter)
 
-    adapter = Adapter[:memory].new({})
-    search = Flipper::Feature.new(:search, adapter)
+if search.enabled?
+  puts 'Search away!'
+else
+  puts 'No search for you!'
+end
 
-    if search.enabled?
-      puts 'Search away!'
-    else
-      puts 'No search for you!'
-    end
+puts 'Enabling Search...'
+search.enable
 
-    puts 'Enabling Search...'
-    search.enable
-
-    if search.enabled?
-      puts 'Search away!'
-    else
-      puts 'No search for you!'
-    end
-
+if search.enabled?
+  puts 'Search away!'
+else
+  puts 'No search for you!'
+end
+```
 
 ## Installation
 
