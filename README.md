@@ -1,6 +1,30 @@
 # Flipper
 
-TODO: Write a gem description
+Feature flipper for any adapter.
+
+## Usage
+
+
+    require 'adapter/memory'
+
+    adapter = Adapter[:memory].new({})
+    search = Flipper::Feature.new(:search, adapter)
+
+    if search.enabled?
+      puts 'Search away!'
+    else
+      puts 'No search for you!'
+    end
+
+    puts 'Enabling Search...'
+    search.enable
+
+    if search.enabled?
+      puts 'Search away!'
+    else
+      puts 'No search for you!'
+    end
+
 
 ## Installation
 
@@ -12,13 +36,9 @@ And then execute:
 
     $ bundle
 
-Or install it yourself as:
+Or install it yourself with:
 
     $ gem install flipper
-
-## Usage
-
-TODO: Write usage instructions here
 
 ## Contributing
 
