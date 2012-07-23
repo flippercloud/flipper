@@ -1,4 +1,4 @@
-require "flipper/version"
+require "flipper/feature"
 
 module Flipper
 end
