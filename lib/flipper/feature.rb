@@ -36,11 +36,6 @@ module Flipper
     def enabled?(thing = Switch.new)
       switch_value = value(:switch)
       return switch_value if switch_value || thing.is_a?(Switch)
-
-      if thing.respond_to?(:type) && thing.type == :set
-        return members(thing.key).include?(thing.value)
-      end
-
       groups.any? { |group| group.match?(thing) }
     end
 

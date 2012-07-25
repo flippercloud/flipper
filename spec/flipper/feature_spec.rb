@@ -3,17 +3,21 @@ require 'flipper/feature'
 require 'flipper/memory_adapter'
 
 describe Flipper::Feature do
-  subject { Flipper::Feature.new(:search, adapter) }
+  subject           { Flipper::Feature.new(:search, adapter) }
 
   let(:adapter)     { Flipper::MemoryAdapter.new }
+
   let(:admin_group) { Flipper::Group.get(:admins) }
   let(:dev_group)   { Flipper::Group.get(:devs) }
+
+  let(:admin_actor) { double 'Actor', :admin? => true, :dev? => false }
+  let(:dev_actor)   { double 'Actor', :admin? => false, :dev? => true }
 
   before do
     Flipper::Group.all.clear
 
     Flipper::Group.define(:admins) { |actor| actor.admin? }
-    Flipper::Group.define(:devs) { |actor| actor.dev? }
+    Flipper::Group.define(:devs)   { |actor| actor.dev? }
 
     adapter.clear
   end
@@ -51,8 +55,12 @@ describe Flipper::Feature do
         subject.enable(admin_group)
       end
 
-      it "enables feature for group" do
-        subject.enabled?(admin_group).should be_true
+      it "enables feature for actor in group" do
+        subject.enabled?(admin_actor).should be_true
+      end
+
+      it "does not enable feature for actor in other group" do
+        subject.enabled?(dev_actor).should be_false
       end
 
       it "does not enable feature for all" do
@@ -69,11 +77,11 @@ describe Flipper::Feature do
       end
 
       it "disables feature" do
-        subject.disabled?.should be_true
+        subject.enabled?.should be_false
       end
 
       it "disables feature for all enabled groups" do
-        subject.disabled?(admin_group).should be_true
+        subject.enabled?(admin_group).should be_false
       end
     end
 
@@ -83,12 +91,12 @@ describe Flipper::Feature do
         subject.disable(admin_group)
       end
 
-      it "disables the feature for the group" do
-        subject.disabled?(admin_group).should be_true
+      it "disables the feature for an actor in the group" do
+        subject.enabled?(admin_actor).should be_false
       end
 
-      it "does not disable feature for other groups" do
-        subject.disabled?(dev_group).should be_false
+      it "does not disable feature for actor in other groups" do
+        subject.enabled?(dev_actor).should be_true
       end
     end
   end
@@ -100,26 +108,7 @@ describe Flipper::Feature do
       end
     end
 
-    context "for a group" do
-      it "returns true if group enabled" do
-        adapter.set_add("#{subject.name}.#{Flipper::Group::Key}", admin_group.name)
-        subject.enabled?(admin_group).should be_true
-      end
-
-      it "returns false if group not enabled" do
-        subject.enabled?(admin_group).should be_false
-      end
-
-      it "returns true if switch enabled" do
-        adapter.write("#{subject.name}.#{Flipper::Switch::Key}", true)
-        subject.enabled?(admin_group).should be_true
-      end
-    end
-
     context "for an actor" do
-      let(:admin_actor) { double('Actor', :admin? => true) }
-      let(:non_admin_actor) { double('Actor', :admin? => false) }
-
       before do
         adapter.set_add("#{subject.name}.#{Flipper::Group::Key}", admin_group.name)
       end
@@ -129,13 +118,13 @@ describe Flipper::Feature do
       end
 
       it "returns false if not in enabled group" do
-        subject.enabled?(non_admin_actor).should be_false
+        subject.enabled?(dev_actor).should be_false
       end
 
       it "returns true if switch enabled" do
         adapter.write("#{subject.name}.#{Flipper::Switch::Key}", true)
         subject.enabled?(admin_actor).should be_true
-        subject.enabled?(non_admin_actor).should be_true
+        subject.enabled?(dev_actor).should be_true
       end
     end
 
@@ -158,9 +147,19 @@ describe Flipper::Feature do
         adapter.set_add("#{subject.name}.#{Flipper::Group::Key}", :support)
       end
 
-      it "does not raise error" do
+      it "returns false" do
         subject.enabled?(actor).should be_false
       end
+    end
+  end
+
+  context "#disabled?" do
+    it "returns the opposite of enabled" do
+      subject.stub(:enabled? => true)
+      subject.disabled?.should be_false
+
+      subject.stub(:enabled? => false)
+      subject.disabled?.should be_true
     end
   end
 end
