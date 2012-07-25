@@ -29,6 +29,12 @@ describe Flipper::Feature do
     end
   end
 
+  describe "#adapter" do
+    it "returns adapter" do
+      subject.adapter.should eq(adapter)
+    end
+  end
+
   describe "#enable" do
     context "with no arguments" do
       before do

@@ -4,6 +4,7 @@ require 'flipper/switch'
 module Flipper
   class Feature
     attr_reader :name
+    attr_reader :adapter
 
     def initialize(name, adapter)
       @name = name
