@@ -64,7 +64,7 @@ describe Flipper::Feature do
   describe "#disable" do
     context "with no arguments" do
       before do
-        adapter.set_add("#{subject.name}.groups", admin_group.name)
+        adapter.set_add("#{subject.name}.#{Flipper::Group::Key}", admin_group.name)
         subject.disable
       end
 
@@ -79,7 +79,7 @@ describe Flipper::Feature do
 
     context "with a group" do
       before do
-        adapter.set_add("#{subject.name}.groups", dev_group.name)
+        adapter.set_add("#{subject.name}.#{Flipper::Group::Key}", dev_group.name)
         subject.disable(admin_group)
       end
 
@@ -102,7 +102,7 @@ describe Flipper::Feature do
 
     context "for a group" do
       it "returns true if group enabled" do
-        adapter.set_add("#{subject.name}.groups", admin_group.name)
+        adapter.set_add("#{subject.name}.#{Flipper::Group::Key}", admin_group.name)
         subject.enabled?(admin_group).should be_true
       end
 
@@ -111,7 +111,7 @@ describe Flipper::Feature do
       end
 
       it "returns true if switch enabled" do
-        adapter.write("#{subject.name}.switch", true)
+        adapter.write("#{subject.name}.#{Flipper::Switch::Key}", true)
         subject.enabled?(admin_group).should be_true
       end
     end
@@ -121,7 +121,7 @@ describe Flipper::Feature do
       let(:non_admin_actor) { double('Actor', :admin? => false) }
 
       before do
-        adapter.set_add("#{subject.name}.groups", admin_group.name)
+        adapter.set_add("#{subject.name}.#{Flipper::Group::Key}", admin_group.name)
       end
 
       it "returns true if in enabled group" do
@@ -133,7 +133,7 @@ describe Flipper::Feature do
       end
 
       it "returns true if switch enabled" do
-        adapter.write("#{subject.name}.switch", true)
+        adapter.write("#{subject.name}.#{Flipper::Switch::Key}", true)
         subject.enabled?(admin_actor).should be_true
         subject.enabled?(non_admin_actor).should be_true
       end
@@ -143,7 +143,7 @@ describe Flipper::Feature do
       let(:actor) { double('Actor') }
 
       before do
-        adapter.set_add("#{subject.name}.groups", admin_group.name)
+        adapter.set_add("#{subject.name}.#{Flipper::Group::Key}", admin_group.name)
       end
 
       it "returns false" do
@@ -155,7 +155,7 @@ describe Flipper::Feature do
       let(:actor) { double('Actor') }
 
       before do
-        adapter.set_add("#{subject.name}.groups", :support)
+        adapter.set_add("#{subject.name}.#{Flipper::Group::Key}", :support)
       end
 
       it "does not raise error" do

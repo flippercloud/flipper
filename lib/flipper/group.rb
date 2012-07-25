@@ -1,5 +1,7 @@
 module Flipper
   class Group
+    Key = :groups
+
     def self.all
       @all ||= []
     end
@@ -31,6 +33,18 @@ module Flipper
 
     def match?(*args)
       @block.call(*args) == true
+    end
+
+    def key
+      Key
+    end
+
+    def value
+      name
+    end
+
+    def type
+      :set
     end
   end
 end

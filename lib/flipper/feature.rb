@@ -12,21 +12,19 @@ module Flipper
     end
 
     def enable(thing = Switch.new)
-      case thing
-      when Flipper::Switch
-        @adapter.write "#{@name}.switch", true
-      when Flipper::Group
-        @adapter.set_add "#{@name}.groups", thing.name
+      if thing.type == :set
+        adapter.set_add prefixed_key(thing.key), thing.value
+      else
+        adapter.write prefixed_key(thing.key), thing.value
       end
     end
 
     def disable(thing = Switch.new)
-      case thing
-      when Flipper::Switch
-        @adapter.delete "#{@name}.switch"
-        @adapter.delete "#{@name}.groups"
-      when Flipper::Group
-        @adapter.set_delete "#{@name}.groups", thing.name
+      if thing.type == :set
+        adapter.set_delete prefixed_key(thing.key), thing.value
+      else
+        adapter.delete prefixed_key(Switch::Key)
+        adapter.delete prefixed_key(Group::Key)
       end
     end
 
@@ -36,23 +34,36 @@ module Flipper
     #   group  => group key
     #   else   => true if any enabled groups match actor
     def enabled?(thing = Switch.new)
-      return true if (switch_value = @adapter.read("#{@name}.switch"))
+      switch_value = value(:switch)
+      return switch_value if switch_value || thing.is_a?(Switch)
 
-      case thing
-      when Flipper::Switch
-        switch_value
-      when Flipper::Group
-        group_names = @adapter.set_members("#{@name}.groups")
-        group_names.include?(thing.name)
-      else
-        group_names = @adapter.set_members("#{@name}.groups")
-        groups = group_names.map { |name| Group.get(name) }.compact
-        groups.any? { |group| group.match?(thing) }
+      if thing.respond_to?(:type) && thing.type == :set
+        return members(thing.key).include?(thing.value)
       end
+
+      groups.any? { |group| group.match?(thing) }
     end
 
     def disabled?(thing = nil)
       !enabled?(thing)
+    end
+
+    private
+
+    def prefixed_key(key)
+      "#{name}.#{key}"
+    end
+
+    def value(key)
+      !!adapter.read(prefixed_key(key))
+    end
+
+    def members(key)
+      adapter.set_members prefixed_key(key)
+    end
+
+    def groups
+      members(Group::Key).map { |name| Group.get(name) }.compact
     end
   end
 end
