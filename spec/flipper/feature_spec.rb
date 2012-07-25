@@ -103,6 +103,11 @@ describe Flipper::Feature do
       it "returns false if group not enabled" do
         subject.enabled?(admin_group).should be_false
       end
+
+      it "returns true if switch enabled" do
+        adapter.write("#{subject.name}.switch", true)
+        subject.enabled?(admin_group).should be_true
+      end
     end
 
     context "for an actor" do
@@ -119,6 +124,12 @@ describe Flipper::Feature do
 
       it "returns false if not in enabled group" do
         subject.enabled?(non_admin_actor).should be_false
+      end
+
+      it "returns true if switch enabled" do
+        adapter.write("#{subject.name}.switch", true)
+        subject.enabled?(admin_actor).should be_true
+        subject.enabled?(non_admin_actor).should be_true
       end
     end
 
