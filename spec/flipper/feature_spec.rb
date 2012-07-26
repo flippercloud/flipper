@@ -190,10 +190,12 @@ describe Flipper::Feature do
     end
 
     it "enables feature for actor in enabled group" do
+      pending
       subject.enabled?(admin_actor).should be_true
     end
 
     it "does not enable feature for actor in disabled group" do
+      pending
       subject.enabled?(dev_actor).should be_false
     end
   end
