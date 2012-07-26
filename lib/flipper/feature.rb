@@ -1,3 +1,4 @@
+require 'flipper/errors'
 require 'flipper/group'
 require 'flipper/boolean'
 require 'flipper/toggle'
@@ -32,7 +33,8 @@ module Flipper
     private
 
     def gate_for(thing)
-      gates.detect { |gate| gate.protects?(thing) }
+      gates.detect { |gate| gate.protects?(thing) } ||
+        raise(GateNotFound.new(thing))
     end
 
     def gates

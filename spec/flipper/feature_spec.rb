@@ -67,6 +67,15 @@ describe Flipper::Feature do
         subject.enabled?.should be_false
       end
     end
+
+    context "with argument that has no gate" do
+      it "raises error" do
+        thing = Object.new
+        expect {
+          subject.enable(thing)
+        }.to raise_error(Flipper::GateNotFound, "Could not find gate for #{thing.inspect}")
+      end
+    end
   end
 
   describe "#disable" do
@@ -97,6 +106,15 @@ describe Flipper::Feature do
 
       it "does not disable feature for actor in other groups" do
         subject.enabled?(dev_actor).should be_true
+      end
+    end
+
+    context "with argument that has no gate" do
+      it "raises error" do
+        thing = Object.new
+        expect {
+          subject.disable(thing)
+        }.to raise_error(Flipper::GateNotFound, "Could not find gate for #{thing.inspect}")
       end
     end
   end
@@ -160,6 +178,23 @@ describe Flipper::Feature do
 
       subject.stub(:enabled? => false)
       subject.disabled?.should be_true
+    end
+  end
+
+  context "enabling multiple groups, disabling everything, then enabling one group" do
+    before do
+      subject.enable(admin_group)
+      subject.enable(dev_group)
+      subject.disable
+      subject.enable(admin_group)
+    end
+
+    it "enables feature for actor in enabled group" do
+      subject.enabled?(admin_actor).should be_true
+    end
+
+    it "does not enable feature for actor in disabled group" do
+      subject.enabled?(dev_actor).should be_false
     end
   end
 end
