@@ -29,6 +29,8 @@ module Flipper
       !enabled?(actor)
     end
 
+    private
+
     def gate_for(thing)
       gates.detect { |gate| gate.protects?(thing) }
     end
