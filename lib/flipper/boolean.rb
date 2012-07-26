@@ -1,6 +1,6 @@
 module Flipper
-  class Switch
-    Key = :switch
+  class Boolean
+    Key = :boolean
 
     def key
       Key

@@ -1,5 +1,5 @@
 require 'flipper/group'
-require 'flipper/switch'
+require 'flipper/boolean'
 
 module Flipper
   class Feature
@@ -11,7 +11,7 @@ module Flipper
       @adapter = adapter
     end
 
-    def enable(thing = Switch.new)
+    def enable(thing = Boolean.new)
       if thing.type == :set
         adapter.set_add prefixed_key(thing.key), thing.value
       else
@@ -19,23 +19,26 @@ module Flipper
       end
     end
 
-    def disable(thing = Switch.new)
+    def disable(thing = Boolean.new)
       if thing.type == :set
         adapter.set_delete prefixed_key(thing.key), thing.value
       else
-        adapter.delete prefixed_key(Switch::Key)
+        adapter.delete prefixed_key(Boolean::Key)
         adapter.delete prefixed_key(Group::Key)
       end
     end
 
     # true if switch key true
     # thing is..
-    #   switch => switch key
-    #   group  => group key
+    #   boolean => boolean key
     #   else   => true if any enabled groups match actor
-    def enabled?(thing = Switch.new)
-      switch_value = value(:switch)
-      return switch_value if switch_value || thing.is_a?(Switch)
+    def enabled?(thing = Boolean.new)
+      boolean_value = value(Boolean::Key)
+
+      if boolean_value || thing.is_a?(Boolean)
+        return boolean_value
+      end
+
       groups.any? { |group| group.match?(thing) }
     end
 

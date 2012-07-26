@@ -122,7 +122,7 @@ describe Flipper::Feature do
       end
 
       it "returns true if switch enabled" do
-        adapter.write("#{subject.name}.#{Flipper::Switch::Key}", true)
+        adapter.write("#{subject.name}.#{Flipper::Boolean::Key}", true)
         subject.enabled?(admin_actor).should be_true
         subject.enabled?(dev_actor).should be_true
       end
