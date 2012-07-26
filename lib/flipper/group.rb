@@ -36,9 +36,5 @@ module Flipper
     def value
       name
     end
-
-    def type
-      :set
-    end
   end
 end

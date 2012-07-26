@@ -3,9 +3,5 @@ module Flipper
     def value
       true
     end
-
-    def type
-      :value
-    end
   end
 end
