@@ -1,5 +1,7 @@
 require 'flipper/group'
 require 'flipper/boolean'
+require 'flipper/toggle'
+require 'flipper/gate'
 
 module Flipper
   class Feature
@@ -12,56 +14,27 @@ module Flipper
     end
 
     def enable(thing = Boolean.new)
-      if thing.type == :set
-        adapter.set_add prefixed_key(thing.key), thing.value
-      else
-        adapter.write prefixed_key(thing.key), thing.value
-      end
+      gate_for(thing).enable(thing)
     end
 
     def disable(thing = Boolean.new)
-      if thing.type == :set
-        adapter.set_delete prefixed_key(thing.key), thing.value
-      else
-        adapter.delete prefixed_key(Boolean::Key)
-        adapter.delete prefixed_key(Group::Key)
-      end
+      gate_for(thing).disable(thing)
     end
 
-    # true if switch key true
-    # thing is..
-    #   boolean => boolean key
-    #   else   => true if any enabled groups match actor
-    def enabled?(thing = Boolean.new)
-      boolean_value = value(Boolean::Key)
-
-      if boolean_value || thing.is_a?(Boolean)
-        return boolean_value
-      end
-
-      groups.any? { |group| group.match?(thing) }
+    def enabled?(actor = nil)
+      !! catch(:short_circuit) { gates.detect { |gate| gate.match?(actor) } }
     end
 
-    def disabled?(thing = nil)
-      !enabled?(thing)
+    def disabled?(actor = nil)
+      !enabled?(actor)
     end
 
-    private
-
-    def prefixed_key(key)
-      "#{name}.#{key}"
+    def gate_for(thing)
+      gates.detect { |gate| gate.protects?(thing) }
     end
 
-    def value(key)
-      !!adapter.read(prefixed_key(key))
-    end
-
-    def members(key)
-      adapter.set_members prefixed_key(key)
-    end
-
-    def groups
-      members(Group::Key).map { |name| Group.get(name) }.compact
+    def gates
+      @gates ||= [Gates::Boolean.new(self), Gates::Group.new(self)]
     end
   end
 end

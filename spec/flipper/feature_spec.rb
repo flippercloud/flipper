@@ -80,8 +80,8 @@ describe Flipper::Feature do
         subject.enabled?.should be_false
       end
 
-      it "disables feature for all enabled groups" do
-        subject.enabled?(admin_group).should be_false
+      it "disables feature for actors in previously enabled groups" do
+        subject.enabled?(admin_actor).should be_false
       end
     end
 
