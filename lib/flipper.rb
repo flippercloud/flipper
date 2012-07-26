@@ -1,5 +1,6 @@
 require 'flipper/configuration'
 require 'flipper/feature'
+require 'flipper/adapters/memory'
 
 module Flipper
   module_function
@@ -17,4 +18,6 @@ module Flipper
   end
 end
 
+Flipper.configure do |config|
+  config.adapter = Flipper::Adapters::Memory.new
 end
