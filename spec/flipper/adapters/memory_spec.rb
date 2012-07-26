@@ -1,10 +1,10 @@
 require 'helper'
-require 'flipper/memory_adapter'
+require 'flipper/adapters/memory'
 
-describe Flipper::MemoryAdapter do
+describe Flipper::Adapters::Memory do
   let(:source) { Hash.new }
 
-  subject { Flipper::MemoryAdapter.new(source) }
+  subject { Flipper::Adapters::Memory.new(source) }
 
   describe "#write" do
     it "key to value in store" do

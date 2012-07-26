@@ -1,11 +1,11 @@
 require 'helper'
 require 'flipper/feature'
-require 'flipper/memory_adapter'
+require 'flipper/adapters/memory'
 
 describe Flipper::Feature do
   subject           { Flipper::Feature.new(:search, adapter) }
 
-  let(:adapter)     { Flipper::MemoryAdapter.new }
+  let(:adapter)     { Flipper::Adapters::Memory.new }
 
   let(:admin_group) { Flipper::Group.get(:admins) }
   let(:dev_group)   { Flipper::Group.get(:devs) }
