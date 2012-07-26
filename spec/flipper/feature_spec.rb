@@ -81,7 +81,7 @@ describe Flipper::Feature do
   describe "#disable" do
     context "with no arguments" do
       before do
-        adapter.set_add("#{subject.name}.#{Flipper::Group::Key}", admin_group.name)
+        adapter.set_add("#{subject.name}.#{Flipper::Gates::Group::Key}", admin_group.name)
         subject.disable
       end
 
@@ -96,7 +96,7 @@ describe Flipper::Feature do
 
     context "with a group" do
       before do
-        adapter.set_add("#{subject.name}.#{Flipper::Group::Key}", dev_group.name)
+        adapter.set_add("#{subject.name}.#{Flipper::Gates::Group::Key}", dev_group.name)
         subject.disable(admin_group)
       end
 
@@ -128,7 +128,7 @@ describe Flipper::Feature do
 
     context "for an actor" do
       before do
-        adapter.set_add("#{subject.name}.#{Flipper::Group::Key}", admin_group.name)
+        adapter.set_add("#{subject.name}.#{Flipper::Gates::Group::Key}", admin_group.name)
       end
 
       it "returns true if in enabled group" do
@@ -140,7 +140,7 @@ describe Flipper::Feature do
       end
 
       it "returns true if switch enabled" do
-        adapter.write("#{subject.name}.#{Flipper::Boolean::Key}", true)
+        adapter.write("#{subject.name}.#{Flipper::Gates::Boolean::Key}", true)
         subject.enabled?(admin_actor).should be_true
         subject.enabled?(dev_actor).should be_true
       end
@@ -150,7 +150,7 @@ describe Flipper::Feature do
       let(:actor) { double('Actor') }
 
       before do
-        adapter.set_add("#{subject.name}.#{Flipper::Group::Key}", admin_group.name)
+        adapter.set_add("#{subject.name}.#{Flipper::Gates::Group::Key}", admin_group.name)
       end
 
       it "returns false" do
@@ -162,7 +162,7 @@ describe Flipper::Feature do
       let(:actor) { double('Actor') }
 
       before do
-        adapter.set_add("#{subject.name}.#{Flipper::Group::Key}", :support)
+        adapter.set_add("#{subject.name}.#{Flipper::Gates::Group::Key}", :support)
       end
 
       it "returns false" do

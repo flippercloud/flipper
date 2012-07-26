@@ -1,8 +1,10 @@
 module Flipper
   module Gates
     class Boolean < Gate
+      Key = :boolean
+
       def key
-        @key ||= "#{@feature.name}.boolean"
+        @key ||= "#{@feature.name}.#{Key}"
       end
 
       def toggle

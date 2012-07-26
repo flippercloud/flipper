@@ -1,8 +1,10 @@
 module Flipper
   module Gates
     class Group < Gate
+      Key = :groups
+
       def key
-        @key ||= "#{@feature.name}.groups"
+        @key ||= "#{@feature.name}.#{Key}"
       end
 
       def toggle
