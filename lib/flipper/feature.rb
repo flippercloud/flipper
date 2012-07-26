@@ -9,7 +9,7 @@ module Flipper
     attr_reader :name
     attr_reader :adapter
 
-    def initialize(name, adapter = Flipper.configuration.adapter)
+    def initialize(name, adapter)
       @name = name
       @adapter = adapter
     end
