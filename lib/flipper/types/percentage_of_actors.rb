@@ -1,6 +1,6 @@
 module Flipper
   module Types
-    class PercentageOfActors
+    class PercentageOfActors < Type
       attr_reader :value
 
       def initialize(value)

@@ -1,6 +1,6 @@
 module Flipper
   module Types
-    class Boolean
+    class Boolean < Type
       def enabled_value
         true
       end

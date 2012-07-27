@@ -1,6 +1,6 @@
 module Flipper
   module Types
-    class Group
+    class Group < Type
       def self.all
         @all ||= []
       end

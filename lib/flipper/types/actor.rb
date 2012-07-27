@@ -1,6 +1,6 @@
 module Flipper
   module Types
-    class Actor
+    class Actor < Type
       attr_reader :identifier
 
       def initialize(identifier)

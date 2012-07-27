@@ -1,8 +1,5 @@
 require 'flipper/errors'
-require 'flipper/types/actor'
-require 'flipper/types/boolean'
-require 'flipper/types/group'
-require 'flipper/types/percentage_of_actors'
+require 'flipper/type'
 require 'flipper/toggle'
 require 'flipper/gate'
 
