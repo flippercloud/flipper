@@ -23,6 +23,12 @@ describe Flipper::Feature do
   let(:five_percent_of_actors)   { Flipper::Types::PercentageOfActors.new(5) }
   let(:percentage_of_actors_key) { Flipper::Gates::PercentageOfActors::Key }
 
+  let(:five_percent_of_time)     { Flipper::Types::PercentageOfTime.new(5) }
+  let(:percentage_of_time_key)   { Flipper::Gates::PercentageOfTime::Key }
+
+  let(:enabled_time)  { Time.mktime(2012) }
+  let(:disabled_time) { Time.mktime(2012, 1, 2, 2, 2) }
+
   before do
     Flipper::Types::Group.all.clear
 
@@ -106,6 +112,23 @@ describe Flipper::Feature do
       end
     end
 
+    context "with a percentage of time" do
+      before do
+        subject.enable(five_percent_of_time)
+      end
+
+      it "enables feature for time within percentage" do
+        Timecop.travel(enabled_time)
+        subject.enabled?(nil).should be_true
+      end
+
+      it "does not enable feature for time not within percentage" do
+        Timecop.travel(disabled_time)
+        subject.enabled?.should be_false
+        subject.enabled?(nil).should be_false
+      end
+    end
+
     context "with argument that has no gate" do
       it "raises error" do
         thing = Object.new
@@ -175,6 +198,22 @@ describe Flipper::Feature do
 
       it "disables feature for actors not within percentage" do
         subject.enabled?(clooney).should be_false
+      end
+    end
+
+    context "with a percentage of time" do
+      before do
+        subject.disable(five_percent_of_time)
+      end
+
+      it "disables feature for time within percentage" do
+        Timecop.travel(enabled_time)
+        subject.enabled?.should be_false
+      end
+
+      it "disables feature for time not within percentage" do
+        Timecop.travel(disabled_time)
+        subject.enabled?.should be_false
       end
     end
 
@@ -248,6 +287,42 @@ describe Flipper::Feature do
       it "returns true if boolean enabled" do
         adapter.write("#{subject.name}.#{boolean_key}", true)
         subject.enabled?(clooney).should be_true
+      end
+    end
+
+    context "during enabled percentage of time" do
+      before do
+        Timecop.travel(enabled_time)
+        adapter.write("#{subject.name}.#{percentage_of_time_key}", five_percent_of_time.value)
+      end
+
+      it "returns true" do
+        subject.enabled?.should be_true
+        subject.enabled?(nil).should be_true
+        subject.enabled?(pitt).should be_true
+        subject.enabled?(admin_thing).should be_true
+      end
+    end
+
+    context "during not enabled percentage of time" do
+      before do
+        Timecop.travel(disabled_time)
+        adapter.write("#{subject.name}.#{percentage_of_time_key}", five_percent_of_time.value)
+      end
+
+      it "returns false" do
+        subject.enabled?.should be_false
+        subject.enabled?(nil).should be_false
+        subject.enabled?(pitt).should be_false
+        subject.enabled?(admin_thing).should be_false
+      end
+
+      it "returns true if boolean enabled" do
+        adapter.write("#{subject.name}.#{boolean_key}", true)
+        subject.enabled?.should be_true
+        subject.enabled?(nil).should be_true
+        subject.enabled?(pitt).should be_true
+        subject.enabled?(admin_thing).should be_true
       end
     end
 
