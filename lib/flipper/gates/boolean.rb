@@ -3,12 +3,8 @@ module Flipper
     class Boolean < Gate
       Key = :boolean
 
-      def key
-        @key ||= "#{@feature.name}.#{Key}"
-      end
-
-      def toggle
-        @toggle ||= Toggles::Value.new(@feature.adapter, key)
+      def type_key
+        Key
       end
 
       def match?(actor)

@@ -4,16 +4,28 @@ module Flipper
       @feature = feature
     end
 
+    def feature_prefix
+      @feature.name
+    end
+
+    def key
+      "#{feature_prefix}.#{type_key}"
+    end
+
+    def toggle_class
+      Toggles::Value
+    end
+
+    def toggle
+      @toggle ||= toggle_class.new(@feature.adapter, key)
+    end
+
     def protects?(thing)
       false
     end
 
     def match?(actor)
       false
-    end
-
-    def toggle
-      raise 'Not implemented'
     end
 
     def enable(thing)

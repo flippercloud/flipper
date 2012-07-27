@@ -3,12 +3,12 @@ module Flipper
     class Actor < Gate
       Key = :actors
 
-      def key
-        @key ||= "#{@feature.name}.#{Key}"
+      def type_key
+        Key
       end
 
-      def toggle
-        @toggle ||= Toggles::Set.new(@feature.adapter, key)
+      def toggle_class
+        Toggles::Set
       end
 
       def match?(actor)
