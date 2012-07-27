@@ -5,19 +5,26 @@ require 'flipper/adapters/memory'
 describe Flipper::Feature do
   subject           { Flipper::Feature.new(:search, adapter) }
 
+  let(:actor_key)   { Flipper::Gates::Actor::Key }
+  let(:boolean_key) { Flipper::Gates::Boolean::Key }
+  let(:group_key)   { Flipper::Gates::Group::Key }
+
   let(:adapter)     { Flipper::Adapters::Memory.new }
 
   let(:admin_group) { Flipper::Group.get(:admins) }
   let(:dev_group)   { Flipper::Group.get(:devs) }
 
-  let(:admin_actor) { double 'Actor', :admin? => true, :dev? => false }
-  let(:dev_actor)   { double 'Actor', :admin? => false, :dev? => true }
+  let(:admin_thing) { double 'Non Flipper Thing', :admin? => true, :dev? => false }
+  let(:dev_thing)   { double 'Non Flipper Thing', :admin? => false, :dev? => true }
+
+  let(:pitt)        { Flipper::Actor.new(1) }
+  let(:clooney)     { Flipper::Actor.new(2) }
 
   before do
     Flipper::Group.all.clear
 
-    Flipper::Group.define(:admins) { |actor| actor.admin? }
-    Flipper::Group.define(:devs)   { |actor| actor.dev? }
+    Flipper::Group.define(:admins) { |thing| thing.admin? }
+    Flipper::Group.define(:devs)   { |thing| thing.dev? }
 
     adapter.clear
   end
@@ -55,16 +62,30 @@ describe Flipper::Feature do
         subject.enable(admin_group)
       end
 
-      it "enables feature for actor in group" do
-        subject.enabled?(admin_actor).should be_true
+      it "enables feature for non flipper thing in group" do
+        subject.enabled?(admin_thing).should be_true
       end
 
-      it "does not enable feature for actor in other group" do
-        subject.enabled?(dev_actor).should be_false
+      it "does not enable feature for non flipper thing in other group" do
+        subject.enabled?(dev_thing).should be_false
       end
 
       it "does not enable feature for all" do
         subject.enabled?.should be_false
+      end
+    end
+
+    context "with an actor" do
+      before do
+        subject.enable(pitt)
+      end
+
+      it "enables feature for actor" do
+        subject.enabled?(pitt).should be_true
+      end
+
+      it "does not enable feature for other actors" do
+        subject.enabled?(clooney).should be_false
       end
     end
 
@@ -81,7 +102,7 @@ describe Flipper::Feature do
   describe "#disable" do
     context "with no arguments" do
       before do
-        adapter.set_add("#{subject.name}.#{Flipper::Gates::Group::Key}", admin_group.name)
+        adapter.set_add("#{subject.name}.#{group_key}", admin_group.name)
         subject.disable
       end
 
@@ -89,23 +110,40 @@ describe Flipper::Feature do
         subject.enabled?.should be_false
       end
 
-      it "disables feature for actors in previously enabled groups" do
-        subject.enabled?(admin_actor).should be_false
+      it "disables feature for non flipper thing in previously enabled groups" do
+        subject.enabled?(admin_thing).should be_false
       end
     end
 
     context "with a group" do
       before do
-        adapter.set_add("#{subject.name}.#{Flipper::Gates::Group::Key}", dev_group.name)
+        adapter.set_add("#{subject.name}.#{group_key}", dev_group.name)
+        adapter.set_add("#{subject.name}.#{group_key}", admin_group.name)
         subject.disable(admin_group)
       end
 
-      it "disables the feature for an actor in the group" do
-        subject.enabled?(admin_actor).should be_false
+      it "disables the feature for non flipper thing in the group" do
+        subject.enabled?(admin_thing).should be_false
       end
 
-      it "does not disable feature for actor in other groups" do
-        subject.enabled?(dev_actor).should be_true
+      it "does not disable feature for non flipper thing in other groups" do
+        subject.enabled?(dev_thing).should be_true
+      end
+    end
+
+    context "with an actor" do
+      before do
+        adapter.set_add("#{subject.name}.#{actor_key}", pitt.identifier)
+        adapter.set_add("#{subject.name}.#{actor_key}", clooney.identifier)
+        subject.disable(pitt)
+      end
+
+      it "disables feature for actor" do
+        subject.enabled?(pitt).should be_false
+      end
+
+      it "does not disable feature for other actors" do
+        subject.enabled?(clooney).should be_true
       end
     end
 
@@ -128,29 +166,49 @@ describe Flipper::Feature do
 
     context "for an actor" do
       before do
-        adapter.set_add("#{subject.name}.#{Flipper::Gates::Group::Key}", admin_group.name)
+        adapter.set_add("#{subject.name}.#{actor_key}", pitt.identifier)
       end
 
-      it "returns true if in enabled group" do
-        subject.enabled?(admin_actor).should be_true
+      it "returns true for enabled actor" do
+        subject.enabled?(pitt).should be_true
       end
 
-      it "returns false if not in enabled group" do
-        subject.enabled?(dev_actor).should be_false
+      it "returns false for disabled actor" do
+        subject.enabled?(clooney).should be_false
       end
 
-      it "returns true if switch enabled" do
-        adapter.write("#{subject.name}.#{Flipper::Gates::Boolean::Key}", true)
-        subject.enabled?(admin_actor).should be_true
-        subject.enabled?(dev_actor).should be_true
+      it "returns true if boolean enabled" do
+        adapter.write("#{subject.name}.#{boolean_key}", true)
+        subject.enabled?(pitt).should be_true
+        subject.enabled?(clooney).should be_true
       end
     end
 
-    context "for an actor that does not respond to something in group block" do
+    context "for a non flipper thing" do
+      before do
+        adapter.set_add("#{subject.name}.#{group_key}", admin_group.name)
+      end
+
+      it "returns true if in enabled group" do
+        subject.enabled?(admin_thing).should be_true
+      end
+
+      it "returns false if not in enabled group" do
+        subject.enabled?(dev_thing).should be_false
+      end
+
+      it "returns true if boolean enabled" do
+        adapter.write("#{subject.name}.#{boolean_key}", true)
+        subject.enabled?(admin_thing).should be_true
+        subject.enabled?(dev_thing).should be_true
+      end
+    end
+
+    context "for a non flipper thing that does not respond to something in group block" do
       let(:actor) { double('Actor') }
 
       before do
-        adapter.set_add("#{subject.name}.#{Flipper::Gates::Group::Key}", admin_group.name)
+        adapter.set_add("#{subject.name}.#{group_key}", admin_group.name)
       end
 
       it "returns false" do
@@ -158,11 +216,11 @@ describe Flipper::Feature do
       end
     end
 
-    context "for an actor when group not defined" do
+    context "for a non flipper thing when group in adapter, but not defined in code" do
       let(:actor) { double('Actor') }
 
       before do
-        adapter.set_add("#{subject.name}.#{Flipper::Gates::Group::Key}", :support)
+        adapter.set_add("#{subject.name}.#{group_key}", :support)
       end
 
       it "returns false" do
@@ -189,14 +247,14 @@ describe Flipper::Feature do
       subject.enable(admin_group)
     end
 
-    it "enables feature for actor in enabled group" do
+    it "enables feature for object in enabled group" do
       pending
-      subject.enabled?(admin_actor).should be_true
+      subject.enabled?(admin_thing).should be_true
     end
 
-    it "does not enable feature for actor in disabled group" do
+    it "does not enable feature for object in disabled group" do
       pending
-      subject.enabled?(dev_actor).should be_false
+      subject.enabled?(dev_thing).should be_false
     end
   end
 end

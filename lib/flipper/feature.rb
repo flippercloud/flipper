@@ -38,7 +38,7 @@ module Flipper
     end
 
     def gates
-      @gates ||= [Gates::Boolean.new(self), Gates::Group.new(self)]
+      @gates ||= [Gates::Boolean.new(self), Gates::Group.new(self), Gates::Actor.new(self)]
     end
   end
 end

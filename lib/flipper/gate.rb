@@ -26,5 +26,6 @@ module Flipper
   end
 end
 
+require 'flipper/gates/actor'
 require 'flipper/gates/boolean'
 require 'flipper/gates/group'
