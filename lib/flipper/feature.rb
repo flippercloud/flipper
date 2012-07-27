@@ -1,6 +1,7 @@
 require 'flipper/errors'
-require 'flipper/group'
 require 'flipper/boolean'
+require 'flipper/group'
+require 'flipper/percentage_of_actors'
 require 'flipper/toggle'
 require 'flipper/gate'
 
@@ -38,7 +39,12 @@ module Flipper
     end
 
     def gates
-      @gates ||= [Gates::Boolean.new(self), Gates::Group.new(self), Gates::Actor.new(self)]
+      @gates ||= [
+        Gates::Boolean.new(self),
+        Gates::Group.new(self),
+        Gates::Actor.new(self),
+        Gates::PercentageOfActors.new(self),
+      ]
     end
   end
 end

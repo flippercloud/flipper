@@ -18,7 +18,10 @@ describe Flipper::Feature do
   let(:dev_thing)   { double 'Non Flipper Thing', :admin? => false, :dev? => true }
 
   let(:pitt)        { Flipper::Actor.new(1) }
-  let(:clooney)     { Flipper::Actor.new(2) }
+  let(:clooney)     { Flipper::Actor.new(10) }
+
+  let(:five_percent_of_actors)   { Flipper::PercentageOfActors.new(5) }
+  let(:percentage_of_actors_key) { Flipper::Gates::PercentageOfActors::Key }
 
   before do
     Flipper::Group.all.clear
@@ -89,6 +92,20 @@ describe Flipper::Feature do
       end
     end
 
+    context "with a percentage of actors" do
+      before do
+        subject.enable(five_percent_of_actors)
+      end
+
+      it "enables feature for actor within percentage" do
+        subject.enabled?(pitt).should be_true
+      end
+
+      it "does not enable feature for actors not within percentage" do
+        subject.enabled?(clooney).should be_false
+      end
+    end
+
     context "with argument that has no gate" do
       it "raises error" do
         thing = Object.new
@@ -147,6 +164,20 @@ describe Flipper::Feature do
       end
     end
 
+    context "with a percentage of actors" do
+      before do
+        subject.disable(five_percent_of_actors)
+      end
+
+      it "disables feature for actor within percentage" do
+        subject.enabled?(pitt).should be_false
+      end
+
+      it "disables feature for actors not within percentage" do
+        subject.enabled?(clooney).should be_false
+      end
+    end
+
     context "with argument that has no gate" do
       it "raises error" do
         thing = Object.new
@@ -164,22 +195,58 @@ describe Flipper::Feature do
       end
     end
 
-    context "for an actor" do
+    context "with no arguments, but boolean enabled" do
+      before do
+        adapter.write("#{subject.name}.#{boolean_key}", true)
+      end
+
+      it "returns true" do
+        subject.enabled?.should be_true
+      end
+    end
+
+    context "for enabled actor" do
       before do
         adapter.set_add("#{subject.name}.#{actor_key}", pitt.identifier)
       end
 
-      it "returns true for enabled actor" do
+      it "returns true" do
         subject.enabled?(pitt).should be_true
       end
+    end
 
-      it "returns false for disabled actor" do
+    context "for not enabled actor" do
+      it "returns false" do
         subject.enabled?(clooney).should be_false
       end
 
       it "returns true if boolean enabled" do
         adapter.write("#{subject.name}.#{boolean_key}", true)
+        subject.enabled?(clooney).should be_true
+      end
+    end
+
+    context "for actor in percentage of actors enabled" do
+      before do
+        adapter.write("#{subject.name}.#{percentage_of_actors_key}", five_percent_of_actors.value)
+      end
+
+      it "returns true" do
         subject.enabled?(pitt).should be_true
+      end
+    end
+
+    context "for actor not in percentage of actors enabled" do
+      before do
+        adapter.write("#{subject.name}.#{percentage_of_actors_key}", five_percent_of_actors.value)
+      end
+
+      it "returns false" do
+        subject.enabled?(clooney).should be_false
+      end
+
+      it "returns true if boolean enabled" do
+        adapter.write("#{subject.name}.#{boolean_key}", true)
         subject.enabled?(clooney).should be_true
       end
     end
@@ -252,7 +319,7 @@ describe Flipper::Feature do
       subject.enabled?(admin_thing).should be_true
     end
 
-    it "does not enable feature for object in disabled group" do
+    it "does not enable feature for object in not enabled group" do
       pending
       subject.enabled?(dev_thing).should be_false
     end

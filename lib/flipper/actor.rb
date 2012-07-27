@@ -6,8 +6,10 @@ module Flipper
       @identifier = identifier
     end
 
-    def value
+    def enabled_value
       @identifier
     end
+
+    alias_method :disabled_value, :enabled_value
   end
 end

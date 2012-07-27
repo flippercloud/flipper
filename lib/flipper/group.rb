@@ -33,8 +33,10 @@ module Flipper
       @block.call(*args) == true
     end
 
-    def value
-      name
+    def enabled_value
+      @name
     end
+
+    alias_method :disabled_value, :enabled_value
   end
 end

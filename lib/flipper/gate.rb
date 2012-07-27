@@ -29,3 +29,4 @@ end
 require 'flipper/gates/actor'
 require 'flipper/gates/boolean'
 require 'flipper/gates/group'
+require 'flipper/gates/percentage_of_actors'
