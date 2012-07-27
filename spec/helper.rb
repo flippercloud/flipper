@@ -23,3 +23,20 @@ RSpec.configure do |config|
   config.alias_example_to :xit, :disabled => true
   config.run_all_when_everything_filtered = true
 end
+
+shared_examples_for 'a percentage' do
+  it "initializes with value" do
+    percentage = described_class.new(12)
+    percentage.should be_instance_of(described_class)
+  end
+
+  it "converts string values to integers when initializing" do
+    percentage = described_class.new('15')
+    percentage.value.should eq(15)
+  end
+
+  it "has a value" do
+    percentage = described_class.new(19)
+    percentage.value.should eq(19)
+  end
+end
