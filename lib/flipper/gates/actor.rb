@@ -22,7 +22,7 @@ module Flipper
       end
 
       def protects?(thing)
-        thing.is_a?(Flipper::Actor)
+        thing.is_a?(Flipper::Types::Actor)
       end
     end
   end

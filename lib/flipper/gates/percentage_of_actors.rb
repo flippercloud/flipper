@@ -22,7 +22,7 @@ module Flipper
       end
 
       def protects?(thing)
-        thing.is_a?(Flipper::PercentageOfActors)
+        thing.is_a?(Flipper::Types::PercentageOfActors)
       end
     end
   end

@@ -1,7 +1,8 @@
 require 'flipper/errors'
-require 'flipper/boolean'
-require 'flipper/group'
-require 'flipper/percentage_of_actors'
+require 'flipper/types/actor'
+require 'flipper/types/boolean'
+require 'flipper/types/group'
+require 'flipper/types/percentage_of_actors'
 require 'flipper/toggle'
 require 'flipper/gate'
 
@@ -15,11 +16,11 @@ module Flipper
       @adapter = adapter
     end
 
-    def enable(thing = Boolean.new)
+    def enable(thing = Types::Boolean.new)
       gate_for(thing).enable(thing)
     end
 
-    def disable(thing = Boolean.new)
+    def disable(thing = Types::Boolean.new)
       gate_for(thing).disable(thing)
     end
 

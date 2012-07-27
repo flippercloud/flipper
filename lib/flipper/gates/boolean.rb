@@ -22,7 +22,7 @@ module Flipper
       end
 
       def protects?(thing)
-        thing.is_a?(Flipper::Boolean)
+        thing.is_a?(Flipper::Types::Boolean)
       end
     end
   end

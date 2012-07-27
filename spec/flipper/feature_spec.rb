@@ -11,23 +11,23 @@ describe Flipper::Feature do
 
   let(:adapter)     { Flipper::Adapters::Memory.new }
 
-  let(:admin_group) { Flipper::Group.get(:admins) }
-  let(:dev_group)   { Flipper::Group.get(:devs) }
+  let(:admin_group) { Flipper::Types::Group.get(:admins) }
+  let(:dev_group)   { Flipper::Types::Group.get(:devs) }
 
   let(:admin_thing) { double 'Non Flipper Thing', :admin? => true, :dev? => false }
   let(:dev_thing)   { double 'Non Flipper Thing', :admin? => false, :dev? => true }
 
-  let(:pitt)        { Flipper::Actor.new(1) }
-  let(:clooney)     { Flipper::Actor.new(10) }
+  let(:pitt)        { Flipper::Types::Actor.new(1) }
+  let(:clooney)     { Flipper::Types::Actor.new(10) }
 
-  let(:five_percent_of_actors)   { Flipper::PercentageOfActors.new(5) }
+  let(:five_percent_of_actors)   { Flipper::Types::PercentageOfActors.new(5) }
   let(:percentage_of_actors_key) { Flipper::Gates::PercentageOfActors::Key }
 
   before do
-    Flipper::Group.all.clear
+    Flipper::Types::Group.all.clear
 
-    Flipper::Group.define(:admins) { |thing| thing.admin? }
-    Flipper::Group.define(:devs)   { |thing| thing.dev? }
+    Flipper::Types::Group.define(:admins) { |thing| thing.admin? }
+    Flipper::Types::Group.define(:devs)   { |thing| thing.dev? }
 
     adapter.clear
   end
