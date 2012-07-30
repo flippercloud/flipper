@@ -11,7 +11,7 @@ module Flipper
         Toggles::Set
       end
 
-      def match?(actor)
+      def open?(actor)
         return if actor.nil?
         groups.any? { |group| group.match?(actor) }
       end

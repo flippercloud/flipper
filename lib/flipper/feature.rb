@@ -22,7 +22,7 @@ module Flipper
     end
 
     def enabled?(actor = nil)
-      !! catch(:short_circuit) { gates.detect { |gate| gate.match?(actor) } }
+      !! catch(:short_circuit) { gates.detect { |gate| gate.open?(actor) } }
     end
 
     def disabled?(actor = nil)

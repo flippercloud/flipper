@@ -11,7 +11,7 @@ module Flipper
         Toggles::Boolean
       end
 
-      def match?(actor)
+      def open?(actor)
         value = toggle.value
 
         if value.nil?

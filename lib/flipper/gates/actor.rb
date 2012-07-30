@@ -11,7 +11,7 @@ module Flipper
         Toggles::Set
       end
 
-      def match?(actor)
+      def open?(actor)
         if actor && actor.respond_to?(:identifier)
           identifiers.include?(actor.identifier)
         end

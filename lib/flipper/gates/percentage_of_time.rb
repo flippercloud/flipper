@@ -7,7 +7,7 @@ module Flipper
         Key
       end
 
-      def match?(actor, time = Time.now)
+      def open?(actor, time = Time.now)
         percentage = toggle.value
 
         if percentage.nil?
