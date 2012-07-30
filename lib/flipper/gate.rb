@@ -2,7 +2,7 @@ module Flipper
   class Gate
     extend Forwardable
 
-    Separator = '.'
+    Separator = '/'
 
     attr_reader :feature
 
