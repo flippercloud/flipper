@@ -1,5 +1,7 @@
 module Flipper
   class Gate
+    attr_reader :feature
+
     def initialize(feature)
       @feature = feature
     end
