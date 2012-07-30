@@ -9,7 +9,8 @@ describe Flipper::Feature do
   let(:boolean_key) { Flipper::Gates::Boolean::Key }
   let(:group_key)   { Flipper::Gates::Group::Key }
 
-  let(:adapter)     { Flipper::Adapters::Memory.new }
+  let(:source)      { {} }
+  let(:adapter)     { Flipper::Adapters::Memory.new(source) }
 
   let(:admin_group) { Flipper::Types::Group.get(:admins) }
   let(:dev_group)   { Flipper::Types::Group.get(:devs) }
@@ -35,7 +36,7 @@ describe Flipper::Feature do
     Flipper::Types::Group.define(:admins) { |thing| thing.admin? }
     Flipper::Types::Group.define(:devs)   { |thing| thing.dev? }
 
-    adapter.clear
+    source.clear
   end
 
   it "initializes with name and adapter" do
