@@ -31,8 +31,6 @@ describe Flipper::Feature do
   let(:disabled_time) { Time.mktime(2012, 1, 2, 2, 2) }
 
   before do
-    Flipper::Types::Group.all.clear
-
     Flipper::Types::Group.define(:admins) { |thing| thing.admin? }
     Flipper::Types::Group.define(:devs)   { |thing| thing.dev? }
 

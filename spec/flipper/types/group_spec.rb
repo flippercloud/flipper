@@ -6,10 +6,6 @@ describe Flipper::Types::Group do
     Flipper::Types::Group.new(:admins) { |actor| actor.admin? }
   end
 
-  before do
-    Flipper::Types::Group.all.clear
-  end
-
   it "is enumerable at the class level" do
     Flipper::Types::Group.define(:admins) { |actor| actor.admin? }
     Flipper::Types::Group.map { |group|
