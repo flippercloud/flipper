@@ -23,7 +23,7 @@ module Flipper
     end
 
     def toggle
-      @toggle ||= toggle_class.new(@feature.adapter, key)
+      @toggle ||= toggle_class.new(self)
     end
 
     def protects?(thing)

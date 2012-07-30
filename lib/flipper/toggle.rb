@@ -1,8 +1,13 @@
 module Flipper
   class Toggle
-    def initialize(adapter, key)
-      @adapter = adapter
-      @key = key
+    extend Forwardable
+
+    attr_reader :gate
+
+    def_delegators :@gate, :key, :feature, :adapter
+
+    def initialize(gate)
+      @gate = gate
     end
 
     def enable(thing)
@@ -19,5 +24,6 @@ module Flipper
   end
 end
 
+require 'flipper/toggles/boolean'
 require 'flipper/toggles/set'
 require 'flipper/toggles/value'
