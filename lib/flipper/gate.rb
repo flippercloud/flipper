@@ -10,12 +10,12 @@ module Flipper
       @feature = feature
     end
 
-    def feature_prefix
+    def key_prefix
       @feature.name
     end
 
     def key
-      "#{feature_prefix}.#{type_key}"
+      "#{key_prefix}.#{type_key}"
     end
 
     def toggle_class
