@@ -142,7 +142,7 @@ describe Flipper::Feature do
   describe "#disable" do
     context "with no arguments" do
       before do
-        adapter.set_add("#{subject.name}.#{group_key}", admin_group.name)
+        adapter.set_add("#{subject.name}#{Flipper::Gate::Separator}#{group_key}", admin_group.name)
         subject.disable
       end
 
@@ -157,8 +157,8 @@ describe Flipper::Feature do
 
     context "with a group" do
       before do
-        adapter.set_add("#{subject.name}.#{group_key}", dev_group.name)
-        adapter.set_add("#{subject.name}.#{group_key}", admin_group.name)
+        adapter.set_add("#{subject.name}#{Flipper::Gate::Separator}#{group_key}", dev_group.name)
+        adapter.set_add("#{subject.name}#{Flipper::Gate::Separator}#{group_key}", admin_group.name)
         subject.disable(admin_group)
       end
 
@@ -173,8 +173,8 @@ describe Flipper::Feature do
 
     context "with an actor" do
       before do
-        adapter.set_add("#{subject.name}.#{actor_key}", pitt.identifier)
-        adapter.set_add("#{subject.name}.#{actor_key}", clooney.identifier)
+        adapter.set_add("#{subject.name}#{Flipper::Gate::Separator}#{actor_key}", pitt.identifier)
+        adapter.set_add("#{subject.name}#{Flipper::Gate::Separator}#{actor_key}", clooney.identifier)
         subject.disable(pitt)
       end
 
@@ -236,7 +236,7 @@ describe Flipper::Feature do
 
     context "with no arguments, but boolean enabled" do
       before do
-        adapter.write("#{subject.name}.#{boolean_key}", true)
+        adapter.write("#{subject.name}#{Flipper::Gate::Separator}#{boolean_key}", true)
       end
 
       it "returns true" do
@@ -246,7 +246,7 @@ describe Flipper::Feature do
 
     context "for enabled actor" do
       before do
-        adapter.set_add("#{subject.name}.#{actor_key}", pitt.identifier)
+        adapter.set_add("#{subject.name}#{Flipper::Gate::Separator}#{actor_key}", pitt.identifier)
       end
 
       it "returns true" do
@@ -260,14 +260,14 @@ describe Flipper::Feature do
       end
 
       it "returns true if boolean enabled" do
-        adapter.write("#{subject.name}.#{boolean_key}", true)
+        adapter.write("#{subject.name}#{Flipper::Gate::Separator}#{boolean_key}", true)
         subject.enabled?(clooney).should be_true
       end
     end
 
     context "for actor in percentage of actors enabled" do
       before do
-        adapter.write("#{subject.name}.#{percentage_of_actors_key}", five_percent_of_actors.value)
+        adapter.write("#{subject.name}#{Flipper::Gate::Separator}#{percentage_of_actors_key}", five_percent_of_actors.value)
       end
 
       it "returns true" do
@@ -277,7 +277,7 @@ describe Flipper::Feature do
 
     context "for actor not in percentage of actors enabled" do
       before do
-        adapter.write("#{subject.name}.#{percentage_of_actors_key}", five_percent_of_actors.value)
+        adapter.write("#{subject.name}#{Flipper::Gate::Separator}#{percentage_of_actors_key}", five_percent_of_actors.value)
       end
 
       it "returns false" do
@@ -285,7 +285,7 @@ describe Flipper::Feature do
       end
 
       it "returns true if boolean enabled" do
-        adapter.write("#{subject.name}.#{boolean_key}", true)
+        adapter.write("#{subject.name}#{Flipper::Gate::Separator}#{boolean_key}", true)
         subject.enabled?(clooney).should be_true
       end
     end
@@ -293,7 +293,7 @@ describe Flipper::Feature do
     context "during enabled percentage of time" do
       before do
         Timecop.travel(enabled_time)
-        adapter.write("#{subject.name}.#{percentage_of_time_key}", five_percent_of_time.value)
+        adapter.write("#{subject.name}#{Flipper::Gate::Separator}#{percentage_of_time_key}", five_percent_of_time.value)
       end
 
       it "returns true" do
@@ -307,7 +307,7 @@ describe Flipper::Feature do
     context "during not enabled percentage of time" do
       before do
         Timecop.travel(disabled_time)
-        adapter.write("#{subject.name}.#{percentage_of_time_key}", five_percent_of_time.value)
+        adapter.write("#{subject.name}#{Flipper::Gate::Separator}#{percentage_of_time_key}", five_percent_of_time.value)
       end
 
       it "returns false" do
@@ -318,7 +318,7 @@ describe Flipper::Feature do
       end
 
       it "returns true if boolean enabled" do
-        adapter.write("#{subject.name}.#{boolean_key}", true)
+        adapter.write("#{subject.name}#{Flipper::Gate::Separator}#{boolean_key}", true)
         subject.enabled?.should be_true
         subject.enabled?(nil).should be_true
         subject.enabled?(pitt).should be_true
@@ -328,7 +328,7 @@ describe Flipper::Feature do
 
     context "for a non flipper thing" do
       before do
-        adapter.set_add("#{subject.name}.#{group_key}", admin_group.name)
+        adapter.set_add("#{subject.name}#{Flipper::Gate::Separator}#{group_key}", admin_group.name)
       end
 
       it "returns true if in enabled group" do
@@ -340,7 +340,7 @@ describe Flipper::Feature do
       end
 
       it "returns true if boolean enabled" do
-        adapter.write("#{subject.name}.#{boolean_key}", true)
+        adapter.write("#{subject.name}#{Flipper::Gate::Separator}#{boolean_key}", true)
         subject.enabled?(admin_thing).should be_true
         subject.enabled?(dev_thing).should be_true
       end
@@ -350,7 +350,7 @@ describe Flipper::Feature do
       let(:actor) { double('Actor') }
 
       before do
-        adapter.set_add("#{subject.name}.#{group_key}", admin_group.name)
+        adapter.set_add("#{subject.name}#{Flipper::Gate::Separator}#{group_key}", admin_group.name)
       end
 
       it "returns false" do
@@ -362,7 +362,7 @@ describe Flipper::Feature do
       let(:actor) { double('Actor') }
 
       before do
-        adapter.set_add("#{subject.name}.#{group_key}", :support)
+        adapter.set_add("#{subject.name}#{Flipper::Gate::Separator}#{group_key}", :support)
       end
 
       it "returns false" do

@@ -2,6 +2,8 @@ module Flipper
   class Gate
     extend Forwardable
 
+    Separator = '.'
+
     attr_reader :feature
 
     def_delegator :@feature, :adapter
@@ -15,7 +17,7 @@ module Flipper
     end
 
     def key
-      "#{key_prefix}.#{type_key}"
+      "#{key_prefix}#{Separator}#{type_key}"
     end
 
     def toggle_class
