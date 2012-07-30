@@ -7,6 +7,10 @@ describe Flipper::Adapters::Memory do
 
   subject { Flipper::Adapters::Memory.new(source) }
 
+  before do
+    source.clear
+  end
+
   def read_key(key)
     source[key]
   end

@@ -28,10 +28,6 @@ module Flipper
       def set_members(key)
         @source[key] ||= Set.new
       end
-
-      def clear
-        @source.clear
-      end
     end
   end
 end
