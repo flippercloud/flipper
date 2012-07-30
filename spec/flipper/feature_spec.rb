@@ -390,12 +390,10 @@ describe Flipper::Feature do
     end
 
     it "enables feature for object in enabled group" do
-      pending
       subject.enabled?(admin_thing).should be_true
     end
 
     it "does not enable feature for object in not enabled group" do
-      pending
       subject.enabled?(dev_thing).should be_false
     end
   end

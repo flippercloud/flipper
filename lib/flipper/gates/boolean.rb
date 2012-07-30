@@ -7,6 +7,10 @@ module Flipper
         Key
       end
 
+      def toggle_class
+        Toggles::Boolean
+      end
+
       def match?(actor)
         value = toggle.value
 
