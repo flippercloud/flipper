@@ -12,9 +12,9 @@ module Flipper
       end
 
       def match?(actor)
-        return if actor.nil?
-        return unless actor.respond_to?(:identifier)
-        identifiers.include?(actor.identifier)
+        if actor && actor.respond_to?(:identifier)
+          identifiers.include?(actor.identifier)
+        end
       end
 
       def identifiers
