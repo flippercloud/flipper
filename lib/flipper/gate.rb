@@ -1,6 +1,10 @@
 module Flipper
   class Gate
+    extend Forwardable
+
     attr_reader :feature
+
+    def_delegator :@feature, :adapter
 
     def initialize(feature)
       @feature = feature
