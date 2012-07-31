@@ -17,7 +17,7 @@ describe Flipper::Adapters::Mongo do
     if (doc = collection.find_one(criteria))
       value = doc[key]
 
-      if value.is_a?(Array)
+      if value.is_a?(::Array)
         value = value.to_set
       end
 
@@ -26,7 +26,7 @@ describe Flipper::Adapters::Mongo do
   end
 
   def write_key(key, value)
-    if value.is_a?(Set)
+    if value.is_a?(::Set)
       value = value.to_a
     end
 
