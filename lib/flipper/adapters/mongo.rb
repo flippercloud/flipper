@@ -1,3 +1,4 @@
+require 'set'
 require 'mongo'
 
 module Flipper

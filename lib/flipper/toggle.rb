@@ -1,3 +1,5 @@
+require 'forwardable'
+
 module Flipper
   class Toggle
     extend Forwardable

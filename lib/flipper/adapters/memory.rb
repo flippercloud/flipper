@@ -1,3 +1,5 @@
+require 'set'
+
 module Flipper
   module Adapters
     class Memory

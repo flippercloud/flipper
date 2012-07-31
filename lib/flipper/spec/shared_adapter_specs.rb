@@ -1,3 +1,5 @@
+require 'set'
+
 # Requires the following methods
 # subject
 # read_key(key)
