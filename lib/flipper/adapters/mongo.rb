@@ -37,6 +37,10 @@ module Flipper
 
       private
 
+      def update(updates)
+        @collection.update(@mongo_criteria, updates, @mongo_options)
+      end
+
       def read_key(key, &block)
         load
 
@@ -45,10 +49,6 @@ module Flipper
         else
           @document[key]
         end
-      end
-
-      def update(updates)
-        @collection.update(@mongo_criteria, updates, @mongo_options)
       end
 
       def ttl
