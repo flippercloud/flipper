@@ -7,13 +7,13 @@ module Flipper
         Key
       end
 
-      def open?(actor, time = Time.now)
+      def open?(actor)
         percentage = toggle.value
 
         if percentage.nil?
           false
         else
-          time.to_i % 100 < percentage
+          rand < (percentage / 100.0)
         end
       end
 

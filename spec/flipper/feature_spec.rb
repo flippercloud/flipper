@@ -27,9 +27,6 @@ describe Flipper::Feature do
   let(:five_percent_of_time)     { Flipper::Types::PercentageOfTime.new(5) }
   let(:percentage_of_time_key)   { Flipper::Gates::PercentageOfTime::Key }
 
-  let(:enabled_time)  { Time.mktime(2012) }
-  let(:disabled_time) { Time.mktime(2012, 1, 2, 2, 2) }
-
   before do
     Flipper::Types::Group.define(:admins) { |thing| thing.admin? }
     Flipper::Types::Group.define(:devs)   { |thing| thing.dev? }
@@ -113,18 +110,19 @@ describe Flipper::Feature do
 
     context "with a percentage of time" do
       before do
+        @gate = Flipper::Gates::PercentageOfTime.new(subject)
+        Flipper::Gates::PercentageOfTime.should_receive(:new).and_return(@gate)
         subject.enable(five_percent_of_time)
       end
 
       it "enables feature for time within percentage" do
-        Timecop.travel(enabled_time)
-        subject.enabled?(nil).should be_true
+        @gate.stub(:rand => 0.04)
+        subject.enabled?.should be_true
       end
 
       it "does not enable feature for time not within percentage" do
-        Timecop.travel(disabled_time)
+        @gate.stub(:rand => 0.10)
         subject.enabled?.should be_false
-        subject.enabled?(nil).should be_false
       end
     end
 
@@ -202,16 +200,18 @@ describe Flipper::Feature do
 
     context "with a percentage of time" do
       before do
+        @gate = Flipper::Gates::PercentageOfTime.new(subject)
+        Flipper::Gates::PercentageOfTime.should_receive(:new).and_return(@gate)
         subject.disable(five_percent_of_time)
       end
 
       it "disables feature for time within percentage" do
-        Timecop.travel(enabled_time)
+        @gate.stub(:rand => 0.04)
         subject.enabled?.should be_false
       end
 
       it "disables feature for time not within percentage" do
-        Timecop.travel(disabled_time)
+        @gate.stub(:rand => 0.10)
         subject.enabled?.should be_false
       end
     end
@@ -291,7 +291,9 @@ describe Flipper::Feature do
 
     context "during enabled percentage of time" do
       before do
-        Timecop.travel(enabled_time)
+        @gate = Flipper::Gates::PercentageOfTime.new(subject)
+        @gate.stub(:rand => 0.04)
+        Flipper::Gates::PercentageOfTime.should_receive(:new).and_return(@gate)
         adapter.write("#{subject.name}#{Flipper::Gate::Separator}#{percentage_of_time_key}", five_percent_of_time.value)
       end
 
@@ -305,7 +307,9 @@ describe Flipper::Feature do
 
     context "during not enabled percentage of time" do
       before do
-        Timecop.travel(disabled_time)
+        @gate = Flipper::Gates::PercentageOfTime.new(subject)
+        @gate.stub(:rand => 0.10)
+        Flipper::Gates::PercentageOfTime.should_receive(:new).and_return(@gate)
         adapter.write("#{subject.name}#{Flipper::Gate::Separator}#{percentage_of_time_key}", five_percent_of_time.value)
       end
 
