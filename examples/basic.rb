@@ -1,27 +1,22 @@
-require 'pp'
-require 'pathname'
-
-root_path = Pathname(__FILE__).dirname.join('..').expand_path
-lib_path  = root_path.join('lib')
-$:.unshift(lib_path)
+require './example_setup'
 
 require 'flipper'
-require 'adapter/memory'
+require 'flipper/adapters/memory'
 
-adapter = Adapter[:memory].new({})
+adapter = Flipper::Adapters::Memory.new
 search = Flipper::Feature.new(:search, adapter)
 
-if search.enabled?
-  puts 'Search away!'
-else
-  puts 'No search for you!'
+perform = lambda do
+  if search.enabled?
+    puts 'Search away!'
+  else
+    puts 'No search for you!'
+  end
 end
+
+perform.call
 
 puts 'Enabling Search...'
 search.enable
 
-if search.enabled?
-  puts 'Search away!'
-else
-  puts 'No search for you!'
-end
+perform.call
