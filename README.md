@@ -7,7 +7,7 @@ Feature flipper for any adapter.
 ```ruby
 require 'flipper/adapters/memory'
 
-adapter = Flipper::Adapters::Memory.new({})
+adapter = Flipper::Adapters::Memory.new
 search = Flipper::Feature.new(:search, adapter)
 
 if search.enabled?
