@@ -1,6 +1,6 @@
 module Flipper
   module Gates
-    class PercentageOfTime < Gate
+    class PercentageOfRandom < Gate
       Key = :perc_time
 
       def type_key
@@ -18,7 +18,7 @@ module Flipper
       end
 
       def protects?(thing)
-        thing.is_a?(Flipper::Types::PercentageOfTime)
+        thing.is_a?(Flipper::Types::PercentageOfRandom)
       end
     end
   end

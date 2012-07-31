@@ -42,7 +42,7 @@ module Flipper
         Gates::Group.new(self),
         Gates::Actor.new(self),
         Gates::PercentageOfActors.new(self),
-        Gates::PercentageOfTime.new(self),
+        Gates::PercentageOfRandom.new(self),
       ]
     end
   end

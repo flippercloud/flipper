@@ -24,8 +24,8 @@ describe Flipper::Feature do
   let(:five_percent_of_actors)   { Flipper::Types::PercentageOfActors.new(5) }
   let(:percentage_of_actors_key) { Flipper::Gates::PercentageOfActors::Key }
 
-  let(:five_percent_of_time)     { Flipper::Types::PercentageOfTime.new(5) }
-  let(:percentage_of_time_key)   { Flipper::Gates::PercentageOfTime::Key }
+  let(:five_percent_of_random)     { Flipper::Types::PercentageOfRandom.new(5) }
+  let(:percentage_of_random_key)   { Flipper::Gates::PercentageOfRandom::Key }
 
   before do
     Flipper::Types::Group.define(:admins) { |thing| thing.admin? }
@@ -110,9 +110,9 @@ describe Flipper::Feature do
 
     context "with a percentage of time" do
       before do
-        @gate = Flipper::Gates::PercentageOfTime.new(subject)
-        Flipper::Gates::PercentageOfTime.should_receive(:new).and_return(@gate)
-        subject.enable(five_percent_of_time)
+        @gate = Flipper::Gates::PercentageOfRandom.new(subject)
+        Flipper::Gates::PercentageOfRandom.should_receive(:new).and_return(@gate)
+        subject.enable(five_percent_of_random)
       end
 
       it "enables feature for time within percentage" do
@@ -200,9 +200,9 @@ describe Flipper::Feature do
 
     context "with a percentage of time" do
       before do
-        @gate = Flipper::Gates::PercentageOfTime.new(subject)
-        Flipper::Gates::PercentageOfTime.should_receive(:new).and_return(@gate)
-        subject.disable(five_percent_of_time)
+        @gate = Flipper::Gates::PercentageOfRandom.new(subject)
+        Flipper::Gates::PercentageOfRandom.should_receive(:new).and_return(@gate)
+        subject.disable(five_percent_of_random)
       end
 
       it "disables feature for time within percentage" do
@@ -291,10 +291,10 @@ describe Flipper::Feature do
 
     context "during enabled percentage of time" do
       before do
-        @gate = Flipper::Gates::PercentageOfTime.new(subject)
+        @gate = Flipper::Gates::PercentageOfRandom.new(subject)
         @gate.stub(:rand => 0.04)
-        Flipper::Gates::PercentageOfTime.should_receive(:new).and_return(@gate)
-        adapter.write("#{subject.name}#{Flipper::Gate::Separator}#{percentage_of_time_key}", five_percent_of_time.value)
+        Flipper::Gates::PercentageOfRandom.should_receive(:new).and_return(@gate)
+        adapter.write("#{subject.name}#{Flipper::Gate::Separator}#{percentage_of_random_key}", five_percent_of_random.value)
       end
 
       it "returns true" do
@@ -307,10 +307,10 @@ describe Flipper::Feature do
 
     context "during not enabled percentage of time" do
       before do
-        @gate = Flipper::Gates::PercentageOfTime.new(subject)
+        @gate = Flipper::Gates::PercentageOfRandom.new(subject)
         @gate.stub(:rand => 0.10)
-        Flipper::Gates::PercentageOfTime.should_receive(:new).and_return(@gate)
-        adapter.write("#{subject.name}#{Flipper::Gate::Separator}#{percentage_of_time_key}", five_percent_of_time.value)
+        Flipper::Gates::PercentageOfRandom.should_receive(:new).and_return(@gate)
+        adapter.write("#{subject.name}#{Flipper::Gate::Separator}#{percentage_of_random_key}", five_percent_of_random.value)
       end
 
       it "returns false" do
