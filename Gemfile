@@ -15,5 +15,6 @@ group(:test) do
   gem 'timecop'
   gem 'bson_ext'
   gem 'mongo'
+  gem 'redis'
 end
 
