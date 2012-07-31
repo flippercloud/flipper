@@ -3,9 +3,10 @@ require 'mongo'
 module Flipper
   module Adapters
     class Mongo
-      def initialize(collection, id)
+      def initialize(collection, id, options = {})
         @collection = collection
         @id = id
+        @options = options
         @mongo_criteria = {:_id => @id}
         @mongo_options = {:upsert => true, :safe => true}
       end
@@ -50,11 +51,27 @@ module Flipper
         @collection.update(@mongo_criteria, updates, @mongo_options)
       end
 
+      def ttl
+        @options.fetch(:ttl) { 0 }
+      end
+
+      def expired?
+        return true if never_loaded?
+        Time.now.to_i >= (@last_load_at + ttl)
+      end
+
+      def never_loaded?
+        @last_load_at.nil?
+      end
+
       def load
-        @document = fresh_load
+        if expired?
+          @document = fresh_load
+        end
       end
 
       def fresh_load
+        @last_load_at = Time.now.to_i
         @collection.find_one(@mongo_criteria) || {}
       end
     end
