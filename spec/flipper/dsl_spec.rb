@@ -11,6 +11,7 @@ describe Flipper::DSL do
 
   before do
     source.clear
+    Flipper.groups = Flipper::Registry.new
   end
 
   def feature(name)

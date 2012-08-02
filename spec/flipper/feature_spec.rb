@@ -28,6 +28,8 @@ describe Flipper::Feature do
   let(:percentage_of_random_key)   { Flipper::Gates::PercentageOfRandom::Key }
 
   before do
+    Flipper.groups = Flipper::Registry.new
+
     Flipper.register(:admins) { |thing| thing.admin? }
     Flipper.register(:devs)   { |thing| thing.dev? }
 
