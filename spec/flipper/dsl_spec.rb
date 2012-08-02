@@ -152,4 +152,18 @@ describe Flipper::DSL do
       @result.value.should eq(5)
     end
   end
+
+  describe "#actors" do
+    before do
+      @result = subject.actors(17)
+    end
+
+    it "returns percentage of actors" do
+      @result.should be_instance_of(Flipper::Types::PercentageOfActors)
+    end
+
+    it "sets value" do
+      @result.value.should eq(17)
+    end
+  end
 end
