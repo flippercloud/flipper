@@ -32,8 +32,6 @@ describe Flipper::Feature do
 
     Flipper.register(:admins) { |thing| thing.admin? }
     Flipper.register(:devs)   { |thing| thing.dev? }
-
-    source.clear
   end
 
   it "initializes with name and adapter" do

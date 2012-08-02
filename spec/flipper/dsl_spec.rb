@@ -10,7 +10,6 @@ describe Flipper::DSL do
   let(:admins_feature) { feature(:admins) }
 
   before do
-    source.clear
     Flipper.groups = Flipper::Registry.new
   end
 
