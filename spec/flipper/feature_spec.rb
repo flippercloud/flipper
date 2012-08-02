@@ -12,8 +12,8 @@ describe Flipper::Feature do
   let(:boolean_key) { Flipper::Gates::Boolean::Key }
   let(:group_key)   { Flipper::Gates::Group::Key }
 
-  let(:admin_group) { Flipper::Types::Group.get(:admins) }
-  let(:dev_group)   { Flipper::Types::Group.get(:devs) }
+  let(:admin_group) { Flipper.groups.get(:admins) }
+  let(:dev_group)   { Flipper.groups.get(:devs) }
 
   let(:admin_thing) { double 'Non Flipper Thing', :admin? => true, :dev? => false }
   let(:dev_thing)   { double 'Non Flipper Thing', :admin? => false, :dev? => true }
@@ -28,8 +28,8 @@ describe Flipper::Feature do
   let(:percentage_of_random_key)   { Flipper::Gates::PercentageOfRandom::Key }
 
   before do
-    Flipper::Types::Group.define(:admins) { |thing| thing.admin? }
-    Flipper::Types::Group.define(:devs)   { |thing| thing.dev? }
+    Flipper.register(:admins) { |thing| thing.admin? }
+    Flipper.register(:devs)   { |thing| thing.dev? }
 
     source.clear
   end

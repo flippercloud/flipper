@@ -7,7 +7,7 @@ adapter = Flipper::Adapters::Memory.new
 stats = Flipper::Feature.new(:stats, adapter)
 
 # Define group
-admins = Flipper::Types::Group.define(:admins) do |actor|
+admins = Flipper.register(:admins) do |actor|
   actor.respond_to?(:admin?) && actor.admin?
 end
 

@@ -21,7 +21,7 @@ module Flipper
       end
 
       def groups
-        group_names.map { |name| Flipper::Types::Group.get(name) }.compact
+        group_names.map { |name| Flipper.groups.get(name) }.compact
       end
 
       def protects?(thing)

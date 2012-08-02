@@ -24,7 +24,7 @@ RSpec.configure do |config|
   config.run_all_when_everything_filtered = true
 
   config.before(:each) do
-    Flipper::Types::Group.all.clear
+    Flipper.groups.clear
     Timecop.return
   end
 end
