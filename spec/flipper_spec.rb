@@ -7,6 +7,14 @@ describe Flipper do
     end
   end
 
+  describe ".groups=" do
+    it "sets groups registry" do
+      registry = Flipper::Registry.new
+      Flipper.groups = registry
+      Flipper.instance_variable_get("@groups").should eq(Flipper::Registry)
+    end
+  end
+
   describe ".register" do
     it "adds a group to the group_registry" do
       group = Flipper.register(:admins) { |actor| actor.admin? }

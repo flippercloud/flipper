@@ -11,6 +11,10 @@ module Flipper
     @groups ||= Registry.new
   end
 
+  def groups=(registry)
+    @groups = registry
+  end
+
   def register(name, &block)
     group = Types::Group.new(name, &block)
     groups.add(group.name, group)
