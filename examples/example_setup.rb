@@ -1,3 +1,5 @@
+# Nothing to see here... move along.
+# Sets up load path for examples and requires some stuff
 require 'pp'
 require 'pathname'
 
