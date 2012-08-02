@@ -72,6 +72,22 @@ describe Flipper::DSL do
     end
   end
 
+  describe "#[]" do
+    before do
+      @result = subject[:stats]
+    end
+
+    it "returns instance of feature with correct name and adapter" do
+      @result.should be_instance_of(Flipper::Feature)
+      @result.name.should eq(:stats)
+      @result.adapter.should eq(adapter)
+    end
+
+    it "memoizes the feature" do
+      subject[:stats].should equal(@result)
+    end
+  end
+
   describe "#group" do
     context "for registered group" do
       before do

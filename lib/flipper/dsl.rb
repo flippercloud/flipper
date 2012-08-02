@@ -24,6 +24,8 @@ module Flipper
       features[name.to_sym] ||= Flipper::Feature.new(name, @adapter)
     end
 
+    alias :[] :feature
+
     def group(name)
       Flipper.group(name)
     end
