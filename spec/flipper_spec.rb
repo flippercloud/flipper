@@ -11,7 +11,7 @@ describe Flipper do
     it "sets groups registry" do
       registry = Flipper::Registry.new
       Flipper.groups = registry
-      Flipper.instance_variable_get("@groups").should eq(Flipper::Registry)
+      Flipper.instance_variable_get("@groups").should eq(registry)
     end
   end
 
