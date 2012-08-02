@@ -1,10 +1,6 @@
 require 'helper'
 
 describe Flipper do
-  before do
-    Flipper.groups = Flipper::Registry.new
-  end
-
   describe ".groups" do
     it "returns a registry instance" do
       Flipper.groups.should be_instance_of(Flipper::Registry)

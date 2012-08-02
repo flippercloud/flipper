@@ -9,10 +9,6 @@ describe Flipper::DSL do
 
   let(:admins_feature) { feature(:admins) }
 
-  before do
-    Flipper.groups = Flipper::Registry.new
-  end
-
   def feature(name)
     Flipper::Feature.new(name, adapter)
   end
