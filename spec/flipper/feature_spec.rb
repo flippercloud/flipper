@@ -12,8 +12,8 @@ describe Flipper::Feature do
   let(:boolean_key) { Flipper::Gates::Boolean::Key }
   let(:group_key)   { Flipper::Gates::Group::Key }
 
-  let(:admin_group) { Flipper.groups.get(:admins) }
-  let(:dev_group)   { Flipper.groups.get(:devs) }
+  let(:admin_group) { Flipper.group(:admins) }
+  let(:dev_group)   { Flipper.group(:devs) }
 
   let(:admin_thing) { double 'Non Flipper Thing', :admin? => true, :dev? => false }
   let(:dev_thing)   { double 'Non Flipper Thing', :admin? => false, :dev? => true }
