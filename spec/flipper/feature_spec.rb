@@ -5,12 +5,12 @@ require 'flipper/adapters/memory'
 describe Flipper::Feature do
   subject           { Flipper::Feature.new(:search, adapter) }
 
+  let(:source)      { {} }
+  let(:adapter)     { Flipper::Adapters::Memory.new(source) }
+
   let(:actor_key)   { Flipper::Gates::Actor::Key }
   let(:boolean_key) { Flipper::Gates::Boolean::Key }
   let(:group_key)   { Flipper::Gates::Group::Key }
-
-  let(:source)      { {} }
-  let(:adapter)     { Flipper::Adapters::Memory.new(source) }
 
   let(:admin_group) { Flipper::Types::Group.get(:admins) }
   let(:dev_group)   { Flipper::Types::Group.get(:devs) }
