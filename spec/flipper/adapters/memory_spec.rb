@@ -3,13 +3,9 @@ require 'flipper/adapters/memory'
 require 'flipper/spec/shared_adapter_specs'
 
 describe Flipper::Adapters::Memory do
-  let(:source) { Hash.new }
+  let(:source) { {} }
 
   subject { Flipper::Adapters::Memory.new(source) }
-
-  before do
-    source.clear
-  end
 
   def read_key(key)
     source[key]
