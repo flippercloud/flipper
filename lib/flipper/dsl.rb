@@ -28,6 +28,20 @@ module Flipper
       Flipper.group(name)
     end
 
+    def actor(actor_or_number)
+      raise ArgumentError, "actor cannot be nil" if actor_or_number.nil?
+
+      identifier = if actor_or_number.respond_to?(:identifier)
+        actor_or_number.identifier
+      elsif actor_or_number.respond_to?(:id)
+        actor_or_number.id
+      else
+        actor_or_number
+      end
+
+      Flipper::Types::Actor.new(identifier)
+    end
+
     private
 
     def features

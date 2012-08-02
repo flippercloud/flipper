@@ -93,4 +93,49 @@ describe Flipper::DSL do
       end
     end
   end
+
+  describe "#actor" do
+    context "for something that responds to id" do
+      it "returns actor instance with identifier set to id" do
+        user = Struct.new(:id).new(23)
+        actor = subject.actor(user)
+        actor.should be_instance_of(Flipper::Types::Actor)
+        actor.identifier.should eq(23)
+      end
+    end
+
+    context "for something that responds to identifier" do
+      it "returns actor instance with identifier set to id" do
+        user = Struct.new(:identifier).new(45)
+        actor = subject.actor(user)
+        actor.should be_instance_of(Flipper::Types::Actor)
+        actor.identifier.should eq(45)
+      end
+    end
+
+    context "for something that responds to identifier and id" do
+      it "returns actor instance with identifier set to identifier" do
+        user = Struct.new(:id, :identifier).new(1, 50)
+        actor = subject.actor(user)
+        actor.should be_instance_of(Flipper::Types::Actor)
+        actor.identifier.should eq(50)
+      end
+    end
+
+    context "for a number" do
+      it "returns actor instance with identifer set to number" do
+        actor = subject.actor(33)
+        actor.should be_instance_of(Flipper::Types::Actor)
+        actor.identifier.should eq(33)
+      end
+    end
+
+    context "for nil" do
+      it "raises error" do
+        expect {
+          subject.actor(nil)
+        }.to raise_error(ArgumentError)
+      end
+    end
+  end
 end
