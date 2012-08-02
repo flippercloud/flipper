@@ -7,6 +7,10 @@ require 'flipper/toggle'
 require 'flipper/type'
 
 module Flipper
+  def self.new(*args)
+    DSL.new(*args)
+  end
+
   def self.groups
     @groups ||= Registry.new
   end

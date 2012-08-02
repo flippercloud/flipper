@@ -1,6 +1,13 @@
 require 'helper'
 
 describe Flipper do
+  describe ".new" do
+    it "returns new instance of dsl" do
+      instance = Flipper.new(double('Adapter'))
+      instance.should be_instance_of(Flipper::DSL)
+    end
+  end
+
   describe ".groups" do
     it "returns a registry instance" do
       Flipper.groups.should be_instance_of(Flipper::Registry)
