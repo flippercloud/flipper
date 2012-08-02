@@ -24,6 +24,10 @@ module Flipper
       features[name.to_sym] ||= Flipper::Feature.new(name, @adapter)
     end
 
+    def group(name)
+      Flipper.group(name)
+    end
+
     private
 
     def features

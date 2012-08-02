@@ -75,4 +75,22 @@ describe Flipper::Client do
       subject.feature(:stats).should equal(@result)
     end
   end
+
+  describe "#group" do
+    context "for registered group" do
+      before do
+        @group = Flipper.register(:admins) { }
+      end
+
+      it "returns group" do
+        subject.group(:admins).should eq(@group)
+      end
+    end
+
+    context "for unregistered group" do
+      it "returns nil" do
+        subject.group(:admins).should be_nil
+      end
+    end
+  end
 end
