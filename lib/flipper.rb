@@ -7,15 +7,15 @@ require 'flipper/toggle'
 require 'flipper/type'
 
 module Flipper
-  def groups
+  def self.groups
     @groups ||= Registry.new
   end
 
-  def groups=(registry)
+  def self.groups=(registry)
     @groups = registry
   end
 
-  def register(name, &block)
+  def self.register(name, &block)
     group = Types::Group.new(name, &block)
     groups.add(group.name, group)
     group
@@ -23,9 +23,7 @@ module Flipper
     raise DuplicateGroup, %Q{Group named "#{name}" is already registered}
   end
 
-  def group(name)
+  def self.group(name)
     groups.get(name)
   end
-
-  extend self
 end
