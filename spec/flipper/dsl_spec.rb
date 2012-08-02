@@ -81,6 +81,10 @@ describe Flipper::DSL do
       it "returns group" do
         subject.group(:admins).should eq(@group)
       end
+
+      it "always returns same instance for same name" do
+        subject.group(:admins).should equal(subject.group(:admins))
+      end
     end
 
     context "for unregistered group" do
