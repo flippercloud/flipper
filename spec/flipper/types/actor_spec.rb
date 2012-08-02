@@ -11,6 +11,11 @@ describe Flipper::Types::Actor do
     actor.should be_instance_of(Flipper::Types::Actor)
   end
 
+  it "converts identifier to integer" do
+    actor = Flipper::Types::Actor.new('2')
+    actor.identifier.should eq(2)
+  end
+
   it "has identifier" do
     actor = Flipper::Types::Actor.new(2)
     actor.identifier.should eq(2)

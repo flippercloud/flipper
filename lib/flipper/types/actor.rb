@@ -4,7 +4,7 @@ module Flipper
       attr_reader :identifier
 
       def initialize(identifier)
-        @identifier = identifier
+        @identifier = identifier.to_i
       end
 
       def enabled_value
