@@ -5,26 +5,44 @@ Feature flipper for any adapter.
 ## Usage
 
 ```ruby
+require 'flipper'
 require 'flipper/adapters/memory'
 
+# pick an adapter
 adapter = Flipper::Adapters::Memory.new
-search = Flipper::Feature.new(:search, adapter)
 
-if search.enabled?
-  puts 'Search away!'
-else
-  puts 'No search for you!'
+# get a handy dsl instance
+flipper = Flipper.new(adapter)
+
+# grab a feature
+search = flipper[:search]
+
+perform = lambda do
+  # check if that feature is enabled
+  if search.enabled?
+    puts 'Search away!'
+  else
+    puts 'No search for you!'
+  end
 end
 
+perform.call
 puts 'Enabling Search...'
 search.enable
-
-if search.enabled?
-  puts 'Search away!'
-else
-  puts 'No search for you!'
-end
+perform.call
 ```
+
+Of course there are more [examples for you to peruse](https://github.com/jnunemaker/flipper/tree/master/examples).
+
+## Types
+
+Out of the box several types of enabling are supported:
+
+* Boolean - All on or all off.
+* Group - Turn on feature based on value of block. Super flexible way to turn on a feature for multiple things (users, people, accounts, etc.)
+* Individual Actor - Turn on for individual thing. Think enable feature for someone to test or for a buddy.
+* Percentage of Actors - Turn this on for a percentage of actors (think users or people). Consistently on or off for this user as long as percentage increases. Think slow rollout of a new feature to users.
+* Percentage of Random - Turn this on for a random percentage of time
 
 ## Installation
 
