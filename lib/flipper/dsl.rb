@@ -1,5 +1,5 @@
 module Flipper
-  class Client
+  class DSL
     def initialize(adapter)
       @adapter = adapter
     end

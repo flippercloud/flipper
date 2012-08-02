@@ -1,7 +1,10 @@
+require 'flipper/dsl'
+require 'flipper/errors'
 require 'flipper/feature'
+require 'flipper/gate'
 require 'flipper/registry'
-require 'flipper/types/group'
-require 'flipper/adapters/memory'
+require 'flipper/toggle'
+require 'flipper/type'
 
 module Flipper
   def groups

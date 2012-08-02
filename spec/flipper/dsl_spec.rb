@@ -1,8 +1,8 @@
 require 'helper'
-require 'flipper/client'
+require 'flipper/dsl'
 
-describe Flipper::Client do
-  subject { Flipper::Client.new(adapter) }
+describe Flipper::DSL do
+  subject { Flipper::DSL.new(adapter) }
 
   let(:source)  { {} }
   let(:adapter) { Flipper::Adapters::Memory.new(source) }
