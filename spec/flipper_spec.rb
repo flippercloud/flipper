@@ -21,8 +21,10 @@ describe Flipper do
 
   describe ".register" do
     it "adds a group to the group_registry" do
+      registry = Flipper::Registry.new
+      Flipper.groups = registry
       group = Flipper.register(:admins) { |actor| actor.admin? }
-      Flipper.groups.get(:admins).should eq(group)
+      registry.get(:admins).should eq(group)
     end
 
     it "raises exception if group already registered" do
