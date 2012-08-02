@@ -42,6 +42,10 @@ module Flipper
       Flipper::Types::Actor.new(identifier)
     end
 
+    def random(number)
+      Flipper::Types::PercentageOfRandom.new(number)
+    end
+
     private
 
     def features

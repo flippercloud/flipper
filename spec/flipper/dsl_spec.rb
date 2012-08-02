@@ -138,4 +138,18 @@ describe Flipper::DSL do
       end
     end
   end
+
+  describe "#random" do
+    before do
+      @result = subject.random(5)
+    end
+
+    it "returns percentage of random" do
+      @result.should be_instance_of(Flipper::Types::PercentageOfRandom)
+    end
+
+    it "sets value" do
+      @result.value.should eq(5)
+    end
+  end
 end
