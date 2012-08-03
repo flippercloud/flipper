@@ -75,4 +75,8 @@ shared_examples_for 'a flipper adapter' do
       subject.set_members('foo').should eq(Set[1, 2])
     end
   end
+
+  it "should work with Flipper.new" do
+    Flipper.new(subject).should_not be_nil
+  end
 end
