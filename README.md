@@ -4,6 +4,10 @@ Feature flipping is the act of enabling or disabling features or parts of your a
 
 The goal of this gem is to make turning features on or off so easy that everyone does it. Whatever your data store, throughput, or experience, feature flipping should be easy and relatively no extra burden to your application.
 
+## Note
+
+This project is a work in progress and not ready for production yet, but will be very soon.
+
 ## Why not use &lt;insert gem name here, most likely rollout&gt;?
 
 I've used rollout extensively in the past and it was fantastic. The main reason I reinvented the wheel to some extent is:
