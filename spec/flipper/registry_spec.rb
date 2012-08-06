@@ -58,6 +58,28 @@ describe Flipper::Registry do
     end
   end
 
+  describe "#keys" do
+    before do
+      source[:admins] = 'admins'
+      source[:devs] = 'devs'
+    end
+
+    it "returns the keys" do
+      subject.keys.should eq([:admins, :devs])
+    end
+  end
+
+  describe "#values" do
+    before do
+      source[:admins] = 'admins'
+      source[:devs] = 'devs'
+    end
+
+    it "returns the values" do
+      subject.values.should eq(['admins', 'devs'])
+    end
+  end
+
   describe "#clear" do
     before do
       source[:admins] = 'admins'

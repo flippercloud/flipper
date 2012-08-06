@@ -9,6 +9,14 @@ module Flipper
       @source = source
     end
 
+    def keys
+      @mutex.synchronize { @source.keys }
+    end
+
+    def values
+      @mutex.synchronize { @source.values }
+    end
+
     def add(key, value)
       @mutex.synchronize do
         if @source[key]
