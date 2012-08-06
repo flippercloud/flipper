@@ -1,5 +1,7 @@
 module Flipper
   class Registry
+    include Enumerable
+
     class Error < StandardError; end
     class DuplicateKey < Error; end
     class MissingKey < Error; end

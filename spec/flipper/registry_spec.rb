@@ -80,6 +80,26 @@ describe Flipper::Registry do
     end
   end
 
+  describe "enumeration" do
+    before do
+      source[:admins] = 'admins'
+      source[:devs] = 'devs'
+    end
+
+    it "works" do
+      keys = []
+      values = []
+
+      subject.map do |key, value|
+        keys << key
+        values << value
+      end
+
+      keys.should eq([:admins, :devs])
+      values.should eq(['admins', 'devs'])
+    end
+  end
+
   describe "#clear" do
     before do
       source[:admins] = 'admins'
