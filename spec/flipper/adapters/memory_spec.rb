@@ -5,7 +5,7 @@ require 'flipper/spec/shared_adapter_specs'
 describe Flipper::Adapters::Memory do
   let(:source) { {} }
 
-  subject { Flipper::Adapters::Memory.new(source) }
+  subject { described_class.new(source) }
 
   def read_key(key)
     source[key]
