@@ -16,5 +16,6 @@ group(:test) do
   gem 'bson_ext'
   gem 'mongo'
   gem 'redis'
+  gem 'rack-test'
 end
 
