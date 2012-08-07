@@ -23,12 +23,12 @@ module Flipper
       @local_cache ||= {}
     end
 
-    def use_local_cache?
+    def using_local_cache?
       @use_local_cache == true
     end
 
     def read(key)
-      if use_local_cache?
+      if using_local_cache?
         local_cache.fetch(key) {
           local_cache[key] = @adapter.read(key)
         }
@@ -39,18 +39,18 @@ module Flipper
 
     def write(key, value)
       result = @adapter.write(key, value)
-      local_cache.delete(key) if use_local_cache?
+      local_cache.delete(key) if using_local_cache?
       result
     end
 
     def delete(key)
       result = @adapter.delete(key)
-      local_cache.delete(key) if use_local_cache?
+      local_cache.delete(key) if using_local_cache?
       result
     end
 
     def set_members(key)
-      if use_local_cache?
+      if using_local_cache?
         local_cache.fetch(key) {
           local_cache[key] = @adapter.set_members(key)
         }
@@ -61,13 +61,13 @@ module Flipper
 
     def set_add(key, value)
       result = @adapter.set_add(key, value)
-      local_cache.delete(key) if use_local_cache?
+      local_cache.delete(key) if using_local_cache?
       result
     end
 
     def set_delete(key, value)
       result = @adapter.set_delete(key, value)
-      local_cache.delete(key) if use_local_cache?
+      local_cache.delete(key) if using_local_cache?
       result
     end
 

@@ -36,7 +36,7 @@ describe Flipper::Adapter do
     end
   end
 
-  context "#use_local_cache=" do
+  describe "#use_local_cache=" do
     before do
       subject.local_cache['foo'] = 'bar'
       subject.use_local_cache = true
@@ -48,6 +48,18 @@ describe Flipper::Adapter do
 
     it "clears the local cache" do
       subject.local_cache.should be_empty
+    end
+  end
+
+  describe "#using_local_cache?" do
+    it "returns true if enabled" do
+      subject.use_local_cache = true
+      subject.using_local_cache?.should be_true
+    end
+
+    it "returns false if disabled" do
+      subject.use_local_cache = false
+      subject.using_local_cache?.should be_false
     end
   end
 
