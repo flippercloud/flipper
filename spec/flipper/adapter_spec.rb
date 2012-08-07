@@ -4,8 +4,7 @@ require 'flipper/adapters/memory'
 
 describe Flipper::Adapter do
   let(:local_cache) { {} }
-  let(:source)      { {} }
-  let(:adapter)     { Flipper::Adapters::Memory.new(source) }
+  let(:adapter)     { Flipper::Adapters::Memory.new }
 
   subject { described_class.new(adapter, local_cache) }
 
