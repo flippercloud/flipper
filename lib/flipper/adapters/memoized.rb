@@ -15,23 +15,27 @@ module Flipper
       end
 
       def write(key, value)
+        result = @adapter.write(key, value)
         @cache.delete(key)
-        @adapter.write(key, value)
+        result
       end
 
       def delete(key)
+        result = @adapter.delete(key)
         @cache.delete(key)
-        @adapter.delete(key)
+        result
       end
 
       def set_add(key, value)
+        result = @adapter.set_add(key, value)
         @cache.delete(key)
-        @adapter.set_add(key, value)
+        result
       end
 
       def set_delete(key, value)
+        result = @adapter.set_delete(key, value)
         @cache.delete(key)
-        @adapter.set_delete(key, value)
+        result
       end
 
       def set_members(key)
