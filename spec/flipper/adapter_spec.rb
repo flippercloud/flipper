@@ -43,7 +43,7 @@ describe Flipper::Adapter do
     end
 
     it "sets value" do
-      subject.use_local_cache.should be_true
+      subject.using_local_cache?.should be_true
     end
 
     it "clears the local cache" do

@@ -1,5 +1,5 @@
 module Flipper
-  # Adapter wrapper that wraps vanilla adapter instances with local caching.
+  # Internal: Adapter wrapper that wraps vanilla adapter instances with local caching.
   #
   # So what is this local cache crap?
   #
@@ -17,6 +17,22 @@ module Flipper
   # To see an example adapter that this would wrap, checkout the [memory
   # adapter included with flipper](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb).
   class Adapter
+    # Internal: Wraps vanilla adapter instance for use internally in flipper.
+    #
+    # object - Either an instance of Flipper::Adapter or a vanilla adapter instance
+    #
+    # Examples
+    #
+    #   adapter = Flipper::Adapters::Memory.new
+    #   instance = Flipper::Adapter.new(adapter)
+    #
+    #   Flipper::Adapter.wrap(instance)
+    #   # => Flipper::Adapter instance
+    #
+    #   Flipper::Adapter.wrap(adapter)
+    #   # => Flipper::Adapter instance
+    #
+    # Returns Flipper::Adapter instance
     def self.wrap(object)
       if object.is_a?(Flipper::Adapter)
         object
@@ -25,19 +41,23 @@ module Flipper
       end
     end
 
-    attr_reader :adapter, :use_local_cache
+    attr_reader :adapter, :local_cache
 
-    def initialize(adapter)
+    # Internal: Initializes a new instance
+    #
+    # adapter - Vanilla adapter instance to wrap. Just needs to respond to
+    #           read, write, delete, set_members, set_add, and set_delete.
+    #
+    # local_cache - Where to store the local cache data (default: {}).
+    #               Must respond to fetch(key, block), delete(key) and clear.
+    def initialize(adapter, local_cache = {})
       @adapter = adapter
+      @local_cache = local_cache
     end
 
     def use_local_cache=(value)
       local_cache.clear
       @use_local_cache = value
-    end
-
-    def local_cache
-      @local_cache ||= {}
     end
 
     def using_local_cache?
