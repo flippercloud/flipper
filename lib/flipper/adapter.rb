@@ -1,4 +1,21 @@
 module Flipper
+  # Adapter wrapper that wraps vanilla adapter instances with local caching.
+  #
+  # So what is this local cache crap?
+  #
+  # The main goal of the local cache is to prevent multiple queries to an
+  # adapter for the same key for a given amount of time (per request, per
+  # background job, etc.).
+  #
+  # To facilitate with this, there is an included local cache middleware
+  # that enables local caching for the length of a web request. The local
+  # cache is enabled and cleared before each request and cleared and reset
+  # to original value after each request.
+  #
+  # Examples
+  #
+  # To see an example adapter that this would wrap, checkout the [memory
+  # adapter included with flipper](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb).
   class Adapter
     def self.wrap(object)
       if object.is_a?(Flipper::Adapter)
