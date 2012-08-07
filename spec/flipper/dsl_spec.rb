@@ -13,6 +13,12 @@ describe Flipper::DSL do
     Flipper::Feature.new(name, adapter)
   end
 
+  it "wraps adapter when initializing" do
+    dsl = described_class.new(adapter)
+    dsl.adapter.should be_instance_of(Flipper::Adapter)
+    dsl.adapter.adapter.should eq(adapter)
+  end
+
   describe "#enabled?" do
     before do
       subject.stub(:feature => admins_feature)
@@ -64,7 +70,7 @@ describe Flipper::DSL do
     it "returns instance of feature with correct name and adapter" do
       @result.should be_instance_of(Flipper::Feature)
       @result.name.should eq(:stats)
-      @result.adapter.should eq(adapter)
+      @result.adapter.should eq(subject.adapter)
     end
 
     it "memoizes the feature" do
@@ -80,7 +86,7 @@ describe Flipper::DSL do
     it "returns instance of feature with correct name and adapter" do
       @result.should be_instance_of(Flipper::Feature)
       @result.name.should eq(:stats)
-      @result.adapter.should eq(adapter)
+      @result.adapter.should eq(subject.adapter)
     end
 
     it "memoizes the feature" do

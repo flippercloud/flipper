@@ -1,7 +1,11 @@
+require 'flipper/adapter'
+
 module Flipper
   class DSL
+    attr_reader :adapter
+
     def initialize(adapter)
-      @adapter = adapter
+      @adapter = Adapter.wrap(adapter)
     end
 
     def enabled?(name, *args)
@@ -21,7 +25,7 @@ module Flipper
     end
 
     def feature(name)
-      features[name.to_sym] ||= Flipper::Feature.new(name, @adapter)
+      features[name.to_sym] ||= Feature.new(name, @adapter)
     end
 
     alias :[] :feature
