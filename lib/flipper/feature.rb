@@ -1,3 +1,4 @@
+require 'flipper/adapter'
 require 'flipper/errors'
 require 'flipper/type'
 require 'flipper/toggle'
@@ -10,7 +11,7 @@ module Flipper
 
     def initialize(name, adapter)
       @name = name
-      @adapter = adapter
+      @adapter = Adapter.wrap(adapter)
     end
 
     def enable(thing = Types::Boolean.new)

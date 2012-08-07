@@ -3,7 +3,7 @@ require 'flipper/feature'
 require 'flipper/adapters/memory'
 
 describe Flipper::Feature do
-  subject           { Flipper::Feature.new(:search, adapter) }
+  subject           { described_class.new(:search, adapter) }
 
   let(:source)      { {} }
   let(:adapter)     { Flipper::Adapters::Memory.new(source) }
@@ -33,20 +33,9 @@ describe Flipper::Feature do
   end
 
   it "initializes with name and adapter" do
-    feature = Flipper::Feature.new(:search, adapter)
-    feature.should be_instance_of(Flipper::Feature)
-  end
-
-  describe "#name" do
-    it "returns name" do
-      subject.name.should eq(:search)
-    end
-  end
-
-  describe "#adapter" do
-    it "returns adapter" do
-      subject.adapter.should eq(adapter)
-    end
+    feature = described_class.new(:search, adapter)
+    feature.name.should eq(:search)
+    feature.adapter.should eq(Flipper::Adapter.wrap(adapter))
   end
 
   describe "#enable" do
