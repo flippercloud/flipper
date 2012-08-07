@@ -266,4 +266,23 @@ describe Flipper::Adapter do
       end
     end
   end
+
+  describe "#eql?" do
+    it "returns true for same class and adapter" do
+      subject.eql?(described_class.new(adapter)).should be_true
+    end
+
+    it "returns false for different adapter" do
+      instance = described_class.new(Flipper::Adapters::Memory.new)
+      subject.eql?(instance).should be_false
+    end
+
+    it "returns false for different class" do
+      subject.eql?(Object.new).should be_false
+    end
+
+    it "is aliased to ==" do
+      (subject == described_class.new(adapter)).should be_true
+    end
+  end
 end
