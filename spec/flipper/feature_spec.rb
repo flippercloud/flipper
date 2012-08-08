@@ -15,8 +15,8 @@ describe Flipper::Feature do
   let(:admin_group) { Flipper.group(:admins) }
   let(:dev_group)   { Flipper.group(:devs) }
 
-  let(:admin_thing) { double 'Non Flipper Thing', :admin? => true, :dev? => false }
-  let(:dev_thing)   { double 'Non Flipper Thing', :admin? => false, :dev? => true }
+  let(:admin_thing) { double 'Non Flipper Thing', :identifier => 1,  :admin? => true, :dev? => false }
+  let(:dev_thing)   { double 'Non Flipper Thing', :identifier => 10, :admin? => false, :dev? => true }
 
   let(:pitt)        { Flipper::Types::Actor.new(1) }
   let(:clooney)     { Flipper::Types::Actor.new(10) }
@@ -60,6 +60,14 @@ describe Flipper::Feature do
 
       it "does not enable feature for non flipper thing in other group" do
         subject.enabled?(dev_thing).should be_false
+      end
+
+      it "enables feature for flipper actor in group" do
+        subject.enabled?(Flipper::Types::Actor.new(admin_thing)).should be_true
+      end
+
+      it "does not enable for flipper actor not in group" do
+        subject.enabled?(Flipper::Types::Actor.new(dev_thing)).should be_false
       end
 
       it "does not enable feature for all" do
@@ -153,6 +161,14 @@ describe Flipper::Feature do
       it "does not disable feature for non flipper thing in other groups" do
         subject.enabled?(dev_thing).should be_true
       end
+
+      it "disables feature for flipper actor in group" do
+        subject.enabled?(Flipper::Types::Actor.new(admin_thing)).should be_false
+      end
+
+      it "does not disable feature for flipper actor in other groups" do
+        subject.enabled?(Flipper::Types::Actor.new(dev_thing)).should be_true
+      end
     end
 
     context "with an actor" do
@@ -227,6 +243,22 @@ describe Flipper::Feature do
 
       it "returns true" do
         subject.enabled?.should be_true
+      end
+    end
+
+    context "for actor in enabled group" do
+      before do
+        adapter.set_add("#{subject.name}#{Flipper::Gate::Separator}#{group_key}", admin_group.name)
+      end
+
+      it "returns true" do
+        subject.enabled?(Flipper::Types::Actor.new(admin_thing)).should be_true
+      end
+    end
+
+    context "for actor in disbled group" do
+      it "returns false" do
+        subject.enabled?(Flipper::Types::Actor.new(dev_thing)).should be_false
       end
     end
 

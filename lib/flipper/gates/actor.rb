@@ -12,9 +12,10 @@ module Flipper
       end
 
       def open?(actor)
-        if actor && actor.respond_to?(:identifier)
-          identifiers.include?(actor.identifier)
-        end
+        return if actor.nil?
+        return unless Types::Actor.wrappable?(actor)
+        actor = Types::Actor.wrap(actor)
+        identifiers.include?(actor.identifier)
       end
 
       def identifiers
