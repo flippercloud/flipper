@@ -25,7 +25,6 @@ RSpec.configure do |config|
 
   config.before(:each) do
     Flipper.groups = nil
-    Timecop.return
   end
 end
 
