@@ -7,10 +7,9 @@ module Flipper
 
       def disable(thing)
         adapter.delete key
-        adapter.delete Key.new(key.prefix, Gates::Actor::Key)
-        adapter.delete Key.new(key.prefix, Gates::Group::Key)
-        adapter.delete Key.new(key.prefix, Gates::PercentageOfActors::Key)
-        adapter.delete Key.new(key.prefix, Gates::PercentageOfRandom::Key)
+        feature.gates.each do |gate|
+          gate.adapter.delete gate.key
+        end
       end
 
       def value
