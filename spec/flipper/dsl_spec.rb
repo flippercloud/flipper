@@ -117,30 +117,12 @@ describe Flipper::DSL do
   end
 
   describe "#actor" do
-    context "for something that responds to id" do
-      it "returns actor instance with identifier set to id" do
-        user = Struct.new(:id).new(23)
-        actor = subject.actor(user)
-        actor.should be_instance_of(Flipper::Types::Actor)
-        actor.identifier.should eq(23)
-      end
-    end
-
     context "for something that responds to identifier" do
       it "returns actor instance with identifier set to id" do
         user = Struct.new(:identifier).new(45)
         actor = subject.actor(user)
         actor.should be_instance_of(Flipper::Types::Actor)
         actor.identifier.should eq(45)
-      end
-    end
-
-    context "for something that responds to identifier and id" do
-      it "returns actor instance with identifier set to identifier" do
-        user = Struct.new(:id, :identifier).new(1, 50)
-        actor = subject.actor(user)
-        actor.should be_instance_of(Flipper::Types::Actor)
-        actor.identifier.should eq(50)
       end
     end
 

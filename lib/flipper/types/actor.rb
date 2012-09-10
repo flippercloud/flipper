@@ -4,7 +4,6 @@ module Flipper
       def self.wrappable?(thing)
         thing.is_a?(Flipper::Types::Actor) ||
           thing.respond_to?(:identifier) ||
-          thing.respond_to?(:id) ||
           thing.respond_to?(:to_i)
       end
 
@@ -24,8 +23,6 @@ module Flipper
         @thing = thing
         @identifier = if thing.respond_to?(:identifier)
           thing.identifier
-        elsif thing.respond_to?(:id)
-          thing.id
         else
           thing
         end.to_i

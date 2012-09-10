@@ -31,17 +31,12 @@ describe Flipper::Types::Actor do
       described_class.wrappable?(thing).should be_true
     end
 
-    it "returns true if responds to id" do
-      thing = Struct.new(:id).new(10)
-      described_class.wrappable?(thing).should be_true
-    end
-
     it "returns true if responds to to_i" do
       described_class.wrappable?(1).should be_true
     end
 
-    it "returns false if not actor and does not respond to identifier, id, nor to_i" do
-      described_class.wrappable?(:nope).should be_false
+    it "returns false if not actor and does not respond to identifier or to_i" do
+      described_class.wrappable?(Object.new).should be_false
     end
   end
 
@@ -71,12 +66,6 @@ describe Flipper::Types::Actor do
     thing = Struct.new(:identifier).new(1)
     actor = described_class.new(thing)
     actor.identifier.should be(1)
-  end
-
-  it "initializes with object that responds to id" do
-    thing = Struct.new(:id).new(13)
-    actor = described_class.new(thing)
-    actor.identifier.should be(13)
   end
 
   it "raises error when initialized with nil" do

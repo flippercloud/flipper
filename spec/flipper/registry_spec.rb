@@ -65,7 +65,7 @@ describe Flipper::Registry do
     end
 
     it "returns the keys" do
-      subject.keys.should eq([:admins, :devs])
+      subject.keys.map(&:to_s).sort.should eq(['admins', 'devs'])
     end
   end
 
@@ -76,7 +76,7 @@ describe Flipper::Registry do
     end
 
     it "returns the values" do
-      subject.values.should eq(['admins', 'devs'])
+      subject.values.map(&:to_s).sort.should eq(['admins', 'devs'])
     end
   end
 
@@ -95,8 +95,8 @@ describe Flipper::Registry do
         values << value
       end
 
-      keys.should eq([:admins, :devs])
-      values.should eq(['admins', 'devs'])
+      keys.map(&:to_s).sort.should eq(['admins', 'devs'])
+      values.sort.should eq(['admins', 'devs'])
     end
   end
 
