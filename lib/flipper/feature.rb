@@ -30,13 +30,7 @@ module Flipper
       !enabled?(actor)
     end
 
-    private
-
-    def gate_for(thing)
-      gates.detect { |gate| gate.protects?(thing) } ||
-        raise(GateNotFound.new(thing))
-    end
-
+    # Internal: Gates to check to see if feature is enabled/disabled
     def gates
       @gates ||= [
         Gates::Boolean.new(self),
@@ -45,6 +39,13 @@ module Flipper
         Gates::PercentageOfActors.new(self),
         Gates::PercentageOfRandom.new(self),
       ]
+    end
+
+    private
+
+    def gate_for(thing)
+      gates.detect { |gate| gate.protects?(thing) } ||
+        raise(GateNotFound.new(thing))
     end
   end
 end

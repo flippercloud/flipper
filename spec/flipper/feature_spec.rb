@@ -57,6 +57,16 @@ describe Flipper::Feature do
     feature.adapter.should eq(Flipper::Adapter.wrap(adapter))
   end
 
+  describe "#gates" do
+    it "returns array of gates" do
+      subject.gates.should be_instance_of(Array)
+      subject.gates.each do |gate|
+        gate.should be_a(Flipper::Gate)
+      end
+      subject.gates.size.should be(5)
+    end
+  end
+
   describe "#enable" do
     context "with no arguments" do
       before do
