@@ -93,7 +93,7 @@ describe Flipper::Types::Actor do
   describe "#respond_to?" do
     it "returns true if responds to method" do
       actor = described_class.new(10)
-      actor.respond_to?(:enabled_value).should be_true
+      actor.respond_to?(:value).should be_true
     end
 
     it "returns true if thing responds to method" do

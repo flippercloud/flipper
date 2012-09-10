@@ -28,11 +28,9 @@ module Flipper
         end.to_i
       end
 
-      def enabled_value
+      def value
         @identifier
       end
-
-      alias_method :disabled_value, :enabled_value
 
       def respond_to?(*args)
         super || @thing.respond_to?(*args)

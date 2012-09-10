@@ -1,10 +1,6 @@
 module Flipper
   class Type
-    def enabled_value
-      raise 'Not implemented'
-    end
-
-    def disabled_value
+    def value
       raise 'Not implemented'
     end
   end

@@ -2,7 +2,7 @@ module Flipper
   module Toggles
     class Boolean < Toggle
       def enable(thing)
-        adapter.write key, thing.enabled_value
+        adapter.write key, thing.value
       end
 
       def disable(thing)

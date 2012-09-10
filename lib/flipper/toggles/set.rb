@@ -2,11 +2,11 @@ module Flipper
   module Toggles
     class Set < Toggle
       def enable(thing)
-        adapter.set_add key, thing.enabled_value
+        adapter.set_add key, thing.value
       end
 
       def disable(thing)
-        adapter.set_delete key, thing.disabled_value
+        adapter.set_delete key, thing.value
       end
 
       def value
