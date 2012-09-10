@@ -6,7 +6,7 @@ module Flipper
       end
 
       def disable(thing)
-        adapter.write key, thing.disabled_value
+        adapter.delete key
       end
 
       def value
