@@ -1,11 +1,3 @@
-require 'flipper/dsl'
-require 'flipper/errors'
-require 'flipper/feature'
-require 'flipper/gate'
-require 'flipper/registry'
-require 'flipper/toggle'
-require 'flipper/type'
-
 module Flipper
   def self.new(*args)
     DSL.new(*args)
@@ -31,3 +23,11 @@ module Flipper
     groups.get(name)
   end
 end
+
+require 'flipper/dsl'
+require 'flipper/errors'
+require 'flipper/feature'
+require 'flipper/gate'
+require 'flipper/registry'
+require 'flipper/toggle'
+require 'flipper/type'
