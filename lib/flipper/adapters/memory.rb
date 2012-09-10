@@ -20,14 +20,23 @@ module Flipper
       end
 
       def set_add(key, value)
-        set_members(key.to_s).add(value)
+        ensure_set_initialized(key)
+        @source[key.to_s].add(value)
       end
 
       def set_delete(key, value)
-        set_members(key.to_s).delete(value)
+        ensure_set_initialized(key)
+        @source[key.to_s].delete(value)
       end
 
       def set_members(key)
+        ensure_set_initialized(key)
+        @source[key.to_s]
+      end
+
+      private
+
+      def ensure_set_initialized(key)
         @source[key.to_s] ||= Set.new
       end
     end
