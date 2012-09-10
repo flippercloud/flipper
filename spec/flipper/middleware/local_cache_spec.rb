@@ -1,41 +1,22 @@
 require 'helper'
 require 'rack/test'
 require 'flipper/middleware/local_cache'
+require 'flipper/adapters/operation_logger'
+require 'flipper/adapters/memory'
 
 describe Flipper::Middleware::LocalCache do
   include Rack::Test::Methods
 
-  class LoggedHash < Hash
-    attr_reader :reads, :writes
-
-    Read  = Struct.new(:key)
-    Write = Struct.new(:key, :value)
-
-    def initialize(*args)
-      @reads, @writes = [], []
-      super
-    end
-
-    def [](key)
-      @reads << Read.new(key)
-      super
-    end
-
-    def []=(key, value)
-      @writes << Write.new(key, value)
-      super
-    end
-  end
-
   class Enum < Struct.new(:iter)
-    def each(&b)
-      iter.call(&b)
+    def each(&block)
+      iter.call(&block)
     end
   end
 
-  let(:source)  { LoggedHash.new }
-  let(:adapter) { Flipper::Adapters::Memory.new(source) }
-  let(:flipper) { Flipper.new(adapter) }
+  let(:source)         { {} }
+  let(:memory_adapter) { Flipper::Adapters::Memory.new(source) }
+  let(:adapter)        { Flipper::Adapters::OperationLogger.new(memory_adapter) }
+  let(:flipper)        { Flipper.new(adapter) }
 
   let(:app) {
     # ensure scoped for builder block, annoying...
@@ -54,6 +35,10 @@ describe Flipper::Middleware::LocalCache do
       end
     end.to_app
   }
+
+  before do
+    adapter.reset
+  end
 
   it "delegates" do
     called = false
@@ -77,9 +62,9 @@ describe Flipper::Middleware::LocalCache do
 
   it "enables local cache for body each" do
     app = lambda { |env|
-      [200, {}, Enum.new(lambda { |&b|
+      [200, {}, Enum.new(lambda { |&block|
         flipper.adapter.using_local_cache?.should be_true
-        b.call "hello"
+        block.call "hello"
       })]
     }
     middleware = described_class.new app, flipper
@@ -110,6 +95,7 @@ describe Flipper::Middleware::LocalCache do
 
   it "really does cache" do
     flipper[:stats].enable
+    adapter.reset
 
     app = lambda { |env|
       flipper[:stats].enabled?
@@ -124,7 +110,9 @@ describe Flipper::Middleware::LocalCache do
     middleware = described_class.new app, flipper
     middleware.call({})
 
-    source.reads.map(&:key).should eq(["stats/boolean"])
+    adapter.operations.should eq([
+      Flipper::Adapters::OperationLogger::Read.new("stats/boolean"),
+    ])
   end
 
   context "with a successful request" do
