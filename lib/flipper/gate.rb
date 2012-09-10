@@ -1,10 +1,9 @@
 require 'forwardable'
+require 'flipper/key'
 
 module Flipper
   class Gate
     extend Forwardable
-
-    Separator = '/'
 
     attr_reader :feature
 
@@ -14,12 +13,8 @@ module Flipper
       @feature = feature
     end
 
-    def key_prefix
-      @feature.name
-    end
-
     def key
-      "#{key_prefix}#{Separator}#{type_key}"
+      @key ||= Key.new(@feature.name, type_key)
     end
 
     def toggle_class

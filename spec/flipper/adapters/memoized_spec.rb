@@ -11,11 +11,11 @@ describe Flipper::Adapters::Memoized do
   subject { described_class.new(adapter, cache) }
 
   def read_key(key)
-    source[key]
+    source[key.to_s]
   end
 
   def write_key(key, value)
-    source[key] = value
+    source[key.to_s] = value
   end
 
   it_should_behave_like 'a flipper adapter'

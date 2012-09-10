@@ -104,11 +104,11 @@ module Flipper
     private
 
     def cache(key)
-      local_cache.fetch(key) { local_cache[key] = yield }
+      local_cache.fetch(key.to_s) { local_cache[key.to_s] = yield }
     end
 
     def expire_local_cache(key)
-      local_cache.delete(key) if using_local_cache?
+      local_cache.delete(key.to_s) if using_local_cache?
     end
   end
 end

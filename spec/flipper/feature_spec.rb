@@ -8,10 +8,6 @@ describe Flipper::Feature do
   let(:source)      { {} }
   let(:adapter)     { Flipper::Adapters::Memory.new(source) }
 
-  let(:actor_key)   { Flipper::Gates::Actor::Key }
-  let(:boolean_key) { Flipper::Gates::Boolean::Key }
-  let(:group_key)   { Flipper::Gates::Group::Key }
-
   let(:admin_group) { Flipper.group(:admins) }
   let(:dev_group)   { Flipper.group(:devs) }
 
@@ -21,15 +17,38 @@ describe Flipper::Feature do
   let(:pitt)        { Flipper::Types::Actor.new(1) }
   let(:clooney)     { Flipper::Types::Actor.new(10) }
 
-  let(:five_percent_of_actors)   { Flipper::Types::PercentageOfActors.new(5) }
-  let(:percentage_of_actors_key) { Flipper::Gates::PercentageOfActors::Key }
-
-  let(:five_percent_of_random)     { Flipper::Types::PercentageOfRandom.new(5) }
-  let(:percentage_of_random_key)   { Flipper::Gates::PercentageOfRandom::Key }
+  let(:five_percent_of_actors) { Flipper::Types::PercentageOfActors.new(5) }
+  let(:five_percent_of_random) { Flipper::Types::PercentageOfRandom.new(5) }
 
   before do
     Flipper.register(:admins) { |thing| thing.admin? }
     Flipper.register(:devs)   { |thing| thing.dev? }
+  end
+
+  def enable_feature(feature)
+    key = Flipper::Key.new(subject.name, Flipper::Gates::Boolean::Key)
+    adapter.write key, true
+  end
+
+  def enable_group(group)
+    key = Flipper::Key.new(subject.name, Flipper::Gates::Group::Key)
+    name = group.respond_to?(:name) ? group.name : group
+    adapter.set_add key, name
+  end
+
+  def enable_actor(actor)
+    key = Flipper::Key.new(subject.name, Flipper::Gates::Actor::Key)
+    adapter.set_add key, actor.identifier
+  end
+
+  def enable_percentage_of_actors(percentage)
+    key = Flipper::Key.new(subject.name, Flipper::Gates::PercentageOfActors::Key)
+    adapter.write key, percentage.value
+  end
+
+  def enable_percentage_of_random(percentage)
+    key = Flipper::Key.new(subject.name, Flipper::Gates::PercentageOfRandom::Key)
+    adapter.write key, percentage.value
   end
 
   it "initializes with name and adapter" do
@@ -134,7 +153,7 @@ describe Flipper::Feature do
   describe "#disable" do
     context "with no arguments" do
       before do
-        adapter.set_add("#{subject.name}#{Flipper::Gate::Separator}#{group_key}", admin_group.name)
+        enable_group admin_group
         subject.disable
       end
 
@@ -149,8 +168,8 @@ describe Flipper::Feature do
 
     context "with a group" do
       before do
-        adapter.set_add("#{subject.name}#{Flipper::Gate::Separator}#{group_key}", dev_group.name)
-        adapter.set_add("#{subject.name}#{Flipper::Gate::Separator}#{group_key}", admin_group.name)
+        enable_group dev_group
+        enable_group admin_group
         subject.disable(admin_group)
       end
 
@@ -173,8 +192,8 @@ describe Flipper::Feature do
 
     context "with an actor" do
       before do
-        adapter.set_add("#{subject.name}#{Flipper::Gate::Separator}#{actor_key}", pitt.identifier)
-        adapter.set_add("#{subject.name}#{Flipper::Gate::Separator}#{actor_key}", clooney.identifier)
+        enable_actor pitt
+        enable_actor clooney
         subject.disable(pitt)
       end
 
@@ -238,7 +257,7 @@ describe Flipper::Feature do
 
     context "with no arguments, but boolean enabled" do
       before do
-        adapter.write("#{subject.name}#{Flipper::Gate::Separator}#{boolean_key}", true)
+        enable_feature subject
       end
 
       it "returns true" do
@@ -248,7 +267,7 @@ describe Flipper::Feature do
 
     context "for actor in enabled group" do
       before do
-        adapter.set_add("#{subject.name}#{Flipper::Gate::Separator}#{group_key}", admin_group.name)
+        enable_group admin_group
       end
 
       it "returns true" do
@@ -264,7 +283,7 @@ describe Flipper::Feature do
 
     context "for enabled actor" do
       before do
-        adapter.set_add("#{subject.name}#{Flipper::Gate::Separator}#{actor_key}", pitt.identifier)
+        enable_actor pitt
       end
 
       it "returns true" do
@@ -278,14 +297,14 @@ describe Flipper::Feature do
       end
 
       it "returns true if boolean enabled" do
-        adapter.write("#{subject.name}#{Flipper::Gate::Separator}#{boolean_key}", true)
+        enable_feature subject
         subject.enabled?(clooney).should be_true
       end
     end
 
     context "for actor in percentage of actors enabled" do
       before do
-        adapter.write("#{subject.name}#{Flipper::Gate::Separator}#{percentage_of_actors_key}", five_percent_of_actors.value)
+        enable_percentage_of_actors five_percent_of_actors
       end
 
       it "returns true" do
@@ -295,7 +314,7 @@ describe Flipper::Feature do
 
     context "for actor not in percentage of actors enabled" do
       before do
-        adapter.write("#{subject.name}#{Flipper::Gate::Separator}#{percentage_of_actors_key}", five_percent_of_actors.value)
+        enable_percentage_of_actors five_percent_of_actors
       end
 
       it "returns false" do
@@ -303,7 +322,7 @@ describe Flipper::Feature do
       end
 
       it "returns true if boolean enabled" do
-        adapter.write("#{subject.name}#{Flipper::Gate::Separator}#{boolean_key}", true)
+        enable_feature subject
         subject.enabled?(clooney).should be_true
       end
     end
@@ -313,7 +332,7 @@ describe Flipper::Feature do
         @gate = Flipper::Gates::PercentageOfRandom.new(subject)
         @gate.stub(:rand => 0.04)
         Flipper::Gates::PercentageOfRandom.should_receive(:new).and_return(@gate)
-        adapter.write("#{subject.name}#{Flipper::Gate::Separator}#{percentage_of_random_key}", five_percent_of_random.value)
+        enable_percentage_of_random five_percent_of_random
       end
 
       it "returns true" do
@@ -329,7 +348,7 @@ describe Flipper::Feature do
         @gate = Flipper::Gates::PercentageOfRandom.new(subject)
         @gate.stub(:rand => 0.10)
         Flipper::Gates::PercentageOfRandom.should_receive(:new).and_return(@gate)
-        adapter.write("#{subject.name}#{Flipper::Gate::Separator}#{percentage_of_random_key}", five_percent_of_random.value)
+        enable_percentage_of_random five_percent_of_random
       end
 
       it "returns false" do
@@ -340,7 +359,7 @@ describe Flipper::Feature do
       end
 
       it "returns true if boolean enabled" do
-        adapter.write("#{subject.name}#{Flipper::Gate::Separator}#{boolean_key}", true)
+        enable_feature subject
         subject.enabled?.should be_true
         subject.enabled?(nil).should be_true
         subject.enabled?(pitt).should be_true
@@ -350,7 +369,7 @@ describe Flipper::Feature do
 
     context "for a non flipper thing" do
       before do
-        adapter.set_add("#{subject.name}#{Flipper::Gate::Separator}#{group_key}", admin_group.name)
+        enable_group admin_group
       end
 
       it "returns true if in enabled group" do
@@ -362,7 +381,7 @@ describe Flipper::Feature do
       end
 
       it "returns true if boolean enabled" do
-        adapter.write("#{subject.name}#{Flipper::Gate::Separator}#{boolean_key}", true)
+        enable_feature subject
         subject.enabled?(admin_thing).should be_true
         subject.enabled?(dev_thing).should be_true
       end
@@ -372,7 +391,7 @@ describe Flipper::Feature do
       let(:actor) { double('Actor') }
 
       before do
-        adapter.set_add("#{subject.name}#{Flipper::Gate::Separator}#{group_key}", admin_group.name)
+        enable_group admin_group
       end
 
       it "returns false" do
@@ -384,7 +403,7 @@ describe Flipper::Feature do
       let(:actor) { double('Actor') }
 
       before do
-        adapter.set_add("#{subject.name}#{Flipper::Gate::Separator}#{group_key}", :support)
+        enable_group :support
       end
 
       it "returns false" do

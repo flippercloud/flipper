@@ -7,10 +7,10 @@ module Flipper
 
       def disable(thing)
         adapter.delete key
-        adapter.delete "#{gate.key_prefix}#{Gate::Separator}#{Gates::Actor::Key}"
-        adapter.delete "#{gate.key_prefix}#{Gate::Separator}#{Gates::Group::Key}"
-        adapter.delete "#{gate.key_prefix}#{Gate::Separator}#{Gates::PercentageOfActors::Key}"
-        adapter.delete "#{gate.key_prefix}#{Gate::Separator}#{Gates::PercentageOfRandom::Key}"
+        adapter.delete Key.new(key.prefix, Gates::Actor::Key)
+        adapter.delete Key.new(key.prefix, Gates::Group::Key)
+        adapter.delete Key.new(key.prefix, Gates::PercentageOfActors::Key)
+        adapter.delete Key.new(key.prefix, Gates::PercentageOfRandom::Key)
       end
 
       def value
