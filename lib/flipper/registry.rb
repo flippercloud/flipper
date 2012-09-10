@@ -1,3 +1,5 @@
+require 'thread'
+
 module Flipper
   class Registry
     include Enumerable
