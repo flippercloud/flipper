@@ -163,7 +163,14 @@ describe Flipper::Feature do
   describe "#disable" do
     context "with no arguments" do
       before do
+        # ensures that random gate is stubbed with result that would be true for pitt
+        @gate = Flipper::Gates::PercentageOfRandom.new(subject)
+        @gate.stub(:rand => 0.04)
+        Flipper::Gates::PercentageOfRandom.should_receive(:new).and_return(@gate)
         enable_group admin_group
+        enable_actor pitt
+        enable_percentage_of_actors five_percent_of_actors
+        enable_percentage_of_random five_percent_of_random
         subject.disable
       end
 
@@ -171,8 +178,20 @@ describe Flipper::Feature do
         subject.enabled?.should be_false
       end
 
-      it "disables feature for non flipper thing in previously enabled groups" do
+      it "disables for individual actor" do
+        subject.enabled?(pitt).should be_false
+      end
+
+      it "disables actor in group" do
         subject.enabled?(admin_thing).should be_false
+      end
+
+      it "disables actor in percentage of actors" do
+        subject.enabled?(pitt).should be_false
+      end
+
+      it "disables percentage of random" do
+        subject.enabled?(pitt).should be_false
       end
     end
 
@@ -430,33 +449,6 @@ describe Flipper::Feature do
 
       subject.stub(:enabled? => false)
       subject.disabled?.should be_true
-    end
-  end
-
-  context "enabling several things, then disabling everything" do
-    before do
-      @gate = Flipper::Gates::PercentageOfRandom.new(subject)
-      @gate.stub(:rand => 0.04)
-      Flipper::Gates::PercentageOfRandom.should_receive(:new).and_return(@gate)
-      subject.enable(admin_group)
-      subject.enable(pitt)
-      subject.enable(five_percent_of_random)
-      subject.enable(five_percent_of_actors)
-      subject.disable
-    end
-
-    it "disables for individual actor" do
-      subject.enabled?(pitt).should be_false
-    end
-    it "disables actor in group" do
-      subject.enabled?(admin_thing).should be_false
-    end
-    it "disables actor in percentage of actors" do
-      subject.enabled?(pitt).should be_false
-    end
-
-    it "disables percentage of random" do
-      subject.enabled?(pitt).should be_false
     end
   end
 
