@@ -13,15 +13,21 @@ module Flipper
     end
 
     def enable(thing)
-      raise 'Not implemented'
+      add_feature_to_set
     end
 
     def disable(thing)
-      raise 'Not implemented'
+      add_feature_to_set
     end
 
     def value
       raise 'Not implemented'
+    end
+
+    private
+
+    def add_feature_to_set
+      adapter.set_add "features", key.prefix
     end
   end
 end

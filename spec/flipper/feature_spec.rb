@@ -76,6 +76,10 @@ describe Flipper::Feature do
       it "enables feature for all" do
         subject.enabled?.should be_true
       end
+
+      it "adds feature to set of features" do
+        adapter.set_members('features').should include(:search)
+      end
     end
 
     context "with a group" do
@@ -102,6 +106,10 @@ describe Flipper::Feature do
       it "does not enable feature for all" do
         subject.enabled?.should be_false
       end
+
+      it "adds feature to set of features" do
+        adapter.set_members('features').should include(:search)
+      end
     end
 
     context "with an actor" do
@@ -116,6 +124,10 @@ describe Flipper::Feature do
       it "does not enable feature for other actors" do
         subject.enabled?(clooney).should be_false
       end
+
+      it "adds feature to set of features" do
+        adapter.set_members('features').should include(:search)
+      end
     end
 
     context "with a percentage of actors" do
@@ -129,6 +141,10 @@ describe Flipper::Feature do
 
       it "does not enable feature for actors not within percentage" do
         subject.enabled?(clooney).should be_false
+      end
+
+      it "adds feature to set of features" do
+        adapter.set_members('features').should include(:search)
       end
     end
 
@@ -147,6 +163,10 @@ describe Flipper::Feature do
       it "does not enable feature for time not within percentage" do
         @gate.stub(:rand => 0.10)
         subject.enabled?.should be_false
+      end
+
+      it "adds feature to set of features" do
+        adapter.set_members('features').should include(:search)
       end
     end
 
@@ -193,6 +213,10 @@ describe Flipper::Feature do
       it "disables percentage of random" do
         subject.enabled?(pitt).should be_false
       end
+
+      it "adds feature to set of features" do
+        adapter.set_members('features').should include(:search)
+      end
     end
 
     context "with a group" do
@@ -217,6 +241,10 @@ describe Flipper::Feature do
       it "does not disable feature for flipper actor in other groups" do
         subject.enabled?(Flipper::Types::Actor.new(dev_thing)).should be_true
       end
+
+      it "adds feature to set of features" do
+        adapter.set_members('features').should include(:search)
+      end
     end
 
     context "with an actor" do
@@ -233,6 +261,10 @@ describe Flipper::Feature do
       it "does not disable feature for other actors" do
         subject.enabled?(clooney).should be_true
       end
+
+      it "adds feature to set of features" do
+        adapter.set_members('features').should include(:search)
+      end
     end
 
     context "with a percentage of actors" do
@@ -246,6 +278,10 @@ describe Flipper::Feature do
 
       it "disables feature for actors not within percentage" do
         subject.enabled?(clooney).should be_false
+      end
+
+      it "adds feature to set of features" do
+        adapter.set_members('features').should include(:search)
       end
     end
 
@@ -264,6 +300,10 @@ describe Flipper::Feature do
       it "disables feature for time not within percentage" do
         @gate.stub(:rand => 0.10)
         subject.enabled?.should be_false
+      end
+
+      it "adds feature to set of features" do
+        adapter.set_members('features').should include(:search)
       end
     end
 
