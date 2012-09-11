@@ -432,6 +432,33 @@ describe Flipper::Feature do
     end
   end
 
+  context "enabling several things, then disabling everything" do
+    before do
+      @gate = Flipper::Gates::PercentageOfRandom.new(subject)
+      @gate.stub(:rand => 0.04)
+      Flipper::Gates::PercentageOfRandom.should_receive(:new).and_return(@gate)
+      subject.enable(admin_group)
+      subject.enable(pitt)
+      subject.enable(five_percent_of_random)
+      subject.enable(five_percent_of_actors)
+      subject.disable
+    end
+
+    it "disables for individual actor" do
+      subject.enabled?(pitt).should be_false
+    end
+    it "disables actor in group" do
+      subject.enabled?(admin_thing).should be_false
+    end
+    it "disables actor in percentage of actors" do
+      subject.enabled?(pitt).should be_false
+    end
+
+    it "disables percentage of random" do
+      subject.enabled?(pitt).should be_false
+    end
+  end
+
   context "enabling multiple groups, disabling everything, then enabling one group" do
     before do
       subject.enable(admin_group)
