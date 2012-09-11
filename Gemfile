@@ -7,7 +7,7 @@ group(:guard) do
   gem 'guard'
   gem 'guard-rspec'
   gem 'guard-bundler'
-  gem 'growl'
+  gem 'terminal-notifier-guard'
 end
 
 group(:test) do
