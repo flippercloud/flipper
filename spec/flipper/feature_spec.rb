@@ -401,7 +401,8 @@ describe Flipper::Feature do
       let(:actor) { double('Actor') }
 
       before do
-        enable_group admin_group
+        boomboom = Flipper.register(:boomboom) { |actor| actor.boomboom? }
+        enable_group boomboom
       end
 
       it "returns false" do
