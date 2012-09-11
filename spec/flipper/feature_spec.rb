@@ -132,7 +132,7 @@ describe Flipper::Feature do
       end
     end
 
-    context "with a percentage of time" do
+    context "with a percentage of random" do
       before do
         @gate = Flipper::Gates::PercentageOfRandom.new(subject)
         Flipper::Gates::PercentageOfRandom.should_receive(:new).and_return(@gate)
@@ -285,7 +285,7 @@ describe Flipper::Feature do
       end
     end
 
-    context "for actor in disbled group" do
+    context "for actor in disabled group" do
       it "returns false" do
         subject.enabled?(Flipper::Types::Actor.new(dev_thing)).should be_false
       end
