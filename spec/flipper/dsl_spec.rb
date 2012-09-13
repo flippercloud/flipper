@@ -170,4 +170,14 @@ describe Flipper::DSL do
       @result.value.should eq(17)
     end
   end
+
+  describe "#features" do
+    it "returns a list of features" do
+      subject[:search].enable
+      subject[:log].disable
+      subject[:metrics].enable subject.random(5)
+
+      subject.features.should have(3).features
+    end
+  end
 end
