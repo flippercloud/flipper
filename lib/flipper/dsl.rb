@@ -46,8 +46,6 @@ module Flipper
       Flipper::Types::PercentageOfActors.new(number)
     end
 
-    private
-
     def features
       @features ||= {}
     end
