@@ -31,6 +31,8 @@ module Flipper
     end
 
     # Internal: Gates to check to see if feature is enabled/disabled
+    #
+    # Returns an array of gates
     def gates
       @gates ||= [
         Gates::Boolean.new(self),
