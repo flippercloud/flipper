@@ -1,5 +1,7 @@
 module Flipper
-  # Internal: Adapter wrapper that wraps vanilla adapter instances with local caching.
+  # Internal: Adapter wrapper that wraps vanilla adapter instances. Adds things
+  # like local caching and convenience methods for adding/reading features from
+  # the adapter.
   #
   # So what is this local cache crap?
   #
