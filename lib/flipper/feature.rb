@@ -43,11 +43,14 @@ module Flipper
       ]
     end
 
+    def gate_for(thing)
+      find_gate(thing) || raise(GateNotFound.new(thing))
+    end
+
     private
 
-    def gate_for(thing)
-      gates.detect { |gate| gate.protects?(thing) } ||
-        raise(GateNotFound.new(thing))
+    def find_gate(thing)
+      gates.detect { |gate| gate.protects?(thing) }
     end
   end
 end
