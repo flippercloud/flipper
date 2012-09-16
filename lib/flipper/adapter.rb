@@ -67,27 +67,27 @@ module Flipper
     end
 
     def read(key)
-      local_cache_read(key) { @adapter.read(key) }
+      perform_read(key) { @adapter.read(key) }
     end
 
     def write(key, value)
-      local_cache_change(key) { @adapter.write(key, value) }
+      perform_update(key) { @adapter.write(key, value) }
     end
 
     def delete(key)
-      local_cache_change(key) { @adapter.delete(key) }
+      perform_update(key) { @adapter.delete(key) }
     end
 
     def set_members(key)
-      local_cache_read(key) { @adapter.set_members(key) }
+      perform_read(key) { @adapter.set_members(key) }
     end
 
     def set_add(key, value)
-      local_cache_change(key) { @adapter.set_add(key, value) }
+      perform_update(key) { @adapter.set_add(key, value) }
     end
 
     def set_delete(key, value)
-      local_cache_change(key) { @adapter.set_delete(key, value) }
+      perform_update(key) { @adapter.set_delete(key, value) }
     end
 
     def eql?(other)
@@ -105,7 +105,7 @@ module Flipper
 
     private
 
-    def local_cache_read(key)
+    def perform_read(key)
       if using_local_cache?
         local_cache.fetch(key.to_s) { local_cache[key.to_s] = yield }
       else
@@ -113,7 +113,7 @@ module Flipper
       end
     end
 
-    def local_cache_change(key)
+    def perform_update(key)
       result = yield
       if using_local_cache?
         local_cache.delete(key.to_s)
