@@ -114,13 +114,11 @@ module Flipper
     end
 
     def local_cache_change(key)
+      result = yield
       if using_local_cache?
-        result = yield
         local_cache.delete(key.to_s)
-        result
-      else
-        yield
       end
+      result
     end
   end
 end
