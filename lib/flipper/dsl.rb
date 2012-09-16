@@ -41,10 +41,12 @@ module Flipper
     def random(number)
       Types::PercentageOfRandom.new(number)
     end
+    alias :percentage_of_random :random
 
     def actors(number)
       Types::PercentageOfActors.new(number)
     end
+    alias :percentage_of_actors :actors
 
     def features
       adapter.features.map { |name| feature(name) }.to_set

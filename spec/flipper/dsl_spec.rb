@@ -155,6 +155,10 @@ describe Flipper::DSL do
     it "sets value" do
       @result.value.should eq(5)
     end
+
+    it "is aliased to percentage_of_random" do
+      @result.should eq(subject.percentage_of_random(@result.value))
+    end
   end
 
   describe "#actors" do
@@ -168,6 +172,10 @@ describe Flipper::DSL do
 
     it "sets value" do
       @result.value.should eq(17)
+    end
+
+    it "is aliased to percentage_of_actors" do
+      @result.should eq(subject.percentage_of_actors(@result.value))
     end
   end
 
