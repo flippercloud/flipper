@@ -8,7 +8,7 @@ group(:guard) do
   gem 'guard-rspec'
   gem 'guard-bundler'
   gem 'terminal-notifier-guard'
-  gem 'rb-fsevent', '~> 0.9.1'
+  gem 'rb-fsevent'
 end
 
 group(:test) do
