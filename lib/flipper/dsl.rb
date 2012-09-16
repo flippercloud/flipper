@@ -35,15 +35,15 @@ module Flipper
     end
 
     def actor(thing)
-      Flipper::Types::Actor.new(thing)
+      Types::Actor.new(thing)
     end
 
     def random(number)
-      Flipper::Types::PercentageOfRandom.new(number)
+      Types::PercentageOfRandom.new(number)
     end
 
     def actors(number)
-      Flipper::Types::PercentageOfActors.new(number)
+      Types::PercentageOfActors.new(number)
     end
 
     def features
