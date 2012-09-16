@@ -17,6 +17,8 @@ module Flipper
   # To see an example adapter that this would wrap, checkout the [memory
   # adapter included with flipper](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb).
   class Adapter
+    FeaturesKey = 'features'
+
     # Internal: Wraps vanilla adapter instance for use internally in flipper.
     #
     # object - Either an instance of Flipper::Adapter or a vanilla adapter instance
@@ -102,7 +104,11 @@ module Flipper
     alias :== :eql?
 
     def features
-      set_members('features')
+      set_members(FeaturesKey)
+    end
+
+    def feature_add(name)
+      set_add(FeaturesKey, name.to_s)
     end
 
     private

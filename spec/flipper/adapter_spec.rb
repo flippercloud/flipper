@@ -3,8 +3,9 @@ require 'flipper/adapter'
 require 'flipper/adapters/memory'
 
 describe Flipper::Adapter do
-  let(:local_cache) { {} }
-  let(:adapter)     { Flipper::Adapters::Memory.new }
+  let(:local_cache)  { {} }
+  let(:adapter)      { Flipper::Adapters::Memory.new }
+  let(:features_key) { described_class::FeaturesKey }
 
   subject { described_class.new(adapter, local_cache) }
 
@@ -290,14 +291,36 @@ describe Flipper::Adapter do
 
     context "with features enabled and disabled" do
       before do
-        subject.set_add('features', 'stats')
-        subject.set_add('features', 'cache')
-        subject.set_add('features', 'search')
+        subject.set_add(features_key, 'stats')
+        subject.set_add(features_key, 'cache')
+        subject.set_add(features_key, 'search')
       end
 
       it "returns set of feature names" do
         subject.features.should be_instance_of(Set)
         subject.features.sort.should eq(['cache', 'search', 'stats'])
+      end
+    end
+  end
+
+  describe "#feature_add" do
+    context "with string name" do
+      before do
+        subject.feature_add('search')
+      end
+
+      it "adds string to set" do
+        subject.set_members(features_key).should include('search')
+      end
+    end
+
+    context "with symbol name" do
+      before do
+        subject.feature_add(:search)
+      end
+
+      it "adds string to set" do
+        subject.set_members(features_key).should include('search')
       end
     end
   end

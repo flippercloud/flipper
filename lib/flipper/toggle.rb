@@ -27,7 +27,7 @@ module Flipper
     private
 
     def add_feature_to_set
-      adapter.set_add "features", key.prefix.to_s
+      adapter.feature_add key.prefix
     end
   end
 end
