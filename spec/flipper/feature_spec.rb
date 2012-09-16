@@ -78,7 +78,7 @@ describe Flipper::Feature do
       end
 
       it "adds feature to set of features" do
-        adapter.set_members('features').should include(:search)
+        adapter.set_members('features').should include('search')
       end
     end
 
@@ -108,7 +108,7 @@ describe Flipper::Feature do
       end
 
       it "adds feature to set of features" do
-        adapter.set_members('features').should include(:search)
+        adapter.set_members('features').should include('search')
       end
     end
 
@@ -126,7 +126,7 @@ describe Flipper::Feature do
       end
 
       it "adds feature to set of features" do
-        adapter.set_members('features').should include(:search)
+        adapter.set_members('features').should include('search')
       end
     end
 
@@ -144,7 +144,7 @@ describe Flipper::Feature do
       end
 
       it "adds feature to set of features" do
-        adapter.set_members('features').should include(:search)
+        adapter.set_members('features').should include('search')
       end
     end
 
@@ -166,7 +166,7 @@ describe Flipper::Feature do
       end
 
       it "adds feature to set of features" do
-        adapter.set_members('features').should include(:search)
+        adapter.set_members('features').should include('search')
       end
     end
 
@@ -215,7 +215,7 @@ describe Flipper::Feature do
       end
 
       it "adds feature to set of features" do
-        adapter.set_members('features').should include(:search)
+        adapter.set_members('features').should include('search')
       end
     end
 
@@ -243,7 +243,7 @@ describe Flipper::Feature do
       end
 
       it "adds feature to set of features" do
-        adapter.set_members('features').should include(:search)
+        adapter.set_members('features').should include('search')
       end
     end
 
@@ -263,7 +263,7 @@ describe Flipper::Feature do
       end
 
       it "adds feature to set of features" do
-        adapter.set_members('features').should include(:search)
+        adapter.set_members('features').should include('search')
       end
     end
 
@@ -281,7 +281,7 @@ describe Flipper::Feature do
       end
 
       it "adds feature to set of features" do
-        adapter.set_members('features').should include(:search)
+        adapter.set_members('features').should include('search')
       end
     end
 
@@ -303,7 +303,7 @@ describe Flipper::Feature do
       end
 
       it "adds feature to set of features" do
-        adapter.set_members('features').should include(:search)
+        adapter.set_members('features').should include('search')
       end
     end
 
