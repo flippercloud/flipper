@@ -25,7 +25,7 @@ module Flipper
     end
 
     def feature(name)
-      features[name.to_sym] ||= Feature.new(name, @adapter)
+      memoized_features[name.to_sym] ||= Feature.new(name, @adapter)
     end
 
     alias :[] :feature
@@ -48,8 +48,8 @@ module Flipper
 
     private
 
-    def features
-      @features ||= {}
+    def memoized_features
+      @memoized_features ||= {}
     end
   end
 end
