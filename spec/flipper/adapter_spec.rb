@@ -280,4 +280,25 @@ describe Flipper::Adapter do
       (subject == described_class.new(adapter)).should be_true
     end
   end
+
+  describe "#features" do
+    context "with no features enabled/disabled" do
+      it "defaults to empty set" do
+        subject.features.should eq(Set.new)
+      end
+    end
+
+    context "with features enabled and disabled" do
+      before do
+        subject.set_add('features', 'stats')
+        subject.set_add('features', 'cache')
+        subject.set_add('features', 'search')
+      end
+
+      it "returns set of feature names" do
+        subject.features.should be_instance_of(Set)
+        subject.features.sort.should eq(['cache', 'search', 'stats'])
+      end
+    end
+  end
 end

@@ -101,6 +101,10 @@ module Flipper
     end
     alias :== :eql?
 
+    def features
+      set_members('features')
+    end
+
     private
 
     def cache(key)
