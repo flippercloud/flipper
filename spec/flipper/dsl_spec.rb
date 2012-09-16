@@ -185,8 +185,12 @@ describe Flipper::DSL do
         subject[:search].disable
       end
 
-      it "returns set of all enabled and disabled features" do
-        subject.features.should eq(Set['stats', 'cache', 'search'])
+      it "returns set of feature instances" do
+        subject.features.should be_instance_of(Set)
+        subject.features.each do |feature|
+          feature.should be_instance_of(Flipper::Feature)
+        end
+        subject.features.map(&:name).map(&:to_s).sort.should eq(['cache', 'search', 'stats'])
       end
     end
   end
