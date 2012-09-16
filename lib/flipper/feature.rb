@@ -43,6 +43,11 @@ module Flipper
       ]
     end
 
+    # Internal: Returns gate that protects thing
+    #
+    # thing - The object for which you would like to find a gate
+    #
+    # Raises Flipper::GateNotFound if no gate found for thing
     def gate_for(thing)
       find_gate(thing) || raise(GateNotFound.new(thing))
     end
