@@ -46,6 +46,10 @@ module Flipper
       Flipper::Types::PercentageOfActors.new(number)
     end
 
+    def features
+      adapter.set_members('features')
+    end
+
     private
 
     def memoized_features

@@ -170,4 +170,24 @@ describe Flipper::DSL do
       @result.value.should eq(17)
     end
   end
+
+  describe "#features" do
+    context "with no features enabled/disabled" do
+      it "defaults to empty set" do
+        subject.features.should eq(Set.new)
+      end
+    end
+
+    context "with features enabled and disabled" do
+      before do
+        subject[:stats].enable
+        subject[:cache].enable
+        subject[:search].disable
+      end
+
+      it "returns set of all enabled and disabled features" do
+        subject.features.should eq(Set['stats', 'cache', 'search'])
+      end
+    end
+  end
 end
