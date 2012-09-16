@@ -47,7 +47,7 @@ module Flipper
     end
 
     def features
-      adapter.set_members('features').map { |name| feature(name) }.to_set
+      adapter.features.map { |name| feature(name) }.to_set
     end
 
     private
