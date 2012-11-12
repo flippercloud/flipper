@@ -120,11 +120,9 @@ describe Flipper::Feature do
       end
 
       it "enables feature for actor within percentage" do
-        subject.enabled?(pitt).should be_true
-      end
+        enabled = (1..100).select { |i| subject.enabled?(Flipper::Types::Actor.new(i)) }.length
 
-      it "does not enable feature for actors not within percentage" do
-        subject.enabled?(clooney).should be_false
+        enabled.should be_within(2).of(5)
       end
 
       it "adds feature to set of features" do
@@ -352,16 +350,6 @@ describe Flipper::Feature do
       it "returns true if boolean enabled" do
         enable_feature subject
         subject.enabled?(clooney).should be_true
-      end
-    end
-
-    context "for actor in percentage of actors enabled" do
-      before do
-        enable_percentage_of_actors five_percent_of_actors
-      end
-
-      it "returns true" do
-        subject.enabled?(pitt).should be_true
       end
     end
 
