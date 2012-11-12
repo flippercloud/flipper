@@ -1,3 +1,5 @@
+require 'zlib'
+
 module Flipper
   module Gates
     class PercentageOfActors < Gate
@@ -13,7 +15,7 @@ module Flipper
         if percentage.nil?
           false
         else
-          actor.identifier % 100 < percentage
+          Zlib.crc32(actor.identifier.to_s) % 100 < percentage
         end
       end
 
