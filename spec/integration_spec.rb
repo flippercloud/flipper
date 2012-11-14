@@ -353,21 +353,6 @@ describe Flipper::Feature do
       end
     end
 
-    context "for actor not in percentage of actors enabled" do
-      before do
-        enable_percentage_of_actors five_percent_of_actors
-      end
-
-      it "returns false" do
-        subject.enabled?(clooney).should be_false
-      end
-
-      it "returns true if boolean enabled" do
-        enable_feature subject
-        subject.enabled?(clooney).should be_true
-      end
-    end
-
     context "during enabled percentage of time" do
       before do
         @gate = Flipper::Gates::PercentageOfRandom.new(subject)
