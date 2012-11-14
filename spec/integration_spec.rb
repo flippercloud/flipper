@@ -121,7 +121,6 @@ describe Flipper::Feature do
 
       it "enables feature for actor within percentage" do
         enabled = (1..100).select { |i| subject.enabled?(Flipper::Types::Actor.new(i)) }.length
-
         enabled.should be_within(2).of(5)
       end
 
@@ -189,7 +188,8 @@ describe Flipper::Feature do
       end
 
       it "disables actor in percentage of actors" do
-        subject.enabled?(pitt).should be_false
+        enabled = (1..100).select { |i| subject.enabled?(Flipper::Types::Actor.new(i)) }.length
+        enabled.should be(0)
       end
 
       it "disables percentage of random" do
@@ -254,12 +254,9 @@ describe Flipper::Feature do
         subject.disable(five_percent_of_actors)
       end
 
-      it "disables feature for actor within percentage" do
-        subject.enabled?(pitt).should be_false
-      end
-
-      it "disables feature for actors not within percentage" do
-        subject.enabled?(clooney).should be_false
+      it "disables feature" do
+        enabled = (1..100).select { |i| subject.enabled?(Flipper::Types::Actor.new(i)) }.length
+        enabled.should be(0)
       end
 
       it "adds feature to set of features" do
