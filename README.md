@@ -4,10 +4,6 @@ Feature flipping is the act of enabling or disabling features or parts of your a
 
 The goal of this gem is to make turning features on or off so easy that everyone does it. Whatever your data store, throughput, or experience, feature flipping should be easy and relatively no extra burden to your application.
 
-## Note
-
-This project is a work in progress and not ready for production yet, but will be very soon.
-
 ## Why not use &lt;insert gem name here, most likely rollout&gt;?
 
 I've used rollout extensively in the past and it was fantastic. The main reason I reinvented the wheel to some extent is:
@@ -17,8 +13,7 @@ I've used rollout extensively in the past and it was fantastic. The main reason 
 
 ## Coming Soon™
 
-* Web UI (think resque UI for features toggling/status)
-* Optimizations for per request in process caching of trips to the adapter
+* [Web UI](https://github.com/jnunemaker/flipper-ui) (think resque UI for features toggling/status)
 
 ## Usage
 
@@ -150,8 +145,6 @@ Randomness is probably not a good idea for enabling new features in the UI. Most
 
 I plan on supporting [in-memory](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb), [Mongo](https://github.com/jnunemaker/flipper-mongo), and [Redis](https://github.com/jnunemaker/flipper-redis) as adapters for flipper. Others are welcome so please let me know if you create one.
 
-
-
 ### Memory
 
 You can use the [in-memory adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb) for tests if you want. That is pretty much all I use it for.
@@ -167,6 +160,25 @@ Personally, the adapter I prefer is the [single document adapter](https://github
 ### Redis
 
 Redis is great for this type of stuff and it only took a few minutes to implement a [redis adapter](https://github.com/jnunemaker/flipper-redis). The only real problem with redis right now is that automated failover isn't that easy so relying on it for every code path in my app would make me nervous.
+
+## Optimization
+
+One optimization that flipper provides is a local cache. Once you have a flipper instance you can use the local cache to store each adapter key lookup in memory for as long as you want.
+
+Out of the box there is a middleware that will store each key lookup for the duration of the request. This means you will only actually query your adapter's data store once per feature per gate that is checked. You can use the middleware from a Rails initializer like so:
+
+```ruby
+require 'flipper/middleware/local_cache'
+
+# create flipper dsl instance, see above examples for more details
+flipper = Flipper.new(...)
+
+# ensure entire request is wrapped, `use` would probably be ok instead of `insert_after`, but I noticed that Rails used `insert_after` for their identity map, which this is akin to, and figured it was for a reason.
+Rails.application.config.middleware.insert_after \
+  ActionDispatch::Callbacks,
+  Flipper::Middleware::LocalCache,
+  flipper
+```
 
 ## Installation
 
