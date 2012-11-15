@@ -26,9 +26,9 @@ The goal of the API for flipper was to have everything revolve around features a
 
 ```ruby
 require 'flipper'
-require 'flipper/adapters/memory'
 
 # pick an adapter
+require 'flipper/adapters/memory'
 adapter = Flipper::Adapters::Memory.new
 
 # get a handy dsl instance
@@ -109,7 +109,7 @@ flipper[:stats].disabled? actor # true
 
 ### 4. Percentage of Actors
 
-Turn this on for a percentage of actors (think users or people). Consistently on or off for this user as long as percentage increases. Think slow rollout of a new feature to users.
+Turn this on for a percentage of actors (think user, member, account, group, whatever). Consistently on or off for this user as long as percentage increases. Think slow rollout of a new feature to a percentage of things.
 
 ```ruby
 flipper = Flipper.new(adapter)
@@ -146,22 +146,27 @@ flipper[:logging].enable percentage
 
 Randomness is probably not a good idea for enabling new features in the UI. Most of the time you want a feature on or off for a user, but there are definitely times when I have found percentage of random to be very useful.
 
-
 ## Adapters
 
-I plan on supporting in-memory, Mongo, and Redis as adapters for flipper. Others are welcome so please let me know if you create one.
+I plan on supporting [in-memory](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb), [Mongo](https://github.com/jnunemaker/flipper-mongo), and [Redis](https://github.com/jnunemaker/flipper-redis) as adapters for flipper. Others are welcome so please let me know if you create one.
+
+
 
 ### Memory
 
-You can use this for tests if you want. That is pretty much all I use it for.
+You can use the [in-memory adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb) for tests if you want. That is pretty much all I use it for.
 
 ### Mongo
 
-Currently, the mongo adapter stores everything in a single document. This is cool as if you cache that document for the life of a web request or whatever, you can check a ton of features by adding very little burden (1 query per request).
+Currently, the [mongo adapter](https://github.com/jnunemaker/flipper-mongo) comes in two flavors.
+
+The [vanilla mongo adapter](https://github.com/jnunemaker/flipper-mongo/blob/master/lib/flipper/adapters/mongo.rb) stores each key in its own document. This means for each gate checked per feature there will be a query to mongo.
+
+Personally, the adapter I prefer is the [single document adapter](https://github.com/jnunemaker/flipper-mongo/blob/master/lib/flipper/adapters/mongo_single_document.rb), which stores all features and gates in a single document. If you combine this adapter with the [local cache middleware](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/middleware/local_cache.rb), the document will only be queried once per request, which is pretty awesome.
 
 ### Redis
 
-Redis is great for this type of stuff and it only took a few minutes to implement. The only real problem with redis right now is that automated failover isn't that easy so relying on it for every code path in my app would make me nervous.
+Redis is great for this type of stuff and it only took a few minutes to implement a [redis adapter](https://github.com/jnunemaker/flipper-redis). The only real problem with redis right now is that automated failover isn't that easy so relying on it for every code path in my app would make me nervous.
 
 ## Installation
 
