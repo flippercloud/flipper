@@ -35,24 +35,24 @@ shared_examples_for 'a flipper adapter' do
 
   describe "#set_add" do
     it "adds value to store" do
-      subject.set_add(key, 1)
-      read_key(key).should eq(Set[1])
+      subject.set_add(key, '1')
+      read_key(key).should eq(Set['1'])
     end
 
     it "does not add same value more than once" do
-      subject.set_add(key, 1)
-      subject.set_add(key, 1)
-      subject.set_add(key, 1)
-      subject.set_add(key, 2)
-      read_key(key).should eq(Set[1, 2])
+      subject.set_add(key, '1')
+      subject.set_add(key, '1')
+      subject.set_add(key, '1')
+      subject.set_add(key, '2')
+      read_key(key).should eq(Set['1', '2'])
     end
   end
 
   describe "#set_delete" do
     it "removes value from set if key in store" do
-      write_key key, Set[1, 2]
-      subject.set_delete(key, 1)
-      read_key(key).should eq(Set[2])
+      write_key key, Set['1', '2']
+      subject.set_delete(key, '1')
+      read_key(key).should eq(Set['2'])
     end
 
     it "works fine if key not in store" do
@@ -66,8 +66,8 @@ shared_examples_for 'a flipper adapter' do
     end
 
     it "returns set if in store" do
-      write_key key, Set[1, 2]
-      subject.set_members(key).should eq(Set[1, 2])
+      write_key key, Set['1', '2']
+      subject.set_members(key).should eq(Set['1', '2'])
     end
   end
 

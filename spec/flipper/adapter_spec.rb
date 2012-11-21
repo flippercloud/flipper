@@ -86,18 +86,18 @@ describe Flipper::Adapter do
 
     describe "#set_members" do
       before do
-        adapter.write 'foo', Set[1, 2]
+        adapter.write 'foo', Set['1', '2']
         @result = subject.set_members('foo')
       end
 
       it "returns result of adapter set members" do
-        @result.should eq(Set[1, 2])
+        @result.should eq(Set['1', '2'])
       end
 
       it "memoizes key" do
-        local_cache['foo'].should eq(Set[1, 2])
+        local_cache['foo'].should eq(Set['1', '2'])
         adapter.should_not_receive(:set_members)
-        subject.set_members('foo').should eq(Set[1, 2])
+        subject.set_members('foo').should eq(Set['1', '2'])
       end
     end
 
@@ -132,13 +132,13 @@ describe Flipper::Adapter do
 
     describe "#set_add" do
       before do
-        adapter.write 'foo', Set[1]
-        local_cache['foo'] = Set[1]
-        subject.set_add 'foo', 2
+        adapter.write 'foo', Set['1']
+        local_cache['foo'] = Set['1']
+        subject.set_add 'foo', '2'
       end
 
       it "returns result of adapter set members" do
-        adapter.set_members('foo').should eq(Set[1, 2])
+        adapter.set_members('foo').should eq(Set['1', '2'])
       end
 
       it "unmemoizes key" do
@@ -148,13 +148,13 @@ describe Flipper::Adapter do
 
     describe "#set_delete" do
       before do
-        adapter.write 'foo', Set[1, 2, 3]
-        local_cache['foo'] = Set[1, 2, 3]
-        subject.set_delete 'foo', 3
+        adapter.write 'foo', Set['1', '2', '3']
+        local_cache['foo'] = Set['1', '2', '3']
+        subject.set_delete 'foo', '3'
       end
 
       it "returns result of adapter set members" do
-        adapter.set_members('foo').should eq(Set[1, 2])
+        adapter.set_members('foo').should eq(Set['1', '2'])
       end
 
       it "unmemoizes key" do
@@ -185,12 +185,12 @@ describe Flipper::Adapter do
 
     describe "#set_members" do
       before do
-        adapter.write 'foo', Set[1, 2]
+        adapter.write 'foo', Set['1', '2']
         @result = subject.set_members('foo')
       end
 
       it "returns result of adapter set members" do
-        @result.should eq(Set[1, 2])
+        @result.should eq(Set['1', '2'])
       end
 
       it "does not memoize the adapter set member result" do
@@ -232,13 +232,13 @@ describe Flipper::Adapter do
 
     describe "#set_add" do
       before do
-        adapter.write 'foo', Set[1]
-        local_cache['foo'] = Set[1]
-        subject.set_add 'foo', 2
+        adapter.write 'foo', Set['1']
+        local_cache['foo'] = Set['1']
+        subject.set_add 'foo', '2'
       end
 
       it "performs adapter set add" do
-        adapter.set_members('foo').should eq(Set[1, 2])
+        adapter.set_members('foo').should eq(Set['1', '2'])
       end
 
       it "does not attempt to delete local cache key" do
@@ -248,13 +248,13 @@ describe Flipper::Adapter do
 
     describe "#set_delete" do
       before do
-        adapter.write 'foo', Set[1, 2, 3]
-        local_cache['foo'] = Set[1, 2, 3]
-        subject.set_delete 'foo', 3
+        adapter.write 'foo', Set['1', '2', '3']
+        local_cache['foo'] = Set['1', '2', '3']
+        subject.set_delete 'foo', '3'
       end
 
       it "performs adapter set delete" do
-        adapter.set_members('foo').should eq(Set[1, 2])
+        adapter.set_members('foo').should eq(Set['1', '2'])
       end
 
       it "does not attempt to delete local cache key" do

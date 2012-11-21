@@ -122,7 +122,7 @@ describe Flipper::DSL do
         user = Struct.new(:identifier).new(45)
         actor = subject.actor(user)
         actor.should be_instance_of(Flipper::Types::Actor)
-        actor.identifier.should eq(45)
+        actor.identifier.should eq('45')
       end
     end
 
@@ -130,7 +130,7 @@ describe Flipper::DSL do
       it "returns actor instance with identifer set to number" do
         actor = subject.actor(33)
         actor.should be_instance_of(Flipper::Types::Actor)
-        actor.identifier.should eq(33)
+        actor.identifier.should eq('33')
       end
     end
 

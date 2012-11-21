@@ -25,7 +25,7 @@ module Flipper
           thing.identifier
         else
           thing
-        end.to_i
+        end.to_s
       end
 
       def value
