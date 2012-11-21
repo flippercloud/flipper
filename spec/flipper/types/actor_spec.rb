@@ -63,9 +63,10 @@ describe Flipper::Types::Actor do
   end
 
   it "initializes with object that responds to identifier" do
-    thing = Struct.new(:identifier).new(1)
+    identifier = '1'
+    thing = Struct.new(:identifier).new(identifier)
     actor = described_class.new(thing)
-    actor.identifier.should be(1)
+    actor.identifier.should be(identifier)
   end
 
   it "raises error when initialized with nil" do
@@ -74,14 +75,14 @@ describe Flipper::Types::Actor do
     }.to raise_error(ArgumentError)
   end
 
-  it "converts identifier to integer" do
-    actor = described_class.new('2')
-    actor.identifier.should eq(2)
+  it "converts identifier to string" do
+    actor = described_class.new(2)
+    actor.identifier.should eq('2')
   end
 
   it "has identifier" do
     actor = described_class.new(2)
-    actor.identifier.should eq(2)
+    actor.identifier.should eq('2')
   end
 
   it "proxies everything to thing" do
