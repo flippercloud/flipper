@@ -1,4 +1,4 @@
-require './example_setup'
+require File.expand_path('../example_setup', __FILE__)
 
 require 'flipper'
 require 'flipper/adapters/memory'
@@ -14,7 +14,10 @@ end
 
 # Some class that represents actor that will be trying to do something
 class User
-  def initialize(admin)
+  attr_reader :id
+
+  def initialize(id, admin)
+    @id = id
     @admin = admin
   end
 
@@ -23,8 +26,8 @@ class User
   end
 end
 
-admin = User.new(true)
-non_admin = User.new(false)
+admin = User.new(1, true)
+non_admin = User.new(2, false)
 
 puts "Stats for admin: #{stats.enabled?(admin)}"
 puts "Stats for non_admin: #{stats.enabled?(non_admin)}"

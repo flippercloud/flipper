@@ -1,4 +1,4 @@
-require './example_setup'
+require File.expand_path('../example_setup', __FILE__)
 
 require 'flipper'
 require 'flipper/adapters/memory'
@@ -19,11 +19,11 @@ end
 user1 = User.new(1)
 user2 = User.new(2)
 
-puts "Stats for user1: #{stats.enabled?(flipper.actor(user1))}"
-puts "Stats for user2: #{stats.enabled?(flipper.actor(user2))}"
+puts "Stats for user1: #{stats.enabled?(user1)}"
+puts "Stats for user2: #{stats.enabled?(user2)}"
 
 puts "\nEnabling stats for user1...\n\n"
-stats.enable(flipper.actor(user1))
+stats.enable(user1)
 
-puts "Stats for user1: #{stats.enabled?(flipper.actor(user1))}"
-puts "Stats for user2: #{stats.enabled?(flipper.actor(user2))}"
+puts "Stats for user1: #{stats.enabled?(user1)}"
+puts "Stats for user2: #{stats.enabled?(user2)}"

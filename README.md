@@ -92,14 +92,11 @@ Turn on for individual thing. Think enable feature for someone to test or for a 
 ```ruby
 flipper = Flipper.new(adapter)
 
-# convert user or person or whatever to flipper actor for storing and checking
-actor = flipper.actor(user.id)
+flipper[:stats].enable user
+flipper[:stats].enabled? user # true
 
-flipper[:stats].enable actor
-flipper[:stats].enabled? actor # true
-
-flipper[:stats].disable actor
-flipper[:stats].disabled? actor # true
+flipper[:stats].disable user
+flipper[:stats].disabled? user # true
 ```
 
 ### 4. Percentage of Actors
@@ -109,17 +106,15 @@ Turn this on for a percentage of actors (think user, member, account, group, wha
 ```ruby
 flipper = Flipper.new(adapter)
 
-# convert user or person or whatever to flipper actor for checking if in percentage
-actor = flipper.actor(user.id)
-
 # returns a percentage of actors instance set to 10
 percentage = flipper.actors(10)
 
 # turn stats on for 10 percent of users in the system
 flipper[:stats].enable percentage
 
-# checks if actor's identifier is in the enabled percentage
-flipper[:stats].enabled? actor
+# checks if actor's id is in the enabled percentage
+# uses hash of user.id.to_s to ensure enabled distribution is smooth
+flipper[:stats].enabled? user
 
 ```
 
@@ -139,7 +134,7 @@ percentage = flipper.random(5)
 flipper[:logging].enable percentage
 ```
 
-Randomness is probably not a good idea for enabling new features in the UI. Most of the time you want a feature on or off for a user, but there are definitely times when I have found percentage of random to be very useful.
+Randomness is not a good idea for enabling new features in the UI. Most of the time you want a feature on or off for a user, but there are definitely times when I have found percentage of random to be very useful.
 
 ## Adapters
 

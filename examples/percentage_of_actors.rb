@@ -1,4 +1,4 @@
-require './example_setup'
+require File.expand_path('../example_setup', __FILE__)
 
 require 'flipper'
 require 'flipper/adapters/memory'
@@ -19,17 +19,17 @@ end
 pitt = User.new(1)
 clooney = User.new(10)
 
-puts "Stats for pitt: #{stats.enabled?(flipper.actor(pitt))}"
-puts "Stats for clooney: #{stats.enabled?(flipper.actor(clooney))}"
+puts "Stats for pitt: #{stats.enabled?(pitt)}"
+puts "Stats for clooney: #{stats.enabled?(clooney)}"
 
 puts "\nEnabling stats for 5 percent...\n\n"
 stats.enable(Flipper::Types::PercentageOfActors.new(5))
 
-puts "Stats for pitt: #{stats.enabled?(flipper.actor(pitt))}"
-puts "Stats for clooney: #{stats.enabled?(flipper.actor(clooney))}"
+puts "Stats for pitt: #{stats.enabled?(pitt)}"
+puts "Stats for clooney: #{stats.enabled?(clooney)}"
 
-puts "\nEnabling stats for 15 percent...\n\n"
-stats.enable(Flipper::Types::PercentageOfActors.new(15))
+puts "\nEnabling stats for 50 percent...\n\n"
+stats.enable(Flipper::Types::PercentageOfActors.new(50))
 
-puts "Stats for pitt: #{stats.enabled?(flipper.actor(pitt))}"
-puts "Stats for clooney: #{stats.enabled?(flipper.actor(clooney))}"
+puts "Stats for pitt: #{stats.enabled?(pitt)}"
+puts "Stats for clooney: #{stats.enabled?(clooney)}"

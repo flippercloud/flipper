@@ -1,4 +1,4 @@
-require './example_setup'
+require File.expand_path('../example_setup', __FILE__)
 
 require 'flipper'
 require 'flipper/adapters/memory'

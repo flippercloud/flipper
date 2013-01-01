@@ -1,4 +1,4 @@
-require './example_setup'
+require File.expand_path('../example_setup', __FILE__)
 
 require 'flipper'
 require 'flipper/adapters/memory'
@@ -68,12 +68,9 @@ puts flipper.actors(15).inspect
 responds_to_id = Struct.new(:id).new(10)
 puts flipper.actor(responds_to_id).inspect
 
-# get an instance of an actor using an object that responds to identifier
-responds_to_identifier = Struct.new(:identifier).new(11)
-puts flipper.actor(responds_to_identifier).inspect
-
-# get an instance of an actor using a number
-puts flipper.actor(23).inspect
+# get an instance of an actor using an object
+thing = Struct.new(:id).new(22)
+puts flipper.actor(thing).inspect
 
 # register a top level group
 admins = Flipper.register(:admins) { |actor|
