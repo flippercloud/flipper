@@ -87,7 +87,7 @@ There is no requirement that the thing yielded to the block be a user model or w
 
 ### 3. Individual Actor
 
-Turn on for individual thing. Think enable feature for someone to test or for a buddy.
+Turn feature on for individual thing. Think enable feature for someone to test or for a buddy. The only requirement for an individual actor is that it must respond to `id`.
 
 ```ruby
 flipper = Flipper.new(adapter)
@@ -97,7 +97,15 @@ flipper[:stats].enabled? user # true
 
 flipper[:stats].disable user
 flipper[:stats].disabled? user # true
+
+# you can enable anything, does not need to be user or person
+flipper[:search].enable group
+flipper[:search].enabled? group
 ```
+
+The key is to make sure you do not enable two different types of objects for the same feature. Imagine that user has an id of 6 and group has an id of 6. Enabling search for user would automatically enable it for group, as they both have an id of 6.
+
+The one exception to this rule is if you have globally unique ids, such as uuid's. If your ids are unique globally in your entire system, enabling two different types should be safe.
 
 ### 4. Percentage of Actors
 
