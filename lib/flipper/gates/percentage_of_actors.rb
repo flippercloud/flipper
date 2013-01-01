@@ -9,13 +9,18 @@ module Flipper
         Key
       end
 
-      def open?(actor)
+      def open?(thing)
         percentage = toggle.value
 
         if percentage.nil?
           false
         else
-          Zlib.crc32(actor.identifier.to_s) % 100 < percentage
+          if Types::Actor.wrappable?(thing)
+            actor = Types::Actor.wrap(thing)
+            Zlib.crc32(actor.value) % 100 < percentage
+          else
+            false
+          end
         end
       end
 

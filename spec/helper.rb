@@ -18,6 +18,8 @@ require 'flipper'
 Logger.new(log_path.join('test.log'))
 
 RSpec.configure do |config|
+  config.fail_fast = true
+
   config.filter_run :focused => true
   config.alias_example_to :fit, :focused => true
   config.alias_example_to :xit, :pending => true

@@ -11,19 +11,27 @@ module Flipper
         Toggles::Set
       end
 
-      def open?(actor)
-        return if actor.nil?
-        return unless Types::Actor.wrappable?(actor)
-        actor = Types::Actor.wrap(actor)
-        identifiers.include?(actor.identifier)
+      def open?(thing)
+        return if thing.nil?
+        return unless Types::Actor.wrappable?(thing)
+        actor = Types::Actor.wrap(thing)
+        ids.include?(actor.value)
       end
 
-      def identifiers
+      def ids
         toggle.value
       end
 
       def protects?(thing)
-        thing.is_a?(Flipper::Types::Actor)
+        thing.is_a?(Flipper::Types::Actor) || thing.respond_to?(:id)
+      end
+
+      def enable(thing)
+        toggle.enable Types::Actor.wrap(thing)
+      end
+
+      def disable(thing)
+        toggle.disable Types::Actor.wrap(thing)
       end
     end
   end

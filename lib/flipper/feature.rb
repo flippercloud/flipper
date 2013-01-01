@@ -22,12 +22,12 @@ module Flipper
       gate_for(thing).disable(thing)
     end
 
-    def enabled?(actor = nil)
-      !! catch(:short_circuit) { gates.detect { |gate| gate.open?(actor) } }
+    def enabled?(thing = nil)
+      !!catch(:short_circuit) { gates.detect { |gate| gate.open?(thing) } }
     end
 
-    def disabled?(actor = nil)
-      !enabled?(actor)
+    def disabled?(thing = nil)
+      !enabled?(thing)
     end
 
     # Internal: Gates to check to see if feature is enabled/disabled

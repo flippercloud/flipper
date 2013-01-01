@@ -3,15 +3,16 @@ require 'flipper/types/actor'
 
 describe Flipper::Types::Actor do
   subject {
-    described_class.new(2)
+    thing = Struct.new(:id).new('2')
+    described_class.new(thing)
   }
 
   let(:thing_class) {
     Class.new {
-      attr_reader :identifier
+      attr_reader :id
 
       def initialize(identifier)
-        @identifier = identifier
+        @id = id
       end
 
       def admin?
@@ -22,21 +23,14 @@ describe Flipper::Types::Actor do
 
   describe ".wrappable?" do
     it "returns true if actor" do
-      thing = described_class.new(1)
+      thing = Struct.new(:id).new('1')
+      actor = described_class.new(thing)
+      described_class.wrappable?(actor).should be_true
+    end
+
+    it "returns true if responds to id" do
+      thing = Struct.new(:id).new(10)
       described_class.wrappable?(thing).should be_true
-    end
-
-    it "returns true if responds to identifier" do
-      thing = Struct.new(:identifier).new(10)
-      described_class.wrappable?(thing).should be_true
-    end
-
-    it "returns true if responds to to_i" do
-      described_class.wrappable?(1).should be_true
-    end
-
-    it "returns false if not actor and does not respond to identifier or to_i" do
-      described_class.wrappable?(Object.new).should be_false
     end
   end
 
@@ -51,22 +45,17 @@ describe Flipper::Types::Actor do
 
     context "for other thing" do
       it "returns actor" do
-        actor = described_class.wrap(1)
+        thing = Struct.new(:id).new('1')
+        actor = described_class.wrap(thing)
         actor.should be_instance_of(described_class)
       end
     end
   end
 
-  it "initializes with identifier" do
-    actor = described_class.new(2)
-    actor.should be_instance_of(described_class)
-  end
-
-  it "initializes with object that responds to identifier" do
-    identifier = '1'
-    thing = Struct.new(:identifier).new(identifier)
+  it "initializes with thing that responds to id" do
+    thing = Struct.new(:id).new('1')
     actor = described_class.new(thing)
-    actor.identifier.should be(identifier)
+    actor.value.should eq('1')
   end
 
   it "raises error when initialized with nil" do
@@ -75,14 +64,10 @@ describe Flipper::Types::Actor do
     }.to raise_error(ArgumentError)
   end
 
-  it "converts identifier to string" do
-    actor = described_class.new(2)
-    actor.identifier.should eq('2')
-  end
-
-  it "has identifier" do
-    actor = described_class.new(2)
-    actor.identifier.should eq('2')
+  it "converts id to string" do
+    thing = Struct.new(:id).new(2)
+    actor = described_class.new(thing)
+    actor.value.should eq('2')
   end
 
   it "proxies everything to thing" do
@@ -93,7 +78,8 @@ describe Flipper::Types::Actor do
 
   describe "#respond_to?" do
     it "returns true if responds to method" do
-      actor = described_class.new(10)
+      thing = Struct.new(:id).new('1')
+      actor = described_class.new(thing)
       actor.respond_to?(:value).should be_true
     end
 
@@ -104,7 +90,8 @@ describe Flipper::Types::Actor do
     end
 
     it "returns false if does not respond to method and thing does not respond to method" do
-      actor = described_class.new(10)
+      thing = Struct.new(:id).new(10)
+      actor = described_class.new(thing)
       actor.respond_to?(:frankenstein).should be_false
     end
   end

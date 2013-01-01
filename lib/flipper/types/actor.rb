@@ -2,9 +2,7 @@ module Flipper
   module Types
     class Actor < Type
       def self.wrappable?(thing)
-        thing.is_a?(Flipper::Types::Actor) ||
-          thing.respond_to?(:identifier) ||
-          thing.respond_to?(:to_i)
+        thing.is_a?(Flipper::Types::Actor) || thing.respond_to?(:id)
       end
 
       def self.wrap(thing)
@@ -15,21 +13,13 @@ module Flipper
         end
       end
 
-      attr_reader :identifier
+      attr_reader :value
 
       def initialize(thing)
         raise ArgumentError, "thing cannot be nil" if thing.nil?
 
         @thing = thing
-        @identifier = if thing.respond_to?(:identifier)
-          thing.identifier
-        else
-          thing
-        end.to_s
-      end
-
-      def value
-        @identifier
+        @value = thing.id.to_s
       end
 
       def respond_to?(*args)

@@ -5,17 +5,19 @@ require 'flipper/adapters/memory'
 describe Flipper::Feature do
   subject           { described_class.new(:search, adapter) }
 
+  let(:actor_class) { Struct.new(:id) }
+
   let(:source)      { {} }
   let(:adapter)     { Flipper::Adapters::Memory.new(source) }
 
   let(:admin_group) { Flipper.group(:admins) }
   let(:dev_group)   { Flipper.group(:devs) }
 
-  let(:admin_thing) { double 'Non Flipper Thing', :identifier => 1,  :admin? => true, :dev? => false }
-  let(:dev_thing)   { double 'Non Flipper Thing', :identifier => 10, :admin? => false, :dev? => true }
+  let(:admin_thing) { double 'Non Flipper Thing', :id => 1,  :admin? => true, :dev? => false }
+  let(:dev_thing)   { double 'Non Flipper Thing', :id => 10, :admin? => false, :dev? => true }
 
-  let(:pitt)        { Flipper::Types::Actor.new(1) }
-  let(:clooney)     { Flipper::Types::Actor.new(10) }
+  let(:pitt)        { actor_class.new(1) }
+  let(:clooney)     { actor_class.new(10) }
 
   let(:five_percent_of_actors) { Flipper::Types::PercentageOfActors.new(5) }
   let(:five_percent_of_random) { Flipper::Types::PercentageOfRandom.new(5) }
@@ -36,9 +38,10 @@ describe Flipper::Feature do
     adapter.set_add key, name
   end
 
-  def enable_actor(actor)
+  def enable_actor(thing)
     key = Flipper::Key.new(subject.name, Flipper::Gates::Actor::Key)
-    adapter.set_add key, actor.identifier
+    actor = Flipper::Types::Actor.wrap(thing)
+    adapter.set_add key, actor.value
   end
 
   def enable_percentage_of_actors(percentage)
@@ -120,7 +123,11 @@ describe Flipper::Feature do
       end
 
       it "enables feature for actor within percentage" do
-        enabled = (1..100).select { |i| subject.enabled?(Flipper::Types::Actor.new(i)) }.length
+        enabled = (1..100).select { |i|
+          thing = Struct.new(:id).new(i)
+          subject.enabled?(thing)
+        }.size
+
         enabled.should be_within(2).of(5)
       end
 
@@ -188,7 +195,11 @@ describe Flipper::Feature do
       end
 
       it "disables actor in percentage of actors" do
-        enabled = (1..100).select { |i| subject.enabled?(Flipper::Types::Actor.new(i)) }.length
+        enabled = (1..100).select { |i|
+          thing = Struct.new(:id).new(i)
+          subject.enabled?(thing)
+        }.size
+
         enabled.should be(0)
       end
 
@@ -255,7 +266,11 @@ describe Flipper::Feature do
       end
 
       it "disables feature" do
-        enabled = (1..100).select { |i| subject.enabled?(Flipper::Types::Actor.new(i)) }.length
+        enabled = (1..100).select { |i|
+          thing = Struct.new(:id).new(i)
+          subject.enabled?(thing)
+        }.size
+
         enabled.should be(0)
       end
 
