@@ -24,6 +24,14 @@ module Flipper
       raise 'Not implemented'
     end
 
+    def inspect
+      attributes = [
+        "gate=#{gate.inspect}",
+        "value=#{value}",
+      ]
+      "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
+    end
+
     private
 
     def add_feature_to_set
