@@ -1,5 +1,12 @@
 require 'set'
 
+shared_examples_for 'a working percentage' do
+  it "does not raise when used" do
+    feature.enable percentage
+    expect { feature.enabled?(actor) }.to_not raise_error
+  end
+end
+
 # Requires the following methods
 # subject
 # read_key(key)
@@ -81,13 +88,6 @@ shared_examples_for 'a flipper adapter' do
     let(:feature) { instance[:feature] }
     let(:actor) { Struct.new(:id).new(1) }
 
-    shared_examples_for 'a working percentage' do
-      it "does not raise when used" do
-        feature.enable percentage
-        expect { feature.enabled?(actor) }.to_not raise_error
-      end
-    end
-
     describe "percentage of actors" do
       let(:percentage) { instance.actors(10) }
       it_should_behave_like 'a working percentage'
@@ -98,5 +98,4 @@ shared_examples_for 'a flipper adapter' do
       it_should_behave_like 'a working percentage'
     end
   end
-
 end
