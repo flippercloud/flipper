@@ -3,10 +3,10 @@ require 'flipper/feature'
 require 'flipper/adapters/memory'
 
 describe Flipper::Feature do
-  subject           { described_class.new(:search, adapter) }
+  subject { described_class.new(:search, adapter) }
 
-  let(:source)      { {} }
-  let(:adapter)     { Flipper::Adapters::Memory.new(source) }
+  let(:source) { {} }
+  let(:adapter) { Flipper::Adapters::Memory.new(source) }
 
   describe "#initialize" do
     it "sets name" do
