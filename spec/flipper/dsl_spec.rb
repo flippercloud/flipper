@@ -64,34 +64,18 @@ describe Flipper::DSL do
   end
 
   describe "#feature" do
-    before do
-      @result = subject.feature(:stats)
-    end
-
-    it "returns instance of feature with correct name and adapter" do
-      @result.should be_instance_of(Flipper::Feature)
-      @result.name.should eq(:stats)
-      @result.adapter.should eq(subject.adapter)
-    end
-
-    it "memoizes the feature" do
-      subject.feature(:stats).should equal(@result)
+    it_should_behave_like "a DSL feature" do
+      let(:instrumentor) { double('Instrumentor', :instrument => nil) }
+      let(:feature) { dsl.feature(:stats) }
+      let(:dsl) { Flipper::DSL.new(adapter, :instrumentor => instrumentor) }
     end
   end
 
   describe "#[]" do
-    before do
-      @result = subject[:stats]
-    end
-
-    it "returns instance of feature with correct name and adapter" do
-      @result.should be_instance_of(Flipper::Feature)
-      @result.name.should eq(:stats)
-      @result.adapter.should eq(subject.adapter)
-    end
-
-    it "memoizes the feature" do
-      subject[:stats].should equal(@result)
+    it_should_behave_like "a DSL feature" do
+      let(:instrumentor) { double('Instrumentor', :instrument => nil) }
+      let(:feature) { dsl[:stats] }
+      let(:dsl) { Flipper::DSL.new(adapter, :instrumentor => instrumentor) }
     end
   end
 
