@@ -113,7 +113,7 @@ module Flipper
     def eql?(other)
       self.class.eql?(other.class) && adapter == other.adapter
     end
-    alias :== :eql?
+    alias_method :==, :eql?
 
     def features
       set_members(FeaturesKey)

@@ -10,7 +10,7 @@ module Flipper
       def eql?(other)
         self.class.eql?(other.class) && value == other.value
       end
-      alias :== :eql?
+      alias_method :==, :eql?
     end
   end
 end
