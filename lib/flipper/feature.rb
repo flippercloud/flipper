@@ -19,7 +19,7 @@ module Flipper
     def initialize(name, adapter, options = {})
       @name = name
       @adapter = Adapter.wrap(adapter)
-      @instrumentor = options.fetch(:instrumentor) { Flipper::NoopInstrumentor }
+      @instrumentor = options.fetch(:instrumentor, Flipper::NoopInstrumentor)
     end
 
     def enable(thing = Types::Boolean.new)

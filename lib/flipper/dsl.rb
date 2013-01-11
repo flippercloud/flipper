@@ -11,7 +11,7 @@ module Flipper
 
     def initialize(adapter, options = {})
       @adapter = Adapter.wrap(adapter)
-      @instrumentor = options.fetch(:instrumentor) { Flipper::NoopInstrumentor }
+      @instrumentor = options.fetch(:instrumentor, Flipper::NoopInstrumentor)
       @memoized_features = {}
     end
 
