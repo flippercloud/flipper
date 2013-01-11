@@ -1,5 +1,6 @@
 require 'helper'
 require 'flipper/dsl'
+require 'flipper/adapters/memory'
 
 describe Flipper::DSL do
   subject { Flipper::DSL.new(adapter) }
