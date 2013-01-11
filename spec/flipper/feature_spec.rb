@@ -14,6 +14,16 @@ describe Flipper::Feature do
     feature.adapter.should eq(Flipper::Adapter.wrap(adapter))
   end
 
+  describe "#gate_for" do
+    context "with percentage of actors" do
+      it "returns percentage of actors gate" do
+        percentage = Flipper::Types::PercentageOfActors.new(10)
+        gate = subject.gate_for(percentage)
+        gate.should be_instance_of(Flipper::Gates::PercentageOfActors)
+      end
+    end
+  end
+
   describe "#gates" do
     it "returns array of gates" do
       subject.gates.should be_instance_of(Array)
