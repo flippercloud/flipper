@@ -35,6 +35,24 @@ describe Flipper::Adapter do
     end
   end
 
+  describe "#initialize" do
+    it "sets adapter" do
+      instance = described_class.new(adapter)
+      instance.adapter.should be(adapter)
+    end
+
+    it "defaults instrumentor" do
+      instance = described_class.new(adapter)
+      instance.instrumentor.should be(Flipper::NoopInstrumentor)
+    end
+
+    it "allows overriding instrumentor" do
+      instrumentor = double('Instrumentor', :instrument => nil)
+      instance = described_class.new(adapter, :instrumentor => instrumentor)
+      instance.instrumentor.should be(instrumentor)
+    end
+  end
+
   describe "#use_local_cache=" do
     it "sets value" do
       subject.use_local_cache = true

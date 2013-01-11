@@ -45,7 +45,17 @@ module Flipper
       end
     end
 
-    attr_reader :adapter, :local_cache
+    # Private: What adapter is being wrapped and will ultimately be used.
+    attr_reader :adapter
+
+    # Private: The name of the adapter. Based on the class name.
+    attr_reader :adapter_name
+
+    # Private: What is used to store the local cache.
+    attr_reader :local_cache
+
+    # Private: What is used to instrument all the things.
+    attr_reader :instrumentor
 
     # Internal: Initializes a new instance
     #
@@ -56,9 +66,13 @@ module Flipper
     #           :local_cache - Where to store the local cache data (default: {}).
     #                          Must respond to fetch(key, block), delete(key)
     #                          and clear.
+    #           :instrumentor - What to use to instrument all the things.
+    #
     def initialize(adapter, options = {})
       @adapter = adapter
+      @adapter_name = adapter.class.name.split('::').last.downcase
       @local_cache = options[:local_cache] || {}
+      @instrumentor = options.fetch(:instrumentor, Flipper::NoopInstrumentor)
     end
 
     def use_local_cache=(value)
