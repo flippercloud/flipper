@@ -40,6 +40,17 @@ module Flipper
     def disable(thing)
       toggle.disable(thing)
     end
+
+    def inspect
+      attributes = [
+        "feature=#{feature.name.inspect}",
+        "adapter=#{adapter.name.inspect}",
+        "toggle_class=#{toggle_class.inspect}",
+        "toggle_value=#{toggle.value.inspect}",
+        "key=#{key.inspect}",
+      ]
+      "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
+    end
   end
 end
 
