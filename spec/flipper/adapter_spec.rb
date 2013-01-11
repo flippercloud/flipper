@@ -16,33 +16,12 @@ describe Flipper::Adapter do
         @result = described_class.wrap(subject)
       end
 
-      it "returns Flipper::Adapter instance" do
-        @result.should be_instance_of(described_class)
-        @result.should_not equal(subject)
+      it "returns same Flipper::Adapter instance" do
+        @result.should equal(subject)
       end
 
       it "wraps adapter that instance was wrapping" do
         @result.adapter.should be(subject.adapter)
-      end
-    end
-
-    context "with Flipper::Adapter instance and options" do
-      let(:instrumentor) { double('Instrumentor') }
-
-      before do
-        @result = described_class.wrap(subject, :instrumentor => instrumentor)
-      end
-
-      it "returns Flipper::Adapter instance" do
-        @result.should be_instance_of(described_class)
-      end
-
-      it "wraps adapter" do
-        @result.adapter.should be(adapter)
-      end
-
-      it "passes options to initialization" do
-        @result.instrumentor.should be(instrumentor)
       end
     end
 
