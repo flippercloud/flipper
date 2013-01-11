@@ -124,7 +124,7 @@ describe Flipper::Feature do
 
       it "enables feature for actor within percentage" do
         enabled = (1..100).select { |i|
-          thing = Struct.new(:id).new(i)
+          thing = actor_class.new(i)
           subject.enabled?(thing)
         }.size
 
@@ -196,7 +196,7 @@ describe Flipper::Feature do
 
       it "disables actor in percentage of actors" do
         enabled = (1..100).select { |i|
-          thing = Struct.new(:id).new(i)
+          thing = actor_class.new(i)
           subject.enabled?(thing)
         }.size
 
@@ -267,7 +267,7 @@ describe Flipper::Feature do
 
       it "disables feature" do
         enabled = (1..100).select { |i|
-          thing = Struct.new(:id).new(i)
+          thing = actor_class.new(i)
           subject.enabled?(thing)
         }.size
 
