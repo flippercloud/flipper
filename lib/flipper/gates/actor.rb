@@ -23,7 +23,7 @@ module Flipper
       end
 
       def protects?(thing)
-        thing.is_a?(Flipper::Types::Actor) || thing.respond_to?(:id)
+        Types::Actor.wrappable?(thing)
       end
 
       def enable(thing)
