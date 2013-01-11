@@ -1,7 +1,7 @@
 require 'helper'
-require 'flipper/memory_instrumentor'
+require 'flipper/instrumentors/memory'
 
-describe Flipper::MemoryInstrumentor do
+describe Flipper::Instrumentors::Memory do
   describe "#initialize" do
     it "sets events to empty array" do
       instrumentor = described_class.new

@@ -1,4 +1,4 @@
-require 'flipper/noop_instrumentor'
+require 'flipper/instrumentors/noop'
 
 module Flipper
   # Internal: Adapter wrapper that wraps vanilla adapter instances. Adds things
@@ -74,7 +74,7 @@ module Flipper
       @adapter = adapter
       @adapter_name = adapter.class.name.split('::').last.downcase
       @local_cache = options[:local_cache] || {}
-      @instrumentor = options.fetch(:instrumentor, Flipper::NoopInstrumentor)
+      @instrumentor = options.fetch(:instrumentor, Flipper::Instrumentors::Noop)
     end
 
     def use_local_cache=(value)

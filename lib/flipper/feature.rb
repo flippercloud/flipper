@@ -3,7 +3,7 @@ require 'flipper/errors'
 require 'flipper/type'
 require 'flipper/toggle'
 require 'flipper/gate'
-require 'flipper/noop_instrumentor'
+require 'flipper/instrumentors/noop'
 
 module Flipper
   class Feature
@@ -18,7 +18,7 @@ module Flipper
 
     def initialize(name, adapter, options = {})
       @name = name
-      @instrumentor = options.fetch(:instrumentor, Flipper::NoopInstrumentor)
+      @instrumentor = options.fetch(:instrumentor, Flipper::Instrumentors::Noop)
       @adapter = Adapter.wrap(adapter, :instrumentor => @instrumentor)
     end
 

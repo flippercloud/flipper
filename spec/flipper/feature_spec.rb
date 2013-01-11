@@ -21,7 +21,7 @@ describe Flipper::Feature do
 
     it "defaults instrumentor" do
       feature = described_class.new(:search, adapter)
-      feature.instrumentor.should be(Flipper::NoopInstrumentor)
+      feature.instrumentor.should be(Flipper::Instrumentors::Noop)
     end
 
     context "with overriden instrumentor" do

@@ -1,5 +1,5 @@
 require 'flipper/adapter'
-require 'flipper/noop_instrumentor'
+require 'flipper/instrumentors/noop'
 
 module Flipper
   class DSL
@@ -10,7 +10,7 @@ module Flipper
     attr_reader :instrumentor
 
     def initialize(adapter, options = {})
-      @instrumentor = options.fetch(:instrumentor, Flipper::NoopInstrumentor)
+      @instrumentor = options.fetch(:instrumentor, Flipper::Instrumentors::Noop)
       @adapter = Adapter.wrap(adapter, :instrumentor => @instrumentor)
       @memoized_features = {}
     end

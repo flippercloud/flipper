@@ -23,7 +23,7 @@ describe Flipper::DSL do
 
     it "defaults instrumentor to noop" do
       dsl = described_class.new(adapter)
-      dsl.instrumentor.should be(Flipper::NoopInstrumentor)
+      dsl.instrumentor.should be(Flipper::Instrumentors::Noop)
     end
 
     context "with overriden instrumentor" do

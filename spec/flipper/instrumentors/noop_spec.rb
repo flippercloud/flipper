@@ -1,7 +1,7 @@
 require 'helper'
-require 'flipper/noop_instrumentor'
+require 'flipper/instrumentors/noop'
 
-describe Flipper::NoopInstrumentor do
+describe Flipper::Instrumentors::Noop do
   describe ".instrument" do
     context "with name" do
       it "yields block" do

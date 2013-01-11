@@ -1,7 +1,7 @@
 require 'helper'
 require 'flipper/adapter'
 require 'flipper/adapters/memory'
-require 'flipper/memory_instrumentor'
+require 'flipper/instrumentors/memory'
 
 describe Flipper::Adapter do
   let(:local_cache)  { {} }
@@ -68,7 +68,7 @@ describe Flipper::Adapter do
 
     it "defaults instrumentor" do
       instance = described_class.new(adapter)
-      instance.instrumentor.should be(Flipper::NoopInstrumentor)
+      instance.instrumentor.should be(Flipper::Instrumentors::Noop)
     end
 
     it "allows overriding instrumentor" do
@@ -369,7 +369,7 @@ describe Flipper::Adapter do
   end
 
   describe "instrumentation" do
-    let(:instrumentor) { Flipper::MemoryInstrumentor.new }
+    let(:instrumentor) { Flipper::Instrumentors::Memory.new }
 
     subject {
       described_class.new(adapter, :instrumentor => instrumentor)
