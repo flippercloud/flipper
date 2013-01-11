@@ -74,4 +74,34 @@ shared_examples_for 'a flipper adapter' do
   it "should work with Flipper.new" do
     Flipper.new(subject).should_not be_nil
   end
+
+  context "integration spot-checks" do
+    class Actor
+      def id
+        1
+      end
+    end
+
+    let(:instance) { Flipper.new(subject) }
+    let(:feature) { instance[:feature] }
+    let(:actor) { Actor.new }
+
+    shared_examples_for 'a working percentage' do
+      it "does not raise when used" do
+        feature.enable percentage
+        expect { feature.enabled?(actor) }.to_not raise_error
+      end
+    end
+
+    describe "percentage of actors" do
+      let(:percentage) { instance.actors(10) }
+      it_should_behave_like 'a working percentage'
+    end
+
+    describe "random percentage" do
+      let(:percentage) { instance.random(10) }
+      it_should_behave_like 'a working percentage'
+    end
+  end
+
 end
