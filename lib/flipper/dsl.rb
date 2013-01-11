@@ -20,7 +20,7 @@ module Flipper
     end
 
     def disabled?(name, *args)
-      !enabled?(name, *args)
+      feature(name).disabled?(*args)
     end
 
     def enable(name, *args)

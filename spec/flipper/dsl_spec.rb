@@ -54,8 +54,9 @@ describe Flipper::DSL do
   end
 
   describe "#disabled?" do
-    it "passes all args to enabled? and returns the opposite" do
-      subject.should_receive(:enabled?).with(:stats, :foo).and_return(true)
+    it "passes arguments to feature disabled check and returns result" do
+      admins_feature.should_receive(:disabled?).with(:foo).and_return(false)
+      subject.should_receive(:feature).with(:stats).and_return(admins_feature)
       subject.disabled?(:stats, :foo).should be_false
     end
   end
