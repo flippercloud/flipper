@@ -1,13 +1,14 @@
 require 'helper'
 require 'flipper/adapter'
 require 'flipper/adapters/memory'
+require 'flipper/instrumentors/memory'
 
 describe Flipper::Adapter do
   let(:local_cache)  { {} }
   let(:adapter)      { Flipper::Adapters::Memory.new }
   let(:features_key) { described_class::FeaturesKey }
 
-  subject { described_class.new(adapter, local_cache) }
+  subject { described_class.new(adapter, :local_cache => local_cache) }
 
   describe ".wrap" do
     context "with Flipper::Adapter instance" do
@@ -15,8 +16,12 @@ describe Flipper::Adapter do
         @result = described_class.wrap(subject)
       end
 
-      it "returns self" do
-        @result.should be(subject)
+      it "returns same Flipper::Adapter instance" do
+        @result.should equal(subject)
+      end
+
+      it "wraps adapter that instance was wrapping" do
+        @result.adapter.should be(subject.adapter)
       end
     end
 
@@ -30,8 +35,46 @@ describe Flipper::Adapter do
       end
 
       it "wraps adapter" do
-        @result.adapter.should eq(adapter)
+        @result.adapter.should be(adapter)
       end
+    end
+
+    context "with adapter instance and options" do
+      let(:instrumentor) { double('Instrumentor') }
+
+      before do
+        @result = described_class.wrap(adapter, :instrumentor => instrumentor)
+      end
+
+      it "returns Flipper::Adapter instance" do
+        @result.should be_instance_of(described_class)
+      end
+
+      it "wraps adapter" do
+        @result.adapter.should be(adapter)
+      end
+
+      it "passes options to initialization" do
+        @result.instrumentor.should be(instrumentor)
+      end
+    end
+  end
+
+  describe "#initialize" do
+    it "sets adapter" do
+      instance = described_class.new(adapter)
+      instance.adapter.should be(adapter)
+    end
+
+    it "defaults instrumentor" do
+      instance = described_class.new(adapter)
+      instance.instrumentor.should be(Flipper::Instrumentors::Noop)
+    end
+
+    it "allows overriding instrumentor" do
+      instrumentor = double('Instrumentor', :instrument => nil)
+      instance = described_class.new(adapter, :instrumentor => instrumentor)
+      instance.instrumentor.should be(instrumentor)
     end
   end
 
@@ -322,6 +365,74 @@ describe Flipper::Adapter do
       it "adds string to set" do
         subject.set_members(features_key).should include('search')
       end
+    end
+  end
+
+  describe "instrumentation" do
+    let(:instrumentor) { Flipper::Instrumentors::Memory.new }
+
+    subject {
+      described_class.new(adapter, :instrumentor => instrumentor)
+    }
+
+    it "is recorded for read" do
+      subject.read('foo')
+
+      event = instrumentor.events.last
+      event.should_not be_nil
+      event.name.should eq('read.memory.adapter.flipper')
+      event.payload.should eq({:key => 'foo'})
+    end
+
+    it "is recorded for write" do
+      subject.write('foo', 'bar')
+
+      event = instrumentor.events.last
+      event.should_not be_nil
+      event.name.should eq('write.memory.adapter.flipper')
+      event.payload.should eq({:key => 'foo', :value => 'bar'})
+    end
+
+    it "is recorded for delete" do
+      subject.delete('foo')
+
+      event = instrumentor.events.last
+      event.should_not be_nil
+      event.name.should eq('delete.memory.adapter.flipper')
+      event.payload.should eq({:key => 'foo'})
+    end
+
+    it "is recorded for set_members" do
+      subject.set_members('foo')
+
+      event = instrumentor.events.last
+      event.should_not be_nil
+      event.name.should eq('set_members.memory.adapter.flipper')
+      event.payload.should eq({:key => 'foo'})
+    end
+
+    it "is recorded for set_add" do
+      subject.set_add('foo', 'bar')
+
+      event = instrumentor.events.last
+      event.should_not be_nil
+      event.name.should eq('set_add.memory.adapter.flipper')
+      event.payload.should eq({:key => 'foo', :value => 'bar'})
+    end
+
+    it "is recorded for set_delete" do
+      subject.set_delete('foo', 'bar')
+
+      event = instrumentor.events.last
+      event.should_not be_nil
+      event.name.should eq('set_delete.memory.adapter.flipper')
+      event.payload.should eq({:key => 'foo', :value => 'bar'})
+    end
+  end
+
+  describe "#inspect" do
+    it "returns easy to read string representation" do
+      subject.inspect.should eq("#<Flipper::Adapter:#{subject.object_id} name=\"memory\", use_local_cache=nil>")
     end
   end
 end

@@ -14,4 +14,10 @@ describe Flipper::Key do
       subject.to_s.should eq("foo#{subject.separator}bar")
     end
   end
+
+  describe "#inspect" do
+    it "returns easy to read string representation" do
+      subject.inspect.should eq("#<Flipper::Key:#{subject.object_id} prefix=:foo, suffix=:bar>")
+    end
+  end
 end

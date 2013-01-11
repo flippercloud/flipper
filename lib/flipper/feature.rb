@@ -3,31 +3,41 @@ require 'flipper/errors'
 require 'flipper/type'
 require 'flipper/toggle'
 require 'flipper/gate'
+require 'flipper/instrumentors/noop'
 
 module Flipper
   class Feature
+    # Private
     attr_reader :name
+
+    # Private
     attr_reader :adapter
 
-    def initialize(name, adapter)
+    # Private: What is being used to instrument all the things.
+    attr_reader :instrumentor
+
+    def initialize(name, adapter, options = {})
       @name = name
-      @adapter = Adapter.wrap(adapter)
+      @instrumentor = options.fetch(:instrumentor, Flipper::Instrumentors::Noop)
+      @adapter = Adapter.wrap(adapter, :instrumentor => @instrumentor)
     end
 
     def enable(thing = Types::Boolean.new)
-      gate_for(thing).enable(thing)
+      gate = gate_for(thing)
+      instrument(:enable, thing, gate) { gate.enable(thing) }
     end
 
     def disable(thing = Types::Boolean.new)
-      gate_for(thing).disable(thing)
+      gate = gate_for(thing)
+      instrument(:disable, thing, gate) { gate.disable(thing) }
     end
 
     def enabled?(thing = nil)
-      !!catch(:short_circuit) { gates.detect { |gate| gate.open?(thing) } }
+      instrument(:enabled, thing) { any_gates_open?(thing) }
     end
 
     def disabled?(thing = nil)
-      !enabled?(thing)
+      instrument(:disabled, thing) { !any_gates_open?(thing) }
     end
 
     # Internal: Gates to check to see if feature is enabled/disabled
@@ -52,7 +62,33 @@ module Flipper
       find_gate(thing) || raise(GateNotFound.new(thing))
     end
 
+    def inspect
+      attributes = [
+        "name=#{name.inspect}",
+        "adapter=#{adapter.name.inspect}",
+      ]
+      "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
+    end
+
     private
+
+    def any_gates_open?(thing)
+      !!catch(:short_circuit) { gates.detect { |gate| gate.open?(thing) } }
+    end
+
+    def instrument(action, thing, gate = nil)
+      instrument_name = instrumentation_name(action)
+      payload = {
+        :feature_name => name,
+        :thing => thing,
+      }
+      payload[:gate] = gate if gate
+      @instrumentor.instrument(instrument_name, payload) { yield }
+    end
+
+    def instrumentation_name(action)
+      "#{action}.#{name}.feature.flipper"
+    end
 
     def find_gate(thing)
       gates.detect { |gate| gate.protects?(thing) }

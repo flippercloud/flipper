@@ -3,6 +3,10 @@ module Flipper
     class Group < Gate
       Key = :groups
 
+      def name
+        :group
+      end
+
       def type_key
         Key
       end
@@ -11,9 +15,14 @@ module Flipper
         Toggles::Set
       end
 
-      def open?(actor)
-        return if actor.nil?
-        groups.any? { |group| group.match?(actor) }
+      def open?(thing)
+        instrument(:open, thing) {
+          if thing.nil?
+            false
+          else
+            groups.any? { |group| group.match?(thing) }
+          end
+        }
       end
 
       def group_names
