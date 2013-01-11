@@ -14,6 +14,9 @@ class User
   def initialize(id)
     @id = id
   end
+
+  # Must respond to flipper_id
+  alias_method :flipper_id, :id
 end
 
 user1 = User.new(1)

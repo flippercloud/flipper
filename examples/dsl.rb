@@ -13,6 +13,9 @@ class Person
   def initialize(id)
     @id = id
   end
+
+  # Must respond to flipper_id
+  alias_method :flipper_id, :id
 end
 
 person = Person.new(1)
@@ -64,12 +67,12 @@ puts flipper.random(5).inspect
 # get an instance of the percentage of actors type set to 15
 puts flipper.actors(15).inspect
 
-# get an instance of an actor using an object that responds to id
-responds_to_id = Struct.new(:id).new(10)
-puts flipper.actor(responds_to_id).inspect
+# get an instance of an actor using an object that responds to flipper_id
+responds_to_flipper_id = Struct.new(:flipper_id).new(10)
+puts flipper.actor(responds_to_flipper_id).inspect
 
 # get an instance of an actor using an object
-thing = Struct.new(:id).new(22)
+thing = Struct.new(:flipper_id).new(22)
 puts flipper.actor(thing).inspect
 
 # register a top level group

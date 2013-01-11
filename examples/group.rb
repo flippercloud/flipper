@@ -21,6 +21,9 @@ class User
     @admin = admin
   end
 
+  # Must respond to flipper_id
+  alias_method :flipper_id, :id
+
   def admin?
     @admin == true
   end

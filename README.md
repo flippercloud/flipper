@@ -87,7 +87,7 @@ There is no requirement that the thing yielded to the block be a user model or w
 
 ### 3. Individual Actor
 
-Turn feature on for individual thing. Think enable feature for someone to test or for a buddy. The only requirement for an individual actor is that it must respond to `id`.
+Turn feature on for individual thing. Think enable feature for someone to test or for a buddy. The only requirement for an individual actor is that it must respond to `flipper_id`.
 
 ```ruby
 flipper = Flipper.new(adapter)
@@ -103,9 +103,23 @@ flipper[:search].enable group
 flipper[:search].enabled? group
 ```
 
-The key is to make sure you do not enable two different types of objects for the same feature. Imagine that user has an id of 6 and group has an id of 6. Enabling search for user would automatically enable it for group, as they both have an id of 6.
+The key is to make sure you do not enable two different types of objects for the same feature. Imagine that user has a flipper_id of 6 and group has a flipper_id of 6. Enabling search for user would automatically enable it for group, as they both have a flipper_id of 6.
 
-The one exception to this rule is if you have globally unique ids, such as uuid's. If your ids are unique globally in your entire system, enabling two different types should be safe.
+The one exception to this rule is if you have globally unique flipper_ids, such as uuid's. If your flipper_ids are unique globally in your entire system, enabling two different types should be safe. Another way around this is to prefix the flipper_id with the class name like this:
+
+```ruby
+class User
+  def flipper_id
+    "User:#{id}"
+  end
+end
+
+class Group
+  def flipper_id
+    "Group:#{id}"
+  end
+end
+```
 
 ### 4. Percentage of Actors
 
@@ -120,8 +134,8 @@ percentage = flipper.actors(10)
 # turn stats on for 10 percent of users in the system
 flipper[:stats].enable percentage
 
-# checks if actor's id is in the enabled percentage
-# uses hash of user.id.to_s to ensure enabled distribution is smooth
+# checks if actor's flipper_id is in the enabled percentage by hashing
+# user.flipper_id.to_s to ensure enabled distribution is smooth
 flipper[:stats].enabled? user
 
 ```
