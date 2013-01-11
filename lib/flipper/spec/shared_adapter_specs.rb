@@ -76,15 +76,10 @@ shared_examples_for 'a flipper adapter' do
   end
 
   context "integration spot-checks" do
-    class Actor
-      def id
-        1
-      end
-    end
 
     let(:instance) { Flipper.new(subject) }
     let(:feature) { instance[:feature] }
-    let(:actor) { Actor.new }
+    let(:actor) { Struct.new(:id).new(1) }
 
     shared_examples_for 'a working percentage' do
       it "does not raise when used" do
