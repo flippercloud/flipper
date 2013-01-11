@@ -15,5 +15,13 @@ module Flipper
     def to_s
       "#{prefix}#{separator}#{suffix}"
     end
+
+    def inspect
+      attributes = [
+        "prefix=#{prefix.inspect}",
+        "suffix=#{suffix.inspect}",
+      ]
+      "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
+    end
   end
 end

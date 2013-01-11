@@ -3,6 +3,10 @@ module Flipper
     class Boolean < Gate
       Key = :boolean
 
+      def name
+        :boolean
+      end
+
       def type_key
         Key
       end
@@ -11,14 +15,16 @@ module Flipper
         Toggles::Boolean
       end
 
-      def open?(actor)
-        value = toggle.value
+      def open?(thing)
+        instrument(:open, thing) {
+          value = toggle.value
 
-        if value.nil?
-          false
-        else
-          throw :short_circuit, !!value
-        end
+          if value.nil?
+            false
+          else
+            throw :short_circuit, !!value
+          end
+        }
       end
 
       def protects?(thing)

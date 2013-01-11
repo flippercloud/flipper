@@ -46,3 +46,25 @@ shared_examples_for 'a percentage' do
     percentage.value.should eq(19)
   end
 end
+
+shared_examples_for 'a DSL feature' do
+  it "returns instance of feature" do
+    feature.should be_instance_of(Flipper::Feature)
+  end
+
+  it "sets name" do
+    feature.name.should eq(:stats)
+  end
+
+  it "sets adapter" do
+    feature.adapter.should eq(dsl.adapter)
+  end
+
+  it "sets instrumentor" do
+    feature.instrumentor.should eq(dsl.instrumentor)
+  end
+
+  it "memoizes the feature" do
+    dsl.feature(:stats).should equal(feature)
+  end
+end

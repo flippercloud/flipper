@@ -14,10 +14,31 @@ describe Flipper::DSL do
     Flipper::Feature.new(name, adapter)
   end
 
-  it "wraps adapter when initializing" do
-    dsl = described_class.new(adapter)
-    dsl.adapter.should be_instance_of(Flipper::Adapter)
-    dsl.adapter.adapter.should eq(adapter)
+  describe "#initialize" do
+    it "wraps adapter" do
+      dsl = described_class.new(adapter)
+      dsl.adapter.should be_instance_of(Flipper::Adapter)
+      dsl.adapter.adapter.should eq(adapter)
+    end
+
+    it "defaults instrumentor to noop" do
+      dsl = described_class.new(adapter)
+      dsl.instrumentor.should be(Flipper::Instrumentors::Noop)
+    end
+
+    context "with overriden instrumentor" do
+      let(:instrumentor) { double('Instrumentor', :instrument => nil) }
+
+      it "overrides default instrumentor" do
+        dsl = described_class.new(adapter, :instrumentor => instrumentor)
+        dsl.instrumentor.should be(instrumentor)
+      end
+
+      it "passes overridden instrumentor to adapter wrapping" do
+        dsl = described_class.new(adapter, :instrumentor => instrumentor)
+        dsl.adapter.instrumentor.should be(instrumentor)
+      end
+    end
   end
 
   describe "#enabled?" do
@@ -33,8 +54,9 @@ describe Flipper::DSL do
   end
 
   describe "#disabled?" do
-    it "passes all args to enabled? and returns the opposite" do
-      subject.should_receive(:enabled?).with(:stats, :foo).and_return(true)
+    it "passes arguments to feature disabled check and returns result" do
+      admins_feature.should_receive(:disabled?).with(:foo).and_return(false)
+      subject.should_receive(:feature).with(:stats).and_return(admins_feature)
       subject.disabled?(:stats, :foo).should be_false
     end
   end
@@ -64,34 +86,18 @@ describe Flipper::DSL do
   end
 
   describe "#feature" do
-    before do
-      @result = subject.feature(:stats)
-    end
-
-    it "returns instance of feature with correct name and adapter" do
-      @result.should be_instance_of(Flipper::Feature)
-      @result.name.should eq(:stats)
-      @result.adapter.should eq(subject.adapter)
-    end
-
-    it "memoizes the feature" do
-      subject.feature(:stats).should equal(@result)
+    it_should_behave_like "a DSL feature" do
+      let(:instrumentor) { double('Instrumentor', :instrument => nil) }
+      let(:feature) { dsl.feature(:stats) }
+      let(:dsl) { Flipper::DSL.new(adapter, :instrumentor => instrumentor) }
     end
   end
 
   describe "#[]" do
-    before do
-      @result = subject[:stats]
-    end
-
-    it "returns instance of feature with correct name and adapter" do
-      @result.should be_instance_of(Flipper::Feature)
-      @result.name.should eq(:stats)
-      @result.adapter.should eq(subject.adapter)
-    end
-
-    it "memoizes the feature" do
-      subject[:stats].should equal(@result)
+    it_should_behave_like "a DSL feature" do
+      let(:instrumentor) { double('Instrumentor', :instrument => nil) }
+      let(:feature) { dsl[:stats] }
+      let(:dsl) { Flipper::DSL.new(adapter, :instrumentor => instrumentor) }
     end
   end
 

@@ -1,11 +1,18 @@
 require 'flipper/adapter'
+require 'flipper/instrumentors/noop'
 
 module Flipper
   class DSL
+    # Private
     attr_reader :adapter
 
-    def initialize(adapter)
-      @adapter = Adapter.wrap(adapter)
+    # Private: What is being used to instrument all the things.
+    attr_reader :instrumentor
+
+    def initialize(adapter, options = {})
+      @instrumentor = options.fetch(:instrumentor, Flipper::Instrumentors::Noop)
+      @adapter = Adapter.wrap(adapter, :instrumentor => @instrumentor)
+      @memoized_features = {}
     end
 
     def enabled?(name, *args)
@@ -13,7 +20,7 @@ module Flipper
     end
 
     def disabled?(name, *args)
-      !enabled?(name, *args)
+      feature(name).disabled?(*args)
     end
 
     def enable(name, *args)
@@ -25,10 +32,12 @@ module Flipper
     end
 
     def feature(name)
-      memoized_features[name.to_sym] ||= Feature.new(name, @adapter)
+      @memoized_features[name.to_sym] ||= Feature.new(name, @adapter, {
+        :instrumentor => instrumentor,
+      })
     end
 
-    alias :[] :feature
+    alias_method :[], :feature
 
     def group(name)
       Flipper.group(name)
@@ -41,21 +50,15 @@ module Flipper
     def random(number)
       Types::PercentageOfRandom.new(number)
     end
-    alias :percentage_of_random :random
+    alias_method :percentage_of_random, :random
 
     def actors(number)
       Types::PercentageOfActors.new(number)
     end
-    alias :percentage_of_actors :actors
+    alias_method :percentage_of_actors, :actors
 
     def features
       adapter.features.map { |name| feature(name) }.to_set
-    end
-
-    private
-
-    def memoized_features
-      @memoized_features ||= {}
     end
   end
 end
