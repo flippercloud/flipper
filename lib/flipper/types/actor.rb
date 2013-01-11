@@ -2,7 +2,7 @@ module Flipper
   module Types
     class Actor < Type
       def self.wrappable?(thing)
-        thing.is_a?(Flipper::Types::Actor) || thing.respond_to?(:id)
+        thing && (thing.is_a?(Flipper::Types::Actor) || thing.respond_to?(:id))
       end
 
       def self.wrap(thing)

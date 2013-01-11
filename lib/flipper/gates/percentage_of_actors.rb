@@ -10,17 +10,13 @@ module Flipper
       end
 
       def open?(thing)
-        percentage = toggle.value
+        percentage = toggle.value.to_i
 
-        if percentage.nil?
-          false
+        if Types::Actor.wrappable?(thing)
+          actor = Types::Actor.wrap(thing)
+          Zlib.crc32(actor.value) % 100 < percentage
         else
-          if Types::Actor.wrappable?(thing)
-            actor = Types::Actor.wrap(thing)
-            Zlib.crc32(actor.value) % 100 < percentage
-          else
-            false
-          end
+          false
         end
       end
 
