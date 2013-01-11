@@ -16,7 +16,9 @@ module Flipper
       attr_reader :value
 
       def initialize(thing)
-        raise ArgumentError, "thing cannot be nil" if thing.nil?
+        if thing.nil?
+          raise ArgumentError.new("thing cannot be nil")
+        end
 
         @thing = thing
         @value = thing.id.to_s
