@@ -24,12 +24,22 @@ describe Flipper::Feature do
       feature.instrumentor.should be(Flipper::NoopInstrumentor)
     end
 
-    it "allows overriding instrumentor" do
-      instrumentor = double('Instrumentor', :instrument => nil)
-      feature = described_class.new(:search, adapter, {
-        :instrumentor => instrumentor,
-      })
-      feature.instrumentor.should be(instrumentor)
+    context "with overriden instrumentor" do
+      let(:instrumentor) { double('Instrumentor', :instrument => nil) }
+
+      it "overrides default instrumentor" do
+        feature = described_class.new(:search, adapter, {
+          :instrumentor => instrumentor,
+        })
+        feature.instrumentor.should be(instrumentor)
+      end
+
+      it "passes overridden instrumentor to adapter wrapping" do
+        feature = described_class.new(:search, adapter, {
+          :instrumentor => instrumentor,
+        })
+        feature.adapter.instrumentor.should be(instrumentor)
+      end
     end
   end
 

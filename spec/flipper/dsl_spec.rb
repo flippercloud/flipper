@@ -26,10 +26,18 @@ describe Flipper::DSL do
       dsl.instrumentor.should be(Flipper::NoopInstrumentor)
     end
 
-    it "allows setting instrumentor" do
-      instrumentor = double('Instrumentor', :instrument => nil)
-      dsl = described_class.new(adapter, :instrumentor => instrumentor)
-      dsl.instrumentor.should be(instrumentor)
+    context "with overriden instrumentor" do
+      let(:instrumentor) { double('Instrumentor', :instrument => nil) }
+
+      it "overrides default instrumentor" do
+        dsl = described_class.new(adapter, :instrumentor => instrumentor)
+        dsl.instrumentor.should be(instrumentor)
+      end
+
+      it "passes overridden instrumentor to adapter wrapping" do
+        dsl = described_class.new(adapter, :instrumentor => instrumentor)
+        dsl.adapter.instrumentor.should be(instrumentor)
+      end
     end
   end
 

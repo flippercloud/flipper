@@ -10,8 +10,8 @@ module Flipper
     attr_reader :instrumentor
 
     def initialize(adapter, options = {})
-      @adapter = Adapter.wrap(adapter)
       @instrumentor = options.fetch(:instrumentor, Flipper::NoopInstrumentor)
+      @adapter = Adapter.wrap(adapter, :instrumentor => @instrumentor)
       @memoized_features = {}
     end
 
