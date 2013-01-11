@@ -3,14 +3,20 @@ module Flipper
     class PercentageOfRandom < Gate
       Key = :perc_time
 
+      def name
+        :percentage_of_random
+      end
+
       def type_key
         Key
       end
 
-      def open?(actor)
-        percentage = toggle.value.to_i
+      def open?(thing)
+        instrument(:open, thing) {
+          percentage = toggle.value.to_i
 
-        rand < (percentage / 100.0)
+          rand < (percentage / 100.0)
+        }
       end
 
       def protects?(thing)

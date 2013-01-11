@@ -10,6 +10,24 @@ describe Flipper::Gate do
     gate
   }
 
+  describe "#initialize" do
+    it "sets feature" do
+      gate = described_class.new(feature)
+      gate.feature.should be(feature)
+    end
+
+    it "defaults instrumentor" do
+      gate = described_class.new(feature)
+      gate.instrumentor.should be(Flipper::Instrumentors::Noop)
+    end
+
+    it "allows overriding instrumentor" do
+      instrumentor = double('Instrumentor')
+      gate = described_class.new(feature, :instrumentor => instrumentor)
+      gate.instrumentor.should be(instrumentor)
+    end
+  end
+
   describe "#inspect" do
     it "returns easy to read string representation" do
       string = subject.inspect

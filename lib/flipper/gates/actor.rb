@@ -3,6 +3,10 @@ module Flipper
     class Actor < Gate
       Key = :actors
 
+      def name
+        :actor
+      end
+
       def type_key
         Key
       end
@@ -12,10 +16,18 @@ module Flipper
       end
 
       def open?(thing)
-        return if thing.nil?
-        return unless Types::Actor.wrappable?(thing)
-        actor = Types::Actor.wrap(thing)
-        ids.include?(actor.value)
+        instrument(:open, thing) {
+          if thing.nil?
+            false
+          else
+            if Types::Actor.wrappable?(thing)
+              actor = Types::Actor.wrap(thing)
+              ids.include?(actor.value)
+            else
+              false
+            end
+          end
+        }
       end
 
       def ids

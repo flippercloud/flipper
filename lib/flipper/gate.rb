@@ -1,16 +1,30 @@
 require 'forwardable'
 require 'flipper/key'
+require 'flipper/instrumentors/noop'
 
 module Flipper
   class Gate
     extend Forwardable
 
+    # Private
     attr_reader :feature
+
+    # Private: What is used to instrument all the things.
+    attr_reader :instrumentor
 
     def_delegator :@feature, :adapter
 
-    def initialize(feature)
+    def initialize(feature, options = {})
       @feature = feature
+      @instrumentor = options.fetch(:instrumentor, Flipper::Instrumentors::Noop)
+    end
+
+    def name
+      raise 'Not implemented'
+    end
+
+    def type_key
+      raise 'Not implemented'
     end
 
     def key
@@ -23,6 +37,10 @@ module Flipper
 
     def toggle
       @toggle ||= toggle_class.new(self)
+    end
+
+    def open?(thing)
+      false
     end
 
     def protects?(thing)
@@ -50,6 +68,20 @@ module Flipper
         "key=#{key.inspect}",
       ]
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
+    end
+
+    private
+
+    def instrument(action, thing)
+      name = instrument_name(action)
+      payload = {
+        :thing => thing,
+      }
+      @instrumentor.instrument(name, payload) { yield }
+    end
+
+    def instrument_name(action)
+      "#{action}.#{name}.gate.flipper"
     end
   end
 end
