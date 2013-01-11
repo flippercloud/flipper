@@ -6,6 +6,7 @@ module Flipper
 
     def initialize(adapter)
       @adapter = Adapter.wrap(adapter)
+      @memoized_features = {}
     end
 
     def enabled?(name, *args)
@@ -25,7 +26,9 @@ module Flipper
     end
 
     def feature(name)
-      memoized_features[name.to_sym] ||= Feature.new(name, @adapter)
+      @memoized_features[name.to_sym] ||= Feature.new(name, @adapter, {
+        :instrumentor => instrumentor,
+      })
     end
 
     alias_method :[], :feature
@@ -50,12 +53,6 @@ module Flipper
 
     def features
       adapter.features.map { |name| feature(name) }.to_set
-    end
-
-    private
-
-    def memoized_features
-      @memoized_features ||= {}
     end
   end
 end
