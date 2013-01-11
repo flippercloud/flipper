@@ -34,6 +34,26 @@ describe Flipper::Adapter do
         @result.adapter.should eq(adapter)
       end
     end
+
+    context "with adapter instance and options" do
+      let(:instrumentor) { double('Instrumentor') }
+
+      before do
+        @result = described_class.wrap(adapter, :instrumentor => instrumentor)
+      end
+
+      it "returns Flipper::Adapter instance" do
+        @result.should be_instance_of(described_class)
+      end
+
+      it "wraps adapter" do
+        @result.adapter.should eq(adapter)
+      end
+
+      it "passes options to initialization" do
+        @result.instrumentor.should be(instrumentor)
+      end
+    end
   end
 
   describe "#initialize" do

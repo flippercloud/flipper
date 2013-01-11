@@ -39,11 +39,11 @@ module Flipper
     #   # => Flipper::Adapter instance
     #
     # Returns Flipper::Adapter instance
-    def self.wrap(object)
+    def self.wrap(object, options = {})
       if object.is_a?(Flipper::Adapter)
         object
       else
-        new(object)
+        new(object, options)
       end
     end
 
