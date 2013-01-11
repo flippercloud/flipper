@@ -1,6 +1,7 @@
 require 'helper'
 require 'flipper/adapter'
 require 'flipper/adapters/memory'
+require 'flipper/memory_instrumentor'
 
 describe Flipper::Adapter do
   let(:local_cache)  { {} }
@@ -340,6 +341,68 @@ describe Flipper::Adapter do
       it "adds string to set" do
         subject.set_members(features_key).should include('search')
       end
+    end
+  end
+
+  describe "instrumentation" do
+    let(:instrumentor) { Flipper::MemoryInstrumentor.new }
+
+    subject {
+      described_class.new(adapter, :instrumentor => instrumentor)
+    }
+
+    it "is recorded for read" do
+      subject.read('foo')
+
+      event = instrumentor.events.last
+      event.should_not be_nil
+      event.name.should eq('read.memory.adapter.flipper')
+      event.payload.should eq({:key => 'foo'})
+    end
+
+    it "is recorded for write" do
+      subject.write('foo', 'bar')
+
+      event = instrumentor.events.last
+      event.should_not be_nil
+      event.name.should eq('write.memory.adapter.flipper')
+      event.payload.should eq({:key => 'foo', :value => 'bar'})
+    end
+
+    it "is recorded for delete" do
+      subject.delete('foo')
+
+      event = instrumentor.events.last
+      event.should_not be_nil
+      event.name.should eq('delete.memory.adapter.flipper')
+      event.payload.should eq({:key => 'foo'})
+    end
+
+    it "is recorded for set_members" do
+      subject.set_members('foo')
+
+      event = instrumentor.events.last
+      event.should_not be_nil
+      event.name.should eq('set_members.memory.adapter.flipper')
+      event.payload.should eq({:key => 'foo'})
+    end
+
+    it "is recorded for set_add" do
+      subject.set_add('foo', 'bar')
+
+      event = instrumentor.events.last
+      event.should_not be_nil
+      event.name.should eq('set_add.memory.adapter.flipper')
+      event.payload.should eq({:key => 'foo', :value => 'bar'})
+    end
+
+    it "is recorded for set_delete" do
+      subject.set_delete('foo', 'bar')
+
+      event = instrumentor.events.last
+      event.should_not be_nil
+      event.name.should eq('set_delete.memory.adapter.flipper')
+      event.payload.should eq({:key => 'foo', :value => 'bar'})
     end
   end
 end

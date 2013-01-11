@@ -1,3 +1,5 @@
+require 'flipper/noop_instrumentor'
+
 module Flipper
   # Internal: Adapter wrapper that wraps vanilla adapter instances. Adds things
   # like local caching and convenience methods for adding/reading features from
@@ -85,27 +87,27 @@ module Flipper
     end
 
     def read(key)
-      perform_read(key) { @adapter.read(key) }
+      perform_read(:read, key)
     end
 
     def write(key, value)
-      perform_update(key) { @adapter.write(key, value) }
+      perform_update(:write, key, value)
     end
 
     def delete(key)
-      perform_update(key) { @adapter.delete(key) }
+      perform_delete(:delete, key)
     end
 
     def set_members(key)
-      perform_read(key) { @adapter.set_members(key) }
+      perform_read(:set_members, key)
     end
 
     def set_add(key, value)
-      perform_update(key) { @adapter.set_add(key, value) }
+      perform_update(:set_add, key, value)
     end
 
     def set_delete(key, value)
-      perform_update(key) { @adapter.set_delete(key, value) }
+      perform_update(:set_delete, key, value)
     end
 
     def eql?(other)
@@ -123,20 +125,53 @@ module Flipper
 
     private
 
-    def perform_read(key)
+    def perform_read(operation, key)
       if using_local_cache?
-        local_cache.fetch(key.to_s) { local_cache[key.to_s] = yield }
+        local_cache.fetch(key.to_s) {
+          local_cache[key.to_s] = @adapter.send(operation, key)
+        }
       else
-        yield
+        name = instrumentation_name(operation)
+        payload = {:key => key}
+
+        @instrumentor.instrument(name, payload) {
+          @adapter.send(operation, key)
+        }
       end
     end
 
-    def perform_update(key)
-      result = yield
+    def perform_update(operation, key, value)
+      name = instrumentation_name(operation)
+      payload = {:key => key, :value => value}
+
+      result = @instrumentor.instrument(name, payload) {
+        @adapter.send(operation, key, value)
+      }
+
       if using_local_cache?
         local_cache.delete(key.to_s)
       end
+
       result
+    end
+
+    def perform_delete(operation, key)
+      name = instrumentation_name(operation)
+      payload = {:key => key}
+
+      result = @instrumentor.instrument(name, payload) {
+        @adapter.send(operation, key)
+      }
+
+      if using_local_cache?
+        local_cache.delete(key.to_s)
+      end
+
+      result
+    end
+
+    def instrumentation_name(operation)
+      "#{operation}.#{adapter_name}.adapter.flipper"
     end
   end
 end
