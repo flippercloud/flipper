@@ -429,4 +429,10 @@ describe Flipper::Adapter do
       event.payload.should eq({:key => 'foo', :value => 'bar'})
     end
   end
+
+  describe "#inspect" do
+    it "returns easy to read string representation" do
+      subject.inspect.should eq("#<Flipper::Adapter:#{subject.object_id} name=\"memory\", use_local_cache=nil>")
+    end
+  end
 end

@@ -51,7 +51,7 @@ module Flipper
     attr_reader :adapter
 
     # Private: The name of the adapter. Based on the class name.
-    attr_reader :adapter_name
+    attr_reader :name
 
     # Private: What is used to store the local cache.
     attr_reader :local_cache
@@ -72,7 +72,7 @@ module Flipper
     #
     def initialize(adapter, options = {})
       @adapter = adapter
-      @adapter_name = adapter.class.name.split('::').last.downcase
+      @name = adapter.class.name.split('::').last.downcase
       @local_cache = options[:local_cache] || {}
       @instrumentor = options.fetch(:instrumentor, Flipper::Instrumentors::Noop)
     end
@@ -123,6 +123,14 @@ module Flipper
       set_add(FeaturesKey, name.to_s)
     end
 
+    def inspect
+      attributes = [
+        "name=#{name.inspect}",
+        "use_local_cache=#{@use_local_cache.inspect}"
+      ]
+      "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
+    end
+
     private
 
     def perform_read(operation, key)
@@ -171,7 +179,7 @@ module Flipper
     end
 
     def instrumentation_name(operation)
-      "#{operation}.#{adapter_name}.adapter.flipper"
+      "#{operation}.#{name}.adapter.flipper"
     end
   end
 end
