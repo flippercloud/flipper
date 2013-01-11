@@ -5,7 +5,7 @@ require 'flipper/adapters/memory'
 describe Flipper::Feature do
   subject           { described_class.new(:search, adapter) }
 
-  let(:actor_class) { Struct.new(:id) }
+  let(:actor_class) { Struct.new(:flipper_id) }
 
   let(:source)      { {} }
   let(:adapter)     { Flipper::Adapters::Memory.new(source) }
@@ -13,8 +13,8 @@ describe Flipper::Feature do
   let(:admin_group) { Flipper.group(:admins) }
   let(:dev_group)   { Flipper.group(:devs) }
 
-  let(:admin_thing) { double 'Non Flipper Thing', :id => 1,  :admin? => true, :dev? => false }
-  let(:dev_thing)   { double 'Non Flipper Thing', :id => 10, :admin? => false, :dev? => true }
+  let(:admin_thing) { double 'Non Flipper Thing', :flipper_id => 1,  :admin? => true, :dev? => false }
+  let(:dev_thing)   { double 'Non Flipper Thing', :flipper_id => 10, :admin? => false, :dev? => true }
 
   let(:pitt)        { actor_class.new(1) }
   let(:clooney)     { actor_class.new(10) }

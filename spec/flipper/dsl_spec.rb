@@ -120,7 +120,7 @@ describe Flipper::DSL do
   describe "#actor" do
     context "for a thing" do
       it "returns actor instance" do
-        thing = Struct.new(:id).new(33)
+        thing = Struct.new(:flipper_id).new(33)
         actor = subject.actor(thing)
         actor.should be_instance_of(Flipper::Types::Actor)
         actor.value.should eq('33')

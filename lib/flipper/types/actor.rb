@@ -2,7 +2,9 @@ module Flipper
   module Types
     class Actor < Type
       def self.wrappable?(thing)
-        thing && (thing.is_a?(Flipper::Types::Actor) || thing.respond_to?(:id))
+        return false if thing.nil?
+        return true if thing.is_a?(Flipper::Types::Actor)
+        thing.respond_to?(:flipper_id)
       end
 
       def self.wrap(thing)
@@ -20,8 +22,12 @@ module Flipper
           raise ArgumentError.new("thing cannot be nil")
         end
 
+        unless thing.respond_to?(:flipper_id)
+          raise ArgumentError.new("thing must respond to :flipper_id")
+        end
+
         @thing = thing
-        @value = thing.id.to_s
+        @value = thing.flipper_id.to_s
       end
 
       def respond_to?(*args)

@@ -9,10 +9,10 @@ describe Flipper::Types::Actor do
 
   let(:thing_class) {
     Class.new {
-      attr_reader :id
+      attr_reader :flipper_id
 
-      def initialize(identifier)
-        @id = id
+      def initialize(flipper_id)
+        @flipper_id = flipper_id
       end
 
       def admin?
