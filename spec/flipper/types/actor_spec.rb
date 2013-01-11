@@ -3,7 +3,7 @@ require 'flipper/types/actor'
 
 describe Flipper::Types::Actor do
   subject {
-    thing = Struct.new(:id).new('2')
+    thing = thing_class.new('2')
     described_class.new(thing)
   }
 
@@ -23,13 +23,13 @@ describe Flipper::Types::Actor do
 
   describe ".wrappable?" do
     it "returns true if actor" do
-      thing = Struct.new(:id).new('1')
+      thing = thing_class.new('1')
       actor = described_class.new(thing)
       described_class.wrappable?(actor).should be_true
     end
 
     it "returns true if responds to id" do
-      thing = Struct.new(:id).new(10)
+      thing = thing_class.new(10)
       described_class.wrappable?(thing).should be_true
     end
   end
@@ -45,7 +45,7 @@ describe Flipper::Types::Actor do
 
     context "for other thing" do
       it "returns actor" do
-        thing = Struct.new(:id).new('1')
+        thing = thing_class.new('1')
         actor = described_class.wrap(thing)
         actor.should be_instance_of(described_class)
       end
@@ -53,7 +53,7 @@ describe Flipper::Types::Actor do
   end
 
   it "initializes with thing that responds to id" do
-    thing = Struct.new(:id).new('1')
+    thing = thing_class.new('1')
     actor = described_class.new(thing)
     actor.value.should eq('1')
   end
@@ -65,7 +65,7 @@ describe Flipper::Types::Actor do
   end
 
   it "converts id to string" do
-    thing = Struct.new(:id).new(2)
+    thing = thing_class.new(2)
     actor = described_class.new(thing)
     actor.value.should eq('2')
   end
@@ -78,7 +78,7 @@ describe Flipper::Types::Actor do
 
   describe "#respond_to?" do
     it "returns true if responds to method" do
-      thing = Struct.new(:id).new('1')
+      thing = thing_class.new('1')
       actor = described_class.new(thing)
       actor.respond_to?(:value).should be_true
     end
@@ -90,7 +90,7 @@ describe Flipper::Types::Actor do
     end
 
     it "returns false if does not respond to method and thing does not respond to method" do
-      thing = Struct.new(:id).new(10)
+      thing = thing_class.new(10)
       actor = described_class.new(thing)
       actor.respond_to?(:frankenstein).should be_false
     end
