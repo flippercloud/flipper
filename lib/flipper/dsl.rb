@@ -2,6 +2,7 @@ require 'flipper/adapter'
 
 module Flipper
   class DSL
+    # Private
     attr_reader :adapter
 
     def initialize(adapter)
