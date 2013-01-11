@@ -28,7 +28,7 @@ module Flipper
       memoized_features[name.to_sym] ||= Feature.new(name, @adapter)
     end
 
-    alias :[] :feature
+    alias_method :[], :feature
 
     def group(name)
       Flipper.group(name)
