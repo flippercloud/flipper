@@ -8,13 +8,9 @@ module Flipper
       end
 
       def open?(actor)
-        percentage = toggle.value
+        percentage = toggle.value.to_i
 
-        if percentage.nil?
-          false
-        else
-          rand < (percentage / 100.0)
-        end
+        rand < (percentage / 100.0)
       end
 
       def protects?(thing)
