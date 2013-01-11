@@ -52,11 +52,13 @@ module Flipper
     # adapter - Vanilla adapter instance to wrap. Just needs to respond to
     #           read, write, delete, set_members, set_add, and set_delete.
     #
-    # local_cache - Where to store the local cache data (default: {}).
-    #               Must respond to fetch(key, block), delete(key) and clear.
-    def initialize(adapter, local_cache = {})
+    # options - The Hash of options.
+    #           :local_cache - Where to store the local cache data (default: {}).
+    #                          Must respond to fetch(key, block), delete(key)
+    #                          and clear.
+    def initialize(adapter, options = {})
       @adapter = adapter
-      @local_cache = local_cache
+      @local_cache = options[:local_cache] || {}
     end
 
     def use_local_cache=(value)

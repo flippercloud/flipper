@@ -7,7 +7,7 @@ describe Flipper::Adapter do
   let(:adapter)      { Flipper::Adapters::Memory.new }
   let(:features_key) { described_class::FeaturesKey }
 
-  subject { described_class.new(adapter, local_cache) }
+  subject { described_class.new(adapter, :local_cache => local_cache) }
 
   describe ".wrap" do
     context "with Flipper::Adapter instance" do
