@@ -8,10 +8,29 @@ describe Flipper::Feature do
   let(:source)      { {} }
   let(:adapter)     { Flipper::Adapters::Memory.new(source) }
 
-  it "initializes with name and adapter" do
-    feature = described_class.new(:search, adapter)
-    feature.name.should eq(:search)
-    feature.adapter.should eq(Flipper::Adapter.wrap(adapter))
+  describe "#initialize" do
+    it "sets name" do
+      feature = described_class.new(:search, adapter)
+      feature.name.should eq(:search)
+    end
+
+    it "sets adapter" do
+      feature = described_class.new(:search, adapter)
+      feature.adapter.should eq(Flipper::Adapter.wrap(adapter))
+    end
+
+    it "defaults instrumentor" do
+      feature = described_class.new(:search, adapter)
+      feature.instrumentor.should be(Flipper::NoopInstrumentor)
+    end
+
+    it "allows overriding instrumentor" do
+      instrumentor = double('Instrumentor', :instrument => nil)
+      feature = described_class.new(:search, adapter, {
+        :instrumentor => instrumentor,
+      })
+      feature.instrumentor.should be(instrumentor)
+    end
   end
 
   describe "#gate_for" do

@@ -3,15 +3,23 @@ require 'flipper/errors'
 require 'flipper/type'
 require 'flipper/toggle'
 require 'flipper/gate'
+require 'flipper/noop_instrumentor'
 
 module Flipper
   class Feature
+    # Private
     attr_reader :name
+
+    # Private
     attr_reader :adapter
 
-    def initialize(name, adapter)
+    # Private: What is being used to instrument all the things.
+    attr_reader :instrumentor
+
+    def initialize(name, adapter, options = {})
       @name = name
       @adapter = Adapter.wrap(adapter)
+      @instrumentor = options.fetch(:instrumentor) { Flipper::NoopInstrumentor }
     end
 
     def enable(thing = Types::Boolean.new)
