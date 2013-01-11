@@ -14,10 +14,23 @@ describe Flipper::DSL do
     Flipper::Feature.new(name, adapter)
   end
 
-  it "wraps adapter when initializing" do
-    dsl = described_class.new(adapter)
-    dsl.adapter.should be_instance_of(Flipper::Adapter)
-    dsl.adapter.adapter.should eq(adapter)
+  describe "#initialize" do
+    it "wraps adapter" do
+      dsl = described_class.new(adapter)
+      dsl.adapter.should be_instance_of(Flipper::Adapter)
+      dsl.adapter.adapter.should eq(adapter)
+    end
+
+    it "defaults instrumentor to noop" do
+      dsl = described_class.new(adapter)
+      dsl.instrumentor.should be(Flipper::NoopInstrumentor)
+    end
+
+    it "allows setting instrumentor" do
+      instrumentor = double('Instrumentor', :instrument => nil)
+      dsl = described_class.new(adapter, :instrumentor => instrumentor)
+      dsl.instrumentor.should be(instrumentor)
+    end
   end
 
   describe "#enabled?" do

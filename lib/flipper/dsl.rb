@@ -1,12 +1,17 @@
 require 'flipper/adapter'
+require 'flipper/noop_instrumentor'
 
 module Flipper
   class DSL
     # Private
     attr_reader :adapter
 
-    def initialize(adapter)
+    # Private: What is being used to instrument all the things.
+    attr_reader :instrumentor
+
+    def initialize(adapter, options = {})
       @adapter = Adapter.wrap(adapter)
+      @instrumentor = options.fetch(:instrumentor) { Flipper::NoopInstrumentor }
       @memoized_features = {}
     end
 
