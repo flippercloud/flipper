@@ -47,10 +47,6 @@ module Flipper
       false
     end
 
-    def match?(actor)
-      false
-    end
-
     def enable(thing)
       toggle.enable(thing)
     end
