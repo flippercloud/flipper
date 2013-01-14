@@ -19,7 +19,7 @@ module Flipper
 
           if Types::Actor.wrappable?(thing)
             actor = Types::Actor.wrap(thing)
-            Zlib.crc32(actor.value) % 100 < percentage
+            modulo_key(actor.value) % 100 < percentage
           else
             false
           end
@@ -28,6 +28,13 @@ module Flipper
 
       def protects?(thing)
         thing.is_a?(Flipper::Types::PercentageOfActors)
+      end
+
+      private
+
+      def modulo_key(actor_value)
+        offset = Zlib.crc32(@feature.name.to_s)
+        Zlib.crc32(actor_value) + offset
       end
     end
   end
