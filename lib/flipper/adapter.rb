@@ -59,7 +59,7 @@ module Flipper
     # Private: What is used to instrument all the things.
     attr_reader :instrumentor
 
-    # Internal: Initializes a new instance
+    # Internal: Initializes a new adapter instance.
     #
     # adapter - Vanilla adapter instance to wrap. Just needs to respond to
     #           read, write, delete, set_members, set_add, and set_delete.
@@ -77,52 +77,67 @@ module Flipper
       @instrumentor = options.fetch(:instrumentor, Flipper::Instrumentors::Noop)
     end
 
+    # Public: Turns local caching on/off.
+    #
+    # value - The Boolean that decides if local caching is on.
     def use_local_cache=(value)
       local_cache.clear
       @use_local_cache = value
     end
 
+    # Public: Returns true for using local cache, false for not.
     def using_local_cache?
       @use_local_cache == true
     end
 
+    # Public: Reads a key.
     def read(key)
       perform_read(:read, key)
     end
 
+    # Public: Set a key to a value.
     def write(key, value)
       perform_update(:write, key, value)
     end
 
+    # Public: Deletes a key.
     def delete(key)
       perform_delete(:delete, key)
     end
 
+    # Public: Returns the members of a set.
     def set_members(key)
       perform_read(:set_members, key)
     end
 
+    # Public: Adds a value to a set.
     def set_add(key, value)
       perform_update(:set_add, key, value)
     end
 
+    # Public: Deletes a value from a set.
     def set_delete(key, value)
       perform_update(:set_delete, key, value)
     end
 
+    # Public: Determines equality for an adapter instance when compared to
+    # another object.
     def eql?(other)
       self.class.eql?(other.class) && adapter == other.adapter
     end
     alias_method :==, :eql?
 
+    # Public: Returns all the features that the adapter knows of.
     def features
       set_members(FeaturesKey)
     end
 
+    # Internal: Adds a known feature to the set of features.
     def feature_add(name)
       set_add(FeaturesKey, name.to_s)
     end
 
+    # Public: Returns a pretty version of this adapter instance.
     def inspect
       attributes = [
         "name=#{name.inspect}",
