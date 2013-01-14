@@ -26,7 +26,8 @@ module Flipper
           else
             if Types::Actor.wrappable?(thing)
               actor = Types::Actor.wrap(thing)
-              ids.include?(actor.value)
+              enabled_actor_ids = toggle.value
+              enabled_actor_ids.include?(actor.value)
             else
               false
             end
@@ -36,10 +37,6 @@ module Flipper
 
       def protects?(thing)
         Types::Actor.wrappable?(thing)
-      end
-
-      def ids
-        toggle.value
       end
 
       def enable(thing)
