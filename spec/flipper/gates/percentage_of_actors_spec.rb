@@ -2,13 +2,11 @@ require 'helper'
 require 'flipper/instrumentors/memory'
 
 describe Flipper::Gates::PercentageOfActors do
-  let(:percentage) { 5 }
-  let(:adapter) { double('Adapter', :read => percentage) }
+  let(:adapter) { double('Adapter', :read => nil) }
   let(:feature) { double('Feature', :name => :search, :adapter => adapter) }
   let(:instrumentor) { Flipper::Instrumentors::Memory.new }
 
   describe "instrumentation" do
-
     subject {
       described_class.new(feature, :instrumentor => instrumentor)
     }
@@ -27,38 +25,46 @@ describe Flipper::Gates::PercentageOfActors do
   end
 
   describe "#open?" do
-    context "with a unique set of actors" do
-      let(:total_actors) { 100 }
-      let(:margin_of_error) { 0.02 * total_actors }
-      let(:actors) do
-        (1..total_actors).map { |n| Struct.new(:flipper_id).new(n) }
+    context "when compared against two features" do
+      let(:percentage) { 0.05 }
+      let(:number_of_actors) { 100 }
+
+      let(:actors) {
+        (1..number_of_actors).map { |n|
+          Struct.new(:flipper_id).new(n)
+        }
+      }
+
+      let(:feature_one_enabled_actors) do
+        feature_one = double('Feature', :name => :name_one, :adapter => adapter)
+        gate = described_class.new(feature_one)
+        actors.select { |actor| gate.open? actor }
       end
 
-      context "when compared against two features" do
-        let(:feature_one_enabled_actors) do
-          feature_one = double('Feature', :name => :name_one, :adapter => adapter)
-          gate = described_class.new(feature_one)
-          actors.select { |actor| gate.open? actor }
-        end
+      let(:feature_two_enabled_actors) do
+        feature_two = double('Feature', :name => :name_two, :adapter => adapter)
+        gate = described_class.new(feature_two)
+        actors.select { |actor| gate.open? actor }
+      end
 
-        let(:feature_two_enabled_actors) do
-          feature_two = double('Feature', :name => :name_two, :adapter => adapter)
-          gate = described_class.new(feature_two)
-          actors.select { |actor| gate.open? actor }
-        end
+      before do
+        percentage_as_integer = percentage * 100
+        adapter.stub(:read => percentage_as_integer)
+      end
 
-        it "returns unique sets" do
-          feature_one_enabled_actors.should_not eq(feature_two_enabled_actors)
-        end
+      it "does not enable both features for same set of actors" do
+        feature_one_enabled_actors.should_not eq(feature_two_enabled_actors)
+      end
 
-        it "returns an accurate percentage of actors" do
-          expected_actors = total_actors * percentage * 0.01
-          feature_one_enabled_actors.size.should(
-            be_within(margin_of_error).of(expected_actors)
-          )
-          feature_two_enabled_actors.size.should(
-            be_within(margin_of_error).of(expected_actors)
-          )
+      it "enables feature for accurate number of actors for each feature" do
+        margin_of_error = 0.02 * number_of_actors # 2 percent margin of error
+        expected_enabled_size = number_of_actors * percentage
+
+        [
+          feature_one_enabled_actors.size,
+          feature_two_enabled_actors.size,
+        ].each do |actual_enabled_size|
+          actual_enabled_size.should be_within(margin_of_error).of(expected_enabled_size)
         end
       end
     end
