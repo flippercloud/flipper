@@ -24,17 +24,14 @@ module Flipper
           if thing.nil?
             false
           else
-            groups.any? { |group| group.match?(thing) }
+            enabled_group_names = toggle.value
+            enabled_groups = enabled_group_names.map { |name|
+              Flipper.group(name)
+            }.compact
+
+            enabled_groups.any? { |group| group.match?(thing) }
           end
         }
-      end
-
-      def group_names
-        toggle.value
-      end
-
-      def groups
-        group_names.map { |name| Flipper.group(name) }.compact
       end
 
       def protects?(thing)
