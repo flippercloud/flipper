@@ -34,12 +34,12 @@ module Flipper
         }
       end
 
-      def ids
-        toggle.value
-      end
-
       def protects?(thing)
         Types::Actor.wrappable?(thing)
+      end
+
+      def ids
+        toggle.value
       end
 
       def enable(thing)
