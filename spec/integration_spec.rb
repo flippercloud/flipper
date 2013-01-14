@@ -28,29 +28,29 @@ describe Flipper::Feature do
   end
 
   def enable_feature(feature)
-    key = Flipper::Key.new(subject.name, Flipper::Gates::Boolean::Key)
+    key = Flipper::Key.new(subject.name, :boolean)
     adapter.write key, true
   end
 
   def enable_group(group)
-    key = Flipper::Key.new(subject.name, Flipper::Gates::Group::Key)
+    key = Flipper::Key.new(subject.name, :groups)
     name = group.respond_to?(:name) ? group.name : group
     adapter.set_add key, name
   end
 
   def enable_actor(thing)
-    key = Flipper::Key.new(subject.name, Flipper::Gates::Actor::Key)
+    key = Flipper::Key.new(subject.name, :actors)
     actor = Flipper::Types::Actor.wrap(thing)
     adapter.set_add key, actor.value
   end
 
   def enable_percentage_of_actors(percentage)
-    key = Flipper::Key.new(subject.name, Flipper::Gates::PercentageOfActors::Key)
+    key = Flipper::Key.new(subject.name, :perc_actors)
     adapter.write key, percentage.value
   end
 
   def enable_percentage_of_random(percentage)
-    key = Flipper::Key.new(subject.name, Flipper::Gates::PercentageOfRandom::Key)
+    key = Flipper::Key.new(subject.name, :perc_time)
     adapter.write key, percentage.value
   end
 

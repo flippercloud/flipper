@@ -36,7 +36,7 @@ describe Flipper::Gate do
       string.should include('adapter="memory"')
       string.should include('toggle_class=Flipper::Toggles::Value')
       string.should include('toggle_value="22"')
-      string.should include('key=#<Flipper::Key:')
+      string.should include('adapter_key=#<Flipper::Key:')
     end
   end
 end

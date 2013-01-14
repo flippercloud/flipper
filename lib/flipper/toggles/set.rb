@@ -3,16 +3,16 @@ module Flipper
     class Set < Toggle
       def enable(thing)
         super
-        adapter.set_add key, thing.value
+        adapter.set_add adapter_key, thing.value
       end
 
       def disable(thing)
         super
-        adapter.set_delete key, thing.value
+        adapter.set_delete adapter_key, thing.value
       end
 
       def value
-        adapter.set_members key
+        adapter.set_members adapter_key
       end
     end
   end

@@ -1,14 +1,12 @@
 module Flipper
   module Gates
     class Boolean < Gate
-      Key = :boolean
-
       def name
         :boolean
       end
 
       def type_key
-        Key
+        :boolean
       end
 
       def toggle_class

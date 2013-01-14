@@ -1,14 +1,12 @@
 module Flipper
   module Gates
     class PercentageOfRandom < Gate
-      Key = :perc_time
-
       def name
         :percentage_of_random
       end
 
       def type_key
-        Key
+        :perc_time
       end
 
       def open?(thing)

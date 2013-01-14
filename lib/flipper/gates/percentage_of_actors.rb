@@ -3,14 +3,12 @@ require 'zlib'
 module Flipper
   module Gates
     class PercentageOfActors < Gate
-      Key = :perc_actors
-
       def name
         :percentage_of_actors
       end
 
       def type_key
-        Key
+        :perc_actors
       end
 
       def open?(thing)

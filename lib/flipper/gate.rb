@@ -31,7 +31,7 @@ module Flipper
 
     # Internal: The key where details about this gate can be retrieved from the
     # adapter.
-    def key
+    def adapter_key
       @key ||= Key.new(@feature.name, type_key)
     end
 
@@ -80,7 +80,7 @@ module Flipper
         "adapter=#{adapter.name.inspect}",
         "toggle_class=#{toggle_class.inspect}",
         "toggle_value=#{toggle.value.inspect}",
-        "key=#{key.inspect}",
+        "adapter_key=#{adapter_key.inspect}",
       ]
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
     end

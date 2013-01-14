@@ -6,7 +6,7 @@ module Flipper
 
     attr_reader :gate
 
-    def_delegators :@gate, :key, :feature, :adapter
+    def_delegators :@gate, :adapter_key, :feature, :adapter
 
     def initialize(gate)
       @gate = gate
@@ -36,7 +36,7 @@ module Flipper
     private
 
     def add_feature_to_set
-      adapter.feature_add key.prefix
+      adapter.feature_add adapter_key.prefix
     end
   end
 end

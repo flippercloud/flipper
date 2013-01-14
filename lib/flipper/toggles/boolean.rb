@@ -3,18 +3,18 @@ module Flipper
     class Boolean < Toggle
       def enable(thing)
         super
-        adapter.write key, thing.value
+        adapter.write adapter_key, thing.value
       end
 
       def disable(thing)
         super
         feature.gates.each do |gate|
-          gate.adapter.delete gate.key
+          gate.adapter.delete gate.adapter_key
         end
       end
 
       def value
-        adapter.read key
+        adapter.read adapter_key
       end
     end
   end

@@ -1,14 +1,12 @@
 module Flipper
   module Gates
     class Group < Gate
-      Key = :groups
-
       def name
         :group
       end
 
       def type_key
-        Key
+        :groups
       end
 
       def toggle_class
