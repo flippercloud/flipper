@@ -23,7 +23,7 @@ module Flipper
         end
 
         unless thing.respond_to?(:flipper_id)
-          raise ArgumentError.new("thing must respond to :flipper_id")
+          raise ArgumentError.new("#{thing.inspect} must respond to flipper_id, but does not")
         end
 
         @thing = thing
