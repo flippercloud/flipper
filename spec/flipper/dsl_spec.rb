@@ -134,9 +134,17 @@ describe Flipper::DSL do
     end
 
     context "for nil" do
-      it "raises error" do
+      it "raises argument error" do
         expect {
           subject.actor(nil)
+        }.to raise_error(ArgumentError)
+      end
+    end
+
+    context "for something that is not actor wrappable" do
+      it "raises argument error" do
+        expect {
+          subject.actor(Object.new)
         }.to raise_error(ArgumentError)
       end
     end
