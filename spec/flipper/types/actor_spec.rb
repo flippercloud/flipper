@@ -64,6 +64,13 @@ describe Flipper::Types::Actor do
     }.to raise_error(ArgumentError)
   end
 
+  it "raises error when initalized with non-wrappable object" do
+    unwrappable_thing = Struct.new(:id).new(1)
+    expect {
+      described_class.new(unwrappable_thing)
+    }.to raise_error(ArgumentError, "#{unwrappable_thing.inspect} must respond to flipper_id, but does not")
+  end
+
   it "converts id to string" do
     thing = thing_class.new(2)
     actor = described_class.new(thing)
