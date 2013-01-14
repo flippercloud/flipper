@@ -24,6 +24,7 @@ module Flipper
       raise 'Not implemented'
     end
 
+    # Public: Pretty string version for debugging.
     def inspect
       attributes = [
         "gate=#{gate.inspect}",

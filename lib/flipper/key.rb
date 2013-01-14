@@ -16,6 +16,7 @@ module Flipper
       "#{prefix}#{separator}#{suffix}"
     end
 
+    # Public: Pretty string version for debugging.
     def inspect
       attributes = [
         "prefix=#{prefix.inspect}",

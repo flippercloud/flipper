@@ -82,7 +82,7 @@ module Flipper
       find_gate(thing) || raise(GateNotFound.new(thing))
     end
 
-    # Public: Pretty string version of feature.
+    # Public: Pretty string version for debugging.
     def inspect
       attributes = [
         "name=#{name.inspect}",

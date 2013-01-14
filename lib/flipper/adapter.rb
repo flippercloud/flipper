@@ -137,7 +137,7 @@ module Flipper
       set_add(FeaturesKey, name.to_s)
     end
 
-    # Public: Returns a pretty version of this adapter instance.
+    # Public: Pretty string version for debugging.
     def inspect
       attributes = [
         "name=#{name.inspect}",
