@@ -3,14 +3,19 @@ require 'zlib'
 module Flipper
   module Gates
     class PercentageOfActors < Gate
+      # Internal: The name of the gate. Used for instrumentation, etc.
       def name
         :percentage_of_actors
       end
 
+      # Internal: The piece of the adapter key that is unique to the gate class.
       def key
         :perc_actors
       end
 
+      # Internal: Checks if the gate is open for a thing.
+      #
+      # Returns true if gate open for thing, false if not.
       def open?(thing)
         instrument(:open, thing) {
           percentage = toggle.value.to_i

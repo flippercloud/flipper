@@ -1,20 +1,24 @@
 module Flipper
   module Gates
     class Actor < Gate
-      Key = :actors
-
+      # Internal: The name of the gate. Used for instrumentation, etc.
       def name
         :actor
       end
 
+      # Internal: The piece of the adapter key that is unique to the gate class.
       def key
-        Key
+        :actors
       end
 
+      # Internal: The toggle class used to enable/disable the gate for a thing.
       def toggle_class
         Toggles::Set
       end
 
+      # Internal: Checks if the gate is open for a thing.
+      #
+      # Returns true if gate open for thing, false if not.
       def open?(thing)
         instrument(:open, thing) {
           if thing.nil?
