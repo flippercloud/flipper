@@ -5,7 +5,7 @@ module Flipper
         :percentage_of_random
       end
 
-      def type_key
+      def key
         :perc_time
       end
 

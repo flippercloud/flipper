@@ -5,7 +5,7 @@ module Flipper
         :group
       end
 
-      def type_key
+      def key
         :groups
       end
 

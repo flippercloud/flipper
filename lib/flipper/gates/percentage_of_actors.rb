@@ -7,7 +7,7 @@ module Flipper
         :percentage_of_actors
       end
 
-      def type_key
+      def key
         :perc_actors
       end
 

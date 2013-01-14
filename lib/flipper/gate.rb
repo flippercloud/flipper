@@ -24,15 +24,16 @@ module Flipper
       raise 'Not implemented'
     end
 
-    # Private: The key used in the adapter for the gate. Implemented in subclass.
-    def type_key
+    # Private: The piece of the adapter key that is unique to the gate class.
+    # Implemented in subclass.
+    def key
       raise 'Not implemented'
     end
 
     # Internal: The key where details about this gate can be retrieved from the
     # adapter.
     def adapter_key
-      @key ||= Key.new(@feature.name, type_key)
+      @key ||= Key.new(@feature.name, key)
     end
 
     # Internal: The toggle class to use for this gate.

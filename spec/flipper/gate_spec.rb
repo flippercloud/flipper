@@ -6,7 +6,7 @@ describe Flipper::Gate do
 
   subject {
     gate = described_class.new(feature)
-    gate.stub(:type_key => :actors) # implemented in subclass
+    gate.stub(:key => :actors) # implemented in subclass
     gate
   }
 

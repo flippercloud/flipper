@@ -5,7 +5,7 @@ module Flipper
         :boolean
       end
 
-      def type_key
+      def key
         :boolean
       end
 

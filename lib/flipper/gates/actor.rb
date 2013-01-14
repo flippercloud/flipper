@@ -7,7 +7,7 @@ module Flipper
         :actor
       end
 
-      def type_key
+      def key
         Key
       end
 
