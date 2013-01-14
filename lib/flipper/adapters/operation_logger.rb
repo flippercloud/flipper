@@ -13,36 +13,43 @@ module Flipper
       SetDelete = Struct.new(:key, :value)
       SetMember = Struct.new(:key)
 
+      # Public
       def initialize(adapter)
         @operations = []
         @adapter = adapter
       end
 
+      # Public
       def read(key)
         @operations << Read.new(key.to_s)
         @adapter.read key
       end
 
+      # Public
       def write(key, value)
         @operations << Write.new(key.to_s, value)
         @adapter.write key, value
       end
 
+      # Public
       def delete(key)
         @operations << Delete.new(key.to_s, nil)
         @adapter.delete key
       end
 
+      # Public
       def set_add(key, value)
         @operations << SetAdd.new(key.to_s, value)
         @adapter.set_add key, value
       end
 
+      # Public
       def set_delete(key, value)
         @operations << SetDelete.new(key.to_s, value)
         @adapter.set_delete key, value
       end
 
+      # Public
       def set_members(key)
         @operations << SetMembers.new(key.to_s)
         @adapter.set_members key
