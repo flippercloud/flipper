@@ -14,6 +14,10 @@ module Flipper
       def value
         adapter.set_members adapter_key
       end
+
+      def enabled?
+        !value.empty?
+      end
     end
   end
 end

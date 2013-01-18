@@ -162,4 +162,36 @@ describe Flipper::Feature do
       })
     end
   end
+
+  describe "#state" do
+    context "fully on" do
+      before do
+        subject.enable
+      end
+
+      it "returns :on" do
+        subject.state.should be(:on)
+      end
+    end
+
+    context "fully off" do
+      before do
+        subject.disable
+      end
+
+      it "returns :off" do
+        subject.state.should be(:off)
+      end
+    end
+
+    context "partially on" do
+      before do
+        subject.enable Flipper::Types::PercentageOfRandom.new(5)
+      end
+
+      it "returns :conditional" do
+        subject.state.should be(:conditional)
+      end
+    end
+  end
 end

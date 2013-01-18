@@ -16,6 +16,10 @@ module Flipper
       def value
         adapter.read adapter_key
       end
+
+      def enabled?
+        !!value
+      end
     end
   end
 end

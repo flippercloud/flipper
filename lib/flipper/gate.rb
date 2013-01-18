@@ -74,6 +74,10 @@ module Flipper
       toggle.disable(thing)
     end
 
+    def enabled?
+      toggle.enabled?
+    end
+
     # Public: Pretty string version for debugging.
     def inspect
       attributes = [

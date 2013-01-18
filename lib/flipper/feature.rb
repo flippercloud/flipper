@@ -91,6 +91,32 @@ module Flipper
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
     end
 
+    # Public
+    def state
+      if boolean_gate.enabled?
+        :on
+      elsif conditional_gates.any?
+        :conditional
+      else
+        :off
+      end
+    end
+
+    # Private
+    def boolean_gate
+      @boolean_gate ||= gates.detect { |gate| gate.name == :boolean }
+    end
+
+    # Private
+    def non_boolean_gates
+      @non_boolean_gates ||= gates - [boolean_gate]
+    end
+
+    # Private
+    def conditional_gates
+      non_boolean_gates.select { |gate| gate.enabled? }
+    end
+
     private
 
     def any_gates_open?(thing)
