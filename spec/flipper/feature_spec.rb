@@ -194,4 +194,38 @@ describe Flipper::Feature do
       end
     end
   end
+
+  describe "#description" do
+    context "fully on" do
+      before do
+        subject.enable
+      end
+
+      it "returns enabled" do
+        subject.description.should eq('Enabled')
+      end
+    end
+
+    context "fully off" do
+      before do
+        subject.disable
+      end
+
+      it "returns disabled" do
+        subject.description.should eq('Disabled')
+      end
+    end
+
+    context "partially on" do
+      before do
+        actor = Struct.new(:flipper_id).new(5)
+        subject.enable Flipper::Types::PercentageOfRandom.new(5)
+        subject.enable actor
+      end
+
+      it "returns text" do
+        subject.description.should eq('Enabled for actors (5), 5% of the time')
+      end
+    end
+  end
 end

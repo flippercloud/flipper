@@ -46,6 +46,16 @@ module Flipper
       def disable(thing)
         toggle.disable Types::Actor.wrap(thing)
       end
+
+      def description
+        values = toggle.value
+
+        if values.empty?
+          'Disabled'
+        else
+          "actors (#{values.to_a.join(', ')})"
+        end
+      end
     end
   end
 end

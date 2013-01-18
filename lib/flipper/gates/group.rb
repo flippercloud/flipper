@@ -37,6 +37,16 @@ module Flipper
       def protects?(thing)
         thing.is_a?(Flipper::Types::Group)
       end
+
+      def description
+        values = toggle.value
+
+        if values.empty?
+          'Disabled'
+        else
+          "groups (#{values.to_a.join(', ')})"
+        end
+      end
     end
   end
 end

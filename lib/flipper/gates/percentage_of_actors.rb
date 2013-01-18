@@ -33,6 +33,14 @@ module Flipper
       def protects?(thing)
         thing.is_a?(Flipper::Types::PercentageOfActors)
       end
+
+      def description
+        if enabled?
+          "#{toggle.value}% of actors"
+        else
+          'Disabled'
+        end
+      end
     end
   end
 end

@@ -102,6 +102,18 @@ module Flipper
       end
     end
 
+    # Public
+    def description
+      if boolean_gate.enabled?
+        boolean_gate.description
+      elsif conditional_gates.any?
+        fragments = conditional_gates.map(&:description)
+        "Enabled for #{fragments.join(', ')}"
+      else
+        boolean_gate.description
+      end
+    end
+
     # Private
     def boolean_gate
       @boolean_gate ||= gates.detect { |gate| gate.name == :boolean }

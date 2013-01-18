@@ -2,15 +2,37 @@ require 'helper'
 require 'flipper/instrumentors/memory'
 
 describe Flipper::Gates::Boolean do
+  let(:adapter) { double('Adapter', :read => nil) }
+  let(:feature) { double('Feature', :name => :search, :adapter => adapter) }
+  let(:instrumentor) { Flipper::Instrumentors::Memory.new }
+
+  subject {
+    described_class.new(feature, :instrumentor => instrumentor)
+  }
+
+  describe "#description" do
+    context "for enabled" do
+      before do
+        subject.stub(:enabled? => true)
+      end
+
+      it "returns Enabled" do
+        subject.description.should eq('Enabled')
+      end
+    end
+
+    context "for disabled" do
+      before do
+        subject.stub(:enabled? => false)
+      end
+
+      it "returns Disabled" do
+        subject.description.should eq('Disabled')
+      end
+    end
+  end
+
   describe "instrumentation" do
-    let(:adapter) { double('Adapter', :read => nil) }
-    let(:feature) { double('Feature', :name => :search, :adapter => adapter) }
-    let(:instrumentor) { Flipper::Instrumentors::Memory.new }
-
-    subject {
-      described_class.new(feature, :instrumentor => instrumentor)
-    }
-
     it "is recorded for open" do
       thing = nil
       subject.open?(thing)

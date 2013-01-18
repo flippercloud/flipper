@@ -25,6 +25,14 @@ module Flipper
       def protects?(thing)
         thing.is_a?(Flipper::Types::PercentageOfRandom)
       end
+
+      def description
+        if enabled?
+          "#{toggle.value}% of the time"
+        else
+          'Disabled'
+        end
+      end
     end
   end
 end

@@ -34,6 +34,14 @@ module Flipper
       def protects?(thing)
         thing.is_a?(Flipper::Types::Boolean)
       end
+
+      def description
+        if enabled?
+          'Enabled'
+        else
+          'Disabled'
+        end
+      end
     end
   end
 end
