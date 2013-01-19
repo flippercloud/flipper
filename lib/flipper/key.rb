@@ -2,10 +2,10 @@ module Flipper
   class Key
     Separator = '/'
 
-    attr_reader :prefix, :suffix
+    attr_reader :feature_name, :gate_key
 
-    def initialize(prefix, suffix)
-      @prefix, @suffix = prefix, suffix
+    def initialize(feature_name, gate_key)
+      @feature_name, @gate_key = feature_name, gate_key
     end
 
     def separator
@@ -13,14 +13,14 @@ module Flipper
     end
 
     def to_s
-      "#{prefix}#{separator}#{suffix}"
+      "#{feature_name}#{separator}#{gate_key}"
     end
 
     # Public: Pretty string version for debugging.
     def inspect
       attributes = [
-        "prefix=#{prefix.inspect}",
-        "suffix=#{suffix.inspect}",
+        "feature_name=#{feature_name.inspect}",
+        "gate_key=#{gate_key.inspect}",
       ]
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
     end

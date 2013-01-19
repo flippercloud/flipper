@@ -36,7 +36,7 @@ module Flipper
     private
 
     def add_feature_to_set
-      adapter.feature_add adapter_key.prefix
+      adapter.feature_add adapter_key.feature_name
     end
   end
 end

@@ -4,20 +4,20 @@ require 'flipper/key'
 describe Flipper::Key do
   subject { described_class.new(:foo, :bar) }
 
-  it "initializes with prefix and suffix" do
+  it "initializes with feature_name and gate_key" do
     key = described_class.new(:foo, :bar)
     key.should be_instance_of(described_class)
   end
 
   describe "#to_s" do
-    it "returns prefix and suffix joined by separator" do
+    it "returns feature_name and gate_key joined by separator" do
       subject.to_s.should eq("foo#{subject.separator}bar")
     end
   end
 
   describe "#inspect" do
     it "returns easy to read string representation" do
-      subject.inspect.should eq("#<Flipper::Key:#{subject.object_id} prefix=:foo, suffix=:bar>")
+      subject.inspect.should eq("#<Flipper::Key:#{subject.object_id} feature_name=:foo, gate_key=:bar>")
     end
   end
 end
