@@ -13,11 +13,17 @@ describe Flipper::Registry do
       source[:admins].should eq(value)
     end
 
+    it "converts key to symbol" do
+      value = 'thing'
+      subject.add('admins', value)
+      source[:admins].should eq(value)
+    end
+
     it "raises exception if key already registered" do
       subject.add(:admins, 'thing')
 
       expect {
-        subject.add(:admins, 'again')
+        subject.add('admins', 'again')
       }.to raise_error(Flipper::Registry::DuplicateKey)
     end
   end
@@ -30,6 +36,10 @@ describe Flipper::Registry do
 
       it "returns value" do
         subject.get(:admins).should eq('thing')
+      end
+
+      it "returns value if given string key" do
+        subject.get('admins').should eq('thing')
       end
     end
 
@@ -68,6 +78,12 @@ describe Flipper::Registry do
 
     it "returns the keys" do
       subject.keys.map(&:to_s).sort.should eq(['admins', 'devs'])
+    end
+
+    it "returns the keys as symbols" do
+      subject.keys.each do |key|
+        key.should be_instance_of(Symbol)
+      end
     end
   end
 

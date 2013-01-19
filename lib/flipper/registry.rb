@@ -31,6 +31,8 @@ module Flipper
     end
 
     def add(key, value)
+      key = key.to_sym
+
       @mutex.synchronize {
         if @source[key]
           raise DuplicateKey, "#{key} is already registered"
@@ -41,6 +43,8 @@ module Flipper
     end
 
     def get(key)
+      key = key.to_sym
+
       @mutex.synchronize {
         @source.fetch(key) {
           raise KeyNotFound.new(key)
