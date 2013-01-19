@@ -30,7 +30,7 @@ module Flipper
         if enabled?
           "#{toggle.value}% of the time"
         else
-          'Disabled'
+          'disabled'
         end
       end
     end

@@ -43,12 +43,10 @@ module Flipper
       end
 
       def description
-        values = toggle.value
-
-        if values.empty?
-          'Disabled'
+        if enabled?
+          "groups (#{toggle.value.to_a.join(', ')})"
         else
-          "groups (#{values.to_a.join(', ')})"
+          'disabled'
         end
       end
     end

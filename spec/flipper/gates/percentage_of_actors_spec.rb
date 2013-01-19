@@ -40,8 +40,8 @@ describe Flipper::Gates::PercentageOfActors do
         adapter.stub(:read => nil)
       end
 
-      it "returns Disabled" do
-        subject.description.should eq('Disabled')
+      it "returns disabled" do
+        subject.description.should eq('disabled')
       end
     end
   end

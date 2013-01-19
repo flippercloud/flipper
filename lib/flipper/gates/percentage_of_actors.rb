@@ -38,7 +38,7 @@ module Flipper
         if enabled?
           "#{toggle.value}% of actors"
         else
-          'Disabled'
+          'disabled'
         end
       end
     end

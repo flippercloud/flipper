@@ -48,12 +48,10 @@ module Flipper
       end
 
       def description
-        values = toggle.value
-
-        if values.empty?
-          'Disabled'
+        if enabled?
+          "actors (#{toggle.value.to_a.join(', ')})"
         else
-          "actors (#{values.to_a.join(', ')})"
+          'disabled'
         end
       end
     end

@@ -105,12 +105,12 @@ module Flipper
     # Public
     def description
       if boolean_gate.enabled?
-        boolean_gate.description
+        boolean_gate.description.capitalize
       elsif conditional_gates.any?
         fragments = conditional_gates.map(&:description)
         "Enabled for #{fragments.join(', ')}"
       else
-        boolean_gate.description
+        boolean_gate.description.capitalize
       end
     end
 

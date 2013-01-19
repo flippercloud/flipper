@@ -30,7 +30,7 @@ describe Flipper::Gates::Actor do
         adapter.stub(:set_members => Set['bacon', 'ham'])
       end
 
-      it "returns Enabled" do
+      it "returns text" do
         subject.description.should eq("actors (bacon, ham)")
       end
     end
@@ -40,8 +40,8 @@ describe Flipper::Gates::Actor do
         adapter.stub(:set_members => Set.new)
       end
 
-      it "returns Disabled" do
-        subject.description.should eq('Disabled')
+      it "returns disabled" do
+        subject.description.should eq('disabled')
       end
     end
   end
