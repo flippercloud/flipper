@@ -35,7 +35,9 @@ describe Flipper::Registry do
 
     context "key not registered" do
       it "raises key not found" do
-        subject.get(:admins).should be_nil
+        expect {
+          subject.get(:admins)
+        }.to raise_error(Flipper::Registry::KeyNotFound)
       end
     end
   end

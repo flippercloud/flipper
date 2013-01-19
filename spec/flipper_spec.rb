@@ -35,7 +35,7 @@ describe Flipper do
 
       expect {
         Flipper.register(:admins) { }
-      }.to raise_error(Flipper::DuplicateGroup)
+      }.to raise_error(Flipper::DuplicateGroup, "Group :admins has already been registered")
     end
   end
 
@@ -51,8 +51,10 @@ describe Flipper do
     end
 
     context "for unregistered group" do
-      it "returns nil" do
-        Flipper.group(:cats).should be_nil
+      it "raises group not registered error" do
+        expect {
+          Flipper.group(:cats)
+        }.to raise_error(Flipper::GroupNotRegistered, 'Group :cats has not been registered')
       end
     end
   end

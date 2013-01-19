@@ -16,11 +16,13 @@ module Flipper
     groups.add(group.name, group)
     group
   rescue Registry::DuplicateKey
-    raise DuplicateGroup, %Q{Group named "#{name}" is already registered}
+    raise DuplicateGroup, %Q{Group #{name.inspect} has already been registered}
   end
 
   def self.group(name)
     groups.get(name)
+  rescue Flipper::Registry::KeyNotFound => e
+    raise GroupNotRegistered, "Group #{e.key.inspect} has not been registered"
   end
 end
 

@@ -6,7 +6,16 @@ module Flipper
 
     class Error < StandardError; end
     class DuplicateKey < Error; end
-    class MissingKey < Error; end
+
+    class KeyNotFound < Error
+      # Public: The key that was not found
+      attr_reader :key
+
+      def initialize(key)
+        @key = key
+        super("Key #{key.inspect} not found")
+      end
+    end
 
     def initialize(source = {})
       @mutex = Mutex.new
@@ -22,19 +31,21 @@ module Flipper
     end
 
     def add(key, value)
-      @mutex.synchronize do
+      @mutex.synchronize {
         if @source[key]
           raise DuplicateKey, "#{key} is already registered"
         else
           @source[key] = value
         end
-      end
+      }
     end
 
     def get(key)
-      @mutex.synchronize do
-        @source[key]
-      end
+      @mutex.synchronize {
+        @source.fetch(key) {
+          raise KeyNotFound.new(key)
+        }
+      }
     end
 
     def each(&block)

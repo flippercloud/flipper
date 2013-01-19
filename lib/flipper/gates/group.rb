@@ -26,7 +26,11 @@ module Flipper
           else
             enabled_group_names = toggle.value
             enabled_groups = enabled_group_names.map { |name|
-              Flipper.group(name)
+              begin
+                Flipper.group(name)
+              rescue GroupNotRegistered => e
+                nil
+              end
             }.compact
 
             enabled_groups.any? { |group| group.match?(thing) }

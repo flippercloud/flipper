@@ -11,4 +11,7 @@ module Flipper
 
   # Raised when attempting to declare a group name that has already been used.
   class DuplicateGroup < Error; end
+
+  # Raised when attempting to access a group that is not registered.
+  class GroupNotRegistered < Error; end
 end

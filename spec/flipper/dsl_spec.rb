@@ -8,11 +8,7 @@ describe Flipper::DSL do
   let(:source)  { {} }
   let(:adapter) { Flipper::Adapters::Memory.new(source) }
 
-  let(:admins_feature) { feature(:admins) }
-
-  def feature(name)
-    Flipper::Feature.new(name, adapter)
-  end
+  let(:admins_feature) { Flipper::Feature.new(:admins, adapter) }
 
   describe "#initialize" do
     it "wraps adapter" do
@@ -117,8 +113,10 @@ describe Flipper::DSL do
     end
 
     context "for unregistered group" do
-      it "returns nil" do
-        subject.group(:admins).should be_nil
+      it "raises error" do
+        expect {
+          subject.group(:admins)
+        }.to raise_error(Flipper::GroupNotRegistered)
       end
     end
   end
