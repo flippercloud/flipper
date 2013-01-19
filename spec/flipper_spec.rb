@@ -30,6 +30,13 @@ describe Flipper do
       registry.get(:admins).should eq(group)
     end
 
+    it "adds a group to the group_registry for string name" do
+      registry = Flipper::Registry.new
+      Flipper.groups = registry
+      group = Flipper.register('admins') { |actor| actor.admin? }
+      registry.get(:admins).should eq(group)
+    end
+
     it "raises exception if group already registered" do
       Flipper.register(:admins) { }
 
@@ -47,6 +54,10 @@ describe Flipper do
 
       it "returns group" do
         Flipper.group(:admins).should eq(@group)
+      end
+
+      it "returns group with string key" do
+        Flipper.group('admins').should eq(@group)
       end
     end
 
