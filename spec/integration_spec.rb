@@ -424,31 +424,6 @@ describe Flipper::Feature do
         subject.enabled?(dev_thing).should be_true
       end
     end
-
-    context "for a non flipper thing that does not respond to something in group block" do
-      let(:actor) { double('Actor') }
-
-      before do
-        boomboom = Flipper.register(:boomboom) { |actor| actor.boomboom? }
-        enable_group boomboom
-      end
-
-      it "returns false" do
-        expect { subject.enabled?(actor) }.to raise_error
-      end
-    end
-
-    context "for a non flipper thing when group in adapter, but not defined in code" do
-      let(:actor) { double('Actor') }
-
-      before do
-        enable_group :support
-      end
-
-      it "returns false" do
-        subject.enabled?(actor).should be_false
-      end
-    end
   end
 
   context "enabling multiple groups, disabling everything, then enabling one group" do
