@@ -45,6 +45,18 @@ shared_examples_for 'a percentage' do
     percentage = described_class.new(19)
     percentage.value.should eq(19)
   end
+
+  it "raises exception for value higher than 100" do
+    expect {
+      described_class.new(101)
+    }.to raise_error(ArgumentError, "value must be a positive number less than or equal to 100, but was 101")
+  end
+
+  it "raises exception for negative value" do
+    expect {
+      described_class.new(-1)
+    }.to raise_error(ArgumentError, "value must be a positive number less than or equal to 100, but was -1")
+  end
 end
 
 shared_examples_for 'a DSL feature' do
