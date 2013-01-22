@@ -12,7 +12,11 @@ module Flipper
       end
 
       def instrument(name, payload = {})
-        result = yield
+        result = if block_given?
+          yield payload
+        else
+          nil
+        end
         @events << Event.new(name, payload, result)
         result
       end
