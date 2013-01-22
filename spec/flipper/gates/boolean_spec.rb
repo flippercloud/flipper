@@ -1,13 +1,13 @@
 require 'helper'
-require 'flipper/instrumentors/memory'
+require 'flipper/instrumenters/memory'
 
 describe Flipper::Gates::Boolean do
   let(:adapter) { double('Adapter', :read => nil) }
   let(:feature) { double('Feature', :name => :search, :adapter => adapter) }
-  let(:instrumentor) { Flipper::Instrumentors::Memory.new }
+  let(:instrumenter) { Flipper::Instrumenters::Memory.new }
 
   subject {
-    described_class.new(feature, :instrumentor => instrumentor)
+    described_class.new(feature, :instrumenter => instrumenter)
   }
 
   describe "#description" do
@@ -37,7 +37,7 @@ describe Flipper::Gates::Boolean do
       thing = nil
       subject.open?(thing)
 
-      event = instrumentor.events.last
+      event = instrumenter.events.last
       event.should_not be_nil
       event.name.should eq('open.boolean.gate.flipper')
       event.payload.should eq({

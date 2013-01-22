@@ -1,13 +1,13 @@
 require 'helper'
-require 'flipper/instrumentors/memory'
+require 'flipper/instrumenters/memory'
 
 describe Flipper::Gates::Group do
   let(:adapter) { double('Adapter', :set_members => []) }
   let(:feature) { double('Feature', :name => :search, :adapter => adapter) }
-  let(:instrumentor) { Flipper::Instrumentors::Memory.new }
+  let(:instrumenter) { Flipper::Instrumenters::Memory.new }
 
   subject {
-    described_class.new(feature, :instrumentor => instrumentor)
+    described_class.new(feature, :instrumenter => instrumenter)
   }
 
   describe "instrumentation" do
@@ -15,7 +15,7 @@ describe Flipper::Gates::Group do
       thing = Struct.new(:flipper_id).new('22')
       subject.open?(thing)
 
-      event = instrumentor.events.last
+      event = instrumenter.events.last
       event.should_not be_nil
       event.name.should eq('open.group.gate.flipper')
       event.payload.should eq({

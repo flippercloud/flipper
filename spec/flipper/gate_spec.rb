@@ -16,15 +16,15 @@ describe Flipper::Gate do
       gate.feature.should be(feature)
     end
 
-    it "defaults instrumentor" do
+    it "defaults instrumenter" do
       gate = described_class.new(feature)
-      gate.instrumentor.should be(Flipper::Instrumentors::Noop)
+      gate.instrumenter.should be(Flipper::Instrumenters::Noop)
     end
 
-    it "allows overriding instrumentor" do
-      instrumentor = double('Instrumentor')
-      gate = described_class.new(feature, :instrumentor => instrumentor)
-      gate.instrumentor.should be(instrumentor)
+    it "allows overriding instrumenter" do
+      instrumenter = double('Instrumentor')
+      gate = described_class.new(feature, :instrumenter => instrumenter)
+      gate.instrumenter.should be(instrumenter)
     end
   end
 

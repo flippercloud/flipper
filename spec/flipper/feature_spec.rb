@@ -1,7 +1,7 @@
 require 'helper'
 require 'flipper/feature'
 require 'flipper/adapters/memory'
-require 'flipper/instrumentors/memory'
+require 'flipper/instrumenters/memory'
 
 describe Flipper::Feature do
   subject { described_class.new(:search, adapter) }
@@ -20,26 +20,26 @@ describe Flipper::Feature do
       feature.adapter.should eq(Flipper::Adapter.wrap(adapter))
     end
 
-    it "defaults instrumentor" do
+    it "defaults instrumenter" do
       feature = described_class.new(:search, adapter)
-      feature.instrumentor.should be(Flipper::Instrumentors::Noop)
+      feature.instrumenter.should be(Flipper::Instrumenters::Noop)
     end
 
-    context "with overriden instrumentor" do
-      let(:instrumentor) { double('Instrumentor', :instrument => nil) }
+    context "with overriden instrumenter" do
+      let(:instrumenter) { double('Instrumentor', :instrument => nil) }
 
-      it "overrides default instrumentor" do
+      it "overrides default instrumenter" do
         feature = described_class.new(:search, adapter, {
-          :instrumentor => instrumentor,
+          :instrumenter => instrumenter,
         })
-        feature.instrumentor.should be(instrumentor)
+        feature.instrumenter.should be(instrumenter)
       end
 
-      it "passes overridden instrumentor to adapter wrapping" do
+      it "passes overridden instrumenter to adapter wrapping" do
         feature = described_class.new(:search, adapter, {
-          :instrumentor => instrumentor,
+          :instrumenter => instrumenter,
         })
-        feature.adapter.instrumentor.should be(instrumentor)
+        feature.adapter.instrumenter.should be(instrumenter)
       end
     end
   end
@@ -94,10 +94,10 @@ describe Flipper::Feature do
   end
 
   describe "instrumentation" do
-    let(:instrumentor) { Flipper::Instrumentors::Memory.new }
+    let(:instrumenter) { Flipper::Instrumenters::Memory.new }
 
     subject {
-      described_class.new(:search, adapter, :instrumentor => instrumentor)
+      described_class.new(:search, adapter, :instrumenter => instrumenter)
     }
 
     it "is recorded for enable" do
@@ -106,7 +106,7 @@ describe Flipper::Feature do
 
       subject.enable(thing)
 
-      event = instrumentor.events.last
+      event = instrumenter.events.last
       event.should_not be_nil
       event.name.should eq('enable.search.feature.flipper')
       event.payload.should eq({
@@ -122,7 +122,7 @@ describe Flipper::Feature do
 
       subject.disable(thing)
 
-      event = instrumentor.events.last
+      event = instrumenter.events.last
       event.should_not be_nil
       event.name.should eq('disable.search.feature.flipper')
       event.payload.should eq({
@@ -138,7 +138,7 @@ describe Flipper::Feature do
 
       subject.enabled?(thing)
 
-      event = instrumentor.events.last
+      event = instrumenter.events.last
       event.should_not be_nil
       event.name.should eq('enabled.search.feature.flipper')
       event.payload.should eq({
@@ -153,7 +153,7 @@ describe Flipper::Feature do
 
       subject.disabled?(thing)
 
-      event = instrumentor.events.last
+      event = instrumenter.events.last
       event.should_not be_nil
       event.name.should eq('disabled.search.feature.flipper')
       event.payload.should eq({

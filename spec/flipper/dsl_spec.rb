@@ -17,22 +17,22 @@ describe Flipper::DSL do
       dsl.adapter.adapter.should eq(adapter)
     end
 
-    it "defaults instrumentor to noop" do
+    it "defaults instrumenter to noop" do
       dsl = described_class.new(adapter)
-      dsl.instrumentor.should be(Flipper::Instrumentors::Noop)
+      dsl.instrumenter.should be(Flipper::Instrumenters::Noop)
     end
 
-    context "with overriden instrumentor" do
-      let(:instrumentor) { double('Instrumentor', :instrument => nil) }
+    context "with overriden instrumenter" do
+      let(:instrumenter) { double('Instrumentor', :instrument => nil) }
 
-      it "overrides default instrumentor" do
-        dsl = described_class.new(adapter, :instrumentor => instrumentor)
-        dsl.instrumentor.should be(instrumentor)
+      it "overrides default instrumenter" do
+        dsl = described_class.new(adapter, :instrumenter => instrumenter)
+        dsl.instrumenter.should be(instrumenter)
       end
 
-      it "passes overridden instrumentor to adapter wrapping" do
-        dsl = described_class.new(adapter, :instrumentor => instrumentor)
-        dsl.adapter.instrumentor.should be(instrumentor)
+      it "passes overridden instrumenter to adapter wrapping" do
+        dsl = described_class.new(adapter, :instrumenter => instrumenter)
+        dsl.adapter.instrumenter.should be(instrumenter)
       end
     end
   end
@@ -83,17 +83,17 @@ describe Flipper::DSL do
 
   describe "#feature" do
     it_should_behave_like "a DSL feature" do
-      let(:instrumentor) { double('Instrumentor', :instrument => nil) }
+      let(:instrumenter) { double('Instrumentor', :instrument => nil) }
       let(:feature) { dsl.feature(:stats) }
-      let(:dsl) { Flipper::DSL.new(adapter, :instrumentor => instrumentor) }
+      let(:dsl) { Flipper::DSL.new(adapter, :instrumenter => instrumenter) }
     end
   end
 
   describe "#[]" do
     it_should_behave_like "a DSL feature" do
-      let(:instrumentor) { double('Instrumentor', :instrument => nil) }
+      let(:instrumenter) { double('Instrumentor', :instrument => nil) }
       let(:feature) { dsl[:stats] }
-      let(:dsl) { Flipper::DSL.new(adapter, :instrumentor => instrumentor) }
+      let(:dsl) { Flipper::DSL.new(adapter, :instrumenter => instrumenter) }
     end
   end
 

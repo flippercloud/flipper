@@ -1,4 +1,4 @@
-require 'flipper/instrumentors/noop'
+require 'flipper/instrumenters/noop'
 
 module Flipper
   # Internal: Adapter wrapper that wraps vanilla adapter instances. Adds things
@@ -57,7 +57,7 @@ module Flipper
     attr_reader :local_cache
 
     # Private: What is used to instrument all the things.
-    attr_reader :instrumentor
+    attr_reader :instrumenter
 
     # Internal: Initializes a new adapter instance.
     #
@@ -68,13 +68,13 @@ module Flipper
     #           :local_cache - Where to store the local cache data (default: {}).
     #                          Must respond to fetch(key, block), delete(key)
     #                          and clear.
-    #           :instrumentor - What to use to instrument all the things.
+    #           :instrumenter - What to use to instrument all the things.
     #
     def initialize(adapter, options = {})
       @adapter = adapter
       @name = adapter.class.name.split('::').last.downcase
       @local_cache = options[:local_cache] || {}
-      @instrumentor = options.fetch(:instrumentor, Flipper::Instrumentors::Noop)
+      @instrumenter = options.fetch(:instrumenter, Flipper::Instrumenters::Noop)
     end
 
     # Public: Turns local caching on/off.
@@ -157,7 +157,7 @@ module Flipper
         name = instrumentation_name(operation)
         payload = {:key => key}
 
-        @instrumentor.instrument(name, payload) {
+        @instrumenter.instrument(name, payload) {
           @adapter.send(operation, key)
         }
       end
@@ -167,7 +167,7 @@ module Flipper
       name = instrumentation_name(operation)
       payload = {:key => key, :value => value}
 
-      result = @instrumentor.instrument(name, payload) {
+      result = @instrumenter.instrument(name, payload) {
         @adapter.send(operation, key, value)
       }
 
@@ -182,7 +182,7 @@ module Flipper
       name = instrumentation_name(operation)
       payload = {:key => key}
 
-      result = @instrumentor.instrument(name, payload) {
+      result = @instrumenter.instrument(name, payload) {
         @adapter.send(operation, key)
       }
 

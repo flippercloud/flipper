@@ -1,5 +1,5 @@
 module Flipper
-  module Instrumentors
+  module Instrumenters
     # Instrumentor that is useful for tests as it stores each of the events that
     # are instrumented.
     class Memory

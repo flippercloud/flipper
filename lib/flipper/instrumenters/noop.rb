@@ -1,5 +1,5 @@
 module Flipper
-  module Instrumentors
+  module Instrumenters
     class Noop
       def self.instrument(name, payload = {})
         yield

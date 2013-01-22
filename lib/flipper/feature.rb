@@ -3,7 +3,7 @@ require 'flipper/errors'
 require 'flipper/type'
 require 'flipper/toggle'
 require 'flipper/gate'
-require 'flipper/instrumentors/noop'
+require 'flipper/instrumenters/noop'
 
 module Flipper
   class Feature
@@ -14,7 +14,7 @@ module Flipper
     attr_reader :adapter
 
     # Private: What is being used to instrument all the things.
-    attr_reader :instrumentor
+    attr_reader :instrumenter
 
     # Internal: Initializes a new feature instance.
     #
@@ -22,12 +22,12 @@ module Flipper
     # adapter - The adapter that will be used to store details about this feature.
     #
     # options - The Hash of options.
-    #           :instrumentor - What to use to instrument all the things.
+    #           :instrumenter - What to use to instrument all the things.
     #
     def initialize(name, adapter, options = {})
       @name = name
-      @instrumentor = options.fetch(:instrumentor, Flipper::Instrumentors::Noop)
-      @adapter = Adapter.wrap(adapter, :instrumentor => @instrumentor)
+      @instrumenter = options.fetch(:instrumenter, Flipper::Instrumenters::Noop)
+      @adapter = Adapter.wrap(adapter, :instrumenter => @instrumenter)
     end
 
     # Public: Enable this feature for something.
@@ -142,7 +142,7 @@ module Flipper
         :thing => thing,
       }
       payload[:gate] = gate if gate
-      @instrumentor.instrument(instrument_name, payload) { yield }
+      @instrumenter.instrument(instrument_name, payload) { yield }
     end
 
     def instrumentation_name(action)

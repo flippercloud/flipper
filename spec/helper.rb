@@ -72,8 +72,8 @@ shared_examples_for 'a DSL feature' do
     feature.adapter.should eq(dsl.adapter)
   end
 
-  it "sets instrumentor" do
-    feature.instrumentor.should eq(dsl.instrumentor)
+  it "sets instrumenter" do
+    feature.instrumenter.should eq(dsl.instrumenter)
   end
 
   it "memoizes the feature" do

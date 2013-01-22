@@ -1,5 +1,5 @@
 require 'flipper/adapter'
-require 'flipper/instrumentors/noop'
+require 'flipper/instrumenters/noop'
 
 module Flipper
   class DSL
@@ -7,16 +7,16 @@ module Flipper
     attr_reader :adapter
 
     # Private: What is being used to instrument all the things.
-    attr_reader :instrumentor
+    attr_reader :instrumenter
 
     # Public: Returns a new instance of the DSL.
     #
     # adapter - The adapter that this DSL instance should use.
     # options - The Hash of options.
-    #           :instrumentor - What should be used to instrument all the things.
+    #           :instrumenter - What should be used to instrument all the things.
     def initialize(adapter, options = {})
-      @instrumentor = options.fetch(:instrumentor, Flipper::Instrumentors::Noop)
-      @adapter = Adapter.wrap(adapter, :instrumentor => @instrumentor)
+      @instrumenter = options.fetch(:instrumenter, Flipper::Instrumenters::Noop)
+      @adapter = Adapter.wrap(adapter, :instrumenter => @instrumenter)
       @memoized_features = {}
     end
 
@@ -67,7 +67,7 @@ module Flipper
     # Returns an instance of Flipper::Feature.
     def feature(name)
       @memoized_features[name.to_sym] ||= Feature.new(name, @adapter, {
-        :instrumentor => instrumentor,
+        :instrumenter => instrumenter,
       })
     end
 

@@ -19,7 +19,7 @@ require 'flipper/adapters/memory'
 adapter = Flipper::Adapters::Memory.new
 
 # get a handy dsl instance
-flipper = Flipper.new(adapter, :instrumentor => ActiveSupport::Notifications)
+flipper = Flipper.new(adapter, :instrumenter => ActiveSupport::Notifications)
 
 # grab a feature
 search = flipper[:search]

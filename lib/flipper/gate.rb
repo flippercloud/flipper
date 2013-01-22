@@ -1,6 +1,6 @@
 require 'forwardable'
 require 'flipper/key'
-require 'flipper/instrumentors/noop'
+require 'flipper/instrumenters/noop'
 
 module Flipper
   class Gate
@@ -10,13 +10,13 @@ module Flipper
     attr_reader :feature
 
     # Private: What is used to instrument all the things.
-    attr_reader :instrumentor
+    attr_reader :instrumenter
 
     def_delegator :@feature, :adapter
 
     def initialize(feature, options = {})
       @feature = feature
-      @instrumentor = options.fetch(:instrumentor, Flipper::Instrumentors::Noop)
+      @instrumenter = options.fetch(:instrumenter, Flipper::Instrumenters::Noop)
     end
 
     # Public: The name of the gate. Implemented in subclass.
@@ -97,7 +97,7 @@ module Flipper
       payload = {
         :thing => thing,
       }
-      @instrumentor.instrument(name, payload) { yield }
+      @instrumenter.instrument(name, payload) { yield }
     end
 
     def instrument_name(action)
