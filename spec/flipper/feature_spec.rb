@@ -92,6 +92,7 @@ describe Flipper::Feature do
       string = subject.inspect
       string.should include('Flipper::Feature')
       string.should include('name=:search')
+      string.should include('state=:off')
       string.should include("adapter=#{subject.adapter.name.inspect}")
     end
   end

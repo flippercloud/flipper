@@ -91,6 +91,7 @@ module Flipper
     def inspect
       attributes = [
         "name=#{name.inspect}",
+        "state=#{state.inspect}",
         "adapter=#{adapter.name.inspect}",
       ]
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
