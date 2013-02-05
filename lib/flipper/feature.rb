@@ -76,13 +76,15 @@ module Flipper
       ]
     end
 
-    # Internal: Returns gate that protects thing
+    # Internal: Find the gate that protects a thing.
     #
     # thing - The object for which you would like to find a gate
     #
+    # Returns a Flipper::Gate.
     # Raises Flipper::GateNotFound if no gate found for thing
     def gate_for(thing)
-      find_gate_that_protects(thing) || raise(GateNotFound.new(thing))
+      gates.detect { |gate| gate.protects?(thing) } ||
+        raise(GateNotFound.new(thing))
     end
 
     # Public: Pretty string version for debugging.
@@ -148,11 +150,6 @@ module Flipper
       @instrumenter.instrument(InstrumentationName, payload) {
         payload[:result] = yield(payload) if block_given?
       }
-    end
-
-    # Private
-    def find_gate_that_protects(thing)
-      gates.detect { |gate| gate.protects?(thing) }
     end
   end
 end
