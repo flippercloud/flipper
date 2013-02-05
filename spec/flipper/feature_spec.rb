@@ -109,11 +109,10 @@ describe Flipper::Feature do
       event = instrumenter.events.last
       event.should_not be_nil
       event.name.should eq('feature_operation.flipper')
-      event.payload.should eq({
-        :feature_name => :search,
-        :operation => :enable,
-        :thing => thing,
-      })
+      event.payload[:feature_name].should eq(:search)
+      event.payload[:operation].should eq(:enable)
+      event.payload[:thing].should eq(thing)
+      event.payload[:result].should_not be_nil
     end
 
     it "is recorded for disable" do
@@ -125,11 +124,10 @@ describe Flipper::Feature do
       event = instrumenter.events.last
       event.should_not be_nil
       event.name.should eq('feature_operation.flipper')
-      event.payload.should eq({
-        :feature_name => :search,
-        :operation => :disable,
-        :thing => thing,
-      })
+      event.payload[:feature_name].should eq(:search)
+      event.payload[:operation].should eq(:disable)
+      event.payload[:thing].should eq(thing)
+      event.payload[:result].should_not be_nil
     end
 
     it "is recorded for enabled?" do
@@ -141,11 +139,10 @@ describe Flipper::Feature do
       event = instrumenter.events.last
       event.should_not be_nil
       event.name.should eq('feature_operation.flipper')
-      event.payload.should eq({
-        :feature_name => :search,
-        :operation => :enabled,
-        :thing => thing,
-      })
+      event.payload[:feature_name].should eq(:search)
+      event.payload[:operation].should eq(:enabled)
+      event.payload[:thing].should eq(thing)
+      event.payload[:result].should be_false
     end
 
     it "is recorded for disabled?" do
@@ -157,11 +154,10 @@ describe Flipper::Feature do
       event = instrumenter.events.last
       event.should_not be_nil
       event.name.should eq('feature_operation.flipper')
-      event.payload.should eq({
-        :feature_name => :search,
-        :operation => :disabled,
-        :thing => thing,
-      })
+      event.payload[:feature_name].should eq(:search)
+      event.payload[:operation].should eq(:disabled)
+      event.payload[:thing].should eq(thing)
+      event.payload[:result].should be_true
     end
   end
 

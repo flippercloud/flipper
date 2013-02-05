@@ -144,7 +144,9 @@ module Flipper
         :operation => operation,
         :thing => thing,
       }
-      @instrumenter.instrument(InstrumentationName, payload) { yield }
+      @instrumenter.instrument(InstrumentationName, payload) {
+        payload[:result] = yield(payload) if block_given?
+      }
     end
 
     # Private
