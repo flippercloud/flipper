@@ -53,14 +53,14 @@ module Flipper
     #
     # Returns true if enabled, false if not.
     def enabled?(thing = nil)
-      instrument(:enabled, thing) { any_gates_open?(thing) }
+      instrument(:enabled?, thing) { any_gates_open?(thing) }
     end
 
     # Public: Check if a feature is disabled for a thing.
     #
     # Returns true if disabled, false if not.
     def disabled?(thing = nil)
-      instrument(:disabled, thing) { !any_gates_open?(thing) }
+      instrument(:disabled?, thing) { !any_gates_open?(thing) }
     end
 
     # Internal: Gates to check to see if feature is enabled/disabled

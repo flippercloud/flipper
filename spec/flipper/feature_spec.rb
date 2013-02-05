@@ -143,7 +143,7 @@ describe Flipper::Feature do
       event.should_not be_nil
       event.name.should eq('feature_operation.flipper')
       event.payload[:feature_name].should eq(:search)
-      event.payload[:operation].should eq(:enabled)
+      event.payload[:operation].should eq(:enabled?)
       event.payload[:thing].should eq(thing)
       event.payload[:result].should be_false
     end
@@ -158,7 +158,7 @@ describe Flipper::Feature do
       event.should_not be_nil
       event.name.should eq('feature_operation.flipper')
       event.payload[:feature_name].should eq(:search)
-      event.payload[:operation].should eq(:disabled)
+      event.payload[:operation].should eq(:disabled?)
       event.payload[:thing].should eq(thing)
       event.payload[:result].should be_true
     end
