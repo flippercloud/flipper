@@ -21,6 +21,10 @@ module Flipper
   # To see an example adapter that this would wrap, checkout the [memory
   # adapter included with flipper](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb).
   class Adapter
+    # Private: The name of instrumentation events.
+    InstrumentationName = "adapter_operation.#{InstrumentationNamespace}"
+
+    # Private: The name of the key that stores the set of known features.
     FeaturesKey = 'features'
 
     # Internal: Wraps vanilla adapter instance for use internally in flipper.
@@ -160,7 +164,7 @@ module Flipper
           :adapter_name => @name,
         }
 
-        @instrumenter.instrument(instrumentation_name, payload) { |payload|
+        @instrumenter.instrument(InstrumentationName, payload) { |payload|
           @adapter.send(operation, key)
         }
       end
@@ -174,7 +178,7 @@ module Flipper
         :adapter_name => @name,
       }
 
-      result = @instrumenter.instrument(instrumentation_name, payload) { |payload|
+      result = @instrumenter.instrument(InstrumentationName, payload) { |payload|
         @adapter.send(operation, key, value)
       }
 
@@ -192,7 +196,7 @@ module Flipper
         :adapter_name => @name,
       }
 
-      result = @instrumenter.instrument(instrumentation_name, payload) { |payload|
+      result = @instrumenter.instrument(InstrumentationName, payload) { |payload|
         @adapter.send(operation, key)
       }
 
@@ -201,10 +205,6 @@ module Flipper
       end
 
       result
-    end
-
-    def instrumentation_name
-      "adapter_operation.flipper"
     end
   end
 end

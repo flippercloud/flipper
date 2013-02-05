@@ -7,6 +7,9 @@ require 'flipper/instrumenters/noop'
 
 module Flipper
   class Feature
+    # Private: The name of instrumentation events.
+    InstrumentationName = "feature_operation.#{InstrumentationNamespace}"
+
     # Internal: The name of the feature.
     attr_reader :name
 
@@ -141,12 +144,7 @@ module Flipper
         :operation => operation,
         :thing => thing,
       }
-      @instrumenter.instrument(instrumentation_name, payload) { yield }
-    end
-
-    # Private
-    def instrumentation_name
-      "feature_operation.flipper"
+      @instrumenter.instrument(InstrumentationName, payload) { yield }
     end
 
     # Private
