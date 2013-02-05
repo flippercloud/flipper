@@ -1,4 +1,7 @@
 module Flipper
+  # Private: The namespace for all instrumented events.
+  InstrumentationNamespace = :flipper
+
   def self.new(*args)
     DSL.new(*args)
   end
