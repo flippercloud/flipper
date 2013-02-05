@@ -54,7 +54,10 @@ module Flipper
       end
 
       def update_adapter_operation_metrics
-        # noop for now
+        adapter_name = @payload[:adapter_name]
+        operation = @payload[:operation]
+
+        Metriks.timer("flipper.adapter.#{adapter_name}.#{operation}").update(@duration)
       end
 
       def update_gate_operation_metrics

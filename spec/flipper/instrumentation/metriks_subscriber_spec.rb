@@ -35,4 +35,18 @@ describe Flipper::Instrumentation::MetriksSubscriber do
       Metriks.meter("flipper.feature.stats.disabled").count.should be(1)
     end
   end
+
+  it "updates adapter metriks when calls happen" do
+    flipper[:stats].enable(user)
+    # one for features and one for actors
+    Metriks.timer("flipper.adapter.memory.set_add").count.should be(2)
+
+    flipper[:stats].enabled?(user)
+    Metriks.timer("flipper.adapter.memory.read").count.should be(1)
+    # one for actors and one for groups
+    Metriks.timer("flipper.adapter.memory.set_members").count.should be(2)
+
+    flipper[:stats].disable(user)
+    Metriks.timer("flipper.adapter.memory.set_delete").count.should be(1)
+  end
 end
