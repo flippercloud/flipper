@@ -134,7 +134,7 @@ module Flipper
 
     # Private
     def any_gates_open?(thing)
-      !!catch(:short_circuit) { gates.detect { |gate| gate.open?(thing) } }
+      !!gates.detect { |gate| gate.open?(thing) }
     end
 
     # Private
