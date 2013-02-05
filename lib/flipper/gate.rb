@@ -68,14 +68,14 @@ module Flipper
     #
     # Returns the result of Flipper::Toggle#enable.
     def enable(thing)
-      toggle.enable(thing)
+      instrument(:enable, thing) { toggle.enable(thing) }
     end
 
     # Internal: Disable this gate for a thing.
     #
     # Returns the result of Flipper::Toggle#disable.
     def disable(thing)
-      toggle.disable(thing)
+      instrument(:disable, thing) { toggle.disable(thing) }
     end
 
     def enabled?
