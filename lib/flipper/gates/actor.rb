@@ -49,7 +49,7 @@ module Flipper
 
       def description
         if enabled?
-          "actors (#{toggle.value.to_a.join(', ')})"
+          "actors (#{toggle.value.to_a.sort.join(', ')})"
         else
           'disabled'
         end
