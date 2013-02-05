@@ -85,10 +85,11 @@ module Flipper
     def inspect
       attributes = [
         "feature=#{feature.name.inspect}",
+        "description=#{description.inspect}",
         "adapter=#{adapter.name.inspect}",
+        "adapter_key=#{adapter_key.inspect}",
         "toggle_class=#{toggle_class.inspect}",
         "toggle_value=#{toggle.value.inspect}",
-        "adapter_key=#{adapter_key.inspect}",
       ]
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
     end
