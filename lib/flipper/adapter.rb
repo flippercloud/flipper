@@ -150,8 +150,7 @@ module Flipper
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
     end
 
-    private
-
+    # Private
     def perform_read(operation, key)
       if using_local_cache?
         local_cache.fetch(key.to_s) {
@@ -170,6 +169,7 @@ module Flipper
       end
     end
 
+    # Private
     def perform_update(operation, key, value)
       payload = {
         :key => key,
@@ -189,6 +189,7 @@ module Flipper
       result
     end
 
+    # Private
     def perform_delete(operation, key)
       payload = {
         :key => key,

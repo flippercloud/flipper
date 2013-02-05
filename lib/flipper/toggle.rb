@@ -1,6 +1,8 @@
 require 'forwardable'
 
 module Flipper
+  # Internal: Used by gate to toggle values (true/false, add/delete from set, etc.).
+  # Named poorly maybe, but haven't come up with a better name yet.
   class Toggle
     extend Forwardable
 

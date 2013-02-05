@@ -17,6 +17,7 @@ module Flipper
 
     def_delegator :@feature, :adapter
 
+    # Public
     def initialize(feature, options = {})
       @feature = feature
       @instrumenter = options.fetch(:instrumenter, Flipper::Instrumenters::Noop)
@@ -94,8 +95,7 @@ module Flipper
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
     end
 
-    private
-
+    # Private
     def instrument(operation, thing)
       payload = {
         :thing => thing,
