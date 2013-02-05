@@ -1,6 +1,8 @@
 require 'forwardable'
 
 module Flipper
+  # Internal: Used by gate to toggle values (true/false, add/delete from set, etc.).
+  # Named poorly maybe, but haven't come up with a better name yet.
   class Toggle
     extend Forwardable
 
@@ -12,10 +14,16 @@ module Flipper
       @gate = gate
     end
 
+    # Internal: Enables thing for gate and adds feature to known features.
+    #
+    # Returns Boolean (currently always true).
     def enable(thing)
       add_feature_to_set
     end
 
+    # Internal: Disables thing for gate and adds feature to known features.
+    #
+    # Returns Boolean (currently always true).
     def disable(thing)
       add_feature_to_set
     end

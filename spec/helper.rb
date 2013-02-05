@@ -11,11 +11,9 @@ log_path.mkpath
 require 'rubygems'
 require 'bundler'
 
-Bundler.require(:default, :test)
+Bundler.setup(:default)
 
 require 'flipper'
-
-Logger.new(log_path.join('test.log'))
 
 RSpec.configure do |config|
   config.fail_fast = true

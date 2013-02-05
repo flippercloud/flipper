@@ -20,7 +20,7 @@ module Flipper
       #
       # Returns true if gate open for thing, false if not.
       def open?(thing)
-        instrument(:open, thing) {
+        instrument(:open?, thing) { |payload|
           if thing.nil?
             false
           else
@@ -40,16 +40,16 @@ module Flipper
       end
 
       def enable(thing)
-        toggle.enable Types::Actor.wrap(thing)
+        super Types::Actor.wrap(thing)
       end
 
       def disable(thing)
-        toggle.disable Types::Actor.wrap(thing)
+        super Types::Actor.wrap(thing)
       end
 
       def description
         if enabled?
-          "actors (#{toggle.value.to_a.join(', ')})"
+          "actors (#{toggle.value.to_a.sort.join(', ')})"
         else
           'disabled'
         end

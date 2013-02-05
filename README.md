@@ -96,7 +96,7 @@ flipper[:stats].enable user
 flipper[:stats].enabled? user # true
 
 flipper[:stats].disable user
-flipper[:stats].disabled? user # true
+flipper[:stats].enabled? user # false
 
 # you can enable anything, does not need to be user or person
 flipper[:search].enable group
@@ -190,7 +190,9 @@ require 'flipper/middleware/local_cache'
 # create flipper dsl instance, see above examples for more details
 flipper = Flipper.new(...)
 
-# ensure entire request is wrapped, `use` would probably be ok instead of `insert_after`, but I noticed that Rails used `insert_after` for their identity map, which this is akin to, and figured it was for a reason.
+# ensure entire request is wrapped, `use` would probably be ok instead of
+# `insert_after`, but I noticed that Rails used `insert_after` for their
+# identity map, which this is akin to, and figured it was for a reason.
 Rails.application.config.middleware.insert_after \
   ActionDispatch::Callbacks,
   Flipper::Middleware::LocalCache,

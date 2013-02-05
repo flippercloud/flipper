@@ -56,9 +56,7 @@ flipper.disable :stats
 stats.disable
 
 puts "stats.enabled?: #{stats.enabled?}"
-puts "stats.disabled?: #{stats.disabled?}"
 puts "stats.enabled? person: #{stats.enabled? person}"
-puts "stats.disabled? person: #{stats.disabled? person}"
 puts
 
 # get an instance of the percentage of random type set to 5

@@ -2,6 +2,10 @@ source 'https://rubygems.org'
 gemspec
 
 gem 'rake'
+gem 'metriks', :require => false
+gem 'rspec'
+gem 'rack-test'
+gem 'activesupport', :require => false
 
 group(:guard) do
   gem 'guard'
@@ -9,10 +13,3 @@ group(:guard) do
   gem 'guard-bundler'
   gem 'rb-fsevent'
 end
-
-group(:test) do
-  gem 'rspec'
-  gem 'rack-test'
-  gem 'activesupport', :require => false
-end
-

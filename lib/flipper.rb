@@ -1,16 +1,27 @@
 module Flipper
-  def self.new(*args)
-    DSL.new(*args)
+  # Private: The namespace for all instrumented events.
+  InstrumentationNamespace = :flipper
+
+  # Public: Start here. Given an adapter returns a handy DSL to all the flipper
+  # goodness. To see supported options, check out dsl.rb.
+  def self.new(adapter, options = {})
+    DSL.new(adapter, options)
   end
 
-  def self.groups
-    @groups ||= Registry.new
-  end
-
-  def self.groups=(registry)
-    @groups = registry
-  end
-
+  # Public: Use this to register a group by name.
+  #
+  # name - The Symbol name of the group.
+  # block - The block that should be used to determine if the group matches a
+  #         given thing.
+  #
+  # Examples
+  #
+  #   Flipper.registry(:admins) { |thing|
+  #     thing.respond_to?(:admin?) && thing.admin?
+  #   }
+  #
+  # Returns a Flipper::Group.
+  # Raises Flipper::DuplicateGroup if the group is already registered.
   def self.register(name, &block)
     group = Types::Group.new(name, &block)
     groups.add(group.name, group)
@@ -19,10 +30,30 @@ module Flipper
     raise DuplicateGroup, %Q{Group #{name.inspect} has already been registered}
   end
 
+  # Internal: Fetches a group by name.
+  #
+  # name - The Symbol name of the group.
+  #
+  # Examples
+  #
+  #   Flipper.group(:admins)
+  #
+  # Returns the Flipper::Group if group registered.
+  # Raises Flipper::GroupNotRegistered if group is not registered.
   def self.group(name)
     groups.get(name)
   rescue Flipper::Registry::KeyNotFound => e
     raise GroupNotRegistered, "Group #{e.key.inspect} has not been registered"
+  end
+
+  # Internal: Registry of all groups.
+  def self.groups
+    @groups ||= Registry.new
+  end
+
+  # Internal: Change the groups registry.
+  def self.groups=(registry)
+    @groups = registry
   end
 end
 

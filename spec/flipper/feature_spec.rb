@@ -55,32 +55,15 @@ describe Flipper::Feature do
   end
 
   describe "#gates" do
-    it "returns array of gates" do
-      subject.gates.should be_instance_of(Array)
-      subject.gates.each do |gate|
+    it "returns array of gates with each gate's instrumenter set" do
+      instrumenter = double('Instrumenter')
+      instance = described_class.new(:search, adapter, :instrumenter => instrumenter)
+      instance.gates.should be_instance_of(Array)
+      instance.gates.each do |gate|
         gate.should be_a(Flipper::Gate)
+        gate.instrumenter.should be(instrumenter)
       end
-      subject.gates.size.should be(5)
-    end
-  end
-
-  context "#enabled?" do
-    it "returns the same as any_gates_open" do
-      subject.stub(:any_gates_open? => true)
-      subject.enabled?.should be_true
-
-      subject.stub(:any_gates_open? => false)
-      subject.enabled?.should be_false
-    end
-  end
-
-  context "#disabled?" do
-    it "returns the opposite of any_gates_open" do
-      subject.stub(:any_gates_open? => true)
-      subject.disabled?.should be_false
-
-      subject.stub(:any_gates_open? => false)
-      subject.disabled?.should be_true
+      instance.gates.size.should be(5)
     end
   end
 
@@ -89,7 +72,8 @@ describe Flipper::Feature do
       string = subject.inspect
       string.should include('Flipper::Feature')
       string.should include('name=:search')
-      string.should include('adapter="memory"')
+      string.should include('state=:off')
+      string.should include("adapter=#{subject.adapter.name.inspect}")
     end
   end
 
@@ -108,12 +92,11 @@ describe Flipper::Feature do
 
       event = instrumenter.events.last
       event.should_not be_nil
-      event.name.should eq('enable.search.feature.flipper')
-      event.payload.should eq({
-        :feature_name => :search,
-        :thing => thing,
-        :gate => gate,
-      })
+      event.name.should eq('feature_operation.flipper')
+      event.payload[:feature_name].should eq(:search)
+      event.payload[:operation].should eq(:enable)
+      event.payload[:thing].should eq(thing)
+      event.payload[:result].should_not be_nil
     end
 
     it "is recorded for disable" do
@@ -124,12 +107,11 @@ describe Flipper::Feature do
 
       event = instrumenter.events.last
       event.should_not be_nil
-      event.name.should eq('disable.search.feature.flipper')
-      event.payload.should eq({
-        :feature_name => :search,
-        :thing => thing,
-        :gate => gate,
-      })
+      event.name.should eq('feature_operation.flipper')
+      event.payload[:feature_name].should eq(:search)
+      event.payload[:operation].should eq(:disable)
+      event.payload[:thing].should eq(thing)
+      event.payload[:result].should_not be_nil
     end
 
     it "is recorded for enabled?" do
@@ -140,26 +122,11 @@ describe Flipper::Feature do
 
       event = instrumenter.events.last
       event.should_not be_nil
-      event.name.should eq('enabled.search.feature.flipper')
-      event.payload.should eq({
-        :feature_name => :search,
-        :thing => thing,
-      })
-    end
-
-    it "is recorded for disabled?" do
-      thing = Flipper::Types::Boolean.new
-      gate = subject.gate_for(thing)
-
-      subject.disabled?(thing)
-
-      event = instrumenter.events.last
-      event.should_not be_nil
-      event.name.should eq('disabled.search.feature.flipper')
-      event.payload.should eq({
-        :feature_name => :search,
-        :thing => thing,
-      })
+      event.name.should eq('feature_operation.flipper')
+      event.payload[:feature_name].should eq(:search)
+      event.payload[:operation].should eq(:enabled?)
+      event.payload[:thing].should eq(thing)
+      event.payload[:result].should be_false
     end
   end
 

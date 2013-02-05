@@ -21,6 +21,10 @@ module Flipper
   # To see an example adapter that this would wrap, checkout the [memory
   # adapter included with flipper](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb).
   class Adapter
+    # Private: The name of instrumentation events.
+    InstrumentationName = "adapter_operation.#{InstrumentationNamespace}"
+
+    # Private: The name of the key that stores the set of known features.
     FeaturesKey = 'features'
 
     # Internal: Wraps vanilla adapter instance for use internally in flipper.
@@ -72,7 +76,7 @@ module Flipper
     #
     def initialize(adapter, options = {})
       @adapter = adapter
-      @name = adapter.class.name.split('::').last.downcase
+      @name = adapter.class.name.split('::').last.downcase.to_sym
       @local_cache = options[:local_cache] || {}
       @instrumenter = options.fetch(:instrumenter, Flipper::Instrumenters::Noop)
     end
@@ -97,7 +101,7 @@ module Flipper
 
     # Public: Set a key to a value.
     def write(key, value)
-      perform_update(:write, key, value)
+      perform_update(:write, key, value.to_s)
     end
 
     # Public: Deletes a key.
@@ -112,12 +116,12 @@ module Flipper
 
     # Public: Adds a value to a set.
     def set_add(key, value)
-      perform_update(:set_add, key, value)
+      perform_update(:set_add, key, value.to_s)
     end
 
     # Public: Deletes a value from a set.
     def set_delete(key, value)
-      perform_update(:set_delete, key, value)
+      perform_update(:set_delete, key, value.to_s)
     end
 
     # Public: Determines equality for an adapter instance when compared to
@@ -146,29 +150,36 @@ module Flipper
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
     end
 
-    private
-
+    # Private
     def perform_read(operation, key)
       if using_local_cache?
         local_cache.fetch(key.to_s) {
           local_cache[key.to_s] = @adapter.send(operation, key)
         }
       else
-        name = instrumentation_name(operation)
-        payload = {:key => key}
+        payload = {
+          :key => key,
+          :operation => operation,
+          :adapter_name => @name,
+        }
 
-        @instrumenter.instrument(name, payload) {
-          @adapter.send(operation, key)
+        @instrumenter.instrument(InstrumentationName, payload) { |payload|
+          payload[:result] = @adapter.send(operation, key)
         }
       end
     end
 
+    # Private
     def perform_update(operation, key, value)
-      name = instrumentation_name(operation)
-      payload = {:key => key, :value => value}
+      payload = {
+        :key => key,
+        :value => value,
+        :operation => operation,
+        :adapter_name => @name,
+      }
 
-      result = @instrumenter.instrument(name, payload) {
-        @adapter.send(operation, key, value)
+      result = @instrumenter.instrument(InstrumentationName, payload) { |payload|
+        payload[:result] = @adapter.send(operation, key, value)
       }
 
       if using_local_cache?
@@ -178,12 +189,16 @@ module Flipper
       result
     end
 
+    # Private
     def perform_delete(operation, key)
-      name = instrumentation_name(operation)
-      payload = {:key => key}
+      payload = {
+        :key => key,
+        :operation => operation,
+        :adapter_name => @name,
+      }
 
-      result = @instrumenter.instrument(name, payload) {
-        @adapter.send(operation, key)
+      result = @instrumenter.instrument(InstrumentationName, payload) { |payload|
+        payload[:result] = @adapter.send(operation, key)
       }
 
       if using_local_cache?
@@ -191,10 +206,6 @@ module Flipper
       end
 
       result
-    end
-
-    def instrumentation_name(operation)
-      "#{operation}.#{name}.adapter.flipper"
     end
   end
 end

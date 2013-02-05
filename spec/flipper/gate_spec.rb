@@ -6,7 +6,11 @@ describe Flipper::Gate do
 
   subject {
     gate = described_class.new(feature)
-    gate.stub(:key => :actors) # implemented in subclass
+    # implemented in subclass
+    gate.stub({
+      :key => :actors,
+      :description => 'enabled',
+    })
     gate
   }
 
@@ -33,10 +37,11 @@ describe Flipper::Gate do
       string = subject.inspect
       string.should include('Flipper::Gate')
       string.should include('feature=:search')
-      string.should include('adapter="memory"')
+      string.should include('description="enabled"')
+      string.should include("adapter=#{subject.adapter.name.inspect}")
+      string.should include('adapter_key=#<Flipper::Key:')
       string.should include('toggle_class=Flipper::Toggles::Value')
       string.should include('toggle_value="22"')
-      string.should include('adapter_key=#<Flipper::Key:')
     end
   end
 end
