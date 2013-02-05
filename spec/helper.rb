@@ -15,8 +15,6 @@ Bundler.setup(:default)
 
 require 'flipper'
 
-Logger.new(log_path.join('test.log'))
-
 RSpec.configure do |config|
   config.fail_fast = true
 
