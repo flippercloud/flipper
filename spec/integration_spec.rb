@@ -27,31 +27,8 @@ describe Flipper::Feature do
     Flipper.register(:devs)   { |thing| thing.dev? }
   end
 
-  def enable_feature(feature)
-    key = Flipper::Key.new(subject.name, :boolean)
-    adapter.write key, true
-  end
-
-  def enable_group(group)
-    key = Flipper::Key.new(subject.name, :groups)
-    name = group.respond_to?(:name) ? group.name : group
-    adapter.set_add key, name
-  end
-
-  def enable_actor(thing)
-    key = Flipper::Key.new(subject.name, :actors)
-    actor = Flipper::Types::Actor.wrap(thing)
-    adapter.set_add key, actor.value
-  end
-
-  def enable_percentage_of_actors(percentage)
-    key = Flipper::Key.new(subject.name, :perc_actors)
-    adapter.write key, percentage.value
-  end
-
-  def enable_percentage_of_random(percentage)
-    key = Flipper::Key.new(subject.name, :perc_time)
-    adapter.write key, percentage.value
+  after do
+    Flipper.groups = nil
   end
 
   describe "#enable" do
@@ -195,10 +172,10 @@ describe Flipper::Feature do
         @gate = Flipper::Gates::PercentageOfRandom.new(subject)
         @gate.stub(:rand => 0.04)
         Flipper::Gates::PercentageOfRandom.should_receive(:new).and_return(@gate)
-        enable_group admin_group
-        enable_actor pitt
-        enable_percentage_of_actors five_percent_of_actors
-        enable_percentage_of_random five_percent_of_random
+        subject.enable admin_group
+        subject.enable pitt
+        subject.enable five_percent_of_actors
+        subject.enable five_percent_of_random
         @result = subject.disable
       end
 
@@ -238,8 +215,8 @@ describe Flipper::Feature do
 
     context "with a group" do
       before do
-        enable_group dev_group
-        enable_group admin_group
+        subject.enable dev_group
+        subject.enable admin_group
         @result = subject.disable(admin_group)
       end
 
@@ -270,8 +247,8 @@ describe Flipper::Feature do
 
     context "with an actor" do
       before do
-        enable_actor pitt
-        enable_actor clooney
+        subject.enable pitt
+        subject.enable clooney
         @result = subject.disable(pitt)
       end
 
@@ -360,7 +337,7 @@ describe Flipper::Feature do
 
     context "with no arguments, but boolean enabled" do
       before do
-        enable_feature subject
+        subject.enable
       end
 
       it "returns true" do
@@ -370,7 +347,7 @@ describe Flipper::Feature do
 
     context "for actor in enabled group" do
       before do
-        enable_group admin_group
+        subject.enable admin_group
       end
 
       it "returns true" do
@@ -386,7 +363,7 @@ describe Flipper::Feature do
 
     context "for enabled actor" do
       before do
-        enable_actor pitt
+        subject.enable pitt
       end
 
       it "returns true" do
@@ -400,7 +377,7 @@ describe Flipper::Feature do
       end
 
       it "returns true if boolean enabled" do
-        enable_feature subject
+        subject.enable
         subject.enabled?(clooney).should be_true
       end
     end
@@ -410,7 +387,7 @@ describe Flipper::Feature do
         @gate = Flipper::Gates::PercentageOfRandom.new(subject)
         @gate.stub(:rand => 0.04)
         Flipper::Gates::PercentageOfRandom.should_receive(:new).and_return(@gate)
-        enable_percentage_of_random five_percent_of_random
+        subject.enable five_percent_of_random
       end
 
       it "returns true" do
@@ -426,7 +403,7 @@ describe Flipper::Feature do
         @gate = Flipper::Gates::PercentageOfRandom.new(subject)
         @gate.stub(:rand => 0.10)
         Flipper::Gates::PercentageOfRandom.should_receive(:new).and_return(@gate)
-        enable_percentage_of_random five_percent_of_random
+        subject.enable five_percent_of_random
       end
 
       it "returns false" do
@@ -437,7 +414,7 @@ describe Flipper::Feature do
       end
 
       it "returns true if boolean enabled" do
-        enable_feature subject
+        subject.enable
         subject.enabled?.should be_true
         subject.enabled?(nil).should be_true
         subject.enabled?(pitt).should be_true
@@ -447,7 +424,7 @@ describe Flipper::Feature do
 
     context "for a non flipper thing" do
       before do
-        enable_group admin_group
+        subject.enable admin_group
       end
 
       it "returns true if in enabled group" do
@@ -459,7 +436,7 @@ describe Flipper::Feature do
       end
 
       it "returns true if boolean enabled" do
-        enable_feature subject
+        subject.enable
         subject.enabled?(admin_thing).should be_true
         subject.enabled?(dev_thing).should be_true
       end
