@@ -50,8 +50,9 @@ module Flipper
 
         adapter_name = event.payload[:adapter_name]
         operation = event.payload[:operation]
-        key = event.payload[:key]
         result = event.payload[:result]
+        value = event.payload[:value]
+        key = event.payload[:key]
 
         feature_description = if key.respond_to?(:feature_name)
           "Flipper feature(#{key.feature_name})"
@@ -65,7 +66,7 @@ module Flipper
         details = "result=#{result.inspect}"
 
         if event.payload.key?(:value)
-          details += " value=#{event.payload[:value].inspect}"
+          details += " value=#{value.inspect}"
         end
 
         name = '%s (%.1fms)' % [description, event.duration]
