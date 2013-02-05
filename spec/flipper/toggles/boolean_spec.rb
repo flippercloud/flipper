@@ -11,7 +11,7 @@ describe Flipper::Toggles::Boolean do
 
   describe "#value" do
     described_class::TruthMap.each do |value, expected|
-      context "when set to #{value.inspect}" do
+      context "when adapter value set to #{value.inspect}" do
         it "returns #{expected.inspect}" do
           adapter.stub(:read => value)
           subject.value.should be(expected)
@@ -28,33 +28,12 @@ describe Flipper::Toggles::Boolean do
   end
 
   describe "#enabled?" do
-    context "for nil" do
-      before do
-        subject.stub(:value => nil)
-      end
-
-      it "returns false" do
-        subject.enabled?.should be_false
-      end
-    end
-
-    context "for false" do
-      before do
-        subject.stub(:value => false)
-      end
-
-      it "returns false" do
-        subject.enabled?.should be_false
-      end
-    end
-
-    context "for true" do
-      before do
-        subject.stub(:value => true)
-      end
-
-      it "returns true" do
-        subject.enabled?.should be_true
+    described_class::TruthMap.each do |value, expected|
+      context "when adapter value set to #{value.inspect}" do
+        it "returns #{expected.inspect}" do
+          adapter.stub(:read => value)
+          subject.enabled?.should be(expected)
+        end
       end
     end
   end
