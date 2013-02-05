@@ -20,8 +20,6 @@ module Flipper
         @payload = payload
         @duration = ending - start
         @transaction_id = transaction_id
-
-        @operation = payload[:operation]
       end
 
       def update
@@ -36,14 +34,16 @@ module Flipper
       end
 
       def update_feature_operation_metrics
-        # no trailing question mark in metric names
-        operation = strip_trailing_question_mark(@operation)
         feature_name = @payload[:feature_name]
+        gate_name = @payload[:gate_name]
+        operation = strip_trailing_question_mark(@payload[:operation])
+        result = @payload[:result]
+        thing = @payload[:thing]
 
         Metriks.timer("flipper.feature_operation.#{operation}").update(@duration)
 
-        if @operation == :enabled?
-          metric_name = if @payload[:result]
+        if @payload[:operation] == :enabled?
+          metric_name = if result
             "flipper.feature.#{feature_name}.enabled"
           else
             "flipper.feature.#{feature_name}.disabled"
@@ -56,21 +56,25 @@ module Flipper
       def update_adapter_operation_metrics
         adapter_name = @payload[:adapter_name]
         operation = @payload[:operation]
+        result = @payload[:result]
+        value = @payload[:value]
+        key = @payload[:key]
 
         Metriks.timer("flipper.adapter.#{adapter_name}.#{operation}").update(@duration)
       end
 
       def update_gate_operation_metrics
-        operation = strip_trailing_question_mark(@operation)
         feature_name = @payload[:feature_name]
         gate_name = @payload[:gate_name]
+        operation = strip_trailing_question_mark(@payload[:operation])
         result = @payload[:result]
+        thing = @payload[:thing]
 
         Metriks.timer("flipper.gate_operation.#{gate_name}.#{operation}").update(@duration)
         Metriks.timer("flipper.feature.#{feature_name}.gate_operation.#{gate_name}.#{operation}").update(@duration)
 
-        if @operation == :open?
-          metric_name = if @payload[:result]
+        if @payload[:operation] == :open?
+          metric_name = if result
             "flipper.feature.#{feature_name}.gate.#{gate_name}.open"
           else
             "flipper.feature.#{feature_name}.gate.#{gate_name}.closed"
