@@ -2,14 +2,7 @@
 
 Feature flipping is the act of enabling or disabling features or parts of your application, ideally without re-deploying or changing anything in your code base.
 
-The goal of this gem is to make turning features on or off so easy that everyone does it. Whatever your data store, throughput, or experience, feature flipping should be easy and relatively no extra burden to your application.
-
-## Why not use &lt;insert gem name here, most likely rollout&gt;?
-
-I've used rollout extensively in the past and it was fantastic. The main reason I reinvented the wheel to some extent is:
-
-* API - For whatever reason, I could never remember the API for rollout.
-* Adapter Based - Rather than force redis, if you can implement a few simple methods, you can use the data store of your choice to power your flippers (memory, file system, mongo, redis, sql, etc.). It is also dead simple to front your data store with memcache if you so desire since feature checking is read heavy, as opposed to write heavy.
+The goal of this gem is to make turning features on or off so easy that everyone does it. Whatever your data store, throughput, or experience, feature flipping should be easy and have minimal impact on your application.
 
 ## Coming Soon™
 
