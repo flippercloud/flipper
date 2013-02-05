@@ -35,7 +35,7 @@ module Flipper
 
       def description
         if enabled?
-          "groups (#{toggle.value.to_a.join(', ')})"
+          "groups (#{toggle.value.to_a.sort.join(', ')})"
         else
           'disabled'
         end
