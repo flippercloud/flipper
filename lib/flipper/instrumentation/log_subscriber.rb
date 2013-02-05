@@ -16,13 +16,18 @@ module Flipper
       def feature_operation(event)
         return unless logger.debug?
 
-        operation = event.payload[:operation]
         feature_name = event.payload[:feature_name]
+        gate_name = event.payload[:gate_name]
+        operation = event.payload[:operation]
         result = event.payload[:result]
         thing = event.payload[:thing]
 
         description = "Flipper feature(#{feature_name}) #{operation} #{result.inspect}"
         details = "thing=#{thing.inspect}"
+
+        unless gate_name.nil?
+          details += " gate_name=#{gate_name}"
+        end
 
         name = '%s (%.1fms)' % [description, event.duration]
         debug "  #{color(name, CYAN, true)}  [ #{details} ]"
@@ -43,8 +48,10 @@ module Flipper
       def adapter_operation(event)
         return unless logger.debug?
 
-        payload = event.payload
-        key = payload[:key]
+        adapter_name = event.payload[:adapter_name]
+        operation = event.payload[:operation]
+        key = event.payload[:key]
+        result = event.payload[:result]
 
         feature_description = if key.respond_to?(:feature_name)
           "Flipper feature(#{key.feature_name})"
@@ -52,19 +59,13 @@ module Flipper
           "Flipper"
         end
 
-        adapter_name = payload[:adapter_name]
         adapter_description = "adapter(#{adapter_name})"
-
-        operation = payload[:operation]
         operation_description = "#{operation}(#{key.to_s.inspect})"
-
         description = "#{feature_description} #{adapter_description} #{operation_description}"
-
-        result = payload[:result]
         details = "result=#{result.inspect}"
 
-        if payload.key?(:value)
-          details += " value=#{payload[:value].inspect}"
+        if event.payload.key?(:value)
+          details += " value=#{event.payload[:value].inspect}"
         end
 
         name = '%s (%.1fms)' % [description, event.duration]
@@ -86,13 +87,13 @@ module Flipper
       def gate_operation(event)
         return unless logger.debug?
 
-        operation = event.payload[:operation]
         feature_name = event.payload[:feature_name]
         gate_name = event.payload[:gate_name]
+        operation = event.payload[:operation]
         result = event.payload[:result]
-        description = "Flipper feature(#{feature_name}) gate(#{gate_name}) #{operation} #{result.inspect}"
-
         thing = event.payload[:thing]
+
+        description = "Flipper feature(#{feature_name}) gate(#{gate_name}) #{operation} #{result.inspect}"
         details = "thing=#{thing.inspect}"
 
         name = '%s (%.1fms)' % [description, event.duration]

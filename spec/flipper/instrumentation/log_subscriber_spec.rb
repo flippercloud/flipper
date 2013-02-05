@@ -76,7 +76,7 @@ describe Flipper::Instrumentation::LogSubscriber do
 
     it "logs feature calls with result in brackets" do
       feature_line = find_line('Flipper feature(search) enable true')
-      feature_line.should include("[ thing=#{user.inspect} ]")
+      feature_line.should include("[ thing=#{user.inspect} gate_name=actor ]")
     end
 
     it "logs adapter value" do
