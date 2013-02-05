@@ -15,7 +15,7 @@ module Flipper
       #
       # Returns true if gate open for thing, false if not.
       def open?(thing)
-        instrument(:open, thing) {
+        instrument(:open, thing) { |payload|
           percentage = toggle.value.to_i
 
           rand < (percentage / 100.0)

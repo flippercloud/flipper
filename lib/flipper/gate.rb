@@ -104,9 +104,7 @@ module Flipper
       }
 
       @instrumenter.instrument(InstrumentationName, payload) {
-        result = yield
-        payload[:result] = result
-        result
+        payload[:result] = yield(payload) if block_given?
       }
     end
   end
