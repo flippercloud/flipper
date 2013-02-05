@@ -77,16 +77,6 @@ describe Flipper::Feature do
     end
   end
 
-  context "#disabled?" do
-    it "returns the opposite of any_gates_open" do
-      subject.stub(:any_gates_open? => true)
-      subject.disabled?.should be_false
-
-      subject.stub(:any_gates_open? => false)
-      subject.disabled?.should be_true
-    end
-  end
-
   describe "#inspect" do
     it "returns easy to read string representation" do
       string = subject.inspect
@@ -147,21 +137,6 @@ describe Flipper::Feature do
       event.payload[:operation].should eq(:enabled?)
       event.payload[:thing].should eq(thing)
       event.payload[:result].should be_false
-    end
-
-    it "is recorded for disabled?" do
-      thing = Flipper::Types::Boolean.new
-      gate = subject.gate_for(thing)
-
-      subject.disabled?(thing)
-
-      event = instrumenter.events.last
-      event.should_not be_nil
-      event.name.should eq('feature_operation.flipper')
-      event.payload[:feature_name].should eq(:search)
-      event.payload[:operation].should eq(:disabled?)
-      event.payload[:thing].should eq(thing)
-      event.payload[:result].should be_true
     end
   end
 

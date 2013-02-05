@@ -96,7 +96,7 @@ flipper[:stats].enable user
 flipper[:stats].enabled? user # true
 
 flipper[:stats].disable user
-flipper[:stats].disabled? user # true
+flipper[:stats].enabled? user # false
 
 # you can enable anything, does not need to be user or person
 flipper[:search].enable group

@@ -49,14 +49,6 @@ describe Flipper::DSL do
     end
   end
 
-  describe "#disabled?" do
-    it "passes arguments to feature disabled check and returns result" do
-      admins_feature.should_receive(:disabled?).with(:foo).and_return(false)
-      subject.should_receive(:feature).with(:stats).and_return(admins_feature)
-      subject.disabled?(:stats, :foo).should be_false
-    end
-  end
-
   describe "#enable" do
     before do
       subject.stub(:feature => admins_feature)
