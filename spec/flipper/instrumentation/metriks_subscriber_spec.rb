@@ -17,9 +17,9 @@ describe Flipper::Instrumentation::MetriksSubscriber do
   context "for enabled feature" do
     it "updates feature metrics when calls happen" do
       flipper[:stats].enable(user)
-      flipper[:stats].enabled?(user)
-
       Metriks.timer("flipper.feature_operation.enable").count.should be(1)
+
+      flipper[:stats].enabled?(user)
       Metriks.timer("flipper.feature_operation.enabled").count.should be(1)
       Metriks.meter("flipper.feature.stats.enabled").count.should be(1)
     end
@@ -28,9 +28,9 @@ describe Flipper::Instrumentation::MetriksSubscriber do
   context "for disabled feature" do
     it "updates feature metrics when calls happen" do
       flipper[:stats].disable(user)
-      flipper[:stats].enabled?(user)
-
       Metriks.timer("flipper.feature_operation.disable").count.should be(1)
+
+      flipper[:stats].enabled?(user)
       Metriks.timer("flipper.feature_operation.enabled").count.should be(1)
       Metriks.meter("flipper.feature.stats.disabled").count.should be(1)
     end
