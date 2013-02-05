@@ -4,6 +4,7 @@ module Flipper
       def enable(thing)
         super
         adapter.write adapter_key, thing.value
+        true
       end
 
       def disable(thing)
@@ -11,6 +12,7 @@ module Flipper
         feature.gates.each do |gate|
           gate.adapter.delete gate.adapter_key
         end
+        true
       end
 
       def value

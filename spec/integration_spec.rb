@@ -57,7 +57,11 @@ describe Flipper::Feature do
   describe "#enable" do
     context "with no arguments" do
       before do
-        subject.enable
+        @result = subject.enable
+      end
+
+      it "returns true" do
+        @result.should be_true
       end
 
       it "enables feature for all" do
@@ -71,7 +75,11 @@ describe Flipper::Feature do
 
     context "with a group" do
       before do
-        subject.enable(admin_group)
+        @result = subject.enable(admin_group)
+      end
+
+      it "returns true" do
+        @result.should be_true
       end
 
       it "enables feature for non flipper thing in group" do
@@ -101,7 +109,11 @@ describe Flipper::Feature do
 
     context "with an actor" do
       before do
-        subject.enable(pitt)
+        @result = subject.enable(pitt)
+      end
+
+      it "returns true" do
+        @result.should be_true
       end
 
       it "enables feature for actor" do
@@ -119,7 +131,11 @@ describe Flipper::Feature do
 
     context "with a percentage of actors" do
       before do
-        subject.enable(five_percent_of_actors)
+        @result = subject.enable(five_percent_of_actors)
+      end
+
+      it "returns true" do
+        @result.should be_true
       end
 
       it "enables feature for actor within percentage" do
@@ -140,7 +156,11 @@ describe Flipper::Feature do
       before do
         @gate = Flipper::Gates::PercentageOfRandom.new(subject)
         Flipper::Gates::PercentageOfRandom.should_receive(:new).and_return(@gate)
-        subject.enable(five_percent_of_random)
+        @result = subject.enable(five_percent_of_random)
+      end
+
+      it "returns true" do
+        @result.should be_true
       end
 
       it "enables feature for time within percentage" do
@@ -179,7 +199,11 @@ describe Flipper::Feature do
         enable_actor pitt
         enable_percentage_of_actors five_percent_of_actors
         enable_percentage_of_random five_percent_of_random
-        subject.disable
+        @result = subject.disable
+      end
+
+      it "returns true" do
+        @result.should be_true
       end
 
       it "disables feature" do
@@ -216,7 +240,11 @@ describe Flipper::Feature do
       before do
         enable_group dev_group
         enable_group admin_group
-        subject.disable(admin_group)
+        @result = subject.disable(admin_group)
+      end
+
+      it "returns true" do
+        @result.should be_true
       end
 
       it "disables the feature for non flipper thing in the group" do
@@ -244,7 +272,11 @@ describe Flipper::Feature do
       before do
         enable_actor pitt
         enable_actor clooney
-        subject.disable(pitt)
+        @result = subject.disable(pitt)
+      end
+
+      it "returns true" do
+        @result.should be_true
       end
 
       it "disables feature for actor" do
@@ -262,7 +294,11 @@ describe Flipper::Feature do
 
     context "with a percentage of actors" do
       before do
-        subject.disable(five_percent_of_actors)
+        @result = subject.disable(five_percent_of_actors)
+      end
+
+      it "returns true" do
+        @result.should be_true
       end
 
       it "disables feature" do
@@ -283,7 +319,11 @@ describe Flipper::Feature do
       before do
         @gate = Flipper::Gates::PercentageOfRandom.new(subject)
         Flipper::Gates::PercentageOfRandom.should_receive(:new).and_return(@gate)
-        subject.disable(five_percent_of_random)
+        @result = subject.disable(five_percent_of_random)
+      end
+
+      it "returns true" do
+        @result.should be_true
       end
 
       it "disables feature for time within percentage" do

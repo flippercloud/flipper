@@ -4,11 +4,13 @@ module Flipper
       def enable(thing)
         super
         adapter.set_add adapter_key, thing.value
+        true
       end
 
       def disable(thing)
         super
         adapter.set_delete adapter_key, thing.value
+        true
       end
 
       def value

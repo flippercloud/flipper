@@ -14,10 +14,16 @@ module Flipper
       @gate = gate
     end
 
+    # Internal: Enables thing for gate and adds feature to known features.
+    #
+    # Returns Boolean (currently always true).
     def enable(thing)
       add_feature_to_set
     end
 
+    # Internal: Disables thing for gate and adds feature to known features.
+    #
+    # Returns Boolean (currently always true).
     def disable(thing)
       add_feature_to_set
     end
