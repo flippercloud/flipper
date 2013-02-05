@@ -23,6 +23,7 @@ describe Flipper::Gates::Actor do
         :operation => :open,
         :result => false,
         :gate_name => :actor,
+        :feature_name => :search,
       })
     end
   end

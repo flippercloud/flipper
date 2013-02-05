@@ -23,6 +23,7 @@ describe Flipper::Gates::Group do
         :operation => :open,
         :result => false,
         :gate_name => :group,
+        :feature_name => :search,
       })
     end
   end

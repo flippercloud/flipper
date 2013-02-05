@@ -100,6 +100,7 @@ module Flipper
         :thing => thing,
         :operation => operation,
         :gate_name => name,
+        :feature_name => @feature.name,
       }
 
       @instrumenter.instrument(InstrumentationName, payload) {

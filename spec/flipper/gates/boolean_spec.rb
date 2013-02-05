@@ -45,6 +45,7 @@ describe Flipper::Gates::Boolean do
         :operation => :open,
         :result => false,
         :gate_name => :boolean,
+        :feature_name => :search,
       })
     end
   end

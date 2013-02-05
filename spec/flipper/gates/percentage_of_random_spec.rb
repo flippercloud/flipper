@@ -23,6 +23,7 @@ describe Flipper::Gates::PercentageOfRandom do
         :operation => :open,
         :result => false,
         :gate_name => :percentage_of_random,
+        :feature_name => :search,
       })
     end
   end

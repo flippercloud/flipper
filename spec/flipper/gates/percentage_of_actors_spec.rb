@@ -23,6 +23,7 @@ describe Flipper::Gates::PercentageOfActors do
         :operation => :open,
         :result => false,
         :gate_name => :percentage_of_actors,
+        :feature_name => :search,
       })
     end
   end
