@@ -17,9 +17,12 @@ describe Flipper::Gates::Group do
 
       event = instrumenter.events.last
       event.should_not be_nil
-      event.name.should eq('open.group.gate.flipper')
+      event.name.should eq('gate_operation.flipper')
       event.payload.should eq({
         :thing => thing,
+        :operation => :open,
+        :result => false,
+        :gate_name => :group,
       })
     end
   end

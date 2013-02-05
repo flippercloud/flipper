@@ -6,6 +6,9 @@ module Flipper
   class Gate
     extend Forwardable
 
+    # Private: The name of instrumentation events.
+    InstrumentationName = "gate_operation.#{InstrumentationNamespace}"
+
     # Private
     attr_reader :feature
 
@@ -92,16 +95,18 @@ module Flipper
 
     private
 
-    def instrument(action, thing)
-      name = instrument_name(action)
+    def instrument(operation, thing)
       payload = {
         :thing => thing,
+        :operation => operation,
+        :gate_name => name,
       }
-      @instrumenter.instrument(name, payload) { yield }
-    end
 
-    def instrument_name(action)
-      "#{action}.#{name}.gate.flipper"
+      @instrumenter.instrument(InstrumentationName, payload) {
+        result = yield
+        payload[:result] = result
+        result
+      }
     end
   end
 end

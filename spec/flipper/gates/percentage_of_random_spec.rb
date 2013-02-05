@@ -17,9 +17,12 @@ describe Flipper::Gates::PercentageOfRandom do
 
       event = instrumenter.events.last
       event.should_not be_nil
-      event.name.should eq('open.percentage_of_random.gate.flipper')
+      event.name.should eq('gate_operation.flipper')
       event.payload.should eq({
         :thing => thing,
+        :operation => :open,
+        :result => false,
+        :gate_name => :percentage_of_random,
       })
     end
   end

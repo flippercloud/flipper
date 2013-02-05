@@ -17,9 +17,12 @@ describe Flipper::Gates::Actor do
 
       event = instrumenter.events.last
       event.should_not be_nil
-      event.name.should eq('open.actor.gate.flipper')
+      event.name.should eq('gate_operation.flipper')
       event.payload.should eq({
         :thing => thing,
+        :operation => :open,
+        :result => false,
+        :gate_name => :actor,
       })
     end
   end
