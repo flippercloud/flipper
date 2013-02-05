@@ -37,16 +37,20 @@ module Flipper
     #
     # Returns the result of Flipper::Gate#enable.
     def enable(thing = Types::Boolean.new)
-      gate = gate_for(thing)
-      instrument(:enable, thing) { gate.enable(thing) }
+      instrument(:enable, thing) {
+        gate = gate_for(thing)
+        gate.enable(thing)
+      }
     end
 
     # Public: Disable this feature for something.
     #
     # Returns the result of Flipper::Gate#disable.
     def disable(thing = Types::Boolean.new)
-      gate = gate_for(thing)
-      instrument(:disable, thing) { gate.disable(thing) }
+      instrument(:disable, thing) {
+        gate = gate_for(thing)
+        gate.disable(thing)
+      }
     end
 
     # Public: Check if a feature is enabled for a thing.
