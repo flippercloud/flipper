@@ -37,7 +37,7 @@ module Flipper
 
       def update_feature_operation_metrics
         # no trailing question mark in metric names
-        operation = @operation.to_s.gsub(/\?$/, '')
+        operation = strip_trailing_question_mark(@operation)
         feature_name = @payload[:feature_name]
 
         Metriks.timer("flipper.feature_operation.#{operation}").update(@duration)
@@ -61,7 +61,27 @@ module Flipper
       end
 
       def update_gate_operation_metrics
-        # noop for now
+        operation = strip_trailing_question_mark(@operation)
+        feature_name = @payload[:feature_name]
+        gate_name = @payload[:gate_name]
+        result = @payload[:result]
+
+        Metriks.timer("flipper.gate_operation.#{gate_name}.#{operation}").update(@duration)
+        Metriks.timer("flipper.feature.#{feature_name}.gate_operation.#{gate_name}.#{operation}").update(@duration)
+
+        if @operation == :open?
+          metric_name = if @payload[:result]
+            "flipper.feature.#{feature_name}.gate.#{gate_name}.open"
+          else
+            "flipper.feature.#{feature_name}.gate.#{gate_name}.closed"
+          end
+
+          Metriks.meter(metric_name).mark
+        end
+      end
+
+      def strip_trailing_question_mark(operation)
+        operation.to_s.gsub(/\?$/, '')
       end
     end
   end
