@@ -11,7 +11,7 @@ log_path.mkpath
 require 'rubygems'
 require 'bundler'
 
-Bundler.require(:default, :test)
+Bundler.setup(:default)
 
 require 'flipper'
 
