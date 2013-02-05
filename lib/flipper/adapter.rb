@@ -164,7 +164,7 @@ module Flipper
         }
 
         @instrumenter.instrument(InstrumentationName, payload) { |payload|
-          @adapter.send(operation, key)
+          payload[:result] = @adapter.send(operation, key)
         }
       end
     end
@@ -179,7 +179,7 @@ module Flipper
       }
 
       result = @instrumenter.instrument(InstrumentationName, payload) { |payload|
-        @adapter.send(operation, key, value)
+        payload[:result] = @adapter.send(operation, key, value)
       }
 
       if using_local_cache?
@@ -198,7 +198,7 @@ module Flipper
       }
 
       result = @instrumenter.instrument(InstrumentationName, payload) { |payload|
-        @adapter.send(operation, key)
+        payload[:result] = @adapter.send(operation, key)
       }
 
       if using_local_cache?

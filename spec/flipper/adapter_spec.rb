@@ -386,11 +386,10 @@ describe Flipper::Adapter do
       event = instrumenter.events.last
       event.should_not be_nil
       event.name.should eq('adapter_operation.flipper')
-      event.payload.should eq({
-        :key => 'foo',
-        :operation => :read,
-        :adapter_name => :memory,
-      })
+      event.payload[:key].should eq('foo')
+      event.payload[:operation].should eq(:read)
+      event.payload[:adapter_name].should eq(:memory)
+      event.payload[:result].should be_nil
     end
 
     it "is recorded for write" do
@@ -399,12 +398,11 @@ describe Flipper::Adapter do
       event = instrumenter.events.last
       event.should_not be_nil
       event.name.should eq('adapter_operation.flipper')
-      event.payload.should eq({
-        :key => 'foo',
-        :value => 'bar',
-        :operation => :write,
-        :adapter_name => :memory,
-      })
+      event.payload[:key].should eq('foo')
+      event.payload[:value].should eq('bar')
+      event.payload[:operation].should eq(:write)
+      event.payload[:adapter_name].should eq(:memory)
+      event.payload[:result].should eq('bar')
     end
 
     it "is recorded for delete" do
@@ -413,11 +411,10 @@ describe Flipper::Adapter do
       event = instrumenter.events.last
       event.should_not be_nil
       event.name.should eq('adapter_operation.flipper')
-      event.payload.should eq({
-        :key => 'foo',
-        :operation => :delete,
-        :adapter_name => :memory,
-      })
+      event.payload[:key].should eq('foo')
+      event.payload[:operation].should eq(:delete)
+      event.payload[:adapter_name].should eq(:memory)
+      event.payload[:result].should be_nil
     end
 
     it "is recorded for set_members" do
@@ -426,11 +423,10 @@ describe Flipper::Adapter do
       event = instrumenter.events.last
       event.should_not be_nil
       event.name.should eq('adapter_operation.flipper')
-      event.payload.should eq({
-        :key => 'foo',
-        :operation => :set_members,
-        :adapter_name => :memory,
-      })
+      event.payload[:key].should eq('foo')
+      event.payload[:operation].should eq(:set_members)
+      event.payload[:adapter_name].should eq(:memory)
+      event.payload[:result].should eq(Set.new)
     end
 
     it "is recorded for set_add" do
@@ -439,12 +435,10 @@ describe Flipper::Adapter do
       event = instrumenter.events.last
       event.should_not be_nil
       event.name.should eq('adapter_operation.flipper')
-      event.payload.should eq({
-        :key => 'foo',
-        :value => 'bar',
-        :operation => :set_add,
-        :adapter_name => :memory,
-      })
+      event.payload[:key].should eq('foo')
+      event.payload[:operation].should eq(:set_add)
+      event.payload[:adapter_name].should eq(:memory)
+      event.payload[:result].should eq(Set['bar'])
     end
 
     it "is recorded for set_delete" do
@@ -453,12 +447,10 @@ describe Flipper::Adapter do
       event = instrumenter.events.last
       event.should_not be_nil
       event.name.should eq('adapter_operation.flipper')
-      event.payload.should eq({
-        :key => 'foo',
-        :value => 'bar',
-        :operation => :set_delete,
-        :adapter_name => :memory,
-      })
+      event.payload[:key].should eq('foo')
+      event.payload[:operation].should eq(:set_delete)
+      event.payload[:adapter_name].should eq(:memory)
+      event.payload[:result].should eq(Set.new)
     end
   end
 
