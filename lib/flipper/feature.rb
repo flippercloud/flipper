@@ -82,7 +82,7 @@ module Flipper
     #
     # Raises Flipper::GateNotFound if no gate found for thing
     def gate_for(thing)
-      find_gate(thing) || raise(GateNotFound.new(thing))
+      find_gate_that_protects(thing) || raise(GateNotFound.new(thing))
     end
 
     # Public: Pretty string version for debugging.
@@ -144,13 +144,14 @@ module Flipper
         :operation => operation,
         :thing => thing,
       }
+
       @instrumenter.instrument(InstrumentationName, payload) {
         payload[:result] = yield(payload) if block_given?
       }
     end
 
     # Private
-    def find_gate(thing)
+    def find_gate_that_protects(thing)
       gates.detect { |gate| gate.protects?(thing) }
     end
   end
