@@ -5,7 +5,8 @@ require 'flipper/instrumenters/memory'
 
 describe Flipper::Adapter do
   let(:local_cache)  { {} }
-  let(:adapter)      { Flipper::Adapters::Memory.new }
+  let(:source)       { {} }
+  let(:adapter)      { Flipper::Adapters::Memory.new(source) }
   let(:features_key) { described_class::FeaturesKey }
 
   subject { described_class.new(adapter, :local_cache => local_cache) }
@@ -64,6 +65,11 @@ describe Flipper::Adapter do
     it "sets adapter" do
       instance = described_class.new(adapter)
       instance.adapter.should be(adapter)
+    end
+
+    it "sets adapter name" do
+      instance = described_class.new(adapter)
+      instance.name.should be(:memory)
     end
 
     it "defaults instrumenter" do
@@ -129,7 +135,7 @@ describe Flipper::Adapter do
 
     describe "#set_members" do
       before do
-        adapter.write 'foo', Set['1', '2']
+        source['foo'] = Set['1', '2']
         @result = subject.set_members('foo')
       end
 
@@ -175,7 +181,7 @@ describe Flipper::Adapter do
 
     describe "#set_add" do
       before do
-        adapter.write 'foo', Set['1']
+        source['foo'] = Set['1']
         local_cache['foo'] = Set['1']
         subject.set_add 'foo', '2'
       end
@@ -191,7 +197,7 @@ describe Flipper::Adapter do
 
     describe "#set_delete" do
       before do
-        adapter.write 'foo', Set['1', '2', '3']
+        source['foo'] = Set['1', '2', '3']
         local_cache['foo'] = Set['1', '2', '3']
         subject.set_delete 'foo', '3'
       end
@@ -228,7 +234,7 @@ describe Flipper::Adapter do
 
     describe "#set_members" do
       before do
-        adapter.write 'foo', Set['1', '2']
+        source['foo'] = Set['1', '2']
         @result = subject.set_members('foo')
       end
 
@@ -275,7 +281,7 @@ describe Flipper::Adapter do
 
     describe "#set_add" do
       before do
-        adapter.write 'foo', Set['1']
+        source['foo'] = Set['1']
         local_cache['foo'] = Set['1']
         subject.set_add 'foo', '2'
       end
@@ -291,7 +297,7 @@ describe Flipper::Adapter do
 
     describe "#set_delete" do
       before do
-        adapter.write 'foo', Set['1', '2', '3']
+        source['foo'] = Set['1', '2', '3']
         local_cache['foo'] = Set['1', '2', '3']
         subject.set_delete 'foo', '3'
       end
@@ -380,8 +386,11 @@ describe Flipper::Adapter do
 
       event = instrumenter.events.last
       event.should_not be_nil
-      event.name.should eq('read.memory.adapter.flipper')
-      event.payload.should eq({:key => 'foo'})
+      event.name.should eq('adapter_operation.flipper')
+      event.payload[:key].should eq('foo')
+      event.payload[:operation].should eq(:read)
+      event.payload[:adapter_name].should eq(:memory)
+      event.payload[:result].should be_nil
     end
 
     it "is recorded for write" do
@@ -389,8 +398,12 @@ describe Flipper::Adapter do
 
       event = instrumenter.events.last
       event.should_not be_nil
-      event.name.should eq('write.memory.adapter.flipper')
-      event.payload.should eq({:key => 'foo', :value => 'bar'})
+      event.name.should eq('adapter_operation.flipper')
+      event.payload[:key].should eq('foo')
+      event.payload[:value].should eq('bar')
+      event.payload[:operation].should eq(:write)
+      event.payload[:adapter_name].should eq(:memory)
+      event.payload[:result].should eq('bar')
     end
 
     it "is recorded for delete" do
@@ -398,8 +411,11 @@ describe Flipper::Adapter do
 
       event = instrumenter.events.last
       event.should_not be_nil
-      event.name.should eq('delete.memory.adapter.flipper')
-      event.payload.should eq({:key => 'foo'})
+      event.name.should eq('adapter_operation.flipper')
+      event.payload[:key].should eq('foo')
+      event.payload[:operation].should eq(:delete)
+      event.payload[:adapter_name].should eq(:memory)
+      event.payload[:result].should be_nil
     end
 
     it "is recorded for set_members" do
@@ -407,8 +423,11 @@ describe Flipper::Adapter do
 
       event = instrumenter.events.last
       event.should_not be_nil
-      event.name.should eq('set_members.memory.adapter.flipper')
-      event.payload.should eq({:key => 'foo'})
+      event.name.should eq('adapter_operation.flipper')
+      event.payload[:key].should eq('foo')
+      event.payload[:operation].should eq(:set_members)
+      event.payload[:adapter_name].should eq(:memory)
+      event.payload[:result].should eq(Set.new)
     end
 
     it "is recorded for set_add" do
@@ -416,8 +435,11 @@ describe Flipper::Adapter do
 
       event = instrumenter.events.last
       event.should_not be_nil
-      event.name.should eq('set_add.memory.adapter.flipper')
-      event.payload.should eq({:key => 'foo', :value => 'bar'})
+      event.name.should eq('adapter_operation.flipper')
+      event.payload[:key].should eq('foo')
+      event.payload[:operation].should eq(:set_add)
+      event.payload[:adapter_name].should eq(:memory)
+      event.payload[:result].should eq(Set['bar'])
     end
 
     it "is recorded for set_delete" do
@@ -425,14 +447,17 @@ describe Flipper::Adapter do
 
       event = instrumenter.events.last
       event.should_not be_nil
-      event.name.should eq('set_delete.memory.adapter.flipper')
-      event.payload.should eq({:key => 'foo', :value => 'bar'})
+      event.name.should eq('adapter_operation.flipper')
+      event.payload[:key].should eq('foo')
+      event.payload[:operation].should eq(:set_delete)
+      event.payload[:adapter_name].should eq(:memory)
+      event.payload[:result].should eq(Set.new)
     end
   end
 
   describe "#inspect" do
     it "returns easy to read string representation" do
-      subject.inspect.should eq("#<Flipper::Adapter:#{subject.object_id} name=\"memory\", use_local_cache=nil>")
+      subject.inspect.should eq("#<Flipper::Adapter:#{subject.object_id} name=:memory, use_local_cache=nil>")
     end
   end
 end

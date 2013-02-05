@@ -39,9 +39,13 @@ describe Flipper::Gates::Boolean do
 
       event = instrumenter.events.last
       event.should_not be_nil
-      event.name.should eq('open.boolean.gate.flipper')
+      event.name.should eq('gate_operation.flipper')
       event.payload.should eq({
         :thing => thing,
+        :operation => :open?,
+        :result => false,
+        :gate_name => :boolean,
+        :feature_name => :search,
       })
     end
   end

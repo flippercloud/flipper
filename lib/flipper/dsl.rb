@@ -30,16 +30,6 @@ module Flipper
       feature(name).enabled?(*args)
     end
 
-    # Public: Check if a feature is disabled.
-    #
-    # name - The String or Symbol name of the feature.
-    # args - The args passed through to the disabled check.
-    #
-    # Returns true if feature is disabled, false if not.
-    def disabled?(name, *args)
-      feature(name).disabled?(*args)
-    end
-
     # Public: Enable a feature.
     #
     # name - The String or Symbol name of the feature.

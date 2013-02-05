@@ -7,6 +7,9 @@ require 'flipper/instrumenters/noop'
 
 module Flipper
   class Feature
+    # Private: The name of instrumentation events.
+    InstrumentationName = "feature_operation.#{InstrumentationNamespace}"
+
     # Internal: The name of the feature.
     attr_reader :name
 
@@ -34,30 +37,38 @@ module Flipper
     #
     # Returns the result of Flipper::Gate#enable.
     def enable(thing = Types::Boolean.new)
-      gate = gate_for(thing)
-      instrument(:enable, thing, gate) { gate.enable(thing) }
+      instrument(:enable, thing) { |payload|
+        gate = gate_for(thing)
+        payload[:gate_name] = gate.name
+        gate.enable(thing)
+      }
     end
 
     # Public: Disable this feature for something.
     #
     # Returns the result of Flipper::Gate#disable.
     def disable(thing = Types::Boolean.new)
-      gate = gate_for(thing)
-      instrument(:disable, thing, gate) { gate.disable(thing) }
+      instrument(:disable, thing) { |payload|
+        gate = gate_for(thing)
+        payload[:gate_name] = gate.name
+        gate.disable(thing)
+      }
     end
 
     # Public: Check if a feature is enabled for a thing.
     #
     # Returns true if enabled, false if not.
     def enabled?(thing = nil)
-      instrument(:enabled, thing) { any_gates_open?(thing) }
-    end
+      instrument(:enabled?, thing) { |payload|
+        gate = gates.detect { |gate| gate.open?(thing) }
 
-    # Public: Check if a feature is disabled for a thing.
-    #
-    # Returns true if disabled, false if not.
-    def disabled?(thing = nil)
-      instrument(:disabled, thing) { !any_gates_open?(thing) }
+        if gate.nil?
+          false
+        else
+          payload[:gate_name] = gate.name
+          true
+        end
+      }
     end
 
     # Internal: Gates to check to see if feature is enabled/disabled
@@ -65,27 +76,30 @@ module Flipper
     # Returns an array of gates
     def gates
       @gates ||= [
-        Gates::Boolean.new(self),
-        Gates::Group.new(self),
-        Gates::Actor.new(self),
-        Gates::PercentageOfActors.new(self),
-        Gates::PercentageOfRandom.new(self),
+        Gates::Boolean.new(self, :instrumenter => @instrumenter),
+        Gates::Group.new(self, :instrumenter => @instrumenter),
+        Gates::Actor.new(self, :instrumenter => @instrumenter),
+        Gates::PercentageOfActors.new(self, :instrumenter => @instrumenter),
+        Gates::PercentageOfRandom.new(self, :instrumenter => @instrumenter),
       ]
     end
 
-    # Internal: Returns gate that protects thing
+    # Internal: Find the gate that protects a thing.
     #
     # thing - The object for which you would like to find a gate
     #
+    # Returns a Flipper::Gate.
     # Raises Flipper::GateNotFound if no gate found for thing
     def gate_for(thing)
-      find_gate(thing) || raise(GateNotFound.new(thing))
+      gates.detect { |gate| gate.protects?(thing) } ||
+        raise(GateNotFound.new(thing))
     end
 
     # Public: Pretty string version for debugging.
     def inspect
       attributes = [
         "name=#{name.inspect}",
+        "state=#{state.inspect}",
         "adapter=#{adapter.name.inspect}",
       ]
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
@@ -126,31 +140,20 @@ module Flipper
 
     # Private
     def conditional_gates
-      non_boolean_gates.select { |gate| gate.enabled? }
+      @conditional_gates ||= non_boolean_gates.select { |gate| gate.enabled? }
     end
 
-    private
-
-    def any_gates_open?(thing)
-      !!catch(:short_circuit) { gates.detect { |gate| gate.open?(thing) } }
-    end
-
-    def instrument(action, thing, gate = nil)
-      instrument_name = instrumentation_name(action)
+    # Private
+    def instrument(operation, thing)
       payload = {
         :feature_name => name,
+        :operation => operation,
         :thing => thing,
       }
-      payload[:gate] = gate if gate
-      @instrumenter.instrument(instrument_name, payload) { yield }
-    end
 
-    def instrumentation_name(action)
-      "#{action}.#{name}.feature.flipper"
-    end
-
-    def find_gate(thing)
-      gates.detect { |gate| gate.protects?(thing) }
+      @instrumenter.instrument(InstrumentationName, payload) {
+        payload[:result] = yield(payload) if block_given?
+      }
     end
   end
 end

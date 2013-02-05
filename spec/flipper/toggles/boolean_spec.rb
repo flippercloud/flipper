@@ -2,43 +2,38 @@ require 'helper'
 
 describe Flipper::Toggles::Boolean do
   let(:key) { double('Key') }
-  let(:adapter) { double('Adapter', :read => '22') }
-  let(:gate) { double('Gate', :adapter => adapter, :key => key) }
+  let(:adapter) { double('Adapter', :read => true) }
+  let(:gate) { double('Gate', :adapter => adapter, :key => key, :adapter_key => 'foo') }
 
   subject {
-    toggle = described_class.new(gate)
-    toggle.stub(:value => 22)
-    toggle
+    described_class.new(gate)
   }
 
+  describe "#value" do
+    described_class::TruthMap.each do |value, expected|
+      context "when adapter value set to #{value.inspect}" do
+        it "returns #{expected.inspect}" do
+          adapter.stub(:read => value)
+          subject.value.should be(expected)
+        end
+      end
+    end
+
+    context "for value not in truth map" do
+      it "returns false" do
+        adapter.stub(:read => 'jibberish')
+        subject.value.should be(false)
+      end
+    end
+  end
+
   describe "#enabled?" do
-    context "for nil" do
-      before do
-        subject.stub(:value => nil)
-      end
-
-      it "returns false" do
-        subject.enabled?.should be_false
-      end
-    end
-
-    context "for false" do
-      before do
-        subject.stub(:value => false)
-      end
-
-      it "returns false" do
-        subject.enabled?.should be_false
-      end
-    end
-
-    context "for true" do
-      before do
-        subject.stub(:value => true)
-      end
-
-      it "returns true" do
-        subject.enabled?.should be_true
+    described_class::TruthMap.each do |value, expected|
+      context "when adapter value set to #{value.inspect}" do
+        it "returns #{expected.inspect}" do
+          adapter.stub(:read => value)
+          subject.enabled?.should be(expected)
+        end
       end
     end
   end

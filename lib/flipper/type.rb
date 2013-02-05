@@ -1,4 +1,5 @@
 module Flipper
+  # Internal: Root class for all flipper types. You should never need to use this.
   class Type
     def value
       raise 'Not implemented'

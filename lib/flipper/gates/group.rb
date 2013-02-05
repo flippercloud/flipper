@@ -20,7 +20,7 @@ module Flipper
       #
       # Returns true if gate open for thing, false if not.
       def open?(thing)
-        instrument(:open, thing) {
+        instrument(:open?, thing) { |payload|
           if thing.nil?
             false
           else
@@ -35,7 +35,7 @@ module Flipper
 
       def description
         if enabled?
-          "groups (#{toggle.value.to_a.join(', ')})"
+          "groups (#{toggle.value.to_a.sort.join(', ')})"
         else
           'disabled'
         end

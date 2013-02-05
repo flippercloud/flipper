@@ -6,6 +6,9 @@ module Flipper
   class Gate
     extend Forwardable
 
+    # Private: The name of instrumentation events.
+    InstrumentationName = "gate_operation.#{InstrumentationNamespace}"
+
     # Private
     attr_reader :feature
 
@@ -14,6 +17,7 @@ module Flipper
 
     def_delegator :@feature, :adapter
 
+    # Public
     def initialize(feature, options = {})
       @feature = feature
       @instrumenter = options.fetch(:instrumenter, Flipper::Instrumenters::Noop)
@@ -82,26 +86,27 @@ module Flipper
     def inspect
       attributes = [
         "feature=#{feature.name.inspect}",
+        "description=#{description.inspect}",
         "adapter=#{adapter.name.inspect}",
+        "adapter_key=#{adapter_key.inspect}",
         "toggle_class=#{toggle_class.inspect}",
         "toggle_value=#{toggle.value.inspect}",
-        "adapter_key=#{adapter_key.inspect}",
       ]
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
     end
 
-    private
-
-    def instrument(action, thing)
-      name = instrument_name(action)
+    # Private
+    def instrument(operation, thing)
       payload = {
         :thing => thing,
+        :operation => operation,
+        :gate_name => name,
+        :feature_name => @feature.name,
       }
-      @instrumenter.instrument(name, payload) { yield }
-    end
 
-    def instrument_name(action)
-      "#{action}.#{name}.gate.flipper"
+      @instrumenter.instrument(InstrumentationName, payload) {
+        payload[:result] = yield(payload) if block_given?
+      }
     end
   end
 end
