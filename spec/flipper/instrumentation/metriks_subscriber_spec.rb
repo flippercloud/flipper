@@ -52,18 +52,12 @@ describe Flipper::Instrumentation::MetriksSubscriber do
 
   it "updates gate metrics when calls happen" do
     flipper[:stats].enable(user)
-    Metriks.timer("flipper.gate_operation.actor.enable").count.should be(1)
-    Metriks.timer("flipper.feature.stats.gate_operation.actor.enable").count.should be(1)
-
     flipper[:stats].enabled?(user)
+
     Metriks.timer("flipper.gate_operation.boolean.open").count.should be(1)
     Metriks.timer("flipper.feature.stats.gate_operation.boolean.open").count.should be(1)
     Metriks.meter("flipper.feature.stats.gate.actor.open").count.should be(1)
     Metriks.meter("flipper.feature.stats.gate.boolean.closed").count.should be(1)
-
-    flipper[:stats].disable(user)
-    Metriks.timer("flipper.gate_operation.actor.disable").count.should be(1)
-    Metriks.timer("flipper.feature.stats.gate_operation.actor.disable").count.should be(1)
   end
 
   # Helper for seeing what is in the metriks registry
