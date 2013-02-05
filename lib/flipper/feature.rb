@@ -35,7 +35,7 @@ module Flipper
     # Returns the result of Flipper::Gate#enable.
     def enable(thing = Types::Boolean.new)
       gate = gate_for(thing)
-      instrument(:enable, thing, gate) { gate.enable(thing) }
+      instrument(:enable, thing) { gate.enable(thing) }
     end
 
     # Public: Disable this feature for something.
@@ -43,7 +43,7 @@ module Flipper
     # Returns the result of Flipper::Gate#disable.
     def disable(thing = Types::Boolean.new)
       gate = gate_for(thing)
-      instrument(:disable, thing, gate) { gate.disable(thing) }
+      instrument(:disable, thing) { gate.disable(thing) }
     end
 
     # Public: Check if a feature is enabled for a thing.
@@ -135,18 +135,17 @@ module Flipper
       !!catch(:short_circuit) { gates.detect { |gate| gate.open?(thing) } }
     end
 
-    def instrument(action, thing, gate = nil)
-      instrument_name = instrumentation_name(action)
+    def instrument(operation, thing)
       payload = {
         :feature_name => name,
+        :operation => operation,
         :thing => thing,
       }
-      payload[:gate] = gate if gate
-      @instrumenter.instrument(instrument_name, payload) { yield }
+      @instrumenter.instrument(instrumentation_name, payload) { yield }
     end
 
-    def instrumentation_name(action)
-      "#{action}.#{name}.feature.flipper"
+    def instrumentation_name
+      "feature_operation.flipper"
     end
 
     def find_gate(thing)

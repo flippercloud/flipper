@@ -89,7 +89,7 @@ describe Flipper::Feature do
       string = subject.inspect
       string.should include('Flipper::Feature')
       string.should include('name=:search')
-      string.should include('adapter="memory"')
+      string.should include("adapter=#{subject.adapter.name.inspect}")
     end
   end
 
@@ -108,11 +108,11 @@ describe Flipper::Feature do
 
       event = instrumenter.events.last
       event.should_not be_nil
-      event.name.should eq('enable.search.feature.flipper')
+      event.name.should eq('feature_operation.flipper')
       event.payload.should eq({
         :feature_name => :search,
+        :operation => :enable,
         :thing => thing,
-        :gate => gate,
       })
     end
 
@@ -124,11 +124,11 @@ describe Flipper::Feature do
 
       event = instrumenter.events.last
       event.should_not be_nil
-      event.name.should eq('disable.search.feature.flipper')
+      event.name.should eq('feature_operation.flipper')
       event.payload.should eq({
         :feature_name => :search,
+        :operation => :disable,
         :thing => thing,
-        :gate => gate,
       })
     end
 
@@ -140,9 +140,10 @@ describe Flipper::Feature do
 
       event = instrumenter.events.last
       event.should_not be_nil
-      event.name.should eq('enabled.search.feature.flipper')
+      event.name.should eq('feature_operation.flipper')
       event.payload.should eq({
         :feature_name => :search,
+        :operation => :enabled,
         :thing => thing,
       })
     end
@@ -155,9 +156,10 @@ describe Flipper::Feature do
 
       event = instrumenter.events.last
       event.should_not be_nil
-      event.name.should eq('disabled.search.feature.flipper')
+      event.name.should eq('feature_operation.flipper')
       event.payload.should eq({
         :feature_name => :search,
+        :operation => :disabled,
         :thing => thing,
       })
     end
