@@ -40,11 +40,11 @@ module Flipper
       end
 
       def enable(thing)
-        toggle.enable Types::Actor.wrap(thing)
+        super Types::Actor.wrap(thing)
       end
 
       def disable(thing)
-        toggle.disable Types::Actor.wrap(thing)
+        super Types::Actor.wrap(thing)
       end
 
       def description
