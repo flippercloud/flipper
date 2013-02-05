@@ -129,12 +129,12 @@ module Flipper
       non_boolean_gates.select { |gate| gate.enabled? }
     end
 
-    private
-
+    # Private
     def any_gates_open?(thing)
       !!catch(:short_circuit) { gates.detect { |gate| gate.open?(thing) } }
     end
 
+    # Private
     def instrument(operation, thing)
       payload = {
         :feature_name => name,
@@ -144,10 +144,12 @@ module Flipper
       @instrumenter.instrument(instrumentation_name, payload) { yield }
     end
 
+    # Private
     def instrumentation_name
       "feature_operation.flipper"
     end
 
+    # Private
     def find_gate(thing)
       gates.detect { |gate| gate.protects?(thing) }
     end
