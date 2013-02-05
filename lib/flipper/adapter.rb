@@ -72,7 +72,7 @@ module Flipper
     #
     def initialize(adapter, options = {})
       @adapter = adapter
-      @name = adapter.class.name.split('::').last.downcase
+      @name = adapter.class.name.split('::').last.downcase.to_sym
       @local_cache = options[:local_cache] || {}
       @instrumenter = options.fetch(:instrumenter, Flipper::Instrumenters::Noop)
     end
@@ -154,20 +154,27 @@ module Flipper
           local_cache[key.to_s] = @adapter.send(operation, key)
         }
       else
-        name = instrumentation_name(operation)
-        payload = {:key => key}
+        payload = {
+          :key => key,
+          :operation => operation,
+          :adapter_name => @name,
+        }
 
-        @instrumenter.instrument(name, payload) {
+        @instrumenter.instrument(instrumentation_name, payload) { |payload|
           @adapter.send(operation, key)
         }
       end
     end
 
     def perform_update(operation, key, value)
-      name = instrumentation_name(operation)
-      payload = {:key => key, :value => value}
+      payload = {
+        :key => key,
+        :value => value,
+        :operation => operation,
+        :adapter_name => @name,
+      }
 
-      result = @instrumenter.instrument(name, payload) {
+      result = @instrumenter.instrument(instrumentation_name, payload) { |payload|
         @adapter.send(operation, key, value)
       }
 
@@ -179,10 +186,13 @@ module Flipper
     end
 
     def perform_delete(operation, key)
-      name = instrumentation_name(operation)
-      payload = {:key => key}
+      payload = {
+        :key => key,
+        :operation => operation,
+        :adapter_name => @name,
+      }
 
-      result = @instrumenter.instrument(name, payload) {
+      result = @instrumenter.instrument(instrumentation_name, payload) { |payload|
         @adapter.send(operation, key)
       }
 
@@ -193,8 +203,8 @@ module Flipper
       result
     end
 
-    def instrumentation_name(operation)
-      "#{operation}.#{name}.adapter.flipper"
+    def instrumentation_name
+      "adapter_operation.flipper"
     end
   end
 end

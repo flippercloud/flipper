@@ -66,6 +66,11 @@ describe Flipper::Adapter do
       instance.adapter.should be(adapter)
     end
 
+    it "sets adapter name" do
+      instance = described_class.new(adapter)
+      instance.name.should be(:memory)
+    end
+
     it "defaults instrumenter" do
       instance = described_class.new(adapter)
       instance.instrumenter.should be(Flipper::Instrumenters::Noop)
@@ -380,8 +385,12 @@ describe Flipper::Adapter do
 
       event = instrumenter.events.last
       event.should_not be_nil
-      event.name.should eq('read.memory.adapter.flipper')
-      event.payload.should eq({:key => 'foo'})
+      event.name.should eq('adapter_operation.flipper')
+      event.payload.should eq({
+        :key => 'foo',
+        :operation => :read,
+        :adapter_name => :memory,
+      })
     end
 
     it "is recorded for write" do
@@ -389,8 +398,13 @@ describe Flipper::Adapter do
 
       event = instrumenter.events.last
       event.should_not be_nil
-      event.name.should eq('write.memory.adapter.flipper')
-      event.payload.should eq({:key => 'foo', :value => 'bar'})
+      event.name.should eq('adapter_operation.flipper')
+      event.payload.should eq({
+        :key => 'foo',
+        :value => 'bar',
+        :operation => :write,
+        :adapter_name => :memory,
+      })
     end
 
     it "is recorded for delete" do
@@ -398,8 +412,12 @@ describe Flipper::Adapter do
 
       event = instrumenter.events.last
       event.should_not be_nil
-      event.name.should eq('delete.memory.adapter.flipper')
-      event.payload.should eq({:key => 'foo'})
+      event.name.should eq('adapter_operation.flipper')
+      event.payload.should eq({
+        :key => 'foo',
+        :operation => :delete,
+        :adapter_name => :memory,
+      })
     end
 
     it "is recorded for set_members" do
@@ -407,8 +425,12 @@ describe Flipper::Adapter do
 
       event = instrumenter.events.last
       event.should_not be_nil
-      event.name.should eq('set_members.memory.adapter.flipper')
-      event.payload.should eq({:key => 'foo'})
+      event.name.should eq('adapter_operation.flipper')
+      event.payload.should eq({
+        :key => 'foo',
+        :operation => :set_members,
+        :adapter_name => :memory,
+      })
     end
 
     it "is recorded for set_add" do
@@ -416,8 +438,13 @@ describe Flipper::Adapter do
 
       event = instrumenter.events.last
       event.should_not be_nil
-      event.name.should eq('set_add.memory.adapter.flipper')
-      event.payload.should eq({:key => 'foo', :value => 'bar'})
+      event.name.should eq('adapter_operation.flipper')
+      event.payload.should eq({
+        :key => 'foo',
+        :value => 'bar',
+        :operation => :set_add,
+        :adapter_name => :memory,
+      })
     end
 
     it "is recorded for set_delete" do
@@ -425,14 +452,19 @@ describe Flipper::Adapter do
 
       event = instrumenter.events.last
       event.should_not be_nil
-      event.name.should eq('set_delete.memory.adapter.flipper')
-      event.payload.should eq({:key => 'foo', :value => 'bar'})
+      event.name.should eq('adapter_operation.flipper')
+      event.payload.should eq({
+        :key => 'foo',
+        :value => 'bar',
+        :operation => :set_delete,
+        :adapter_name => :memory,
+      })
     end
   end
 
   describe "#inspect" do
     it "returns easy to read string representation" do
-      subject.inspect.should eq("#<Flipper::Adapter:#{subject.object_id} name=\"memory\", use_local_cache=nil>")
+      subject.inspect.should eq("#<Flipper::Adapter:#{subject.object_id} name=:memory, use_local_cache=nil>")
     end
   end
 end
