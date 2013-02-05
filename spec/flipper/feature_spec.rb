@@ -55,12 +55,15 @@ describe Flipper::Feature do
   end
 
   describe "#gates" do
-    it "returns array of gates" do
-      subject.gates.should be_instance_of(Array)
-      subject.gates.each do |gate|
+    it "returns array of gates with each gate's instrumenter set" do
+      instrumenter = double('Instrumenter')
+      instance = described_class.new(:search, adapter, :instrumenter => instrumenter)
+      instance.gates.should be_instance_of(Array)
+      instance.gates.each do |gate|
         gate.should be_a(Flipper::Gate)
+        gate.instrumenter.should be(instrumenter)
       end
-      subject.gates.size.should be(5)
+      instance.gates.size.should be(5)
     end
   end
 
