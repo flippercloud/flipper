@@ -20,7 +20,7 @@ describe Flipper::Gates::Actor do
       event.name.should eq('gate_operation.flipper')
       event.payload.should eq({
         :thing => thing,
-        :operation => :open,
+        :operation => :open?,
         :result => false,
         :gate_name => :actor,
         :feature_name => :search,

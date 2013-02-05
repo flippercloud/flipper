@@ -20,7 +20,7 @@ module Flipper
       #
       # Returns true if gate open for thing, false if not.
       def open?(thing)
-        instrument(:open, thing) { |payload| toggle.value }
+        instrument(:open?, thing) { |payload| toggle.value }
       end
 
       def protects?(thing)

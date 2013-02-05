@@ -20,7 +20,7 @@ describe Flipper::Gates::PercentageOfRandom do
       event.name.should eq('gate_operation.flipper')
 
       event.payload[:thing].should eq(thing)
-      event.payload[:operation].should eq(:open)
+      event.payload[:operation].should eq(:open?)
       event.payload[:gate_name].should eq(:percentage_of_random)
       event.payload[:feature_name].should eq(:search)
 

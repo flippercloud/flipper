@@ -42,7 +42,7 @@ describe Flipper::Instrumentation::LogSubscriber do
     end
 
     it "logs gate calls" do
-      gate_line = find_line('Flipper feature(search) gate(boolean) open false')
+      gate_line = find_line('Flipper feature(search) gate(boolean) open? false')
       gate_line.should include('[ thing=nil ]')
     end
   end
