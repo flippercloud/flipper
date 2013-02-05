@@ -15,7 +15,7 @@ module Flipper
 
       # Public
       def write(key, value)
-        @source[key.to_s] = value
+        @source[key.to_s] = value.to_s
       end
 
       # Public
@@ -26,13 +26,13 @@ module Flipper
       # Public
       def set_add(key, value)
         ensure_set_initialized(key)
-        @source[key.to_s].add(value)
+        @source[key.to_s].add(value.to_s)
       end
 
       # Public
       def set_delete(key, value)
         ensure_set_initialized(key)
-        @source[key.to_s].delete(value)
+        @source[key.to_s].delete(value.to_s)
       end
 
       # Public

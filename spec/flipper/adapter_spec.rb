@@ -5,7 +5,8 @@ require 'flipper/instrumenters/memory'
 
 describe Flipper::Adapter do
   let(:local_cache)  { {} }
-  let(:adapter)      { Flipper::Adapters::Memory.new }
+  let(:source)       { {} }
+  let(:adapter)      { Flipper::Adapters::Memory.new(source) }
   let(:features_key) { described_class::FeaturesKey }
 
   subject { described_class.new(adapter, :local_cache => local_cache) }
@@ -134,7 +135,7 @@ describe Flipper::Adapter do
 
     describe "#set_members" do
       before do
-        adapter.write 'foo', Set['1', '2']
+        source['foo'] = Set['1', '2']
         @result = subject.set_members('foo')
       end
 
@@ -180,7 +181,7 @@ describe Flipper::Adapter do
 
     describe "#set_add" do
       before do
-        adapter.write 'foo', Set['1']
+        source['foo'] = Set['1']
         local_cache['foo'] = Set['1']
         subject.set_add 'foo', '2'
       end
@@ -196,7 +197,7 @@ describe Flipper::Adapter do
 
     describe "#set_delete" do
       before do
-        adapter.write 'foo', Set['1', '2', '3']
+        source['foo'] = Set['1', '2', '3']
         local_cache['foo'] = Set['1', '2', '3']
         subject.set_delete 'foo', '3'
       end
@@ -233,7 +234,7 @@ describe Flipper::Adapter do
 
     describe "#set_members" do
       before do
-        adapter.write 'foo', Set['1', '2']
+        source['foo'] = Set['1', '2']
         @result = subject.set_members('foo')
       end
 
@@ -280,7 +281,7 @@ describe Flipper::Adapter do
 
     describe "#set_add" do
       before do
-        adapter.write 'foo', Set['1']
+        source['foo'] = Set['1']
         local_cache['foo'] = Set['1']
         subject.set_add 'foo', '2'
       end
@@ -296,7 +297,7 @@ describe Flipper::Adapter do
 
     describe "#set_delete" do
       before do
-        adapter.write 'foo', Set['1', '2', '3']
+        source['foo'] = Set['1', '2', '3']
         local_cache['foo'] = Set['1', '2', '3']
         subject.set_delete 'foo', '3'
       end

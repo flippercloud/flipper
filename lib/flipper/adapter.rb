@@ -101,7 +101,7 @@ module Flipper
 
     # Public: Set a key to a value.
     def write(key, value)
-      perform_update(:write, key, value)
+      perform_update(:write, key, value.to_s)
     end
 
     # Public: Deletes a key.
@@ -116,12 +116,12 @@ module Flipper
 
     # Public: Adds a value to a set.
     def set_add(key, value)
-      perform_update(:set_add, key, value)
+      perform_update(:set_add, key, value.to_s)
     end
 
     # Public: Deletes a value from a set.
     def set_delete(key, value)
-      perform_update(:set_delete, key, value)
+      perform_update(:set_delete, key, value.to_s)
     end
 
     # Public: Determines equality for an adapter instance when compared to

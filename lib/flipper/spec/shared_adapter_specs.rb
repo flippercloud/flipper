@@ -82,18 +82,27 @@ shared_examples_for 'a flipper adapter' do
     Flipper.new(subject).should_not be_nil
   end
 
-  context "integration spot-checks" do
+  context "working with sets" do
+    it "always returns strings" do
+      subject.set_add key, 1
+      subject.set_add key, 2
+      subject.set_members(key).should eq(Set['1', '2'])
+      subject.set_delete key, 2
+      subject.set_members(key).should eq(Set['1'])
+    end
+  end
 
+  context "integration spot-checks" do
     let(:instance) { Flipper.new(subject) }
     let(:feature) { instance[:feature] }
     let(:actor) { Struct.new(:id).new(1) }
 
-    describe "percentage of actors" do
+    context "percentage of actors" do
       let(:percentage) { instance.actors(10) }
       it_should_behave_like 'a working percentage'
     end
 
-    describe "random percentage" do
+    context "random percentage" do
       let(:percentage) { instance.random(10) }
       it_should_behave_like 'a working percentage'
     end
