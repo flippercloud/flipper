@@ -37,8 +37,9 @@ module Flipper
     #
     # Returns the result of Flipper::Gate#enable.
     def enable(thing = Types::Boolean.new)
-      instrument(:enable, thing) {
+      instrument(:enable, thing) { |payload|
         gate = gate_for(thing)
+        payload[:gate_name] = gate.name
         gate.enable(thing)
       }
     end
@@ -47,8 +48,9 @@ module Flipper
     #
     # Returns the result of Flipper::Gate#disable.
     def disable(thing = Types::Boolean.new)
-      instrument(:disable, thing) {
+      instrument(:disable, thing) { |payload|
         gate = gate_for(thing)
+        payload[:gate_name] = gate.name
         gate.disable(thing)
       }
     end
@@ -57,7 +59,16 @@ module Flipper
     #
     # Returns true if enabled, false if not.
     def enabled?(thing = nil)
-      instrument(:enabled?, thing) { any_gates_open?(thing) }
+      instrument(:enabled?, thing) { |payload|
+        gate = gates.detect { |gate| gate.open?(thing) }
+
+        if gate.nil?
+          false
+        else
+          payload[:gate_name] = gate.name
+          true
+        end
+      }
     end
 
     # Internal: Gates to check to see if feature is enabled/disabled
@@ -130,11 +141,6 @@ module Flipper
     # Private
     def conditional_gates
       @conditional_gates ||= non_boolean_gates.select { |gate| gate.enabled? }
-    end
-
-    # Private
-    def any_gates_open?(thing)
-      !!gates.detect { |gate| gate.open?(thing) }
     end
 
     # Private

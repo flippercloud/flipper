@@ -67,16 +67,6 @@ describe Flipper::Feature do
     end
   end
 
-  context "#enabled?" do
-    it "returns the same as any_gates_open" do
-      subject.stub(:any_gates_open? => true)
-      subject.enabled?.should be_true
-
-      subject.stub(:any_gates_open? => false)
-      subject.enabled?.should be_false
-    end
-  end
-
   describe "#inspect" do
     it "returns easy to read string representation" do
       string = subject.inspect
