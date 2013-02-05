@@ -34,13 +34,13 @@ describe Flipper::Adapters::Memoized do
 
   describe "#set_members" do
     before do
-      source['foo'] = Set[1, 2]
+      source['foo'] = Set['1', '2']
       subject.set_members('foo')
     end
 
     it "memoizes key" do
       cache['foo'].should eq(source['foo'])
-      cache['foo'].should eq(Set[1, 2])
+      cache['foo'].should eq(Set['1', '2'])
     end
   end
 
@@ -70,9 +70,9 @@ describe Flipper::Adapters::Memoized do
 
   describe "#set_add" do
     before do
-      source['foo'] = Set[1, 2]
+      source['foo'] = Set['1', '2']
       @result = subject.set_members('foo')
-      subject.set_add('foo', 3)
+      subject.set_add('foo', '3')
     end
 
     it "unmemoizes key" do
@@ -82,8 +82,8 @@ describe Flipper::Adapters::Memoized do
 
   describe "#set_delete" do
     before do
-      source['foo'] = Set[1, 2]
-      subject.set_delete('foo', 2)
+      source['foo'] = Set['1', '2']
+      subject.set_delete('foo', '2')
     end
 
     it "unmemoizes key" do
