@@ -82,8 +82,22 @@ shared_examples_for 'a flipper adapter' do
     Flipper.new(subject).should_not be_nil
   end
 
+  context "working with values" do
+    it "always uses strings" do
+      subject.read(key).should be_nil
+      subject.write key, true
+      subject.read(key).should eq('true')
+
+      subject.write key, 22
+      subject.read(key).should eq('22')
+
+      subject.delete(key)
+      subject.read(key).should be_nil
+    end
+  end
+
   context "working with sets" do
-    it "always returns strings" do
+    it "always uses strings" do
       subject.set_add key, 1
       subject.set_add key, 2
       subject.set_members(key).should eq(Set['1', '2'])
