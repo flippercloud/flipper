@@ -35,7 +35,7 @@ describe Flipper::Gates::Actor do
       end
 
       it "returns text" do
-        subject.description.should eq("actors (bacon, ham)")
+        subject.description.should eq('actors ("bacon", "ham")')
       end
     end
 

@@ -191,7 +191,7 @@ describe Flipper::Feature do
       end
 
       it "returns text" do
-        subject.description.should eq('Enabled for actors (5), 5% of the time')
+        subject.description.should eq('Enabled for actors ("5"), 5% of the time')
       end
     end
   end
