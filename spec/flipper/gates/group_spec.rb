@@ -35,7 +35,7 @@ describe Flipper::Gates::Group do
       end
 
       it "returns text" do
-        subject.description.should eq("groups (bacon, ham)")
+        subject.description.should eq('groups (:bacon, :ham)')
       end
     end
 
