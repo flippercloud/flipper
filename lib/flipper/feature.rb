@@ -84,6 +84,13 @@ module Flipper
       ]
     end
 
+    # Internal: Finds a gate by name.
+    #
+    # Returns a Flipper::Gate if found, nil if not.
+    def gate(name)
+      gates.detect { |gate| gate.name.to_s == name.to_s }
+    end
+
     # Internal: Find the gate that protects a thing.
     #
     # thing - The object for which you would like to find a gate

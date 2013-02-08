@@ -67,6 +67,28 @@ describe Flipper::Feature do
     end
   end
 
+  describe "#gate" do
+    context "with symbol name" do
+      it "returns gate by name" do
+        boolean_gate = subject.gates.detect { |gate| gate.name == :boolean }
+        subject.gate(:boolean).should eq(boolean_gate)
+      end
+    end
+
+    context "with string name" do
+      it "returns gate by name" do
+        boolean_gate = subject.gates.detect { |gate| gate.name == :boolean }
+        subject.gate('boolean').should eq(boolean_gate)
+      end
+    end
+
+    context "with name that does not exist" do
+      it "returns nil" do
+        subject.gate(:poo).should be_nil
+      end
+    end
+  end
+
   describe "#inspect" do
     it "returns easy to read string representation" do
       string = subject.inspect
