@@ -10,6 +10,12 @@ describe Flipper::Gates::Boolean do
     described_class.new(feature, :instrumenter => instrumenter)
   }
 
+  describe "#value" do
+    it "returns value" do
+      subject.value.should be(false)
+    end
+  end
+
   describe "#description" do
     context "for enabled" do
       before do
