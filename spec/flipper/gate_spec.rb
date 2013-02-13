@@ -39,7 +39,6 @@ describe Flipper::Gate do
       string.should include('Flipper::Gate')
       string.should include('feature=:search')
       string.should include('description="enabled"')
-      string.should include("adapter=#{subject.adapter.name.inspect}")
       string.should include('value=22')
     end
   end

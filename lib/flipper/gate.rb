@@ -14,8 +14,6 @@ module Flipper
     # Private: What is used to instrument all the things.
     attr_reader :instrumenter
 
-    def_delegator :@feature, :adapter
-
     # Public
     def initialize(feature, options = {})
       @feature = feature
@@ -75,7 +73,6 @@ module Flipper
       attributes = [
         "feature=#{feature.name.inspect}",
         "description=#{description.inspect}",
-        "adapter=#{adapter.name.inspect}",
         "value=#{value.inspect}",
       ]
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
