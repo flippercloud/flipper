@@ -75,6 +75,6 @@ shared_examples_for 'a DSL feature' do
   end
 
   it "memoizes the feature" do
-    dsl.feature(:stats).should equal(feature)
+    dsl.send(method_name, :stats).should equal(feature)
   end
 end

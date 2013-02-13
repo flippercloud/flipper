@@ -75,16 +75,18 @@ describe Flipper::DSL do
 
   describe "#feature" do
     it_should_behave_like "a DSL feature" do
+      let(:method_name) { :feature }
       let(:instrumenter) { double('Instrumentor', :instrument => nil) }
-      let(:feature) { dsl.feature(:stats) }
+      let(:feature) { dsl.send(method_name, :stats) }
       let(:dsl) { Flipper::DSL.new(adapter, :instrumenter => instrumenter) }
     end
   end
 
   describe "#[]" do
     it_should_behave_like "a DSL feature" do
+      let(:method_name) { :[] }
       let(:instrumenter) { double('Instrumentor', :instrument => nil) }
-      let(:feature) { dsl[:stats] }
+      let(:feature) { dsl.send(method_name, :stats) }
       let(:dsl) { Flipper::DSL.new(adapter, :instrumenter => instrumenter) }
     end
   end
