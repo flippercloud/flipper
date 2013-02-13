@@ -15,16 +15,6 @@ module Flipper
         :set
       end
 
-      def enable(thing)
-        adapter.set_add adapter_key, thing.value
-        true
-      end
-
-      def disable(thing)
-        adapter.set_delete adapter_key, thing.value
-        true
-      end
-
       def enabled?
         !value.empty?
       end

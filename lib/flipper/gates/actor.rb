@@ -15,18 +15,6 @@ module Flipper
         :set
       end
 
-      def enable(thing)
-        thing = Types::Actor.wrap(thing)
-        adapter.set_add adapter_key, thing.value
-        true
-      end
-
-      def disable(thing)
-        thing = Types::Actor.wrap(thing)
-        adapter.set_delete adapter_key, thing.value
-        true
-      end
-
       def enabled?
         !value.empty?
       end

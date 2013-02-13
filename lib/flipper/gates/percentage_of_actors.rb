@@ -17,16 +17,6 @@ module Flipper
         :integer
       end
 
-      def enable(thing)
-        adapter.write adapter_key, thing.value
-        true
-      end
-
-      def disable(thing)
-        adapter.delete adapter_key
-        true
-      end
-
       def enabled?
         !value.nil? && value.to_i > 0
       end
