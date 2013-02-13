@@ -15,12 +15,17 @@ module Flipper
         :set
       end
 
-      def enabled?
-        !value.empty?
+      def description(value)
+        if enabled?(value)
+          group_names = value.to_a.sort.map { |name| name.to_sym.inspect }
+          "groups (#{group_names.join(', ')})"
+        else
+          'disabled'
+        end
       end
 
-      def value
-        adapter.set_members adapter_key
+      def enabled?(value)
+        !value.nil? && !value.empty?
       end
 
       # Internal: Checks if the gate is open for a thing.
@@ -45,15 +50,6 @@ module Flipper
 
       def protects?(thing)
         thing.is_a?(Flipper::Types::Group)
-      end
-
-      def description
-        if enabled?
-          group_names = value.to_a.sort.map { |name| name.to_sym.inspect }
-          "groups (#{group_names.join(', ')})"
-        else
-          'disabled'
-        end
       end
     end
   end

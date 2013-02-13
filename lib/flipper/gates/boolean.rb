@@ -23,12 +23,15 @@ module Flipper
         :boolean
       end
 
-      def enabled?
-        value
+      def description(value)
+        if enabled?(value)
+          'Enabled'
+        else
+          'Disabled'
+        end
       end
 
-      def value
-        value = adapter.read(adapter_key)
+      def enabled?(value)
         !!TruthMap[value]
       end
 
@@ -41,14 +44,6 @@ module Flipper
 
       def protects?(thing)
         thing.is_a?(Flipper::Types::Boolean)
-      end
-
-      def description
-        if enabled?
-          'Enabled'
-        else
-          'Disabled'
-        end
       end
     end
   end

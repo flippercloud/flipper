@@ -127,9 +127,12 @@ module Flipper
 
     # Public
     def state
-      if boolean_gate.enabled?
+      gate_values = adapter.get(self)
+      boolean_value = gate_values[boolean_gate]
+
+      if boolean_gate.enabled?(boolean_value)
         :on
-      elsif conditional_gates.any?
+      elsif conditional_gates(gate_values).any?
         :conditional
       else
         :off
@@ -138,13 +141,21 @@ module Flipper
 
     # Public
     def description
-      if boolean_gate.enabled?
-        boolean_gate.description.capitalize
+      gate_values = adapter.get(self)
+      boolean_value = gate_values[boolean_gate]
+      conditional_gates = conditional_gates(gate_values)
+
+      if boolean_gate.enabled?(boolean_value)
+        boolean_gate.description(boolean_value).capitalize
       elsif conditional_gates.any?
-        fragments = conditional_gates.map(&:description)
+        fragments = conditional_gates.map { |gate|
+          value = gate_values[gate]
+          gate.description(value)
+        }
+
         "Enabled for #{fragments.join(', ')}"
       else
-        boolean_gate.description.capitalize
+        boolean_gate.description(boolean_value).capitalize
       end
     end
 
@@ -159,8 +170,11 @@ module Flipper
     end
 
     # Private
-    def conditional_gates
-      @conditional_gates ||= non_boolean_gates.select { |gate| gate.enabled? }
+    def conditional_gates(gate_values)
+      @conditional_gates ||= non_boolean_gates.select { |gate|
+        value = gate_values[gate]
+        gate.enabled?(value)
+      }
     end
 
     # Private

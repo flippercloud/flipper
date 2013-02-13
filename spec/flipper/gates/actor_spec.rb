@@ -30,22 +30,15 @@ describe Flipper::Gates::Actor do
 
   describe "#description" do
     context "with actors in set" do
-      before do
-        adapter.stub(:set_members => Set['bacon', 'ham'])
-      end
-
       it "returns text" do
-        subject.description.should eq('actors ("bacon", "ham")')
+        values = Set['bacon', 'ham']
+        subject.description(values).should eq('actors ("bacon", "ham")')
       end
     end
 
     context "with no actors in set" do
-      before do
-        adapter.stub(:set_members => Set.new)
-      end
-
       it "returns disabled" do
-        subject.description.should eq('disabled')
+        subject.description(Set.new).should eq('disabled')
       end
     end
   end

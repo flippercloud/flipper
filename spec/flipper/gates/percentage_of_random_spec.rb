@@ -32,22 +32,15 @@ describe Flipper::Gates::PercentageOfRandom do
 
   describe "#description" do
     context "when enabled" do
-      before do
-        adapter.stub(:read => 22)
-      end
-
       it "returns text" do
-        subject.description.should eq('22% of the time')
+        subject.description(22).should eq('22% of the time')
       end
     end
 
     context "when disabled" do
-      before do
-        adapter.stub(:read => nil)
-      end
-
       it "returns disabled" do
-        subject.description.should eq('disabled')
+        subject.description(nil).should eq('disabled')
+        subject.description(0).should eq('disabled')
       end
     end
   end

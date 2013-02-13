@@ -15,12 +15,16 @@ module Flipper
         :integer
       end
 
-      def enabled?
-        !value.nil? && value.to_i > 0
+      def description(value)
+        if enabled?(value)
+          "#{value}% of the time"
+        else
+          'disabled'
+        end
       end
 
-      def value
-        adapter.read adapter_key
+      def enabled?(value)
+        !value.nil? && value.to_i > 0
       end
 
       # Internal: Checks if the gate is open for a thing.
@@ -36,14 +40,6 @@ module Flipper
 
       def protects?(thing)
         thing.is_a?(Flipper::Types::PercentageOfRandom)
-      end
-
-      def description
-        if enabled?
-          "#{value}% of the time"
-        else
-          'disabled'
-        end
       end
     end
   end

@@ -10,30 +10,16 @@ describe Flipper::Gates::Boolean do
     described_class.new(feature, :instrumenter => instrumenter)
   }
 
-  describe "#value" do
-    it "returns value" do
-      subject.value.should be(false)
-    end
-  end
-
   describe "#description" do
     context "for enabled" do
-      before do
-        subject.stub(:enabled? => true)
-      end
-
       it "returns Enabled" do
-        subject.description.should eq('Enabled')
+        subject.description(true).should eq('Enabled')
       end
     end
 
     context "for disabled" do
-      before do
-        subject.stub(:enabled? => false)
-      end
-
       it "returns Disabled" do
-        subject.description.should eq('Disabled')
+        subject.description(false).should eq('Disabled')
       end
     end
   end

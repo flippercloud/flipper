@@ -15,12 +15,17 @@ module Flipper
         :set
       end
 
-      def enabled?
-        !value.empty?
+      def description(value)
+        if enabled?(value)
+          actor_ids = value.to_a.sort.map { |id| id.inspect }
+          "actors (#{actor_ids.join(', ')})"
+        else
+          'disabled'
+        end
       end
 
-      def value
-        adapter.set_members adapter_key
+      def enabled?(value)
+        !value.nil? && !value.empty?
       end
 
       # Internal: Checks if the gate is open for a thing.
@@ -48,15 +53,6 @@ module Flipper
 
       def typecast(thing)
         Types::Actor.wrap(thing)
-      end
-
-      def description
-        if enabled?
-          actor_ids = value.to_a.sort.map { |id| id.inspect }
-          "actors (#{actor_ids.join(', ')})"
-        else
-          'disabled'
-        end
       end
     end
   end
