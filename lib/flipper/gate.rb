@@ -45,18 +45,12 @@ module Flipper
       raise 'Not implemented'
     end
 
-    def enabled?
+    def enabled?(value)
       raise 'Not implemented'
     end
 
-    def value
+    def description(value)
       raise 'Not implemented'
-    end
-
-    # Internal: The key where details about this gate can be retrieved from the
-    # adapter.
-    def adapter_key
-      @adapter_key ||= "#{feature.key}/#{key}"
     end
 
     # Internal: Check if a gate is open for a thing. Implemented in subclass.

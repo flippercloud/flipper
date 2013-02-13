@@ -15,11 +15,11 @@ module Flipper
         feature.gates.each do |gate|
           result[gate] = case gate.data_type
           when :boolean
-            read gate.adapter_key
+            read key(feature, gate)
           when :integer
-            read gate.adapter_key
+            read key(feature, gate)
           when :set
-            set_members gate.adapter_key
+            set_members key(feature, gate)
           else
             raise "#{gate} is not supported by this adapter yet"
           end
@@ -32,9 +32,9 @@ module Flipper
       def enable(feature, gate, thing)
         case gate.data_type
         when :boolean, :integer
-          write gate.adapter_key, thing.value.to_s
+          write key(feature, gate), thing.value.to_s
         when :set
-          set_add gate.adapter_key, thing.value.to_s
+          set_add key(feature, gate), thing.value.to_s
         else
           raise "#{gate} is not supported by this adapter yet"
         end
@@ -46,15 +46,19 @@ module Flipper
         when :boolean
           # FIXME: Need to make boolean gate not need to delete everything
           feature.gates.each do |gate|
-            delete gate.adapter_key
+            delete key(feature, gate)
           end
         when :integer
-          write gate.adapter_key, 0
+          write key(feature, gate), 0
         when :set
-          set_delete gate.adapter_key, thing.value.to_s
+          set_delete key(feature, gate), thing.value.to_s
         else
           raise "#{gate} is not supported by this adapter yet"
         end
+      end
+
+      def key(feature, gate)
+        "#{feature.key}/#{gate.key}"
       end
 
       # Private
