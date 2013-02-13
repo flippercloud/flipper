@@ -12,6 +12,9 @@ module Flipper
     # Internal: The name of the feature.
     attr_reader :name
 
+    # Internal: Name converted to value safe for adapter.
+    attr_reader :key
+
     # Private: The adapter this feature should use.
     attr_reader :adapter
 
@@ -28,13 +31,9 @@ module Flipper
     #
     def initialize(name, adapter, options = {})
       @name = name
+      @key = name.to_s
       @instrumenter = options.fetch(:instrumenter, Flipper::Instrumenters::Noop)
       @adapter = Adapter.wrap(adapter, :instrumenter => @instrumenter)
-    end
-
-    # Internal: Name converted to value safe for adapter.
-    def key
-      @key ||= name.to_s
     end
 
     # Public: Enable this feature for something.
