@@ -27,8 +27,7 @@ module Flipper
       raise 'Not implemented'
     end
 
-    # Private: The piece of the adapter key that is unique to the gate class.
-    # Implemented in subclass.
+    # Private: Name converted to value safe for adapter. Implemented in subclass.
     def key
       raise 'Not implemented'
     end

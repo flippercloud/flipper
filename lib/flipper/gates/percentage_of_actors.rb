@@ -8,7 +8,7 @@ module Flipper
         :percentage_of_actors
       end
 
-      # Internal: The piece of the adapter key that is unique to the gate class.
+      # Internal: Name converted to value safe for adapter.
       def key
         :perc_actors
       end

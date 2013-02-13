@@ -6,7 +6,7 @@ module Flipper
         :actor
       end
 
-      # Internal: The piece of the adapter key that is unique to the gate class.
+      # Internal: Name converted to value safe for adapter.
       def key
         :actors
       end
