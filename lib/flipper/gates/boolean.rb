@@ -3,27 +3,9 @@ module Flipper
     class Boolean < Gate
       TruthMap = {
         true    => true,
-        'true'  => true,
-        'TRUE'  => true,
-        'True'  => true,
-        't'     => true,
-        'T'     => true,
-        '1'     => true,
-        'on'    => true,
-        'ON'    => true,
-        1       => true,
-        1.0     => true,
         false   => false,
+        'true'  => true,
         'false' => false,
-        'FALSE' => false,
-        'False' => false,
-        'f'     => false,
-        'F'     => false,
-        '0'     => false,
-        'off'   => false,
-        'OFF'   => false,
-        0       => false,
-        0.0     => false,
         nil     => false,
       }
 
