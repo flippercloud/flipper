@@ -148,101 +148,6 @@ describe Flipper::Adapter do
         subject.get(@feature).should be(@result)
       end
     end
-
-    describe "#read" do
-      before do
-        adapter.write 'foo', 'bar'
-        @result = subject.read('foo')
-      end
-
-      it "returns result of adapter read" do
-        @result.should eq('bar')
-      end
-
-      it "memoizes adapter read value" do
-        local_cache['foo'].should eq('bar')
-        adapter.should_not_receive(:read)
-        subject.read('foo').should eq('bar')
-      end
-    end
-
-    describe "#set_members" do
-      before do
-        source['foo'] = Set['1', '2']
-        @result = subject.set_members('foo')
-      end
-
-      it "returns result of adapter set members" do
-        @result.should eq(Set['1', '2'])
-      end
-
-      it "memoizes key" do
-        local_cache['foo'].should eq(Set['1', '2'])
-        adapter.should_not_receive(:set_members)
-        subject.set_members('foo').should eq(Set['1', '2'])
-      end
-    end
-
-    describe "#write" do
-      before do
-        subject.write 'foo', 'swanky'
-      end
-
-      it "performs adapter write" do
-        adapter.read('foo').should eq('swanky')
-      end
-
-      it "unmemoizes key" do
-        local_cache.key?('foo').should be_false
-      end
-    end
-
-    describe "#delete" do
-      before do
-        adapter.write 'foo', 'bar'
-        subject.delete 'foo'
-      end
-
-      it "performs adapter delete" do
-        adapter.read('foo').should be_nil
-      end
-
-      it "unmemoizes key" do
-        local_cache.key?('foo').should be_false
-      end
-    end
-
-    describe "#set_add" do
-      before do
-        source['foo'] = Set['1']
-        local_cache['foo'] = Set['1']
-        subject.set_add 'foo', '2'
-      end
-
-      it "returns result of adapter set members" do
-        adapter.set_members('foo').should eq(Set['1', '2'])
-      end
-
-      it "unmemoizes key" do
-        local_cache.key?('foo').should be_false
-      end
-    end
-
-    describe "#set_delete" do
-      before do
-        source['foo'] = Set['1', '2', '3']
-        local_cache['foo'] = Set['1', '2', '3']
-        subject.set_delete 'foo', '3'
-      end
-
-      it "returns result of adapter set members" do
-        adapter.set_members('foo').should eq(Set['1', '2'])
-      end
-
-      it "unmemoizes key" do
-        local_cache.key?('foo').should be_false
-      end
-    end
   end
 
   context "with local cache disabled" do
@@ -273,100 +178,6 @@ describe Flipper::Adapter do
         @result[@feature.gate(:group)].should eq(Set['admins'])
         @result[@feature.gate(:percentage_of_actors)].should eq('20')
         @result[@feature.gate(:percentage_of_random)].should eq('10')
-      end
-    end
-
-    describe "#read" do
-      before do
-        adapter.write 'foo', 'bar'
-        @result = subject.read('foo')
-      end
-
-      it "returns result of adapter read" do
-        @result.should eq('bar')
-      end
-
-      it "does not memoize adapter read value" do
-        local_cache.key?('foo').should be_false
-      end
-    end
-
-    describe "#set_members" do
-      before do
-        source['foo'] = Set['1', '2']
-        @result = subject.set_members('foo')
-      end
-
-      it "returns result of adapter set members" do
-        @result.should eq(Set['1', '2'])
-      end
-
-      it "does not memoize the adapter set member result" do
-        local_cache.key?('foo').should be_false
-      end
-    end
-
-    describe "#write" do
-      before do
-        adapter.write 'foo', 'bar'
-        local_cache['foo'] = 'bar'
-        subject.write 'foo', 'swanky'
-      end
-
-      it "performs adapter write" do
-        adapter.read('foo').should eq('swanky')
-      end
-
-      it "does not attempt to delete local cache key" do
-        local_cache.key?('foo').should be_true
-      end
-    end
-
-    describe "#delete" do
-      before do
-        adapter.write 'foo', 'bar'
-        local_cache['foo'] = 'bar'
-        subject.delete 'foo'
-      end
-
-      it "performs adapter delete" do
-        adapter.read('foo').should be_nil
-      end
-
-      it "does not attempt to delete local cache key" do
-        local_cache.key?('foo').should be_true
-      end
-    end
-
-    describe "#set_add" do
-      before do
-        source['foo'] = Set['1']
-        local_cache['foo'] = Set['1']
-        subject.set_add 'foo', '2'
-      end
-
-      it "performs adapter set add" do
-        adapter.set_members('foo').should eq(Set['1', '2'])
-      end
-
-      it "does not attempt to delete local cache key" do
-        local_cache.key?('foo').should be_true
-      end
-    end
-
-    describe "#set_delete" do
-      before do
-        source['foo'] = Set['1', '2', '3']
-        local_cache['foo'] = Set['1', '2', '3']
-        subject.set_delete 'foo', '3'
-      end
-
-      it "performs adapter set delete" do
-        adapter.set_members('foo').should eq(Set['1', '2'])
-      end
-
-      it "does not attempt to delete local cache key" do
-        local_cache.key?('foo').should be_true
       end
     end
   end
@@ -435,82 +246,50 @@ describe Flipper::Adapter do
 
   describe "instrumentation" do
     let(:instrumenter) { Flipper::Instrumenters::Memory.new }
+    let(:feature) { flipper[:stats] }
+    let(:gate) { feature.gate(:percentage_of_actors) }
+    let(:thing) { flipper.actors(22) }
 
     subject {
       described_class.new(adapter, :instrumenter => instrumenter)
     }
 
-    it "is recorded for read" do
-      subject.read('foo')
+    it "is recorded for get" do
+      subject.get(feature)
 
       event = instrumenter.events.last
       event.should_not be_nil
       event.name.should eq('adapter_operation.flipper')
-      event.payload[:key].should eq('foo')
-      event.payload[:operation].should eq(:read)
+      event.payload[:operation].should eq(:get)
       event.payload[:adapter_name].should eq(:memory)
-      event.payload[:result].should be_nil
+      event.payload[:feature_name].should eq(:stats)
+      event.payload[:result].should be_instance_of(Hash)
     end
 
-    it "is recorded for write" do
-      subject.write('foo', 'bar')
+    it "is recorded for enable" do
+      subject.enable(feature, gate, thing)
 
       event = instrumenter.events.last
       event.should_not be_nil
       event.name.should eq('adapter_operation.flipper')
-      event.payload[:key].should eq('foo')
-      event.payload[:value].should eq('bar')
-      event.payload[:operation].should eq(:write)
+      event.payload[:operation].should eq(:enable)
       event.payload[:adapter_name].should eq(:memory)
-      event.payload[:result].should eq('bar')
+      event.payload[:feature_name].should eq(:stats)
+      event.payload[:gate_name].should eq(:percentage_of_actors)
+      event.payload[:result].should eq('22')
     end
 
-    it "is recorded for delete" do
-      subject.delete('foo')
+    it "is recorded for disable" do
+      subject.disable(feature, gate, thing)
 
       event = instrumenter.events.last
       event.should_not be_nil
       event.name.should eq('adapter_operation.flipper')
-      event.payload[:key].should eq('foo')
-      event.payload[:operation].should eq(:delete)
+      event.payload[:operation].should eq(:disable)
       event.payload[:adapter_name].should eq(:memory)
-      event.payload[:result].should be_nil
-    end
-
-    it "is recorded for set_members" do
-      subject.set_members('foo')
-
-      event = instrumenter.events.last
-      event.should_not be_nil
-      event.name.should eq('adapter_operation.flipper')
-      event.payload[:key].should eq('foo')
-      event.payload[:operation].should eq(:set_members)
-      event.payload[:adapter_name].should eq(:memory)
-      event.payload[:result].should eq(Set.new)
-    end
-
-    it "is recorded for set_add" do
-      subject.set_add('foo', 'bar')
-
-      event = instrumenter.events.last
-      event.should_not be_nil
-      event.name.should eq('adapter_operation.flipper')
-      event.payload[:key].should eq('foo')
-      event.payload[:operation].should eq(:set_add)
-      event.payload[:adapter_name].should eq(:memory)
-      event.payload[:result].should eq(Set['bar'])
-    end
-
-    it "is recorded for set_delete" do
-      subject.set_delete('foo', 'bar')
-
-      event = instrumenter.events.last
-      event.should_not be_nil
-      event.name.should eq('adapter_operation.flipper')
-      event.payload[:key].should eq('foo')
-      event.payload[:operation].should eq(:set_delete)
-      event.payload[:adapter_name].should eq(:memory)
-      event.payload[:result].should eq(Set.new)
+      event.payload[:feature_name].should eq(:stats)
+      event.payload[:gate_name].should eq(:percentage_of_actors)
+      event.payload[:result].should eq('0')
     end
   end
 

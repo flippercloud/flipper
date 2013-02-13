@@ -34,10 +34,30 @@ module Flipper
       raise 'Not implemented'
     end
 
+    def data_type
+      raise 'Not implemented'
+    end
+
+    def enable(thing)
+      raise 'Not implemented'
+    end
+
+    def disable(thing)
+      raise 'Not implemented'
+    end
+
+    def enabled?
+      raise 'Not implemented'
+    end
+
+    def value
+      raise 'Not implemented'
+    end
+
     # Internal: The key where details about this gate can be retrieved from the
     # adapter.
     def adapter_key
-      @key ||= Key.new(@feature.name, key)
+      @adapter_key ||= Key.new(@feature.name, key)
     end
 
     # Internal: Check if a gate is open for a thing. Implemented in subclass.
@@ -54,13 +74,16 @@ module Flipper
       false
     end
 
+    def typecast(thing)
+      thing
+    end
+
     # Public: Pretty string version for debugging.
     def inspect
       attributes = [
         "feature=#{feature.name.inspect}",
         "description=#{description.inspect}",
         "adapter=#{adapter.name.inspect}",
-        "adapter_key=#{adapter_key.inspect}",
         "value=#{value.inspect}",
       ]
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"

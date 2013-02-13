@@ -32,74 +32,31 @@ describe Flipper::Adapters::Memoized do
     end
   end
 
-  describe "#read" do
+  describe "#enable" do
     before do
-      source['foo'] = 'bar'
-      subject.read('foo')
+      @feature = flipper[:stats]
+      gate = @feature.gate(:boolean)
+
+      cache[@feature] = {:some => 'thing'}
+      subject.enable(@feature, gate, Flipper::Types::Boolean.new)
     end
 
-    it "memoizes key" do
-      cache['foo'].should eq(source['foo'])
-      cache['foo'].should eq('bar')
+    it "unmemoizes feature in cache" do
+      cache[@feature].should be_nil
     end
   end
 
-  describe "#set_members" do
+  describe "#disable" do
     before do
-      source['foo'] = Set['1', '2']
-      subject.set_members('foo')
+      @feature = flipper[:stats]
+      gate = @feature.gate(:boolean)
+
+      cache[@feature] = {:some => 'thing'}
+      subject.disable(@feature, gate, Flipper::Types::Boolean.new)
     end
 
-    it "memoizes key" do
-      cache['foo'].should eq(source['foo'])
-      cache['foo'].should eq(Set['1', '2'])
-    end
-  end
-
-  describe "#write" do
-    before do
-      source['foo'] = 'bar'
-      @result = subject.read('foo')
-      subject.write('foo', 'bar')
-    end
-
-    it "unmemoizes key" do
-      cache.key?('foo').should be_false
-    end
-  end
-
-  describe "#delete" do
-    before do
-      source['foo'] = 'bar'
-      @result = subject.read('foo')
-      subject.delete('foo')
-    end
-
-    it "unmemoizes key" do
-      cache.key?('foo').should be_false
-    end
-  end
-
-  describe "#set_add" do
-    before do
-      source['foo'] = Set['1', '2']
-      @result = subject.set_members('foo')
-      subject.set_add('foo', '3')
-    end
-
-    it "unmemoizes key" do
-      cache.key?('foo').should be_false
-    end
-  end
-
-  describe "#set_delete" do
-    before do
-      source['foo'] = Set['1', '2']
-      subject.set_delete('foo', '2')
-    end
-
-    it "unmemoizes key" do
-      cache.key?('foo').should be_false
+    it "unmemoizes feature in cache" do
+      cache[@feature].should be_nil
     end
   end
 end

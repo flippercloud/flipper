@@ -105,81 +105,60 @@ module Flipper
       end
     end
 
+    # Public: Enable feature gate for thing.
+    def enable(feature, gate, thing)
+      perform_enable(feature, gate, thing)
+
+      if using_local_cache?
+        local_cache.delete(feature.name)
+      end
+
+      true
+    end
+
+    # Public: Disable feature gate for thing.
+    def disable(feature, gate, thing)
+      perform_disable(feature, gate, thing)
+
+      if using_local_cache?
+        local_cache.delete(feature.name)
+      end
+
+      true
+    end
+
     # Public: Reads a key.
     def read(key)
-      if using_local_cache?
-        local_cache.fetch(key.to_s) {
-          local_cache[key.to_s] = perform_read(key)
-        }
-      else
-        perform_read(key)
-      end
+      @adapter.read(key)
     end
 
     # Public: Set a key to a value.
     def write(key, value)
       value = value.to_s
-      result = perform_write(key, value)
-
-      if using_local_cache?
-        local_cache.delete(key.to_s)
-      end
-
-      result
+      @adapter.write(key, value)
     end
 
     # Public: Deletes a key.
     def delete(key)
-      result = perform_delete(key)
-
-      if using_local_cache?
-        local_cache.delete(key.to_s)
-      end
-
-      result
+      @adapter.delete(key)
     end
 
     # Public: Returns the members of a set.
     def set_members(key)
-      if using_local_cache?
-        local_cache.fetch(key.to_s) {
-          local_cache[key.to_s] = perform_set_members(key)
-        }
-      else
-        perform_set_members(key)
-      end
+      @adapter.set_members(key)
     end
 
     # Public: Adds a value to a set.
     def set_add(key, value)
       value = value.to_s
-      result = perform_set_add(key, value)
-
-      if using_local_cache?
-        local_cache.delete(key.to_s)
-      end
-
-      result
+      @adapter.set_add(key, value)
     end
 
     # Public: Deletes a value from a set.
     def set_delete(key, value)
       value = value.to_s
-      result = perform_set_delete(key, value)
-
-      if using_local_cache?
-        local_cache.delete(key.to_s)
-      end
-
-      result
+      @adapter.set_delete(key, value)
     end
-
-    # Public: Determines equality for an adapter instance when compared to
-    # another object.
-    def eql?(other)
-      self.class.eql?(other.class) && adapter == other.adapter
-    end
-    alias_method :==, :eql?
 
     # Public: Returns all the features that the adapter knows of.
     def features
@@ -191,6 +170,13 @@ module Flipper
       set_add(FeaturesKey, name.to_s)
     end
 
+    # Public: Determines equality for an adapter instance when compared to
+    # another object.
+    def eql?(other)
+      self.class.eql?(other.class) && adapter == other.adapter
+    end
+    alias_method :==, :eql?
+
     # Public: Pretty string version for debugging.
     def inspect
       attributes = [
@@ -198,6 +184,28 @@ module Flipper
         "use_local_cache=#{@use_local_cache.inspect}"
       ]
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
+    end
+
+    def perform_enable(feature, gate, thing)
+      payload = {
+        :operation => :enable,
+        :adapter_name => @name,
+        :feature_name => feature.name,
+        :gate_name => gate.name,
+      }
+
+      instrument_operation :enable, payload, feature, gate, thing
+    end
+
+    def perform_disable(feature, gate, thing)
+      payload = {
+        :operation => :disable,
+        :adapter_name => @name,
+        :feature_name => feature.name,
+        :gate_name => gate.name,
+      }
+
+      instrument_operation :disable, payload, feature, gate, thing
     end
 
     # Private: Performs actual get with instrumentation.
@@ -209,71 +217,6 @@ module Flipper
       }
 
       instrument_operation :get, payload, feature
-    end
-
-    # Private
-    def perform_read(key)
-      payload = {
-        :key => key,
-        :operation => :read,
-        :adapter_name => @name,
-      }
-
-      instrument_operation :read, payload, key
-    end
-
-    def perform_write(key, value)
-      payload = {
-        :key => key,
-        :value => value,
-        :operation => :write,
-        :adapter_name => @name,
-      }
-
-      instrument_operation :write, payload, key, value
-    end
-
-    # Private
-    def perform_delete(key)
-      payload = {
-        :key => key,
-        :operation => :delete,
-        :adapter_name => @name,
-      }
-
-      instrument_operation :delete, payload, key
-    end
-
-    def perform_set_members(key)
-      payload = {
-        :key => key,
-        :operation => :set_members,
-        :adapter_name => @name,
-      }
-
-      instrument_operation :set_members, payload, key
-    end
-
-    def perform_set_add(key, value)
-      payload = {
-        :key => key,
-        :value => value,
-        :operation => :set_add,
-        :adapter_name => @name,
-      }
-
-      instrument_operation :set_add, payload, key, value
-    end
-
-    def perform_set_delete(key, value)
-      payload = {
-        :key => key,
-        :value => value,
-        :operation => :set_delete,
-        :adapter_name => @name,
-      }
-
-      instrument_operation :set_delete, payload, key, value
     end
 
     # Private: Instruments operation with payload.

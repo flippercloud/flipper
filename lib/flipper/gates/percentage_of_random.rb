@@ -11,6 +11,10 @@ module Flipper
         :perc_time
       end
 
+      def data_type
+        :integer
+      end
+
       def enable(thing)
         adapter.write adapter_key, thing.value
         true

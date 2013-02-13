@@ -12,7 +12,7 @@ end
 # read_key(key)
 # write_key(key, value)
 shared_examples_for 'a flipper adapter' do
-  let(:key) { Flipper::Key.new(:foo, :bar) }
+  let(:key) { "foo/bar" }
 
   describe "#write" do
     it "sets key to value in store" do

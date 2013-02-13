@@ -31,17 +31,17 @@ describe Flipper::Instrumentation::LogSubscriber do
       flipper[:search].enabled?
     end
 
-    it "logs feature calls with result after operation" do
+    xit "logs feature calls with result after operation" do
       feature_line = find_line('Flipper feature(search) enabled? false')
       feature_line.should include('[ thing=nil ]')
     end
 
-    it "logs adapter calls" do
+    xit "logs adapter calls" do
       adapter_line = find_line('Flipper feature(search) adapter(memory) read("search/boolean")')
       adapter_line.should include('[ result=nil ]')
     end
 
-    it "logs gate calls" do
+    xit "logs gate calls" do
       gate_line = find_line('Flipper feature(search) gate(boolean) open? false')
       gate_line.should include('[ thing=nil ]')
     end
@@ -55,12 +55,12 @@ describe Flipper::Instrumentation::LogSubscriber do
       flipper[:search].enabled?(user)
     end
 
-    it "logs thing for feature" do
+    xit "logs thing for feature" do
       feature_line = find_line('Flipper feature(search) enabled?')
       feature_line.should include(user.inspect)
     end
 
-    it "logs thing for gate" do
+    xit "logs thing for gate" do
       gate_line = find_line('Flipper feature(search) gate(boolean) open')
       gate_line.should include(user.inspect)
     end
@@ -74,17 +74,17 @@ describe Flipper::Instrumentation::LogSubscriber do
       flipper[:search].enable(user)
     end
 
-    it "logs feature calls with result in brackets" do
+    xit "logs feature calls with result in brackets" do
       feature_line = find_line('Flipper feature(search) enable true')
       feature_line.should include("[ thing=#{user.inspect} gate_name=actor ]")
     end
 
-    it "logs adapter value" do
+    xit "logs adapter value" do
       adapter_line = find_line('Flipper feature(search) adapter(memory) set_add("search/actors")')
       adapter_line.should include("value=#{user.flipper_id.to_s.inspect}")
     end
 
-    it "logs adapter calls not related to a specific feature" do
+    xit "logs adapter calls not related to a specific feature" do
       adapter_line = find_line('Flipper adapter(memory) set_add("features")')
       log.should_not include('Could not log')
       log.should_not include('NoMethodError: undefined method')

@@ -15,7 +15,7 @@ describe Flipper::Instrumentation::MetriksSubscriber do
   end
 
   context "for enabled feature" do
-    it "updates feature metrics when calls happen" do
+    xit "updates feature metrics when calls happen" do
       flipper[:stats].enable(user)
       Metriks.timer("flipper.feature_operation.enable").count.should be(1)
 
@@ -26,7 +26,7 @@ describe Flipper::Instrumentation::MetriksSubscriber do
   end
 
   context "for disabled feature" do
-    it "updates feature metrics when calls happen" do
+    xit "updates feature metrics when calls happen" do
       flipper[:stats].disable(user)
       Metriks.timer("flipper.feature_operation.disable").count.should be(1)
 
@@ -36,7 +36,7 @@ describe Flipper::Instrumentation::MetriksSubscriber do
     end
   end
 
-  it "updates adapter metrics when calls happen" do
+  xit "updates adapter metrics when calls happen" do
     flipper[:stats].enable(user)
     # one for features and one for actors
     Metriks.timer("flipper.adapter.memory.set_add").count.should be(2)
@@ -50,7 +50,7 @@ describe Flipper::Instrumentation::MetriksSubscriber do
     Metriks.timer("flipper.adapter.memory.set_delete").count.should be(1)
   end
 
-  it "updates gate metrics when calls happen" do
+  xit "updates gate metrics when calls happen" do
     flipper[:stats].enable(user)
     flipper[:stats].enabled?(user)
 

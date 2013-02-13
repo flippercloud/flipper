@@ -13,6 +13,10 @@ module Flipper
         :perc_actors
       end
 
+      def data_type
+        :integer
+      end
+
       def enable(thing)
         adapter.write adapter_key, thing.value
         true

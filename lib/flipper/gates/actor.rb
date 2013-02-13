@@ -11,6 +11,10 @@ module Flipper
         :actors
       end
 
+      def data_type
+        :set
+      end
+
       def enable(thing)
         thing = Types::Actor.wrap(thing)
         adapter.set_add adapter_key, thing.value
@@ -40,7 +44,7 @@ module Flipper
             false
           else
             if Types::Actor.wrappable?(thing)
-              actor = Types::Actor.wrap(thing)
+              actor = typecast(thing)
               enabled_actor_ids = value
               enabled_actor_ids.include?(actor.value)
             else
@@ -52,6 +56,10 @@ module Flipper
 
       def protects?(thing)
         Types::Actor.wrappable?(thing)
+      end
+
+      def typecast(thing)
+        Types::Actor.wrap(thing)
       end
 
       def description

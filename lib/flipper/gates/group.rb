@@ -11,6 +11,10 @@ module Flipper
         :groups
       end
 
+      def data_type
+        :set
+      end
+
       def enable(thing)
         adapter.set_add adapter_key, thing.value
         true

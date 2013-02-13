@@ -4,15 +4,18 @@ module Flipper
     #
     # Useful in tests to verify calls and such.
     class OperationLogger
+      extend Forwardable
+
+      # Forward soon to be private adapter methods to source adapter
+      def_delegators :@adapter, :read, :write, :delete,
+        :set_members, :set_add, :set_delete
+
+      # Internal: An array of the operations that have happened.
       attr_reader :operations
 
       Get        = Struct.new(:feature)
-      Read       = Struct.new(:key)
-      Write      = Struct.new(:key, :value)
-      Delete     = Struct.new(:key)
-      SetAdd     = Struct.new(:key, :value)
-      SetDelete  = Struct.new(:key, :value)
-      SetMembers = Struct.new(:key)
+      Enable     = Struct.new(:feature, :gate, :thing)
+      Disable    = Struct.new(:feature, :gate, :thing)
 
       # Public
       def initialize(adapter)
@@ -27,42 +30,18 @@ module Flipper
       end
 
       # Public
-      def read(key)
-        @operations << Read.new(key.to_s)
-        @adapter.read key
+      def enable(feature, gate, thing)
+        @operations << Enable.new(feature, gate, thing)
+        @adapter.enable feature, gate, thing
       end
 
       # Public
-      def write(key, value)
-        @operations << Write.new(key.to_s, value)
-        @adapter.write key, value
+      def disable(feature, gate, thing)
+        @operations << Disable.new(feature, gate, thing)
+        @adapter.disable feature, gate, thing
       end
 
-      # Public
-      def delete(key)
-        @operations << Delete.new(key.to_s, nil)
-        @adapter.delete key
-      end
-
-      # Public
-      def set_add(key, value)
-        @operations << SetAdd.new(key.to_s, value)
-        @adapter.set_add key, value
-      end
-
-      # Public
-      def set_delete(key, value)
-        @operations << SetDelete.new(key.to_s, value)
-        @adapter.set_delete key, value
-      end
-
-      # Public
-      def set_members(key)
-        @operations << SetMembers.new(key.to_s)
-        @adapter.set_members key
-      end
-
-      # Public: Clears operation log
+      # Public: Resets the operation log to empty
       def reset
         @operations.clear
       end

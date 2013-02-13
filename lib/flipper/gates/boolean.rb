@@ -19,6 +19,10 @@ module Flipper
         :boolean
       end
 
+      def data_type
+        :boolean
+      end
+
       def enable(thing)
         adapter.write adapter_key, thing.value
         true
