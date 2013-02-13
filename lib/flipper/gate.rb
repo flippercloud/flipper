@@ -74,8 +74,6 @@ module Flipper
     def inspect
       attributes = [
         "feature=#{feature.name.inspect}",
-        "description=#{description.inspect}",
-        "value=#{value.inspect}",
       ]
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
     end
