@@ -13,6 +13,24 @@ module Flipper
         :perc_actors
       end
 
+      def enable(thing)
+        adapter.write adapter_key, thing.value
+        true
+      end
+
+      def disable(thing)
+        adapter.delete adapter_key
+        true
+      end
+
+      def enabled?
+        !value.nil? && value.to_i > 0
+      end
+
+      def value
+        adapter.read adapter_key
+      end
+
       # Internal: Checks if the gate is open for a thing.
       #
       # Returns true if gate open for thing, false if not.
