@@ -60,10 +60,10 @@ module Flipper
     # Returns true if enabled, false if not.
     def enabled?(thing = nil)
       instrument(:enabled?, thing) { |payload|
-        preloaded_values = adapter.get(self)
+        gate_values = adapter.get(self)
 
         gate = gates.detect { |gate|
-          gate.open?(thing, preloaded_values[gate])
+          gate.open?(thing, gate_values[gate])
         }
 
         if gate.nil?
