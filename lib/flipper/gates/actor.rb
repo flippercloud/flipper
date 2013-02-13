@@ -36,8 +36,8 @@ module Flipper
           if thing.nil?
             false
           else
-            if Types::Actor.wrappable?(thing)
-              actor = typecast(thing)
+            if protects?(thing)
+              actor = wrap(thing)
               enabled_actor_ids = value
               enabled_actor_ids.include?(actor.value)
             else
@@ -47,12 +47,12 @@ module Flipper
         }
       end
 
-      def protects?(thing)
-        Types::Actor.wrappable?(thing)
+      def wrap(thing)
+        Types::Actor.wrap(thing)
       end
 
-      def typecast(thing)
-        Types::Actor.wrap(thing)
+      def protects?(thing)
+        Types::Actor.wrappable?(thing)
       end
     end
   end

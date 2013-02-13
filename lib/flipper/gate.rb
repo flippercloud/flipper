@@ -64,7 +64,9 @@ module Flipper
       false
     end
 
-    def typecast(thing)
+    # Internal: Allows gate to wrap thing using one of the supported flipper
+    # types so adapters always get something that responds to value.
+    def wrap(thing)
       thing
     end
 
