@@ -32,6 +32,11 @@ module Flipper
       @adapter = Adapter.wrap(adapter, :instrumenter => @instrumenter)
     end
 
+    # Internal: Name converted to value safe for adapter.
+    def key
+      @key ||= name.to_s
+    end
+
     # Public: Enable this feature for something.
     #
     # Returns the result of Flipper::Gate#enable.

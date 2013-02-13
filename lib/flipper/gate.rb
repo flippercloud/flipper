@@ -1,5 +1,4 @@
 require 'forwardable'
-require 'flipper/key'
 require 'flipper/instrumenters/noop'
 
 module Flipper
@@ -57,7 +56,7 @@ module Flipper
     # Internal: The key where details about this gate can be retrieved from the
     # adapter.
     def adapter_key
-      @adapter_key ||= Key.new(@feature.name, key)
+      @adapter_key ||= "#{feature.key}/#{key}"
     end
 
     # Internal: Check if a gate is open for a thing. Implemented in subclass.

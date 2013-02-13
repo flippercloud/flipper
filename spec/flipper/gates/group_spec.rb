@@ -3,7 +3,7 @@ require 'flipper/instrumenters/memory'
 
 describe Flipper::Gates::Group do
   let(:adapter) { double('Adapter', :set_members => []) }
-  let(:feature) { double('Feature', :name => :search, :adapter => adapter) }
+  let(:feature) { double('Feature', :key => 'search', :name => :search, :adapter => adapter) }
   let(:instrumenter) { Flipper::Instrumenters::Memory.new }
 
   subject {

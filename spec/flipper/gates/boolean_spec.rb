@@ -3,7 +3,7 @@ require 'flipper/instrumenters/memory'
 
 describe Flipper::Gates::Boolean do
   let(:adapter) { double('Adapter', :read => nil) }
-  let(:feature) { double('Feature', :name => :search, :adapter => adapter) }
+  let(:feature) { double('Feature', :key => 'search', :name => :search, :adapter => adapter) }
   let(:instrumenter) { Flipper::Instrumenters::Memory.new }
 
   subject {

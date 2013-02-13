@@ -65,8 +65,8 @@ module Flipper
 
     # Internal: Initializes a new adapter instance.
     #
-    # adapter - Vanilla adapter instance to wrap. Just needs to respond to
-    #           read, write, delete, set_members, set_add, and set_delete.
+    # adapter - Vanilla adapter instance to wrap. Just needs to respond to get,
+    #           enable and disable.
     #
     # options - The Hash of options.
     #           :local_cache - Where to store the local cache data (default: {}).
