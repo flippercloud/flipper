@@ -12,7 +12,16 @@ module Flipper
       def get(feature)
         result = {}
         feature.gates.each do |gate|
-          result[gate] = gate.value
+          result[gate] = case gate.data_type
+          when :boolean
+            read gate.adapter_key
+          when :integer
+            read gate.adapter_key
+          when :set
+            set_members gate.adapter_key
+          else
+            raise "#{gate} is not supported by this adapter yet"
+          end
         end
         result
       end
