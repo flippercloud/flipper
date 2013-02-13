@@ -95,7 +95,7 @@ module Flipper
         "adapter=#{adapter.name.inspect}",
         "adapter_key=#{adapter_key.inspect}",
         "toggle_class=#{toggle_class.inspect}",
-        "toggle_value=#{toggle.value.inspect}",
+        "value=#{value.inspect}",
       ]
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
     end

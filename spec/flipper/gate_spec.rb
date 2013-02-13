@@ -41,7 +41,7 @@ describe Flipper::Gate do
       string.should include("adapter=#{subject.adapter.name.inspect}")
       string.should include('adapter_key=#<Flipper::Key:')
       string.should include('toggle_class=Flipper::Toggles::Value')
-      string.should include('toggle_value="22"')
+      string.should include('value="22"')
     end
   end
 end
