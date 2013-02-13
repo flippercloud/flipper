@@ -7,6 +7,7 @@ describe Flipper::Adapters::Memoized do
   let(:cache)   { {} }
   let(:source)  { {} }
   let(:adapter) { Flipper::Adapters::Memory.new(source) }
+  let(:flipper) { Flipper.new(adapter) }
 
   subject { described_class.new(adapter, cache) }
 
@@ -19,6 +20,17 @@ describe Flipper::Adapters::Memoized do
   end
 
   it_should_behave_like 'a flipper adapter'
+
+  describe "#get" do
+    before do
+      @feature = flipper[:stats]
+      @result = subject.get(@feature)
+    end
+
+    it "memoizes feature" do
+      cache[@feature].should be(@result)
+    end
+  end
 
   describe "#read" do
     before do

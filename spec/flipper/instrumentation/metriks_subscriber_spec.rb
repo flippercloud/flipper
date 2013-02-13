@@ -42,7 +42,7 @@ describe Flipper::Instrumentation::MetriksSubscriber do
     Metriks.timer("flipper.adapter.memory.set_add").count.should be(2)
 
     flipper[:stats].enabled?(user)
-    Metriks.timer("flipper.adapter.memory.read").count.should be(1)
+    Metriks.timer("flipper.adapter.memory.read").count.should be(3)
     # one for actors and one for groups
     Metriks.timer("flipper.adapter.memory.set_members").count.should be(2)
 

@@ -8,6 +8,8 @@ describe Flipper::Adapter do
   let(:source)       { {} }
   let(:adapter)      { Flipper::Adapters::Memory.new(source) }
   let(:features_key) { described_class::FeaturesKey }
+  let(:flipper)      { Flipper.new(adapter) }
+  let(:feature)      { flipper[:stats] }
 
   subject { described_class.new(adapter, :local_cache => local_cache) }
 
@@ -116,6 +118,37 @@ describe Flipper::Adapter do
       subject.use_local_cache = true
     end
 
+    describe "#get" do
+      before do
+        @group = Flipper.register(:admins) { |thing| thing.admin? }
+        @actor = Struct.new(:flipper_id).new('13')
+        @actors = flipper.actors(20)
+        @random = flipper.random(10)
+
+        feature.enable @group
+        feature.enable @actors
+        feature.enable @random
+        feature.enable @actor
+
+        @result = subject.get(feature)
+      end
+
+      it "returns hash of gate => value" do
+        @result.should be_instance_of(Hash)
+        @result[feature.gate(:boolean)].should be_false
+        @result[feature.gate(:actor)].should eq(Set['13'])
+        @result[feature.gate(:group)].should eq(Set['admins'])
+        @result[feature.gate(:percentage_of_actors)].should eq('20')
+        @result[feature.gate(:percentage_of_random)].should eq('10')
+      end
+
+      it "memoizes adapter get value" do
+        local_cache[feature.name].should eq(@result)
+        adapter.should_not_receive(:get)
+        subject.get(feature).should be(@result)
+      end
+    end
+
     describe "#read" do
       before do
         adapter.write 'foo', 'bar'
@@ -215,6 +248,31 @@ describe Flipper::Adapter do
   context "with local cache disabled" do
     before do
       subject.use_local_cache = false
+    end
+
+    describe "#get" do
+      before do
+        @group = Flipper.register(:admins) { |thing| thing.admin? }
+        @actor = Struct.new(:flipper_id).new('13')
+        @actors = flipper.actors(20)
+        @random = flipper.random(10)
+
+        feature.enable @group
+        feature.enable @actors
+        feature.enable @random
+        feature.enable @actor
+
+        @result = subject.get(feature)
+      end
+
+      it "returns hash of gate => value" do
+        @result.should be_instance_of(Hash)
+        @result[feature.gate(:boolean)].should be_false
+        @result[feature.gate(:actor)].should eq(Set['13'])
+        @result[feature.gate(:group)].should eq(Set['admins'])
+        @result[feature.gate(:percentage_of_actors)].should eq('20')
+        @result[feature.gate(:percentage_of_random)].should eq('10')
+      end
     end
 
     describe "#read" do

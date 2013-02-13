@@ -10,6 +10,13 @@ module Flipper
       end
 
       # Public
+      def get(feature)
+        @cache.fetch(feature) {
+          @cache[feature] = @adapter.get(feature)
+        }
+      end
+
+      # Public
       def read(key)
         @cache.fetch(key) {
           @cache[key] = @adapter.read(key)

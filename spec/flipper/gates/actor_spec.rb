@@ -13,7 +13,7 @@ describe Flipper::Gates::Actor do
   describe "instrumentation" do
     it "is recorded for open" do
       thing = Struct.new(:flipper_id).new('22')
-      subject.open?(thing)
+      subject.open?(thing, Set.new)
 
       event = instrumenter.events.last
       event.should_not be_nil

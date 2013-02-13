@@ -19,8 +19,8 @@ module Flipper
       # Internal: Checks if the gate is open for a thing.
       #
       # Returns true if gate open for thing, false if not.
-      def open?(thing)
-        instrument(:open?, thing) { |payload| toggle.value }
+      def open?(thing, value)
+        instrument(:open?, thing) { |payload| value }
       end
 
       def protects?(thing)

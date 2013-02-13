@@ -41,7 +41,7 @@ describe Flipper::Gates::Boolean do
   describe "instrumentation" do
     it "is recorded for open" do
       thing = nil
-      subject.open?(thing)
+      subject.open?(thing, false)
 
       event = instrumenter.events.last
       event.should_not be_nil

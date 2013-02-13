@@ -111,7 +111,12 @@ describe Flipper::Middleware::LocalCache do
     middleware.call({})
 
     adapter.operations.should eq([
+      Flipper::Adapters::OperationLogger::Get.new(flipper[:stats]),
       Flipper::Adapters::OperationLogger::Read.new("stats/boolean"),
+      Flipper::Adapters::OperationLogger::SetMembers.new("stats/groups"),
+      Flipper::Adapters::OperationLogger::SetMembers.new("stats/actors"),
+      Flipper::Adapters::OperationLogger::Read.new("stats/perc_actors"),
+      Flipper::Adapters::OperationLogger::Read.new("stats/perc_time"),
     ])
   end
 

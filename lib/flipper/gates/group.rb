@@ -19,12 +19,12 @@ module Flipper
       # Internal: Checks if the gate is open for a thing.
       #
       # Returns true if gate open for thing, false if not.
-      def open?(thing)
+      def open?(thing, value)
         instrument(:open?, thing) { |payload|
           if thing.nil?
             false
           else
-            enabled_groups.any? { |group| group.match?(thing) }
+            enabled_groups(value).any? { |group| group.match?(thing) }
           end
         }
       end
@@ -45,21 +45,14 @@ module Flipper
       # Private: Get all the enabled groups for this gate.
       #
       # Returns an Array of Flipper::Types::Group instances.
-      def enabled_groups
-        enabled_group_names.map { |name|
+      def enabled_groups(value)
+        value.map { |name|
           begin
             Flipper.group(name)
           rescue GroupNotRegistered
             nil
           end
         }.compact
-      end
-
-      # Private: Get all the names of enabled groups.
-      #
-      # Returns a Set of the enabled group names.
-      def enabled_group_names
-        toggle.value
       end
     end
   end

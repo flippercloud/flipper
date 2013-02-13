@@ -13,7 +13,7 @@ describe Flipper::Gates::PercentageOfActors do
   describe "instrumentation" do
     it "is recorded for open" do
       thing = Struct.new(:flipper_id).new('22')
-      subject.open?(thing)
+      subject.open?(thing, 0)
 
       event = instrumenter.events.last
       event.should_not be_nil
@@ -53,6 +53,7 @@ describe Flipper::Gates::PercentageOfActors do
   describe "#open?" do
     context "when compared against two features" do
       let(:percentage) { 0.05 }
+      let(:percentage_as_integer) { percentage * 100 }
       let(:number_of_actors) { 100 }
 
       let(:actors) {
@@ -64,18 +65,13 @@ describe Flipper::Gates::PercentageOfActors do
       let(:feature_one_enabled_actors) do
         feature_one = double('Feature', :name => :name_one, :adapter => adapter)
         gate = described_class.new(feature_one)
-        actors.select { |actor| gate.open? actor }
+        actors.select { |actor| gate.open? actor, percentage_as_integer }
       end
 
       let(:feature_two_enabled_actors) do
         feature_two = double('Feature', :name => :name_two, :adapter => adapter)
         gate = described_class.new(feature_two)
-        actors.select { |actor| gate.open? actor }
-      end
-
-      before do
-        percentage_as_integer = percentage * 100
-        adapter.stub(:read => percentage_as_integer)
+        actors.select { |actor| gate.open? actor, percentage_as_integer }
       end
 
       it "does not enable both features for same set of actors" do

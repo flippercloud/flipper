@@ -6,17 +6,24 @@ module Flipper
     class OperationLogger
       attr_reader :operations
 
-      Read      = Struct.new(:key)
-      Write     = Struct.new(:key, :value)
-      Delete    = Struct.new(:key)
-      SetAdd    = Struct.new(:key, :value)
-      SetDelete = Struct.new(:key, :value)
-      SetMember = Struct.new(:key)
+      Get        = Struct.new(:feature)
+      Read       = Struct.new(:key)
+      Write      = Struct.new(:key, :value)
+      Delete     = Struct.new(:key)
+      SetAdd     = Struct.new(:key, :value)
+      SetDelete  = Struct.new(:key, :value)
+      SetMembers = Struct.new(:key)
 
       # Public
       def initialize(adapter)
         @operations = []
         @adapter = adapter
+      end
+
+      # Public
+      def get(feature)
+        @operations << Get.new(feature)
+        @adapter.get feature
       end
 
       # Public

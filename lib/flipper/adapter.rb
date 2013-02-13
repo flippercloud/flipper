@@ -94,34 +94,84 @@ module Flipper
       @use_local_cache == true
     end
 
+    # Public: Reads all keys for a given feature.
+    def get(feature)
+      if using_local_cache?
+        local_cache.fetch(feature.name) {
+          local_cache[feature.name] = perform_get(feature)
+        }
+      else
+        perform_get(feature)
+      end
+    end
+
     # Public: Reads a key.
     def read(key)
-      perform_read(:read, key)
+      if using_local_cache?
+        local_cache.fetch(key.to_s) {
+          local_cache[key.to_s] = perform_read(key)
+        }
+      else
+        perform_read(key)
+      end
     end
 
     # Public: Set a key to a value.
     def write(key, value)
-      perform_update(:write, key, value.to_s)
+      value = value.to_s
+      result = perform_write(key, value)
+
+      if using_local_cache?
+        local_cache.delete(key.to_s)
+      end
+
+      result
     end
 
     # Public: Deletes a key.
     def delete(key)
-      perform_delete(:delete, key)
+      result = perform_delete(key)
+
+      if using_local_cache?
+        local_cache.delete(key.to_s)
+      end
+
+      result
     end
 
     # Public: Returns the members of a set.
     def set_members(key)
-      perform_read(:set_members, key)
+      if using_local_cache?
+        local_cache.fetch(key.to_s) {
+          local_cache[key.to_s] = perform_set_members(key)
+        }
+      else
+        perform_set_members(key)
+      end
     end
 
     # Public: Adds a value to a set.
     def set_add(key, value)
-      perform_update(:set_add, key, value.to_s)
+      value = value.to_s
+      result = perform_set_add(key, value)
+
+      if using_local_cache?
+        local_cache.delete(key.to_s)
+      end
+
+      result
     end
 
     # Public: Deletes a value from a set.
     def set_delete(key, value)
-      perform_update(:set_delete, key, value.to_s)
+      value = value.to_s
+      result = perform_set_delete(key, value)
+
+      if using_local_cache?
+        local_cache.delete(key.to_s)
+      end
+
+      result
     end
 
     # Public: Determines equality for an adapter instance when compared to
@@ -150,62 +200,87 @@ module Flipper
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
     end
 
-    # Private
-    def perform_read(operation, key)
-      if using_local_cache?
-        local_cache.fetch(key.to_s) {
-          local_cache[key.to_s] = @adapter.send(operation, key)
-        }
-      else
-        payload = {
-          :key => key,
-          :operation => operation,
-          :adapter_name => @name,
-        }
+    # Private: Performs actual get with instrumentation.
+    def perform_get(feature)
+      payload = {
+        :operation => :get,
+        :adapter_name => @name,
+        :feature_name => feature.name,
+      }
 
-        @instrumenter.instrument(InstrumentationName, payload) { |payload|
-          payload[:result] = @adapter.send(operation, key)
-        }
-      end
+      instrument_operation :get, payload, feature
     end
 
     # Private
-    def perform_update(operation, key, value)
+    def perform_read(key)
+      payload = {
+        :key => key,
+        :operation => :read,
+        :adapter_name => @name,
+      }
+
+      instrument_operation :read, payload, key
+    end
+
+    def perform_write(key, value)
       payload = {
         :key => key,
         :value => value,
-        :operation => operation,
+        :operation => :write,
         :adapter_name => @name,
       }
 
-      result = @instrumenter.instrument(InstrumentationName, payload) { |payload|
-        payload[:result] = @adapter.send(operation, key, value)
-      }
-
-      if using_local_cache?
-        local_cache.delete(key.to_s)
-      end
-
-      result
+      instrument_operation :write, payload, key, value
     end
 
     # Private
-    def perform_delete(operation, key)
+    def perform_delete(key)
       payload = {
         :key => key,
-        :operation => operation,
+        :operation => :delete,
         :adapter_name => @name,
       }
 
-      result = @instrumenter.instrument(InstrumentationName, payload) { |payload|
-        payload[:result] = @adapter.send(operation, key)
+      instrument_operation :delete, payload, key
+    end
+
+    def perform_set_members(key)
+      payload = {
+        :key => key,
+        :operation => :set_members,
+        :adapter_name => @name,
       }
 
-      if using_local_cache?
-        local_cache.delete(key.to_s)
-      end
+      instrument_operation :set_members, payload, key
+    end
 
-      result
+    def perform_set_add(key, value)
+      payload = {
+        :key => key,
+        :value => value,
+        :operation => :set_add,
+        :adapter_name => @name,
+      }
+
+      instrument_operation :set_add, payload, key, value
+    end
+
+    def perform_set_delete(key, value)
+      payload = {
+        :key => key,
+        :value => value,
+        :operation => :set_delete,
+        :adapter_name => @name,
+      }
+
+      instrument_operation :set_delete, payload, key, value
+    end
+
+    # Private: Instruments operation with payload.
+    def instrument_operation(operation, payload = {}, *args)
+      @instrumenter.instrument(InstrumentationName, payload) { |payload|
+        payload[:result] = @adapter.send(operation, *args)
+      }
     end
   end
 end

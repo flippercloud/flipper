@@ -9,6 +9,15 @@ module Flipper
       end
 
       # Public
+      def get(feature)
+        result = {}
+        feature.gates.each do |gate|
+          result[gate] = gate.value
+        end
+        result
+      end
+
+      # Public
       def read(key)
         @source[key.to_s]
       end
