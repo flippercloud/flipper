@@ -50,11 +50,6 @@ module Flipper
       @toggle ||= toggle_class.new(self)
     end
 
-    # Internal: The value of the toggle as read from the adapter.
-    def value
-      toggle.value
-    end
-
     # Internal: Check if a gate is open for a thing. Implemented in subclass.
     #
     # Returns true if gate open for thing, false if not.
@@ -73,7 +68,6 @@ module Flipper
     #
     # Returns the result of Flipper::Toggle#enable.
     def enable(thing)
-      add_feature_awareness
       toggle.enable(thing)
     end
 
@@ -81,7 +75,6 @@ module Flipper
     #
     # Returns the result of Flipper::Toggle#disable.
     def disable(thing)
-      add_feature_awareness
       toggle.disable(thing)
     end
 
@@ -89,8 +82,9 @@ module Flipper
       toggle.enabled?
     end
 
-    def add_feature_awareness
-      adapter.feature_add adapter_key.feature_name
+    # Internal: The value of the toggle as read from the adapter.
+    def value
+      toggle.value
     end
 
     # Public: Pretty string version for debugging.

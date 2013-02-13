@@ -38,6 +38,7 @@ module Flipper
     # Returns the result of Flipper::Gate#enable.
     def enable(thing = Types::Boolean.new)
       instrument(:enable, thing) { |payload|
+        adapter.feature_add @name
         gate = gate_for(thing)
         payload[:gate_name] = gate.name
         gate.enable(thing)
@@ -49,6 +50,7 @@ module Flipper
     # Returns the result of Flipper::Gate#disable.
     def disable(thing = Types::Boolean.new)
       instrument(:disable, thing) { |payload|
+        adapter.feature_add @name
         gate = gate_for(thing)
         payload[:gate_name] = gate.name
         gate.disable(thing)
