@@ -84,47 +84,6 @@ module Flipper
       }
     end
 
-    # Internal: Gates to check to see if feature is enabled/disabled
-    #
-    # Returns an array of gates
-    def gates
-      @gates ||= [
-        Gates::Boolean.new(self, :instrumenter => @instrumenter),
-        Gates::Group.new(self, :instrumenter => @instrumenter),
-        Gates::Actor.new(self, :instrumenter => @instrumenter),
-        Gates::PercentageOfActors.new(self, :instrumenter => @instrumenter),
-        Gates::PercentageOfRandom.new(self, :instrumenter => @instrumenter),
-      ]
-    end
-
-    # Internal: Finds a gate by name.
-    #
-    # Returns a Flipper::Gate if found, nil if not.
-    def gate(name)
-      gates.detect { |gate| gate.name.to_s == name.to_s }
-    end
-
-    # Internal: Find the gate that protects a thing.
-    #
-    # thing - The object for which you would like to find a gate
-    #
-    # Returns a Flipper::Gate.
-    # Raises Flipper::GateNotFound if no gate found for thing
-    def gate_for(thing)
-      gates.detect { |gate| gate.protects?(thing) } ||
-        raise(GateNotFound.new(thing))
-    end
-
-    # Public: Pretty string version for debugging.
-    def inspect
-      attributes = [
-        "name=#{name.inspect}",
-        "state=#{state.inspect}",
-        "adapter=#{adapter.name.inspect}",
-      ]
-      "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
-    end
-
     # Public
     def state
       gate_values = adapter.get(self)
@@ -157,6 +116,47 @@ module Flipper
       else
         boolean_gate.description(boolean_value).capitalize
       end
+    end
+
+    # Public: Pretty string version for debugging.
+    def inspect
+      attributes = [
+        "name=#{name.inspect}",
+        "state=#{state.inspect}",
+        "adapter=#{adapter.name.inspect}",
+      ]
+      "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
+    end
+
+    # Internal: Gates to check to see if feature is enabled/disabled
+    #
+    # Returns an array of gates
+    def gates
+      @gates ||= [
+        Gates::Boolean.new(self, :instrumenter => @instrumenter),
+        Gates::Group.new(self, :instrumenter => @instrumenter),
+        Gates::Actor.new(self, :instrumenter => @instrumenter),
+        Gates::PercentageOfActors.new(self, :instrumenter => @instrumenter),
+        Gates::PercentageOfRandom.new(self, :instrumenter => @instrumenter),
+      ]
+    end
+
+    # Internal: Finds a gate by name.
+    #
+    # Returns a Flipper::Gate if found, nil if not.
+    def gate(name)
+      gates.detect { |gate| gate.name.to_s == name.to_s }
+    end
+
+    # Internal: Find the gate that protects a thing.
+    #
+    # thing - The object for which you would like to find a gate
+    #
+    # Returns a Flipper::Gate.
+    # Raises Flipper::GateNotFound if no gate found for thing
+    def gate_for(thing)
+      gates.detect { |gate| gate.protects?(thing) } ||
+        raise(GateNotFound.new(thing))
     end
 
     # Private
