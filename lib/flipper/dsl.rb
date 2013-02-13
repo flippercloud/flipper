@@ -56,6 +56,10 @@ module Flipper
     #
     # Returns an instance of Flipper::Feature.
     def feature(name)
+      if !name.is_a?(String) && !name.is_a?(Symbol)
+        raise ArgumentError, "#{name} must be a String or Symbol"
+      end
+
       @memoized_features[name.to_sym] ||= Feature.new(name, @adapter, {
         :instrumenter => instrumenter,
       })

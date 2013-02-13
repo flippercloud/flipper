@@ -77,4 +77,10 @@ shared_examples_for 'a DSL feature' do
   it "memoizes the feature" do
     dsl.send(method_name, :stats).should equal(feature)
   end
+
+  it "raises argument error if not string or symbol" do
+    expect {
+      dsl.send(method_name, Object.new)
+    }.to raise_error(ArgumentError, /must be a String or Symbol/)
+  end
 end
