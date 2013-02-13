@@ -11,9 +11,22 @@ module Flipper
         :groups
       end
 
-      # Internal: The toggle class used to enable/disable the gate for a thing.
-      def toggle_class
-        Toggles::Set
+      def enable(thing)
+        adapter.set_add adapter_key, thing.value
+        true
+      end
+
+      def disable(thing)
+        adapter.set_delete adapter_key, thing.value
+        true
+      end
+
+      def enabled?
+        !value.empty?
+      end
+
+      def value
+        adapter.set_members adapter_key
       end
 
       # Internal: Checks if the gate is open for a thing.
