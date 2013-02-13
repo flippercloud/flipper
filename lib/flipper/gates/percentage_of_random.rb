@@ -28,7 +28,7 @@ module Flipper
 
       def description
         if enabled?
-          "#{toggle.value}% of the time"
+          "#{value}% of the time"
         else
           'disabled'
         end

@@ -49,7 +49,7 @@ module Flipper
 
       def description
         if enabled?
-          actor_ids = toggle.value.to_a.sort.map { |id| id.inspect }
+          actor_ids = value.to_a.sort.map { |id| id.inspect }
           "actors (#{actor_ids.join(', ')})"
         else
           'disabled'

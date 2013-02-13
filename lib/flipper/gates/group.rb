@@ -35,7 +35,7 @@ module Flipper
 
       def description
         if enabled?
-          group_names = toggle.value.to_a.sort.map { |name| name.to_sym.inspect }
+          group_names = value.to_a.sort.map { |name| name.to_sym.inspect }
           "groups (#{group_names.join(', ')})"
         else
           'disabled'

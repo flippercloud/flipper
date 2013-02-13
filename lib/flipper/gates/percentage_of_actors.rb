@@ -36,7 +36,7 @@ module Flipper
 
       def description
         if enabled?
-          "#{toggle.value}% of actors"
+          "#{value}% of actors"
         else
           'disabled'
         end
