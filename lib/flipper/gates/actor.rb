@@ -11,9 +11,24 @@ module Flipper
         :actors
       end
 
-      # Internal: The toggle class used to enable/disable the gate for a thing.
-      def toggle_class
-        Toggles::Set
+      def enable(thing)
+        thing = Types::Actor.wrap(thing)
+        adapter.set_add adapter_key, thing.value
+        true
+      end
+
+      def disable(thing)
+        thing = Types::Actor.wrap(thing)
+        adapter.set_delete adapter_key, thing.value
+        true
+      end
+
+      def enabled?
+        !value.empty?
+      end
+
+      def value
+        adapter.set_members adapter_key
       end
 
       # Internal: Checks if the gate is open for a thing.
@@ -37,14 +52,6 @@ module Flipper
 
       def protects?(thing)
         Types::Actor.wrappable?(thing)
-      end
-
-      def enable(thing)
-        super Types::Actor.wrap(thing)
-      end
-
-      def disable(thing)
-        super Types::Actor.wrap(thing)
       end
 
       def description
