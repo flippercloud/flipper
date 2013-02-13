@@ -24,7 +24,14 @@ module Flipper
           if thing.nil?
             false
           else
-            enabled_groups(value).any? { |group| group.match?(thing) }
+            value.any? { |name|
+              begin
+                group = Flipper.group(name)
+                group.match?(thing)
+              rescue GroupNotRegistered
+                false
+              end
+            }
           end
         }
       end
@@ -40,19 +47,6 @@ module Flipper
         else
           'disabled'
         end
-      end
-
-      # Private: Get all the enabled groups for this gate.
-      #
-      # Returns an Array of Flipper::Types::Group instances.
-      def enabled_groups(value)
-        value.map { |name|
-          begin
-            Flipper.group(name)
-          rescue GroupNotRegistered
-            nil
-          end
-        }.compact
       end
     end
   end
