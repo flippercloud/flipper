@@ -2,12 +2,11 @@ require 'helper'
 require 'flipper/instrumenters/memory'
 
 describe Flipper::Gates::PercentageOfActors do
-  let(:adapter) { double('Adapter', :read => nil) }
-  let(:feature) { double('Feature', :key => 'search', :name => :search, :adapter => adapter) }
   let(:instrumenter) { Flipper::Instrumenters::Memory.new }
+  let(:feature_name) { :search }
 
   subject {
-    described_class.new(feature, :instrumenter => instrumenter)
+    described_class.new(feature_name, :instrumenter => instrumenter)
   }
 
   describe "instrumentation" do
@@ -50,20 +49,16 @@ describe Flipper::Gates::PercentageOfActors do
       let(:number_of_actors) { 100 }
 
       let(:actors) {
-        (1..number_of_actors).map { |n|
-          Struct.new(:flipper_id).new(n)
-        }
+        (1..number_of_actors).map { |n| Struct.new(:flipper_id).new(n) }
       }
 
       let(:feature_one_enabled_actors) do
-        feature_one = double('Feature', :name => :name_one, :adapter => adapter)
-        gate = described_class.new(feature_one)
+        gate = described_class.new(:name_one)
         actors.select { |actor| gate.open? actor, percentage_as_integer }
       end
 
       let(:feature_two_enabled_actors) do
-        feature_two = double('Feature', :name => :name_two, :adapter => adapter)
-        gate = described_class.new(feature_two)
+        gate = described_class.new(:name_two)
         actors.select { |actor| gate.open? actor, percentage_as_integer }
       end
 

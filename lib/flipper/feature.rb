@@ -134,11 +134,11 @@ module Flipper
     # Returns an array of gates
     def gates
       @gates ||= [
-        Gates::Boolean.new(self, :instrumenter => @instrumenter),
-        Gates::Group.new(self, :instrumenter => @instrumenter),
-        Gates::Actor.new(self, :instrumenter => @instrumenter),
-        Gates::PercentageOfActors.new(self, :instrumenter => @instrumenter),
-        Gates::PercentageOfRandom.new(self, :instrumenter => @instrumenter),
+        Gates::Boolean.new(@name, :instrumenter => @instrumenter),
+        Gates::Group.new(@name, :instrumenter => @instrumenter),
+        Gates::Actor.new(@name, :instrumenter => @instrumenter),
+        Gates::PercentageOfActors.new(@name, :instrumenter => @instrumenter),
+        Gates::PercentageOfRandom.new(@name, :instrumenter => @instrumenter),
       ]
     end
 

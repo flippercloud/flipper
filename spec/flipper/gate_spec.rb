@@ -1,37 +1,35 @@
 require 'helper'
 
 describe Flipper::Gate do
-  let(:adapter) { double('Adapter', :name => 'memory', :read => '22') }
-  let(:feature) { double('Feature', :name => :search, :adapter => adapter) }
+  let(:feature_name) { :stats }
 
   subject {
-    described_class.new(feature)
+    described_class.new(feature_name)
   }
 
   describe "#initialize" do
-    it "sets feature" do
-      gate = described_class.new(feature)
-      gate.feature.should be(feature)
+    it "sets feature_name" do
+      gate = described_class.new(feature_name)
+      gate.feature_name.should be(feature_name)
     end
 
     it "defaults instrumenter" do
-      gate = described_class.new(feature)
+      gate = described_class.new(feature_name)
       gate.instrumenter.should be(Flipper::Instrumenters::Noop)
     end
 
     it "allows overriding instrumenter" do
       instrumenter = double('Instrumentor')
-      gate = described_class.new(feature, :instrumenter => instrumenter)
+      gate = described_class.new(feature_name, :instrumenter => instrumenter)
       gate.instrumenter.should be(instrumenter)
     end
   end
 
   describe "#inspect" do
     it "returns easy to read string representation" do
-      subject.stub(:value => 22)
       string = subject.inspect
       string.should include('Flipper::Gate')
-      string.should include('feature=:search')
+      string.should include('feature_name=:stats')
     end
   end
 end

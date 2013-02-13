@@ -9,14 +9,14 @@ module Flipper
     InstrumentationName = "gate_operation.#{InstrumentationNamespace}"
 
     # Private
-    attr_reader :feature
+    attr_reader :feature_name
 
     # Private: What is used to instrument all the things.
     attr_reader :instrumenter
 
     # Public
-    def initialize(feature, options = {})
-      @feature = feature
+    def initialize(feature_name, options = {})
+      @feature_name = feature_name
       @instrumenter = options.fetch(:instrumenter, Flipper::Instrumenters::Noop)
     end
 
@@ -73,7 +73,7 @@ module Flipper
     # Public: Pretty string version for debugging.
     def inspect
       attributes = [
-        "feature=#{feature.name.inspect}",
+        "feature_name=#{feature_name.inspect}",
       ]
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
     end
@@ -84,7 +84,7 @@ module Flipper
         :thing => thing,
         :operation => operation,
         :gate_name => name,
-        :feature_name => @feature.name,
+        :feature_name => @feature_name,
       }
 
       @instrumenter.instrument(InstrumentationName, payload) {

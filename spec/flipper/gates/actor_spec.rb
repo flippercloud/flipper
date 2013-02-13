@@ -2,12 +2,11 @@ require 'helper'
 require 'flipper/instrumenters/memory'
 
 describe Flipper::Gates::Actor do
-  let(:adapter) { double('Adapter', :set_members => []) }
-  let(:feature) { double('Feature', :key => 'search', :name => :search, :adapter => adapter) }
   let(:instrumenter) { Flipper::Instrumenters::Memory.new }
+  let(:feature_name) { :search }
 
   subject {
-    described_class.new(feature, :instrumenter => instrumenter)
+    described_class.new(feature_name, :instrumenter => instrumenter)
   }
 
   describe "instrumentation" do

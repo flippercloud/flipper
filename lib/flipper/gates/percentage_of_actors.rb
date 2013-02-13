@@ -38,7 +38,7 @@ module Flipper
 
           if Types::Actor.wrappable?(thing)
             actor = Types::Actor.wrap(thing)
-            key = "#{@feature.name}#{actor.value}"
+            key = "#{@feature_name}#{actor.value}"
             Zlib.crc32(key) % 100 < percentage
           else
             false
