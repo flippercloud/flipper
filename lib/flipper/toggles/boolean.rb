@@ -28,13 +28,11 @@ module Flipper
       }
 
       def enable(thing)
-        super
         adapter.write adapter_key, thing.value
         true
       end
 
       def disable(thing)
-        super
         feature.gates.each do |gate|
           gate.adapter.delete gate.adapter_key
         end

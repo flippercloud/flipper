@@ -73,6 +73,7 @@ module Flipper
     #
     # Returns the result of Flipper::Toggle#enable.
     def enable(thing)
+      add_feature_awareness
       toggle.enable(thing)
     end
 
@@ -80,11 +81,16 @@ module Flipper
     #
     # Returns the result of Flipper::Toggle#disable.
     def disable(thing)
+      add_feature_awareness
       toggle.disable(thing)
     end
 
     def enabled?
       toggle.enabled?
+    end
+
+    def add_feature_awareness
+      adapter.feature_add adapter_key.feature_name
     end
 
     # Public: Pretty string version for debugging.

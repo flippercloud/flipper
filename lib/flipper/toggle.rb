@@ -14,20 +14,6 @@ module Flipper
       @gate = gate
     end
 
-    # Internal: Enables thing for gate and adds feature to known features.
-    #
-    # Returns Boolean (currently always true).
-    def enable(thing)
-      add_feature_to_set
-    end
-
-    # Internal: Disables thing for gate and adds feature to known features.
-    #
-    # Returns Boolean (currently always true).
-    def disable(thing)
-      add_feature_to_set
-    end
-
     def value
       raise 'Not implemented'
     end
@@ -39,12 +25,6 @@ module Flipper
         "value=#{value}",
       ]
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
-    end
-
-    private
-
-    def add_feature_to_set
-      adapter.feature_add adapter_key.feature_name
     end
   end
 end

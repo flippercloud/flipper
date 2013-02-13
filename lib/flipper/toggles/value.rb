@@ -2,13 +2,11 @@ module Flipper
   module Toggles
     class Value < Toggle
       def enable(thing)
-        super
         adapter.write adapter_key, thing.value
         true
       end
 
       def disable(thing)
-        super
         adapter.delete adapter_key
         true
       end
