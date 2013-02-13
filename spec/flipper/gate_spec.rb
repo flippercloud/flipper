@@ -34,14 +34,14 @@ describe Flipper::Gate do
 
   describe "#inspect" do
     it "returns easy to read string representation" do
+      subject.stub(:value => 22)
       string = subject.inspect
       string.should include('Flipper::Gate')
       string.should include('feature=:search')
       string.should include('description="enabled"')
       string.should include("adapter=#{subject.adapter.name.inspect}")
       string.should include('adapter_key=#<Flipper::Key:')
-      string.should include('toggle_class=Flipper::Toggles::Value')
-      string.should include('value="22"')
+      string.should include('value=22')
     end
   end
 end

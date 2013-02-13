@@ -40,16 +40,6 @@ module Flipper
       @key ||= Key.new(@feature.name, key)
     end
 
-    # Internal: The toggle class to use for this gate.
-    def toggle_class
-      Toggles::Value
-    end
-
-    # Internal: The toggle to use to enable/disable this gate.
-    def toggle
-      @toggle ||= toggle_class.new(self)
-    end
-
     # Internal: Check if a gate is open for a thing. Implemented in subclass.
     #
     # Returns true if gate open for thing, false if not.
@@ -64,29 +54,6 @@ module Flipper
       false
     end
 
-    # Internal: Enable this gate for a thing.
-    #
-    # Returns the result of Flipper::Toggle#enable.
-    def enable(thing)
-      toggle.enable(thing)
-    end
-
-    # Internal: Disable this gate for a thing.
-    #
-    # Returns the result of Flipper::Toggle#disable.
-    def disable(thing)
-      toggle.disable(thing)
-    end
-
-    def enabled?
-      toggle.enabled?
-    end
-
-    # Internal: The value of the toggle as read from the adapter.
-    def value
-      toggle.value
-    end
-
     # Public: Pretty string version for debugging.
     def inspect
       attributes = [
@@ -94,7 +61,6 @@ module Flipper
         "description=#{description.inspect}",
         "adapter=#{adapter.name.inspect}",
         "adapter_key=#{adapter_key.inspect}",
-        "toggle_class=#{toggle_class.inspect}",
         "value=#{value.inspect}",
       ]
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
