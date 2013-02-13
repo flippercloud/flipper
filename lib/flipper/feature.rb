@@ -1,7 +1,6 @@
 require 'flipper/adapter'
 require 'flipper/errors'
 require 'flipper/type'
-require 'flipper/toggle'
 require 'flipper/gate'
 require 'flipper/instrumenters/noop'
 
