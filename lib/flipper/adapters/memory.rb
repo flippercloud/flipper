@@ -11,6 +11,7 @@ module Flipper
       # Public
       def get(feature)
         result = {}
+
         feature.gates.each do |gate|
           result[gate] = case gate.data_type
           when :boolean
@@ -23,6 +24,7 @@ module Flipper
             raise "#{gate} is not supported by this adapter yet"
           end
         end
+
         result
       end
 
