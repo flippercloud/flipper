@@ -44,7 +44,6 @@ module Flipper
       def disable(feature, gate, thing)
         case gate.data_type
         when :boolean
-          # FIXME: Need to make boolean gate not need to delete everything
           feature.gates.each do |gate|
             delete key(feature, gate)
           end
