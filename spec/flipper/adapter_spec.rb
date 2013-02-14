@@ -276,7 +276,7 @@ describe Flipper::Adapter do
       event.payload[:adapter_name].should eq(:memory)
       event.payload[:feature_name].should eq(:stats)
       event.payload[:gate_name].should eq(:percentage_of_actors)
-      event.payload[:result].should eq('22')
+      event.payload[:result].should eq(thing.value.to_s)
     end
 
     it "is recorded for disable" do
@@ -289,7 +289,7 @@ describe Flipper::Adapter do
       event.payload[:adapter_name].should eq(:memory)
       event.payload[:feature_name].should eq(:stats)
       event.payload[:gate_name].should eq(:percentage_of_actors)
-      event.payload[:result].should eq('0')
+      event.payload[:result].should eq(thing.value.to_s)
     end
   end
 

@@ -48,7 +48,7 @@ module Flipper
             delete key(feature, gate)
           end
         when :integer
-          write key(feature, gate), 0
+          write key(feature, gate), thing.value.to_s
         when :set
           set_delete key(feature, gate), thing.value.to_s
         else
