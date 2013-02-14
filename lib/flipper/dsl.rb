@@ -72,6 +72,22 @@ module Flipper
     # Returns an instance of Flipper::Feature.
     alias_method :[], :feature
 
+    # Public: Shortcut for getting a boolean type instance.
+    #
+    # value - The true or false value for the boolean.
+    #
+    # Returns a Flipper::Types::Boolean instance.
+    def boolean(value = true)
+      Types::Boolean.new(value)
+    end
+
+    # Public: Event shorter shortcut for getting a boolean type instance.
+    #
+    # value - The true or false value for the boolean.
+    #
+    # Returns a Flipper::Types::Boolean instance.
+    alias_method :bool, :boolean
+
     # Public: Access a flipper group by name.
     #
     # name - The String or Symbol name of the feature.

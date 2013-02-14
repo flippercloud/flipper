@@ -84,3 +84,15 @@ shared_examples_for 'a DSL feature' do
     }.to raise_error(ArgumentError, /must be a String or Symbol/)
   end
 end
+
+shared_examples_for "a DSL boolean method" do
+  it "returns boolean with value set" do
+    result = subject.send(method_name, true)
+    result.should be_instance_of(Flipper::Types::Boolean)
+    result.value.should be(true)
+
+    result = subject.send(method_name, false)
+    result.should be_instance_of(Flipper::Types::Boolean)
+    result.value.should be(false)
+  end
+end

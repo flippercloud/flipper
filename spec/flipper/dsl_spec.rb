@@ -91,6 +91,18 @@ describe Flipper::DSL do
     end
   end
 
+  describe "#boolean" do
+    it_should_behave_like "a DSL boolean method" do
+      let(:method_name) { :boolean }
+    end
+  end
+
+  describe "#bool" do
+    it_should_behave_like "a DSL boolean method" do
+      let(:method_name) { :bool }
+    end
+  end
+
   describe "#group" do
     context "for registered group" do
       before do
