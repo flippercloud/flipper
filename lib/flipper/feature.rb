@@ -39,7 +39,7 @@ module Flipper
     # Public: Enable this feature for something.
     #
     # Returns the result of Flipper::Gate#enable.
-    def enable(thing = Types::Boolean.new)
+    def enable(thing = Types::Boolean.new(true))
       instrument(:enable, thing) { |payload|
         adapter.feature_add @name
 
@@ -53,7 +53,7 @@ module Flipper
     # Public: Disable this feature for something.
     #
     # Returns the result of Flipper::Gate#disable.
-    def disable(thing = Types::Boolean.new)
+    def disable(thing = Types::Boolean.new(false))
       instrument(:disable, thing) { |payload|
         adapter.feature_add @name
 
