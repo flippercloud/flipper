@@ -267,7 +267,7 @@ describe Flipper do
 
     context "with a percentage of actors" do
       before do
-        @result = feature.disable(five_percent_of_actors)
+        @result = feature.disable(flipper.actors(0))
       end
 
       it "returns true" do
@@ -290,9 +290,8 @@ describe Flipper do
 
     context "with a percentage of time" do
       before do
-        @gate = Flipper::Gates::PercentageOfRandom.new(feature)
-        Flipper::Gates::PercentageOfRandom.should_receive(:new).and_return(@gate)
-        @result = feature.disable(five_percent_of_random)
+        @gate = feature.gate(:percentage_of_random)
+        @result = feature.disable(flipper.random(0))
       end
 
       it "returns true" do
