@@ -24,7 +24,7 @@ RSpec.configure do |config|
   config.run_all_when_everything_filtered = true
 
   config.before(:each) do
-    Flipper.groups = nil
+    Flipper.unregister_groups
   end
 end
 

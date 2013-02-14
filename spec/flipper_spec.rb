@@ -46,6 +46,13 @@ describe Flipper do
     end
   end
 
+  describe ".unregister_groups" do
+    it "clear group registry" do
+      Flipper.groups.should_receive(:clear)
+      Flipper.unregister_groups
+    end
+  end
+
   describe ".group" do
     context "for registered group" do
       before do
