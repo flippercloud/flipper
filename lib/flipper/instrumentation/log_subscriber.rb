@@ -48,26 +48,17 @@ module Flipper
       def adapter_operation(event)
         return unless logger.debug?
 
+        feature_name = event.payload[:feature_name]
         adapter_name = event.payload[:adapter_name]
+        gate_name = event.payload[:gate_name]
         operation = event.payload[:operation]
         result = event.payload[:result]
-        value = event.payload[:value]
-        key = event.payload[:key]
 
-        feature_description = if key.respond_to?(:feature_name)
-          "Flipper feature(#{key.feature_name})"
-        else
-          "Flipper"
-        end
+        description = "Flipper feature(#{feature_name}) "
+        description << "adapter(#{adapter_name}) "
+        description << "#{operation} "
 
-        adapter_description = "adapter(#{adapter_name})"
-        operation_description = "#{operation}(#{key.to_s.inspect})"
-        description = "#{feature_description} #{adapter_description} #{operation_description}"
         details = "result=#{result.inspect}"
-
-        if event.payload.key?(:value)
-          details += " value=#{value.inspect}"
-        end
 
         name = '%s (%.1fms)' % [description, event.duration]
         debug "  #{color(name, CYAN, true)}  [ #{details} ]"
