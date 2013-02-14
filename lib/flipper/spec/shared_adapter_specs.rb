@@ -48,7 +48,7 @@ shared_examples_for 'a flipper adapter' do
     result[boolean_gate].should be_nil
   end
 
-  it "can fully disable all enabled things with boolean gate disable" do
+  it "fully disables all enabled things with boolean gate disable" do
     actor_22 = actor_class.new('22')
     subject.enable feature, boolean_gate, flipper.boolean
     subject.enable feature, group_gate, flipper.group(:admins)
