@@ -7,7 +7,6 @@ describe Flipper::Adapter do
   let(:local_cache)  { {} }
   let(:source)       { {} }
   let(:adapter)      { Flipper::Adapters::Memory.new(source) }
-  let(:features_key) { described_class::FeaturesKey }
   let(:flipper)      { Flipper.new(adapter) }
 
   subject { described_class.new(adapter, :local_cache => local_cache) }
@@ -198,49 +197,6 @@ describe Flipper::Adapter do
 
     it "is aliased to ==" do
       (subject == described_class.new(adapter)).should be_true
-    end
-  end
-
-  describe "#features" do
-    context "with no features enabled/disabled" do
-      it "defaults to empty set" do
-        subject.features.should eq(Set.new)
-      end
-    end
-
-    context "with features enabled and disabled" do
-      before do
-        subject.set_add(features_key, 'stats')
-        subject.set_add(features_key, 'cache')
-        subject.set_add(features_key, 'search')
-      end
-
-      it "returns set of feature names" do
-        subject.features.should be_instance_of(Set)
-        subject.features.sort.should eq(['cache', 'search', 'stats'])
-      end
-    end
-  end
-
-  describe "#feature_add" do
-    context "with string name" do
-      before do
-        subject.feature_add('search')
-      end
-
-      it "adds string to set" do
-        subject.set_members(features_key).should include('search')
-      end
-    end
-
-    context "with symbol name" do
-      before do
-        subject.feature_add(:search)
-      end
-
-      it "adds string to set" do
-        subject.set_members(features_key).should include('search')
-      end
     end
   end
 
