@@ -81,7 +81,6 @@ describe Flipper::Instrumentation::LogSubscriber do
     end
 
     it "logs adapter value" do
-      puts log
       adapter_line = find_line('Flipper feature(search) adapter(memory) enable')
       adapter_line.should include("[ result=")
     end
