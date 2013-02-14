@@ -1,124 +1,154 @@
-require 'set'
-
-shared_examples_for 'a working percentage' do
-  it "does not raise when used" do
-    feature.enable percentage
-    expect { feature.enabled?(actor) }.to_not raise_error
-  end
-end
-
-# Requires the following methods
-# subject
-# read_key(key)
-# write_key(key, value)
+# Requires the following methods:
+# * subject - The instance of the adapter
 shared_examples_for 'a flipper adapter' do
-  let(:key) { "foo/bar" }
+  let(:actor_class) { Struct.new(:flipper_id) }
 
-  describe "#write" do
-    it "sets key to value in store" do
-      subject.write(key, true)
-      read_key(key).should be_true
-    end
+  let(:flipper) { Flipper.new(subject) }
+  let(:feature) { flipper[:stats] }
+
+  let(:boolean_gate) { feature.gate(:boolean) }
+  let(:group_gate)   { feature.gate(:group) }
+  let(:actor_gate)   { feature.gate(:actor) }
+  let(:actors_gate)  { feature.gate(:percentage_of_actors) }
+  let(:random_gate)  { feature.gate(:percentage_of_random) }
+
+  before do
+    Flipper.register(:admins) { |actor|
+      actor.respond_to?(:admin?) && actor.admin?
+    }
+
+    Flipper.register(:early_access) { |actor|
+      actor.respond_to?(:early_access?) && actor.early_access?
+    }
   end
 
-  describe "#read" do
-    it "returns nil if key not in store" do
-      subject.read(key).should be_nil
-    end
-
-    it "returns value if key in store" do
-      write_key key, 'bar'
-      subject.read(key).should eq('bar')
-    end
+  after do
+    Flipper.unregister_groups
   end
 
-  describe "#delete" do
-    it "deletes key" do
-      write_key key, 'bar'
-      subject.delete(key)
-      read_key(key).should be_nil
-    end
+  it "returns correct default values for the gates if none are enabled" do
+    subject.get(feature).should eq({
+      boolean_gate => nil,
+      group_gate   => Set.new,
+      actor_gate   => Set.new,
+      actors_gate  => nil,
+      random_gate  => nil,
+    })
   end
 
-  describe "#set_add" do
-    it "adds value to store" do
-      subject.set_add(key, '1')
-      read_key(key).should eq(Set['1'])
-    end
+  it "can enable get value for boolean gate" do
+    subject.enable feature, boolean_gate, flipper.boolean
 
-    it "does not add same value more than once" do
-      subject.set_add(key, '1')
-      subject.set_add(key, '1')
-      subject.set_add(key, '1')
-      subject.set_add(key, '2')
-      read_key(key).should eq(Set['1', '2'])
-    end
+    result = subject.get(feature)
+    result[boolean_gate].should eq('true')
+
+    subject.disable feature, boolean_gate, flipper.boolean(false)
+
+    result = subject.get(feature)
+    result[boolean_gate].should be_nil
   end
 
-  describe "#set_delete" do
-    it "removes value from set if key in store" do
-      write_key key, Set['1', '2']
-      subject.set_delete(key, '1')
-      read_key(key).should eq(Set['2'])
-    end
+  it "can fully disable all enabled things with boolean gate disable" do
+    actor_22 = actor_class.new('22')
+    subject.enable feature, boolean_gate, flipper.boolean
+    subject.enable feature, group_gate, flipper.group(:admins)
+    subject.enable feature, actor_gate, flipper.actor(actor_22)
+    subject.enable feature, actors_gate, flipper.actors(25)
+    subject.enable feature, random_gate, flipper.random(45)
 
-    it "works fine if key not in store" do
-      subject.set_delete(key, 'bar')
-    end
+    subject.disable feature, boolean_gate, flipper.boolean
+
+    subject.get(feature).should eq({
+      boolean_gate => nil,
+      group_gate   => Set.new,
+      actor_gate   => Set.new,
+      actors_gate  => nil,
+      random_gate  => nil,
+    })
   end
 
-  describe "#set_members" do
-    it "defaults to empty set" do
-      subject.set_members(key).should eq(Set.new)
-    end
+  it "can enable, disable and get value for group gate" do
+    subject.enable feature, group_gate, flipper.group(:admins)
+    subject.enable feature, group_gate, flipper.group(:early_access)
 
-    it "returns set if in store" do
-      write_key key, Set['1', '2']
-      subject.set_members(key).should eq(Set['1', '2'])
-    end
+    result = subject.get(feature)
+    result[group_gate].should eq(Set['admins', 'early_access'])
+
+    subject.disable feature, group_gate, flipper.group(:early_access)
+    result = subject.get(feature)
+    result[group_gate].should eq(Set['admins'])
+
+    subject.disable feature, group_gate, flipper.group(:admins)
+    result = subject.get(feature)
+    result[group_gate].should eq(Set.new)
   end
 
-  it "should work with Flipper.new" do
-    Flipper.new(subject).should_not be_nil
+  it "can enable, disable and get value for actor gate" do
+    actor_22 = actor_class.new('22')
+    actor_asdf = actor_class.new('asdf')
+
+    subject.enable feature, actor_gate, flipper.actor(actor_22)
+    subject.enable feature, actor_gate, flipper.actor(actor_asdf)
+
+    result = subject.get(feature)
+    result[actor_gate].should eq(Set['22', 'asdf'])
+
+    subject.disable feature, actor_gate, flipper.actor(actor_22)
+    result = subject.get(feature)
+    result[actor_gate].should eq(Set['asdf'])
+
+    subject.disable feature, actor_gate, flipper.actor(actor_asdf)
+    result = subject.get(feature)
+    result[actor_gate].should eq(Set.new)
   end
 
-  context "working with values" do
-    it "always uses strings" do
-      subject.read(key).should be_nil
-      subject.write key, true
-      subject.read(key).should eq('true')
+  it "can enable, disable and get value for percentage of actors gate" do
+    subject.enable feature, actors_gate, flipper.actors(15)
+    result = subject.get(feature)
+    result[actors_gate].should eq('15')
 
-      subject.write key, 22
-      subject.read(key).should eq('22')
-
-      subject.delete(key)
-      subject.read(key).should be_nil
-    end
+    subject.disable feature, actors_gate, flipper.actors(0)
+    result = subject.get(feature)
+    result[actors_gate].should eq('0')
   end
 
-  context "working with sets" do
-    it "always uses strings" do
-      subject.set_add key, 1
-      subject.set_add key, 2
-      subject.set_members(key).should eq(Set['1', '2'])
-      subject.set_delete key, 2
-      subject.set_members(key).should eq(Set['1'])
-    end
+  it "can enable, disable and get value for percentage of random gate" do
+    subject.enable feature, random_gate, flipper.random(10)
+    result = subject.get(feature)
+    result[random_gate].should eq('10')
+
+    subject.disable feature, random_gate, flipper.random(0)
+    result = subject.get(feature)
+    result[random_gate].should eq('0')
   end
 
-  context "integration spot-checks" do
-    let(:instance) { Flipper.new(subject) }
-    let(:feature) { instance[:feature] }
-    let(:actor) { Struct.new(:id).new(1) }
+  it "converts boolean value to a string" do
+    subject.enable feature, boolean_gate, flipper.boolean
+    result = subject.get(feature)
+    result[boolean_gate].should eq('true')
+  end
 
-    context "percentage of actors" do
-      let(:percentage) { instance.actors(10) }
-      it_should_behave_like 'a working percentage'
-    end
+  it "converts the actor value to a string" do
+    subject.enable feature, actor_gate, flipper.actor(actor_class.new(22))
+    result = subject.get(feature)
+    result[actor_gate].should eq(Set['22'])
+  end
 
-    context "random percentage" do
-      let(:percentage) { instance.random(10) }
-      it_should_behave_like 'a working percentage'
-    end
+  it "converts group value to a string" do
+    subject.enable feature, group_gate, flipper.group(:admins)
+    result = subject.get(feature)
+    result[group_gate].should eq(Set['admins'])
+  end
+
+  it "converts percentage of random integer value to a string" do
+    subject.enable feature, random_gate, flipper.random(10)
+    result = subject.get(feature)
+    result[random_gate].should eq('10')
+  end
+
+  it "converts percentage of actors integer value to a string" do
+    subject.enable feature, actors_gate, flipper.actors(10)
+    result = subject.get(feature)
+    result[actors_gate].should eq('10')
   end
 end
