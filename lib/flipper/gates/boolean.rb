@@ -6,7 +6,6 @@ module Flipper
         false   => false,
         'true'  => true,
         'false' => false,
-        nil     => false,
       }
 
       # Internal: The name of the gate. Used for instrumentation, etc.
@@ -37,9 +36,12 @@ module Flipper
 
       # Internal: Checks if the gate is open for a thing.
       #
-      # Returns true if gate open for thing, false if not.
+      # Returns true if explicitly set to true, false if explicitly set to false
+      # or nil if not explicitly set.
       def open?(thing, value)
-        instrument(:open?, thing) { |payload| value }
+        instrument(:open?, thing) { |payload|
+          TruthMap[value]
+        }
       end
 
       def protects?(thing)

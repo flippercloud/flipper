@@ -23,6 +23,82 @@ describe Flipper::Gates::Boolean do
     end
   end
 
+  describe "#enabled?" do
+    context "for true value" do
+      it "returns true" do
+        subject.enabled?(true).should be_true
+      end
+    end
+
+    context "for false value" do
+      it "returns false" do
+        subject.enabled?(false).should be_false
+      end
+    end
+
+    context "for nil value" do
+      it "returns false" do
+        subject.enabled?(nil).should be_false
+      end
+    end
+
+    context "for empty string value" do
+      it "returns false" do
+        subject.enabled?('').should be_false
+      end
+    end
+
+    context "for the string true value" do
+      it "returns true" do
+        subject.enabled?('true').should be_true
+      end
+    end
+
+    context "for the string false value" do
+      it "returns false" do
+        subject.enabled?('false').should be_false
+      end
+    end
+  end
+
+  describe "#open?" do
+    context "for true value" do
+      it "returns true" do
+        subject.open?(Object.new, true).should be_true
+      end
+    end
+
+    context "for false value" do
+      it "returns false" do
+        subject.open?(Object.new, false).should be_false
+      end
+    end
+
+    context "for nil value" do
+      it "returns nil" do
+        subject.open?(Object.new, nil).should be_nil
+      end
+    end
+
+    context "for string true value" do
+      it "returns true" do
+        subject.open?(Object.new, 'true').should be_true
+      end
+    end
+
+    context "for string false value" do
+      it "returns false" do
+        subject.open?(Object.new, 'false').should be_false
+      end
+    end
+
+    context "for an empty string value" do
+      it "returns false" do
+        subject.open?(Object.new, '').should be_false
+      end
+    end
+  end
+
   describe "instrumentation" do
     it "is recorded for open" do
       thing = nil
