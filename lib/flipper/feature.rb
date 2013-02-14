@@ -146,7 +146,7 @@ module Flipper
     #
     # Returns a Flipper::Gate if found, nil if not.
     def gate(name)
-      gates.detect { |gate| gate.name.to_s == name.to_s }
+      gates.detect { |gate| gate.name == name.to_sym }
     end
 
     # Internal: Find the gate that protects a thing.
