@@ -28,10 +28,6 @@ describe Flipper do
     Flipper.register(:devs)   { |thing| thing.dev? }
   end
 
-  after do
-    Flipper.groups = nil
-  end
-
   describe "#enable" do
     context "with no arguments" do
       before do
