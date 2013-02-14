@@ -162,7 +162,7 @@ module Flipper
 
     # Private
     def boolean_gate
-      @boolean_gate ||= gates.detect { |gate| gate.name == :boolean }
+      @boolean_gate ||= gate(:boolean)
     end
 
     # Private
