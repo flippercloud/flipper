@@ -40,7 +40,7 @@ module Flipper
       # or nil if not explicitly set.
       def open?(thing, value)
         instrument(:open?, thing) { |payload|
-          TruthMap[value]
+          !!TruthMap[value]
         }
       end
 

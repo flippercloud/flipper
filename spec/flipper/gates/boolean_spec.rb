@@ -75,8 +75,8 @@ describe Flipper::Gates::Boolean do
     end
 
     context "for nil value" do
-      it "returns nil" do
-        subject.open?(Object.new, nil).should be_nil
+      it "returns false" do
+        subject.open?(Object.new, nil).should be_false
       end
     end
 
