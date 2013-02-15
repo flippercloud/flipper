@@ -155,42 +155,29 @@ Randomness is not a good idea for enabling new features in the UI. Most of the t
 
 I plan on supporting [in-memory](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb), [Mongo](https://github.com/jnunemaker/flipper-mongo), and [Redis](https://github.com/jnunemaker/flipper-redis) as adapters for flipper. Others are welcome so please let me know if you create one.
 
-### Memory
-
-You can use the [in-memory adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb) for tests if you want. That is pretty much all I use it for.
-
-### Mongo
-
-Currently, the [mongo adapter](https://github.com/jnunemaker/flipper-mongo) comes in two flavors.
-
-The [vanilla mongo adapter](https://github.com/jnunemaker/flipper-mongo/blob/master/lib/flipper/adapters/mongo.rb) stores each key in its own document. This means for each gate checked per feature there will be a query to mongo.
-
-Personally, the adapter I prefer is the [single document adapter](https://github.com/jnunemaker/flipper-mongo/blob/master/lib/flipper/adapters/mongo_single_document.rb), which stores all features and gates in a single document. If you combine this adapter with the [local cache middleware](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/middleware/local_cache.rb), the document will only be queried once per request, which is pretty awesome.
-
-### Redis
-
-Redis is great for this type of stuff and it only took a few minutes to implement a [redis adapter](https://github.com/jnunemaker/flipper-redis). The only real problem with redis right now is that automated failover isn't that easy so relying on it for every code path in my app would make me nervous.
+* [memory adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb) - Great for tests.
+* [mongo adapter](https://github.com/jnunemaker/flipper-mongo)
+* [redis adapter](https://github.com/jnunemaker/flipper-redis)
 
 ## Optimization
 
-One optimization that flipper provides is a local cache. Once you have a flipper instance you can use the local cache to store each adapter key lookup in memory for as long as you want.
+One optimization that flipper provides is a memoizing middleware. The memoizing middleware ensures that you only make one adapter call per feature per request.
 
-Out of the box there is a middleware that will store each key lookup for the duration of the request. This means you will only actually query your adapter's data store once per feature per gate that is checked. You can use the middleware from a Rails initializer like so:
+This means if you check the same feature over and over, it will only make one mongo, redis, or whatever call per feature for the length of the request.
+
+You can use the middleware from a Rails initializer like so:
 
 ```ruby
-require 'flipper/middleware/local_cache'
+require 'flipper/middleware/memoizer'
 
 # create flipper dsl instance, see above examples for more details
 flipper = Flipper.new(...)
 
-# ensure entire request is wrapped, `use` would probably be ok instead of
-# `insert_after`, but I noticed that Rails used `insert_after` for their
-# identity map, which this is akin to, and figured it was for a reason.
-Rails.application.config.middleware.insert_after \
-  ActionDispatch::Callbacks,
-  Flipper::Middleware::LocalCache,
-  flipper
+# add the middleware
+Rails.application.config.middleware.use Flipper::Middleware::Memoizer, flipper
 ```
+
+**Note**: Be sure that the middlware is high enough up in your stack that all feature checks are wrapped.
 
 ## Installation
 
