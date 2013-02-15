@@ -33,7 +33,7 @@ module Flipper
       @name = name
       @key = name.to_s
       @instrumenter = options.fetch(:instrumenter, Flipper::Instrumenters::Noop)
-      @adapter = Adapter.wrap(adapter, :instrumenter => @instrumenter)
+      @adapter = adapter
     end
 
     # Public: Enable this feature for something.

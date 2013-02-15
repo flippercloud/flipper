@@ -17,7 +17,7 @@ describe Flipper::Feature do
 
     it "sets adapter" do
       feature = described_class.new(:search, adapter)
-      feature.adapter.should eq(Flipper::Adapter.wrap(adapter))
+      feature.adapter.should eq(adapter)
     end
 
     it "defaults instrumenter" do
@@ -33,13 +33,6 @@ describe Flipper::Feature do
           :instrumenter => instrumenter,
         })
         feature.instrumenter.should be(instrumenter)
-      end
-
-      it "passes overridden instrumenter to adapter wrapping" do
-        feature = described_class.new(:search, adapter, {
-          :instrumenter => instrumenter,
-        })
-        feature.adapter.instrumenter.should be(instrumenter)
       end
     end
   end
