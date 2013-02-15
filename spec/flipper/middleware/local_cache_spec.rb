@@ -41,15 +41,6 @@ describe Flipper::Middleware::LocalCache do
     called.should be_true
   end
 
-  it "enables memoization during delegation" do
-    app = lambda { |env|
-      flipper.adapter.using_local_cache?.should be_true
-      [200, {}, nil]
-    }
-    middleware = described_class.new app, flipper
-    middleware.call({})
-  end
-
   it "disables local cache after body close" do
     app = lambda { |env| [200, {}, []] }
     middleware = described_class.new app, flipper
@@ -70,7 +61,19 @@ describe Flipper::Middleware::LocalCache do
     flipper.adapter.local_cache.should be_empty
   end
 
-  it "only performs one get per feature enabled check" do
+  it "clears the local cache with a successful request" do
+    flipper.adapter.local_cache['hello'] = 'world'
+    get '/'
+    flipper.adapter.local_cache.should be_empty
+  end
+
+  it "clears the local cache even when the request raises an error" do
+    flipper.adapter.local_cache['hello'] = 'world'
+    get '/fail' rescue nil
+    flipper.adapter.local_cache.should be_empty
+  end
+
+  it "caches getting a feature for duration of request" do
     flipper[:stats].enable
 
     # clear the log of operations
@@ -90,21 +93,5 @@ describe Flipper::Middleware::LocalCache do
     middleware.call({})
 
     adapter.count(:get).should be(1)
-  end
-
-  context "with a successful request" do
-    it "clears the local cache" do
-      flipper.adapter.local_cache['hello'] = 'world'
-      get '/'
-      flipper.adapter.local_cache.should be_empty
-    end
-  end
-
-  context "when the request raises an error" do
-    it "clears the local cache" do
-      flipper.adapter.local_cache['hello'] = 'world'
-      get '/fail' rescue nil
-      flipper.adapter.local_cache.should be_empty
-    end
   end
 end
