@@ -7,12 +7,6 @@ require 'flipper/adapters/memory'
 describe Flipper::Middleware::LocalCache do
   include Rack::Test::Methods
 
-  class Enum < Struct.new(:iter)
-    def each(&block)
-      iter.call(&block)
-    end
-  end
-
   let(:source)         { {} }
   let(:memory_adapter) { Flipper::Adapters::Memory.new(source) }
   let(:adapter)        { Flipper::Adapters::OperationLogger.new(memory_adapter) }
