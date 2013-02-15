@@ -6,17 +6,33 @@ module Flipper
         :percentage_of_random
       end
 
-      # Internal: The piece of the adapter key that is unique to the gate class.
+      # Internal: Name converted to value safe for adapter.
       def key
-        :perc_time
+        :percentage_of_random
+      end
+
+      def data_type
+        :integer
+      end
+
+      def description(value)
+        if enabled?(value)
+          "#{value}% of the time"
+        else
+          'disabled'
+        end
+      end
+
+      def enabled?(value)
+        !value.nil? && value.to_i > 0
       end
 
       # Internal: Checks if the gate is open for a thing.
       #
       # Returns true if gate open for thing, false if not.
-      def open?(thing)
+      def open?(thing, value)
         instrument(:open?, thing) { |payload|
-          percentage = toggle.value.to_i
+          percentage = value.to_i
 
           rand < (percentage / 100.0)
         }
@@ -24,14 +40,6 @@ module Flipper
 
       def protects?(thing)
         thing.is_a?(Flipper::Types::PercentageOfRandom)
-      end
-
-      def description
-        if enabled?
-          "#{toggle.value}% of the time"
-        else
-          'disabled'
-        end
       end
     end
   end

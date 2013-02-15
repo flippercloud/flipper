@@ -37,8 +37,9 @@ describe Flipper::Instrumentation::LogSubscriber do
     end
 
     it "logs adapter calls" do
-      adapter_line = find_line('Flipper feature(search) adapter(memory) read("search/boolean")')
-      adapter_line.should include('[ result=nil ]')
+      adapter_line = find_line('Flipper feature(search) adapter(memory) get')
+      adapter_line.should include('[ result={')
+      adapter_line.should include('} ]')
     end
 
     it "logs gate calls" do
@@ -80,14 +81,20 @@ describe Flipper::Instrumentation::LogSubscriber do
     end
 
     it "logs adapter value" do
-      adapter_line = find_line('Flipper feature(search) adapter(memory) set_add("search/actors")')
-      adapter_line.should include("value=#{user.flipper_id.to_s.inspect}")
+      adapter_line = find_line('Flipper feature(search) adapter(memory) enable')
+      adapter_line.should include("[ result=")
+    end
+  end
+
+  context "getting all the features from the adapter" do
+    before do
+      clear_logs
+      flipper.features
     end
 
-    it "logs adapter calls not related to a specific feature" do
-      adapter_line = find_line('Flipper adapter(memory) set_add("features")')
-      log.should_not include('Could not log')
-      log.should_not include('NoMethodError: undefined method')
+    it "logs adapter calls" do
+      adapter_line = find_line('Flipper adapter(memory) features')
+      adapter_line.should include('[ result=')
     end
   end
 

@@ -8,13 +8,10 @@ describe Flipper::DSL do
   let(:source)  { {} }
   let(:adapter) { Flipper::Adapters::Memory.new(source) }
 
-  let(:admins_feature) { Flipper::Feature.new(:admins, adapter) }
-
   describe "#initialize" do
-    it "wraps adapter" do
+    it "sets adapter" do
       dsl = described_class.new(adapter)
-      dsl.adapter.should be_instance_of(Flipper::Adapter)
-      dsl.adapter.adapter.should eq(adapter)
+      dsl.adapter.should_not be_nil
     end
 
     it "defaults instrumenter to noop" do
@@ -37,42 +34,6 @@ describe Flipper::DSL do
     end
   end
 
-  describe "#enabled?" do
-    before do
-      subject.stub(:feature => admins_feature)
-    end
-
-    it "passes arguments to feature enabled check and returns result" do
-      admins_feature.should_receive(:enabled?).with(:foo).and_return(true)
-      subject.should_receive(:feature).with(:stats).and_return(admins_feature)
-      subject.enabled?(:stats, :foo).should be_true
-    end
-  end
-
-  describe "#enable" do
-    before do
-      subject.stub(:feature => admins_feature)
-    end
-
-    it "calls enable for feature with arguments" do
-      admins_feature.should_receive(:enable).with(:foo)
-      subject.should_receive(:feature).with(:stats).and_return(admins_feature)
-      subject.enable :stats, :foo
-    end
-  end
-
-  describe "#disable" do
-    before do
-      subject.stub(:feature => admins_feature)
-    end
-
-    it "calls disable for feature with arguments" do
-      admins_feature.should_receive(:disable).with(:foo)
-      subject.should_receive(:feature).with(:stats).and_return(admins_feature)
-      subject.disable :stats, :foo
-    end
-  end
-
   describe "#feature" do
     it_should_behave_like "a DSL feature" do
       let(:method_name) { :feature }
@@ -88,6 +49,18 @@ describe Flipper::DSL do
       let(:instrumenter) { double('Instrumentor', :instrument => nil) }
       let(:feature) { dsl.send(method_name, :stats) }
       let(:dsl) { Flipper::DSL.new(adapter, :instrumenter => instrumenter) }
+    end
+  end
+
+  describe "#boolean" do
+    it_should_behave_like "a DSL boolean method" do
+      let(:method_name) { :boolean }
+    end
+  end
+
+  describe "#bool" do
+    it_should_behave_like "a DSL boolean method" do
+      let(:method_name) { :bool }
     end
   end
 

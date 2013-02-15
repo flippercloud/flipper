@@ -30,6 +30,13 @@ module Flipper
     raise DuplicateGroup, %Q{Group #{name.inspect} has already been registered}
   end
 
+  # Public: Clears the group registry.
+  #
+  # Returns nothing.
+  def self.unregister_groups
+    groups.clear
+  end
+
   # Internal: Fetches a group by name.
   #
   # name - The Symbol name of the group.
@@ -62,5 +69,4 @@ require 'flipper/errors'
 require 'flipper/feature'
 require 'flipper/gate'
 require 'flipper/registry'
-require 'flipper/toggle'
 require 'flipper/type'

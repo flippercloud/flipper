@@ -1,5 +1,4 @@
 require 'forwardable'
-require 'flipper/key'
 require 'flipper/instrumenters/noop'
 
 module Flipper
@@ -10,16 +9,14 @@ module Flipper
     InstrumentationName = "gate_operation.#{InstrumentationNamespace}"
 
     # Private
-    attr_reader :feature
+    attr_reader :feature_name
 
     # Private: What is used to instrument all the things.
     attr_reader :instrumenter
 
-    def_delegator :@feature, :adapter
-
     # Public
-    def initialize(feature, options = {})
-      @feature = feature
+    def initialize(feature_name, options = {})
+      @feature_name = feature_name
       @instrumenter = options.fetch(:instrumenter, Flipper::Instrumenters::Noop)
     end
 
@@ -28,31 +25,29 @@ module Flipper
       raise 'Not implemented'
     end
 
-    # Private: The piece of the adapter key that is unique to the gate class.
-    # Implemented in subclass.
+    # Private: Name converted to value safe for adapter. Implemented in subclass.
     def key
       raise 'Not implemented'
     end
 
-    # Internal: The key where details about this gate can be retrieved from the
-    # adapter.
-    def adapter_key
-      @key ||= Key.new(@feature.name, key)
+    def data_type
+      raise 'Not implemented'
     end
 
-    # Internal: The toggle class to use for this gate.
-    def toggle_class
-      Toggles::Value
+    def enable(thing)
+      raise 'Not implemented'
     end
 
-    # Internal: The toggle to use to enable/disable this gate.
-    def toggle
-      @toggle ||= toggle_class.new(self)
+    def disable(thing)
+      raise 'Not implemented'
     end
 
-    # Internal: The value of the toggle as read from the adapter.
-    def value
-      toggle.value
+    def enabled?(value)
+      raise 'Not implemented'
+    end
+
+    def description(value)
+      raise 'Not implemented'
     end
 
     # Internal: Check if a gate is open for a thing. Implemented in subclass.
@@ -69,33 +64,16 @@ module Flipper
       false
     end
 
-    # Internal: Enable this gate for a thing.
-    #
-    # Returns the result of Flipper::Toggle#enable.
-    def enable(thing)
-      toggle.enable(thing)
-    end
-
-    # Internal: Disable this gate for a thing.
-    #
-    # Returns the result of Flipper::Toggle#disable.
-    def disable(thing)
-      toggle.disable(thing)
-    end
-
-    def enabled?
-      toggle.enabled?
+    # Internal: Allows gate to wrap thing using one of the supported flipper
+    # types so adapters always get something that responds to value.
+    def wrap(thing)
+      thing
     end
 
     # Public: Pretty string version for debugging.
     def inspect
       attributes = [
-        "feature=#{feature.name.inspect}",
-        "description=#{description.inspect}",
-        "adapter=#{adapter.name.inspect}",
-        "adapter_key=#{adapter_key.inspect}",
-        "toggle_class=#{toggle_class.inspect}",
-        "toggle_value=#{toggle.value.inspect}",
+        "feature_name=#{feature_name.inspect}",
       ]
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
     end
@@ -106,7 +84,7 @@ module Flipper
         :thing => thing,
         :operation => operation,
         :gate_name => name,
-        :feature_name => @feature.name,
+        :feature_name => @feature_name,
       }
 
       @instrumenter.instrument(InstrumentationName, payload) {

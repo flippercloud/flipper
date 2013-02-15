@@ -2,18 +2,17 @@ require 'helper'
 require 'flipper/instrumenters/memory'
 
 describe Flipper::Gates::PercentageOfRandom do
-  let(:adapter) { double('Adapter', :read => 5) }
-  let(:feature) { double('Feature', :name => :search, :adapter => adapter) }
   let(:instrumenter) { Flipper::Instrumenters::Memory.new }
+  let(:feature_name) { :search }
 
   subject {
-    described_class.new(feature, :instrumenter => instrumenter)
+    described_class.new(feature_name, :instrumenter => instrumenter)
   }
 
   describe "instrumentation" do
     it "is recorded for open" do
       thing = Struct.new(:flipper_id).new('22')
-      subject.open?(thing)
+      subject.open?(thing, 0)
 
       event = instrumenter.events.last
       event.should_not be_nil
@@ -32,22 +31,15 @@ describe Flipper::Gates::PercentageOfRandom do
 
   describe "#description" do
     context "when enabled" do
-      before do
-        adapter.stub(:read => 22)
-      end
-
       it "returns text" do
-        subject.description.should eq('22% of the time')
+        subject.description(22).should eq('22% of the time')
       end
     end
 
     context "when disabled" do
-      before do
-        adapter.stub(:read => nil)
-      end
-
       it "returns disabled" do
-        subject.description.should eq('disabled')
+        subject.description(nil).should eq('disabled')
+        subject.description(0).should eq('disabled')
       end
     end
   end

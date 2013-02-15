@@ -19,20 +19,25 @@ class User
   alias_method :flipper_id, :id
 end
 
-pitt = User.new(1)
-clooney = User.new(10)
+total = 10_000
 
-puts "Stats for pitt: #{stats.enabled?(pitt)}"
-puts "Stats for clooney: #{stats.enabled?(clooney)}"
+# create array of fake users
+users = (1..total).map { |n| User.new(n) }
 
-puts "\nEnabling stats for 5 percent...\n\n"
-stats.enable(Flipper::Types::PercentageOfActors.new(5))
+perform_test = lambda { |number|
+  flipper[:stats].enable flipper.actors(number)
 
-puts "Stats for pitt: #{stats.enabled?(pitt)}"
-puts "Stats for clooney: #{stats.enabled?(clooney)}"
+  enabled = users.map { |user|
+    flipper[:stats].enabled?(user) ? true : nil
+  }.compact
 
-puts "\nEnabling stats for 50 percent...\n\n"
-stats.enable(Flipper::Types::PercentageOfActors.new(50))
+  actual = (enabled.size / total.to_f * 100).round(2)
 
-puts "Stats for pitt: #{stats.enabled?(pitt)}"
-puts "Stats for clooney: #{stats.enabled?(clooney)}"
+  puts "percentage: #{actual.to_s.rjust(6, ' ')} vs #{number.to_s.rjust(3, ' ')}"
+}
+
+puts "percentage: Actual vs Hoped For"
+
+[1, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 99, 100].each do |number|
+  perform_test.call number
+end

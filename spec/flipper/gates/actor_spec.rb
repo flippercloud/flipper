@@ -2,18 +2,17 @@ require 'helper'
 require 'flipper/instrumenters/memory'
 
 describe Flipper::Gates::Actor do
-  let(:adapter) { double('Adapter', :set_members => []) }
-  let(:feature) { double('Feature', :name => :search, :adapter => adapter) }
   let(:instrumenter) { Flipper::Instrumenters::Memory.new }
+  let(:feature_name) { :search }
 
   subject {
-    described_class.new(feature, :instrumenter => instrumenter)
+    described_class.new(feature_name, :instrumenter => instrumenter)
   }
 
   describe "instrumentation" do
     it "is recorded for open" do
       thing = Struct.new(:flipper_id).new('22')
-      subject.open?(thing)
+      subject.open?(thing, Set.new)
 
       event = instrumenter.events.last
       event.should_not be_nil
@@ -30,22 +29,15 @@ describe Flipper::Gates::Actor do
 
   describe "#description" do
     context "with actors in set" do
-      before do
-        adapter.stub(:set_members => Set['bacon', 'ham'])
-      end
-
       it "returns text" do
-        subject.description.should eq('actors ("bacon", "ham")')
+        values = Set['bacon', 'ham']
+        subject.description(values).should eq('actors ("bacon", "ham")')
       end
     end
 
     context "with no actors in set" do
-      before do
-        adapter.stub(:set_members => Set.new)
-      end
-
       it "returns disabled" do
-        subject.description.should eq('disabled')
+        subject.description(Set.new).should eq('disabled')
       end
     end
   end

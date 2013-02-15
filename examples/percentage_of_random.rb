@@ -14,13 +14,9 @@ perform_test = lambda do |number|
   enabled = []
   disabled = []
 
-  (1..total).each do |number|
-    if logging.enabled?
-      enabled << number
-    else
-      disabled << number
-    end
-  end
+  enabled = (1..total).map { |n|
+    logging.enabled? ? true : nil
+  }.compact
 
   actual = (enabled.size / total.to_f * 100).round(2)
 

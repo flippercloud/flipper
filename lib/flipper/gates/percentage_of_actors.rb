@@ -8,21 +8,37 @@ module Flipper
         :percentage_of_actors
       end
 
-      # Internal: The piece of the adapter key that is unique to the gate class.
+      # Internal: Name converted to value safe for adapter.
       def key
-        :perc_actors
+        :percentage_of_actors
+      end
+
+      def data_type
+        :integer
+      end
+
+      def description(value)
+        if enabled?(value)
+          "#{value}% of actors"
+        else
+          'disabled'
+        end
+      end
+
+      def enabled?(value)
+        !value.nil? && value.to_i > 0
       end
 
       # Internal: Checks if the gate is open for a thing.
       #
       # Returns true if gate open for thing, false if not.
-      def open?(thing)
+      def open?(thing, value)
         instrument(:open?, thing) { |payload|
-          percentage = toggle.value.to_i
+          percentage = value.to_i
 
           if Types::Actor.wrappable?(thing)
             actor = Types::Actor.wrap(thing)
-            key = "#{@feature.name}#{actor.value}"
+            key = "#{@feature_name}#{actor.value}"
             Zlib.crc32(key) % 100 < percentage
           else
             false
@@ -32,14 +48,6 @@ module Flipper
 
       def protects?(thing)
         thing.is_a?(Flipper::Types::PercentageOfActors)
-      end
-
-      def description
-        if enabled?
-          "#{toggle.value}% of actors"
-        else
-          'disabled'
-        end
       end
     end
   end

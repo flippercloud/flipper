@@ -2,18 +2,17 @@ require 'helper'
 require 'flipper/instrumenters/memory'
 
 describe Flipper::Gates::PercentageOfActors do
-  let(:adapter) { double('Adapter', :read => nil) }
-  let(:feature) { double('Feature', :name => :search, :adapter => adapter) }
   let(:instrumenter) { Flipper::Instrumenters::Memory.new }
+  let(:feature_name) { :search }
 
   subject {
-    described_class.new(feature, :instrumenter => instrumenter)
+    described_class.new(feature_name, :instrumenter => instrumenter)
   }
 
   describe "instrumentation" do
     it "is recorded for open" do
       thing = Struct.new(:flipper_id).new('22')
-      subject.open?(thing)
+      subject.open?(thing, 0)
 
       event = instrumenter.events.last
       event.should_not be_nil
@@ -30,22 +29,15 @@ describe Flipper::Gates::PercentageOfActors do
 
   describe "#description" do
     context "when enabled" do
-      before do
-        adapter.stub(:read => 22)
-      end
-
       it "returns text" do
-        subject.description.should eq('22% of actors')
+        subject.description(22).should eq('22% of actors')
       end
     end
 
     context "when disabled" do
-      before do
-        adapter.stub(:read => nil)
-      end
-
       it "returns disabled" do
-        subject.description.should eq('disabled')
+        subject.description(nil).should eq('disabled')
+        subject.description(0).should eq('disabled')
       end
     end
   end
@@ -53,29 +45,21 @@ describe Flipper::Gates::PercentageOfActors do
   describe "#open?" do
     context "when compared against two features" do
       let(:percentage) { 0.05 }
+      let(:percentage_as_integer) { percentage * 100 }
       let(:number_of_actors) { 100 }
 
       let(:actors) {
-        (1..number_of_actors).map { |n|
-          Struct.new(:flipper_id).new(n)
-        }
+        (1..number_of_actors).map { |n| Struct.new(:flipper_id).new(n) }
       }
 
       let(:feature_one_enabled_actors) do
-        feature_one = double('Feature', :name => :name_one, :adapter => adapter)
-        gate = described_class.new(feature_one)
-        actors.select { |actor| gate.open? actor }
+        gate = described_class.new(:name_one)
+        actors.select { |actor| gate.open? actor, percentage_as_integer }
       end
 
       let(:feature_two_enabled_actors) do
-        feature_two = double('Feature', :name => :name_two, :adapter => adapter)
-        gate = described_class.new(feature_two)
-        actors.select { |actor| gate.open? actor }
-      end
-
-      before do
-        percentage_as_integer = percentage * 100
-        adapter.stub(:read => percentage_as_integer)
+        gate = described_class.new(:name_two)
+        actors.select { |actor| gate.open? actor, percentage_as_integer }
       end
 
       it "does not enable both features for same set of actors" do

@@ -1,61 +1,47 @@
+require 'flipper/adapters/decorator'
+
 module Flipper
   module Adapters
     # Public: Adapter that wraps another adapter and stores the operations.
     #
-    # Useful in tests to verify calls and such.
-    class OperationLogger
+    # Useful in tests to verify calls and such. Never use outside of testing.
+    class OperationLogger < Decorator
+      Operation = Struct.new(:type, :args)
+
+      OperationTypes = [
+        :get,
+        :add,
+        :enable,
+        :disable,
+        :features
+      ]
+
+      # Internal: An array of the operations that have happened.
       attr_reader :operations
 
-      Read      = Struct.new(:key)
-      Write     = Struct.new(:key, :value)
-      Delete    = Struct.new(:key)
-      SetAdd    = Struct.new(:key, :value)
-      SetDelete = Struct.new(:key, :value)
-      SetMember = Struct.new(:key)
-
       # Public
-      def initialize(adapter)
-        @operations = []
-        @adapter = adapter
+      def initialize(adapter, operations = nil)
+        super(adapter)
+        @operations = operations || []
       end
 
-      # Public
-      def read(key)
-        @operations << Read.new(key.to_s)
-        @adapter.read key
+      OperationTypes.each do |type|
+        class_eval <<-EOE
+          def #{type}(*args)
+            @operations << Operation.new(:#{type}, args)
+            super
+          end
+        EOE
       end
 
-      # Public
-      def write(key, value)
-        @operations << Write.new(key.to_s, value)
-        @adapter.write key, value
+      # Public: Count the number of times a certain operation happened.
+      def count(type)
+        @operations.select { |operation|
+          operation.type == type
+        }.size
       end
 
-      # Public
-      def delete(key)
-        @operations << Delete.new(key.to_s, nil)
-        @adapter.delete key
-      end
-
-      # Public
-      def set_add(key, value)
-        @operations << SetAdd.new(key.to_s, value)
-        @adapter.set_add key, value
-      end
-
-      # Public
-      def set_delete(key, value)
-        @operations << SetDelete.new(key.to_s, value)
-        @adapter.set_delete key, value
-      end
-
-      # Public
-      def set_members(key)
-        @operations << SetMembers.new(key.to_s)
-        @adapter.set_members key
-      end
-
-      # Public: Clears operation log
+      # Public: Resets the operation log to empty
       def reset
         @operations.clear
       end

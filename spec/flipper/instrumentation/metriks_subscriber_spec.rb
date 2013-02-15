@@ -38,16 +38,13 @@ describe Flipper::Instrumentation::MetriksSubscriber do
 
   it "updates adapter metrics when calls happen" do
     flipper[:stats].enable(user)
-    # one for features and one for actors
-    Metriks.timer("flipper.adapter.memory.set_add").count.should be(2)
+    Metriks.timer("flipper.adapter.memory.enable").count.should be(1)
 
     flipper[:stats].enabled?(user)
-    Metriks.timer("flipper.adapter.memory.read").count.should be(1)
-    # one for actors and one for groups
-    Metriks.timer("flipper.adapter.memory.set_members").count.should be(2)
+    Metriks.timer("flipper.adapter.memory.get").count.should be(1)
 
     flipper[:stats].disable(user)
-    Metriks.timer("flipper.adapter.memory.set_delete").count.should be(1)
+    Metriks.timer("flipper.adapter.memory.disable").count.should be(1)
   end
 
   it "updates gate metrics when calls happen" do

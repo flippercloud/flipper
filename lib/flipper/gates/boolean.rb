@@ -1,38 +1,51 @@
 module Flipper
   module Gates
     class Boolean < Gate
+      TruthMap = {
+        true    => true,
+        false   => false,
+        'true'  => true,
+        'false' => false,
+      }
+
       # Internal: The name of the gate. Used for instrumentation, etc.
       def name
         :boolean
       end
 
-      # Internal: The piece of the adapter key that is unique to the gate class.
+      # Internal: Name converted to value safe for adapter.
       def key
         :boolean
       end
 
-      # Internal: The toggle class used to enable/disable the gate for a thing.
-      def toggle_class
-        Toggles::Boolean
+      def data_type
+        :boolean
       end
 
-      # Internal: Checks if the gate is open for a thing.
-      #
-      # Returns true if gate open for thing, false if not.
-      def open?(thing)
-        instrument(:open?, thing) { |payload| toggle.value }
-      end
-
-      def protects?(thing)
-        thing.is_a?(Flipper::Types::Boolean)
-      end
-
-      def description
-        if enabled?
+      def description(value)
+        if enabled?(value)
           'Enabled'
         else
           'Disabled'
         end
+      end
+
+      def enabled?(value)
+        !!TruthMap[value]
+      end
+
+      # Internal: Checks if the gate is open for a thing.
+      #
+      # Returns true if explicitly set to true, false if explicitly set to false
+      # or nil if not explicitly set.
+      def open?(thing, value)
+        instrument(:open?, thing) { |payload|
+          !!TruthMap[value]
+        }
+      end
+
+      def protects?(thing)
+        thing.is_a?(Flipper::Types::Boolean)
       end
     end
   end

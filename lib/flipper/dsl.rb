@@ -1,4 +1,5 @@
-require 'flipper/adapter'
+require 'flipper/adapters/instrumented'
+require 'flipper/adapters/memoizable'
 require 'flipper/instrumenters/noop'
 
 module Flipper
@@ -16,7 +17,13 @@ module Flipper
     #           :instrumenter - What should be used to instrument all the things.
     def initialize(adapter, options = {})
       @instrumenter = options.fetch(:instrumenter, Flipper::Instrumenters::Noop)
-      @adapter = Adapter.wrap(adapter, :instrumenter => @instrumenter)
+
+      instrumented = Flipper::Adapters::Instrumented.new(adapter, {
+        :instrumenter => @instrumenter,
+      })
+      memoized = Flipper::Adapters::Memoizable.new(instrumented)
+      @adapter = memoized
+
       @memoized_features = {}
     end
 
@@ -71,6 +78,22 @@ module Flipper
     #
     # Returns an instance of Flipper::Feature.
     alias_method :[], :feature
+
+    # Public: Shortcut for getting a boolean type instance.
+    #
+    # value - The true or false value for the boolean.
+    #
+    # Returns a Flipper::Types::Boolean instance.
+    def boolean(value = true)
+      Types::Boolean.new(value)
+    end
+
+    # Public: Event shorter shortcut for getting a boolean type instance.
+    #
+    # value - The true or false value for the boolean.
+    #
+    # Returns a Flipper::Types::Boolean instance.
+    alias_method :bool, :boolean
 
     # Public: Access a flipper group by name.
     #
