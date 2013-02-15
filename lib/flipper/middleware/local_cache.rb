@@ -12,13 +12,11 @@ module Flipper
         original = @flipper.adapter.memoizing?
         @flipper.adapter.memoize = true
 
-        status, headers, body = @app.call(env)
-
-        body_proxy = Rack::BodyProxy.new(body) {
+        response = @app.call(env)
+        response[2] = Rack::BodyProxy.new(response[2]) {
           @flipper.adapter.memoize = original
         }
-
-        [status, headers, body_proxy]
+        response
       end
     end
   end
