@@ -50,7 +50,7 @@ module Flipper
       def inspect
         attributes = [
           "name=#{name.inspect}",
-          "wrapped_adapter=#{__getobj__.inspect}",
+          "wrapped_adapter=#{adapter.inspect}",
           "operations=#{@operations.inspect}",
         ]
         "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
