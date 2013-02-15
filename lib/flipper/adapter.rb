@@ -1,3 +1,4 @@
+require 'flipper/adapters/decorator'
 require 'flipper/instrumenters/noop'
 
 module Flipper
@@ -19,7 +20,7 @@ module Flipper
   #
   # To see an example adapter that this would wrap, checkout the [memory
   # adapter included with flipper](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb).
-  class Adapter
+  class Adapter < Adapters::Decorator
     # Private: What adapter is being wrapped and will ultimately be used.
     attr_reader :adapter
 
