@@ -24,9 +24,6 @@ module Flipper
     # Private: The name of instrumentation events.
     InstrumentationName = "adapter_operation.#{InstrumentationNamespace}"
 
-    # Private: The name of the key that stores the set of known features.
-    FeaturesKey = 'features'
-
     # Internal: Wraps vanilla adapter instance for use internally in flipper.
     #
     # object - Either an instance of Flipper::Adapter or a vanilla adapter instance
@@ -107,67 +104,34 @@ module Flipper
 
     # Public: Enable feature gate for thing.
     def enable(feature, gate, thing)
-      perform_enable(feature, gate, thing)
+      result = perform_enable(feature, gate, thing)
 
       if using_local_cache?
         local_cache.delete(feature.name)
       end
 
-      true
+      result
     end
 
     # Public: Disable feature gate for thing.
     def disable(feature, gate, thing)
-      perform_disable(feature, gate, thing)
+      result = perform_disable(feature, gate, thing)
 
       if using_local_cache?
         local_cache.delete(feature.name)
       end
 
-      true
-    end
-
-    # Public: Reads a key.
-    def read(key)
-      @adapter.read(key)
-    end
-
-    # Public: Set a key to a value.
-    def write(key, value)
-      value = value.to_s
-      @adapter.write(key, value)
-    end
-
-    # Public: Deletes a key.
-    def delete(key)
-      @adapter.delete(key)
-    end
-
-    # Public: Returns the members of a set.
-    def set_members(key)
-      @adapter.set_members(key)
-    end
-
-    # Public: Adds a value to a set.
-    def set_add(key, value)
-      value = value.to_s
-      @adapter.set_add(key, value)
-    end
-
-    # Public: Deletes a value from a set.
-    def set_delete(key, value)
-      value = value.to_s
-      @adapter.set_delete(key, value)
+      result
     end
 
     # Public: Returns all the features that the adapter knows of.
     def features
-      set_members(FeaturesKey)
+      perform_features
     end
 
     # Internal: Adds a known feature to the set of features.
-    def feature_add(name)
-      set_add(FeaturesKey, name.to_s)
+    def add(feature)
+      perform_add(feature)
     end
 
     # Public: Determines equality for an adapter instance when compared to
@@ -217,6 +181,25 @@ module Flipper
       }
 
       instrument_operation :get, payload, feature
+    end
+
+    def perform_features
+      payload = {
+        :operation => :features,
+        :adapter_name => @name,
+      }
+
+      instrument_operation :features, payload
+    end
+
+    def perform_add(feature)
+      payload = {
+        :operation => :add,
+        :adapter_name => @name,
+        :feature_name => feature.name,
+      }
+
+      instrument_operation :add, payload, feature
     end
 
     # Private: Instruments operation with payload.

@@ -5,6 +5,8 @@ module Flipper
     class Memoized
       extend Forwardable
 
+      FeaturesKey = :flipper_features
+
       # Forward soon to be private adapter methods to source adapter
       def_delegators :@adapter, :read, :write, :delete,
         :set_members, :set_add, :set_delete
@@ -33,6 +35,18 @@ module Flipper
       def disable(feature, gate, thing)
         result = @adapter.disable(feature, gate, thing)
         @cache.delete(feature)
+        result
+      end
+
+      def features
+        @cache.fetch(FeaturesKey) {
+          @cache[FeaturesKey] = @adapter.features
+        }
+      end
+
+      def add(feature)
+        result = @adapter.add(feature)
+        @cache.delete(FeaturesKey)
         result
       end
     end

@@ -50,4 +50,17 @@ describe Flipper::Adapters::Memoized do
       cache[@feature].should be_nil
     end
   end
+
+  describe "#features" do
+    before do
+      flipper[:stats].enable
+      flipper[:search].disable
+
+      @result = subject.features
+    end
+
+    it "memoizes features" do
+      cache[:flipper_features].should be(@result)
+    end
+  end
 end

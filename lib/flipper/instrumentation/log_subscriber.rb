@@ -10,7 +10,7 @@ module Flipper
       # Example Output
       #
       #   flipper[:search].enabled?(user)
-      #   # Flipper feature(search) enabled? false (1.2ms)  [ thing=#<struct flipper_id="1"> ]
+      #   # Flipper feature(search) enabled? false (1.2ms)  [ thing=... ]
       #
       # Returns nothing.
       def feature_operation(event)
@@ -39,10 +39,10 @@ module Flipper
       # Example Output
       #
       #   # log output for adapter operation with feature
-      #   # Flipper feature(search) adapter(memory) set_add("search/actors") (0.0ms)  [ result=#<Set: {"1"}> value="1" ]
+      #   # Flipper feature(search) adapter(memory) enable  (0.0ms)  [ result=...]
       #
       #   # log output for adapter operation with no feature
-      #   # Flipper adapter(memory) set_add("features") (0.0ms)  [ result=#<Set: {"search"}> value="search" ]
+      #   # Flipper adapter(memory) features (0.0ms)  [ result=... ]
       #
       # Returns nothing.
       def adapter_operation(event)
@@ -54,7 +54,8 @@ module Flipper
         operation = event.payload[:operation]
         result = event.payload[:result]
 
-        description = "Flipper feature(#{feature_name}) "
+        description = "Flipper "
+        description << "feature(#{feature_name}) " unless feature_name.nil?
         description << "adapter(#{adapter_name}) "
         description << "#{operation} "
 
@@ -69,11 +70,11 @@ module Flipper
       # Example Output
       #
       #   flipper[:search].enabled?(user)
-      #   # Flipper feature(search) gate(boolean) open false (0.1ms)  [ thing=#<struct flipper_id="1"> ]
-      #   # Flipper feature(search) gate(group) open false (0.1ms)  [ thing=#<struct flipper_id="1"> ]
-      #   # Flipper feature(search) gate(actor) open false (0.1ms)  [ thing=#<struct flipper_id="1"> ]
-      #   # Flipper feature(search) gate(percentage_of_actors) open false (0.1ms)  [ thing=#<struct flipper_id="1"> ]
-      #   # Flipper feature(search) gate(percentage_of_random) open false (0.1ms)  [ thing=#<struct flipper_id="1"> ]
+      #   # Flipper feature(search) gate(boolean) open false (0.1ms)  [ thing=... ]
+      #   # Flipper feature(search) gate(group) open false (0.1ms)  [ thing=... ]
+      #   # Flipper feature(search) gate(actor) open false (0.1ms)  [ thing=... ]
+      #   # Flipper feature(search) gate(percentage_of_actors) open false (0.1ms)  [ thing=... ]
+      #   # Flipper feature(search) gate(percentage_of_random) open false (0.1ms)  [ thing=... ]
       #
       # Returns nothing.
       def gate_operation(event)

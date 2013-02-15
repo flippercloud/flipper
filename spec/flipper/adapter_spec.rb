@@ -211,7 +211,7 @@ describe Flipper::Adapter do
     }
 
     it "is recorded for get" do
-      subject.get(feature)
+      result = subject.get(feature)
 
       event = instrumenter.events.last
       event.should_not be_nil
@@ -219,11 +219,11 @@ describe Flipper::Adapter do
       event.payload[:operation].should eq(:get)
       event.payload[:adapter_name].should eq(:memory)
       event.payload[:feature_name].should eq(:stats)
-      event.payload[:result].should be_instance_of(Hash)
+      event.payload[:result].should be(result)
     end
 
     it "is recorded for enable" do
-      subject.enable(feature, gate, thing)
+      result = subject.enable(feature, gate, thing)
 
       event = instrumenter.events.last
       event.should_not be_nil
@@ -232,11 +232,11 @@ describe Flipper::Adapter do
       event.payload[:adapter_name].should eq(:memory)
       event.payload[:feature_name].should eq(:stats)
       event.payload[:gate_name].should eq(:percentage_of_actors)
-      event.payload[:result].should eq(thing.value.to_s)
+      event.payload[:result].should be(result)
     end
 
     it "is recorded for disable" do
-      subject.disable(feature, gate, thing)
+      result = subject.disable(feature, gate, thing)
 
       event = instrumenter.events.last
       event.should_not be_nil
@@ -245,7 +245,30 @@ describe Flipper::Adapter do
       event.payload[:adapter_name].should eq(:memory)
       event.payload[:feature_name].should eq(:stats)
       event.payload[:gate_name].should eq(:percentage_of_actors)
-      event.payload[:result].should eq(thing.value.to_s)
+      event.payload[:result].should be(result)
+    end
+
+    it "is recorded for add" do
+      result = subject.add(feature)
+
+      event = instrumenter.events.last
+      event.should_not be_nil
+      event.name.should eq('adapter_operation.flipper')
+      event.payload[:operation].should eq(:add)
+      event.payload[:adapter_name].should eq(:memory)
+      event.payload[:feature_name].should eq(:stats)
+      event.payload[:result].should be(result)
+    end
+
+    it "is recorded for features" do
+      result = subject.features
+
+      event = instrumenter.events.last
+      event.should_not be_nil
+      event.name.should eq('adapter_operation.flipper')
+      event.payload[:operation].should eq(:features)
+      event.payload[:adapter_name].should eq(:memory)
+      event.payload[:result].should be(result)
     end
   end
 

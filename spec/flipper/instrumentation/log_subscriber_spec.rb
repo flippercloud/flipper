@@ -84,11 +84,17 @@ describe Flipper::Instrumentation::LogSubscriber do
       adapter_line = find_line('Flipper feature(search) adapter(memory) enable')
       adapter_line.should include("[ result=")
     end
+  end
 
-    xit "logs adapter calls not related to a specific feature" do
-      adapter_line = find_line('Flipper adapter(memory) set_add("features")')
-      log.should_not include('Could not log')
-      log.should_not include('NoMethodError: undefined method')
+  context "getting all the features from the adapter" do
+    before do
+      clear_logs
+      flipper.features
+    end
+
+    it "logs adapter calls" do
+      adapter_line = find_line('Flipper adapter(memory) features')
+      adapter_line.should include('[ result=')
     end
   end
 

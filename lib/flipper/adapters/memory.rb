@@ -3,6 +3,8 @@ require 'set'
 module Flipper
   module Adapters
     class Memory
+      FeaturesKey = :flipper_features
+
       # Public
       def initialize(source = nil)
         @source = source || {}
@@ -38,6 +40,8 @@ module Flipper
         else
           raise "#{gate} is not supported by this adapter yet"
         end
+
+        true
       end
 
       # Public
@@ -54,8 +58,23 @@ module Flipper
         else
           raise "#{gate} is not supported by this adapter yet"
         end
+
+        true
       end
 
+      # Public: Adds a feature to the set of known features.
+      def add(feature)
+        features.add(feature.name.to_s)
+
+        true
+      end
+
+      # Public: The set of known features.
+      def features
+        set_members(FeaturesKey)
+      end
+
+      # private
       def key(feature, gate)
         "#{feature.key}/#{gate.key}"
       end
@@ -93,8 +112,7 @@ module Flipper
         @source[key.to_s]
       end
 
-      private
-
+      # Private
       def ensure_set_initialized(key)
         @source[key.to_s] ||= Set.new
       end

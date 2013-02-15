@@ -37,12 +37,12 @@ shared_examples_for 'a flipper adapter' do
   end
 
   it "can enable get value for boolean gate" do
-    subject.enable feature, boolean_gate, flipper.boolean
+    subject.enable(feature, boolean_gate, flipper.boolean).should be_true
 
     result = subject.get(feature)
     result[boolean_gate].should eq('true')
 
-    subject.disable feature, boolean_gate, flipper.boolean(false)
+    subject.disable(feature, boolean_gate, flipper.boolean(false)).should be_true
 
     result = subject.get(feature)
     result[boolean_gate].should be_nil
@@ -50,13 +50,13 @@ shared_examples_for 'a flipper adapter' do
 
   it "fully disables all enabled things with boolean gate disable" do
     actor_22 = actor_class.new('22')
-    subject.enable feature, boolean_gate, flipper.boolean
-    subject.enable feature, group_gate, flipper.group(:admins)
-    subject.enable feature, actor_gate, flipper.actor(actor_22)
-    subject.enable feature, actors_gate, flipper.actors(25)
-    subject.enable feature, random_gate, flipper.random(45)
+    subject.enable(feature, boolean_gate, flipper.boolean).should be_true
+    subject.enable(feature, group_gate, flipper.group(:admins)).should be_true
+    subject.enable(feature, actor_gate, flipper.actor(actor_22)).should be_true
+    subject.enable(feature, actors_gate, flipper.actors(25)).should be_true
+    subject.enable(feature, random_gate, flipper.random(45)).should be_true
 
-    subject.disable feature, boolean_gate, flipper.boolean
+    subject.disable(feature, boolean_gate, flipper.boolean).should be_true
 
     subject.get(feature).should eq({
       boolean_gate => nil,
@@ -68,17 +68,17 @@ shared_examples_for 'a flipper adapter' do
   end
 
   it "can enable, disable and get value for group gate" do
-    subject.enable feature, group_gate, flipper.group(:admins)
-    subject.enable feature, group_gate, flipper.group(:early_access)
+    subject.enable(feature, group_gate, flipper.group(:admins)).should be_true
+    subject.enable(feature, group_gate, flipper.group(:early_access)).should be_true
 
     result = subject.get(feature)
     result[group_gate].should eq(Set['admins', 'early_access'])
 
-    subject.disable feature, group_gate, flipper.group(:early_access)
+    subject.disable(feature, group_gate, flipper.group(:early_access)).should be_true
     result = subject.get(feature)
     result[group_gate].should eq(Set['admins'])
 
-    subject.disable feature, group_gate, flipper.group(:admins)
+    subject.disable(feature, group_gate, flipper.group(:admins)).should be_true
     result = subject.get(feature)
     result[group_gate].should eq(Set.new)
   end
@@ -87,68 +87,78 @@ shared_examples_for 'a flipper adapter' do
     actor_22 = actor_class.new('22')
     actor_asdf = actor_class.new('asdf')
 
-    subject.enable feature, actor_gate, flipper.actor(actor_22)
-    subject.enable feature, actor_gate, flipper.actor(actor_asdf)
+    subject.enable(feature, actor_gate, flipper.actor(actor_22)).should be_true
+    subject.enable(feature, actor_gate, flipper.actor(actor_asdf)).should be_true
 
     result = subject.get(feature)
     result[actor_gate].should eq(Set['22', 'asdf'])
 
-    subject.disable feature, actor_gate, flipper.actor(actor_22)
+    subject.disable(feature, actor_gate, flipper.actor(actor_22)).should be_true
     result = subject.get(feature)
     result[actor_gate].should eq(Set['asdf'])
 
-    subject.disable feature, actor_gate, flipper.actor(actor_asdf)
+    subject.disable(feature, actor_gate, flipper.actor(actor_asdf)).should be_true
     result = subject.get(feature)
     result[actor_gate].should eq(Set.new)
   end
 
   it "can enable, disable and get value for percentage of actors gate" do
-    subject.enable feature, actors_gate, flipper.actors(15)
+    subject.enable(feature, actors_gate, flipper.actors(15)).should be_true
     result = subject.get(feature)
     result[actors_gate].should eq('15')
 
-    subject.disable feature, actors_gate, flipper.actors(0)
+    subject.disable(feature, actors_gate, flipper.actors(0)).should be_true
     result = subject.get(feature)
     result[actors_gate].should eq('0')
   end
 
   it "can enable, disable and get value for percentage of random gate" do
-    subject.enable feature, random_gate, flipper.random(10)
+    subject.enable(feature, random_gate, flipper.random(10)).should be_true
     result = subject.get(feature)
     result[random_gate].should eq('10')
 
-    subject.disable feature, random_gate, flipper.random(0)
+    subject.disable(feature, random_gate, flipper.random(0)).should be_true
     result = subject.get(feature)
     result[random_gate].should eq('0')
   end
 
   it "converts boolean value to a string" do
-    subject.enable feature, boolean_gate, flipper.boolean
+    subject.enable(feature, boolean_gate, flipper.boolean).should be_true
     result = subject.get(feature)
     result[boolean_gate].should eq('true')
   end
 
   it "converts the actor value to a string" do
-    subject.enable feature, actor_gate, flipper.actor(actor_class.new(22))
+    subject.enable(feature, actor_gate, flipper.actor(actor_class.new(22))).should be_true
     result = subject.get(feature)
     result[actor_gate].should eq(Set['22'])
   end
 
   it "converts group value to a string" do
-    subject.enable feature, group_gate, flipper.group(:admins)
+    subject.enable(feature, group_gate, flipper.group(:admins)).should be_true
     result = subject.get(feature)
     result[group_gate].should eq(Set['admins'])
   end
 
   it "converts percentage of random integer value to a string" do
-    subject.enable feature, random_gate, flipper.random(10)
+    subject.enable(feature, random_gate, flipper.random(10)).should be_true
     result = subject.get(feature)
     result[random_gate].should eq('10')
   end
 
   it "converts percentage of actors integer value to a string" do
-    subject.enable feature, actors_gate, flipper.actors(10)
+    subject.enable(feature, actors_gate, flipper.actors(10)).should be_true
     result = subject.get(feature)
     result[actors_gate].should eq('10')
+  end
+
+  it "can add and list known features" do
+    subject.features.should eq(Set.new)
+
+    subject.add(flipper[:stats]).should be_true
+    subject.features.should eq(Set['stats'])
+
+    subject.add(flipper[:search]).should be_true
+    subject.features.should eq(Set['stats', 'search'])
   end
 end
