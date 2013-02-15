@@ -3,17 +3,18 @@ require 'forwardable'
 module Flipper
   module Adapters
     class Memoized
-      extend Forwardable
-
       FeaturesKey = :flipper_features
 
-      # Forward soon to be private adapter methods to source adapter
-      def_delegators :@adapter, :read, :write, :delete,
-        :set_members, :set_add, :set_delete
+      # Public: The name of the adapter.
+      attr_reader :name
+
+      # Public: The adapter that is being memoized.
+      attr_reader :adapter
 
       # Public
       def initialize(adapter, cache = {})
         @adapter = adapter
+        @name = :memoized
         @cache = cache
       end
 
@@ -48,6 +49,19 @@ module Flipper
         result = @adapter.add(feature)
         @cache.delete(FeaturesKey)
         result
+      end
+
+      def unmemoize
+        @cache.clear
+      end
+
+      def inspect
+        attributes = [
+          "name=#{name.inspect}",
+          "adapter=#{adapter.inspect}",
+          "cache=#{@cache.inspect}",
+        ]
+        "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
       end
     end
   end
