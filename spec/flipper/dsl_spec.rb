@@ -8,8 +8,6 @@ describe Flipper::DSL do
   let(:source)  { {} }
   let(:adapter) { Flipper::Adapters::Memory.new(source) }
 
-  let(:admins_feature) { Flipper::Feature.new(:admins, adapter) }
-
   describe "#initialize" do
     it "wraps adapter" do
       dsl = described_class.new(adapter)
@@ -34,42 +32,6 @@ describe Flipper::DSL do
         dsl = described_class.new(adapter, :instrumenter => instrumenter)
         dsl.adapter.instrumenter.should be(instrumenter)
       end
-    end
-  end
-
-  describe "#enabled?" do
-    before do
-      subject.stub(:feature => admins_feature)
-    end
-
-    it "passes arguments to feature enabled check and returns result" do
-      admins_feature.should_receive(:enabled?).with(:foo).and_return(true)
-      subject.should_receive(:feature).with(:stats).and_return(admins_feature)
-      subject.enabled?(:stats, :foo).should be_true
-    end
-  end
-
-  describe "#enable" do
-    before do
-      subject.stub(:feature => admins_feature)
-    end
-
-    it "calls enable for feature with arguments" do
-      admins_feature.should_receive(:enable).with(:foo)
-      subject.should_receive(:feature).with(:stats).and_return(admins_feature)
-      subject.enable :stats, :foo
-    end
-  end
-
-  describe "#disable" do
-    before do
-      subject.stub(:feature => admins_feature)
-    end
-
-    it "calls disable for feature with arguments" do
-      admins_feature.should_receive(:disable).with(:foo)
-      subject.should_receive(:feature).with(:stats).and_return(admins_feature)
-      subject.disable :stats, :foo
     end
   end
 
