@@ -30,6 +30,10 @@ describe Flipper::Middleware::LocalCache do
     end.to_app
   }
 
+  after do
+    flipper.adapter.memoize = nil
+  end
+
   it "delegates" do
     called = false
     app = lambda { |env|
