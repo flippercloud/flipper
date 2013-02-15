@@ -11,6 +11,9 @@ module Flipper
       # Public: The adapter that is being memoized.
       attr_reader :adapter
 
+      # Private: The memoized cache of adapter operations and results.
+      attr_reader :cache
+
       # Public
       def initialize(adapter, cache = {})
         @adapter = adapter
