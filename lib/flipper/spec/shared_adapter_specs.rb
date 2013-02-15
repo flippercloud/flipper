@@ -26,6 +26,11 @@ shared_examples_for 'a flipper adapter' do
     Flipper.unregister_groups
   end
 
+  it "has name that is a symbol" do
+    subject.name.should_not be_nil
+    subject.name.should be_instance_of(Symbol)
+  end
+
   it "returns correct default values for the gates if none are enabled" do
     subject.get(feature).should eq({
       boolean_gate => nil,
