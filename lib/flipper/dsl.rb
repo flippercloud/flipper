@@ -1,4 +1,5 @@
-require 'flipper/adapter'
+require 'flipper/adapters/instrumented'
+require 'flipper/adapters/memoized'
 require 'flipper/instrumenters/noop'
 
 module Flipper
@@ -16,7 +17,13 @@ module Flipper
     #           :instrumenter - What should be used to instrument all the things.
     def initialize(adapter, options = {})
       @instrumenter = options.fetch(:instrumenter, Flipper::Instrumenters::Noop)
-      @adapter = Flipper::Adapter.new(adapter, :instrumenter => @instrumenter)
+
+      instrumented = Flipper::Adapters::Instrumented.new(adapter, {
+        :instrumenter => @instrumenter,
+      })
+      memoized = Flipper::Adapters::Memoized.new(instrumented)
+      @adapter = memoized
+
       @memoized_features = {}
     end
 

@@ -46,9 +46,9 @@ describe Flipper::Middleware::LocalCache do
     middleware = described_class.new app, flipper
     body = middleware.call({}).last
 
-    flipper.adapter.using_local_cache?.should be_true
+    flipper.adapter.memoizing?.should be_true
     body.close
-    flipper.adapter.using_local_cache?.should be_false
+    flipper.adapter.memoizing?.should be_false
   end
 
   it "clears local cache after body close" do
@@ -56,21 +56,21 @@ describe Flipper::Middleware::LocalCache do
     middleware = described_class.new app, flipper
     body = middleware.call({}).last
 
-    flipper.adapter.local_cache['hello'] = 'world'
+    flipper.adapter.cache['hello'] = 'world'
     body.close
-    flipper.adapter.local_cache.should be_empty
+    flipper.adapter.cache.should be_empty
   end
 
   it "clears the local cache with a successful request" do
-    flipper.adapter.local_cache['hello'] = 'world'
+    flipper.adapter.cache['hello'] = 'world'
     get '/'
-    flipper.adapter.local_cache.should be_empty
+    flipper.adapter.cache.should be_empty
   end
 
   it "clears the local cache even when the request raises an error" do
-    flipper.adapter.local_cache['hello'] = 'world'
+    flipper.adapter.cache['hello'] = 'world'
     get '/fail' rescue nil
-    flipper.adapter.local_cache.should be_empty
+    flipper.adapter.cache.should be_empty
   end
 
   it "caches getting a feature for duration of request" do

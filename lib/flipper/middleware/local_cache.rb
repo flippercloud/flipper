@@ -9,13 +9,13 @@ module Flipper
       end
 
       def call(env)
-        original = @flipper.adapter.using_local_cache?
-        @flipper.adapter.use_local_cache = true
+        original = @flipper.adapter.memoizing?
+        @flipper.adapter.memoize = true
 
         status, headers, body = @app.call(env)
 
         body_proxy = Rack::BodyProxy.new(body) {
-          @flipper.adapter.use_local_cache = original
+          @flipper.adapter.memoize = original
         }
 
         [status, headers, body_proxy]

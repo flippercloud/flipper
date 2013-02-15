@@ -1,4 +1,3 @@
-require 'flipper/adapter'
 require 'flipper/errors'
 require 'flipper/type'
 require 'flipper/gate'

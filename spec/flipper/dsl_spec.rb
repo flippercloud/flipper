@@ -9,10 +9,9 @@ describe Flipper::DSL do
   let(:adapter) { Flipper::Adapters::Memory.new(source) }
 
   describe "#initialize" do
-    it "wraps adapter" do
+    it "sets adapter" do
       dsl = described_class.new(adapter)
-      dsl.adapter.should be_instance_of(Flipper::Adapter)
-      dsl.adapter.adapter.should eq(adapter)
+      dsl.adapter.should_not be_nil
     end
 
     it "defaults instrumenter to noop" do
