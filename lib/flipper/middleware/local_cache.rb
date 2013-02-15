@@ -1,24 +1,8 @@
+require 'rack/body_proxy'
+
 module Flipper
   module Middleware
     class LocalCache
-      class Body
-        def initialize(target, flipper, original)
-          @target   = target
-          @flipper  = flipper
-          @original = original
-        end
-
-        def each(&block)
-          @target.each(&block)
-        end
-
-        def close
-          @target.close if @target.respond_to?(:close)
-        ensure
-          @flipper.adapter.use_local_cache = @original
-        end
-      end
-
       def initialize(app, flipper)
         @app = app
         @flipper = flipper
@@ -29,7 +13,12 @@ module Flipper
         @flipper.adapter.use_local_cache = true
 
         status, headers, body = @app.call(env)
-        [status, headers, Body.new(body, @flipper, original)]
+
+        body_proxy = Rack::BodyProxy.new(body) {
+          @flipper.adapter.use_local_cache = original
+        }
+
+        [status, headers, body_proxy]
       end
     end
   end
