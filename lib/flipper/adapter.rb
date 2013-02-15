@@ -169,22 +169,6 @@ module Flipper
       instrument_operation :add, payload, feature
     end
 
-    # Public: Determines equality for an adapter instance when compared to
-    # another object.
-    def eql?(other)
-      self.class.eql?(other.class) && adapter == other.adapter
-    end
-    alias_method :==, :eql?
-
-    # Public: Pretty string version for debugging.
-    def inspect
-      attributes = [
-        "name=#{name.inspect}",
-        "use_local_cache=#{@use_local_cache.inspect}"
-      ]
-      "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
-    end
-
     # Private: Instruments operation with payload.
     def instrument_operation(operation, payload = {}, *args)
       @instrumenter.instrument(InstrumentationName, payload) { |payload|

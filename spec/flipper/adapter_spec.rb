@@ -181,25 +181,6 @@ describe Flipper::Adapter do
     end
   end
 
-  describe "#eql?" do
-    it "returns true for same class and adapter" do
-      subject.eql?(described_class.new(adapter)).should be_true
-    end
-
-    it "returns false for different adapter" do
-      instance = described_class.new(Flipper::Adapters::Memory.new)
-      subject.eql?(instance).should be_false
-    end
-
-    it "returns false for different class" do
-      subject.eql?(Object.new).should be_false
-    end
-
-    it "is aliased to ==" do
-      (subject == described_class.new(adapter)).should be_true
-    end
-  end
-
   describe "instrumentation" do
     let(:instrumenter) { Flipper::Instrumenters::Memory.new }
     let(:feature) { flipper[:stats] }
@@ -269,12 +250,6 @@ describe Flipper::Adapter do
       event.payload[:operation].should eq(:features)
       event.payload[:adapter_name].should eq(:memory)
       event.payload[:result].should be(result)
-    end
-  end
-
-  describe "#inspect" do
-    it "returns easy to read string representation" do
-      subject.inspect.should eq("#<Flipper::Adapter:#{subject.object_id} name=:memory, use_local_cache=nil>")
     end
   end
 end
