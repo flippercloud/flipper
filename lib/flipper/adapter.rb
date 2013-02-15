@@ -73,7 +73,6 @@ module Flipper
     #
     def initialize(adapter, options = {})
       @adapter = adapter
-      @name = adapter.class.name.split('::').last.downcase.to_sym
       @local_cache = options[:local_cache] || {}
       @instrumenter = options.fetch(:instrumenter, Flipper::Instrumenters::Noop)
     end
@@ -91,11 +90,16 @@ module Flipper
       @use_local_cache == true
     end
 
+    # Public: The name of the wrapped adapter.
+    def name
+      @adapter.name
+    end
+
     # Public: Reads all keys for a given feature.
     def get(feature)
       payload = {
         :operation => :get,
-        :adapter_name => @name,
+        :adapter_name => name,
         :feature_name => feature.name,
       }
 
@@ -112,7 +116,7 @@ module Flipper
     def enable(feature, gate, thing)
       payload = {
         :operation => :enable,
-        :adapter_name => @name,
+        :adapter_name => name,
         :feature_name => feature.name,
         :gate_name => gate.name,
       }
@@ -130,7 +134,7 @@ module Flipper
     def disable(feature, gate, thing)
       payload = {
         :operation => :disable,
-        :adapter_name => @name,
+        :adapter_name => name,
         :feature_name => feature.name,
         :gate_name => gate.name,
       }
@@ -148,7 +152,7 @@ module Flipper
     def features
       payload = {
         :operation => :features,
-        :adapter_name => @name,
+        :adapter_name => name,
       }
 
       instrument_operation :features, payload
@@ -158,7 +162,7 @@ module Flipper
     def add(feature)
       payload = {
         :operation => :add,
-        :adapter_name => @name,
+        :adapter_name => name,
         :feature_name => feature.name,
       }
 
