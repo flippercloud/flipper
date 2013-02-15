@@ -45,6 +45,8 @@ module Flipper
       @adapter = Adapters::Instrumented.new(adapter, {
         :instrumenter => @instrumenter,
       })
+
+      super @adapter
     end
 
     # Public: Turns local caching on/off.
@@ -60,25 +62,20 @@ module Flipper
       @use_local_cache == true
     end
 
-    # Public: The name of the wrapped adapter.
-    def name
-      @adapter.name
-    end
-
     # Public: Reads all keys for a given feature.
     def get(feature)
       if using_local_cache?
         local_cache.fetch(feature.name) {
-          local_cache[feature.name] = @adapter.get(feature)
+          local_cache[feature.name] = super
         }
       else
-        @adapter.get(feature)
+        super
       end
     end
 
     # Public: Enable feature gate for thing.
     def enable(feature, gate, thing)
-      result = @adapter.enable(feature, gate, thing)
+      result = super
 
       if using_local_cache?
         local_cache.delete(feature.name)
@@ -89,7 +86,7 @@ module Flipper
 
     # Public: Disable feature gate for thing.
     def disable(feature, gate, thing)
-      result = @adapter.disable(feature, gate, thing)
+      result = super
 
       if using_local_cache?
         local_cache.delete(feature.name)
@@ -100,12 +97,12 @@ module Flipper
 
     # Public: Returns all the features that the adapter knows of.
     def features
-      @adapter.features
+      super
     end
 
     # Internal: Adds a known feature to the set of features.
     def add(feature)
-      @adapter.add(feature)
+      super
     end
   end
 end
