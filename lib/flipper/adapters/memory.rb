@@ -5,9 +5,13 @@ module Flipper
     class Memory
       FeaturesKey = :flipper_features
 
+      # Public: The name of the adapter.
+      attr_reader :name
+
       # Public
       def initialize(source = nil)
         @source = source || {}
+        @name = :memory
       end
 
       # Public
@@ -70,6 +74,14 @@ module Flipper
       # Public: The set of known features.
       def features
         set_members(FeaturesKey)
+      end
+
+      def inspect
+        attributes = [
+          "name=:memory",
+          "source=#{@source.inspect}",
+        ]
+        "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
       end
 
       # private
