@@ -1,5 +1,5 @@
 require 'flipper/adapters/instrumented'
-require 'flipper/adapters/memoized'
+require 'flipper/adapters/memoizable'
 require 'flipper/instrumenters/noop'
 
 module Flipper
