@@ -16,9 +16,7 @@ module Flipper
 
         feature.gates.each do |gate|
           result[gate] = case gate.data_type
-          when :boolean
-            read key(feature, gate)
-          when :integer
+          when :boolean, :integer
             read key(feature, gate)
           when :set
             set_members key(feature, gate)
