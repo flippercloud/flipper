@@ -50,6 +50,13 @@ module Flipper
         @operations.clear
       end
 
+      # Public: Determines equality for an adapter instance when compared to
+      # another object.
+      def eql?(other)
+        self.class.eql?(other.class) && adapter == other.adapter
+      end
+      alias_method :==, :eql?
+
       def inspect
         attributes = [
           "name=#{name.inspect}",
