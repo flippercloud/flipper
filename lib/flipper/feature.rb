@@ -71,7 +71,7 @@ module Flipper
         gate_values = adapter.get(self)
 
         gate = gates.detect { |gate|
-          gate.open?(thing, gate_values[gate])
+          gate.open?(thing, gate_values[gate.key])
         }
 
         if gate.nil?
@@ -86,7 +86,7 @@ module Flipper
     # Public
     def state
       gate_values = adapter.get(self)
-      boolean_value = gate_values[boolean_gate]
+      boolean_value = gate_values[:boolean]
 
       if boolean_gate.enabled?(boolean_value)
         :on
@@ -100,14 +100,14 @@ module Flipper
     # Public
     def description
       gate_values = adapter.get(self)
-      boolean_value = gate_values[boolean_gate]
+      boolean_value = gate_values[:boolean]
       conditional_gates = conditional_gates(gate_values)
 
       if boolean_gate.enabled?(boolean_value)
         boolean_gate.description(boolean_value).capitalize
       elsif conditional_gates.any?
         fragments = conditional_gates.map { |gate|
-          value = gate_values[gate]
+          value = gate_values[gate.key]
           gate.description(value)
         }
 
@@ -172,7 +172,7 @@ module Flipper
     # Private
     def conditional_gates(gate_values)
       @conditional_gates ||= non_boolean_gates.select { |gate|
-        value = gate_values[gate]
+        value = gate_values[gate.key]
         gate.enabled?(value)
       }
     end
