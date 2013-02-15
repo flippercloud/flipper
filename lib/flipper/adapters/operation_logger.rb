@@ -21,6 +21,9 @@ module Flipper
       # Public: The name of the adapter.
       attr_reader :name
 
+      # Public: The adapter whose operations will be logged.
+      attr_reader :adapter
+
       # Public
       def initialize(adapter, operations = nil)
         @adapter = adapter
