@@ -3,10 +3,7 @@ module Flipper
     # Public: Adapter that wraps another adapter and stores the operations.
     #
     # Useful in tests to verify calls and such. Never use outside of testing.
-    class OperationLogger < SimpleDelegator
-
-      # Internal: An array of the operations that have happened.
-      attr_reader :operations
+    class OperationLogger
 
       Operation = Struct.new(:type, :args)
 
@@ -18,17 +15,24 @@ module Flipper
         :features
       ]
 
+      # Internal: An array of the operations that have happened.
+      attr_reader :operations
+
+      # Public: The name of the adapter.
+      attr_reader :name
+
       # Public
-      def initialize(*args)
-        super
-        @operations = []
+      def initialize(adapter, operations = nil)
+        @adapter = adapter
+        @operations = operations || []
+        @name = :operation_logger
       end
 
       OperationTypes.each do |type|
         class_eval <<-EOE
           def #{type}(*args)
             @operations << Operation.new(:#{type}, args)
-            super
+            @adapter.#{type}(*args)
           end
         EOE
       end
@@ -41,6 +45,15 @@ module Flipper
       # Public: Resets the operation log to empty
       def reset
         @operations.clear
+      end
+
+      def inspect
+        attributes = [
+          "name=#{name.inspect}",
+          "wrapped_adapter=#{__getobj__.inspect}",
+          "operations=#{@operations.inspect}",
+        ]
+        "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
       end
     end
   end
