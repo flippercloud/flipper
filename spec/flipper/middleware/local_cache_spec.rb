@@ -100,15 +100,17 @@ describe Flipper::Middleware::LocalCache do
 
   context "with a successful request" do
     it "clears the local cache" do
-      flipper.adapter.local_cache.should_receive(:clear).twice
+      flipper.adapter.local_cache['hello'] = 'world'
       get '/'
+      flipper.adapter.local_cache.should be_empty
     end
   end
 
   context "when the request raises an error" do
     it "clears the local cache" do
-      flipper.adapter.local_cache.should_receive(:clear).once
+      flipper.adapter.local_cache['hello'] = 'world'
       get '/fail' rescue nil
+      flipper.adapter.local_cache.should be_empty
     end
   end
 end
