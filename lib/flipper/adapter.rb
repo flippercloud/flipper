@@ -93,18 +93,31 @@ module Flipper
 
     # Public: Reads all keys for a given feature.
     def get(feature)
+      payload = {
+        :operation => :get,
+        :adapter_name => @name,
+        :feature_name => feature.name,
+      }
+
       if using_local_cache?
         local_cache.fetch(feature.name) {
-          local_cache[feature.name] = perform_get(feature)
+          local_cache[feature.name] = instrument_operation(:get, payload, feature)
         }
       else
-        perform_get(feature)
+        instrument_operation(:get, payload, feature)
       end
     end
 
     # Public: Enable feature gate for thing.
     def enable(feature, gate, thing)
-      result = perform_enable(feature, gate, thing)
+      payload = {
+        :operation => :enable,
+        :adapter_name => @name,
+        :feature_name => feature.name,
+        :gate_name => gate.name,
+      }
+
+      result = instrument_operation(:enable, payload, feature, gate, thing)
 
       if using_local_cache?
         local_cache.delete(feature.name)
@@ -115,7 +128,14 @@ module Flipper
 
     # Public: Disable feature gate for thing.
     def disable(feature, gate, thing)
-      result = perform_disable(feature, gate, thing)
+      payload = {
+        :operation => :disable,
+        :adapter_name => @name,
+        :feature_name => feature.name,
+        :gate_name => gate.name,
+      }
+
+      result = instrument_operation(:disable, payload, feature, gate, thing)
 
       if using_local_cache?
         local_cache.delete(feature.name)
@@ -126,12 +146,23 @@ module Flipper
 
     # Public: Returns all the features that the adapter knows of.
     def features
-      perform_features
+      payload = {
+        :operation => :features,
+        :adapter_name => @name,
+      }
+
+      instrument_operation :features, payload
     end
 
     # Internal: Adds a known feature to the set of features.
     def add(feature)
-      perform_add(feature)
+      payload = {
+        :operation => :add,
+        :adapter_name => @name,
+        :feature_name => feature.name,
+      }
+
+      instrument_operation :add, payload, feature
     end
 
     # Public: Determines equality for an adapter instance when compared to
@@ -148,58 +179,6 @@ module Flipper
         "use_local_cache=#{@use_local_cache.inspect}"
       ]
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
-    end
-
-    def perform_enable(feature, gate, thing)
-      payload = {
-        :operation => :enable,
-        :adapter_name => @name,
-        :feature_name => feature.name,
-        :gate_name => gate.name,
-      }
-
-      instrument_operation :enable, payload, feature, gate, thing
-    end
-
-    def perform_disable(feature, gate, thing)
-      payload = {
-        :operation => :disable,
-        :adapter_name => @name,
-        :feature_name => feature.name,
-        :gate_name => gate.name,
-      }
-
-      instrument_operation :disable, payload, feature, gate, thing
-    end
-
-    # Private: Performs actual get with instrumentation.
-    def perform_get(feature)
-      payload = {
-        :operation => :get,
-        :adapter_name => @name,
-        :feature_name => feature.name,
-      }
-
-      instrument_operation :get, payload, feature
-    end
-
-    def perform_features
-      payload = {
-        :operation => :features,
-        :adapter_name => @name,
-      }
-
-      instrument_operation :features, payload
-    end
-
-    def perform_add(feature)
-      payload = {
-        :operation => :add,
-        :adapter_name => @name,
-        :feature_name => feature.name,
-      }
-
-      instrument_operation :add, payload, feature
     end
 
     # Private: Instruments operation with payload.
