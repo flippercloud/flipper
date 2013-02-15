@@ -56,18 +56,6 @@ describe Flipper::Middleware::LocalCache do
     middleware.call({})
   end
 
-  it "enables local cache for body each" do
-    app = lambda { |env|
-      [200, {}, Enum.new(lambda { |&block|
-        flipper.adapter.using_local_cache?.should be_true
-        block.call "hello"
-      })]
-    }
-    middleware = described_class.new app, flipper
-    body = middleware.call({}).last
-    body.each { |x| x.should eql('hello') }
-  end
-
   it "disables local cache after body close" do
     app = lambda { |env| [200, {}, []] }
     middleware = described_class.new app, flipper
@@ -82,15 +70,16 @@ describe Flipper::Middleware::LocalCache do
     app = lambda { |env| [200, {}, []] }
     middleware = described_class.new app, flipper
     body = middleware.call({}).last
-    flipper.adapter.local_cache['hello'] = 'world'
 
-    flipper.adapter.local_cache.should_not be_empty
+    flipper.adapter.local_cache['hello'] = 'world'
     body.close
     flipper.adapter.local_cache.should be_empty
   end
 
-  it "really does cache" do
+  it "only performs one get per feature enabled check" do
     flipper[:stats].enable
+
+    # clear the log of operations
     adapter.reset
 
     app = lambda { |env|
@@ -100,15 +89,13 @@ describe Flipper::Middleware::LocalCache do
       flipper[:stats].enabled?
       flipper[:stats].enabled?
       flipper[:stats].enabled?
-
       [200, {}, []]
     }
+
     middleware = described_class.new app, flipper
     middleware.call({})
 
-    adapter.operations.should eq([
-      Flipper::Adapters::OperationLogger::Get.new(flipper[:stats]),
-    ])
+    adapter.count(:get).should be(1)
   end
 
   context "with a successful request" do
