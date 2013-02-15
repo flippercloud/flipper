@@ -16,7 +16,7 @@ module Flipper
     #           :instrumenter - What should be used to instrument all the things.
     def initialize(adapter, options = {})
       @instrumenter = options.fetch(:instrumenter, Flipper::Instrumenters::Noop)
-      @adapter = Adapter.wrap(adapter, :instrumenter => @instrumenter)
+      @adapter = Flipper::Adapter.new(adapter, :instrumenter => @instrumenter)
       @memoized_features = {}
     end
 

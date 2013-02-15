@@ -11,60 +11,10 @@ describe Flipper::Adapter do
 
   subject { described_class.new(adapter, :local_cache => local_cache) }
 
-  describe ".wrap" do
-    context "with Flipper::Adapter instance" do
-      before do
-        @result = described_class.wrap(subject)
-      end
-
-      it "returns same Flipper::Adapter instance" do
-        @result.should equal(subject)
-      end
-
-      it "wraps adapter that instance was wrapping" do
-        @result.adapter.should be(subject.adapter)
-      end
-    end
-
-    context "with adapter instance" do
-      before do
-        @result = described_class.wrap(adapter)
-      end
-
-      it "returns Flipper::Adapter instance" do
-        @result.should be_instance_of(described_class)
-      end
-
-      it "wraps adapter" do
-        @result.adapter.should be(adapter)
-      end
-    end
-
-    context "with adapter instance and options" do
-      let(:instrumenter) { double('Instrumentor') }
-
-      before do
-        @result = described_class.wrap(adapter, :instrumenter => instrumenter)
-      end
-
-      it "returns Flipper::Adapter instance" do
-        @result.should be_instance_of(described_class)
-      end
-
-      it "wraps adapter" do
-        @result.adapter.should be(adapter)
-      end
-
-      it "passes options to initialization" do
-        @result.instrumenter.should be(instrumenter)
-      end
-    end
-  end
-
   describe "#initialize" do
-    it "sets adapter" do
+    it "wraps adapter with instrumentation" do
       instance = described_class.new(adapter)
-      instance.adapter.should be(adapter)
+      instance.adapter.should be_instance_of(Flipper::Adapters::Instrumented)
     end
 
     it "sets adapter name" do
@@ -81,6 +31,7 @@ describe Flipper::Adapter do
       instrumenter = double('Instrumentor', :instrument => nil)
       instance = described_class.new(adapter, :instrumenter => instrumenter)
       instance.instrumenter.should be(instrumenter)
+      instance.adapter.instrumenter.should be(instrumenter)
     end
   end
 
@@ -178,78 +129,6 @@ describe Flipper::Adapter do
         @result[@feature.gate(:percentage_of_actors)].should eq('20')
         @result[@feature.gate(:percentage_of_random)].should eq('10')
       end
-    end
-  end
-
-  describe "instrumentation" do
-    let(:instrumenter) { Flipper::Instrumenters::Memory.new }
-    let(:feature) { flipper[:stats] }
-    let(:gate) { feature.gate(:percentage_of_actors) }
-    let(:thing) { flipper.actors(22) }
-
-    subject {
-      described_class.new(adapter, :instrumenter => instrumenter)
-    }
-
-    it "is recorded for get" do
-      result = subject.get(feature)
-
-      event = instrumenter.events.last
-      event.should_not be_nil
-      event.name.should eq('adapter_operation.flipper')
-      event.payload[:operation].should eq(:get)
-      event.payload[:adapter_name].should eq(:memory)
-      event.payload[:feature_name].should eq(:stats)
-      event.payload[:result].should be(result)
-    end
-
-    it "is recorded for enable" do
-      result = subject.enable(feature, gate, thing)
-
-      event = instrumenter.events.last
-      event.should_not be_nil
-      event.name.should eq('adapter_operation.flipper')
-      event.payload[:operation].should eq(:enable)
-      event.payload[:adapter_name].should eq(:memory)
-      event.payload[:feature_name].should eq(:stats)
-      event.payload[:gate_name].should eq(:percentage_of_actors)
-      event.payload[:result].should be(result)
-    end
-
-    it "is recorded for disable" do
-      result = subject.disable(feature, gate, thing)
-
-      event = instrumenter.events.last
-      event.should_not be_nil
-      event.name.should eq('adapter_operation.flipper')
-      event.payload[:operation].should eq(:disable)
-      event.payload[:adapter_name].should eq(:memory)
-      event.payload[:feature_name].should eq(:stats)
-      event.payload[:gate_name].should eq(:percentage_of_actors)
-      event.payload[:result].should be(result)
-    end
-
-    it "is recorded for add" do
-      result = subject.add(feature)
-
-      event = instrumenter.events.last
-      event.should_not be_nil
-      event.name.should eq('adapter_operation.flipper')
-      event.payload[:operation].should eq(:add)
-      event.payload[:adapter_name].should eq(:memory)
-      event.payload[:feature_name].should eq(:stats)
-      event.payload[:result].should be(result)
-    end
-
-    it "is recorded for features" do
-      result = subject.features
-
-      event = instrumenter.events.last
-      event.should_not be_nil
-      event.name.should eq('adapter_operation.flipper')
-      event.payload[:operation].should eq(:features)
-      event.payload[:adapter_name].should eq(:memory)
-      event.payload[:result].should be(result)
     end
   end
 end
