@@ -8,7 +8,7 @@ module Flipper
 
       # Internal: Name converted to value safe for adapter.
       def key
-        :perc_time
+        :percentage_of_random
       end
 
       def data_type

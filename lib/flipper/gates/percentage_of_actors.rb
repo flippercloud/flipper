@@ -10,7 +10,7 @@ module Flipper
 
       # Internal: Name converted to value safe for adapter.
       def key
-        :perc_actors
+        :percentage_of_actors
       end
 
       def data_type
