@@ -67,7 +67,7 @@ shared_examples_for 'a DSL feature' do
   end
 
   it "sets adapter" do
-    feature.adapter.should eq(dsl.adapter)
+    feature.adapter.name.should eq(dsl.adapter.name)
   end
 
   it "sets instrumenter" do
