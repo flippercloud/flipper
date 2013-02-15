@@ -9,9 +9,9 @@ module Flipper
       attr_reader :cache
 
       # Public
-      def initialize(adapter, cache = {})
+      def initialize(adapter, cache = nil)
         super(adapter)
-        @cache = cache
+        @cache = cache || {}
       end
 
       # Public: Turns local caching on/off.
