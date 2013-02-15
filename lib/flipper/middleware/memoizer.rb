@@ -2,7 +2,7 @@ require 'rack/body_proxy'
 
 module Flipper
   module Middleware
-    class LocalCache
+    class Memoizer
       def initialize(app, flipper)
         @app = app
         @flipper = flipper

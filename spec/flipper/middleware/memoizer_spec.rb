@@ -1,10 +1,10 @@
 require 'helper'
 require 'rack/test'
-require 'flipper/middleware/local_cache'
+require 'flipper/middleware/memoizer'
 require 'flipper/adapters/operation_logger'
 require 'flipper/adapters/memory'
 
-describe Flipper::Middleware::LocalCache do
+describe Flipper::Middleware::Memoizer do
   include Rack::Test::Methods
 
   let(:source)         { {} }
