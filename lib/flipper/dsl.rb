@@ -21,7 +21,7 @@ module Flipper
       instrumented = Flipper::Adapters::Instrumented.new(adapter, {
         :instrumenter => @instrumenter,
       })
-      memoized = Flipper::Adapters::Memoized.new(instrumented)
+      memoized = Flipper::Adapters::Memoizable.new(instrumented)
       @adapter = memoized
 
       @memoized_features = {}

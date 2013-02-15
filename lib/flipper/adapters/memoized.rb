@@ -2,7 +2,7 @@ require 'flipper/adapters/decorator'
 
 module Flipper
   module Adapters
-    class Memoized < Decorator
+    class Memoizable < Decorator
       FeaturesKey = :flipper_features
 
       # Private: The cache of memoized adapter operations and results.
@@ -50,6 +50,7 @@ module Flipper
         result
       end
 
+      # Public
       def features
         if memoizing?
           @cache.fetch(FeaturesKey) {
@@ -60,6 +61,7 @@ module Flipper
         end
       end
 
+      # Public
       def add(feature)
         result = super
         @cache.delete(FeaturesKey) if memoizing?

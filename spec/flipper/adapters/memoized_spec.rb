@@ -3,7 +3,7 @@ require 'flipper/adapters/memoized'
 require 'flipper/adapters/memory'
 require 'flipper/spec/shared_adapter_specs'
 
-describe Flipper::Adapters::Memoized do
+describe Flipper::Adapters::Memoizable do
   let(:features_key) { described_class::FeaturesKey }
 
   let(:cache)   { {} }
