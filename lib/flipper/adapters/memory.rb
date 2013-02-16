@@ -3,6 +3,8 @@ require 'set'
 module Flipper
   module Adapters
     class Memory
+      include Flipper::Adapter
+
       FeaturesKey = :flipper_features
 
       # Public: The name of the adapter.

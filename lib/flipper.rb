@@ -64,6 +64,7 @@ module Flipper
   end
 end
 
+require 'flipper/adapter'
 require 'flipper/dsl'
 require 'flipper/errors'
 require 'flipper/feature'

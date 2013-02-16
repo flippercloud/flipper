@@ -31,6 +31,10 @@ shared_examples_for 'a flipper adapter' do
     subject.name.should be_instance_of(Symbol)
   end
 
+  it "has included the flipper adapter module" do
+    subject.class.ancestors.should include(Flipper::Adapter)
+  end
+
   it "returns correct default values for the gates if none are enabled" do
     subject.get(feature).should eq({
       :boolean => nil,
