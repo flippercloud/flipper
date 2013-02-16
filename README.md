@@ -1,4 +1,4 @@
-# Flipper
+![flipper logo](https://raw.github.com/jnunemaker/flipper-ui/master/lib/flipper/ui/public/flipper/images/logo.png)
 
 Feature flipping is the act of enabling or disabling features or parts of your application, ideally without re-deploying or changing anything in your code base.
 
