@@ -172,6 +172,7 @@ I plan on supporting [in-memory](https://github.com/jnunemaker/flipper/blob/mast
 * [memory adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb) - Great for tests.
 * [mongo adapter](https://github.com/jnunemaker/flipper-mongo)
 * [redis adapter](https://github.com/jnunemaker/flipper-redis)
+* [cassanity adapter](https://github.com/jnunemaker/flipper-cassanity)
 
 ## Optimization
 
