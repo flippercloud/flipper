@@ -41,7 +41,7 @@ shared_examples_for 'a flipper adapter' do
     })
   end
 
-  it "can enable get value for boolean gate" do
+  it "can enable and get value for boolean gate" do
     subject.enable(feature, boolean_gate, flipper.boolean).should be_true
 
     result = subject.get(feature)
@@ -53,7 +53,7 @@ shared_examples_for 'a flipper adapter' do
     result[:boolean].should be_nil
   end
 
-  it "fully disables all enabled things with boolean gate disable" do
+  it "fully disables all enabled things when boolean gate disabled" do
     actor_22 = actor_class.new('22')
     subject.enable(feature, boolean_gate, flipper.boolean).should be_true
     subject.enable(feature, group_gate, flipper.group(:admins)).should be_true
