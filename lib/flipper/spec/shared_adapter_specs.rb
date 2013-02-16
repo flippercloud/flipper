@@ -41,7 +41,7 @@ shared_examples_for 'a flipper adapter' do
     })
   end
 
-  it "can enable and get value for boolean gate" do
+  it "can enable, disable and get value for boolean gate" do
     subject.enable(feature, boolean_gate, flipper.boolean).should be_true
 
     result = subject.get(feature)
