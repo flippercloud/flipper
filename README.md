@@ -4,6 +4,20 @@ Feature flipping is the act of enabling or disabling features or parts of your a
 
 The goal of this gem is to make turning features on or off so easy that everyone does it. Whatever your data store, throughput, or experience, feature flipping should be easy and have minimal impact on your application.
 
+## Installation
+
+Add this line to your application's Gemfile:
+
+    gem 'flipper'
+
+And then execute:
+
+    $ bundle
+
+Or install it yourself with:
+
+    $ gem install flipper
+
 ## Coming Soon™
 
 * [Web UI](https://github.com/jnunemaker/flipper-ui) (think resque UI for features toggling/status)
@@ -178,20 +192,6 @@ Rails.application.config.middleware.use Flipper::Middleware::Memoizer, flipper
 ```
 
 **Note**: Be sure that the middlware is high enough up in your stack that all feature checks are wrapped.
-
-## Installation
-
-Add this line to your application's Gemfile:
-
-    gem 'flipper'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself with:
-
-    $ gem install flipper
 
 ## Contributing
 
