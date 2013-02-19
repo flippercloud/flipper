@@ -9,93 +9,123 @@ describe Flipper::Middleware::Memoizer do
 
   let(:source)         { {} }
   let(:memory_adapter) { Flipper::Adapters::Memory.new(source) }
-  let(:adapter)        { Flipper::Adapters::OperationLogger.new(memory_adapter) }
-  let(:flipper)        { Flipper.new(adapter) }
-
-  let(:app) {
-    # ensure scoped for builder block, annoying...
-    instance = flipper
-    middleware = described_class
-
-    Rack::Builder.new do
-      use middleware, instance
-
-      map "/" do
-        run lambda {|env| [200, {}, []] }
-      end
-
-      map "/fail" do
-        run lambda {|env| raise "FAIL!" }
-      end
-    end.to_app
+  let(:adapter)        {
+    Flipper::Adapters::OperationLogger.new(memory_adapter)
   }
+  let(:flipper)        { Flipper.new(adapter) }
 
   after do
     flipper.adapter.memoize = nil
   end
 
-  it "delegates" do
-    called = false
-    app = lambda { |env|
-      called = true
-      [200, {}, nil]
+  shared_examples_for "flipper middleware" do
+    it "delegates" do
+      called = false
+      app = lambda { |env|
+        called = true
+        [200, {}, nil]
+      }
+      middleware = described_class.new app, flipper
+      middleware.call({})
+      called.should be_true
+    end
+
+    it "disables local cache after body close" do
+      app = lambda { |env| [200, {}, []] }
+      middleware = described_class.new app, flipper
+      body = middleware.call({}).last
+
+      flipper.adapter.memoizing?.should be_true
+      body.close
+      flipper.adapter.memoizing?.should be_false
+    end
+
+    it "clears local cache after body close" do
+      app = lambda { |env| [200, {}, []] }
+      middleware = described_class.new app, flipper
+      body = middleware.call({}).last
+
+      flipper.adapter.cache['hello'] = 'world'
+      body.close
+      flipper.adapter.cache.should be_empty
+    end
+
+    it "clears the local cache with a successful request" do
+      flipper.adapter.cache['hello'] = 'world'
+      get '/'
+      flipper.adapter.cache.should be_empty
+    end
+
+    it "clears the local cache even when the request raises an error" do
+      flipper.adapter.cache['hello'] = 'world'
+      get '/fail' rescue nil
+      flipper.adapter.cache.should be_empty
+    end
+
+    it "caches getting a feature for duration of request" do
+      flipper[:stats].enable
+
+      # clear the log of operations
+      adapter.reset
+
+      app = lambda { |env|
+        flipper[:stats].enabled?
+        flipper[:stats].enabled?
+        flipper[:stats].enabled?
+        flipper[:stats].enabled?
+        flipper[:stats].enabled?
+        flipper[:stats].enabled?
+        [200, {}, []]
+      }
+
+      middleware = described_class.new app, flipper
+      middleware.call({})
+
+      adapter.count(:get).should be(1)
+    end
+  end
+
+  context "with flipper instance" do
+    let(:app) {
+      # ensure scoped for builder block, annoying...
+      instance = flipper
+      middleware = described_class
+
+      Rack::Builder.new do
+        use middleware, instance
+
+        map "/" do
+          run lambda {|env| [200, {}, []] }
+        end
+
+        map "/fail" do
+          run lambda {|env| raise "FAIL!" }
+        end
+      end.to_app
     }
-    middleware = described_class.new app, flipper
-    middleware.call({})
-    called.should be_true
+
+    include_examples "flipper middleware"
   end
 
-  it "disables local cache after body close" do
-    app = lambda { |env| [200, {}, []] }
-    middleware = described_class.new app, flipper
-    body = middleware.call({}).last
+  context "with block that yields flipper instance" do
+    let(:app) {
+      # ensure scoped for builder block, annoying...
+      instance = flipper
+      middleware = described_class
 
-    flipper.adapter.memoizing?.should be_true
-    body.close
-    flipper.adapter.memoizing?.should be_false
-  end
+      Rack::Builder.new do
+        use middleware, lambda { instance }
 
-  it "clears local cache after body close" do
-    app = lambda { |env| [200, {}, []] }
-    middleware = described_class.new app, flipper
-    body = middleware.call({}).last
+        map "/" do
+          run lambda {|env| [200, {}, []] }
+        end
 
-    flipper.adapter.cache['hello'] = 'world'
-    body.close
-    flipper.adapter.cache.should be_empty
-  end
-
-  it "clears the local cache with a successful request" do
-    flipper.adapter.cache['hello'] = 'world'
-    get '/'
-    flipper.adapter.cache.should be_empty
-  end
-
-  it "clears the local cache even when the request raises an error" do
-    flipper.adapter.cache['hello'] = 'world'
-    get '/fail' rescue nil
-    flipper.adapter.cache.should be_empty
-  end
-
-  it "caches getting a feature for duration of request" do
-    flipper[:stats].enable
-
-    # clear the log of operations
-    adapter.reset
-
-    app = lambda { |env|
-      flipper[:stats].enabled?
-      flipper[:stats].enabled?
-      flipper[:stats].enabled?
-      flipper[:stats].enabled?
-      flipper[:stats].enabled?
-      flipper[:stats].enabled?
-      [200, {}, []]
+        map "/fail" do
+          run lambda {|env| raise "FAIL!" }
+        end
+      end.to_app
     }
 
-    middleware = described_class.new app, flipper
-    middleware.call({})
-
-    adapter.count(:get).should be(1)
+    include_examples "flipper middleware"
   end
 end
