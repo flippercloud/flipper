@@ -59,7 +59,11 @@ module Flipper
         gate = gate_for(thing)
         payload[:gate_name] = gate.name
 
-        adapter.disable self, gate, gate.wrap(thing)
+        if gate.is_a?(Gates::Boolean)
+          adapter.clear self
+        else
+          adapter.disable self, gate, gate.wrap(thing)
+        end
       }
     end
 
