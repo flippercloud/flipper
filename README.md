@@ -167,12 +167,38 @@ Randomness is not a good idea for enabling new features in the UI. Most of the t
 
 ## Adapters
 
-I plan on supporting [in-memory](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb), [Mongo](https://github.com/jnunemaker/flipper-mongo), and [Redis](https://github.com/jnunemaker/flipper-redis) as adapters for flipper. Others are welcome so please let me know if you create one.
+I plan on supporting [in-memory](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb), [Mongo](https://github.com/jnunemaker/flipper-mongo), and [Redis](https://github.com/jnunemaker/flipper-redis) as adapters for flipper. Others are welcome, so please let me know if you create one.
 
 * [memory adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb) - Great for tests.
 * [mongo adapter](https://github.com/jnunemaker/flipper-mongo)
 * [redis adapter](https://github.com/jnunemaker/flipper-redis)
 * [cassanity adapter](https://github.com/jnunemaker/flipper-cassanity)
+
+If you would like to make your own adapter, there are shared adapter specs that you can use to verify that you have everything working correctly.
+
+For example, here is what the in-memory adapter spec looks like:
+
+```ruby
+require 'helper'
+require 'flipper/adapters/memory'
+
+# The shared specs are included with the flipper gem so you can use them in
+# separate adapter specific gems.
+require 'flipper/spec/shared_adapter_specs'
+
+describe Flipper::Adapters::Memory do
+
+  # an instance of the new adapter you are trying to create
+  subject { described_class.new }
+
+  # include the shared specs that the subject must pass
+  it_should_behave_like 'a flipper adapter'
+end
+```
+
+A good place to start when creating your own adapter is to copy one of the adapters mentioned above and replace the client specific code with whatever client you are attempting to adapt.
+
+I would also recommend setting `fail_fast = true` in your RSpec configuration as that will just give you one failure at a time to work through. It is also handy to have the shared adapter spec file open.
 
 ## Optimization
 
@@ -183,13 +209,21 @@ This means if you check the same feature over and over, it will only make one mo
 You can use the middleware from a Rails initializer like so:
 
 ```ruby
-require 'flipper/middleware/memoizer'
-
-# create flipper dsl instance, see above examples for more details
+# create flipper dsl instance, see above Usage for more details
 flipper = Flipper.new(...)
 
-# add the middleware
-Rails.application.config.middleware.use Flipper::Middleware::Memoizer, flipper
+require 'flipper/middleware/memoizer'
+config.middleware.use Flipper::Middleware::Memoizer, flipper
+```
+
+If you set your flipper instance up in an initializer, you can pass a block to the middleware and it will lazily load the instance the first time the middleware is invoked.
+
+```ruby
+# config/initializers/flipper.rb
+$flipper = Flipper.new(...)
+
+# config/application.rb
+config.middleware.use Flipper::Middleware::Memoizer, lambda { $flipper }
 ```
 
 **Note**: Be sure that the middlware is high enough up in your stack that all feature checks are wrapped.
