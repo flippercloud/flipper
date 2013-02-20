@@ -164,7 +164,7 @@ describe Flipper::Adapters::Memoizable do
         subject.memoize = true
       end
 
-      it "unmemoizes features" do
+      it "unmemoizes the known features" do
         cache[features_key] = {:some => 'thing'}
         subject.add(flipper[:stats])
         cache.should be_empty
@@ -178,6 +178,63 @@ describe Flipper::Adapters::Memoizable do
 
       it "returns result" do
         subject.add(flipper[:stats]).should eq(adapter.add(flipper[:stats]))
+      end
+    end
+  end
+
+  describe "#remove" do
+    context "with memoization enabled" do
+      before do
+        subject.memoize = true
+      end
+
+      it "unmemoizes the known features" do
+        cache[features_key] = {:some => 'thing'}
+        subject.remove(flipper[:stats])
+        cache.should be_empty
+      end
+
+      it "unmemoizes the feature" do
+        feature = flipper[:stats]
+        cache[feature] = {:some => 'thing'}
+        subject.remove(feature)
+        cache[feature].should be_nil
+      end
+    end
+
+    context "with memoization disabled" do
+      before do
+        subject.memoize = false
+      end
+
+      it "returns result" do
+        subject.remove(flipper[:stats]).should eq(adapter.remove(flipper[:stats]))
+      end
+    end
+  end
+
+  describe "#clear" do
+    context "with memoization enabled" do
+      before do
+        subject.memoize = true
+      end
+
+      it "unmemoizes feature" do
+        feature = flipper[:stats]
+        cache[feature] = {:some => 'thing'}
+        subject.clear(feature)
+        cache[feature].should be_nil
+      end
+    end
+
+    context "with memoization disabled" do
+      before do
+        subject.memoize = false
+      end
+
+      it "returns result" do
+        feature = flipper[:stats]
+        subject.clear(feature).should eq(adapter.clear(feature))
       end
     end
   end

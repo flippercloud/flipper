@@ -52,9 +52,7 @@ module Flipper
       def disable(feature, gate, thing)
         case gate.data_type
         when :boolean
-          feature.gates.each do |gate|
-            delete key(feature, gate)
-          end
+          clear(feature)
         when :integer
           write key(feature, gate), thing.value.to_s
         when :set
@@ -69,7 +67,21 @@ module Flipper
       # Public: Adds a feature to the set of known features.
       def add(feature)
         features.add(feature.name.to_s)
+        true
+      end
 
+      # Public: Clears all the gate values for a feature.
+      def clear(feature)
+        feature.gates.each do |gate|
+          delete key(feature, gate)
+        end
+      end
+
+      # Public: Removes a feature from the set of known features and clears
+      # all the values for the feature.
+      def remove(feature)
+        features.delete(feature.name.to_s)
+        clear(feature)
         true
       end
 

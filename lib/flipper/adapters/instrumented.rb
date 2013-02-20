@@ -87,6 +87,30 @@ module Flipper
           payload[:result] = super
         }
       end
+
+      def remove(feature)
+        payload = {
+          :operation => :remove,
+          :adapter_name => name,
+          :feature_name => feature.name,
+        }
+
+        @instrumenter.instrument(InstrumentationName, payload) { |payload|
+          payload[:result] = super
+        }
+      end
+
+      def clear(feature)
+        payload = {
+          :operation => :clear,
+          :adapter_name => name,
+          :feature_name => feature.name,
+        }
+
+        @instrumenter.instrument(InstrumentationName, payload) { |payload|
+          payload[:result] = super
+        }
+      end
     end
   end
 end
