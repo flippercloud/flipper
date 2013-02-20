@@ -174,6 +174,16 @@ I plan on supporting [in-memory](https://github.com/jnunemaker/flipper/blob/mast
 * [redis adapter](https://github.com/jnunemaker/flipper-redis)
 * [cassanity adapter](https://github.com/jnunemaker/flipper-cassanity)
 
+The basic API for an adapter is this:
+
+* `features` - Get the set of known features.
+* `add(feature)` - Add a feature to the set of known features.
+* `remove(feature)` - Remove a feature from the set of known features.
+* `clear(feature)` - Clear all gate values for a feature.
+* `get(feature)` - Get all gate values for a feature.
+* `enable(feature, gate, thing)` - Enable a gate for a thing.
+* `disable(feature, gate, thing)` - Disable a gate for a thing.
+
 If you would like to make your own adapter, there are shared adapter specs that you can use to verify that you have everything working correctly.
 
 For example, here is what the in-memory adapter spec looks like:
