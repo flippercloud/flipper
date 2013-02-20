@@ -177,7 +177,7 @@ shared_examples_for 'a flipper adapter' do
     subject.features.should eq(Set.new)
   end
 
-  it "clears all the values for the feature on remove" do
+  it "clears all the gate values for the feature on remove" do
     actor_22 = actor_class.new('22')
     subject.enable(feature, boolean_gate, flipper.boolean).should be_true
     subject.enable(feature, group_gate, flipper.group(:admins)).should be_true
@@ -196,11 +196,7 @@ shared_examples_for 'a flipper adapter' do
     })
   end
 
-  it "does not complain removing a feature that is already removed" do
-    subject.remove(flipper[:stats]).should be_true
-  end
-
-  it "can clear all the values for a feature" do
+  it "can clear all the gate values for a feature" do
     actor_22 = actor_class.new('22')
     subject.enable(feature, boolean_gate, flipper.boolean).should be_true
     subject.enable(feature, group_gate, flipper.group(:admins)).should be_true
@@ -217,5 +213,9 @@ shared_examples_for 'a flipper adapter' do
       :percentage_of_actors => nil,
       :percentage_of_random => nil,
     })
+  end
+
+  it "does not complain clearing a feature that does not exist in adapter" do
+    subject.clear(flipper[:stats]).should be_true
   end
 end
