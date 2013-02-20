@@ -23,6 +23,58 @@ module Flipper
         @instrumenter = options.fetch(:instrumenter, Flipper::Instrumenters::Noop)
       end
 
+      # Public
+      def features
+        payload = {
+          :operation => :features,
+          :adapter_name => name,
+        }
+
+        @instrumenter.instrument(InstrumentationName, payload) { |payload|
+          payload[:result] = super
+        }
+      end
+
+      # Public
+      def add(feature)
+        payload = {
+          :operation => :add,
+          :adapter_name => name,
+          :feature_name => feature.name,
+        }
+
+        @instrumenter.instrument(InstrumentationName, payload) { |payload|
+          payload[:result] = super
+        }
+      end
+
+      # Public
+      def remove(feature)
+        payload = {
+          :operation => :remove,
+          :adapter_name => name,
+          :feature_name => feature.name,
+        }
+
+        @instrumenter.instrument(InstrumentationName, payload) { |payload|
+          payload[:result] = super
+        }
+      end
+
+      # Public
+      def clear(feature)
+        payload = {
+          :operation => :clear,
+          :adapter_name => name,
+          :feature_name => feature.name,
+        }
+
+        @instrumenter.instrument(InstrumentationName, payload) { |payload|
+          payload[:result] = super
+        }
+      end
+
+      # Public
       def get(feature)
         payload = {
           :operation => :get,
@@ -35,7 +87,7 @@ module Flipper
         }
       end
 
-      # Public: Enable feature gate for thing.
+      # Public
       def enable(feature, gate, thing)
         payload = {
           :operation => :enable,
@@ -49,38 +101,13 @@ module Flipper
         }
       end
 
-      # Public: Disable feature gate for thing.
+      # Public
       def disable(feature, gate, thing)
         payload = {
           :operation => :disable,
           :adapter_name => name,
           :feature_name => feature.name,
           :gate_name => gate.name,
-        }
-
-        @instrumenter.instrument(InstrumentationName, payload) { |payload|
-          payload[:result] = super
-        }
-      end
-
-      # Public: Returns all the features that the adapter knows of.
-      def features
-        payload = {
-          :operation => :features,
-          :adapter_name => name,
-        }
-
-        @instrumenter.instrument(InstrumentationName, payload) { |payload|
-          payload[:result] = super
-        }
-      end
-
-      # Internal: Adds a known feature to the set of features.
-      def add(feature)
-        payload = {
-          :operation => :add,
-          :adapter_name => name,
-          :feature_name => feature.name,
         }
 
         @instrumenter.instrument(InstrumentationName, payload) { |payload|

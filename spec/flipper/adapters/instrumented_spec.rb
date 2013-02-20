@@ -77,6 +77,34 @@ describe Flipper::Adapters::Instrumented do
     end
   end
 
+  describe "#remove" do
+    it "records instrumentation" do
+      result = subject.remove(feature)
+
+      event = instrumenter.events.last
+      event.should_not be_nil
+      event.name.should eq('adapter_operation.flipper')
+      event.payload[:operation].should eq(:remove)
+      event.payload[:adapter_name].should eq(:memory)
+      event.payload[:feature_name].should eq(:stats)
+      event.payload[:result].should be(result)
+    end
+  end
+
+  describe "#clear" do
+    it "records instrumentation" do
+      result = subject.clear(feature)
+
+      event = instrumenter.events.last
+      event.should_not be_nil
+      event.name.should eq('adapter_operation.flipper')
+      event.payload[:operation].should eq(:clear)
+      event.payload[:adapter_name].should eq(:memory)
+      event.payload[:feature_name].should eq(:stats)
+      event.payload[:result].should be(result)
+    end
+  end
+
   describe "#features" do
     it "records instrumentation" do
       result = subject.features

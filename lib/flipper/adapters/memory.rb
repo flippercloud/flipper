@@ -16,6 +16,32 @@ module Flipper
         @name = :memory
       end
 
+      # Public: The set of known features.
+      def features
+        set_members(FeaturesKey)
+      end
+
+      # Public: Adds a feature to the set of known features.
+      def add(feature)
+        features.add(feature.name.to_s)
+        true
+      end
+
+      # Public: Removes a feature from the set of known features and clears
+      # all the values for the feature.
+      def remove(feature)
+        features.delete(feature.name.to_s)
+        clear(feature)
+        true
+      end
+
+      # Public: Clears all the gate values for a feature.
+      def clear(feature)
+        feature.gates.each do |gate|
+          delete key(feature, gate)
+        end
+      end
+
       # Public
       def get(feature)
         result = {}
@@ -52,9 +78,7 @@ module Flipper
       def disable(feature, gate, thing)
         case gate.data_type
         when :boolean
-          feature.gates.each do |gate|
-            delete key(feature, gate)
-          end
+          clear(feature)
         when :integer
           write key(feature, gate), thing.value.to_s
         when :set
@@ -66,18 +90,7 @@ module Flipper
         true
       end
 
-      # Public: Adds a feature to the set of known features.
-      def add(feature)
-        features.add(feature.name.to_s)
-
-        true
-      end
-
-      # Public: The set of known features.
-      def features
-        set_members(FeaturesKey)
-      end
-
+      # Public
       def inspect
         attributes = [
           "name=:memory",
@@ -86,7 +99,7 @@ module Flipper
         "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
       end
 
-      # private
+      # Private
       def key(feature, gate)
         "#{feature.key}/#{gate.key}"
       end

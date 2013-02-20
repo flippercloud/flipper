@@ -27,6 +27,41 @@ module Flipper
       end
 
       # Public
+      def features
+        if memoizing?
+          cache.fetch(FeaturesKey) {
+            cache[FeaturesKey] = super
+          }
+        else
+          super
+        end
+      end
+
+      # Public
+      def add(feature)
+        result = super
+        cache.delete(FeaturesKey) if memoizing?
+        result
+      end
+
+      # Public
+      def remove(feature)
+        result = super
+        if memoizing?
+          cache.delete(FeaturesKey)
+          cache.delete(feature)
+        end
+        result
+      end
+
+      # Public
+      def clear(feature)
+        result = super
+        cache.delete(feature) if memoizing?
+        result
+      end
+
+      # Public
       def get(feature)
         if memoizing?
           cache.fetch(feature) { cache[feature] = super }
@@ -46,24 +81,6 @@ module Flipper
       def disable(feature, gate, thing)
         result = super
         cache.delete(feature) if memoizing?
-        result
-      end
-
-      # Public
-      def features
-        if memoizing?
-          cache.fetch(FeaturesKey) {
-            cache[FeaturesKey] = super
-          }
-        else
-          super
-        end
-      end
-
-      # Public
-      def add(feature)
-        result = super
-        cache.delete(FeaturesKey) if memoizing?
         result
       end
 

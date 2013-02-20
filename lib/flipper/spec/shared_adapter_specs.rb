@@ -161,7 +161,7 @@ shared_examples_for 'a flipper adapter' do
     result[:percentage_of_actors].should eq('10')
   end
 
-  it "can add and list known features" do
+  it "can add, remove and list known features" do
     subject.features.should eq(Set.new)
 
     subject.add(flipper[:stats]).should be_true
@@ -169,5 +169,53 @@ shared_examples_for 'a flipper adapter' do
 
     subject.add(flipper[:search]).should be_true
     subject.features.should eq(Set['stats', 'search'])
+
+    subject.remove(flipper[:stats]).should be_true
+    subject.features.should eq(Set['search'])
+
+    subject.remove(flipper[:search]).should be_true
+    subject.features.should eq(Set.new)
+  end
+
+  it "clears all the gate values for the feature on remove" do
+    actor_22 = actor_class.new('22')
+    subject.enable(feature, boolean_gate, flipper.boolean).should be_true
+    subject.enable(feature, group_gate, flipper.group(:admins)).should be_true
+    subject.enable(feature, actor_gate, flipper.actor(actor_22)).should be_true
+    subject.enable(feature, actors_gate, flipper.actors(25)).should be_true
+    subject.enable(feature, random_gate, flipper.random(45)).should be_true
+
+    subject.remove(feature).should be_true
+
+    subject.get(feature).should eq({
+      :boolean => nil,
+      :groups => Set.new,
+      :actors => Set.new,
+      :percentage_of_actors => nil,
+      :percentage_of_random => nil,
+    })
+  end
+
+  it "can clear all the gate values for a feature" do
+    actor_22 = actor_class.new('22')
+    subject.enable(feature, boolean_gate, flipper.boolean).should be_true
+    subject.enable(feature, group_gate, flipper.group(:admins)).should be_true
+    subject.enable(feature, actor_gate, flipper.actor(actor_22)).should be_true
+    subject.enable(feature, actors_gate, flipper.actors(25)).should be_true
+    subject.enable(feature, random_gate, flipper.random(45)).should be_true
+
+    subject.clear(feature).should be_true
+
+    subject.get(feature).should eq({
+      :boolean => nil,
+      :groups => Set.new,
+      :actors => Set.new,
+      :percentage_of_actors => nil,
+      :percentage_of_random => nil,
+    })
+  end
+
+  it "does not complain clearing a feature that does not exist in adapter" do
+    subject.clear(flipper[:stats]).should be_true
   end
 end
