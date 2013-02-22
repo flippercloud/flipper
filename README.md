@@ -35,10 +35,6 @@ Or install it yourself with:
 
     $ gem install flipper
 
-## Coming Soon™
-
-* [Web UI](https://github.com/jnunemaker/flipper-ui) (think resque UI for features toggling/status)
-
 ## Usage
 
 The goal of the API for flipper was to have everything revolve around features and what ways they can be enabled. Start with top level and dig into a feature, then dig in further and enable that feature for a given type of access, as opposed to thinking about how the feature will be accessed first (ie: stats.enable vs activate_group(:stats, ...)).
@@ -262,3 +258,7 @@ config.middleware.use Flipper::Middleware::Memoizer, lambda { $flipper }
 3. Commit your changes (`git commit -am 'Added some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
+## Coming Soon™
+
+* [Web UI](https://github.com/jnunemaker/flipper-ui) (think resque UI for features toggling/status)
