@@ -1,5 +1,22 @@
 ![flipper logo](https://raw.github.com/jnunemaker/flipper-ui/master/lib/flipper/ui/public/flipper/images/logo.png)
 
+<pre>
+__
+                               _.-~  )
+                    _..--~~~~,'   ,-/     _
+                 .-'. . . .'   ,-','    ,' )
+               ,'. . . _   ,--~,-'__..-'  ,'
+             ,'. . .  (@)' ---~~~~      ,'
+            /. . . . '~~             ,-'
+           /. . . . .             ,-'
+          ; . . . .  - .        ,'
+         : . . . .       _     /
+        . . . . .          `-.:
+       . . . ./  - .          )
+      .  . . |  _____..---.._/ _____
+~---~~~~----~~~~             ~~
+</pre>
+
 Feature flipping is the act of enabling or disabling features or parts of your application, ideally without re-deploying or changing anything in your code base.
 
 The goal of this gem is to make turning features on or off so easy that everyone does it. Whatever your data store, throughput, or experience, feature flipping should be easy and have minimal impact on your application.
