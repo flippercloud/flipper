@@ -36,7 +36,7 @@ describe Flipper::Feature do
       end
     end
 
-    it "defaults default" do
+    it "defaults to no default" do
       feature = described_class.new(:search, adapter)
       feature.default.should be_nil
     end
@@ -156,6 +156,36 @@ describe Flipper::Feature do
       event.payload[:operation].should eq(:enabled?)
       event.payload[:thing].should eq(thing)
       event.payload[:result].should be_false
+    end
+  end
+
+  describe "#enabled?" do
+    context "with working adapter" do
+      it "should not return the default when overriden" do
+        feature = described_class.new(:search, adapter, default: true)
+        feature.enabled?.should be_false
+      end
+    end
+
+    context "with bad adapter" do
+      let(:bad_adapter) { double('BadAdapter') }
+      before do
+        bad_adapter.stub(:get).and_raise
+      end
+
+      it "should raise" do
+        feature = described_class.new(:search, bad_adapter)
+        expect {
+          feature.enabled?
+        }.to raise_error
+      end
+
+      context "with overriden default" do
+        pending "should return the default state" do
+          feature = described_class.new(:search, bad_adapter, default: true)
+          feature.enabled?.should be_true
+        end
+      end
     end
   end
 
