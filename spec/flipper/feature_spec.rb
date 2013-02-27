@@ -181,7 +181,7 @@ describe Flipper::Feature do
       end
 
       context "with overriden default" do
-        pending "should return the default state" do
+        it "should return the default state" do
           feature = described_class.new(:search, bad_adapter, default: true)
           feature.enabled?.should be_true
         end

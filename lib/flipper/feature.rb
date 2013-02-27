@@ -77,7 +77,16 @@ module Flipper
     # Returns true if enabled, false if not.
     def enabled?(thing = nil)
       instrument(:enabled?, thing) { |payload|
-        gate_values = adapter.get(self)
+        begin
+          gate_values = adapter.get(self)
+        rescue Exception => e
+          if default.nil?
+            raise e
+          else
+            payload[:gate_name] = :default
+            return default
+          end
+        end
 
         gate = gates.detect { |gate|
           gate.open?(thing, gate_values[gate.key])
