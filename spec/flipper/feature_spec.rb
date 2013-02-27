@@ -35,6 +35,19 @@ describe Flipper::Feature do
         feature.instrumenter.should be(instrumenter)
       end
     end
+
+    it "defaults default" do
+      feature = described_class.new(:search, adapter)
+      feature.default.should be_nil
+    end
+
+    context "with overriden default" do
+      it "overrides default default" do
+        feature = described_class.new(:search, adapter, default: true)
+        feature.default.should be_true
+      end
+    end
+
   end
 
   describe "#gate_for" do
