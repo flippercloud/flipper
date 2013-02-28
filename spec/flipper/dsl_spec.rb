@@ -40,6 +40,9 @@ describe Flipper::DSL do
       let(:instrumenter) { double('Instrumentor', :instrument => nil) }
       let(:feature) { dsl.send(method_name, :stats) }
       let(:dsl) { Flipper::DSL.new(adapter, :instrumenter => instrumenter) }
+      before do
+        dsl.feature_defaults = {stats: true}
+      end
     end
   end
 
@@ -49,6 +52,9 @@ describe Flipper::DSL do
       let(:instrumenter) { double('Instrumentor', :instrument => nil) }
       let(:feature) { dsl.send(method_name, :stats) }
       let(:dsl) { Flipper::DSL.new(adapter, :instrumenter => instrumenter) }
+      before do
+        dsl.feature_defaults = {stats: false}
+      end
     end
   end
 
