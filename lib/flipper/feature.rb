@@ -20,6 +20,9 @@ module Flipper
     # Private: What is being used to instrument all the things.
     attr_reader :instrumenter
 
+    # Private: The default state of the feature (if the adapter cannot be reached)
+    attr_reader :default
+
     # Internal: Initializes a new feature instance.
     #
     # name - The Symbol or String name of the feature.
@@ -27,11 +30,13 @@ module Flipper
     #
     # options - The Hash of options.
     #           :instrumenter - What to use to instrument all the things.
+    #           :default - What the state should be if the adapter is down
     #
     def initialize(name, adapter, options = {})
       @name = name
       @key = name.to_s
       @instrumenter = options.fetch(:instrumenter, Flipper::Instrumenters::Noop)
+      @default = options.fetch(:default, nil)
       @adapter = adapter
     end
 
@@ -72,7 +77,16 @@ module Flipper
     # Returns true if enabled, false if not.
     def enabled?(thing = nil)
       instrument(:enabled?, thing) { |payload|
-        gate_values = adapter.get(self)
+        begin
+          gate_values = adapter.get(self)
+        rescue Exception => e
+          if default.nil?
+            raise e
+          else
+            payload[:gate_name] = :default
+            return default
+          end
+        end
 
         gate = gates.detect { |gate|
           gate.open?(thing, gate_values[gate.key])

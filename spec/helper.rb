@@ -74,6 +74,10 @@ shared_examples_for 'a DSL feature' do
     feature.instrumenter.should eq(dsl.instrumenter)
   end
 
+  it "sets default" do
+    feature.default.should eq(dsl.feature_defaults[:stats])
+  end
+
   it "memoizes the feature" do
     dsl.send(method_name, :stats).should equal(feature)
   end

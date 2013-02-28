@@ -10,6 +10,9 @@ module Flipper
     # Private: What is being used to instrument all the things.
     attr_reader :instrumenter
 
+    # Public: Default states for features to use when adapter is down
+    attr_accessor :feature_defaults
+
     # Public: Returns a new instance of the DSL.
     #
     # adapter - The adapter that this DSL instance should use.
@@ -25,6 +28,8 @@ module Flipper
       @adapter = memoized
 
       @memoized_features = {}
+
+      @feature_defaults = {}
     end
 
     # Public: Check if a feature is enabled.
@@ -69,6 +74,7 @@ module Flipper
 
       @memoized_features[name.to_sym] ||= Feature.new(name, @adapter, {
         :instrumenter => instrumenter,
+        :default => feature_defaults[name.to_sym]
       })
     end
 
