@@ -43,7 +43,7 @@ describe Flipper::Feature do
 
     context "with overriden default" do
       it "overrides default default" do
-        feature = described_class.new(:search, adapter, default: true)
+        feature = described_class.new(:search, adapter, :default => true)
         feature.default.should be_true
       end
     end
@@ -162,7 +162,7 @@ describe Flipper::Feature do
   describe "#enabled?" do
     context "with working adapter" do
       it "should not return the default when overriden" do
-        feature = described_class.new(:search, adapter, default: true)
+        feature = described_class.new(:search, adapter, :default => true)
         feature.enabled?.should be_false
       end
     end
@@ -182,7 +182,7 @@ describe Flipper::Feature do
 
       context "with overriden default" do
         it "should return the default state" do
-          feature = described_class.new(:search, bad_adapter, default: true)
+          feature = described_class.new(:search, bad_adapter, :default => true)
           feature.enabled?.should be_true
         end
       end
