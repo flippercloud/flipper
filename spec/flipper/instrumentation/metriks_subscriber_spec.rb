@@ -56,11 +56,4 @@ describe Flipper::Instrumentation::MetriksSubscriber do
     Metriks.meter("flipper.feature.stats.gate.actor.open").count.should be(1)
     Metriks.meter("flipper.feature.stats.gate.boolean.closed").count.should be(1)
   end
-
-  # Helper for seeing what is in the metriks registry
-  def print_registry_names
-    Metriks::Registry.default.each do |name, metric|
-      puts name
-    end
-  end
 end

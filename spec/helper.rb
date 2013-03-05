@@ -15,6 +15,8 @@ Bundler.setup(:default)
 
 require 'flipper'
 
+Dir[root_path.join("spec/support/**/*.rb")].each { |f| require f }
+
 RSpec.configure do |config|
   config.fail_fast = true
 
