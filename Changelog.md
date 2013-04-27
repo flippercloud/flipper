@@ -1,3 +1,7 @@
+## 0.6.1
+
+* Added statsd support for instrumentation.
+
 ## 0.4.0
 
 * No longer use #id for detecting actors. You must now define #flipper_id on
