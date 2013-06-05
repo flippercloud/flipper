@@ -8,7 +8,7 @@ module Flipper
     # Private: The name of instrumentation events.
     InstrumentationName = "feature_operation.#{InstrumentationNamespace}"
 
-    # Internal: The name of the feature.
+    # Public: The name of the feature.
     attr_reader :name
 
     # Internal: Name converted to value safe for adapter.
