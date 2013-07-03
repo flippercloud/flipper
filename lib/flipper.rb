@@ -16,7 +16,7 @@ module Flipper
   #
   # Examples
   #
-  #   Flipper.registry(:admins) { |thing|
+  #   Flipper.register(:admins) { |thing|
   #     thing.respond_to?(:admin?) && thing.admin?
   #   }
   #
