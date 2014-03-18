@@ -211,4 +211,20 @@ describe Flipper::Feature do
       end
     end
   end
+
+  describe "#meta" do
+    it "gets meta" do
+      feature = described_class.new(:search, adapter)
+      feature.meta = "A new streamlined search functionality for browsing through widgets"
+      feature.meta.should eq("A new streamlined search functionality for browsing through widgets")
+    end
+  end
+
+  describe "#meta=" do
+    it "sets meta" do
+      feature = described_class.new(:search, adapter)
+      feature.meta = "A new streamlined search functionality for browsing through widgets"
+      feature.meta.should eq("A new streamlined search functionality for browsing through widgets")
+    end
+  end
 end
