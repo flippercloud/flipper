@@ -9,19 +9,19 @@ describe Flipper::Types::Percentage do
 
   describe "#eql?" do
     it "returns true for same class and value" do
-      subject.eql?(described_class.new(subject.value)).should be_true
+      subject.eql?(described_class.new(subject.value)).should eq(true)
     end
 
     it "returns false for different value" do
-      subject.eql?(described_class.new(subject.value + 1)).should be_false
+      subject.eql?(described_class.new(subject.value + 1)).should eq(false)
     end
 
     it "returns false for different class" do
-      subject.eql?(Object.new).should be_false
+      subject.eql?(Object.new).should eq(false)
     end
 
     it "is aliased to ==" do
-      (subject == described_class.new(subject.value)).should be_true
+      (subject == described_class.new(subject.value)).should eq(true)
     end
   end
 end

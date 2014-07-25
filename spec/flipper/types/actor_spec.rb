@@ -25,12 +25,12 @@ describe Flipper::Types::Actor do
     it "returns true if actor" do
       thing = thing_class.new('1')
       actor = described_class.new(thing)
-      described_class.wrappable?(actor).should be_true
+      described_class.wrappable?(actor).should eq(true)
     end
 
     it "returns true if responds to id" do
       thing = thing_class.new(10)
-      described_class.wrappable?(thing).should be_true
+      described_class.wrappable?(thing).should eq(true)
     end
   end
 
@@ -80,26 +80,26 @@ describe Flipper::Types::Actor do
   it "proxies everything to thing" do
     thing = thing_class.new(10)
     actor = described_class.new(thing)
-    actor.admin?.should be_true
+    actor.admin?.should eq(true)
   end
 
   describe "#respond_to?" do
     it "returns true if responds to method" do
       thing = thing_class.new('1')
       actor = described_class.new(thing)
-      actor.respond_to?(:value).should be_true
+      actor.respond_to?(:value).should eq(true)
     end
 
     it "returns true if thing responds to method" do
       thing = thing_class.new(10)
       actor = described_class.new(thing)
-      actor.respond_to?(:admin?).should be_true
+      actor.respond_to?(:admin?).should eq(true)
     end
 
     it "returns false if does not respond to method and thing does not respond to method" do
       thing = thing_class.new(10)
       actor = described_class.new(thing)
-      actor.respond_to?(:frankenstein).should be_false
+      actor.respond_to?(:frankenstein).should eq(false)
     end
   end
 end

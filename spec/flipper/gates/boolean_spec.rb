@@ -26,37 +26,37 @@ describe Flipper::Gates::Boolean do
   describe "#enabled?" do
     context "for true value" do
       it "returns true" do
-        subject.enabled?(true).should be_true
+        subject.enabled?(true).should eq(true)
       end
     end
 
     context "for false value" do
       it "returns false" do
-        subject.enabled?(false).should be_false
+        subject.enabled?(false).should eq(false)
       end
     end
 
     context "for nil value" do
       it "returns false" do
-        subject.enabled?(nil).should be_false
+        subject.enabled?(nil).should eq(false)
       end
     end
 
     context "for empty string value" do
       it "returns false" do
-        subject.enabled?('').should be_false
+        subject.enabled?('').should eq(false)
       end
     end
 
     context "for the string true value" do
       it "returns true" do
-        subject.enabled?('true').should be_true
+        subject.enabled?('true').should eq(true)
       end
     end
 
     context "for the string false value" do
       it "returns false" do
-        subject.enabled?('false').should be_false
+        subject.enabled?('false').should eq(false)
       end
     end
   end
@@ -64,37 +64,37 @@ describe Flipper::Gates::Boolean do
   describe "#open?" do
     context "for true value" do
       it "returns true" do
-        subject.open?(Object.new, true).should be_true
+        subject.open?(Object.new, true).should eq(true)
       end
     end
 
     context "for false value" do
       it "returns false" do
-        subject.open?(Object.new, false).should be_false
+        subject.open?(Object.new, false).should eq(false)
       end
     end
 
     context "for nil value" do
       it "returns false" do
-        subject.open?(Object.new, nil).should be_false
+        subject.open?(Object.new, nil).should eq(false)
       end
     end
 
     context "for string true value" do
       it "returns true" do
-        subject.open?(Object.new, 'true').should be_true
+        subject.open?(Object.new, 'true').should eq(true)
       end
     end
 
     context "for string false value" do
       it "returns false" do
-        subject.open?(Object.new, 'false').should be_false
+        subject.open?(Object.new, 'false').should eq(false)
       end
     end
 
     context "for an empty string value" do
       it "returns false" do
-        subject.open?(Object.new, '').should be_false
+        subject.open?(Object.new, '').should eq(false)
       end
     end
   end

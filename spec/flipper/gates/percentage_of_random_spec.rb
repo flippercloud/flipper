@@ -24,7 +24,7 @@ describe Flipper::Gates::PercentageOfRandom do
       event.payload[:feature_name].should eq(:search)
 
       # random so don't test value
-      event.payload.key?(:result).should be_true
+      event.payload.key?(:result).should eq(true)
       event.payload[:result].should_not be_nil
     end
   end

@@ -22,11 +22,11 @@ describe Flipper::Types::Group do
     let(:non_admin_actor) { double('Actor', :admin? => false) }
 
     it "returns true if block matches" do
-      subject.match?(admin_actor).should be_true
+      subject.match?(admin_actor).should eq(true)
     end
 
     it "returns false if block does not match" do
-      subject.match?(non_admin_actor).should be_false
+      subject.match?(non_admin_actor).should eq(false)
     end
   end
 end

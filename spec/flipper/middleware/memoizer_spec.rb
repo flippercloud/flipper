@@ -27,7 +27,7 @@ describe Flipper::Middleware::Memoizer do
       }
       middleware = described_class.new app, flipper
       middleware.call({})
-      called.should be_true
+      called.should eq(true)
     end
 
     it "disables local cache after body close" do
@@ -35,9 +35,9 @@ describe Flipper::Middleware::Memoizer do
       middleware = described_class.new app, flipper
       body = middleware.call({}).last
 
-      flipper.adapter.memoizing?.should be_true
+      flipper.adapter.memoizing?.should eq(true)
       body.close
-      flipper.adapter.memoizing?.should be_false
+      flipper.adapter.memoizing?.should eq(false)
     end
 
     it "clears local cache after body close" do

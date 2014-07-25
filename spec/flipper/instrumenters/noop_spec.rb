@@ -7,7 +7,7 @@ describe Flipper::Instrumenters::Noop do
       it "yields block" do
         yielded = false
         described_class.instrument(:foo) { yielded = true }
-        yielded.should be_true
+        yielded.should eq(true)
       end
     end
 
@@ -15,7 +15,7 @@ describe Flipper::Instrumenters::Noop do
       it "yields block" do
         yielded = false
         described_class.instrument(:foo, {:pay => :load}) { yielded = true }
-        yielded.should be_true
+        yielded.should eq(true)
       end
     end
   end
