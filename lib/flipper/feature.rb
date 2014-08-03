@@ -82,6 +82,7 @@ module Flipper
           false
         else
           payload[:gate_name] = gate.name
+          yield if block_given?
           true
         end
       }

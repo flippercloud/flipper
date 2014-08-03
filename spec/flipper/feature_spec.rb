@@ -37,6 +37,33 @@ describe Flipper::Feature do
     end
   end
 
+  describe "#enabled?" do
+    it "should call the block when enabled" do
+      feature = described_class.new(:search, adapter)
+      block_executed = false
+      feature.enable
+
+      feature.enabled? do
+        block_executed = true
+      end
+
+      block_executed.should eq(true)
+    end
+
+    it "should not call the block when disabled" do
+      feature = described_class.new(:search, adapter)
+      block_executed = false
+      feature.disable
+
+      feature.enabled? do
+        block_executed = true
+      end
+
+      block_executed.should eq(false)
+    end
+
+  end
+
   describe "#gate_for" do
     context "with percentage of actors" do
       it "returns percentage of actors gate" do
