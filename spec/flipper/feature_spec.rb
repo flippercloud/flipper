@@ -142,7 +142,7 @@ describe Flipper::Feature do
       event.payload[:feature_name].should eq(:search)
       event.payload[:operation].should eq(:enabled?)
       event.payload[:thing].should eq(thing)
-      event.payload[:result].should be_false
+      event.payload[:result].should eq(false)
     end
   end
 

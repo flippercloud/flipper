@@ -35,11 +35,11 @@ describe Flipper do
       end
 
       it "returns true" do
-        @result.should be_true
+        @result.should eq(true)
       end
 
       it "enables feature for all" do
-        feature.enabled?.should be_true
+        feature.enabled?.should eq(true)
       end
 
       it "adds feature to set of features" do
@@ -53,27 +53,27 @@ describe Flipper do
       end
 
       it "returns true" do
-        @result.should be_true
+        @result.should eq(true)
       end
 
       it "enables feature for non flipper thing in group" do
-        feature.enabled?(admin_thing).should be_true
+        feature.enabled?(admin_thing).should eq(true)
       end
 
       it "does not enable feature for non flipper thing in other group" do
-        feature.enabled?(dev_thing).should be_false
+        feature.enabled?(dev_thing).should eq(false)
       end
 
       it "enables feature for flipper actor in group" do
-        feature.enabled?(flipper.actor(admin_thing)).should be_true
+        feature.enabled?(flipper.actor(admin_thing)).should eq(true)
       end
 
       it "does not enable for flipper actor not in group" do
-        feature.enabled?(flipper.actor(dev_thing)).should be_false
+        feature.enabled?(flipper.actor(dev_thing)).should eq(false)
       end
 
       it "does not enable feature for all" do
-        feature.enabled?.should be_false
+        feature.enabled?.should eq(false)
       end
 
       it "adds feature to set of features" do
@@ -87,15 +87,15 @@ describe Flipper do
       end
 
       it "returns true" do
-        @result.should be_true
+        @result.should eq(true)
       end
 
       it "enables feature for actor" do
-        feature.enabled?(pitt).should be_true
+        feature.enabled?(pitt).should eq(true)
       end
 
       it "does not enable feature for other actors" do
-        feature.enabled?(clooney).should be_false
+        feature.enabled?(clooney).should eq(false)
       end
 
       it "adds feature to set of features" do
@@ -109,7 +109,7 @@ describe Flipper do
       end
 
       it "returns true" do
-        @result.should be_true
+        @result.should eq(true)
       end
 
       it "enables feature for actor within percentage" do
@@ -133,17 +133,17 @@ describe Flipper do
       end
 
       it "returns true" do
-        @result.should be_true
+        @result.should eq(true)
       end
 
       it "enables feature for time within percentage" do
         @gate.stub(:rand => 0.04)
-        feature.enabled?.should be_true
+        feature.enabled?.should eq(true)
       end
 
       it "does not enable feature for time not within percentage" do
         @gate.stub(:rand => 0.10)
-        feature.enabled?.should be_false
+        feature.enabled?.should eq(false)
       end
 
       it "adds feature to set of features" do
@@ -176,19 +176,19 @@ describe Flipper do
       end
 
       it "returns true" do
-        @result.should be_true
+        @result.should be_truthy
       end
 
       it "disables feature" do
-        feature.enabled?.should be_false
+        feature.enabled?.should eq(false)
       end
 
       it "disables for individual actor" do
-        feature.enabled?(pitt).should be_false
+        feature.enabled?(pitt).should eq(false)
       end
 
       it "disables actor in group" do
-        feature.enabled?(admin_thing).should be_false
+        feature.enabled?(admin_thing).should eq(false)
       end
 
       it "disables actor in percentage of actors" do
@@ -201,7 +201,7 @@ describe Flipper do
       end
 
       it "disables percentage of random" do
-        feature.enabled?(pitt).should be_false
+        feature.enabled?(pitt).should eq(false)
       end
 
       it "adds feature to set of features" do
@@ -217,23 +217,23 @@ describe Flipper do
       end
 
       it "returns true" do
-        @result.should be_true
+        @result.should eq(true)
       end
 
       it "disables the feature for non flipper thing in the group" do
-        feature.enabled?(admin_thing).should be_false
+        feature.enabled?(admin_thing).should eq(false)
       end
 
       it "does not disable feature for non flipper thing in other groups" do
-        feature.enabled?(dev_thing).should be_true
+        feature.enabled?(dev_thing).should eq(true)
       end
 
       it "disables feature for flipper actor in group" do
-        feature.enabled?(flipper.actor(admin_thing)).should be_false
+        feature.enabled?(flipper.actor(admin_thing)).should eq(false)
       end
 
       it "does not disable feature for flipper actor in other groups" do
-        feature.enabled?(flipper.actor(dev_thing)).should be_true
+        feature.enabled?(flipper.actor(dev_thing)).should eq(true)
       end
 
       it "adds feature to set of features" do
@@ -249,15 +249,15 @@ describe Flipper do
       end
 
       it "returns true" do
-        @result.should be_true
+        @result.should eq(true)
       end
 
       it "disables feature for actor" do
-        feature.enabled?(pitt).should be_false
+        feature.enabled?(pitt).should eq(false)
       end
 
       it "does not disable feature for other actors" do
-        feature.enabled?(clooney).should be_true
+        feature.enabled?(clooney).should eq(true)
       end
 
       it "adds feature to set of features" do
@@ -271,7 +271,7 @@ describe Flipper do
       end
 
       it "returns true" do
-        @result.should be_true
+        @result.should eq(true)
       end
 
       it "disables feature" do
@@ -295,17 +295,17 @@ describe Flipper do
       end
 
       it "returns true" do
-        @result.should be_true
+        @result.should eq(true)
       end
 
       it "disables feature for time within percentage" do
         @gate.stub(:rand => 0.04)
-        feature.enabled?.should be_false
+        feature.enabled?.should eq(false)
       end
 
       it "disables feature for time not within percentage" do
         @gate.stub(:rand => 0.10)
-        feature.enabled?.should be_false
+        feature.enabled?.should eq(false)
       end
 
       it "adds feature to set of features" do
@@ -326,7 +326,7 @@ describe Flipper do
   describe "#enabled?" do
     context "with no arguments" do
       it "defaults to false" do
-        feature.enabled?.should be_false
+        feature.enabled?.should eq(false)
       end
     end
 
@@ -336,7 +336,7 @@ describe Flipper do
       end
 
       it "returns true" do
-        feature.enabled?.should be_true
+        feature.enabled?.should eq(true)
       end
     end
 
@@ -346,15 +346,15 @@ describe Flipper do
       end
 
       it "returns true" do
-        feature.enabled?(flipper.actor(admin_thing)).should be_true
-        feature.enabled?(admin_thing).should be_true
+        feature.enabled?(flipper.actor(admin_thing)).should eq(true)
+        feature.enabled?(admin_thing).should eq(true)
       end
     end
 
     context "for actor in disabled group" do
       it "returns false" do
-        feature.enabled?(flipper.actor(dev_thing)).should be_false
-        feature.enabled?(dev_thing).should be_false
+        feature.enabled?(flipper.actor(dev_thing)).should eq(false)
+        feature.enabled?(dev_thing).should eq(false)
       end
     end
 
@@ -364,18 +364,18 @@ describe Flipper do
       end
 
       it "returns true" do
-        feature.enabled?(pitt).should be_true
+        feature.enabled?(pitt).should eq(true)
       end
     end
 
     context "for not enabled actor" do
       it "returns false" do
-        feature.enabled?(clooney).should be_false
+        feature.enabled?(clooney).should eq(false)
       end
 
       it "returns true if boolean enabled" do
         feature.enable
-        feature.enabled?(clooney).should be_true
+        feature.enabled?(clooney).should eq(true)
       end
     end
 
@@ -389,10 +389,10 @@ describe Flipper do
       end
 
       it "returns true" do
-        feature.enabled?.should be_true
-        feature.enabled?(nil).should be_true
-        feature.enabled?(pitt).should be_true
-        feature.enabled?(admin_thing).should be_true
+        feature.enabled?.should eq(true)
+        feature.enabled?(nil).should eq(true)
+        feature.enabled?(pitt).should eq(true)
+        feature.enabled?(admin_thing).should eq(true)
       end
     end
 
@@ -406,18 +406,18 @@ describe Flipper do
       end
 
       it "returns false" do
-        feature.enabled?.should be_false
-        feature.enabled?(nil).should be_false
-        feature.enabled?(pitt).should be_false
-        feature.enabled?(admin_thing).should be_false
+        feature.enabled?.should eq(false)
+        feature.enabled?(nil).should eq(false)
+        feature.enabled?(pitt).should eq(false)
+        feature.enabled?(admin_thing).should eq(false)
       end
 
       it "returns true if boolean enabled" do
         feature.enable
-        feature.enabled?.should be_true
-        feature.enabled?(nil).should be_true
-        feature.enabled?(pitt).should be_true
-        feature.enabled?(admin_thing).should be_true
+        feature.enabled?.should eq(true)
+        feature.enabled?(nil).should eq(true)
+        feature.enabled?(pitt).should eq(true)
+        feature.enabled?(admin_thing).should eq(true)
       end
     end
 
@@ -427,17 +427,17 @@ describe Flipper do
       end
 
       it "returns true if in enabled group" do
-        feature.enabled?(admin_thing).should be_true
+        feature.enabled?(admin_thing).should eq(true)
       end
 
       it "returns false if not in enabled group" do
-        feature.enabled?(dev_thing).should be_false
+        feature.enabled?(dev_thing).should eq(false)
       end
 
       it "returns true if boolean enabled" do
         feature.enable
-        feature.enabled?(admin_thing).should be_true
-        feature.enabled?(dev_thing).should be_true
+        feature.enabled?(admin_thing).should eq(true)
+        feature.enabled?(dev_thing).should eq(true)
       end
     end
   end
@@ -451,11 +451,11 @@ describe Flipper do
     end
 
     it "enables feature for object in enabled group" do
-      feature.enabled?(admin_thing).should be_true
+      feature.enabled?(admin_thing).should eq(true)
     end
 
     it "does not enable feature for object in not enabled group" do
-      feature.enabled?(dev_thing).should be_false
+      feature.enabled?(dev_thing).should eq(false)
     end
   end
 end

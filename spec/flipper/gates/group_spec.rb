@@ -50,7 +50,7 @@ describe Flipper::Gates::Group do
 
       it "ignores group" do
         thing = Struct.new(:flipper_id).new('5')
-        subject.open?(thing, Set[:newbs, :staff]).should be_true
+        subject.open?(thing, Set[:newbs, :staff]).should eq(true)
       end
     end
 

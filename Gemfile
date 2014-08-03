@@ -6,7 +6,7 @@ gem 'metriks', :require => false
 gem 'statsd-ruby', :require => false
 gem 'rspec'
 gem 'rack-test'
-gem 'activesupport', :require => false
+gem 'activesupport', '< 4.0.0', :require => false
 
 group(:guard) do
   gem 'guard'

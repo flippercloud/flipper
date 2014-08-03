@@ -21,10 +21,10 @@ describe Flipper::Adapters::Memoizable do
   describe "#memoize=" do
     it "sets value" do
       subject.memoize = true
-      subject.memoizing?.should be_true
+      subject.memoizing?.should eq(true)
 
       subject.memoize = false
-      subject.memoizing?.should be_false
+      subject.memoizing?.should eq(false)
     end
 
     it "clears the local cache" do
@@ -37,12 +37,12 @@ describe Flipper::Adapters::Memoizable do
   describe "#memoizing?" do
     it "returns true if enabled" do
       subject.memoize = true
-      subject.memoizing?.should be_true
+      subject.memoizing?.should eq(true)
     end
 
     it "returns false if disabled" do
       subject.memoize = false
-      subject.memoizing?.should be_false
+      subject.memoizing?.should eq(false)
     end
   end
 
