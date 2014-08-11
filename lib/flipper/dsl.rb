@@ -135,6 +135,17 @@ module Flipper
     end
     alias_method :percentage_of_actors, :actors
 
+    # Public: Declare the feature names you expect to flip
+    #
+    # names - 0..n names of features
+    #
+    # Returns the names you tried to add
+    def declare(*names)
+      names.each do |name|
+        adapter.add(::Flipper::Feature.new(name, adapter))
+      end
+    end
+
     # Internal: Returns a Set of the known features for this adapter.
     #
     # Returns Set of Flipper::Feature instances.
