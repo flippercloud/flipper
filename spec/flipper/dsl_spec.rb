@@ -34,19 +34,6 @@ describe Flipper::DSL do
     end
   end
 
-  describe "#declare" do
-    let(:dsl) { described_class.new(adapter) }
-    let(:names) { ["feature_1", "feature_2", "feature_3"] }
-    let(:new_feature) { double(:new_feature) }
-
-    it "creates new features for each name" do
-      dsl.declare(*names)
-      names.each do |name|
-        dsl.features.map(&:name).should =~ names
-      end
-    end
-  end
-
   describe "#feature" do
     it_should_behave_like "a DSL feature" do
       let(:method_name) { :feature }
@@ -179,7 +166,7 @@ describe Flipper::DSL do
       end
 
       it "returns set of feature instances" do
-        subject.features.should be_instance_of(Set)
+        subject.features.should be_a(Set)
         subject.features.each do |feature|
           feature.should be_instance_of(Flipper::Feature)
         end
