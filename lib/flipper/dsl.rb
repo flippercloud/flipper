@@ -139,7 +139,7 @@ module Flipper
     #
     # Returns Set of Flipper::Feature instances.
     def features
-      adapter.features.map { |name| feature(name) }.to_set
+      Features.new(adapter.features.map { |name| feature(name) }, adapter)
     end
   end
 end

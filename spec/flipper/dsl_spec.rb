@@ -166,7 +166,7 @@ describe Flipper::DSL do
       end
 
       it "returns set of feature instances" do
-        subject.features.should be_instance_of(Set)
+        subject.features.should be_a(Set)
         subject.features.each do |feature|
           feature.should be_instance_of(Flipper::Feature)
         end
