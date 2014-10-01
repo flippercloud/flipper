@@ -52,6 +52,20 @@ describe Flipper::Registry do
     end
   end
 
+  describe "#key?" do
+    before do
+      source[:admins] = "admins"
+    end
+
+    it "returns true if the key exists" do
+      subject.key?(:admins).should eq true
+    end
+
+    it "returns false if the key does not exists" do
+      subject.key?(:unknown_key).should eq false
+    end
+  end
+
   describe "#each" do
     before do
       source[:admins] = 'admins'

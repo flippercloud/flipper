@@ -37,6 +37,13 @@ module Flipper
     groups.clear
   end
 
+  # Public: Check if a group exists
+  #
+  # Returns boolean
+  def self.group_exists?(name)
+    self.groups.key?(name)
+  end
+
   # Internal: Fetches a group by name.
   #
   # name - The Symbol name of the group.

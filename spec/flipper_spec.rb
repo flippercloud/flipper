@@ -8,6 +8,19 @@ describe Flipper do
     end
   end
 
+  describe ".group_exists" do
+    it "returns true if the group is already created" do
+      group = Flipper.register('admins') { |actor| actor.admin? }
+      Flipper.group_exists?(:admins).should eq(true)
+    end
+
+    it "returns false when the group is not yet registered" do
+      registry = Flipper::Registry.new
+      Flipper.groups = registry
+      Flipper.group_exists?(:non_existing).should eq(false)
+    end
+  end
+
   describe ".groups" do
     it "returns a registry instance" do
       Flipper.groups.should be_instance_of(Flipper::Registry)
