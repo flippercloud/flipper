@@ -15,8 +15,6 @@ describe Flipper do
     end
 
     it "returns false when the group is not yet registered" do
-      registry = Flipper::Registry.new
-      Flipper.groups = registry
       Flipper.group_exists?(:non_existing).should eq(false)
     end
   end
