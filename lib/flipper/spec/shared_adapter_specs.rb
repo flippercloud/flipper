@@ -204,7 +204,7 @@ shared_examples_for 'a flipper adapter' do
     subject.enable(feature, actors_gate, flipper.actors(25)).should eq(true)
     subject.enable(feature, random_gate, flipper.random(45)).should eq(true)
 
-    subject.clear(feature).any?.should eq(true)
+    subject.clear(feature).should eq(true)
 
     subject.get(feature).should eq({
       :boolean => nil,
@@ -216,6 +216,6 @@ shared_examples_for 'a flipper adapter' do
   end
 
   it "does not complain clearing a feature that does not exist in adapter" do
-    subject.clear(flipper[:stats]).any?.should eq(true)
+    subject.clear(flipper[:stats]).should eq(true)
   end
 end
