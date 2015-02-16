@@ -186,7 +186,8 @@ I plan on supporting [in-memory](https://github.com/jnunemaker/flipper/blob/mast
 * [mongo adapter](https://github.com/jnunemaker/flipper-mongo)
 * [redis adapter](https://github.com/jnunemaker/flipper-redis)
 * [cassanity adapter](https://github.com/jnunemaker/flipper-cassanity)
-* [activerecord adapter](https://github.com/bgentry/flipper-activerecord)
+* [activerecord 4 adapter](https://github.com/bgentry/flipper-activerecord)
+* [activerecord 3 adapter](https://github.com/jproudman/flipper-activerecord)
 
 The basic API for an adapter is this:
 
