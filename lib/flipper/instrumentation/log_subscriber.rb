@@ -92,6 +92,10 @@ module Flipper
         name = '%s (%.1fms)' % [description, event.duration]
         debug "  #{color(name, CYAN, true)}  [ #{details} ]"
       end
+
+      def logger
+        self.class.logger
+      end
     end
   end
 
