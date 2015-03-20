@@ -40,6 +40,7 @@ module Flipper
         feature.gates.each do |gate|
           delete key(feature, gate)
         end
+        true
       end
 
       # Public
