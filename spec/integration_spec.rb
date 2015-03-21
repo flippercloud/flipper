@@ -176,7 +176,7 @@ describe Flipper do
       end
 
       it "returns true" do
-        @result.should be_truthy
+        @result.should be_true
       end
 
       it "disables feature" do
