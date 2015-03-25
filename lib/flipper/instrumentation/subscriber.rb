@@ -95,7 +95,7 @@ module Flipper
 
       # Private
       def strip_trailing_question_mark(operation)
-        operation.to_s.gsub(/\?$/, '')
+        operation.to_s.chomp('?')
       end
     end
   end
