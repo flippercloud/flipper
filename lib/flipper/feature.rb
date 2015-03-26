@@ -145,27 +145,27 @@ module Flipper
 
     # Public: Returns the Set of group Symbol names enabled.
     def groups_value
-      gate_values[:groups]
+      gate_values.groups
     end
 
     # Public: Returns the Set of actor flipper ids enabled.
     def actors_value
-      gate_values[:actors]
+      gate_values.actors
     end
 
     # Public: Returns the adapter value for the boolean gate.
     def boolean_value
-      gate_values[:boolean]
+      gate_values.boolean
     end
 
     # Public: Returns the adapter value for the percentage of actors gate.
     def percentage_of_actors_value
-      gate_values[:percentage_of_actors]
+      gate_values.percentage_of_actors
     end
 
     # Public: Returns the adapter value for the percentage of random gate.
     def percentage_of_random_value
-      gate_values[:percentage_of_random]
+      gate_values.percentage_of_random
     end
 
     # Public: Returns the string representation of the feature.
