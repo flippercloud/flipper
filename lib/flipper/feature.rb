@@ -175,7 +175,7 @@ module Flipper
 
     # Private
     def conditional_gates(gate_values)
-      @conditional_gates ||= non_boolean_gates.select { |gate|
+      non_boolean_gates.select { |gate|
         value = gate_values[gate.key]
         gate.enabled?(value)
       }
