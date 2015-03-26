@@ -136,6 +136,21 @@ module Flipper
       end
     end
 
+    # Public: Returns the raw gate values stored by the adapter.
+    def gate_values
+      adapter.get(self)
+    end
+
+    # Public: Returns the Set of Flipper::Types::Group instances enabled.
+    def groups
+      gate_values[:groups].map { |name| Flipper.group(name) }.to_set
+    end
+
+    # Public: Returns the Set of group Symbol names enabled.
+    def group_names
+      gate_values[:groups].map { |name| name.to_sym }.to_set
+    end
+
     # Public: Returns the string representation of the feature.
     def to_s
       @to_s ||= name.to_s

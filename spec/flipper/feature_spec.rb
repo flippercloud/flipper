@@ -261,4 +261,108 @@ describe Flipper::Feature do
       end
     end
   end
+
+  describe "#groups" do
+    context "when no groups enabled" do
+      it "returns empty set" do
+        subject.groups.should eq(Set.new)
+      end
+    end
+
+    context "when one or more groups enabled" do
+      before do
+        @staff = Flipper.register(:staff) { |thing| true }
+        @preview_features = Flipper.register(:preview_features) { |thing| true }
+        @not_enabled = Flipper.register(:not_enabled) { |thing| true }
+        @disabled = Flipper.register(:disabled) { |thing| true }
+        subject.enable @staff
+        subject.enable @preview_features
+        subject.disable @disabled
+      end
+
+      it "returns set of enabled groups" do
+        subject.groups.should eq(Set.new([
+          @staff,
+          @preview_features,
+        ]))
+      end
+
+      it "does not include groups that have not been enabled" do
+        subject.groups.should_not include(@not_enabled)
+      end
+
+      it "does not include disabled groups" do
+        subject.groups.should_not include(@disabled)
+      end
+    end
+  end
+
+  describe "#group_names" do
+    context "when no groups enabled" do
+      it "returns empty set" do
+        subject.group_names.should eq(Set.new)
+      end
+    end
+
+    context "when one or more groups enabled" do
+      before do
+        @staff = Flipper.register(:staff) { |thing| true }
+        @preview_features = Flipper.register(:preview_features) { |thing| true }
+        @not_enabled = Flipper.register(:not_enabled) { |thing| true }
+        @disabled = Flipper.register(:disabled) { |thing| true }
+        subject.enable @staff
+        subject.enable @preview_features
+        subject.disable @disabled
+      end
+
+      it "returns set of enabled groups" do
+        subject.group_names.should eq(Set.new([
+          @staff.name,
+          @preview_features.name,
+        ]))
+      end
+
+      it "does not include groups that have not been enabled" do
+        subject.group_names.should_not include(@not_enabled.name)
+      end
+
+      it "does not include disabled groups" do
+        subject.group_names.should_not include(@disabled.name)
+      end
+    end
+  end
+
+  describe "#gate_values" do
+    context "when no gates are set in adapter" do
+      it "returns default gate values" do
+        subject.gate_values.should eq({
+          :actors => Set.new,
+          :groups => Set.new,
+          :boolean => nil,
+          :percentage_of_actors => nil,
+          :percentage_of_random => nil,
+        })
+      end
+    end
+
+    context "with gate values set in adapter" do
+      before do
+        subject.enable Flipper::Types::Boolean.new(true)
+        subject.enable Flipper::Types::Actor.new(Struct.new(:flipper_id).new(5))
+        subject.enable Flipper::Types::Group.new(:admins)
+        subject.enable Flipper::Types::PercentageOfRandom.new(50)
+        subject.enable Flipper::Types::PercentageOfActors.new(25)
+      end
+
+      it "returns gate values" do
+        subject.gate_values.should eq({
+          :actors => Set.new(["5"]),
+          :groups => Set.new(["admins"]),
+          :boolean => "true",
+          :percentage_of_random => "50",
+          :percentage_of_actors => "25",
+        })
+      end
+    end
+  end
 end
