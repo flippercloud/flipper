@@ -37,6 +37,20 @@ describe Flipper::Feature do
     end
   end
 
+  describe "#to_s" do
+    it "returns name as string" do
+      feature = described_class.new(:search, adapter)
+      feature.to_s.should eq("search")
+    end
+  end
+
+  describe "#to_param" do
+    it "returns name as string" do
+      feature = described_class.new(:search, adapter)
+      feature.to_param.should eq("search")
+    end
+  end
+
   describe "#gate_for" do
     context "with percentage of actors" do
       it "returns percentage of actors gate" do
