@@ -143,7 +143,7 @@ module Flipper
 
     # Public: Returns the Set of Flipper::Types::Group instances enabled.
     def groups
-      gate_values[:groups].map { |name| Flipper.group(name) }.to_set
+      groups_value.map { |name| Flipper.group(name) }.to_set
     end
 
     # Public: Returns the Set of group Symbol names enabled.
