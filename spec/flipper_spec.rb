@@ -87,4 +87,26 @@ describe Flipper do
       end
     end
   end
+
+  describe ".groups" do
+    it "returns array of group instances" do
+      admins = Flipper.register(:admins) { |actor| actor.admin? }
+      preview_features = Flipper.register(:preview_features) { |actor| actor.preview_features? }
+      Flipper.groups.should eq([
+        admins,
+        preview_features,
+      ])
+    end
+  end
+
+  describe ".group_names" do
+    it "returns array of group names" do
+      Flipper.register(:admins) { |actor| actor.admin? }
+      Flipper.register(:preview_features) { |actor| actor.preview_features? }
+      Flipper.group_names.should eq([
+        :admins,
+        :preview_features,
+      ])
+    end
+  end
 end
