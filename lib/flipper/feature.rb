@@ -121,17 +121,15 @@ module Flipper
       values = gate_values
       conditional_gates = conditional_gates(values)
 
-      if boolean_gate.enabled?(values.boolean)
+      if boolean_gate.enabled?(values.boolean) || !conditional_gates.any?
         boolean_gate.description(values.boolean).capitalize
-      elsif conditional_gates.any?
+      else
         fragments = conditional_gates.map { |gate|
           value = values[gate.key]
           gate.description(value)
         }
 
         "Enabled for #{fragments.join(', ')}"
-      else
-        boolean_gate.description(values.boolean).capitalize
       end
     end
 
