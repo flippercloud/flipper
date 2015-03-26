@@ -151,6 +151,11 @@ module Flipper
       gate_values[:groups].map { |name| name.to_sym }.to_set
     end
 
+    # Public: Returns the Set of actor flipper ids enabled.
+    def actor_ids
+      gate_values[:actors]
+    end
+
     # Public: Returns the string representation of the feature.
     def to_s
       @to_s ||= name.to_s

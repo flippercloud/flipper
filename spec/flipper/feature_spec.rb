@@ -332,6 +332,25 @@ describe Flipper::Feature do
     end
   end
 
+  describe "#actor_ids" do
+    context "when no groups enabled" do
+      it "returns empty set" do
+        subject.actor_ids.should eq(Set.new)
+      end
+    end
+
+    context "when one or more actors are enabled" do
+      before do
+        subject.enable Flipper::Types::Actor.new(Struct.new(:flipper_id).new("User:5"))
+        subject.enable Flipper::Types::Actor.new(Struct.new(:flipper_id).new("User:22"))
+      end
+
+      it "returns set of actor ids" do
+        subject.actor_ids.should eq(Set.new(["User:5", "User:22"]))
+      end
+    end
+  end
+
   describe "#gate_values" do
     context "when no gates are set in adapter" do
       it "returns default gate values" do
