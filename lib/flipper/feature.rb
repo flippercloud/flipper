@@ -1,6 +1,7 @@
 require 'flipper/errors'
 require 'flipper/type'
 require 'flipper/gate'
+require 'flipper/gate_values'
 require 'flipper/instrumenters/noop'
 
 module Flipper
@@ -90,9 +91,8 @@ module Flipper
     # Public: Returns state for feature (:on, :off, or :conditional).
     def state
       values = gate_values
-      boolean_value = values[:boolean]
 
-      if boolean_gate.enabled?(boolean_value)
+      if boolean_gate.enabled?(values.boolean)
         :on
       elsif conditional_gates(values).any?
         :conditional
@@ -119,11 +119,10 @@ module Flipper
     # Public
     def description
       values = gate_values
-      boolean_value = values[:boolean]
       conditional_gates = conditional_gates(values)
 
-      if boolean_gate.enabled?(boolean_value)
-        boolean_gate.description(boolean_value).capitalize
+      if boolean_gate.enabled?(values.boolean)
+        boolean_gate.description(values.boolean).capitalize
       elsif conditional_gates.any?
         fragments = conditional_gates.map { |gate|
           value = values[gate.key]
@@ -132,13 +131,13 @@ module Flipper
 
         "Enabled for #{fragments.join(', ')}"
       else
-        boolean_gate.description(boolean_value).capitalize
+        boolean_gate.description(values.boolean).capitalize
       end
     end
 
     # Public: Returns the raw gate values stored by the adapter.
     def gate_values
-      adapter.get(self)
+      GateValues.new(adapter.get(self))
     end
 
     # Public: Returns the Set of Flipper::Types::Group instances enabled.
