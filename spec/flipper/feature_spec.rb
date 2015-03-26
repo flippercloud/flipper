@@ -351,6 +351,34 @@ describe Flipper::Feature do
     end
   end
 
+  describe "#boolean_value" do
+    context "when not enabled or disabled" do
+      it "returns nil" do
+        subject.boolean_value.should be(nil)
+      end
+    end
+
+    context "when enabled" do
+      before do
+        subject.enable
+      end
+
+      it "returns true" do
+        subject.boolean_value.should eq("true")
+      end
+    end
+
+    context "when disabled" do
+      before do
+        subject.disable
+      end
+
+      it "returns nil" do
+        subject.boolean_value.should be(nil)
+      end
+    end
+  end
+
   describe "#gate_values" do
     context "when no gates are set in adapter" do
       it "returns default gate values" do

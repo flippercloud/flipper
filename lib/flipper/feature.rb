@@ -156,6 +156,11 @@ module Flipper
       gate_values[:actors]
     end
 
+    # Public: Returns the adapter value for the boolean gate.
+    def boolean_value
+      gate_values[:boolean]
+    end
+
     # Public: Returns the string representation of the feature.
     def to_s
       @to_s ||= name.to_s
