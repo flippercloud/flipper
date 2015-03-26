@@ -161,6 +161,16 @@ module Flipper
       gate_values[:boolean]
     end
 
+    # Public: Returns the adapter value for the percentage of actors gate.
+    def percentage_of_actors_value
+      gate_values[:percentage_of_actors]
+    end
+
+    # Public: Returns the adapter value for the percentage of random gate.
+    def percentage_of_random_value
+      gate_values[:percentage_of_random]
+    end
+
     # Public: Returns the string representation of the feature.
     def to_s
       @to_s ||= name.to_s

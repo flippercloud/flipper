@@ -379,6 +379,62 @@ describe Flipper::Feature do
     end
   end
 
+  describe "#percentage_of_actors_value" do
+    context "when not enabled or disabled" do
+      it "returns nil" do
+        subject.percentage_of_actors_value.should be(nil)
+      end
+    end
+
+    context "when enabled" do
+      before do
+        subject.enable Flipper::Types::PercentageOfActors.new(5)
+      end
+
+      it "returns true" do
+        subject.percentage_of_actors_value.should eq("5")
+      end
+    end
+
+    context "when disabled" do
+      before do
+        subject.disable
+      end
+
+      it "returns nil" do
+        subject.percentage_of_actors_value.should be(nil)
+      end
+    end
+  end
+
+  describe "#percentage_of_random_value" do
+    context "when not enabled or disabled" do
+      it "returns nil" do
+        subject.percentage_of_random_value.should be(nil)
+      end
+    end
+
+    context "when enabled" do
+      before do
+        subject.enable Flipper::Types::PercentageOfRandom.new(5)
+      end
+
+      it "returns true" do
+        subject.percentage_of_random_value.should eq("5")
+      end
+    end
+
+    context "when disabled" do
+      before do
+        subject.disable
+      end
+
+      it "returns nil" do
+        subject.percentage_of_random_value.should be(nil)
+      end
+    end
+  end
+
   describe "#gate_values" do
     context "when no gates are set in adapter" do
       it "returns default gate values" do
