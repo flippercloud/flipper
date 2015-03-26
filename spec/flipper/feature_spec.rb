@@ -155,6 +155,18 @@ describe Flipper::Feature do
       it "returns :on" do
         subject.state.should be(:on)
       end
+
+      it "returns true for on?" do
+        subject.on?.should be_true
+      end
+
+      it "returns false for off?" do
+        subject.off?.should be_false
+      end
+
+      it "returns false for conditional?" do
+        subject.conditional?.should be_false
+      end
     end
 
     context "fully off" do
@@ -165,6 +177,18 @@ describe Flipper::Feature do
       it "returns :off" do
         subject.state.should be(:off)
       end
+
+      it "returns false for on?" do
+        subject.on?.should be_false
+      end
+
+      it "returns true for off?" do
+        subject.off?.should be_true
+      end
+
+      it "returns false for conditional?" do
+        subject.conditional?.should be_false
+      end
     end
 
     context "partially on" do
@@ -174,6 +198,18 @@ describe Flipper::Feature do
 
       it "returns :conditional" do
         subject.state.should be(:conditional)
+      end
+
+      it "returns false for on?" do
+        subject.on?.should be_false
+      end
+
+      it "returns false for off?" do
+        subject.off?.should be_false
+      end
+
+      it "returns true for conditional?" do
+        subject.conditional?.should be_true
       end
     end
   end

@@ -87,7 +87,7 @@ module Flipper
       }
     end
 
-    # Public
+    # Public: Returns state for feature (:on, :off, or :conditional).
     def state
       gate_values = adapter.get(self)
       boolean_value = gate_values[:boolean]
@@ -99,6 +99,21 @@ module Flipper
       else
         :off
       end
+    end
+
+    # Public
+    def on?
+      state == :on
+    end
+
+    # Public
+    def off?
+      state == :off
+    end
+
+    # Public
+    def conditional?
+      state == :conditional
     end
 
     # Public
