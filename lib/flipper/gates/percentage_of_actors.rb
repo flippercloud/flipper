@@ -33,17 +33,15 @@ module Flipper
       #
       # Returns true if gate open for thing, false if not.
       def open?(thing, value)
-        instrument(:open?, thing) { |payload|
-          percentage = value.to_i
+        percentage = value.to_i
 
-          if Types::Actor.wrappable?(thing)
-            actor = Types::Actor.wrap(thing)
-            key = "#{@feature_name}#{actor.value}"
-            Zlib.crc32(key) % 100 < percentage
-          else
-            false
-          end
-        }
+        if Types::Actor.wrappable?(thing)
+          actor = Types::Actor.wrap(thing)
+          key = "#{@feature_name}#{actor.value}"
+          Zlib.crc32(key) % 100 < percentage
+        else
+          false
+        end
       end
 
       def protects?(thing)

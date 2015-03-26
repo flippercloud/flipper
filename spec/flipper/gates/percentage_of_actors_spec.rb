@@ -9,24 +9,6 @@ describe Flipper::Gates::PercentageOfActors do
     described_class.new(feature_name, :instrumenter => instrumenter)
   }
 
-  describe "instrumentation" do
-    it "is recorded for open" do
-      thing = Struct.new(:flipper_id).new('22')
-      subject.open?(thing, 0)
-
-      event = instrumenter.events.last
-      event.should_not be_nil
-      event.name.should eq('gate_operation.flipper')
-      event.payload.should eq({
-        :thing => thing,
-        :operation => :open?,
-        :result => false,
-        :gate_name => :percentage_of_actors,
-        :feature_name => :search,
-      })
-    end
-  end
-
   describe "#description" do
     context "when enabled" do
       it "returns text" do
