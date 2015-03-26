@@ -1,0 +1,21 @@
+#!/bin/sh
+#/ Usage: bootstrap [bundle options]
+#/
+#/ Bundle install the dependencies.
+#/
+#/ Examples:
+#/
+#/   bootstrap
+#/   bootstrap --local
+#/
+
+set -e
+cd $(dirname "$0")/..
+
+[ "$1" = "--help" -o "$1" = "-h" -o "$1" = "help" ] && {
+    grep '^#/' <"$0"| cut -c4-
+    exit 0
+}
+
+rm -rf .bundle/{binstubs,config}
+bundle install --binstubs .bundle/binstubs --path .bundle --quiet "$@"

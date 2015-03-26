@@ -24,27 +24,39 @@ module Flipper
   # Raises Flipper::DuplicateGroup if the group is already registered.
   def self.register(name, &block)
     group = Types::Group.new(name, &block)
-    groups.add(group.name, group)
+    groups_registry.add(group.name, group)
     group
   rescue Registry::DuplicateKey
     raise DuplicateGroup, %Q{Group #{name.inspect} has already been registered}
+  end
+
+  # Public: Returns an array of registered Types::Group instances.
+  def self.groups
+    groups_registry.values
+  end
+
+  # Public: Returns an array of symbols where each symbol is a registered
+  # group name. If you just want the names, this is more efficient than doing
+  # `Flipper.groups.map(&:name)`.
+  def self.group_names
+    groups_registry.keys
   end
 
   # Public: Clears the group registry.
   #
   # Returns nothing.
   def self.unregister_groups
-    groups.clear
+    groups_registry.clear
   end
 
   # Public: Check if a group exists
   #
   # Returns boolean
   def self.group_exists?(name)
-    self.groups.key?(name)
+    groups_registry.key?(name)
   end
 
-  # Internal: Fetches a group by name.
+  # Public: Fetches a group by name.
   #
   # name - The Symbol name of the group.
   #
@@ -55,19 +67,19 @@ module Flipper
   # Returns the Flipper::Group if group registered.
   # Raises Flipper::GroupNotRegistered if group is not registered.
   def self.group(name)
-    groups.get(name)
+    groups_registry.get(name)
   rescue Flipper::Registry::KeyNotFound => e
     raise GroupNotRegistered, "Group #{e.key.inspect} has not been registered"
   end
 
-  # Internal: Registry of all groups.
-  def self.groups
-    @groups ||= Registry.new
+  # Internal: Registry of all groups_registry.
+  def self.groups_registry
+    @groups_registry ||= Registry.new
   end
 
-  # Internal: Change the groups registry.
-  def self.groups=(registry)
-    @groups = registry
+  # Internal: Change the groups_registry registry.
+  def self.groups_registry=(registry)
+    @groups_registry = registry
   end
 end
 

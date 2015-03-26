@@ -19,31 +19,31 @@ describe Flipper do
     end
   end
 
-  describe ".groups" do
+  describe ".groups_registry" do
     it "returns a registry instance" do
-      Flipper.groups.should be_instance_of(Flipper::Registry)
+      Flipper.groups_registry.should be_instance_of(Flipper::Registry)
     end
   end
 
-  describe ".groups=" do
-    it "sets groups registry" do
+  describe ".groups_registry=" do
+    it "sets groups_registry registry" do
       registry = Flipper::Registry.new
-      Flipper.groups = registry
-      Flipper.instance_variable_get("@groups").should eq(registry)
+      Flipper.groups_registry = registry
+      Flipper.instance_variable_get("@groups_registry").should eq(registry)
     end
   end
 
   describe ".register" do
     it "adds a group to the group_registry" do
       registry = Flipper::Registry.new
-      Flipper.groups = registry
+      Flipper.groups_registry = registry
       group = Flipper.register(:admins) { |actor| actor.admin? }
       registry.get(:admins).should eq(group)
     end
 
     it "adds a group to the group_registry for string name" do
       registry = Flipper::Registry.new
-      Flipper.groups = registry
+      Flipper.groups_registry = registry
       group = Flipper.register('admins') { |actor| actor.admin? }
       registry.get(:admins).should eq(group)
     end
@@ -59,7 +59,7 @@ describe Flipper do
 
   describe ".unregister_groups" do
     it "clear group registry" do
-      Flipper.groups.should_receive(:clear)
+      Flipper.groups_registry.should_receive(:clear)
       Flipper.unregister_groups
     end
   end
@@ -85,6 +85,28 @@ describe Flipper do
           Flipper.group(:cats)
         }.to raise_error(Flipper::GroupNotRegistered, 'Group :cats has not been registered')
       end
+    end
+  end
+
+  describe ".groups" do
+    it "returns array of group instances" do
+      admins = Flipper.register(:admins) { |actor| actor.admin? }
+      preview_features = Flipper.register(:preview_features) { |actor| actor.preview_features? }
+      Flipper.groups.should eq([
+        admins,
+        preview_features,
+      ])
+    end
+  end
+
+  describe ".group_names" do
+    it "returns array of group names" do
+      Flipper.register(:admins) { |actor| actor.admin? }
+      Flipper.register(:preview_features) { |actor| actor.preview_features? }
+      Flipper.group_names.should eq([
+        :admins,
+        :preview_features,
+      ])
     end
   end
 end

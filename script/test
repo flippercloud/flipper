@@ -1,0 +1,30 @@
+#!/bin/sh
+#/ Usage: test [individual test file]
+#/
+#/ Bootstrap and run all tests or an individual test.
+#/
+#/ Examples:
+#/
+#/   # run all tests
+#/   test
+#/
+#/   # run individual test
+#/   test spec/qu_spec.rb
+#/
+
+set -e
+cd $(dirname "$0")/..
+
+[ "$1" = "--help" -o "$1" = "-h" -o "$1" = "help" ] && {
+    grep '^#/' <"$0"| cut -c4-
+    exit 0
+}
+
+specs="spec/"
+
+if [ $# -gt 0 ]
+  then
+    specs=$@
+fi
+
+script/bootstrap && bundle exec rspec $specs
