@@ -147,8 +147,8 @@ module Flipper
     end
 
     # Public: Returns the Set of group Symbol names enabled.
-    def group_names
-      gate_values[:groups].map { |name| name.to_sym }.to_set
+    def groups_value
+      gate_values[:groups]
     end
 
     # Public: Returns the Set of actor flipper ids enabled.
