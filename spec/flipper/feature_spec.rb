@@ -332,10 +332,10 @@ describe Flipper::Feature do
     end
   end
 
-  describe "#actor_ids" do
+  describe "#actors_value" do
     context "when no groups enabled" do
       it "returns empty set" do
-        subject.actor_ids.should eq(Set.new)
+        subject.actors_value.should eq(Set.new)
       end
     end
 
@@ -346,7 +346,7 @@ describe Flipper::Feature do
       end
 
       it "returns set of actor ids" do
-        subject.actor_ids.should eq(Set.new(["User:5", "User:22"]))
+        subject.actors_value.should eq(Set.new(["User:5", "User:22"]))
       end
     end
   end

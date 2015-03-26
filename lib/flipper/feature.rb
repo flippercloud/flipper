@@ -152,7 +152,7 @@ module Flipper
     end
 
     # Public: Returns the Set of actor flipper ids enabled.
-    def actor_ids
+    def actors_value
       gate_values[:actors]
     end
 
