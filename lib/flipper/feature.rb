@@ -137,11 +137,11 @@ module Flipper
     # Returns an array of gates
     def gates
       @gates ||= [
-        Gates::Boolean.new(@name, :instrumenter => @instrumenter),
-        Gates::Group.new(@name, :instrumenter => @instrumenter),
-        Gates::Actor.new(@name, :instrumenter => @instrumenter),
-        Gates::PercentageOfActors.new(@name, :instrumenter => @instrumenter),
-        Gates::PercentageOfRandom.new(@name, :instrumenter => @instrumenter),
+        Gates::Boolean.new(@name),
+        Gates::Group.new(@name),
+        Gates::Actor.new(@name),
+        Gates::PercentageOfActors.new(@name),
+        Gates::PercentageOfRandom.new(@name),
       ]
     end
 
@@ -175,7 +175,7 @@ module Flipper
 
     # Private
     def conditional_gates(gate_values)
-      @conditional_gates ||= non_boolean_gates.select { |gate|
+      non_boolean_gates.select { |gate|
         value = gate_values[gate.key]
         gate.enabled?(value)
       }

@@ -41,11 +41,6 @@ describe Flipper::Instrumentation::LogSubscriber do
       adapter_line.should include('[ result={')
       adapter_line.should include('} ]')
     end
-
-    it "logs gate calls" do
-      gate_line = find_line('Flipper feature(search) gate(boolean) open? false')
-      gate_line.should include('[ thing=nil ]')
-    end
   end
 
   context "feature enabled checks with a thing" do
@@ -59,11 +54,6 @@ describe Flipper::Instrumentation::LogSubscriber do
     it "logs thing for feature" do
       feature_line = find_line('Flipper feature(search) enabled?')
       feature_line.should include(user.inspect)
-    end
-
-    it "logs thing for gate" do
-      gate_line = find_line('Flipper feature(search) gate(boolean) open')
-      gate_line.should include(user.inspect)
     end
   end
 

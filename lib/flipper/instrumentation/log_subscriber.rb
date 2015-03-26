@@ -65,34 +65,6 @@ module Flipper
         debug "  #{color(name, CYAN, true)}  [ #{details} ]"
       end
 
-      # Logs a gate operation.
-      #
-      # Example Output
-      #
-      #   flipper[:search].enabled?(user)
-      #   # Flipper feature(search) gate(boolean) open false (0.1ms)  [ thing=... ]
-      #   # Flipper feature(search) gate(group) open false (0.1ms)  [ thing=... ]
-      #   # Flipper feature(search) gate(actor) open false (0.1ms)  [ thing=... ]
-      #   # Flipper feature(search) gate(percentage_of_actors) open false (0.1ms)  [ thing=... ]
-      #   # Flipper feature(search) gate(percentage_of_random) open false (0.1ms)  [ thing=... ]
-      #
-      # Returns nothing.
-      def gate_operation(event)
-        return unless logger.debug?
-
-        feature_name = event.payload[:feature_name]
-        gate_name = event.payload[:gate_name]
-        operation = event.payload[:operation]
-        result = event.payload[:result]
-        thing = event.payload[:thing]
-
-        description = "Flipper feature(#{feature_name}) gate(#{gate_name}) #{operation} #{result.inspect}"
-        details = "thing=#{thing.inspect}"
-
-        name = '%s (%.1fms)' % [description, event.duration]
-        debug "  #{color(name, CYAN, true)}  [ #{details} ]"
-      end
-
       def logger
         self.class.logger
       end

@@ -32,19 +32,17 @@ module Flipper
       #
       # Returns true if gate open for thing, false if not.
       def open?(thing, value)
-        instrument(:open?, thing) { |payload|
-          if thing.nil?
-            false
+        if thing.nil?
+          false
+        else
+          if protects?(thing)
+            actor = wrap(thing)
+            enabled_actor_ids = value
+            enabled_actor_ids.include?(actor.value)
           else
-            if protects?(thing)
-              actor = wrap(thing)
-              enabled_actor_ids = value
-              enabled_actor_ids.include?(actor.value)
-            else
-              false
-            end
+            false
           end
-        }
+        end
       end
 
       def wrap(thing)
