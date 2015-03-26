@@ -72,10 +72,10 @@ module Flipper
     # Returns true if enabled, false if not.
     def enabled?(thing = nil)
       instrument(:enabled?, thing) { |payload|
-        gate_values = adapter.get(self)
+        values = gate_values
 
         gate = gates.detect { |gate|
-          gate.open?(thing, gate_values[gate.key])
+          gate.open?(thing, values[gate.key])
         }
 
         if gate.nil?
@@ -89,12 +89,12 @@ module Flipper
 
     # Public: Returns state for feature (:on, :off, or :conditional).
     def state
-      gate_values = adapter.get(self)
-      boolean_value = gate_values[:boolean]
+      values = gate_values
+      boolean_value = values[:boolean]
 
       if boolean_gate.enabled?(boolean_value)
         :on
-      elsif conditional_gates(gate_values).any?
+      elsif conditional_gates(values).any?
         :conditional
       else
         :off
@@ -118,15 +118,15 @@ module Flipper
 
     # Public
     def description
-      gate_values = adapter.get(self)
-      boolean_value = gate_values[:boolean]
-      conditional_gates = conditional_gates(gate_values)
+      values = gate_values
+      boolean_value = values[:boolean]
+      conditional_gates = conditional_gates(values)
 
       if boolean_gate.enabled?(boolean_value)
         boolean_gate.description(boolean_value).capitalize
       elsif conditional_gates.any?
         fragments = conditional_gates.map { |gate|
-          value = gate_values[gate.key]
+          value = values[gate.key]
           gate.description(value)
         }
 
