@@ -7,11 +7,11 @@ module Flipper
       "1"     => true,
     }
 
-    def self.boolean(value)
+    def self.to_boolean(value)
       !!TruthMap[value]
     end
 
-    def self.integer(value)
+    def self.to_integer(value)
       if value.respond_to?(:to_i)
         value.to_i
       else
@@ -19,7 +19,7 @@ module Flipper
       end
     end
 
-    def self.set(value)
+    def self.to_set(value)
       return value if value.is_a?(Set)
       return Set.new if value.nil? || value.empty?
 
@@ -37,11 +37,11 @@ module Flipper
     attr_reader :percentage_of_random
 
     def initialize(adapter_values)
-      @boolean = self.class.boolean(adapter_values[:boolean])
-      @actors = self.class.set(adapter_values[:actors])
-      @groups = self.class.set(adapter_values[:groups])
-      @percentage_of_actors = self.class.integer(adapter_values[:percentage_of_actors])
-      @percentage_of_random = self.class.integer(adapter_values[:percentage_of_random])
+      @boolean = self.class.to_boolean(adapter_values[:boolean])
+      @actors = self.class.to_set(adapter_values[:actors])
+      @groups = self.class.to_set(adapter_values[:groups])
+      @percentage_of_actors = self.class.to_integer(adapter_values[:percentage_of_actors])
+      @percentage_of_random = self.class.to_integer(adapter_values[:percentage_of_random])
     end
 
     def [](key)
