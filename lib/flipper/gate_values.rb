@@ -7,6 +7,29 @@ module Flipper
       "1"     => true,
     }
 
+    def self.boolean(value)
+      !!TruthMap[value]
+    end
+
+    def self.integer(value)
+      if value.respond_to?(:to_i)
+        value.to_i
+      else
+        raise ArgumentError, "#{value.inspect} cannot be converted to an integer"
+      end
+    end
+
+    def self.set(value)
+      return value if value.is_a?(Set)
+      return Set.new if value.nil? || value.empty?
+
+      if value.respond_to?(:to_set)
+        value.to_set
+      else
+        raise ArgumentError, "#{value.inspect} cannot be converted to a set"
+      end
+    end
+
     attr_reader :boolean
     attr_reader :actors
     attr_reader :groups
@@ -14,11 +37,11 @@ module Flipper
     attr_reader :percentage_of_random
 
     def initialize(adapter_values)
-      @boolean = !!TruthMap[adapter_values[:boolean]]
-      @actors = adapter_values[:actors]
-      @groups = adapter_values[:groups]
-      @percentage_of_actors = adapter_values[:percentage_of_actors].to_i
-      @percentage_of_random = adapter_values[:percentage_of_random].to_i
+      @boolean = self.class.boolean(adapter_values[:boolean])
+      @actors = self.class.set(adapter_values[:actors])
+      @groups = self.class.set(adapter_values[:groups])
+      @percentage_of_actors = self.class.integer(adapter_values[:percentage_of_actors])
+      @percentage_of_random = self.class.integer(adapter_values[:percentage_of_random])
     end
 
     def [](key)
