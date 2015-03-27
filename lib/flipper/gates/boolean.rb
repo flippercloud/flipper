@@ -24,7 +24,7 @@ module Flipper
       end
 
       def enabled?(value)
-        value
+        GateValues.to_boolean(value)
       end
 
       # Internal: Checks if the gate is open for a thing.
