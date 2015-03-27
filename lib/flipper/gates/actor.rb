@@ -25,7 +25,7 @@ module Flipper
       end
 
       def enabled?(value)
-        !value.nil? && !value.empty?
+        !GateValues.set(value).empty?
       end
 
       # Internal: Checks if the gate is open for a thing.
