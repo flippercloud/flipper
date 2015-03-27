@@ -1,5 +1,12 @@
 module Flipper
   class GateValues
+    TruthMap = {
+      true    => true,
+      1       => true,
+      "true"  => true,
+      "1"     => true,
+    }
+
     attr_reader :boolean
     attr_reader :actors
     attr_reader :groups
@@ -7,7 +14,7 @@ module Flipper
     attr_reader :percentage_of_random
 
     def initialize(adapter_values)
-      @boolean = adapter_values[:boolean]
+      @boolean = !!TruthMap[adapter_values[:boolean]]
       @actors = adapter_values[:actors]
       @groups = adapter_values[:groups]
       @percentage_of_actors = adapter_values[:percentage_of_actors].to_i

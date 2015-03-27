@@ -353,8 +353,8 @@ describe Flipper::Feature do
 
   describe "#boolean_value" do
     context "when not enabled or disabled" do
-      it "returns nil" do
-        subject.boolean_value.should be(nil)
+      it "returns false" do
+        subject.boolean_value.should be(false)
       end
     end
 
@@ -364,7 +364,7 @@ describe Flipper::Feature do
       end
 
       it "returns true" do
-        subject.boolean_value.should eq("true")
+        subject.boolean_value.should be(true)
       end
     end
 
@@ -373,8 +373,8 @@ describe Flipper::Feature do
         subject.disable
       end
 
-      it "returns nil" do
-        subject.boolean_value.should be(nil)
+      it "returns false" do
+        subject.boolean_value.should be(false)
       end
     end
   end
