@@ -11,7 +11,7 @@ module Flipper
       @actors = adapter_values[:actors]
       @groups = adapter_values[:groups]
       @percentage_of_actors = adapter_values[:percentage_of_actors].to_i
-      @percentage_of_random = adapter_values[:percentage_of_random]
+      @percentage_of_random = adapter_values[:percentage_of_random].to_i
     end
 
     def [](key)

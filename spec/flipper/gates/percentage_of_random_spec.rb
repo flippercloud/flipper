@@ -38,7 +38,6 @@ describe Flipper::Gates::PercentageOfRandom do
 
     context "when disabled" do
       it "returns disabled" do
-        subject.description(nil).should eq('disabled')
         subject.description(0).should eq('disabled')
       end
     end

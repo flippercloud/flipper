@@ -410,7 +410,7 @@ describe Flipper::Feature do
   describe "#percentage_of_random_value" do
     context "when not enabled or disabled" do
       it "returns nil" do
-        subject.percentage_of_random_value.should be(nil)
+        subject.percentage_of_random_value.should be(0)
       end
     end
 
@@ -420,7 +420,7 @@ describe Flipper::Feature do
       end
 
       it "returns true" do
-        subject.percentage_of_random_value.should eq("5")
+        subject.percentage_of_random_value.should eq(5)
       end
     end
 
@@ -430,7 +430,7 @@ describe Flipper::Feature do
       end
 
       it "returns nil" do
-        subject.percentage_of_random_value.should be(nil)
+        subject.percentage_of_random_value.should be(0)
       end
     end
   end
