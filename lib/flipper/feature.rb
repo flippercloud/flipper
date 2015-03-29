@@ -88,6 +88,22 @@ module Flipper
       }
     end
 
+    def enable_actor(actor)
+      enable Types::Actor.wrap(actor)
+    end
+
+    def enable_group(group)
+      enable Flipper::Types::Group.wrap(group)
+    end
+
+    def enable_percentage_of_random(percentage)
+      enable Types::PercentageOfRandom.wrap(percentage)
+    end
+
+    def enable_percentage_of_actors(percentage)
+      enable Types::PercentageOfActors.wrap(percentage)
+    end
+
     # Public: Returns state for feature (:on, :off, or :conditional).
     def state
       values = gate_values
