@@ -8,11 +8,8 @@ module Flipper
       end
 
       def self.wrap(thing)
-        if thing.is_a?(Flipper::Types::Actor)
-          thing
-        else
-          new(thing)
-        end
+        return thing if thing.is_a?(self)
+        new(thing)
       end
 
       attr_reader :value
