@@ -37,7 +37,7 @@ Or install it yourself with:
 
 ## Usage
 
-The goal of the API for flipper was to have everything revolve around features and what ways they can be enabled. Start with top level and dig into a feature, then dig in further and enable that feature for a given type of access, as opposed to thinking about how the feature will be accessed first (ie: stats.enable vs activate_group(:stats, ...)).
+The goal of the API for flipper was to have everything revolve around features and what ways they can be enabled. Start with top level and dig into a feature, then dig in further and enable that feature for a given type of access, as opposed to thinking about how the feature will be accessed first (ie: `stats.enable` vs `activate_group(:stats, ...)`).
 
 ```ruby
 require 'flipper'
@@ -78,7 +78,7 @@ Out of the box several types of enabling are supported. They are checked in this
 
 ### 1. Boolean
 
-All on or all off. Think top level things like :stats, :search, :logging, etc. Also, an easy way to release a new feature as once a feature is boolean enabled it is on for every situation.
+All on or all off. Think top level things like `:stats`, `:search`, `:logging`, etc. Also, an easy way to release a new feature as once a feature is boolean enabled it is on for every situation.
 
 ```ruby
 flipper = Flipper.new(adapter)
@@ -123,9 +123,9 @@ flipper[:search].enable group
 flipper[:search].enabled? group
 ```
 
-The key is to make sure you do not enable two different types of objects for the same feature. Imagine that user has a flipper_id of 6 and group has a flipper_id of 6. Enabling search for user would automatically enable it for group, as they both have a flipper_id of 6.
+The key is to make sure you do not enable two different types of objects for the same feature. Imagine that user has a `flipper_id` of 6 and group has a `flipper_id` of 6. Enabling search for user would automatically enable it for group, as they both have a `flipper_id` of 6.
 
-The one exception to this rule is if you have globally unique flipper_ids, such as UUIDs. If your flipper_ids are unique globally in your entire system, enabling two different types should be safe. Another way around this is to prefix the flipper_id with the class name like this:
+The one exception to this rule is if you have globally unique `flipper_ids`, such as UUIDs. If your `flipper_ids` are unique globally in your entire system, enabling two different types should be safe. Another way around this is to prefix the `flipper_id` with the class name like this:
 
 ```ruby
 class User
