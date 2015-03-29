@@ -1,6 +1,12 @@
 module Flipper
   module Types
     class Percentage < Type
+
+      def self.wrap(value)
+        return value if value.is_a?(self)
+        new(value)
+      end
+
       attr_reader :value
 
       def initialize(value)
