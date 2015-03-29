@@ -1,7 +1,7 @@
-![flipper logo](https://raw.github.com/jnunemaker/flipper-ui/master/lib/flipper/ui/public/images/logo.png)
+![flipper logo](https://raw.githubusercontent.com/jnunemaker/flipper-ui/master/lib/flipper/ui/public/images/logo.png)
 
 <pre>
-__
+                                   __
                                _.-~  )
                     _..--~~~~,'   ,-/     _
                  .-'. . . .'   ,-','    ,' )
