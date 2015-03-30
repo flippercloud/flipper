@@ -88,20 +88,84 @@ module Flipper
       }
     end
 
+    # Public: Enables a feature for an actor.
+    #
+    # actor - a Flipper::Types::Actor instance or an object that responds
+    #         to flipper_id.
+    #
+    # Returns result of enable.
     def enable_actor(actor)
       enable Types::Actor.wrap(actor)
     end
 
+    # Public: Enables a feature for a group.
+    #
+    # group - a Flipper::Types::Group instance or a String or Symbol name of a
+    #         registered group.
+    #
+    # Returns result of enable.
     def enable_group(group)
       enable Flipper::Types::Group.wrap(group)
     end
 
+    # Public: Enables a feature a percentage of time.
+    #
+    # percentage - a Flipper::Types::PercentageOfRandom instance or an object that
+    #              responds to to_i.
+    #
+    # Returns result of enable.
     def enable_percentage_of_random(percentage)
       enable Types::PercentageOfRandom.wrap(percentage)
     end
 
+    # Public: Enables a feature for a percentage of actors.
+    #
+    # percentage - a Flipper::Types::PercentageOfRandom instance or an object that
+    #              responds to to_i.
+    #
+    # Returns result of enable.
     def enable_percentage_of_actors(percentage)
       enable Types::PercentageOfActors.wrap(percentage)
+    end
+
+    # Public: Disables a feature for an actor.
+    #
+    # actor - a Flipper::Types::Actor instance or an object that responds
+    #         to flipper_id.
+    #
+    # Returns result of disable.
+    def disable_actor(actor)
+      disable Types::Actor.wrap(actor)
+    end
+
+    # Public: Disables a feature for a group.
+    #
+    # group - a Flipper::Types::Group instance or a String or Symbol name of a
+    #         registered group.
+    #
+    # Returns result of disable.
+    def disable_group(group)
+      disable Flipper::Types::Group.wrap(group)
+    end
+
+    # Public: Disables a feature a percentage of time.
+    #
+    # percentage - a Flipper::Types::PercentageOfRandom instance or an object that
+    #              responds to to_i.
+    #
+    # Returns result of disable.
+    def disable_percentage_of_random
+      disable Types::PercentageOfRandom.new(0)
+    end
+
+    # Public: Disables a feature for a percentage of actors.
+    #
+    # percentage - a Flipper::Types::PercentageOfRandom instance or an object that
+    #              responds to to_i.
+    #
+    # Returns result of disable.
+    def disable_percentage_of_actors
+      disable Types::PercentageOfActors.new(0)
     end
 
     # Public: Returns state for feature (:on, :off, or :conditional).

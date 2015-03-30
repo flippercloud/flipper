@@ -469,28 +469,32 @@ describe Flipper::Feature do
     end
   end
 
-  describe "#enable_actor" do
+  describe "#enable_actor/disable_actor" do
     context "with object that responds to flipper_id" do
-      it "enables the feature for the actor" do
+      it "disables the feature for the actor" do
         actor = Struct.new(:flipper_id).new(5)
         subject.enabled?(actor).should be_false
         subject.enable_actor(actor)
         subject.enabled?(actor).should be_true
+        subject.disable_actor(actor)
+        subject.enabled?(actor).should be_false
       end
     end
 
     context "with actor instance" do
-      it "enables the feature for the actor" do
+      it "disables the feature for the actor" do
         actor = Struct.new(:flipper_id).new(5)
         instance = Flipper::Types::Actor.wrap(actor)
         subject.enabled?(instance).should be_false
         subject.enable_actor(instance)
         subject.enabled?(instance).should be_true
+        subject.disable_actor(instance)
+        subject.enabled?(instance).should be_false
       end
     end
   end
 
-  describe "#enable_group" do
+  describe "#enable_group/disable_group" do
     context "with symbol group name" do
       it "enables the feature for the group" do
         actor = Struct.new(:flipper_id).new(5)
@@ -498,6 +502,8 @@ describe Flipper::Feature do
         subject.enabled?(actor).should be_false
         subject.enable_group(:five_only)
         subject.enabled?(actor).should be_true
+        subject.disable_group(:five_only)
+        subject.enabled?(actor).should be_false
       end
     end
 
@@ -508,6 +514,8 @@ describe Flipper::Feature do
         subject.enabled?(actor).should be_false
         subject.enable_group("five_only")
         subject.enabled?(actor).should be_true
+        subject.disable_group("five_only")
+        subject.enabled?(actor).should be_false
       end
     end
 
@@ -518,16 +526,20 @@ describe Flipper::Feature do
         subject.enabled?(actor).should be_false
         subject.enable_group(group)
         subject.enabled?(actor).should be_true
+        subject.disable_group(group)
+        subject.enabled?(actor).should be_false
       end
     end
   end
 
-  describe "#enable_percentage_of_random" do
+  describe "#enable_percentage_of_random/disable_percentage_of_random" do
     context "with integer" do
       it "enables the feature" do
         subject.gate_values.percentage_of_random.should be(0)
         subject.enable_percentage_of_random(56)
         subject.gate_values.percentage_of_random.should be(56)
+        subject.disable_percentage_of_random
+        subject.gate_values.percentage_of_random.should be(0)
       end
     end
 
@@ -536,6 +548,8 @@ describe Flipper::Feature do
         subject.gate_values.percentage_of_random.should be(0)
         subject.enable_percentage_of_random("56")
         subject.gate_values.percentage_of_random.should be(56)
+        subject.disable_percentage_of_random
+        subject.gate_values.percentage_of_random.should be(0)
       end
     end
 
@@ -545,16 +559,20 @@ describe Flipper::Feature do
         subject.gate_values.percentage_of_random.should be(0)
         subject.enable_percentage_of_random(percentage)
         subject.gate_values.percentage_of_random.should be(56)
+        subject.disable_percentage_of_random
+        subject.gate_values.percentage_of_random.should be(0)
       end
     end
   end
 
-  describe "#enable_percentage_of_actors" do
+  describe "#enable_percentage_of_actors/disable_percentage_of_actors" do
     context "with integer" do
       it "enables the feature" do
         subject.gate_values.percentage_of_actors.should be(0)
         subject.enable_percentage_of_actors(56)
         subject.gate_values.percentage_of_actors.should be(56)
+        subject.disable_percentage_of_actors
+        subject.gate_values.percentage_of_actors.should be(0)
       end
     end
 
@@ -563,6 +581,8 @@ describe Flipper::Feature do
         subject.gate_values.percentage_of_actors.should be(0)
         subject.enable_percentage_of_actors("56")
         subject.gate_values.percentage_of_actors.should be(56)
+        subject.disable_percentage_of_actors
+        subject.gate_values.percentage_of_actors.should be(0)
       end
     end
 
@@ -572,6 +592,8 @@ describe Flipper::Feature do
         subject.gate_values.percentage_of_actors.should be(0)
         subject.enable_percentage_of_actors(percentage)
         subject.gate_values.percentage_of_actors.should be(56)
+        subject.disable_percentage_of_actors
+        subject.gate_values.percentage_of_actors.should be(0)
       end
     end
   end
