@@ -1,7 +1,7 @@
-![flipper logo](https://raw.github.com/jnunemaker/flipper-ui/master/lib/flipper/ui/public/images/logo.png)
+![flipper logo](https://raw.githubusercontent.com/jnunemaker/flipper-ui/master/lib/flipper/ui/public/images/logo.png)
 
 <pre>
-__
+                                   __
                                _.-~  )
                     _..--~~~~,'   ,-/     _
                  .-'. . . .'   ,-','    ,' )
@@ -37,7 +37,7 @@ Or install it yourself with:
 
 ## Usage
 
-The goal of the API for flipper was to have everything revolve around features and what ways they can be enabled. Start with top level and dig into a feature, then dig in further and enable that feature for a given type of access, as opposed to thinking about how the feature will be accessed first (ie: stats.enable vs activate_group(:stats, ...)).
+The goal of the API for flipper was to have everything revolve around features and what ways they can be enabled. Start with top level and dig into a feature, then dig in further and enable that feature for a given type of access, as opposed to thinking about how the feature will be accessed first (ie: `stats.enable` vs `activate_group(:stats, ...)`).
 
 ```ruby
 require 'flipper'
@@ -74,11 +74,11 @@ Of course there are more [examples for you to peruse](https://github.com/jnunema
 
 ## Types
 
-Out of the box several types of enabling are supported. They are checked in this order.
+Out of the box several types of enabling are supported. They are checked in this order:
 
 ### 1. Boolean
 
-All on or all off. Think top level things like :stats, :search, :logging, etc. Also, an easy way to release a new feature as once a feature is boolean enabled it is on for every situation.
+All on or all off. Think top level things like `:stats`, `:search`, `:logging`, etc. Also, an easy way to release a new feature as once a feature is boolean enabled it is on for every situation.
 
 ```ruby
 flipper = Flipper.new(adapter)
@@ -103,7 +103,7 @@ person = Person.find(params[:id])
 flipper[:stats].enabled? person # check if enabled, returns true if person.admin? is true
 ```
 
-There is no requirement that the thing yielded to the block be a user model or whatever. It can be anything you want therefore it is a good idea to check that the thing passed into the group block actually responds to what you are trying.
+There is no requirement that the thing yielded to the block be a user model or whatever. It can be anything you want, therefore it is a good idea to check that the thing passed into the group block actually responds to what you are trying.
 
 ### 3. Individual Actor
 
@@ -123,9 +123,9 @@ flipper[:search].enable group
 flipper[:search].enabled? group
 ```
 
-The key is to make sure you do not enable two different types of objects for the same feature. Imagine that user has a flipper_id of 6 and group has a flipper_id of 6. Enabling search for user would automatically enable it for group, as they both have a flipper_id of 6.
+The key is to make sure you do not enable two different types of objects for the same feature. Imagine that user has a `flipper_id` of 6 and group has a `flipper_id` of 6. Enabling search for user would automatically enable it for group, as they both have a `flipper_id` of 6.
 
-The one exception to this rule is if you have globally unique flipper_ids, such as uuid's. If your flipper_ids are unique globally in your entire system, enabling two different types should be safe. Another way around this is to prefix the flipper_id with the class name like this:
+The one exception to this rule is if you have globally unique `flipper_ids`, such as UUIDs. If your `flipper_ids` are unique globally in your entire system, enabling two different types should be safe. Another way around this is to prefix the `flipper_id` with the class name like this:
 
 ```ruby
 class User
@@ -182,12 +182,12 @@ Randomness is not a good idea for enabling new features in the UI. Most of the t
 
 I plan on supporting [in-memory](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb), [Mongo](https://github.com/jnunemaker/flipper-mongo), and [Redis](https://github.com/jnunemaker/flipper-redis) as adapters for flipper. Others are welcome, so please let me know if you create one.
 
-* [memory adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb) - Great for tests.
-* [mongo adapter](https://github.com/jnunemaker/flipper-mongo)
-* [redis adapter](https://github.com/jnunemaker/flipper-redis)
-* [cassanity adapter](https://github.com/jnunemaker/flipper-cassanity)
-* [activerecord 4 adapter](https://github.com/bgentry/flipper-activerecord)
-* [activerecord 3 adapter](https://github.com/jproudman/flipper-activerecord)
+* [memory adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb) – great for tests
+* [Mongo adapter](https://github.com/jnunemaker/flipper-mongo)
+* [Redis adapter](https://github.com/jnunemaker/flipper-redis)
+* [Cassanity adapter](https://github.com/jnunemaker/flipper-cassanity)
+* [Active Record 4 adapter](https://github.com/bgentry/flipper-activerecord)
+* [Active Record 3 adapter](https://github.com/jproudman/flipper-activerecord)
 
 The basic API for an adapter is this:
 
@@ -229,7 +229,7 @@ I would also recommend setting `fail_fast = true` in your RSpec configuration as
 
 One optimization that flipper provides is a memoizing middleware. The memoizing middleware ensures that you only make one adapter call per feature per request.
 
-This means if you check the same feature over and over, it will only make one mongo, redis, or whatever call per feature for the length of the request.
+This means if you check the same feature over and over, it will only make one Mongo, Redis, or whatever call per feature for the length of the request.
 
 You can use the middleware from a Rails initializer like so:
 
@@ -263,4 +263,4 @@ config.middleware.use Flipper::Middleware::Memoizer, lambda { $flipper }
 
 ## Coming Soon™
 
-* [Web UI](https://github.com/jnunemaker/flipper-ui) (think resque UI for features toggling/status)
+* [Web UI](https://github.com/jnunemaker/flipper-ui) (think Resque UI for features toggling/status)
