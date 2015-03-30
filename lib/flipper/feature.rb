@@ -117,22 +117,23 @@ module Flipper
       end
     end
 
-    # Public
+    # Public: Is the feature fully enabled.
     def on?
       state == :on
     end
 
-    # Public
+    # Public: Is the feature fully disabled.
     def off?
       state == :off
     end
 
-    # Public
+    # Public: Is the feature conditionally enabled for a given actor, group,
+    # percentage of actors or percentage of the time.
     def conditional?
       state == :conditional
     end
 
-    # Public
+    # Public: Human readable description of the enabled-ness of the feature.
     def description
       values = gate_values
       conditional_gates = conditional_gates(values)
