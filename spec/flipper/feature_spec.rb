@@ -471,70 +471,70 @@ describe Flipper::Feature do
 
   describe "#enable_actor/disable_actor" do
     context "with object that responds to flipper_id" do
-      it "disables the feature for the actor" do
+      it "updates the gate values to include the actor" do
         actor = Struct.new(:flipper_id).new(5)
-        subject.enabled?(actor).should be_false
+        subject.gate_values.actors.should be_empty
         subject.enable_actor(actor)
-        subject.enabled?(actor).should be_true
+        subject.gate_values.actors.should eq(Set["5"])
         subject.disable_actor(actor)
-        subject.enabled?(actor).should be_false
+        subject.gate_values.actors.should be_empty
       end
     end
 
     context "with actor instance" do
-      it "disables the feature for the actor" do
+      it "updates the gate values to include the actor" do
         actor = Struct.new(:flipper_id).new(5)
         instance = Flipper::Types::Actor.wrap(actor)
-        subject.enabled?(instance).should be_false
+        subject.gate_values.actors.should be_empty
         subject.enable_actor(instance)
-        subject.enabled?(instance).should be_true
+        subject.gate_values.actors.should eq(Set["5"])
         subject.disable_actor(instance)
-        subject.enabled?(instance).should be_false
+        subject.gate_values.actors.should be_empty
       end
     end
   end
 
   describe "#enable_group/disable_group" do
     context "with symbol group name" do
-      it "enables the feature for the group" do
+      it "updates the gate values to include the group" do
         actor = Struct.new(:flipper_id).new(5)
         group = Flipper.register(:five_only) { |actor| actor.flipper_id == 5 }
-        subject.enabled?(actor).should be_false
+        subject.gate_values.groups.should be_empty
         subject.enable_group(:five_only)
-        subject.enabled?(actor).should be_true
+        subject.gate_values.groups.should eq(Set["five_only"])
         subject.disable_group(:five_only)
-        subject.enabled?(actor).should be_false
+        subject.gate_values.groups.should be_empty
       end
     end
 
     context "with string group name" do
-      it "enables the feature for the group" do
+      it "updates the gate values to include the group" do
         actor = Struct.new(:flipper_id).new(5)
         group = Flipper.register(:five_only) { |actor| actor.flipper_id == 5 }
-        subject.enabled?(actor).should be_false
+        subject.gate_values.groups.should be_empty
         subject.enable_group("five_only")
-        subject.enabled?(actor).should be_true
+        subject.gate_values.groups.should eq(Set["five_only"])
         subject.disable_group("five_only")
-        subject.enabled?(actor).should be_false
+        subject.gate_values.groups.should be_empty
       end
     end
 
     context "with group instance" do
-      it "enables the feature for the group" do
+      it "updates the gate values for the group" do
         actor = Struct.new(:flipper_id).new(5)
         group = Flipper.register(:five_only) { |actor| actor.flipper_id == 5 }
-        subject.enabled?(actor).should be_false
+        subject.gate_values.groups.should be_empty
         subject.enable_group(group)
-        subject.enabled?(actor).should be_true
+        subject.gate_values.groups.should eq(Set["five_only"])
         subject.disable_group(group)
-        subject.enabled?(actor).should be_false
+        subject.gate_values.groups.should be_empty
       end
     end
   end
 
   describe "#enable_percentage_of_random/disable_percentage_of_random" do
     context "with integer" do
-      it "enables the feature" do
+      it "updates the gate values" do
         subject.gate_values.percentage_of_random.should be(0)
         subject.enable_percentage_of_random(56)
         subject.gate_values.percentage_of_random.should be(56)
@@ -544,7 +544,7 @@ describe Flipper::Feature do
     end
 
     context "with string" do
-      it "enables the feature" do
+      it "updates the gate values" do
         subject.gate_values.percentage_of_random.should be(0)
         subject.enable_percentage_of_random("56")
         subject.gate_values.percentage_of_random.should be(56)
@@ -554,7 +554,7 @@ describe Flipper::Feature do
     end
 
     context "with percentage of random instance" do
-      it "enables the feature" do
+      it "updates the gate values" do
         percentage = Flipper::Types::PercentageOfRandom.new(56)
         subject.gate_values.percentage_of_random.should be(0)
         subject.enable_percentage_of_random(percentage)
@@ -567,7 +567,7 @@ describe Flipper::Feature do
 
   describe "#enable_percentage_of_actors/disable_percentage_of_actors" do
     context "with integer" do
-      it "enables the feature" do
+      it "updates the gate values" do
         subject.gate_values.percentage_of_actors.should be(0)
         subject.enable_percentage_of_actors(56)
         subject.gate_values.percentage_of_actors.should be(56)
@@ -577,7 +577,7 @@ describe Flipper::Feature do
     end
 
     context "with string" do
-      it "enables the feature" do
+      it "updates the gate values" do
         subject.gate_values.percentage_of_actors.should be(0)
         subject.enable_percentage_of_actors("56")
         subject.gate_values.percentage_of_actors.should be(56)
@@ -587,7 +587,7 @@ describe Flipper::Feature do
     end
 
     context "with percentage of actors instance" do
-      it "enables the feature" do
+      it "updates the gate values" do
         percentage = Flipper::Types::PercentageOfActors.new(56)
         subject.gate_values.percentage_of_actors.should be(0)
         subject.enable_percentage_of_actors(percentage)
