@@ -3,7 +3,27 @@ require 'flipper/types/group'
 
 describe Flipper::Types::Group do
   subject do
-    Flipper::Types::Group.new(:admins) { |actor| actor.admin? }
+    Flipper.register(:admins) { |actor| actor.admin? }
+  end
+
+  describe ".wrap" do
+    context "with group instance" do
+      it "returns group instance" do
+        described_class.wrap(subject).should eq(subject)
+      end
+    end
+
+    context "with Symbol group name" do
+      it "returns group instance" do
+        described_class.wrap(subject.name).should eq(subject)
+      end
+    end
+
+    context "with String group name" do
+      it "returns group instance" do
+        described_class.wrap(subject.name.to_s).should eq(subject)
+      end
+    end
   end
 
   it "initializes with name" do

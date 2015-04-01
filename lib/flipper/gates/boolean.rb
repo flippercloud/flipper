@@ -1,13 +1,6 @@
 module Flipper
   module Gates
     class Boolean < Gate
-      TruthMap = {
-        true    => true,
-        false   => false,
-        'true'  => true,
-        'false' => false,
-      }
-
       # Internal: The name of the gate. Used for instrumentation, etc.
       def name
         :boolean
@@ -31,7 +24,7 @@ module Flipper
       end
 
       def enabled?(value)
-        !!TruthMap[value]
+        GateValues.to_boolean(value)
       end
 
       # Internal: Checks if the gate is open for a thing.
@@ -40,7 +33,7 @@ module Flipper
       # or nil if not explicitly set.
       def open?(thing, value)
         instrument(:open?, thing) { |payload|
-          !!TruthMap[value]
+          value
         }
       end
 

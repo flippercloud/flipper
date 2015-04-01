@@ -174,4 +174,64 @@ describe Flipper::DSL do
       end
     end
   end
+
+  describe "#enable/disable" do
+    it "enables and disables the feature" do
+      subject[:stats].boolean_value.should eq(false)
+      subject.enable(:stats)
+      subject[:stats].boolean_value.should eq(true)
+
+      subject.disable(:stats)
+      subject[:stats].boolean_value.should eq(false)
+    end
+  end
+
+  describe "#enable_actor/disable_actor" do
+    it "enables and disables the feature for actor" do
+      actor = Struct.new(:flipper_id).new(5)
+
+      subject[:stats].actors_value.should be_empty
+      subject.enable_actor(:stats, actor)
+      subject[:stats].actors_value.should eq(Set["5"])
+
+      subject.disable_actor(:stats, actor)
+      subject[:stats].actors_value.should be_empty
+    end
+  end
+
+  describe "#enable_group/disable_group" do
+    it "enables and disables the feature for group" do
+      actor = Struct.new(:flipper_id).new(5)
+      group = Flipper.register(:fives) { |actor| actor.flipper_id == 5 }
+
+      subject[:stats].groups_value.should be_empty
+      subject.enable_group(:stats, :fives)
+      subject[:stats].groups_value.should eq(Set["fives"])
+
+      subject.disable_group(:stats, :fives)
+      subject[:stats].groups_value.should be_empty
+    end
+  end
+
+  describe "#enable_percentage_of_random/disable_percentage_of_random" do
+    it "enables and disables the feature for percentage of time" do
+      subject[:stats].percentage_of_random_value.should be(0)
+      subject.enable_percentage_of_random(:stats, 6)
+      subject[:stats].percentage_of_random_value.should be(6)
+
+      subject.disable_percentage_of_random(:stats)
+      subject[:stats].percentage_of_random_value.should be(0)
+    end
+  end
+
+  describe "#enable_percentage_of_actors/disable_percentage_of_actors" do
+    it "enables and disables the feature for percentage of time" do
+      subject[:stats].percentage_of_actors_value.should be(0)
+      subject.enable_percentage_of_actors(:stats, 6)
+      subject[:stats].percentage_of_actors_value.should be(6)
+
+      subject.disable_percentage_of_actors(:stats)
+      subject[:stats].percentage_of_actors_value.should be(0)
+    end
+  end
 end

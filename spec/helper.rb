@@ -18,8 +18,6 @@ require 'flipper'
 Dir[root_path.join("spec/support/**/*.rb")].each { |f| require f }
 
 RSpec.configure do |config|
-  config.fail_fast = true
-
   config.filter_run :focused => true
   config.alias_example_to :fit, :focused => true
   config.alias_example_to :xit, :pending => true
