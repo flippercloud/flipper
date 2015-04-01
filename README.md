@@ -97,10 +97,18 @@ Flipper.register(:admins) do |actor|
 end
 
 flipper = Flipper.new(adapter)
+
 flipper[:stats].enable flipper.group(:admins) # turn on for admins
 flipper[:stats].disable flipper.group(:admins) # turn off for admins
+
 person = Person.find(params[:id])
 flipper[:stats].enabled? person # check if enabled, returns true if person.admin? is true
+
+# you can also use shortcut methods
+flipper.enable_group :stats, :admins
+flipper.disable_group :stats, :admins
+flipper[:stats].enable_group :admins
+flipper[:stats].disable_group :admins
 ```
 
 There is no requirement that the thing yielded to the block be a user model or whatever. It can be anything you want, therefore it is a good idea to check that the thing passed into the group block actually responds to what you are trying.
@@ -121,6 +129,12 @@ flipper[:stats].enabled? user # false
 # you can enable anything, does not need to be user or person
 flipper[:search].enable group
 flipper[:search].enabled? group
+
+# you can also use shortcut methods
+flipper.enable_actor :search, user
+flipper.disable_actor :search, user
+flipper[:search].enable_actor user
+flipper[:search].disable_actor user
 ```
 
 The key is to make sure you do not enable two different types of objects for the same feature. Imagine that user has a `flipper_id` of 6 and group has a `flipper_id` of 6. Enabling search for user would automatically enable it for group, as they both have a `flipper_id` of 6.
@@ -158,6 +172,11 @@ flipper[:stats].enable percentage
 # user.flipper_id.to_s to ensure enabled distribution is smooth
 flipper[:stats].enabled? user
 
+# you can also use shortcut methods
+flipper.enable_percentage_of_actors :search, 10
+flipper.disable_percentage_of_actors :search # sets to 0
+flipper[:search].enable_percentage_of_actors 10
+flipper[:search].disable_percentage_of_actors # sets to 0
 ```
 
 ### 5. Percentage of Random
@@ -174,6 +193,12 @@ percentage = flipper.random(5)
 # could be on during one request and off the next
 # could even be on first time in request and off second time
 flipper[:logging].enable percentage
+
+# you can also use shortcut methods
+flipper.enable_percentage_of_random :search, 5
+flipper.disable_percentage_of_random :search # sets to 0
+flipper[:search].enable_percentage_of_random 5
+flipper[:search].disable_percentage_of_random # sets to 0
 ```
 
 Randomness is not a good idea for enabling new features in the UI. Most of the time you want a feature on or off for a user, but there are definitely times when I have found percentage of random to be very useful.
@@ -251,7 +276,7 @@ $flipper = Flipper.new(...)
 config.middleware.use Flipper::Middleware::Memoizer, lambda { $flipper }
 ```
 
-**Note**: Be sure that the middlware is high enough up in your stack that all feature checks are wrapped.
+**Note**: Be sure that the middleware is high enough up in your stack that all feature checks are wrapped.
 
 ## Contributing
 
