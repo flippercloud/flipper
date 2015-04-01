@@ -198,7 +198,7 @@ module Flipper
     # thing - The object that you would like to wrap.
     #
     # Returns an instance of Flipper::Types::Actor.
-    # Raises ArgumentError if thing not wrappable.
+    # Raises ArgumentError if thing does not respond to `flipper_id`.
     def actor(thing)
       Types::Actor.new(thing)
     end
