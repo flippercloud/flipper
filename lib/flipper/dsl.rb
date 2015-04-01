@@ -47,6 +47,50 @@ module Flipper
       feature(name).enable(*args)
     end
 
+    # Public: Enable a feature for an actor.
+    #
+    # name - The String or Symbol name of the feature.
+    # actor - a Flipper::Types::Actor instance or an object that responds
+    #         to flipper_id.
+    #
+    # Returns result of Feature#enable.
+    def enable_actor(name, actor)
+      feature(name).enable_actor(actor)
+    end
+
+    # Public: Enable a feature for a group.
+    #
+    # name - The String or Symbol name of the feature.
+    # group - a Flipper::Types::Group instance or a String or Symbol name of a
+    #         registered group.
+    #
+    # Returns result of Feature#enable.
+    def enable_group(name, group)
+      feature(name).enable_group(group)
+    end
+
+    # Public: Enable a feature a percentage of time.
+    #
+    # name - The String or Symbol name of the feature.
+    # percentage - a Flipper::Types::PercentageOfRandom instance or an object
+    #              that responds to to_i.
+    #
+    # Returns result of Feature#enable.
+    def enable_percentage_of_random(name, percentage)
+      feature(name).enable_percentage_of_random(percentage)
+    end
+
+    # Public: Enable a feature for a percentage of actors.
+    #
+    # name - The String or Symbol name of the feature.
+    # percentage - a Flipper::Types::PercentageOfActors instance or an object
+    #              that responds to to_i.
+    #
+    # Returns result of Feature#enable.
+    def enable_percentage_of_actors(name, percentage)
+      feature(name).enable_percentage_of_actors(percentage)
+    end
+
     # Public: Disable a feature.
     #
     # name - The String or Symbol name of the feature.
@@ -55,6 +99,50 @@ module Flipper
     # Returns the result of the feature instance disable call.
     def disable(name, *args)
       feature(name).disable(*args)
+    end
+
+    # Public: Disable a feature for an actor.
+    #
+    # name - The String or Symbol name of the feature.
+    # actor - a Flipper::Types::Actor instance or an object that responds
+    #         to flipper_id.
+    #
+    # Returns result of disable.
+    def disable_actor(name, actor)
+      feature(name).disable_actor(actor)
+    end
+
+    # Public: Disable a feature for a group.
+    #
+    # name - The String or Symbol name of the feature.
+    # group - a Flipper::Types::Group instance or a String or Symbol name of a
+    #         registered group.
+    #
+    # Returns result of disable.
+    def disable_group(name, group)
+      feature(name).disable_group(group)
+    end
+
+    # Public: Disable a feature a percentage of time.
+    #
+    # name - The String or Symbol name of the feature.
+    # percentage - a Flipper::Types::PercentageOfRandom instance or an object
+    #              that responds to to_i.
+    #
+    # Returns result of disable.
+    def disable_percentage_of_random(name)
+      feature(name).disable_percentage_of_random
+    end
+
+    # Public: Disable a feature for a percentage of actors.
+    #
+    # name - The String or Symbol name of the feature.
+    # percentage - a Flipper::Types::PercentageOfActors instance or an object
+    #              that responds to to_i.
+    #
+    # Returns result of disable.
+    def disable_percentage_of_actors(name)
+      feature(name).disable_percentage_of_actors
     end
 
     # Public: Access a feature instance by name.
