@@ -5,3 +5,4 @@ rvm:
   - 2.2.0
 notifications:
   email: false
+bundler_args: --without guard
