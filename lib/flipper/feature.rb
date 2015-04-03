@@ -225,10 +225,10 @@ module Flipper
     end
 
     # Public: Returns the Set of Flipper::Types::Group instances enabled.
-    def groups
+    def enabled_groups
       groups_value.map { |name| Flipper.group(name) }.to_set
     end
-    alias_method :enabled_groups, :groups
+    alias_method :groups, :enabled_groups
 
     def disabled_groups
       Flipper.groups - enabled_groups

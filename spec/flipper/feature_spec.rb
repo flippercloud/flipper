@@ -260,10 +260,10 @@ describe Flipper::Feature do
     end
   end
 
-  describe "#groups" do
+  describe "#enabled_groups" do
     context "when no groups enabled" do
       it "returns empty set" do
-        subject.groups.should eq(Set.new)
+        subject.enabled_groups.should eq(Set.new)
       end
     end
 
@@ -279,22 +279,22 @@ describe Flipper::Feature do
       end
 
       it "returns set of enabled groups" do
-        subject.groups.should eq(Set.new([
+        subject.enabled_groups.should eq(Set.new([
           @staff,
           @preview_features,
         ]))
       end
 
       it "does not include groups that have not been enabled" do
-        subject.groups.should_not include(@not_enabled)
+        subject.enabled_groups.should_not include(@not_enabled)
       end
 
       it "does not include disabled groups" do
-        subject.groups.should_not include(@disabled)
+        subject.enabled_groups.should_not include(@disabled)
       end
 
-      it "is aliased to enabled_groups" do
-        subject.groups.should eq(subject.enabled_groups)
+      it "is aliased to groups" do
+        subject.enabled_groups.should eq(subject.groups)
       end
     end
   end
