@@ -18,7 +18,7 @@ require 'flipper'
 Dir[root_path.join("spec/support/**/*.rb")].each { |f| require f }
 
 RSpec.configure do |config|
-  config.filter_run :focused => true
+  config.filter_run :focus => true
   config.alias_example_to :fit, :focused => true
   config.alias_example_to :xit, :pending => true
   config.run_all_when_everything_filtered = true
