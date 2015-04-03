@@ -229,6 +229,8 @@ module Flipper
       groups_value.map { |name| Flipper.group(name) }.to_set
     end
 
+    alias_method :enabled_groups, :groups
+
     # Public: Returns the Set of group Symbol names enabled.
     def groups_value
       gate_values.groups

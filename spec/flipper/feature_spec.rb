@@ -292,6 +292,10 @@ describe Flipper::Feature do
       it "does not include disabled groups" do
         subject.groups.should_not include(@disabled)
       end
+
+      it "is aliased to enabled_groups" do
+        subject.groups.should eq(subject.enabled_groups)
+      end
     end
   end
 
