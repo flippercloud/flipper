@@ -6,13 +6,13 @@ describe Flipper::Gates::PercentageOfRandom do
   let(:feature_name) { :search }
 
   subject {
-    described_class.new(feature_name, :instrumenter => instrumenter)
+    described_class.new(:instrumenter => instrumenter)
   }
 
   describe "instrumentation" do
     it "is recorded for open" do
       thing = Struct.new(:flipper_id).new('22')
-      subject.open?(thing, 0)
+      subject.open?(thing, 0, feature_name: feature_name)
 
       event = instrumenter.events.last
       event.should_not be_nil

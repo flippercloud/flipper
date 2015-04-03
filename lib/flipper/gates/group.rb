@@ -31,8 +31,10 @@ module Flipper
       # Internal: Checks if the gate is open for a thing.
       #
       # Returns true if gate open for thing, false if not.
-      def open?(thing, value)
+      def open?(thing, value, options = {})
         instrument(:open?, thing) { |payload|
+          payload[:feature_name] = options.fetch(:feature_name)
+
           if thing.nil?
             false
           else

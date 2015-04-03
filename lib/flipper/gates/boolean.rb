@@ -31,8 +31,9 @@ module Flipper
       #
       # Returns true if explicitly set to true, false if explicitly set to false
       # or nil if not explicitly set.
-      def open?(thing, value)
+      def open?(thing, value, options = {})
         instrument(:open?, thing) { |payload|
+          payload[:feature_name] = options.fetch(:feature_name)
           value
         }
       end

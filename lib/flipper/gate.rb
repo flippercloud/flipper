@@ -8,15 +8,11 @@ module Flipper
     # Private: The name of instrumentation events.
     InstrumentationName = "gate_operation.#{InstrumentationNamespace}"
 
-    # Private
-    attr_reader :feature_name
-
     # Private: What is used to instrument all the things.
     attr_reader :instrumenter
 
     # Public
-    def initialize(feature_name, options = {})
-      @feature_name = feature_name
+    def initialize(options = {})
       @instrumenter = options.fetch(:instrumenter, Flipper::Instrumenters::Noop)
     end
 
@@ -53,7 +49,7 @@ module Flipper
     # Internal: Check if a gate is open for a thing. Implemented in subclass.
     #
     # Returns true if gate open for thing, false if not.
-    def open?(thing)
+    def open?(thing, value, options = {})
       false
     end
 
@@ -72,9 +68,7 @@ module Flipper
 
     # Public: Pretty string version for debugging.
     def inspect
-      attributes = [
-        "feature_name=#{feature_name.inspect}",
-      ]
+      attributes = []
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
     end
 
@@ -84,7 +78,6 @@ module Flipper
         :thing => thing,
         :operation => operation,
         :gate_name => name,
-        :feature_name => @feature_name,
       }
 
       @instrumenter.instrument(InstrumentationName, payload) {

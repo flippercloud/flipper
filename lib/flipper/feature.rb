@@ -76,7 +76,7 @@ module Flipper
         values = gate_values
 
         gate = gates.detect { |gate|
-          gate.open?(thing, values[gate.key])
+          gate.open?(thing, values[gate.key], feature_name: @name)
         }
 
         if gate.nil?
@@ -275,11 +275,11 @@ module Flipper
     # Returns an array of gates
     def gates
       @gates ||= [
-        Gates::Boolean.new(@name, :instrumenter => @instrumenter),
-        Gates::Group.new(@name, :instrumenter => @instrumenter),
-        Gates::Actor.new(@name, :instrumenter => @instrumenter),
-        Gates::PercentageOfActors.new(@name, :instrumenter => @instrumenter),
-        Gates::PercentageOfRandom.new(@name, :instrumenter => @instrumenter),
+        Gates::Boolean.new(:instrumenter => @instrumenter),
+        Gates::Group.new(:instrumenter => @instrumenter),
+        Gates::Actor.new(:instrumenter => @instrumenter),
+        Gates::PercentageOfActors.new(:instrumenter => @instrumenter),
+        Gates::PercentageOfRandom.new(:instrumenter => @instrumenter),
       ]
     end
 

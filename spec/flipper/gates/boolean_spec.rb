@@ -6,7 +6,7 @@ describe Flipper::Gates::Boolean do
   let(:feature_name) { :search }
 
   subject {
-    described_class.new(feature_name, :instrumenter => instrumenter)
+    described_class.new(:instrumenter => instrumenter)
   }
 
   describe "#description" do
@@ -40,13 +40,13 @@ describe Flipper::Gates::Boolean do
   describe "#open?" do
     context "for true value" do
       it "returns true" do
-        subject.open?(Object.new, true).should eq(true)
+        subject.open?(Object.new, true, feature_name: feature_name).should eq(true)
       end
     end
 
     context "for false value" do
       it "returns false" do
-        subject.open?(Object.new, false).should eq(false)
+        subject.open?(Object.new, false, feature_name: feature_name).should eq(false)
       end
     end
   end
@@ -54,7 +54,7 @@ describe Flipper::Gates::Boolean do
   describe "instrumentation" do
     it "is recorded for open" do
       thing = nil
-      subject.open?(thing, false)
+      subject.open?(thing, false, feature_name: feature_name)
 
       event = instrumenter.events.last
       event.should_not be_nil
