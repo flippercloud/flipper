@@ -31,7 +31,7 @@ module Flipper
       #
       # Returns true if gate open for thing, false if not.
       def open?(thing, value, options = {})
-        percentage = value.to_i
+        percentage = GateValues.to_integer(value)
         rand < (percentage / 100.0)
       end
 

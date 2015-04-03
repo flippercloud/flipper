@@ -34,7 +34,7 @@ module Flipper
       # Returns true if gate open for thing, false if not.
       def open?(thing, value, options = {})
         feature_name = options.fetch(:feature_name)
-        percentage = value.to_i
+        percentage = GateValues.to_integer(value)
 
         if Types::Actor.wrappable?(thing)
           actor = Types::Actor.wrap(thing)
