@@ -1,14 +1,14 @@
 module Flipper
   module Gates
-    class PercentageOfRandom < Gate
+    class PercentageOfTime < Gate
       # Internal: The name of the gate. Used for instrumentation, etc.
       def name
-        :percentage_of_random
+        :percentage_of_time
       end
 
       # Internal: Name converted to value safe for adapter.
       def key
-        :percentage_of_random
+        :percentage_of_time
       end
 
       def data_type
@@ -39,7 +39,7 @@ module Flipper
       end
 
       def protects?(thing)
-        thing.is_a?(Flipper::Types::PercentageOfRandom)
+        thing.is_a?(Flipper::Types::PercentageOfTime)
       end
     end
   end

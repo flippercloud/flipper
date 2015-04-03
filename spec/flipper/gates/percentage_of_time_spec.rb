@@ -1,7 +1,7 @@
 require 'helper'
 require 'flipper/instrumenters/memory'
 
-describe Flipper::Gates::PercentageOfRandom do
+describe Flipper::Gates::PercentageOfTime do
   let(:instrumenter) { Flipper::Instrumenters::Memory.new }
   let(:feature_name) { :search }
 
@@ -20,7 +20,7 @@ describe Flipper::Gates::PercentageOfRandom do
 
       event.payload[:thing].should eq(thing)
       event.payload[:operation].should eq(:open?)
-      event.payload[:gate_name].should eq(:percentage_of_random)
+      event.payload[:gate_name].should eq(:percentage_of_time)
       event.payload[:feature_name].should eq(:search)
 
       # random so don't test value

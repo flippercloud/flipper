@@ -72,12 +72,12 @@ module Flipper
     # Public: Enable a feature a percentage of time.
     #
     # name - The String or Symbol name of the feature.
-    # percentage - a Flipper::Types::PercentageOfRandom instance or an object
+    # percentage - a Flipper::Types::PercentageOfTime instance or an object
     #              that responds to to_i.
     #
     # Returns result of Feature#enable.
-    def enable_percentage_of_random(name, percentage)
-      feature(name).enable_percentage_of_random(percentage)
+    def enable_percentage_of_time(name, percentage)
+      feature(name).enable_percentage_of_time(percentage)
     end
 
     # Public: Enable a feature for a percentage of actors.
@@ -126,12 +126,12 @@ module Flipper
     # Public: Disable a feature a percentage of time.
     #
     # name - The String or Symbol name of the feature.
-    # percentage - a Flipper::Types::PercentageOfRandom instance or an object
+    # percentage - a Flipper::Types::PercentageOfTime instance or an object
     #              that responds to to_i.
     #
     # Returns result of disable.
-    def disable_percentage_of_random(name)
-      feature(name).disable_percentage_of_random
+    def disable_percentage_of_time(name)
+      feature(name).disable_percentage_of_time
     end
 
     # Public: Disable a feature for a percentage of actors.
@@ -203,15 +203,15 @@ module Flipper
       Types::Actor.new(thing)
     end
 
-    # Public: Shortcut for getting a percentage of random instance.
+    # Public: Shortcut for getting a percentage of time instance.
     #
-    # number - The percentage of random that should be enabled.
+    # number - The percentage of time that should be enabled.
     #
-    # Returns Flipper::Types::PercentageOfRandom.
-    def random(number)
-      Types::PercentageOfRandom.new(number)
+    # Returns Flipper::Types::PercentageOfTime.
+    def time(number)
+      Types::PercentageOfTime.new(number)
     end
-    alias_method :percentage_of_random, :random
+    alias_method :percentage_of_time, :time
 
     # Public: Shortcut for getting a percentage of actors instance.
     #
