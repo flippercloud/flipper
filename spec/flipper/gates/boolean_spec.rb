@@ -1,12 +1,10 @@
 require 'helper'
-require 'flipper/instrumenters/memory'
 
 describe Flipper::Gates::Boolean do
-  let(:instrumenter) { Flipper::Instrumenters::Memory.new }
   let(:feature_name) { :search }
 
   subject {
-    described_class.new(:instrumenter => instrumenter)
+    described_class.new
   }
 
   describe "#description" do
@@ -48,24 +46,6 @@ describe Flipper::Gates::Boolean do
       it "returns false" do
         subject.open?(Object.new, false, feature_name: feature_name).should eq(false)
       end
-    end
-  end
-
-  describe "instrumentation" do
-    it "is recorded for open" do
-      thing = nil
-      subject.open?(thing, false, feature_name: feature_name)
-
-      event = instrumenter.events.last
-      event.should_not be_nil
-      event.name.should eq('gate_operation.flipper')
-      event.payload.should eq({
-        :thing => thing,
-        :operation => :open?,
-        :result => false,
-        :gate_name => :boolean,
-        :feature_name => :search,
-      })
     end
   end
 end

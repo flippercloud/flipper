@@ -6,8 +6,11 @@ require 'flipper/instrumenters/noop'
 
 module Flipper
   class Feature
-    # Private: The name of instrumentation events.
+    # Private: The name of feature instrumentation events.
     InstrumentationName = "feature_operation.#{InstrumentationNamespace}"
+
+    # Private: The name of gate instrumentation events.
+    GateInstrumentationName = "gate_operation.#{InstrumentationNamespace}"
 
     # Public: The name of the feature.
     attr_reader :name
@@ -75,14 +78,16 @@ module Flipper
       instrument(:enabled?, thing) { |payload|
         values = gate_values
 
-        gate = gates.detect { |gate|
-          gate.open?(thing, values[gate.key], feature_name: @name)
+        open_gate = gates.detect { |gate|
+          instrument_gate(gate, :open?, thing) { |gate_payload|
+            gate.open?(thing, values[gate.key], feature_name: @name)
+          }
         }
 
-        if gate.nil?
+        if open_gate.nil?
           false
         else
-          payload[:gate_name] = gate.name
+          payload[:gate_name] = open_gate.name
           true
         end
       }
@@ -328,6 +333,19 @@ module Flipper
       }
 
       @instrumenter.instrument(InstrumentationName, payload) {
+        payload[:result] = yield(payload) if block_given?
+      }
+    end
+
+    def instrument_gate(gate, operation, thing)
+      payload = {
+        :feature_name => @name,
+        :gate_name => gate.name,
+        :operation => operation,
+        :thing => thing,
+      }
+
+      @instrumenter.instrument(GateInstrumentationName, payload) {
         payload[:result] = yield(payload) if block_given?
       }
     end

@@ -32,22 +32,18 @@ module Flipper
       #
       # Returns true if gate open for thing, false if not.
       def open?(thing, value, options = {})
-        instrument(:open?, thing) { |payload|
-          payload[:feature_name] = options.fetch(:feature_name)
-
-          if thing.nil?
-            false
-          else
-            value.any? { |name|
-              begin
-                group = Flipper.group(name)
-                group.match?(thing)
-              rescue GroupNotRegistered
-                false
-              end
-            }
-          end
-        }
+        if thing.nil?
+          false
+        else
+          value.any? { |name|
+            begin
+              group = Flipper.group(name)
+              group.match?(thing)
+            rescue GroupNotRegistered
+              false
+            end
+          }
+        end
       end
 
       def protects?(thing)

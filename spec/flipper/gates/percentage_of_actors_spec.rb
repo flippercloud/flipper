@@ -1,31 +1,11 @@
 require 'helper'
-require 'flipper/instrumenters/memory'
 
 describe Flipper::Gates::PercentageOfActors do
-  let(:instrumenter) { Flipper::Instrumenters::Memory.new }
   let(:feature_name) { :search }
 
   subject {
-    described_class.new(:instrumenter => instrumenter)
+    described_class.new
   }
-
-  describe "instrumentation" do
-    it "is recorded for open" do
-      thing = Struct.new(:flipper_id).new('22')
-      subject.open?(thing, 0, feature_name: feature_name)
-
-      event = instrumenter.events.last
-      event.should_not be_nil
-      event.name.should eq('gate_operation.flipper')
-      event.payload.should eq({
-        :thing => thing,
-        :operation => :open?,
-        :result => false,
-        :gate_name => :percentage_of_actors,
-        :feature_name => :search,
-      })
-    end
-  end
 
   describe "#description" do
     context "when enabled" do

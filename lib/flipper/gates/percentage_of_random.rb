@@ -31,12 +31,8 @@ module Flipper
       #
       # Returns true if gate open for thing, false if not.
       def open?(thing, value, options = {})
-        instrument(:open?, thing) { |payload|
-          payload[:feature_name] = options.fetch(:feature_name)
-          percentage = value.to_i
-
-          rand < (percentage / 100.0)
-        }
+        percentage = value.to_i
+        rand < (percentage / 100.0)
       end
 
       def protects?(thing)

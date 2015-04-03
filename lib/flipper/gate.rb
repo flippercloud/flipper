@@ -1,19 +1,11 @@
 require 'forwardable'
-require 'flipper/instrumenters/noop'
 
 module Flipper
   class Gate
     extend Forwardable
 
-    # Private: The name of instrumentation events.
-    InstrumentationName = "gate_operation.#{InstrumentationNamespace}"
-
-    # Private: What is used to instrument all the things.
-    attr_reader :instrumenter
-
     # Public
     def initialize(options = {})
-      @instrumenter = options.fetch(:instrumenter, Flipper::Instrumenters::Noop)
     end
 
     # Public: The name of the gate. Implemented in subclass.
@@ -70,19 +62,6 @@ module Flipper
     def inspect
       attributes = []
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
-    end
-
-    # Private
-    def instrument(operation, thing)
-      payload = {
-        :thing => thing,
-        :operation => operation,
-        :gate_name => name,
-      }
-
-      @instrumenter.instrument(InstrumentationName, payload) {
-        payload[:result] = yield(payload) if block_given?
-      }
     end
   end
 end
