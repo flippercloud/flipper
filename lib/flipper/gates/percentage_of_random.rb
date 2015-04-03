@@ -24,14 +24,14 @@ module Flipper
       end
 
       def enabled?(value)
-        GateValues.to_integer(value) > 0
+        Typecast.to_integer(value) > 0
       end
 
       # Internal: Checks if the gate is open for a thing.
       #
       # Returns true if gate open for thing, false if not.
       def open?(thing, value, options = {})
-        percentage = GateValues.to_integer(value)
+        percentage = Typecast.to_integer(value)
         rand < (percentage / 100.0)
       end
 
