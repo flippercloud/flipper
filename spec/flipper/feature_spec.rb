@@ -299,6 +299,33 @@ describe Flipper::Feature do
     end
   end
 
+  describe "#disabled_groups" do
+    context "when no groups enabled" do
+      it "returns empty set" do
+        subject.disabled_groups.should eq(Set.new)
+      end
+    end
+
+    context "when one or more groups enabled" do
+      before do
+        @staff = Flipper.register(:staff) { |thing| true }
+        @preview_features = Flipper.register(:preview_features) { |thing| true }
+        @not_enabled = Flipper.register(:not_enabled) { |thing| true }
+        @disabled = Flipper.register(:disabled) { |thing| true }
+        subject.enable @staff
+        subject.enable @preview_features
+        subject.disable @disabled
+      end
+
+      it "returns set of groups that are not enabled" do
+        subject.disabled_groups.should eq(Set[
+          @not_enabled,
+          @disabled,
+        ])
+      end
+    end
+  end
+
   describe "#groups_value" do
     context "when no groups enabled" do
       it "returns empty set" do
