@@ -175,11 +175,11 @@ describe Flipper::Feature do
       end
 
       it "returns false for off?" do
-        subject.off?.should be_false
+        subject.off?.should be(false)
       end
 
       it "returns false for conditional?" do
-        subject.conditional?.should be_false
+        subject.conditional?.should be(false)
       end
     end
 
@@ -193,7 +193,7 @@ describe Flipper::Feature do
       end
 
       it "returns false for on?" do
-        subject.on?.should be_false
+        subject.on?.should be(false)
       end
 
       it "returns true for off?" do
@@ -201,7 +201,7 @@ describe Flipper::Feature do
       end
 
       it "returns false for conditional?" do
-        subject.conditional?.should be_false
+        subject.conditional?.should be(false)
       end
     end
 
@@ -215,11 +215,11 @@ describe Flipper::Feature do
       end
 
       it "returns false for on?" do
-        subject.on?.should be_false
+        subject.on?.should be(false)
       end
 
       it "returns false for off?" do
-        subject.off?.should be_false
+        subject.off?.should be(false)
       end
 
       it "returns true for conditional?" do
