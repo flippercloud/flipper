@@ -115,21 +115,21 @@ describe Flipper::DSL do
     end
   end
 
-  describe "#random" do
+  describe "#time" do
     before do
-      @result = subject.random(5)
+      @result = subject.time(5)
     end
 
-    it "returns percentage of random" do
-      @result.should be_instance_of(Flipper::Types::PercentageOfRandom)
+    it "returns percentage of time" do
+      @result.should be_instance_of(Flipper::Types::PercentageOfTime)
     end
 
     it "sets value" do
       @result.value.should eq(5)
     end
 
-    it "is aliased to percentage_of_random" do
-      @result.should eq(subject.percentage_of_random(@result.value))
+    it "is aliased to percentage_of_time" do
+      @result.should eq(subject.percentage_of_time(@result.value))
     end
   end
 
@@ -213,14 +213,14 @@ describe Flipper::DSL do
     end
   end
 
-  describe "#enable_percentage_of_random/disable_percentage_of_random" do
+  describe "#enable_percentage_of_time/disable_percentage_of_time" do
     it "enables and disables the feature for percentage of time" do
-      subject[:stats].percentage_of_random_value.should be(0)
-      subject.enable_percentage_of_random(:stats, 6)
-      subject[:stats].percentage_of_random_value.should be(6)
+      subject[:stats].percentage_of_time_value.should be(0)
+      subject.enable_percentage_of_time(:stats, 6)
+      subject[:stats].percentage_of_time_value.should be(6)
 
-      subject.disable_percentage_of_random(:stats)
-      subject[:stats].percentage_of_random_value.should be(0)
+      subject.disable_percentage_of_time(:stats)
+      subject[:stats].percentage_of_time_value.should be(0)
     end
   end
 

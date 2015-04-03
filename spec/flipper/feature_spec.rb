@@ -207,7 +207,7 @@ describe Flipper::Feature do
 
     context "partially on" do
       before do
-        subject.enable Flipper::Types::PercentageOfRandom.new(5)
+        subject.enable Flipper::Types::PercentageOfTime.new(5)
       end
 
       it "returns :conditional" do
@@ -252,7 +252,7 @@ describe Flipper::Feature do
     context "partially on" do
       before do
         actor = Struct.new(:flipper_id).new(5)
-        subject.enable Flipper::Types::PercentageOfRandom.new(5)
+        subject.enable Flipper::Types::PercentageOfTime.new(5)
         subject.enable actor
       end
 
@@ -407,20 +407,20 @@ describe Flipper::Feature do
     end
   end
 
-  describe "#percentage_of_random_value" do
+  describe "#percentage_of_time_value" do
     context "when not enabled or disabled" do
       it "returns nil" do
-        subject.percentage_of_random_value.should be(0)
+        subject.percentage_of_time_value.should be(0)
       end
     end
 
     context "when enabled" do
       before do
-        subject.enable Flipper::Types::PercentageOfRandom.new(5)
+        subject.enable Flipper::Types::PercentageOfTime.new(5)
       end
 
       it "returns true" do
-        subject.percentage_of_random_value.should eq(5)
+        subject.percentage_of_time_value.should eq(5)
       end
     end
 
@@ -430,7 +430,7 @@ describe Flipper::Feature do
       end
 
       it "returns nil" do
-        subject.percentage_of_random_value.should be(0)
+        subject.percentage_of_time_value.should be(0)
       end
     end
   end
@@ -443,7 +443,7 @@ describe Flipper::Feature do
           :groups => Set.new,
           :boolean => nil,
           :percentage_of_actors => nil,
-          :percentage_of_random => nil,
+          :percentage_of_time => nil,
         }))
       end
     end
@@ -453,7 +453,7 @@ describe Flipper::Feature do
         subject.enable Flipper::Types::Boolean.new(true)
         subject.enable Flipper::Types::Actor.new(Struct.new(:flipper_id).new(5))
         subject.enable Flipper::Types::Group.new(:admins)
-        subject.enable Flipper::Types::PercentageOfRandom.new(50)
+        subject.enable Flipper::Types::PercentageOfTime.new(50)
         subject.enable Flipper::Types::PercentageOfActors.new(25)
       end
 
@@ -462,7 +462,7 @@ describe Flipper::Feature do
           :actors => Set.new(["5"]),
           :groups => Set.new(["admins"]),
           :boolean => "true",
-          :percentage_of_random => "50",
+          :percentage_of_time => "50",
           :percentage_of_actors => "25",
         }))
       end
@@ -532,35 +532,35 @@ describe Flipper::Feature do
     end
   end
 
-  describe "#enable_percentage_of_random/disable_percentage_of_random" do
+  describe "#enable_percentage_of_time/disable_percentage_of_time" do
     context "with integer" do
       it "updates the gate values" do
-        subject.gate_values.percentage_of_random.should be(0)
-        subject.enable_percentage_of_random(56)
-        subject.gate_values.percentage_of_random.should be(56)
-        subject.disable_percentage_of_random
-        subject.gate_values.percentage_of_random.should be(0)
+        subject.gate_values.percentage_of_time.should be(0)
+        subject.enable_percentage_of_time(56)
+        subject.gate_values.percentage_of_time.should be(56)
+        subject.disable_percentage_of_time
+        subject.gate_values.percentage_of_time.should be(0)
       end
     end
 
     context "with string" do
       it "updates the gate values" do
-        subject.gate_values.percentage_of_random.should be(0)
-        subject.enable_percentage_of_random("56")
-        subject.gate_values.percentage_of_random.should be(56)
-        subject.disable_percentage_of_random
-        subject.gate_values.percentage_of_random.should be(0)
+        subject.gate_values.percentage_of_time.should be(0)
+        subject.enable_percentage_of_time("56")
+        subject.gate_values.percentage_of_time.should be(56)
+        subject.disable_percentage_of_time
+        subject.gate_values.percentage_of_time.should be(0)
       end
     end
 
-    context "with percentage of random instance" do
+    context "with percentage of time instance" do
       it "updates the gate values" do
-        percentage = Flipper::Types::PercentageOfRandom.new(56)
-        subject.gate_values.percentage_of_random.should be(0)
-        subject.enable_percentage_of_random(percentage)
-        subject.gate_values.percentage_of_random.should be(56)
-        subject.disable_percentage_of_random
-        subject.gate_values.percentage_of_random.should be(0)
+        percentage = Flipper::Types::PercentageOfTime.new(56)
+        subject.gate_values.percentage_of_time.should be(0)
+        subject.enable_percentage_of_time(percentage)
+        subject.gate_values.percentage_of_time.should be(56)
+        subject.disable_percentage_of_time
+        subject.gate_values.percentage_of_time.should be(0)
       end
     end
   end

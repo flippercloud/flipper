@@ -8,7 +8,7 @@ flipper = Flipper.new(adapter)
 logging = flipper[:logging]
 
 perform_test = lambda do |number|
-  logging.enable flipper.random(number)
+  logging.enable flipper.time(number)
 
   total = 1_000
   enabled = []

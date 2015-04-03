@@ -21,7 +21,7 @@ describe Flipper do
   let(:clooney)     { actor_class.new(10) }
 
   let(:five_percent_of_actors) { flipper.actors(5) }
-  let(:five_percent_of_random) { flipper.random(5) }
+  let(:five_percent_of_time) { flipper.time(5) }
 
   before do
     Flipper.register(:admins) { |thing| thing.admin? }
@@ -126,10 +126,10 @@ describe Flipper do
       end
     end
 
-    context "with a percentage of random" do
+    context "with a percentage of time" do
       before do
-        @gate = feature.gate(:percentage_of_random)
-        @result = feature.enable(five_percent_of_random)
+        @gate = feature.gate(:percentage_of_time)
+        @result = feature.enable(five_percent_of_time)
       end
 
       it "returns true" do
@@ -164,14 +164,14 @@ describe Flipper do
   describe "#disable" do
     context "with no arguments" do
       before do
-        # ensures that random gate is stubbed with result that would be true for pitt
-        @gate = feature.gate(:percentage_of_random)
+        # ensures that time gate is stubbed with result that would be true for pitt
+        @gate = feature.gate(:percentage_of_time)
         @gate.stub(:rand => 0.04)
 
         feature.enable admin_group
         feature.enable pitt
         feature.enable five_percent_of_actors
-        feature.enable five_percent_of_random
+        feature.enable five_percent_of_time
         @result = feature.disable
       end
 
@@ -200,7 +200,7 @@ describe Flipper do
         enabled.should be(0)
       end
 
-      it "disables percentage of random" do
+      it "disables percentage of time" do
         feature.enabled?(pitt).should eq(false)
       end
 
@@ -290,8 +290,8 @@ describe Flipper do
 
     context "with a percentage of time" do
       before do
-        @gate = feature.gate(:percentage_of_random)
-        @result = feature.disable(flipper.random(0))
+        @gate = feature.gate(:percentage_of_time)
+        @result = feature.disable(flipper.time(0))
       end
 
       it "returns true" do
@@ -381,11 +381,11 @@ describe Flipper do
 
     context "during enabled percentage of time" do
       before do
-        # ensure percentage of random returns enabled percentage
-        @gate = feature.gate(:percentage_of_random)
+        # ensure percentage of time returns enabled percentage
+        @gate = feature.gate(:percentage_of_time)
         @gate.stub(:rand => 0.04)
 
-        feature.enable five_percent_of_random
+        feature.enable five_percent_of_time
       end
 
       it "returns true" do
@@ -398,11 +398,11 @@ describe Flipper do
 
     context "during not enabled percentage of time" do
       before do
-        # ensure percentage of random returns not enabled percentage
-        @gate = feature.gate(:percentage_of_random)
+        # ensure percentage of time returns not enabled percentage
+        @gate = feature.gate(:percentage_of_time)
         @gate.stub(:rand => 0.10)
 
-        feature.enable five_percent_of_random
+        feature.enable five_percent_of_time
       end
 
       it "returns false" do

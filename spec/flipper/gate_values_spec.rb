@@ -29,9 +29,9 @@ describe Flipper::GateValues do
     "1" => 1,
     "99" => 99,
   }.each do |value, expected|
-    context "with #{value.inspect} percentage of random" do
+    context "with #{value.inspect} percentage of time" do
       it "returns #{expected}" do
-        described_class.new(percentage_of_random: value).percentage_of_random.should be(expected)
+        described_class.new(percentage_of_time: value).percentage_of_time.should be(expected)
       end
     end
   end
@@ -77,9 +77,9 @@ describe Flipper::GateValues do
     end
   end
 
-  it "raises argument error for percentage of random value that cannot be converted to an integer" do
+  it "raises argument error for percentage of time value that cannot be converted to an integer" do
     expect {
-      described_class.new(percentage_of_random: ["asdf"])
+      described_class.new(percentage_of_time: ["asdf"])
     }.to raise_error(ArgumentError, %Q(["asdf"] cannot be converted to an integer))
   end
 

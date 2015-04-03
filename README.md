@@ -179,29 +179,29 @@ flipper[:search].enable_percentage_of_actors 10
 flipper[:search].disable_percentage_of_actors # sets to 0
 ```
 
-### 5. Percentage of Random
+### 5. Percentage of Time
 
-Turn this on for a random percentage of time. Think load testing new features behind the scenes and such.
+Turn this on for a percentage of time. Think load testing new features behind the scenes and such.
 
 ```ruby
 flipper = Flipper.new(adapter)
 
-# get percentage of random instance set to 5
-percentage = flipper.random(5)
+# get percentage of time instance set to 5
+percentage = flipper.time(5)
 
-# turn on logging for 5 percent of the time randomly
+# turn on logging for 5 percent of the time
 # could be on during one request and off the next
 # could even be on first time in request and off second time
 flipper[:logging].enable percentage
 
 # you can also use shortcut methods
-flipper.enable_percentage_of_random :search, 5
-flipper.disable_percentage_of_random :search # sets to 0
-flipper[:search].enable_percentage_of_random 5
-flipper[:search].disable_percentage_of_random # sets to 0
+flipper.enable_percentage_of_time :search, 5
+flipper.disable_percentage_of_time :search # sets to 0
+flipper[:search].enable_percentage_of_time 5
+flipper[:search].disable_percentage_of_time # sets to 0
 ```
 
-Randomness is not a good idea for enabling new features in the UI. Most of the time you want a feature on or off for a user, but there are definitely times when I have found percentage of random to be very useful.
+Timeness is not a good idea for enabling new features in the UI. Most of the time you want a feature on or off for a user, but there are definitely times when I have found percentage of time to be very useful.
 
 ## Adapters
 
