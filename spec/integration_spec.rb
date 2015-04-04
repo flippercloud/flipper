@@ -377,9 +377,10 @@ describe Flipper do
       end
     end
 
-    context "during enabled percentage of time" do
+    context "for enabled percentage of time" do
       before do
-        # ensure percentage of time returns enabled percentage
+        # ensure percentage of time returns percentage that makes five percent
+        # of time true
         @gate = feature.gate(:percentage_of_time)
         @gate.stub(:rand => 0.04)
 
@@ -394,9 +395,10 @@ describe Flipper do
       end
     end
 
-    context "during not enabled percentage of time" do
+    context "for not enabled percentage of time" do
       before do
-        # ensure percentage of time returns not enabled percentage
+        # ensure percentage of time returns percentage that makes five percent
+        # of time false
         @gate = feature.gate(:percentage_of_time)
         @gate.stub(:rand => 0.10)
 
