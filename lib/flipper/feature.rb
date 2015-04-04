@@ -15,7 +15,7 @@ module Flipper
     # Public: The name of the feature.
     attr_reader :name
 
-    # Internal: Name converted to value safe for adapter.
+    # Public: Name converted to value safe for adapter.
     attr_reader :key
 
     # Private: The adapter this feature should use.
