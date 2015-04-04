@@ -224,37 +224,52 @@ module Flipper
       GateValues.new(adapter.get(self))
     end
 
-    # Public: Returns the Set of Flipper::Types::Group instances enabled.
+    # Public: Get groups enabled for this feature.
+    #
+    # Returns Set of Flipper::Types::Group instances.
     def enabled_groups
       groups_value.map { |name| Flipper.group(name) }.to_set
     end
     alias_method :groups, :enabled_groups
 
+    # Public: Get groups not enabled for this feature.
+    #
+    # Returns Set of Flipper::Types::Group instances.
     def disabled_groups
       Flipper.groups - enabled_groups
     end
 
-    # Public: Returns the Set of group Symbol names enabled.
+    # Public: Get the adapter value for the groups gate.
+    #
+    # Returns Set of String group names.
     def groups_value
       gate_values.groups
     end
 
-    # Public: Returns the Set of actor flipper ids enabled.
+    # Public: Get the adapter value for the actors gate.
+    #
+    # Returns Set of String flipper_id's.
     def actors_value
       gate_values.actors
     end
 
-    # Public: Returns the adapter value for the boolean gate.
+    # Public: Get the adapter value for the boolean gate.
+    #
+    # Returns true or false.
     def boolean_value
       gate_values.boolean
     end
 
-    # Public: Returns the adapter value for the percentage of actors gate.
+    # Public: Get the adapter value for the percentage of actors gate.
+    #
+    # Returns Integer greater than or equal to 0 and less than or equal to 100.
     def percentage_of_actors_value
       gate_values.percentage_of_actors
     end
 
-    # Public: Returns the adapter value for the percentage of time gate.
+    # Public: Get the adapter value for the percentage of time gate.
+    #
+    # Returns Integer greater than or equal to 0 and less than or equal to 100.
     def percentage_of_time_value
       gate_values.percentage_of_time
     end
@@ -280,7 +295,7 @@ module Flipper
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
     end
 
-    # Internal: Gates to check to see if feature is enabled/disabled
+    # Public: Get all the gates used to determine enabled/disabled for the feature.
     #
     # Returns an array of gates
     def gates
@@ -293,14 +308,14 @@ module Flipper
       ]
     end
 
-    # Internal: Finds a gate by name.
+    # Public: Find a gate by name.
     #
     # Returns a Flipper::Gate if found, nil if not.
     def gate(name)
       gates.detect { |gate| gate.name == name.to_sym }
     end
 
-    # Internal: Find the gate that protects a thing.
+    # Public: Find the gate that protects a thing.
     #
     # thing - The object for which you would like to find a gate
     #
@@ -311,17 +326,19 @@ module Flipper
         raise(GateNotFound.new(thing))
     end
 
-    # Private
+    private
+
+    # Private: Get the boolean gate.
     def boolean_gate
       @boolean_gate ||= gate(:boolean)
     end
 
-    # Private
+    # Private: Get all gates except the boolean gate.
     def non_boolean_gates
       @non_boolean_gates ||= gates - [boolean_gate]
     end
 
-    # Private
+    # Private: Get all non boolean gates that are enabled in some way.
     def conditional_gates(gate_values)
       non_boolean_gates.select { |gate|
         value = gate_values[gate.key]
@@ -329,7 +346,7 @@ module Flipper
       }
     end
 
-    # Private
+    # Private: Instrument a feature operation.
     def instrument(operation, thing)
       payload = {
         :feature_name => name,
@@ -342,6 +359,7 @@ module Flipper
       }
     end
 
+    # Private: Intrument a gate operation.
     def instrument_gate(gate, operation, thing)
       payload = {
         :feature_name => @name,
