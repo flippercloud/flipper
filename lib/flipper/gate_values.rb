@@ -4,14 +4,14 @@ module Flipper
     attr_reader :actors
     attr_reader :groups
     attr_reader :percentage_of_actors
-    attr_reader :percentage_of_random
+    attr_reader :percentage_of_time
 
     def initialize(adapter_values)
       @boolean = Typecast.to_boolean(adapter_values[:boolean])
       @actors = Typecast.to_set(adapter_values[:actors])
       @groups = Typecast.to_set(adapter_values[:groups])
       @percentage_of_actors = Typecast.to_integer(adapter_values[:percentage_of_actors])
-      @percentage_of_random = Typecast.to_integer(adapter_values[:percentage_of_random])
+      @percentage_of_time = Typecast.to_integer(adapter_values[:percentage_of_time])
     end
 
     def [](key)
@@ -24,7 +24,7 @@ module Flipper
         actors == other.actors &&
         groups == other.groups &&
         percentage_of_actors == other.percentage_of_actors &&
-        percentage_of_random == other.percentage_of_random
+        percentage_of_time == other.percentage_of_time
     end
     alias_method :==, :eql?
   end

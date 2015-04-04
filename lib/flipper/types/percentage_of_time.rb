@@ -1,6 +1,6 @@
 module Flipper
   module Types
-    class PercentageOfRandom < Percentage
+    class PercentageOfTime < Percentage
     end
   end
 end

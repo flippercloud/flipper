@@ -1,6 +1,6 @@
 require 'helper'
 
-describe Flipper::Gates::PercentageOfRandom do
+describe Flipper::Gates::PercentageOfTime do
   let(:feature_name) { :search }
 
   subject {

@@ -115,17 +115,17 @@ module Flipper
 
     # Public: Enables a feature a percentage of time.
     #
-    # percentage - a Flipper::Types::PercentageOfRandom instance or an object that
+    # percentage - a Flipper::Types::PercentageOfTime instance or an object that
     #              responds to to_i.
     #
     # Returns result of enable.
-    def enable_percentage_of_random(percentage)
-      enable Types::PercentageOfRandom.wrap(percentage)
+    def enable_percentage_of_time(percentage)
+      enable Types::PercentageOfTime.wrap(percentage)
     end
 
     # Public: Enables a feature for a percentage of actors.
     #
-    # percentage - a Flipper::Types::PercentageOfRandom instance or an object that
+    # percentage - a Flipper::Types::PercentageOfTime instance or an object that
     #              responds to to_i.
     #
     # Returns result of enable.
@@ -155,17 +155,17 @@ module Flipper
 
     # Public: Disables a feature a percentage of time.
     #
-    # percentage - a Flipper::Types::PercentageOfRandom instance or an object that
+    # percentage - a Flipper::Types::PercentageOfTime instance or an object that
     #              responds to to_i.
     #
     # Returns result of disable.
-    def disable_percentage_of_random
-      disable Types::PercentageOfRandom.new(0)
+    def disable_percentage_of_time
+      disable Types::PercentageOfTime.new(0)
     end
 
     # Public: Disables a feature for a percentage of actors.
     #
-    # percentage - a Flipper::Types::PercentageOfRandom instance or an object that
+    # percentage - a Flipper::Types::PercentageOfTime instance or an object that
     #              responds to to_i.
     #
     # Returns result of disable.
@@ -254,9 +254,9 @@ module Flipper
       gate_values.percentage_of_actors
     end
 
-    # Public: Returns the adapter value for the percentage of random gate.
-    def percentage_of_random_value
-      gate_values.percentage_of_random
+    # Public: Returns the adapter value for the percentage of time gate.
+    def percentage_of_time_value
+      gate_values.percentage_of_time
     end
 
     # Public: Returns the string representation of the feature.
@@ -289,7 +289,7 @@ module Flipper
         Gates::Group.new(:instrumenter => @instrumenter),
         Gates::Actor.new(:instrumenter => @instrumenter),
         Gates::PercentageOfActors.new(:instrumenter => @instrumenter),
-        Gates::PercentageOfRandom.new(:instrumenter => @instrumenter),
+        Gates::PercentageOfTime.new(:instrumenter => @instrumenter),
       ]
     end
 

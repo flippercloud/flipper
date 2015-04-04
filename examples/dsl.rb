@@ -59,8 +59,8 @@ puts "stats.enabled?: #{stats.enabled?}"
 puts "stats.enabled? person: #{stats.enabled? person}"
 puts
 
-# get an instance of the percentage of random type set to 5
-puts flipper.random(5).inspect
+# get an instance of the percentage of time type set to 5
+puts flipper.time(5).inspect
 
 # get an instance of the percentage of actors type set to 15
 puts flipper.actors(15).inspect

@@ -10,7 +10,7 @@ shared_examples_for 'a flipper adapter' do
   let(:group_gate)   { feature.gate(:group) }
   let(:actor_gate)   { feature.gate(:actor) }
   let(:actors_gate)  { feature.gate(:percentage_of_actors) }
-  let(:random_gate)  { feature.gate(:percentage_of_random) }
+  let(:time_gate)  { feature.gate(:percentage_of_time) }
 
   before do
     Flipper.register(:admins) { |actor|
@@ -41,7 +41,7 @@ shared_examples_for 'a flipper adapter' do
       :groups => Set.new,
       :actors => Set.new,
       :percentage_of_actors => nil,
-      :percentage_of_random => nil,
+      :percentage_of_time => nil,
     })
   end
 
@@ -63,7 +63,7 @@ shared_examples_for 'a flipper adapter' do
     subject.enable(feature, group_gate, flipper.group(:admins)).should eq(true)
     subject.enable(feature, actor_gate, flipper.actor(actor_22)).should eq(true)
     subject.enable(feature, actors_gate, flipper.actors(25)).should eq(true)
-    subject.enable(feature, random_gate, flipper.random(45)).should eq(true)
+    subject.enable(feature, time_gate, flipper.time(45)).should eq(true)
 
     subject.disable(feature, boolean_gate, flipper.boolean).should eq(true)
 
@@ -72,7 +72,7 @@ shared_examples_for 'a flipper adapter' do
       :groups => Set.new,
       :actors => Set.new,
       :percentage_of_actors => nil,
-      :percentage_of_random => nil,
+      :percentage_of_time => nil,
     })
   end
 
@@ -121,14 +121,14 @@ shared_examples_for 'a flipper adapter' do
     result[:percentage_of_actors].should eq('0')
   end
 
-  it "can enable, disable and get value for percentage of random gate" do
-    subject.enable(feature, random_gate, flipper.random(10)).should eq(true)
+  it "can enable, disable and get value for percentage of time gate" do
+    subject.enable(feature, time_gate, flipper.time(10)).should eq(true)
     result = subject.get(feature)
-    result[:percentage_of_random].should eq('10')
+    result[:percentage_of_time].should eq('10')
 
-    subject.disable(feature, random_gate, flipper.random(0)).should eq(true)
+    subject.disable(feature, time_gate, flipper.time(0)).should eq(true)
     result = subject.get(feature)
-    result[:percentage_of_random].should eq('0')
+    result[:percentage_of_time].should eq('0')
   end
 
   it "converts boolean value to a string" do
@@ -149,10 +149,10 @@ shared_examples_for 'a flipper adapter' do
     result[:groups].should eq(Set['admins'])
   end
 
-  it "converts percentage of random integer value to a string" do
-    subject.enable(feature, random_gate, flipper.random(10)).should eq(true)
+  it "converts percentage of time integer value to a string" do
+    subject.enable(feature, time_gate, flipper.time(10)).should eq(true)
     result = subject.get(feature)
-    result[:percentage_of_random].should eq('10')
+    result[:percentage_of_time].should eq('10')
   end
 
   it "converts percentage of actors integer value to a string" do
@@ -183,7 +183,7 @@ shared_examples_for 'a flipper adapter' do
     subject.enable(feature, group_gate, flipper.group(:admins)).should eq(true)
     subject.enable(feature, actor_gate, flipper.actor(actor_22)).should eq(true)
     subject.enable(feature, actors_gate, flipper.actors(25)).should eq(true)
-    subject.enable(feature, random_gate, flipper.random(45)).should eq(true)
+    subject.enable(feature, time_gate, flipper.time(45)).should eq(true)
 
     subject.remove(feature).should eq(true)
 
@@ -192,7 +192,7 @@ shared_examples_for 'a flipper adapter' do
       :groups => Set.new,
       :actors => Set.new,
       :percentage_of_actors => nil,
-      :percentage_of_random => nil,
+      :percentage_of_time => nil,
     })
   end
 
@@ -202,7 +202,7 @@ shared_examples_for 'a flipper adapter' do
     subject.enable(feature, group_gate, flipper.group(:admins)).should eq(true)
     subject.enable(feature, actor_gate, flipper.actor(actor_22)).should eq(true)
     subject.enable(feature, actors_gate, flipper.actors(25)).should eq(true)
-    subject.enable(feature, random_gate, flipper.random(45)).should eq(true)
+    subject.enable(feature, time_gate, flipper.time(45)).should eq(true)
 
     subject.clear(feature).should eq(true)
 
@@ -211,7 +211,7 @@ shared_examples_for 'a flipper adapter' do
       :groups => Set.new,
       :actors => Set.new,
       :percentage_of_actors => nil,
-      :percentage_of_random => nil,
+      :percentage_of_time => nil,
     })
   end
 

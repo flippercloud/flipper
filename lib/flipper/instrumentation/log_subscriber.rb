@@ -74,7 +74,7 @@ module Flipper
       #   # Flipper feature(search) gate(group) open false (0.1ms)  [ thing=... ]
       #   # Flipper feature(search) gate(actor) open false (0.1ms)  [ thing=... ]
       #   # Flipper feature(search) gate(percentage_of_actors) open false (0.1ms)  [ thing=... ]
-      #   # Flipper feature(search) gate(percentage_of_random) open false (0.1ms)  [ thing=... ]
+      #   # Flipper feature(search) gate(percentage_of_time) open false (0.1ms)  [ thing=... ]
       #
       # Returns nothing.
       def gate_operation(event)
