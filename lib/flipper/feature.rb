@@ -261,12 +261,12 @@ module Flipper
 
     # Public: Returns the string representation of the feature.
     def to_s
-      @to_s ||= name.to_s
+      name.to_s
     end
 
     # Public: Identifier to be used in the url (a rails-ism).
     def to_param
-      @to_param ||= name.to_s
+      to_s
     end
 
     # Public: Pretty string version for debugging.
