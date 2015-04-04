@@ -223,7 +223,7 @@ module Flipper
     end
     alias_method :percentage_of_actors, :actors
 
-    # Internal: Returns a Set of the known features for this adapter.
+    # Public: Returns a Set of the known features for this adapter.
     #
     # Returns Set of Flipper::Feature instances.
     def features
