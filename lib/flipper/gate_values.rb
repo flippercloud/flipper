@@ -1,5 +1,7 @@
 module Flipper
   class GateValues
+    # Private: Array of instance variables that are readable through the []
+    # instance method.
     LegitIvars = [
       "boolean",
       "actors",
