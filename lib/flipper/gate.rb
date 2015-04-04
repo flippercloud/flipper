@@ -22,14 +22,6 @@ module Flipper
       raise 'Not implemented'
     end
 
-    def enable(thing)
-      raise 'Not implemented'
-    end
-
-    def disable(thing)
-      raise 'Not implemented'
-    end
-
     def enabled?(value)
       raise 'Not implemented'
     end
