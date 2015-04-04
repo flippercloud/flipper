@@ -5,8 +5,7 @@ require 'flipper/adapters/memory'
 describe Flipper::DSL do
   subject { Flipper::DSL.new(adapter) }
 
-  let(:source)  { {} }
-  let(:adapter) { Flipper::Adapters::Memory.new(source) }
+  let(:adapter) { Flipper::Adapters::Memory.new }
 
   describe "#initialize" do
     it "sets adapter" do

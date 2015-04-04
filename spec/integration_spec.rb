@@ -3,9 +3,7 @@ require 'flipper/feature'
 require 'flipper/adapters/memory'
 
 describe Flipper do
-  let(:source)      { {} }
-  let(:adapter)     { Flipper::Adapters::Memory.new(source) }
-
+  let(:adapter)     { Flipper::Adapters::Memory.new }
   let(:flipper)     { Flipper.new(adapter) }
   let(:feature)     { flipper[:search] }
 
