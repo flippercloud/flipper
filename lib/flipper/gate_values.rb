@@ -1,5 +1,13 @@
 module Flipper
   class GateValues
+    LegitIvars = [
+      "boolean",
+      "actors",
+      "groups",
+      "percentage_of_time",
+      "percentage_of_actors",
+    ]
+
     attr_reader :boolean
     attr_reader :actors
     attr_reader :groups
@@ -15,6 +23,7 @@ module Flipper
     end
 
     def [](key)
+      return nil unless LegitIvars.include?(key.to_s)
       instance_variable_get("@#{key}")
     end
 

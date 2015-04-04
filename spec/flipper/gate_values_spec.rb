@@ -100,4 +100,35 @@ describe Flipper::GateValues do
       described_class.new(groups: "asdf")
     }.to raise_error(ArgumentError, %Q("asdf" cannot be converted to a set))
   end
+
+  describe "#[]" do
+    it "can read the boolean value" do
+      described_class.new(boolean: true)[:boolean].should be(true)
+      described_class.new(boolean: true)["boolean"].should be(true)
+    end
+
+    it "can read the actors value" do
+      described_class.new(actors: Set[1, 2])[:actors].should eq(Set[1, 2])
+      described_class.new(actors: Set[1, 2])["actors"].should eq(Set[1, 2])
+    end
+
+    it "can read the groups value" do
+      described_class.new(groups: Set[:admins])[:groups].should eq(Set[:admins])
+      described_class.new(groups: Set[:admins])["groups"].should eq(Set[:admins])
+    end
+
+    it "can read the percentage of time value" do
+      described_class.new(percentage_of_time: 15)[:percentage_of_time].should eq(15)
+      described_class.new(percentage_of_time: 15)["percentage_of_time"].should eq(15)
+    end
+
+    it "can read the percentage of actors value" do
+      described_class.new(percentage_of_actors: 15)[:percentage_of_actors].should eq(15)
+      described_class.new(percentage_of_actors: 15)["percentage_of_actors"].should eq(15)
+    end
+
+    it "returns nil for value that is not present" do
+      described_class.new({})["not legit"].should be(nil)
+    end
+  end
 end
