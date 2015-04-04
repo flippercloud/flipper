@@ -286,6 +286,12 @@ config.middleware.use Flipper::Middleware::Memoizer, lambda { $flipper }
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
 
+## Releasing
+
+1. Update the version to be whatever it should be and commit.
+2. `script/release`
+3. Profit.
+
 ## Coming Soon™
 
 * [Web UI](https://github.com/jnunemaker/flipper-ui) (think Resque UI for features toggling/status)
