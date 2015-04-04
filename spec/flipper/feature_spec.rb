@@ -75,15 +75,13 @@ describe Flipper::Feature do
   describe "#gate" do
     context "with symbol name" do
       it "returns gate by name" do
-        boolean_gate = subject.gates.detect { |gate| gate.name == :boolean }
-        subject.gate(:boolean).should eq(boolean_gate)
+        subject.gate(:boolean).should be_instance_of(Flipper::Gates::Boolean)
       end
     end
 
     context "with string name" do
       it "returns gate by name" do
-        boolean_gate = subject.gates.detect { |gate| gate.name == :boolean }
-        subject.gate('boolean').should eq(boolean_gate)
+        subject.gate('boolean').should be_instance_of(Flipper::Gates::Boolean)
       end
     end
 
