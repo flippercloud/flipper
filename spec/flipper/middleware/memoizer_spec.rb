@@ -7,8 +7,7 @@ require 'flipper/adapters/memory'
 describe Flipper::Middleware::Memoizer do
   include Rack::Test::Methods
 
-  let(:source)         { {} }
-  let(:memory_adapter) { Flipper::Adapters::Memory.new(source) }
+  let(:memory_adapter) { Flipper::Adapters::Memory.new }
   let(:adapter)        {
     Flipper::Adapters::OperationLogger.new(memory_adapter)
   }

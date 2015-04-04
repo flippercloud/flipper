@@ -10,7 +10,7 @@ module Flipper
       attr_reader :value
 
       def initialize(value)
-        value = GateValues.to_integer(value)
+        value = Typecast.to_integer(value)
 
         if value < 0 || value > 100
           raise ArgumentError, "value must be a positive number less than or equal to 100, but was #{value}"

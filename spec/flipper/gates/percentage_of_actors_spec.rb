@@ -1,31 +1,11 @@
 require 'helper'
-require 'flipper/instrumenters/memory'
 
 describe Flipper::Gates::PercentageOfActors do
-  let(:instrumenter) { Flipper::Instrumenters::Memory.new }
   let(:feature_name) { :search }
 
   subject {
-    described_class.new(feature_name, :instrumenter => instrumenter)
+    described_class.new
   }
-
-  describe "instrumentation" do
-    it "is recorded for open" do
-      thing = Struct.new(:flipper_id).new('22')
-      subject.open?(thing, 0)
-
-      event = instrumenter.events.last
-      event.should_not be_nil
-      event.name.should eq('gate_operation.flipper')
-      event.payload.should eq({
-        :thing => thing,
-        :operation => :open?,
-        :result => false,
-        :gate_name => :percentage_of_actors,
-        :feature_name => :search,
-      })
-    end
-  end
 
   describe "#description" do
     context "when enabled" do
@@ -52,13 +32,13 @@ describe Flipper::Gates::PercentageOfActors do
       }
 
       let(:feature_one_enabled_actors) do
-        gate = described_class.new(:name_one)
-        actors.select { |actor| gate.open? actor, percentage_as_integer }
+        gate = described_class.new
+        actors.select { |actor| gate.open? actor, percentage_as_integer, feature_name: :name_one }
       end
 
       let(:feature_two_enabled_actors) do
-        gate = described_class.new(:name_two)
-        actors.select { |actor| gate.open? actor, percentage_as_integer }
+        gate = described_class.new
+        actors.select { |actor| gate.open? actor, percentage_as_integer, feature_name: :name_two }
       end
 
       it "does not enable both features for same set of actors" do

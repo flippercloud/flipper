@@ -25,27 +25,25 @@ module Flipper
       end
 
       def enabled?(value)
-        !GateValues.to_set(value).empty?
+        !Typecast.to_set(value).empty?
       end
 
       # Internal: Checks if the gate is open for a thing.
       #
       # Returns true if gate open for thing, false if not.
-      def open?(thing, value)
-        instrument(:open?, thing) { |payload|
-          if thing.nil?
-            false
-          else
-            value.any? { |name|
-              begin
-                group = Flipper.group(name)
-                group.match?(thing)
-              rescue GroupNotRegistered
-                false
-              end
-            }
-          end
-        }
+      def open?(thing, value, options = {})
+        if thing.nil?
+          false
+        else
+          value.any? { |name|
+            begin
+              group = Flipper.group(name)
+              group.match?(thing)
+            rescue GroupNotRegistered
+              false
+            end
+          }
+        end
       end
 
       def protects?(thing)

@@ -6,8 +6,7 @@ require 'flipper/instrumenters/memory'
 describe Flipper::Feature do
   subject { described_class.new(:search, adapter) }
 
-  let(:source) { {} }
-  let(:adapter) { Flipper::Adapters::Memory.new(source) }
+  let(:adapter) { Flipper::Adapters::Memory.new }
 
   describe "#initialize" do
     it "sets name" do
@@ -62,13 +61,11 @@ describe Flipper::Feature do
   end
 
   describe "#gates" do
-    it "returns array of gates with each gate's instrumenter set" do
-      instrumenter = double('Instrumenter')
-      instance = described_class.new(:search, adapter, :instrumenter => instrumenter)
+    it "returns array of gates" do
+      instance = described_class.new(:search, adapter)
       instance.gates.should be_instance_of(Array)
       instance.gates.each do |gate|
         gate.should be_a(Flipper::Gate)
-        gate.instrumenter.should be(instrumenter)
       end
       instance.gates.size.should be(5)
     end
@@ -77,15 +74,13 @@ describe Flipper::Feature do
   describe "#gate" do
     context "with symbol name" do
       it "returns gate by name" do
-        boolean_gate = subject.gates.detect { |gate| gate.name == :boolean }
-        subject.gate(:boolean).should eq(boolean_gate)
+        subject.gate(:boolean).should be_instance_of(Flipper::Gates::Boolean)
       end
     end
 
     context "with string name" do
       it "returns gate by name" do
-        boolean_gate = subject.gates.detect { |gate| gate.name == :boolean }
-        subject.gate('boolean').should eq(boolean_gate)
+        subject.gate('boolean').should be_instance_of(Flipper::Gates::Boolean)
       end
     end
 
@@ -262,10 +257,10 @@ describe Flipper::Feature do
     end
   end
 
-  describe "#groups" do
+  describe "#enabled_groups" do
     context "when no groups enabled" do
       it "returns empty set" do
-        subject.groups.should eq(Set.new)
+        subject.enabled_groups.should eq(Set.new)
       end
     end
 
@@ -281,18 +276,49 @@ describe Flipper::Feature do
       end
 
       it "returns set of enabled groups" do
-        subject.groups.should eq(Set.new([
+        subject.enabled_groups.should eq(Set.new([
           @staff,
           @preview_features,
         ]))
       end
 
       it "does not include groups that have not been enabled" do
-        subject.groups.should_not include(@not_enabled)
+        subject.enabled_groups.should_not include(@not_enabled)
       end
 
       it "does not include disabled groups" do
-        subject.groups.should_not include(@disabled)
+        subject.enabled_groups.should_not include(@disabled)
+      end
+
+      it "is aliased to groups" do
+        subject.enabled_groups.should eq(subject.groups)
+      end
+    end
+  end
+
+  describe "#disabled_groups" do
+    context "when no groups enabled" do
+      it "returns empty set" do
+        subject.disabled_groups.should eq(Set.new)
+      end
+    end
+
+    context "when one or more groups enabled" do
+      before do
+        @staff = Flipper.register(:staff) { |thing| true }
+        @preview_features = Flipper.register(:preview_features) { |thing| true }
+        @not_enabled = Flipper.register(:not_enabled) { |thing| true }
+        @disabled = Flipper.register(:disabled) { |thing| true }
+        subject.enable @staff
+        subject.enable @preview_features
+        subject.disable @disabled
+      end
+
+      it "returns set of groups that are not enabled" do
+        subject.disabled_groups.should eq(Set[
+          @not_enabled,
+          @disabled,
+        ])
       end
     end
   end

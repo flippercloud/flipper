@@ -24,17 +24,15 @@ module Flipper
       end
 
       def enabled?(value)
-        GateValues.to_boolean(value)
+        Typecast.to_boolean(value)
       end
 
       # Internal: Checks if the gate is open for a thing.
       #
       # Returns true if explicitly set to true, false if explicitly set to false
       # or nil if not explicitly set.
-      def open?(thing, value)
-        instrument(:open?, thing) { |payload|
-          value
-        }
+      def open?(thing, value, options = {})
+        value
       end
 
       def protects?(thing)

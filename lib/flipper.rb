@@ -30,16 +30,16 @@ module Flipper
     raise DuplicateGroup, %Q{Group #{name.inspect} has already been registered}
   end
 
-  # Public: Returns an array of registered Types::Group instances.
+  # Public: Returns a Set of registered Types::Group instances.
   def self.groups
-    groups_registry.values
+    groups_registry.values.to_set
   end
 
-  # Public: Returns an array of symbols where each symbol is a registered
+  # Public: Returns a Set of symbols where each symbol is a registered
   # group name. If you just want the names, this is more efficient than doing
   # `Flipper.groups.map(&:name)`.
   def self.group_names
-    groups_registry.keys
+    groups_registry.keys.to_set
   end
 
   # Public: Clears the group registry.
@@ -90,3 +90,4 @@ require 'flipper/feature'
 require 'flipper/gate'
 require 'flipper/registry'
 require 'flipper/type'
+require 'flipper/typecast'

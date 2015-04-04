@@ -1,23 +1,11 @@
 require 'forwardable'
-require 'flipper/instrumenters/noop'
 
 module Flipper
   class Gate
     extend Forwardable
 
-    # Private: The name of instrumentation events.
-    InstrumentationName = "gate_operation.#{InstrumentationNamespace}"
-
-    # Private
-    attr_reader :feature_name
-
-    # Private: What is used to instrument all the things.
-    attr_reader :instrumenter
-
     # Public
-    def initialize(feature_name, options = {})
-      @feature_name = feature_name
-      @instrumenter = options.fetch(:instrumenter, Flipper::Instrumenters::Noop)
+    def initialize(options = {})
     end
 
     # Public: The name of the gate. Implemented in subclass.
@@ -34,14 +22,6 @@ module Flipper
       raise 'Not implemented'
     end
 
-    def enable(thing)
-      raise 'Not implemented'
-    end
-
-    def disable(thing)
-      raise 'Not implemented'
-    end
-
     def enabled?(value)
       raise 'Not implemented'
     end
@@ -53,7 +33,7 @@ module Flipper
     # Internal: Check if a gate is open for a thing. Implemented in subclass.
     #
     # Returns true if gate open for thing, false if not.
-    def open?(thing)
+    def open?(thing, value, options = {})
       false
     end
 
@@ -73,23 +53,11 @@ module Flipper
     # Public: Pretty string version for debugging.
     def inspect
       attributes = [
-        "feature_name=#{feature_name.inspect}",
+        "name=#{@name.inspect}",
+        "key=#{@key.inspect}",
+        "data_type=#{@data_type.inspect}",
       ]
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
-    end
-
-    # Private
-    def instrument(operation, thing)
-      payload = {
-        :thing => thing,
-        :operation => operation,
-        :gate_name => name,
-        :feature_name => @feature_name,
-      }
-
-      @instrumenter.instrument(InstrumentationName, payload) {
-        payload[:result] = yield(payload) if block_given?
-      }
     end
   end
 end
