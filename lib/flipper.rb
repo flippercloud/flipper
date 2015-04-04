@@ -27,7 +27,7 @@ module Flipper
     groups_registry.add(group.name, group)
     group
   rescue Registry::DuplicateKey
-    raise DuplicateGroup, %Q{Group #{name.inspect} has already been registered}
+    raise DuplicateGroup, "Group #{name.inspect} has already been registered"
   end
 
   # Public: Returns a Set of registered Types::Group instances.
