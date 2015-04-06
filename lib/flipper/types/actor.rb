@@ -12,6 +12,7 @@ module Flipper
         new(thing)
       end
 
+      attr_reader :thing
       attr_reader :value
 
       def initialize(thing)
