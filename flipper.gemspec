@@ -14,5 +14,5 @@ Gem::Specification.new do |gem|
   gem.name          = "flipper"
   gem.require_paths = ["lib"]
   gem.version       = Flipper::VERSION
-  gem.licenses      = ["MIT"]
+  gem.license       = "MIT"
 end
