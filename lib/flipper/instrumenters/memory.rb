@@ -12,6 +12,11 @@ module Flipper
       end
 
       def instrument(name, payload = {})
+        # Copy the payload to guard against later modifications to it, and to
+        # ensure that all instrumentation code uses the payload passed to the
+        # block rather than the one passed to #instrument.
+        payload = payload.dup
+
         result = if block_given?
           yield payload
         else
