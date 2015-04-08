@@ -292,6 +292,8 @@ config.middleware.use Flipper::Middleware::Memoizer, lambda { $flipper }
 2. `script/release`
 3. Profit.
 
+[![Build Status](https://travis-ci.org/jnunemaker/flipper.svg?branch=master)](https://travis-ci.org/jnunemaker/flipper)
+
 ## Coming Soon™
 
 * [Web UI](https://github.com/jnunemaker/flipper-ui) (think Resque UI for features toggling/status)
