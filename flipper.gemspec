@@ -4,7 +4,6 @@ require File.expand_path('../lib/flipper/version', __FILE__)
 Gem::Specification.new do |gem|
   gem.authors       = ["John Nunemaker"]
   gem.email         = ["nunemaker@gmail.com"]
-  gem.description   = %q{Feature flipper for any adapter}
   gem.summary       = %q{Feature flipper for any adapter}
   gem.homepage      = "http://jnunemaker.github.com/flipper"
 
