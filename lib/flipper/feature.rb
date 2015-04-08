@@ -354,7 +354,7 @@ module Flipper
         :thing => thing,
       }
 
-      @instrumenter.instrument(InstrumentationName, payload) {
+      @instrumenter.instrument(InstrumentationName, payload) { |payload|
         payload[:result] = yield(payload) if block_given?
       }
     end
@@ -368,7 +368,7 @@ module Flipper
         :thing => thing,
       }
 
-      @instrumenter.instrument(GateInstrumentationName, payload) {
+      @instrumenter.instrument(GateInstrumentationName, payload) { |payload|
         payload[:result] = yield(payload) if block_given?
       }
     end
