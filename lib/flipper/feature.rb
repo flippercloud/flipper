@@ -107,10 +107,12 @@ module Flipper
     #
     # group - a Flipper::Types::Group instance or a String or Symbol name of a
     #         registered group.
+    # block_param - an optional String or Symbol (or other object that responds
+    #               to to_str) to be passed to the group's block.
     #
     # Returns result of enable.
-    def enable_group(group)
-      enable Flipper::Types::Group.wrap(group)
+    def enable_group(group, block_param = nil)
+      enable Flipper::Types::Group.wrap(group, block_param)
     end
 
     # Public: Enables a feature a percentage of time.
@@ -147,10 +149,13 @@ module Flipper
     #
     # group - a Flipper::Types::Group instance or a String or Symbol name of a
     #         registered group.
+    # block_param - an optional String or Symbol (or other object that responds
+    #               to to_str) to be passed to the group's block. Must be the
+    #               same value that was passed to #enable_group.
     #
     # Returns result of disable.
-    def disable_group(group)
-      disable Flipper::Types::Group.wrap(group)
+    def disable_group(group, block_param = nil)
+      disable Flipper::Types::Group.wrap(group, block_param)
     end
 
     # Public: Disables a feature a percentage of time.
@@ -226,7 +231,7 @@ module Flipper
 
     # Public: Get groups enabled for this feature.
     #
-    # Returns Set of Flipper::Group instances.
+    # Returns Set of Flipper::Types::Group instances.
     def enabled_groups
       groups_value.map { |name| Flipper.group(name) }.to_set
     end
@@ -234,7 +239,7 @@ module Flipper
 
     # Public: Get groups not enabled for this feature.
     #
-    # Returns Set of Flipper::Group instances.
+    # Returns Set of Flipper::Types::Group instances.
     def disabled_groups
       Flipper.groups - enabled_groups
     end

@@ -477,9 +477,11 @@ describe Flipper::Feature do
     context "with gate values set in adapter" do
       before do
         Flipper.register(:admins) { }
+        Flipper.register(:team) { }
         subject.enable Flipper::Types::Boolean.new(true)
         subject.enable Flipper::Types::Actor.new(Struct.new(:flipper_id).new(5))
         subject.enable Flipper::Types::Group.new(:admins)
+        subject.enable Flipper::Types::Group.new(:team, "7")
         subject.enable Flipper::Types::PercentageOfTime.new(50)
         subject.enable Flipper::Types::PercentageOfActors.new(25)
       end
@@ -487,7 +489,7 @@ describe Flipper::Feature do
       it "returns gate values" do
         subject.gate_values.should eq(Flipper::GateValues.new({
           :actors => Set.new(["5"]),
-          :groups => Set.new(["admins"]),
+          :groups => Set.new(["admins", "team\x1E7"]),
           :boolean => "true",
           :percentage_of_time => "50",
           :percentage_of_actors => "25",
@@ -522,10 +524,12 @@ describe Flipper::Feature do
   end
 
   describe "#enable_group/disable_group" do
+    before do
+      Flipper.register(:five_only) { }
+    end
+
     context "with symbol group name" do
       it "updates the gate values to include the group" do
-        actor = Struct.new(:flipper_id).new(5)
-        group = Flipper.register(:five_only) { |actor| actor.flipper_id == 5 }
         subject.gate_values.groups.should be_empty
         subject.enable_group(:five_only)
         subject.gate_values.groups.should eq(Set["five_only"])
@@ -536,8 +540,6 @@ describe Flipper::Feature do
 
     context "with string group name" do
       it "updates the gate values to include the group" do
-        actor = Struct.new(:flipper_id).new(5)
-        group = Flipper.register(:five_only) { |actor| actor.flipper_id == 5 }
         subject.gate_values.groups.should be_empty
         subject.enable_group("five_only")
         subject.gate_values.groups.should eq(Set["five_only"])
@@ -547,15 +549,26 @@ describe Flipper::Feature do
     end
 
     context "with group instance" do
-      before do
-        Flipper.register(:five_only) { }
-      end
-
       it "updates the gate values for the group" do
         group = Flipper::Types::Group.new(:five_only)
         subject.gate_values.groups.should be_empty
         subject.enable_group(group)
         subject.gate_values.groups.should eq(Set["five_only"])
+        subject.disable_group(group)
+        subject.gate_values.groups.should be_empty
+      end
+    end
+
+    context "with block parameter" do
+      before do
+        Flipper.register(:team) { }
+      end
+
+      it "updates the gate values for the group" do
+        group = Flipper::Types::Group.new(:team, "8")
+        subject.gate_values.groups.should be_empty
+        subject.enable_group(group)
+        subject.gate_values.groups.should eq(Set["team\x1E8"])
         subject.disable_group(group)
         subject.gate_values.groups.should be_empty
       end
