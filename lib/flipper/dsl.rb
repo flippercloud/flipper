@@ -183,14 +183,14 @@ module Flipper
     # Returns a Flipper::Types::Boolean instance.
     alias_method :bool, :boolean
 
-    # Public: Access a flipper group by name.
+    # Public: Shortcut for getting a group type instance.
     #
-    # name - The String or Symbol name of the feature.
+    # name - The String or Symbol name of the group.
     #
-    # Returns an instance of Flipper::Group.
+    # Returns an instance of Flipper::Types::Group.
     # Raises Flipper::GroupNotRegistered if group has not been registered.
     def group(name)
-      Flipper.group(name)
+      Types::Group.new(name)
     end
 
     # Public: Wraps an object as a flipper actor.

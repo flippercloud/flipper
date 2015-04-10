@@ -4,22 +4,18 @@ module Flipper
 
       def self.wrap(group_or_name)
         return group_or_name if group_or_name.is_a?(self)
-        Flipper.group(group_or_name)
+        new(group_or_name)
       end
 
-      attr_reader :name
+      attr_reader :value
 
       def initialize(name, &block)
-        @name = name.to_sym
-        @block = block
-      end
+        name = name.to_sym
 
-      def match?(*args)
-        @block.call(*args) == true
-      end
+        # Make sure there's a registered group with this name.
+        Flipper.group(name)
 
-      def value
-        @name
+        @value = name
       end
     end
   end

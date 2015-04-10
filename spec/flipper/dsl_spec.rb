@@ -69,12 +69,8 @@ describe Flipper::DSL do
         @group = Flipper.register(:admins) { }
       end
 
-      it "returns group" do
-        subject.group(:admins).should eq(@group)
-      end
-
-      it "always returns same instance for same name" do
-        subject.group(:admins).should equal(subject.group(:admins))
+      it "returns group instance" do
+        subject.group(:admins).should be_instance_of(Flipper::Types::Group)
       end
     end
 

@@ -226,7 +226,7 @@ module Flipper
 
     # Public: Get groups enabled for this feature.
     #
-    # Returns Set of Flipper::Types::Group instances.
+    # Returns Set of Flipper::Group instances.
     def enabled_groups
       groups_value.map { |name| Flipper.group(name) }.to_set
     end
@@ -234,7 +234,7 @@ module Flipper
 
     # Public: Get groups not enabled for this feature.
     #
-    # Returns Set of Flipper::Types::Group instances.
+    # Returns Set of Flipper::Group instances.
     def disabled_groups
       Flipper.groups - enabled_groups
     end

@@ -270,9 +270,9 @@ describe Flipper::Feature do
         @preview_features = Flipper.register(:preview_features) { |thing| true }
         @not_enabled = Flipper.register(:not_enabled) { |thing| true }
         @disabled = Flipper.register(:disabled) { |thing| true }
-        subject.enable @staff
-        subject.enable @preview_features
-        subject.disable @disabled
+        subject.enable Flipper::Types::Group.new(:staff)
+        subject.enable Flipper::Types::Group.new(:preview_features)
+        subject.disable Flipper::Types::Group.new(:disabled)
       end
 
       it "returns set of enabled groups" do
@@ -309,9 +309,9 @@ describe Flipper::Feature do
         @preview_features = Flipper.register(:preview_features) { |thing| true }
         @not_enabled = Flipper.register(:not_enabled) { |thing| true }
         @disabled = Flipper.register(:disabled) { |thing| true }
-        subject.enable @staff
-        subject.enable @preview_features
-        subject.disable @disabled
+        subject.enable Flipper::Types::Group.new(:staff)
+        subject.enable Flipper::Types::Group.new(:preview_features)
+        subject.disable Flipper::Types::Group.new(:disabled)
       end
 
       it "returns set of groups that are not enabled" do
@@ -336,9 +336,9 @@ describe Flipper::Feature do
         @preview_features = Flipper.register(:preview_features) { |thing| true }
         @not_enabled = Flipper.register(:not_enabled) { |thing| true }
         @disabled = Flipper.register(:disabled) { |thing| true }
-        subject.enable @staff
-        subject.enable @preview_features
-        subject.disable @disabled
+        subject.enable Flipper::Types::Group.new(:staff)
+        subject.enable Flipper::Types::Group.new(:preview_features)
+        subject.disable Flipper::Types::Group.new(:disabled)
       end
 
       it "returns set of enabled groups" do
@@ -476,6 +476,7 @@ describe Flipper::Feature do
 
     context "with gate values set in adapter" do
       before do
+        Flipper.register(:admins) { }
         subject.enable Flipper::Types::Boolean.new(true)
         subject.enable Flipper::Types::Actor.new(Struct.new(:flipper_id).new(5))
         subject.enable Flipper::Types::Group.new(:admins)
@@ -546,9 +547,12 @@ describe Flipper::Feature do
     end
 
     context "with group instance" do
+      before do
+        Flipper.register(:five_only) { }
+      end
+
       it "updates the gate values for the group" do
-        actor = Struct.new(:flipper_id).new(5)
-        group = Flipper.register(:five_only) { |actor| actor.flipper_id == 5 }
+        group = Flipper::Types::Group.new(:five_only)
         subject.gate_values.groups.should be_empty
         subject.enable_group(group)
         subject.gate_values.groups.should eq(Set["five_only"])
