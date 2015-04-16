@@ -53,9 +53,9 @@ module Flipper
     # Public: Pretty string version for debugging.
     def inspect
       attributes = [
-        "name=#{@name.inspect}",
-        "key=#{@key.inspect}",
-        "data_type=#{@data_type.inspect}",
+        "name=#{name.inspect}",
+        "key=#{key.inspect}",
+        "data_type=#{data_type.inspect}",
       ]
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
     end

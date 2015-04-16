@@ -8,9 +8,34 @@ describe Flipper::Gate do
   }
 
   describe "#inspect" do
-    it "returns easy to read string representation" do
-      string = subject.inspect
-      string.should include('Flipper::Gate')
+    context "for subclass" do
+      let(:subclass) {
+        Class.new(described_class) {
+          def name
+            :name
+          end
+
+          def key
+            :key
+          end
+
+          def data_type
+            :set
+          end
+        }
+      }
+
+      subject {
+        subclass.new
+      }
+
+      it "includes attributes" do
+        string = subject.inspect
+        string.should include(subject.object_id.to_s)
+        string.should include('name=:name')
+        string.should include('key=:key')
+        string.should include('data_type=:set')
+      end
     end
   end
 end
