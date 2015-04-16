@@ -17,8 +17,11 @@ module Flipper
 
       def description(value)
         if enabled?(value)
-          group_names = value.to_a.sort.map { |name| name.to_sym.inspect }
-          "groups (#{group_names.join(', ')})"
+          groups = value.to_a.sort.map do |name|
+            group_name, block_param = Types::Group.hydrate(name)
+            [group_name.to_sym.inspect, block_param && block_param.inspect].compact.join(" ")
+          end
+          "groups (#{groups.join(', ')})"
         else
           'disabled'
         end
@@ -37,8 +40,9 @@ module Flipper
         else
           value.any? { |name|
             begin
-              group = Flipper.group(name)
-              group.match?(thing)
+              group_name, block_param = Types::Group.hydrate(name)
+              group = Flipper.group(group_name)
+              group.match?(thing, block_param)
             rescue GroupNotRegistered
               false
             end

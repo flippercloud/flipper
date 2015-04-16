@@ -10,8 +10,8 @@ describe Flipper::Gates::Group do
   describe "#description" do
     context "with groups in set" do
       it "returns text" do
-        values = Set['bacon', 'ham']
-        subject.description(values).should eq('groups (:bacon, :ham)')
+        values = Set['bacon', 'ham', "team\x1Eadmins"]
+        subject.description(values).should eq('groups (:bacon, :ham, :team "admins")')
       end
     end
 
@@ -43,6 +43,17 @@ describe Flipper::Gates::Group do
         expect {
           subject.open?(Object.new, Set[:stinkers], feature_name: feature_name)
         }.to raise_error(NoMethodError)
+      end
+    end
+
+    context "with block parameter" do
+      before do
+        Flipper.register(:team) { |actor, team_id| actor.team_id == team_id }
+      end
+
+      it "passes the block parameter to the block" do
+        thing = Struct.new(:team_id).new("admins")
+        subject.open?(thing, Set["team\x1Eadmins"], feature_name: feature_name).should eq(true)
       end
     end
   end

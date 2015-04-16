@@ -23,14 +23,14 @@ module Flipper
   # Returns a Flipper::Group.
   # Raises Flipper::DuplicateGroup if the group is already registered.
   def self.register(name, &block)
-    group = Types::Group.new(name, &block)
+    group = Group.new(name, &block)
     groups_registry.add(group.name, group)
     group
   rescue Registry::DuplicateKey
     raise DuplicateGroup, "Group #{name.inspect} has already been registered"
   end
 
-  # Public: Returns a Set of registered Types::Group instances.
+  # Public: Returns a Set of registered Group instances.
   def self.groups
     groups_registry.values.to_set
   end
@@ -88,6 +88,7 @@ require 'flipper/dsl'
 require 'flipper/errors'
 require 'flipper/feature'
 require 'flipper/gate'
+require 'flipper/group'
 require 'flipper/registry'
 require 'flipper/type'
 require 'flipper/typecast'
