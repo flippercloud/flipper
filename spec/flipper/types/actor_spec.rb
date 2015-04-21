@@ -77,6 +77,12 @@ describe Flipper::Types::Actor do
     actor.value.should eq('2')
   end
 
+  it "provides accessor to original thing" do
+    thing = thing_class.new(2)
+    actor = described_class.new(thing)
+    actor.thing.should eq(thing)
+  end
+
   it "proxies everything to thing" do
     thing = thing_class.new(10)
     actor = described_class.new(thing)
