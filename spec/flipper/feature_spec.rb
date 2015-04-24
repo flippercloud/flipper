@@ -97,8 +97,13 @@ describe Flipper::Feature do
       string.should include('Flipper::Feature')
       string.should include('name=:search')
       string.should include('state=:off')
-      string.should include('description="Disabled"')
+      string.should include('enabled_gate_names=[]')
       string.should include("adapter=#{subject.adapter.name.inspect}")
+
+      subject.enable
+      string = subject.inspect
+      string.should include('state=:on')
+      string.should include('enabled_gate_names=[:boolean]')
     end
   end
 
@@ -219,40 +224,6 @@ describe Flipper::Feature do
 
       it "returns true for conditional?" do
         subject.conditional?.should be(true)
-      end
-    end
-  end
-
-  describe "#description" do
-    context "fully on" do
-      before do
-        subject.enable
-      end
-
-      it "returns enabled" do
-        subject.description.should eq('Enabled')
-      end
-    end
-
-    context "fully off" do
-      before do
-        subject.disable
-      end
-
-      it "returns disabled" do
-        subject.description.should eq('Disabled')
-      end
-    end
-
-    context "partially on" do
-      before do
-        actor = Struct.new(:flipper_id).new(5)
-        subject.enable Flipper::Types::PercentageOfTime.new(5)
-        subject.enable actor
-      end
-
-      it "returns text" do
-        subject.description.should eq('Enabled for actors ("5"), 5% of the time')
       end
     end
   end
@@ -631,17 +602,28 @@ describe Flipper::Feature do
     end
 
     it "can return enabled gates" do
-      subject.enabled_gates.map(&:key).to_set.should eq(Set[
+      subject.enabled_gates.map(&:name).to_set.should eq(Set[
+        :percentage_of_actors,
+        :percentage_of_time,
+      ])
+
+      subject.enabled_gate_names.to_set.should eq(Set[
         :percentage_of_actors,
         :percentage_of_time,
       ])
     end
 
     it "can return disabled gates" do
-      subject.disabled_gates.map(&:key).to_set.should eq(Set[
-        :actors,
+      subject.disabled_gates.map(&:name).to_set.should eq(Set[
+        :actor,
         :boolean,
-        :groups,
+        :group,
+      ])
+
+      subject.disabled_gate_names.to_set.should eq(Set[
+        :actor,
+        :boolean,
+        :group,
       ])
     end
   end

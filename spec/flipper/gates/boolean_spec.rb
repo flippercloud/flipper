@@ -7,20 +7,6 @@ describe Flipper::Gates::Boolean do
     described_class.new
   }
 
-  describe "#description" do
-    context "for enabled" do
-      it "returns Enabled" do
-        subject.description(true).should eq('Enabled')
-      end
-    end
-
-    context "for disabled" do
-      it "returns Disabled" do
-        subject.description(false).should eq('Disabled')
-      end
-    end
-  end
-
   describe "#enabled?" do
     context "for true value" do
       it "returns true" do
