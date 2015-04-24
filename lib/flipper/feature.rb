@@ -274,6 +274,15 @@ module Flipper
       gate_values.percentage_of_time
     end
 
+    def enabled_gates
+      values = gate_values
+      gates.select { |gate| gate.enabled?(values[gate.key]) }
+    end
+
+    def disabled_gates
+      gates - enabled_gates
+    end
+
     # Public: Returns the string representation of the feature.
     def to_s
       name.to_s
