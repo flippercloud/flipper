@@ -16,12 +16,12 @@ module Flipper
     # options - The Hash of options.
     #           :instrumenter - What should be used to instrument all the things.
     def initialize(adapter, options = {})
-      @instrumenter = options.fetch(:instrumenter, Flipper::Instrumenters::Noop)
+      @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
 
-      instrumented = Flipper::Adapters::Instrumented.new(adapter, {
+      instrumented = Adapters::Instrumented.new(adapter, {
         :instrumenter => @instrumenter,
       })
-      memoized = Flipper::Adapters::Memoizable.new(instrumented)
+      memoized = Adapters::Memoizable.new(instrumented)
       @adapter = memoized
 
       @memoized_features = {}

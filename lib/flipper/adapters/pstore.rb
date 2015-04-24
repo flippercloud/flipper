@@ -4,7 +4,7 @@ require "set"
 module Flipper
   module Adapters
     class PStore
-      include Flipper::Adapter
+      include Adapter
 
       FeaturesKey = :flipper_features
 

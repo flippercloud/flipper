@@ -68,7 +68,7 @@ module Flipper
   # Raises Flipper::GroupNotRegistered if group is not registered.
   def self.group(name)
     groups_registry.get(name)
-  rescue Flipper::Registry::KeyNotFound => e
+  rescue Registry::KeyNotFound => e
     raise GroupNotRegistered, "Group #{e.key.inspect} has not been registered"
   end
 

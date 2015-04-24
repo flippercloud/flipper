@@ -35,7 +35,7 @@ module Flipper
     def initialize(name, adapter, options = {})
       @name = name
       @key = name.to_s
-      @instrumenter = options.fetch(:instrumenter, Flipper::Instrumenters::Noop)
+      @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
       @adapter = adapter
     end
 
@@ -110,7 +110,7 @@ module Flipper
     #
     # Returns result of enable.
     def enable_group(group)
-      enable Flipper::Types::Group.wrap(group)
+      enable Types::Group.wrap(group)
     end
 
     # Public: Enables a feature a percentage of time.
@@ -150,7 +150,7 @@ module Flipper
     #
     # Returns result of disable.
     def disable_group(group)
-      disable Flipper::Types::Group.wrap(group)
+      disable Types::Group.wrap(group)
     end
 
     # Public: Disables a feature a percentage of time.

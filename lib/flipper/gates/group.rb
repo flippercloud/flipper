@@ -38,7 +38,7 @@ module Flipper
       end
 
       def protects?(thing)
-        thing.is_a?(Flipper::Types::Group)
+        thing.is_a?(Types::Group)
       end
     end
   end

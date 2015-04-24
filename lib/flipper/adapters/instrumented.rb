@@ -20,7 +20,7 @@ module Flipper
       def initialize(adapter, options = {})
         super(adapter)
         @name = :instrumented
-        @instrumenter = options.fetch(:instrumenter, Flipper::Instrumenters::Noop)
+        @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
       end
 
       # Public

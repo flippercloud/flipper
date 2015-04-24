@@ -3,7 +3,7 @@ require 'set'
 module Flipper
   module Adapters
     class Memory
-      include Flipper::Adapter
+      include Adapter
 
       FeaturesKey = :flipper_features
 
