@@ -274,11 +274,17 @@ module Flipper
       gate_values.percentage_of_time
     end
 
+    # Public: Get the gates that have been enabled for the feature.
+    #
+    # Returns an Array of Flipper::Gate instances.
     def enabled_gates
       values = gate_values
       gates.select { |gate| gate.enabled?(values[gate.key]) }
     end
 
+    # Public: Get the gates that have not been enabled for the feature.
+    #
+    # Returns an Array of Flipper::Gate instances.
     def disabled_gates
       gates - enabled_gates
     end
