@@ -176,10 +176,12 @@ module Flipper
     # Public: Returns state for feature (:on, :off, or :conditional).
     def state
       values = gate_values
+      boolean = gate(:boolean)
+      non_boolean_gates = gates - [boolean]
 
-      if gate(:boolean).enabled?(values.boolean)
+      if values.boolean || values.percentage_of_actors == 100 || values.percentage_of_time == 100
         :on
-      elsif conditional_gates(values).any?
+      elsif non_boolean_gates.detect { |gate| gate.enabled?(values[gate.key]) }
         :conditional
       else
         :off
@@ -339,14 +341,6 @@ module Flipper
     end
 
     private
-
-    # Private: Get all non boolean gates that are enabled in some way.
-    def conditional_gates(gate_values)
-      (gates - [gate(:boolean)]).select { |gate|
-        value = gate_values[gate.key]
-        gate.enabled?(value)
-      }
-    end
 
     # Private: Instrument a feature operation.
     def instrument(operation, thing)
