@@ -15,14 +15,6 @@ module Flipper
         :boolean
       end
 
-      def description(value)
-        if enabled?(value)
-          'Enabled'
-        else
-          'Disabled'
-        end
-      end
-
       def enabled?(value)
         Typecast.to_boolean(value)
       end

@@ -15,15 +15,6 @@ module Flipper
         :set
       end
 
-      def description(value)
-        if enabled?(value)
-          group_names = value.to_a.sort.map { |name| name.to_sym.inspect }
-          "groups (#{group_names.join(', ')})"
-        else
-          'disabled'
-        end
-      end
-
       def enabled?(value)
         !Typecast.to_set(value).empty?
       end

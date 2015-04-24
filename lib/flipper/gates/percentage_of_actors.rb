@@ -17,14 +17,6 @@ module Flipper
         :integer
       end
 
-      def description(value)
-        if enabled?(value)
-          "#{value}% of actors"
-        else
-          'disabled'
-        end
-      end
-
       def enabled?(value)
         Typecast.to_integer(value) > 0
       end

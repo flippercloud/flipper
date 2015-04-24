@@ -26,10 +26,6 @@ module Flipper
       raise 'Not implemented'
     end
 
-    def description(value)
-      raise 'Not implemented'
-    end
-
     # Internal: Check if a gate is open for a thing. Implemented in subclass.
     #
     # Returns true if gate open for thing, false if not.

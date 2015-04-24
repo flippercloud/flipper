@@ -7,21 +7,6 @@ describe Flipper::Gates::Group do
     described_class.new
   }
 
-  describe "#description" do
-    context "with groups in set" do
-      it "returns text" do
-        values = Set['bacon', 'ham']
-        subject.description(values).should eq('groups (:bacon, :ham)')
-      end
-    end
-
-    context "with no groups in set" do
-      it "returns disabled" do
-        subject.description(Set.new).should eq('disabled')
-      end
-    end
-  end
-
   describe "#open?" do
     context "with a group in adapter, but not registered" do
       before do

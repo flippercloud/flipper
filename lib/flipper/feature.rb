@@ -177,7 +177,7 @@ module Flipper
     def state
       values = gate_values
 
-      if boolean_gate.enabled?(values.boolean)
+      if gate(:boolean).enabled?(values.boolean)
         :on
       elsif conditional_gates(values).any?
         :conditional
@@ -200,23 +200,6 @@ module Flipper
     # percentage of actors or percentage of the time.
     def conditional?
       state == :conditional
-    end
-
-    # Public: Human readable description of the enabled-ness of the feature.
-    def description
-      values = gate_values
-      conditional_gates = conditional_gates(values)
-
-      if boolean_gate.enabled?(values.boolean) || !conditional_gates.any?
-        boolean_gate.description(values.boolean).capitalize
-      else
-        fragments = conditional_gates.map { |gate|
-          value = values[gate.key]
-          gate.description(value)
-        }
-
-        "Enabled for #{fragments.join(', ')}"
-      end
     end
 
     # Public: Returns the raw gate values stored by the adapter.
@@ -289,7 +272,6 @@ module Flipper
       attributes = [
         "name=#{name.inspect}",
         "state=#{state.inspect}",
-        "description=#{description.inspect}",
         "adapter=#{adapter.name.inspect}",
       ]
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
@@ -328,19 +310,9 @@ module Flipper
 
     private
 
-    # Private: Get the boolean gate.
-    def boolean_gate
-      @boolean_gate ||= gate(:boolean)
-    end
-
-    # Private: Get all gates except the boolean gate.
-    def non_boolean_gates
-      @non_boolean_gates ||= gates - [boolean_gate]
-    end
-
     # Private: Get all non boolean gates that are enabled in some way.
     def conditional_gates(gate_values)
-      non_boolean_gates.select { |gate|
+      (gates - [gate(:boolean)]).select { |gate|
         value = gate_values[gate.key]
         gate.enabled?(value)
       }

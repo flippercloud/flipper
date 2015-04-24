@@ -15,15 +15,6 @@ module Flipper
         :set
       end
 
-      def description(value)
-        if enabled?(value)
-          actor_ids = value.to_a.sort.map { |id| id.inspect }
-          "actors (#{actor_ids.join(', ')})"
-        else
-          'disabled'
-        end
-      end
-
       def enabled?(value)
         !Typecast.to_set(value).empty?
       end
