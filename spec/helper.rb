@@ -3,9 +3,9 @@ $:.unshift(File.expand_path('../../lib', __FILE__))
 require 'pathname'
 require 'logger'
 
-root_path = Pathname(__FILE__).dirname.join('..').expand_path
-lib_path  = root_path.join('lib')
-log_path  = root_path.join('log')
+FlipperRoot = Pathname(__FILE__).dirname.join('..').expand_path
+lib_path  = FlipperRoot.join('lib')
+log_path  = FlipperRoot.join('log')
 log_path.mkpath
 
 require 'rubygems'
@@ -15,14 +15,9 @@ Bundler.setup(:default)
 
 require 'flipper'
 
-Dir[root_path.join("spec/support/**/*.rb")].each { |f| require f }
+Dir[FlipperRoot.join("spec/support/**/*.rb")].each { |f| require f }
 
 RSpec.configure do |config|
-  config.filter_run :focus => true
-  config.alias_example_to :fit, :focused => true
-  config.alias_example_to :xit, :pending => true
-  config.run_all_when_everything_filtered = true
-
   config.before(:each) do
     Flipper.unregister_groups
   end
