@@ -265,11 +265,25 @@ module Flipper
       gates.select { |gate| gate.enabled?(values[gate.key]) }
     end
 
+    # Public: Get the names of the enabled gates.
+    #
+    # Returns an Array of gate names.
+    def enabled_gate_names
+      enabled_gates.map(&:name)
+    end
+
     # Public: Get the gates that have not been enabled for the feature.
     #
     # Returns an Array of Flipper::Gate instances.
     def disabled_gates
       gates - enabled_gates
+    end
+
+    # Public: Get the names of the disabled gates.
+    #
+    # Returns an Array of gate names.
+    def disabled_gate_names
+      disabled_gates.map(&:name)
     end
 
     # Public: Returns the string representation of the feature.
@@ -287,6 +301,7 @@ module Flipper
       attributes = [
         "name=#{name.inspect}",
         "state=#{state.inspect}",
+        "enabled_gate_names=#{enabled_gate_names.inspect}",
         "adapter=#{adapter.name.inspect}",
       ]
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"

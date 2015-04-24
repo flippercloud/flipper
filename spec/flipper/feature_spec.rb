@@ -97,7 +97,13 @@ describe Flipper::Feature do
       string.should include('Flipper::Feature')
       string.should include('name=:search')
       string.should include('state=:off')
+      string.should include('enabled_gate_names=[]')
       string.should include("adapter=#{subject.adapter.name.inspect}")
+
+      subject.enable
+      string = subject.inspect
+      string.should include('state=:on')
+      string.should include('enabled_gate_names=[:boolean]')
     end
   end
 
@@ -596,17 +602,28 @@ describe Flipper::Feature do
     end
 
     it "can return enabled gates" do
-      subject.enabled_gates.map(&:key).to_set.should eq(Set[
+      subject.enabled_gates.map(&:name).to_set.should eq(Set[
+        :percentage_of_actors,
+        :percentage_of_time,
+      ])
+
+      subject.enabled_gate_names.to_set.should eq(Set[
         :percentage_of_actors,
         :percentage_of_time,
       ])
     end
 
     it "can return disabled gates" do
-      subject.disabled_gates.map(&:key).to_set.should eq(Set[
-        :actors,
+      subject.disabled_gates.map(&:name).to_set.should eq(Set[
+        :actor,
         :boolean,
-        :groups,
+        :group,
+      ])
+
+      subject.disabled_gate_names.to_set.should eq(Set[
+        :actor,
+        :boolean,
+        :group,
       ])
     end
   end
