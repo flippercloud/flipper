@@ -183,6 +183,50 @@ describe Flipper::Feature do
       end
     end
 
+    context "percentage of time set to 100" do
+      before do
+        subject.enable_percentage_of_time 100
+      end
+
+      it "returns :on" do
+        subject.state.should be(:on)
+      end
+
+      it "returns true for on?" do
+        subject.on?.should be(true)
+      end
+
+      it "returns false for off?" do
+        subject.off?.should be(false)
+      end
+
+      it "returns false for conditional?" do
+        subject.conditional?.should be(false)
+      end
+    end
+
+    context "percentage of actors set to 100" do
+      before do
+        subject.enable_percentage_of_actors 100
+      end
+
+      it "returns :on" do
+        subject.state.should be(:on)
+      end
+
+      it "returns true for on?" do
+        subject.on?.should be(true)
+      end
+
+      it "returns false for off?" do
+        subject.off?.should be(false)
+      end
+
+      it "returns false for conditional?" do
+        subject.conditional?.should be(false)
+      end
+    end
+
     context "fully off" do
       before do
         subject.disable
