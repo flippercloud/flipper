@@ -27,8 +27,17 @@ module Flipper
         value
       end
 
+      def wrap(thing)
+        Types::Boolean.wrap(thing)
+      end
+
       def protects?(thing)
-        thing.is_a?(Flipper::Types::Boolean)
+        case thing
+        when Types::Boolean, TrueClass, FalseClass
+          true
+        else
+          false
+        end
       end
     end
   end
