@@ -588,4 +588,26 @@ describe Flipper::Feature do
       end
     end
   end
+
+  describe "#enabled/disabled_gates" do
+    before do
+      subject.enable_percentage_of_time 5
+      subject.enable_percentage_of_actors 5
+    end
+
+    it "can return enabled gates" do
+      subject.enabled_gates.map(&:key).to_set.should eq(Set[
+        :percentage_of_actors,
+        :percentage_of_time,
+      ])
+    end
+
+    it "can return disabled gates" do
+      subject.disabled_gates.map(&:key).to_set.should eq(Set[
+        :actors,
+        :boolean,
+        :groups,
+      ])
+    end
+  end
 end
