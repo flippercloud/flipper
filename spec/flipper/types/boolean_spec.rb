@@ -16,4 +16,9 @@ describe Flipper::Types::Boolean do
     boolean = Flipper::Types::Boolean.new(nil)
     boolean.value.should be(true)
   end
+
+  it "typecasts value" do
+    boolean = Flipper::Types::Boolean.new(1)
+    boolean.value.should be(true)
+  end
 end
