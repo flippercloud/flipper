@@ -7,6 +7,7 @@ FlipperRoot = Pathname(__FILE__).dirname.join('..').expand_path
 lib_path  = FlipperRoot.join('lib')
 log_path  = FlipperRoot.join('log')
 log_path.mkpath
+tmp_path = FlipperRoot.join('tmp').mkpath
 
 logger = Logger.new(log_path.join('test.log'))
 logger.formatter = proc { |severity, datetime, progname, msg| "#{msg}\n" }
