@@ -1,3 +1,4 @@
+require 'logger'
 require 'helper'
 require 'flipper/adapters/memory'
 require 'flipper/instrumentation/log_subscriber'

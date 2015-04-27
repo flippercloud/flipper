@@ -1,16 +1,10 @@
 $:.unshift(File.expand_path('../../lib', __FILE__))
 
 require 'pathname'
-require 'logger'
 
 FlipperRoot = Pathname(__FILE__).dirname.join('..').expand_path
 lib_path  = FlipperRoot.join('lib')
-log_path  = FlipperRoot.join('log')
-log_path.mkpath
 tmp_path = FlipperRoot.join('tmp').mkpath
-
-logger = Logger.new(log_path.join('test.log'))
-logger.formatter = proc { |severity, datetime, progname, msg| "#{msg}\n" }
 
 require 'rubygems'
 require 'bundler'
@@ -21,10 +15,6 @@ require 'flipper'
 require 'flipper-ui'
 require 'flipper/adapters/memory'
 require 'rack/test'
-require 'logger'
-
-require 'flipper/instrumentation/log_subscriber'
-Flipper::Instrumentation::LogSubscriber.logger = logger
 
 Dir[FlipperRoot.join("spec/support/**/*.rb")].each { |f| require f }
 
