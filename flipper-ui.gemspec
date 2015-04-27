@@ -2,7 +2,7 @@
 require File.expand_path('../lib/flipper/version', __FILE__)
 
 flipper_ui_files = lambda { |file|
-  file =~ /(examples|flipper)[\/-]ui/
+  file =~ /(docs|examples|flipper)[\/-]ui/
 }
 
 Gem::Specification.new do |gem|
