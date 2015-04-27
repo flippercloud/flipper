@@ -5,9 +5,13 @@ module Flipper
     class Memoizable < Decorator
       FeaturesKey = :flipper_features
 
+      # Internal
+      attr_reader :cache
+
       # Public
-      def initialize(adapter)
+      def initialize(adapter, cache = nil)
         super(adapter)
+        @cache = cache || {}
       end
 
       # Public
@@ -66,11 +70,6 @@ module Flipper
         result = super
         cache.delete(feature) if memoizing?
         result
-      end
-
-      # Internal
-      def cache
-        Thread.current[:flipper_memoize_cache] ||= {}
       end
 
       # Internal: Turns local caching on/off.

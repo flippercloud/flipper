@@ -7,9 +7,9 @@ describe Flipper::Adapters::Memoizable do
   let(:features_key) { described_class::FeaturesKey }
   let(:adapter) { Flipper::Adapters::Memory.new }
   let(:flipper) { Flipper.new(adapter) }
-  let(:cache)   { subject.cache }
+  let(:cache)   { {} }
 
-  subject { described_class.new(adapter) }
+  subject { described_class.new(adapter, cache) }
 
   it_should_behave_like 'a flipper adapter'
 
