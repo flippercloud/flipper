@@ -5,22 +5,6 @@ module Flipper
     class Memoizable < Decorator
       FeaturesKey = :flipper_features
 
-      # Internal
-      def self.cache
-        Thread.current[:flipper_memoize_cache] ||= {}
-      end
-
-      # Internal
-      def self.memoizing?
-        !!Thread.current[:flipper_memoize]
-      end
-
-      # Internal
-      def self.memoize=(value)
-        cache.clear
-        Thread.current[:flipper_memoize] = value
-      end
-
       # Public
       def initialize(adapter)
         super(adapter)
@@ -86,19 +70,20 @@ module Flipper
 
       # Internal
       def cache
-        self.class.cache
+        Thread.current[:flipper_memoize_cache] ||= {}
       end
 
       # Internal: Turns local caching on/off.
       #
       # value - The Boolean that decides if local caching is on.
       def memoize=(value)
-        self.class.memoize = value
+        cache.clear
+        Thread.current[:flipper_memoize] = value
       end
 
       # Internal: Returns true for using local cache, false for not.
       def memoizing?
-        self.class.memoizing?
+        !!Thread.current[:flipper_memoize]
       end
     end
   end

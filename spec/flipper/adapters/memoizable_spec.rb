@@ -5,14 +5,9 @@ require 'flipper/spec/shared_adapter_specs'
 
 describe Flipper::Adapters::Memoizable do
   let(:features_key) { described_class::FeaturesKey }
-
   let(:adapter) { Flipper::Adapters::Memory.new }
   let(:flipper) { Flipper.new(adapter) }
-  let(:cache) { Thread.current[:flipper_memoize_cache] }
-
-  after do
-    described_class.memoize = nil
-  end
+  let(:cache)   { subject.cache }
 
   subject { described_class.new(adapter) }
 
