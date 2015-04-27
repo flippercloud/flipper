@@ -1,8 +1,14 @@
 source 'https://rubygems.org'
-gemspec
+gemspec :name => 'flipper'
+
+Dir['flipper-*.gemspec'].each do |gemspec|
+  plugin = gemspec.scan(/flipper-(.*)\.gemspec/).flatten.first
+  gemspec(:name => "flipper-#{plugin}", :development_group => plugin)
+end
 
 gem 'rake', '~> 10.4.2'
 gem 'metriks', '~> 0.9.9', :require => false
+gem 'shotgun', '~> 0.9', :require => false
 gem 'statsd-ruby', '~> 1.2.1', :require => false
 gem 'rspec', '~> 2.14'
 gem 'rack-test', '~> 0.6.3'
@@ -12,5 +18,7 @@ group(:guard) do
   gem 'guard', '~> 2.12.5'
   gem 'guard-rspec', '~> 4.5.0'
   gem 'guard-bundler', '~> 2.1.0'
+  gem 'guard-coffeescript', '~> 2.0.1'
+  gem 'guard-sass', '~> 1.6.0'
   gem 'rb-fsevent', '~> 0.9.4'
 end

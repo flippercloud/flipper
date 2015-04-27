@@ -16,3 +16,6 @@ test/tmp
 test/version_tmp
 tmp
 log
+flipper.pstore
+.sass-cache
+bin
