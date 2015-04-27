@@ -3,6 +3,8 @@ require 'flipper/instrumenters/noop'
 
 module Flipper
   module Adapters
+    # Internal: Adapter that wraps another adapter and instruments all adapter
+    # operations. Used by flipper dsl to provide instrumentatin for flipper.
     class Instrumented < Decorator
       # Private: The name of instrumentation events.
       InstrumentationName = "adapter_operation.#{InstrumentationNamespace}"

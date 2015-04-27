@@ -2,6 +2,8 @@ require 'set'
 
 module Flipper
   module Adapters
+    # Public: Adapter for storing everything in memory (ie: Hash).
+    # Useful for tests/specs.
     class Memory
       include Adapter
 
