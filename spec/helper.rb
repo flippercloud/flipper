@@ -1,10 +1,7 @@
 $:.unshift(File.expand_path('../../lib', __FILE__))
 
 require 'pathname'
-
 FlipperRoot = Pathname(__FILE__).dirname.join('..').expand_path
-lib_path  = FlipperRoot.join('lib')
-tmp_path = FlipperRoot.join('tmp').mkpath
 
 require 'rubygems'
 require 'bundler'
@@ -13,8 +10,6 @@ Bundler.setup(:default)
 
 require 'flipper'
 require 'flipper-ui'
-require 'flipper/adapters/memory'
-require 'rack/test'
 
 Dir[FlipperRoot.join("spec/support/**/*.rb")].each { |f| require f }
 
@@ -22,9 +17,6 @@ RSpec.configure do |config|
   config.before(:each) do
     Flipper.unregister_groups
   end
-
-  config.include Rack::Test::Methods
-  config.include SpecHelpers
 end
 
 shared_examples_for 'a percentage' do

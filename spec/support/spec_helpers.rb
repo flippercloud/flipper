@@ -1,4 +1,6 @@
 require 'json'
+require 'flipper/adapters/memory'
+require 'rack/test'
 
 module SpecHelpers
   def self.included(base)
@@ -21,4 +23,9 @@ module SpecHelpers
   def json_response
     JSON.load(last_response.body)
   end
+end
+
+RSpec.configure do |config|
+  config.include Rack::Test::Methods
+  config.include SpecHelpers
 end
