@@ -11,7 +11,7 @@ Gem::Specification.new do |gem|
   gem.summary       = "UI for the Flipper gem"
   gem.description   = "Rack middleware that provides a fully featured web interface for the flipper gem."
   gem.license       = "MIT"
-  gem.homepage      = "https://github.com/jnunemaker/flipper-ui"
+  gem.homepage      = "https://github.com/jnunemaker/flipper"
 
   gem.files         = `git ls-files`.split("\n").select(&flipper_ui_files)
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n").select(&flipper_ui_files)

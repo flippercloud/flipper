@@ -1,4 +1,4 @@
-![flipper logo](https://raw.githubusercontent.com/jnunemaker/flipper-ui/master/lib/flipper/ui/public/images/logo.png)
+![flipper logo](https://raw.githubusercontent.com/jnunemaker/flipper/master/lib/flipper/ui/public/images/logo.png)
 
 <pre>
                                    __
