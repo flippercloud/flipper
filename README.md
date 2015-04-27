@@ -63,7 +63,7 @@ puts 'Enabling Search...'
 search.enable
 ```
 
-Of course there are more [examples for you to peruse](https://github.com/jnunemaker/flipper/tree/master/examples).
+Of course there are more [examples for you to peruse](examples/). You could also check out the [DSL](lib/flipper/dsl.rb) and [Feature](lib/flipper/feature.rb) classes for code/docs.
 
 ## Docs
 
