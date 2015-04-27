@@ -307,6 +307,10 @@ config.middleware.use Flipper::Middleware::Memoizer, lambda { $flipper }
 
 **Note**: Be sure that the middleware is high enough up in your stack that all feature checks are wrapped.
 
+## Web UI
+
+* [README](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/ui/README.md) (Rack middleware web interface for managing creating, viewing, deleting, enabling and disabling features)
+
 ## Contributing
 
 1. Fork it
@@ -320,9 +324,3 @@ config.middleware.use Flipper::Middleware::Memoizer, lambda { $flipper }
 1. Update the version to be whatever it should be and commit.
 2. `script/release`
 3. Profit.
-
-[![Build Status](https://travis-ci.org/jnunemaker/flipper.svg?branch=master)](https://travis-ci.org/jnunemaker/flipper)
-
-## Coming Soon™
-
-* [Web UI](https://github.com/jnunemaker/flipper-ui) (think Resque UI for features toggling/status)
