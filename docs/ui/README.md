@@ -5,7 +5,7 @@ UI for the [Flipper](https://github.com/jnunemaker/flipper) gem.
 ## Screenshots
 
 Viewing list of features:
-![features](images/feature_list.png)
+![features](images/features.png)
 
 Viewing an individual feature:
 ![feature](images/feature.png)
