@@ -74,11 +74,11 @@ Of course there are more [examples for you to peruse](https://github.com/jnunema
 
 ### Read More
 
-* [Gates](docs/Gates.md)
-* [Adapters](docs/Adapters.md)
-* [Instrumentation](docs/Instrumentation.md)
-* [Optimization](docs/Optimization.md)
-* [Web Interface](docs/ui/README.md)
+* [Gates](docs/Gates.md) - Boolean, Groups, Actors, % of Actors, and % of Time
+* [Adapters](docs/Adapters.md) - Mongo, Redis, Cassandra, Active Record...
+* [Instrumentation](docs/Instrumentation.md) - Statsd and Metriks
+* [Optimization](docs/Optimization.md) - Memoization middleware
+* [Web Interface](docs/ui/README.md) - Point and click...
 
 ## Contributing
 
