@@ -1,5 +1,9 @@
 # -*- encoding: utf-8 -*-
-require File.expand_path('../lib/flipper/ui/version', __FILE__)
+require File.expand_path('../lib/flipper/version', __FILE__)
+
+flipper_ui_files = lambda { |file|
+  file =~ /(examples|flipper)[\/-]ui/
+}
 
 Gem::Specification.new do |gem|
   gem.authors       = ["John Nunemaker"]
@@ -9,15 +13,14 @@ Gem::Specification.new do |gem|
   gem.license       = "MIT"
   gem.homepage      = "https://github.com/jnunemaker/flipper-ui"
 
-  gem.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
-  gem.files         = `git ls-files`.split("\n")
-  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
+  gem.files         = `git ls-files`.split("\n").select(&flipper_ui_files)
+  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n").select(&flipper_ui_files)
   gem.name          = "flipper-ui"
   gem.require_paths = ["lib"]
-  gem.version       = Flipper::UI::VERSION
+  gem.version       = Flipper::VERSION
 
   gem.add_dependency 'rack', '~> 1.4', '< 1.7'
   gem.add_dependency 'rack-protection', '~> 1.5.3'
-  gem.add_dependency 'flipper', '~> 0.7.0.beta3'
+  gem.add_dependency 'flipper', "~> #{Flipper::VERSION}"
   gem.add_dependency 'erubis', '~> 2.7.0'
 end

@@ -2,6 +2,8 @@
 $LOAD_PATH.push File.expand_path("../lib", __FILE__)
 require "flipper/version"
 
+# gem install pkg/*.gem
+# gem uninstall flipper flipper-ui
 desc 'Build gem into the pkg directory'
 task :build do
   FileUtils.rm_rf('pkg')
