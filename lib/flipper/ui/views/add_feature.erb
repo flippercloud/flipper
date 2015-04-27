@@ -1,0 +1,18 @@
+<% if params.key?("error") %>
+  <div class="flash flash-error">
+    <%= params["error"] %>
+  </div>
+<% end %>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Add Feature</h3>
+  </div>
+  <div class="panel-body">
+    <form action="<%= script_name %>/features" method="post">
+      <%== csrf_input_tag %>
+      <input type="text" name="value" placeholder="ie: admins, orgs_next, etc.">
+      <input type="submit" value="Add Feature" class="btn">
+    </form>
+  </div>
+</div>

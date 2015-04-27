@@ -7,6 +7,10 @@ FlipperRoot = Pathname(__FILE__).dirname.join('..').expand_path
 lib_path  = FlipperRoot.join('lib')
 log_path  = FlipperRoot.join('log')
 log_path.mkpath
+tmp_path = FlipperRoot.join('tmp').mkpath
+
+logger = Logger.new(log_path.join('test.log'))
+logger.formatter = proc { |severity, datetime, progname, msg| "#{msg}\n" }
 
 require 'rubygems'
 require 'bundler'
@@ -14,6 +18,13 @@ require 'bundler'
 Bundler.setup(:default)
 
 require 'flipper'
+require 'flipper-ui'
+require 'flipper/adapters/memory'
+require 'rack/test'
+require 'logger'
+
+require 'flipper/instrumentation/log_subscriber'
+Flipper::Instrumentation::LogSubscriber.logger = logger
 
 Dir[FlipperRoot.join("spec/support/**/*.rb")].each { |f| require f }
 
@@ -21,6 +32,9 @@ RSpec.configure do |config|
   config.before(:each) do
     Flipper.unregister_groups
   end
+
+  config.include Rack::Test::Methods
+  config.include SpecHelpers
 end
 
 shared_examples_for 'a percentage' do

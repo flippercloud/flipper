@@ -1,0 +1,46 @@
+<% if @show_blank_slate %>
+  <div class="blankslate">
+    <span class="mega-octicon octicon-plus"></span>
+    <span class="mega-octicon octicon-list-unordered"></span>
+    <span class="mega-octicon octicon-zap"></span>
+    <h3>But I've got a blank space baby...</h3>
+    <p>And I'll flip your features.</p>
+    <div class="embed-responsive embed-responsive-16by9">
+      <iframe class="embed-responsive-item" width="560" height="315" src="https://www.youtube.com/embed/e-ORhEE9VVg" frameborder="0" allowfullscreen></iframe>
+    </div>
+  </div>
+<% else %>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Features</h3>
+    </div>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th class="feature-state">
+            <span class="octicon octicon-squirrel"></span>
+          </th>
+          <th>Feature</th>
+          <th class="feature-enabled-gates">Enabled Gates</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @features.each do |feature| %>
+          <tr>
+            <td class="feature-state">
+              <span class="octicon octicon-squirrel <%= feature.color_class %>"></span>
+            </td>
+            <td>
+              <a href="<%= "#{script_name}/features/#{feature.key}" %>">
+                <%= feature.key %></a>
+            </td>
+            <td class="feature-enabled-gates">
+              <%= feature.pretty_enabled_gate_names %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>
