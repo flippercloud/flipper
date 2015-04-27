@@ -6,9 +6,12 @@ module Flipper
       new(value_or_instance)
     end
 
-    def value
-      raise 'Not implemented'
+    attr_reader :value
+
+    def eql?(other)
+      self.class.eql?(other.class) && value == other.value
     end
+    alias_method :==, :eql?
   end
 end
 

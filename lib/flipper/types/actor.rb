@@ -3,16 +3,8 @@ module Flipper
     class Actor < Type
       def self.wrappable?(thing)
         return false if thing.nil?
-        return true if thing.is_a?(Flipper::Types::Actor)
         thing.respond_to?(:flipper_id)
       end
-
-      def self.wrap(thing)
-        return thing if thing.is_a?(self)
-        new(thing)
-      end
-
-      attr_reader :value
 
       def initialize(thing)
         if thing.nil?

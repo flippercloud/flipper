@@ -28,9 +28,13 @@ describe Flipper::Types::Actor do
       described_class.wrappable?(actor).should eq(true)
     end
 
-    it "returns true if responds to id" do
+    it "returns true if responds to flipper_id" do
       thing = thing_class.new(10)
       described_class.wrappable?(thing).should eq(true)
+    end
+
+    it "returns false if nil" do
+      described_class.wrappable?(nil).should be(false)
     end
   end
 
