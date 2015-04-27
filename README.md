@@ -61,13 +61,6 @@ end
 
 puts 'Enabling Search...'
 search.enable
-
-# check if that feature is enabled again
-if search.enabled?
-  puts 'Search away!'
-else
-  puts 'No search for you!'
-end
 ```
 
 Of course there are more [examples for you to peruse](https://github.com/jnunemaker/flipper/tree/master/examples).
