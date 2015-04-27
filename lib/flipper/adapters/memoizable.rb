@@ -12,6 +12,7 @@ module Flipper
       def initialize(adapter, cache = nil)
         super(adapter)
         @cache = cache || {}
+        @memoize = false
       end
 
       # Public
@@ -77,12 +78,12 @@ module Flipper
       # value - The Boolean that decides if local caching is on.
       def memoize=(value)
         cache.clear
-        Thread.current[:flipper_memoize] = value
+        @memoize = value
       end
 
       # Internal: Returns true for using local cache, false for not.
       def memoizing?
-        !!Thread.current[:flipper_memoize]
+        !!@memoize
       end
     end
   end
