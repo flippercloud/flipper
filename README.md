@@ -35,7 +35,7 @@ Or install it yourself with:
 
     $ gem install flipper
 
-## Usage
+## Examples
 
 The goal of the API for flipper was to have everything revolve around features and what ways they can be enabled. Start with top level and dig into a feature, then dig in further and enable that feature for a given type of access, as opposed to thinking about how the feature will be accessed first (ie: `stats.enable` vs `activate_group(:stats, ...)`).
 
@@ -65,7 +65,7 @@ search.enable
 
 Of course there are more [examples for you to peruse](https://github.com/jnunemaker/flipper/tree/master/examples).
 
-### Read More
+## Docs
 
 * [Gates](docs/Gates.md) - Boolean, Groups, Actors, % of Actors, and % of Time
 * [Adapters](docs/Adapters.md) - Mongo, Redis, Cassandra, Active Record...
