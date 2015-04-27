@@ -32,164 +32,163 @@
   </div>
 </div>
 
-<% unless @feature.on? %>
-  <div class="container">
-    <div class="columns">
-      <div class="column one-half">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h3 class="panel-title">Percentage of Actors</h3>
-          </div>
-          <div class="panel-body">
-            <form action="<%= script_name %>/features/<%= @feature.key %>/percentage_of_actors" method="post">
-              <%== csrf_input_tag %>
-              <div class="btn-group">
-                <% @percentages.each do |number| %>
-                  <input type="submit" name="value" value="<%= number %>%" class="btn" <% if number == @feature.percentage_of_actors_value %>disabled<% end %>>
-                <% end %>
-              </div>
-            </form>
 
-            <h4>- or -</h4>
+<div class="container">
+  <div class="columns">
+    <div class="column one-half">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Percentage of Actors</h3>
+        </div>
+        <div class="panel-body">
+          <form action="<%= script_name %>/features/<%= @feature.key %>/percentage_of_actors" method="post">
+            <%== csrf_input_tag %>
+            <div class="btn-group">
+              <% @percentages.each do |number| %>
+                <input type="submit" name="value" value="<%= number %>%" class="btn" <% if number == @feature.percentage_of_actors_value %>disabled<% end %>>
+              <% end %>
+            </div>
+          </form>
 
-            <form action="<%= script_name %>/features/<%= @feature.key %>/percentage_of_actors" method="post">
-              <%== csrf_input_tag %>
-              <input type="text" name="value" <% if @feature.percentage_of_actors_value > 0 %>value="<%= @feature.percentage_of_actors_value %>"<% end %> placeholder="custom (ie: 26, 32, etc.)" class="input-mini">
-              <input type="submit" name="action" value="Enable" class="btn btn-sm">
-            </form>
-          </div>
+          <h4>- or -</h4>
+
+          <form action="<%= script_name %>/features/<%= @feature.key %>/percentage_of_actors" method="post">
+            <%== csrf_input_tag %>
+            <input type="text" name="value" <% if @feature.percentage_of_actors_value > 0 %>value="<%= @feature.percentage_of_actors_value %>"<% end %> placeholder="custom (ie: 26, 32, etc.)" class="input-mini">
+            <input type="submit" name="action" value="Enable" class="btn btn-sm">
+          </form>
         </div>
       </div>
-      <div class="column one-half">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h3 class="panel-title">Percentage of Time</h3>
-          </div>
-          <div class="panel-body">
-            <form action="<%= script_name %>/features/<%= @feature.key %>/percentage_of_time" method="post">
-              <%== csrf_input_tag %>
-              <div class="btn-group">
-                <% @percentages.each do |number| %>
-                  <input type="submit" name="value" value="<%= number %>%" class="btn" <% if number == @feature.percentage_of_time_value %>disabled<% end %>>
-                <% end %>
-              </div>
-            </form>
+    </div>
+    <div class="column one-half">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Percentage of Time</h3>
+        </div>
+        <div class="panel-body">
+          <form action="<%= script_name %>/features/<%= @feature.key %>/percentage_of_time" method="post">
+            <%== csrf_input_tag %>
+            <div class="btn-group">
+              <% @percentages.each do |number| %>
+                <input type="submit" name="value" value="<%= number %>%" class="btn" <% if number == @feature.percentage_of_time_value %>disabled<% end %>>
+              <% end %>
+            </div>
+          </form>
 
-            <h4>- or -</h4>
+          <h4>- or -</h4>
 
-            <form action="<%= script_name %>/features/<%= @feature.key %>/percentage_of_time" method="post">
-              <%== csrf_input_tag %>
-              <input type="text" name="value" <% if @feature.percentage_of_time_value > 0 %>value="<%= @feature.percentage_of_time_value %>"<% end %> placeholder="custom (ie: 26, 32, etc.)" class="input-mini">
-              <input type="submit" name="action" value="Enable" class="btn btn-sm">
-            </form>
-          </div>
+          <form action="<%= script_name %>/features/<%= @feature.key %>/percentage_of_time" method="post">
+            <%== csrf_input_tag %>
+            <input type="text" name="value" <% if @feature.percentage_of_time_value > 0 %>value="<%= @feature.percentage_of_time_value %>"<% end %> placeholder="custom (ie: 26, 32, etc.)" class="input-mini">
+            <input type="submit" name="action" value="Enable" class="btn btn-sm">
+          </form>
         </div>
       </div>
     </div>
   </div>
+</div>
 
-  <div class="container">
-    <div class="columns">
-      <div class="column one-half">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <% if @feature.disabled_groups.empty? %>
-              <p class="right">All groups enabled.</p>
-            <% else %>
-              <form action="<%= script_name %>/features/<%= @feature.key %>/groups" method="post" class="right">
-                <%== csrf_input_tag %>
-                <input type="hidden" name="operation" value="enable">
-                <select name="value">
-                  <option value="">Select a group...</option>
-                  <% @feature.disabled_groups.each do |group| %>
-                    <option value="<%= group.name %>"><%= group.name %></option>
-                  <% end %>
-                </select>
-                <input type="submit" value="Add Group" class="btn btn-sm">
-              </form>
-            <% end %>
-            <h3 class="panel-title">Groups</h3>
-          </div>
-          <% if @feature.groups_value.empty? %>
-            <div class="blankslate">
-              <span class="mega-octicon octicon-organization"></span>
-              <span class="mega-octicon octicon-squirrel"></span>
-              <span class="mega-octicon octicon-zap"></span>
-              <h3>No Enabled Groups</h3>
-              <p>Enable groups using the form above.</p>
-            </div>
+<div class="container">
+  <div class="columns">
+    <div class="column one-half">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <% if @feature.disabled_groups.empty? %>
+            <p class="right">All groups enabled.</p>
           <% else %>
-            <ul class="list-group">
-              <% @feature.groups_value.each do |item| %>
-                <li class="list-group-item">
-                  <div class="flex-table">
-                    <div class="flex-table-item flex-table-item-primary">
-                      <%= item %>
-                    </div>
-                    <div class="flex-table-item">
-                      <form action="<%= script_name %>/features/<%= @feature.key %>/groups" method="post">
-                        <%== csrf_input_tag %>
-                        <input type="hidden" name="operation" value="disable">
-                        <input type="hidden" name="value" value="<%= item %>">
-                        <button type="submit" value="Disable" class="button-inv danger tooltipped tooltipped-w" aria-label="Disable <%= item %>">
-                          <span class="octicon octicon-trashcan"></span>
-                        </button>
-                      </form>
-                    </div>
-                  </div>
-                </li>
-              <% end %>
-            </ul>
-          <% end %>
-        </div>
-      </div>
-      <div class="column one-half">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <form action="<%= script_name %>/features/<%= @feature.key %>/actors" method="post" class="right">
+            <form action="<%= script_name %>/features/<%= @feature.key %>/groups" method="post" class="right">
               <%== csrf_input_tag %>
               <input type="hidden" name="operation" value="enable">
-              <input type="text" name="value" placeholder="ie: User:6" class="input-mini">
-              <input type="submit" value="Add Actor" class="btn btn-sm">
+              <select name="value">
+                <option value="">Select a group...</option>
+                <% @feature.disabled_groups.each do |group| %>
+                  <option value="<%= group.name %>"><%= group.name %></option>
+                <% end %>
+              </select>
+              <input type="submit" value="Add Group" class="btn btn-sm">
             </form>
-            <h3 class="panel-title">Actors</h3>
-          </div>
-          <% if @feature.actors_value.empty? %>
-            <div class="blankslate">
-              <span class="mega-octicon octicon-person"></span>
-              <span class="mega-octicon octicon-squirrel"></span>
-              <span class="mega-octicon octicon-zap"></span>
-              <h3>No Enabled Actors</h3>
-              <p>Enable actors using the form above.</p>
-            </div>
-          <% else %>
-            <ul class="list-group">
-              <% @feature.actors_value.each do |item| %>
-                <li class="list-group-item">
-                  <div class="flex-table">
-                    <div class="flex-table-item flex-table-item-primary">
-                      <%= item %>
-                    </div>
-                    <div class="flex-table-item">
-                      <form action="<%= script_name %>/features/<%= @feature.key %>/actors" method="post">
-                        <%== csrf_input_tag %>
-                        <input type="hidden" name="operation" value="disable">
-                        <input type="hidden" name="value" value="<%= item %>">
-                        <button type="submit" value="Disable" class="button-inv danger tooltipped tooltipped-w" aria-label="Disable <%= item %>">
-                          <span class="octicon octicon-trashcan"></span>
-                        </button>
-                      </form>
-                    </div>
-                  </div>
-                </li>
-              <% end %>
-            </ul>
           <% end %>
+          <h3 class="panel-title">Groups</h3>
         </div>
+        <% if @feature.groups_value.empty? %>
+          <div class="blankslate">
+            <span class="mega-octicon octicon-organization"></span>
+            <span class="mega-octicon octicon-squirrel"></span>
+            <span class="mega-octicon octicon-zap"></span>
+            <h3>No Enabled Groups</h3>
+            <p>Enable groups using the form above.</p>
+          </div>
+        <% else %>
+          <ul class="list-group">
+            <% @feature.groups_value.each do |item| %>
+              <li class="list-group-item">
+                <div class="flex-table">
+                  <div class="flex-table-item flex-table-item-primary">
+                    <%= item %>
+                  </div>
+                  <div class="flex-table-item">
+                    <form action="<%= script_name %>/features/<%= @feature.key %>/groups" method="post">
+                      <%== csrf_input_tag %>
+                      <input type="hidden" name="operation" value="disable">
+                      <input type="hidden" name="value" value="<%= item %>">
+                      <button type="submit" value="Disable" class="button-inv danger tooltipped tooltipped-w" aria-label="Disable <%= item %>">
+                        <span class="octicon octicon-trashcan"></span>
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </li>
+            <% end %>
+          </ul>
+        <% end %>
+      </div>
+    </div>
+    <div class="column one-half">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <form action="<%= script_name %>/features/<%= @feature.key %>/actors" method="post" class="right">
+            <%== csrf_input_tag %>
+            <input type="hidden" name="operation" value="enable">
+            <input type="text" name="value" placeholder="ie: User:6" class="input-mini">
+            <input type="submit" value="Add Actor" class="btn btn-sm">
+          </form>
+          <h3 class="panel-title">Actors</h3>
+        </div>
+        <% if @feature.actors_value.empty? %>
+          <div class="blankslate">
+            <span class="mega-octicon octicon-person"></span>
+            <span class="mega-octicon octicon-squirrel"></span>
+            <span class="mega-octicon octicon-zap"></span>
+            <h3>No Enabled Actors</h3>
+            <p>Enable actors using the form above.</p>
+          </div>
+        <% else %>
+          <ul class="list-group">
+            <% @feature.actors_value.each do |item| %>
+              <li class="list-group-item">
+                <div class="flex-table">
+                  <div class="flex-table-item flex-table-item-primary">
+                    <%= item %>
+                  </div>
+                  <div class="flex-table-item">
+                    <form action="<%= script_name %>/features/<%= @feature.key %>/actors" method="post">
+                      <%== csrf_input_tag %>
+                      <input type="hidden" name="operation" value="disable">
+                      <input type="hidden" name="value" value="<%= item %>">
+                      <button type="submit" value="Disable" class="button-inv danger tooltipped tooltipped-w" aria-label="Disable <%= item %>">
+                        <span class="octicon octicon-trashcan"></span>
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </li>
+            <% end %>
+          </ul>
+        <% end %>
       </div>
     </div>
   </div>
-<% end %>
+</div>
 
 <div class="panel panel-danger">
   <div class="panel-heading">
