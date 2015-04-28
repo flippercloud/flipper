@@ -1,4 +1,4 @@
-## master
+## master (0.7)
 
 * Added Flipper.groups and Flipper.group_names
 * Changed percentage_of_random to percentage_of_time
