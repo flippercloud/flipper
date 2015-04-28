@@ -7,13 +7,13 @@ Dir['flipper-*.gemspec'].each do |gemspec|
 end
 
 gem 'rake', '~> 10.4.2'
-gem 'metriks', '~> 0.9.9', :require => false
-gem 'shotgun', '~> 0.9', :require => false
-gem 'statsd-ruby', '~> 1.2.1', :require => false
+gem 'metriks', '~> 0.9.9'
+gem 'shotgun', '~> 0.9'
+gem 'statsd-ruby', '~> 1.2.1'
 gem 'rspec', '~> 2.14'
 gem 'rack-test', '~> 0.6.3'
-gem 'activesupport', '~> 4.2.0', :require => false
-gem 'redis-namespace', :require => false
+gem 'activesupport', '~> 4.2.0'
+gem 'redis-namespace'
 
 group(:guard) do
   gem 'guard', '~> 2.12.5'
