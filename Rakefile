@@ -16,7 +16,7 @@ end
 
 desc 'Tags version, pushes to remote, and pushes gem'
 task :release => :build do
-  sh 'git', 'tag', '-m', changelog, "v#{Flipper::VERSION}"
+  sh 'git', 'tag', "v#{Flipper::VERSION}"
   sh "git push origin master"
   sh "git push origin v#{Flipper::VERSION}"
   sh "ls pkg/*.gem | xargs -n 1 gem push"
