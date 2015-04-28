@@ -20,7 +20,7 @@ Or install it yourself with:
 
 ```ruby
 require 'flipper/adapters/mongo'
-collection = Mongo::MongoClient.new.db('testing')['flipper']
+collection = Mongo::Client.new(["127.0.0.1:27017"], database: 'testing')['flipper']
 adapter = Flipper::Adapters::Mongo.new(collection)
 flipper = Flipper.new(adapter)
 # profit...
@@ -32,7 +32,7 @@ Each feature is stored in a document, which means getting a feature is single qu
 
 ```ruby
 require 'flipper/adapters/mongo'
-collection = Mongo::MongoClient.new.db('testing')['flipper']
+collection = Mongo::Client.new(["127.0.0.1:27017"], database: 'testing')['flipper']
 adapter = Flipper::Adapters::Mongo.new(collection)
 flipper = Flipper.new(adapter)
 
@@ -49,7 +49,7 @@ flipper[:stats].enable flipper.group(:early_access)
 flipper[:stats].enable User.new('25')
 flipper[:stats].enable User.new('90')
 flipper[:stats].enable User.new('180')
-flipper[:stats].enable flipper.random(15)
+flipper[:stats].enable flipper.time(15)
 flipper[:stats].enable flipper.actors(45)
 
 flipper[:search].enable
@@ -62,7 +62,7 @@ pp collection.find.to_a
 #   "boolean"=>"true",
 #   "groups"=>["admins", "early_access"],
 #   "percentage_of_actors"=>"45",
-#   "percentage_of_random"=>"15"},
+#   "percentage_of_time"=>"15"},
 #  {"_id"=>"flipper_features", "features"=>["stats", "search"]},
 #  {"_id"=>"search", "boolean"=>"true"}]
 
@@ -73,7 +73,7 @@ pp adapter.get(flipper[:stats])
 #  :groups=>#<Set: {"admins", "early_access"}>,
 #  :actors=>#<Set: {"25", "90", "180"}>,
 #  :percentage_of_actors=>"45",
-#  :percentage_of_random=>"15"}
+#  :percentage_of_time=>"15"}
 ```
 
 ## Contributing
