@@ -3,8 +3,9 @@
 I plan on supporting [in-memory](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb), [Mongo](https://github.com/jnunemaker/flipper-mongo), and [Redis](https://github.com/jnunemaker/flipper-redis) as adapters for flipper. Others are welcome, so please let me know if you create one.
 
 * [memory adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb) – great for tests
-* [Mongo adapter](https://github.com/jnunemaker/flipper-mongo)
-* [Redis adapter](https://github.com/jnunemaker/flipper-redis)
+* [PStore adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/pstore.rb) – great for when a local file is enough
+* [Mongo adapter](https://github.com/jnunemaker/flipper/blob/master/docs/mongo)
+* [Redis adapter](https://github.com/jnunemaker/flipper/blob/master/docs/redis)
 * [Cassanity adapter](https://github.com/jnunemaker/flipper-cassanity)
 * [Active Record 4 adapter](https://github.com/bgentry/flipper-activerecord)
 * [Active Record 3 adapter](https://github.com/jproudman/flipper-activerecord)
