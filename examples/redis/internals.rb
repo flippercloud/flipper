@@ -7,11 +7,13 @@ lib_path  = root_path.join('lib')
 $:.unshift(lib_path)
 
 require 'flipper/adapters/redis'
-require 'redis/namespace'
 
-client = Redis.new
-namespaced_client = Redis::Namespace.new(:flipper, :redis => client)
-adapter = Flipper::Adapters::Redis.new(namespaced_client)
+options = {}
+if ENV['BOXEN_REDIS_URL']
+  options[:url] = ENV['BOXEN_REDIS_URL']
+end
+client = Redis.new(options)
+adapter = Flipper::Adapters::Redis.new(client)
 flipper = Flipper.new(adapter)
 
 # Register a few groups.
@@ -27,28 +29,28 @@ flipper[:stats].enable flipper.group(:early_access)
 flipper[:stats].enable User.new('25')
 flipper[:stats].enable User.new('90')
 flipper[:stats].enable User.new('180')
-flipper[:stats].enable flipper.random(15)
+flipper[:stats].enable flipper.time(15)
 flipper[:stats].enable flipper.actors(45)
 
 flipper[:search].enable
 
 print 'all keys: '
-pp namespaced_client.keys
+pp client.keys
 # all keys: ["stats", "flipper_features", "search"]
 puts
 
 print "known flipper features: "
-pp namespaced_client.smembers("flipper_features")
+pp client.smembers("flipper_features")
 # known flipper features: ["stats", "search"]
 puts
 
 puts 'stats keys'
-pp namespaced_client.hgetall('stats')
+pp client.hgetall('stats')
 # stats keys
 # {"boolean"=>"true",
 #  "groups/admins"=>"1",
 #  "actors/25"=>"1",
-#  "percentage_of_random"=>"15",
+#  "percentage_of_time"=>"15",
 #  "percentage_of_actors"=>"45",
 #  "groups/early_access"=>"1",
 #  "actors/90"=>"1",
@@ -56,7 +58,7 @@ pp namespaced_client.hgetall('stats')
 puts
 
 puts 'search keys'
-pp namespaced_client.hgetall('search')
+pp client.hgetall('search')
 # search keys
 # {"boolean"=>"true"}
 puts
@@ -68,4 +70,4 @@ pp adapter.get(flipper[:stats])
 #  :groups=>#<Set: {"admins", "early_access"}>,
 #  :actors=>#<Set: {"25", "90", "180"}>,
 #  :percentage_of_actors=>"45",
-#  :percentage_of_random=>"15"}
+#  :percentage_of_time=>"15"}
