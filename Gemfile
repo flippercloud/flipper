@@ -13,6 +13,7 @@ gem 'statsd-ruby', '~> 1.2.1', :require => false
 gem 'rspec', '~> 2.14'
 gem 'rack-test', '~> 0.6.3'
 gem 'activesupport', '~> 4.2.0', :require => false
+gem 'redis-namespace', :require => false
 
 group(:guard) do
   gem 'guard', '~> 2.12.5'

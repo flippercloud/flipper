@@ -29,7 +29,7 @@ Gem::Specification.new do |gem|
   gem.license       = "MIT"
 
   gem.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
-  gem.files         = `git ls-files`.split("\n") - ignored_files
+  gem.files         = `git ls-files`.split("\n") - ignored_files + ["lib/flipper/version.rb"]
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n") - ignored_test_files
   gem.name          = "flipper"
   gem.require_paths = ["lib"]
