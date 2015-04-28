@@ -20,5 +20,5 @@ Gem::Specification.new do |gem|
   gem.version       = Flipper::VERSION
 
   gem.add_dependency 'flipper', "~> #{Flipper::VERSION}"
-  gem.add_dependency 'mongo', '~> 1.8'
+  gem.add_dependency 'mongo', '~> 2.0'
 end

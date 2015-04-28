@@ -116,18 +116,18 @@ module Flipper
 
       # Private
       def find(key)
-        @collection.find_one(criteria(key)) || {}
+        @collection.find(criteria(key)).limit(1).first || {}
       end
 
       # Private
       def update(key, updates)
         options = {:upsert => true}
-        @collection.update criteria(key), updates, options
+        @collection.find(criteria(key)).update_one(updates, options)
       end
 
       # Private
       def delete(key)
-        @collection.remove criteria(key)
+        @collection.find(criteria(key)).delete_one
       end
 
       # Private
