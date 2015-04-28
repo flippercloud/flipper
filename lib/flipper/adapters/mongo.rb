@@ -25,13 +25,13 @@ module Flipper
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
-        update FeaturesKey, '$addToSet' => {'features' => feature.name.to_s}
+        update FeaturesKey, '$addToSet' => {'features' => feature.key}
         true
       end
 
       # Public: Removes a feature from the set of known features.
       def remove(feature)
-        update FeaturesKey, '$pull' => {'features' => feature.name.to_s}
+        update FeaturesKey, '$pull' => {'features' => feature.key}
         clear feature
         true
       end

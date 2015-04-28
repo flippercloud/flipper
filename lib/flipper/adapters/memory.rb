@@ -25,7 +25,7 @@ module Flipper
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
-        features.add(feature.name.to_s)
+        features.add(feature.key)
         true
       end
 

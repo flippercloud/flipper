@@ -28,14 +28,14 @@ module Flipper
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
-        @client.sadd FeaturesKey, feature.name
+        @client.sadd FeaturesKey, feature.key
         true
       end
 
       # Public: Removes a feature from the set of known features.
       def remove(feature)
         @client.multi do
-          @client.srem FeaturesKey, feature.name
+          @client.srem FeaturesKey, feature.key
           @client.del feature.key
         end
         true
