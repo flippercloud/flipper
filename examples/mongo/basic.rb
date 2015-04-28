@@ -6,7 +6,8 @@ lib_path  = root_path.join('lib')
 $:.unshift(lib_path)
 
 require 'flipper/adapters/mongo'
-collection = Mongo::MongoClient.new.db('testing')['flipper']
+Mongo::Logger.logger.level = Logger::INFO
+collection = Mongo::Client.new(["127.0.0.1:#{ENV["BOXEN_MONGODB_PORT"] || 27017}"], :database => 'testing')['flipper']
 adapter = Flipper::Adapters::Mongo.new(collection)
 flipper = Flipper.new(adapter)
 
