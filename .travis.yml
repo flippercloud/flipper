@@ -6,6 +6,7 @@ rvm:
 notifications:
   email: false
 bundler_args: --without guard
-before_script: sudo service redis-server status
+before_script: sudo service redis-server status && sudo service mongodb status
 services:
   - redis-server
+  - mongodb
