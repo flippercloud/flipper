@@ -40,7 +40,7 @@ you can mount `Flipper::UI` to a route of your choice:
 # config/routes.rb
 
 YourRailsApp::Application.routes.draw do
-  mount Flipper::UI.app($flipper, secret: "_your_session_secret") => '/flipper'
+  mount Flipper::UI.app($flipper) => '/flipper'
 end
 ```
 
@@ -53,7 +53,7 @@ You almost certainly want to limit access when using Flipper::UI in production. 
 
 flipper_constraint = lambda { |request| request.remote_ip == '127.0.0.1' }
 constraints flipper_constraint do
-  mount Flipper::UI.app($flipper, secret: "_your_session_secret") => '/flipper'
+  mount Flipper::UI.app($flipper) => '/flipper'
 end
 ```
 
@@ -72,7 +72,7 @@ end
 # config/routes.rb
 
 constraints CanAccessFlipperUI do
-  mount Flipper::UI.app($flipper, secret: "_your_session_secret") => '/flipper'
+  mount Flipper::UI.app($flipper) => '/flipper'
 end
 ```
 
@@ -90,7 +90,15 @@ require 'flipper/adapters/memory'
 adapter = Flipper::Adapters::Memory.new
 flipper = Flipper.new(adapter)
 
-run Flipper::UI.app(flipper, secret: "_your_session_secret")
+run Flipper::UI.app(flipper) { |builder|
+  builder.use Rack::Session::Cookie, secret: "something long and random"
+}
+```
+
+The key is that you need to have sessions setup. Rails does this for you, so this step isn't necessary, but for standalone rack, you'll need it. Without sessions setup, you will receive a Runtime error like:
+
+```
+RuntimeError: you need to set up a session middleware *before* Rack::Protection::RemoteToken.
 ```
 
 See [examples/ui/basic.ru](https://github.com/jnunemaker/flipper/blob/master/examples/ui/basic.ru) for a more full example

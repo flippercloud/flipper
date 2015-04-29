@@ -2,7 +2,7 @@ require 'rack'
 require 'flipper/ui/action_collection'
 
 # Require all actions automatically.
-Flipper::UI.root.join('actions').each_child(false) do |name|
+Pathname(__FILE__).dirname.join('actions').each_child(false) do |name|
   require "flipper/ui/actions/#{name}"
 end
 

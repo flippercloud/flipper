@@ -9,7 +9,9 @@ module SpecHelpers
   end
 
   def build_app(flipper)
-    Flipper::UI.app(flipper, secret: "test")
+    Flipper::UI.app(flipper) { |builder|
+      builder.use Rack::Session::Cookie
+    }
   end
 
   def build_flipper(adapter = build_memory_adapter)
