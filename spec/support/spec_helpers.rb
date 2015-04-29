@@ -10,7 +10,7 @@ module SpecHelpers
 
   def build_app(flipper)
     Flipper::UI.app(flipper) { |builder|
-      builder.use Rack::Session::Cookie
+      builder.use Rack::Session::Cookie, secret: "test"
     }
   end
 
