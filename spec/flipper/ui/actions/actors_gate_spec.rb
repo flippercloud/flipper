@@ -1,5 +1,4 @@
 require 'helper'
-require 'flipper/ui/actor'
 
 describe Flipper::UI::Actions::ActorsGate do
   describe "GET /features/:feature/actors" do

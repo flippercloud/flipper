@@ -1,5 +1,4 @@
 require 'helper'
-require 'flipper/ui/actor'
 
 describe Flipper::UI::Actions::PercentageOfActorsGate do
   describe "POST /features/:feature/percentage_of_actors" do
