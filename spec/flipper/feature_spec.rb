@@ -169,6 +169,7 @@ describe Flipper::Feature do
       false => boolean_false,
       boolean_true => boolean_true,
       boolean_false => boolean_false,
+      :admins => group,
       group => group,
       percentage_of_time => percentage_of_time,
       percentage_of_actors => percentage_of_actors,

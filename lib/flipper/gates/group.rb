@@ -42,7 +42,7 @@ module Flipper
       end
 
       def protects?(thing)
-        thing.is_a?(Types::Group)
+        thing.is_a?(Types::Group) || thing.is_a?(Symbol)
       end
     end
   end

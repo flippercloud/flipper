@@ -49,5 +49,9 @@ describe Flipper::Gates::Group do
       group = Flipper.register(:admins) {}
       subject.protects?(group).should be(true)
     end
+
+    it "returns true for symbol" do
+      subject.protects?(:admins).should be(true)
+    end
   end
 end
