@@ -6,6 +6,8 @@ module Flipper
         thing.respond_to?(:flipper_id)
       end
 
+      attr_reader :thing
+
       def initialize(thing)
         if thing.nil?
           raise ArgumentError.new("thing cannot be nil")

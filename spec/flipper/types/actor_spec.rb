@@ -87,6 +87,12 @@ describe Flipper::Types::Actor do
     actor.admin?.should eq(true)
   end
 
+  it "exposes thing" do
+    thing = thing_class.new(10)
+    actor = described_class.new(thing)
+    actor.thing.should be(thing)
+  end
+
   describe "#respond_to?" do
     it "returns true if responds to method" do
       thing = thing_class.new('1')

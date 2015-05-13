@@ -37,8 +37,12 @@ module Flipper
         end
       end
 
+      def wrap(thing)
+        Types::Group.wrap(thing)
+      end
+
       def protects?(thing)
-        thing.is_a?(Types::Group)
+        thing.is_a?(Types::Group) || thing.is_a?(Symbol)
       end
     end
   end

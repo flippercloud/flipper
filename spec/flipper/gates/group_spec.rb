@@ -31,4 +31,27 @@ describe Flipper::Gates::Group do
       end
     end
   end
+
+  describe "#wrap" do
+    it "returns group instance for symbol" do
+      group = Flipper.register(:admins) {}
+      subject.wrap(:admins).should eq(group)
+    end
+
+    it "returns group instance for group instance" do
+      group = Flipper.register(:admins) {}
+      subject.wrap(group).should eq(group)
+    end
+  end
+
+  describe "#protects?" do
+    it "returns true for group" do
+      group = Flipper.register(:admins) {}
+      subject.protects?(group).should be(true)
+    end
+
+    it "returns true for symbol" do
+      subject.protects?(:admins).should be(true)
+    end
+  end
 end

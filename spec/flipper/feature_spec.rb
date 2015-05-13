@@ -115,7 +115,7 @@ describe Flipper::Feature do
     }
 
     it "is recorded for enable" do
-      thing = Flipper::Types::Boolean.new
+      thing = Flipper::Types::Actor.new(Struct.new(:flipper_id).new("1"))
       gate = subject.gate_for(thing)
 
       subject.enable(thing)
@@ -127,6 +127,17 @@ describe Flipper::Feature do
       event.payload[:operation].should eq(:enable)
       event.payload[:thing].should eq(thing)
       event.payload[:result].should_not be_nil
+    end
+
+    it "always instruments flipper type instance for enable" do
+      thing = Struct.new(:flipper_id).new("1")
+      gate = subject.gate_for(thing)
+
+      subject.enable(thing)
+
+      event = instrumenter.events.last
+      event.should_not be_nil
+      event.payload[:thing].should eq(Flipper::Types::Actor.new(thing))
     end
 
     it "is recorded for disable" do
@@ -144,8 +155,50 @@ describe Flipper::Feature do
       event.payload[:result].should_not be_nil
     end
 
+    user = Struct.new(:flipper_id).new("1")
+    actor = Flipper::Types::Actor.new(user)
+    boolean_true = Flipper::Types::Boolean.new(true)
+    boolean_false = Flipper::Types::Boolean.new(false)
+    group = Flipper::Types::Group.new(:admins)
+    percentage_of_time = Flipper::Types::PercentageOfTime.new(10)
+    percentage_of_actors = Flipper::Types::PercentageOfActors.new(10)
+    {
+      user => actor,
+      actor => actor,
+      true => boolean_true,
+      false => boolean_false,
+      boolean_true => boolean_true,
+      boolean_false => boolean_false,
+      :admins => group,
+      group => group,
+      percentage_of_time => percentage_of_time,
+      percentage_of_actors => percentage_of_actors,
+    }.each do |thing, wrapped_thing|
+      it "always instruments #{thing.inspect} as #{wrapped_thing.class} for enable" do
+        Flipper.register(:admins) {}
+        subject.enable(thing)
+
+        event = instrumenter.events.last
+        event.should_not be_nil
+        event.payload[:operation].should eq(:enable)
+        event.payload[:thing].should eq(wrapped_thing)
+      end
+    end
+
+    it "always instruments flipper type instance for disable" do
+      thing = Struct.new(:flipper_id).new("1")
+      gate = subject.gate_for(thing)
+
+      subject.disable(thing)
+
+      event = instrumenter.events.last
+      event.should_not be_nil
+      event.payload[:operation].should eq(:disable)
+      event.payload[:thing].should eq(Flipper::Types::Actor.new(thing))
+    end
+
     it "is recorded for enabled?" do
-      thing = Flipper::Types::Boolean.new
+      thing = Flipper::Types::Actor.new(Struct.new(:flipper_id).new("1"))
       gate = subject.gate_for(thing)
 
       subject.enabled?(thing)
@@ -157,6 +210,23 @@ describe Flipper::Feature do
       event.payload[:operation].should eq(:enabled?)
       event.payload[:thing].should eq(thing)
       event.payload[:result].should eq(false)
+    end
+
+    user = Struct.new(:flipper_id).new("1")
+    actor = Flipper::Types::Actor.new(user)
+    {
+      nil => nil,
+      user => actor,
+      actor => actor,
+    }.each do |thing, wrapped_thing|
+      it "always instruments #{thing.inspect} as #{wrapped_thing.class} for enabled?" do
+        subject.enabled?(thing)
+
+        event = instrumenter.events.last
+        event.should_not be_nil
+        event.payload[:operation].should eq(:enabled?)
+        event.payload[:thing].should eq(wrapped_thing)
+      end
     end
   end
 
