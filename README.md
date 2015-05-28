@@ -72,6 +72,7 @@ Of course there are more [examples for you to peruse](examples/). You could also
 * [Instrumentation](docs/Instrumentation.md) - ActiveSupport::Notifications, Statsd and Metriks
 * [Optimization](docs/Optimization.md) - Memoization middleware
 * [Web Interface](docs/ui/README.md) - Point and click...
+* [Caveats](docs/Caveats.md) - Flipper beware! (see what I did there)
 
 ## Contributing
 
