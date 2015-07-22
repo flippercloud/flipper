@@ -22,7 +22,8 @@ module Flipper
       # Internal: Checks if the gate is open for a thing.
       #
       # Returns true if gate open for thing, false if not.
-      def open?(thing, value, options = {})
+      def open?(thing, context)
+        value = context.values[key]
         percentage = Typecast.to_integer(value)
         rand < (percentage / 100.0)
       end

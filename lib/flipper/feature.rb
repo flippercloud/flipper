@@ -1,6 +1,7 @@
 require 'flipper/errors'
 require 'flipper/type'
 require 'flipper/gate'
+require 'flipper/gate_context'
 require 'flipper/gate_values'
 require 'flipper/instrumenters/noop'
 
@@ -86,7 +87,12 @@ module Flipper
 
         open_gate = gates.detect { |gate|
           instrument_gate(gate, :open?, thing) { |gate_payload|
-            gate.open?(thing, values[gate.key], feature_name: @name)
+            context = GateContext.new(
+              gates: gates,
+              values: values,
+              feature_name: @name
+            )
+            gate.open?(thing, context)
           }
         }
 

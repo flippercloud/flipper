@@ -7,6 +7,14 @@ describe Flipper::Gates::Boolean do
     described_class.new
   }
 
+  def context(bool)
+    Flipper::GateContext.new(
+      gates: [],
+      values: Flipper::GateValues.new({boolean: bool}),
+      feature_name: feature_name
+    )
+  end
+
   describe "#enabled?" do
     context "for true value" do
       it "returns true" do
@@ -24,13 +32,13 @@ describe Flipper::Gates::Boolean do
   describe "#open?" do
     context "for true value" do
       it "returns true" do
-        subject.open?(Object.new, true, feature_name: feature_name).should eq(true)
+        subject.open?(Object.new, context(true)).should eq(true)
       end
     end
 
     context "for false value" do
       it "returns false" do
-        subject.open?(Object.new, false, feature_name: feature_name).should eq(false)
+        subject.open?(Object.new, context(false)).should eq(false)
       end
     end
   end

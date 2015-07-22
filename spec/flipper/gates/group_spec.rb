@@ -7,6 +7,14 @@ describe Flipper::Gates::Group do
     described_class.new
   }
 
+  def context(set)
+    Flipper::GateContext.new(
+      gates: [],
+      values: Flipper::GateValues.new({groups: set}),
+      feature_name: feature_name
+    )
+  end
+
   describe "#open?" do
     context "with a group in adapter, but not registered" do
       before do
@@ -15,7 +23,7 @@ describe Flipper::Gates::Group do
 
       it "ignores group" do
         thing = Struct.new(:flipper_id).new('5')
-        subject.open?(thing, Set[:newbs, :staff], feature_name: feature_name).should eq(true)
+        subject.open?(thing, context(Set[:newbs, :staff])).should eq(true)
       end
     end
 
@@ -26,7 +34,7 @@ describe Flipper::Gates::Group do
 
       it "raises error" do
         expect {
-          subject.open?(Object.new, Set[:stinkers], feature_name: feature_name)
+          subject.open?(Object.new, context(Set[:stinkers]))
         }.to raise_error(NoMethodError)
       end
     end
