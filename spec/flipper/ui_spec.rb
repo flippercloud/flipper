@@ -32,4 +32,13 @@ describe Flipper::UI do
       }.to raise_error(Flipper::UI::RequestMethodNotSupported)
     end
   end
+
+  # See https://github.com/jnunemaker/flipper/issues/80
+  it "can route features with names that match static directories" do
+    post "features/refactor-images/actors",
+      {"value" => "User:6", "operation" => "enable", "authenticity_token" => "a"},
+      "rack.session" => {:csrf => "a"}
+    last_response.status.should be(302)
+    last_response.headers["Location"].should eq("/features/refactor-images")
+  end
 end
