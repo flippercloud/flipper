@@ -8,7 +8,7 @@ I plan on supporting the adapters in the flipper repo. Other adapters are welcom
 * [Redis adapter](https://github.com/jnunemaker/flipper/blob/master/docs/redis)
 * [Cassanity adapter](https://github.com/jnunemaker/flipper-cassanity)
 * [Active Record 4 adapter](https://github.com/bgentry/flipper-activerecord)
-* [Active Record 3 adapter](https://github.com/jproudman/flipper-activerecord)
+* [Active Record 3 adapter](https://github.com/blueboxjesse/flipper-activerecord)
 
 The basic API for an adapter is this:
 
