@@ -1,3 +1,7 @@
+## 0.7.1
+
+* Fix bug where features with names that match static file routes were incorrectly routing to the file action (https://github.com/jnunemaker/flipper/issues/80)
+
 ## 0.7
 
 * Added Flipper.groups and Flipper.group_names
