@@ -9,6 +9,7 @@ I plan on supporting the adapters in the flipper repo. Other adapters are welcom
 * [Cassanity adapter](https://github.com/jnunemaker/flipper-cassanity)
 * [Active Record 4 adapter](https://github.com/bgentry/flipper-activerecord)
 * [Active Record 3 adapter](https://github.com/blueboxjesse/flipper-activerecord)
+* [Consul adapter](https://github.com/gdavison/flipper-consul)
 
 The basic API for an adapter is this:
 
