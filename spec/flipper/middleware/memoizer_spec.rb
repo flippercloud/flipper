@@ -4,7 +4,7 @@ require 'flipper/middleware/memoizer'
 require 'flipper/adapters/operation_logger'
 require 'flipper/adapters/memory'
 
-describe Flipper::Middleware::Memoizer do
+RSpec.describe Flipper::Middleware::Memoizer do
   include Rack::Test::Methods
 
   let(:memory_adapter) { Flipper::Adapters::Memory.new }
@@ -26,7 +26,7 @@ describe Flipper::Middleware::Memoizer do
       }
       middleware = described_class.new app, flipper
       middleware.call({})
-      called.should eq(true)
+      expect(called).to eq(true)
     end
 
     it "disables local cache after body close" do
@@ -34,9 +34,9 @@ describe Flipper::Middleware::Memoizer do
       middleware = described_class.new app, flipper
       body = middleware.call({}).last
 
-      flipper.adapter.memoizing?.should eq(true)
+      expect(flipper.adapter.memoizing?).to eq(true)
       body.close
-      flipper.adapter.memoizing?.should eq(false)
+      expect(flipper.adapter.memoizing?).to eq(false)
     end
 
     it "clears local cache after body close" do
@@ -46,19 +46,19 @@ describe Flipper::Middleware::Memoizer do
 
       flipper.adapter.cache['hello'] = 'world'
       body.close
-      flipper.adapter.cache.should be_empty
+      expect(flipper.adapter.cache).to be_empty
     end
 
     it "clears the local cache with a successful request" do
       flipper.adapter.cache['hello'] = 'world'
       get '/'
-      flipper.adapter.cache.should be_empty
+      expect(flipper.adapter.cache).to be_empty
     end
 
     it "clears the local cache even when the request raises an error" do
       flipper.adapter.cache['hello'] = 'world'
       get '/fail' rescue nil
-      flipper.adapter.cache.should be_empty
+      expect(flipper.adapter.cache).to be_empty
     end
 
     it "caches getting a feature for duration of request" do
@@ -80,7 +80,7 @@ describe Flipper::Middleware::Memoizer do
       middleware = described_class.new app, flipper
       middleware.call({})
 
-      adapter.count(:get).should be(1)
+      expect(adapter.count(:get)).to be(1)
     end
   end
 

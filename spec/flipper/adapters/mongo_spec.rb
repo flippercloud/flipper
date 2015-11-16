@@ -4,7 +4,7 @@ require 'flipper/spec/shared_adapter_specs'
 
 Mongo::Logger.logger.level = Logger::INFO
 
-describe Flipper::Adapters::Mongo do
+RSpec.describe Flipper::Adapters::Mongo do
   let(:host) { ENV["BOXEN_MONGODB_HOST"] || '127.0.0.1' }
   let(:port) { ENV["BOXEN_MONGODB_PORT"] || 27017 }
 

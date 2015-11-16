@@ -1,7 +1,7 @@
 require 'helper'
 require 'flipper/types/actor'
 
-describe Flipper::Types::Actor do
+RSpec.describe Flipper::Types::Actor do
   subject {
     thing = thing_class.new('2')
     described_class.new(thing)
@@ -25,16 +25,16 @@ describe Flipper::Types::Actor do
     it "returns true if actor" do
       thing = thing_class.new('1')
       actor = described_class.new(thing)
-      described_class.wrappable?(actor).should eq(true)
+      expect(described_class.wrappable?(actor)).to eq(true)
     end
 
     it "returns true if responds to flipper_id" do
       thing = thing_class.new(10)
-      described_class.wrappable?(thing).should eq(true)
+      expect(described_class.wrappable?(thing)).to eq(true)
     end
 
     it "returns false if nil" do
-      described_class.wrappable?(nil).should be(false)
+      expect(described_class.wrappable?(nil)).to be(false)
     end
   end
 
@@ -42,8 +42,8 @@ describe Flipper::Types::Actor do
     context "for actor" do
       it "returns actor" do
         actor = described_class.wrap(subject)
-        actor.should be_instance_of(described_class)
-        actor.should be(subject)
+        expect(actor).to be_instance_of(described_class)
+        expect(actor).to be(subject)
       end
     end
 
@@ -51,7 +51,7 @@ describe Flipper::Types::Actor do
       it "returns actor" do
         thing = thing_class.new('1')
         actor = described_class.wrap(thing)
-        actor.should be_instance_of(described_class)
+        expect(actor).to be_instance_of(described_class)
       end
     end
   end
@@ -59,7 +59,7 @@ describe Flipper::Types::Actor do
   it "initializes with thing that responds to id" do
     thing = thing_class.new('1')
     actor = described_class.new(thing)
-    actor.value.should eq('1')
+    expect(actor.value).to eq('1')
   end
 
   it "raises error when initialized with nil" do
@@ -78,38 +78,38 @@ describe Flipper::Types::Actor do
   it "converts id to string" do
     thing = thing_class.new(2)
     actor = described_class.new(thing)
-    actor.value.should eq('2')
+    expect(actor.value).to eq('2')
   end
 
   it "proxies everything to thing" do
     thing = thing_class.new(10)
     actor = described_class.new(thing)
-    actor.admin?.should eq(true)
+    expect(actor.admin?).to eq(true)
   end
 
   it "exposes thing" do
     thing = thing_class.new(10)
     actor = described_class.new(thing)
-    actor.thing.should be(thing)
+    expect(actor.thing).to be(thing)
   end
 
   describe "#respond_to?" do
     it "returns true if responds to method" do
       thing = thing_class.new('1')
       actor = described_class.new(thing)
-      actor.respond_to?(:value).should eq(true)
+      expect(actor.respond_to?(:value)).to eq(true)
     end
 
     it "returns true if thing responds to method" do
       thing = thing_class.new(10)
       actor = described_class.new(thing)
-      actor.respond_to?(:admin?).should eq(true)
+      expect(actor.respond_to?(:admin?)).to eq(true)
     end
 
     it "returns false if does not respond to method and thing does not respond to method" do
       thing = thing_class.new(10)
       actor = described_class.new(thing)
-      actor.respond_to?(:frankenstein).should eq(false)
+      expect(actor.respond_to?(:frankenstein)).to eq(false)
     end
   end
 end

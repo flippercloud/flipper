@@ -2,7 +2,7 @@ require 'helper'
 require 'flipper/dsl'
 require 'flipper/adapters/memory'
 
-describe Flipper::DSL do
+RSpec.describe Flipper::DSL do
   subject { Flipper::DSL.new(adapter) }
 
   let(:adapter) { Flipper::Adapters::Memory.new }
@@ -10,12 +10,12 @@ describe Flipper::DSL do
   describe "#initialize" do
     it "sets adapter" do
       dsl = described_class.new(adapter)
-      dsl.adapter.should_not be_nil
+      expect(dsl.adapter).not_to be_nil
     end
 
     it "defaults instrumenter to noop" do
       dsl = described_class.new(adapter)
-      dsl.instrumenter.should be(Flipper::Instrumenters::Noop)
+      expect(dsl.instrumenter).to be(Flipper::Instrumenters::Noop)
     end
 
     context "with overriden instrumenter" do
@@ -23,12 +23,12 @@ describe Flipper::DSL do
 
       it "overrides default instrumenter" do
         dsl = described_class.new(adapter, :instrumenter => instrumenter)
-        dsl.instrumenter.should be(instrumenter)
+        expect(dsl.instrumenter).to be(instrumenter)
       end
 
       it "passes overridden instrumenter to adapter wrapping" do
         dsl = described_class.new(adapter, :instrumenter => instrumenter)
-        dsl.adapter.instrumenter.should be(instrumenter)
+        expect(dsl.adapter.instrumenter).to be(instrumenter)
       end
     end
   end
@@ -70,11 +70,11 @@ describe Flipper::DSL do
       end
 
       it "returns group" do
-        subject.group(:admins).should eq(@group)
+        expect(subject.group(:admins)).to eq(@group)
       end
 
       it "always returns same instance for same name" do
-        subject.group(:admins).should equal(subject.group(:admins))
+        expect(subject.group(:admins)).to equal(subject.group(:admins))
       end
     end
 
@@ -92,8 +92,8 @@ describe Flipper::DSL do
       it "returns actor instance" do
         thing = Struct.new(:flipper_id).new(33)
         actor = subject.actor(thing)
-        actor.should be_instance_of(Flipper::Types::Actor)
-        actor.value.should eq('33')
+        expect(actor).to be_instance_of(Flipper::Types::Actor)
+        expect(actor.value).to eq('33')
       end
     end
 
@@ -120,15 +120,15 @@ describe Flipper::DSL do
     end
 
     it "returns percentage of time" do
-      @result.should be_instance_of(Flipper::Types::PercentageOfTime)
+      expect(@result).to be_instance_of(Flipper::Types::PercentageOfTime)
     end
 
     it "sets value" do
-      @result.value.should eq(5)
+      expect(@result.value).to eq(5)
     end
 
     it "is aliased to percentage_of_time" do
-      @result.should eq(subject.percentage_of_time(@result.value))
+      expect(@result).to eq(subject.percentage_of_time(@result.value))
     end
   end
 
@@ -138,22 +138,22 @@ describe Flipper::DSL do
     end
 
     it "returns percentage of actors" do
-      @result.should be_instance_of(Flipper::Types::PercentageOfActors)
+      expect(@result).to be_instance_of(Flipper::Types::PercentageOfActors)
     end
 
     it "sets value" do
-      @result.value.should eq(17)
+      expect(@result.value).to eq(17)
     end
 
     it "is aliased to percentage_of_actors" do
-      @result.should eq(subject.percentage_of_actors(@result.value))
+      expect(@result).to eq(subject.percentage_of_actors(@result.value))
     end
   end
 
   describe "#features" do
     context "with no features enabled/disabled" do
       it "defaults to empty set" do
-        subject.features.should eq(Set.new)
+        expect(subject.features).to eq(Set.new)
       end
     end
 
@@ -165,23 +165,23 @@ describe Flipper::DSL do
       end
 
       it "returns set of feature instances" do
-        subject.features.should be_instance_of(Set)
+        expect(subject.features).to be_instance_of(Set)
         subject.features.each do |feature|
-          feature.should be_instance_of(Flipper::Feature)
+          expect(feature).to be_instance_of(Flipper::Feature)
         end
-        subject.features.map(&:name).map(&:to_s).sort.should eq(['cache', 'search', 'stats'])
+        expect(subject.features.map(&:name).map(&:to_s).sort).to eq(['cache', 'search', 'stats'])
       end
     end
   end
 
   describe "#enable/disable" do
     it "enables and disables the feature" do
-      subject[:stats].boolean_value.should eq(false)
+      expect(subject[:stats].boolean_value).to eq(false)
       subject.enable(:stats)
-      subject[:stats].boolean_value.should eq(true)
+      expect(subject[:stats].boolean_value).to eq(true)
 
       subject.disable(:stats)
-      subject[:stats].boolean_value.should eq(false)
+      expect(subject[:stats].boolean_value).to eq(false)
     end
   end
 
@@ -189,12 +189,12 @@ describe Flipper::DSL do
     it "enables and disables the feature for actor" do
       actor = Struct.new(:flipper_id).new(5)
 
-      subject[:stats].actors_value.should be_empty
+      expect(subject[:stats].actors_value).to be_empty
       subject.enable_actor(:stats, actor)
-      subject[:stats].actors_value.should eq(Set["5"])
+      expect(subject[:stats].actors_value).to eq(Set["5"])
 
       subject.disable_actor(:stats, actor)
-      subject[:stats].actors_value.should be_empty
+      expect(subject[:stats].actors_value).to be_empty
     end
   end
 
@@ -203,34 +203,34 @@ describe Flipper::DSL do
       actor = Struct.new(:flipper_id).new(5)
       group = Flipper.register(:fives) { |actor| actor.flipper_id == 5 }
 
-      subject[:stats].groups_value.should be_empty
+      expect(subject[:stats].groups_value).to be_empty
       subject.enable_group(:stats, :fives)
-      subject[:stats].groups_value.should eq(Set["fives"])
+      expect(subject[:stats].groups_value).to eq(Set["fives"])
 
       subject.disable_group(:stats, :fives)
-      subject[:stats].groups_value.should be_empty
+      expect(subject[:stats].groups_value).to be_empty
     end
   end
 
   describe "#enable_percentage_of_time/disable_percentage_of_time" do
     it "enables and disables the feature for percentage of time" do
-      subject[:stats].percentage_of_time_value.should be(0)
+      expect(subject[:stats].percentage_of_time_value).to be(0)
       subject.enable_percentage_of_time(:stats, 6)
-      subject[:stats].percentage_of_time_value.should be(6)
+      expect(subject[:stats].percentage_of_time_value).to be(6)
 
       subject.disable_percentage_of_time(:stats)
-      subject[:stats].percentage_of_time_value.should be(0)
+      expect(subject[:stats].percentage_of_time_value).to be(0)
     end
   end
 
   describe "#enable_percentage_of_actors/disable_percentage_of_actors" do
     it "enables and disables the feature for percentage of time" do
-      subject[:stats].percentage_of_actors_value.should be(0)
+      expect(subject[:stats].percentage_of_actors_value).to be(0)
       subject.enable_percentage_of_actors(:stats, 6)
-      subject[:stats].percentage_of_actors_value.should be(6)
+      expect(subject[:stats].percentage_of_actors_value).to be(6)
 
       subject.disable_percentage_of_actors(:stats)
-      subject[:stats].percentage_of_actors_value.should be(0)
+      expect(subject[:stats].percentage_of_actors_value).to be(0)
     end
   end
 end

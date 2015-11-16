@@ -2,7 +2,7 @@ require 'helper'
 require 'flipper/adapters/redis'
 require 'flipper/spec/shared_adapter_specs'
 
-describe Flipper::Adapters::Redis do
+RSpec.describe Flipper::Adapters::Redis do
   let(:client) {
     options = {}
 

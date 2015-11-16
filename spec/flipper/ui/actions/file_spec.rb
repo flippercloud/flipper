@@ -1,13 +1,13 @@
 require 'helper'
 
-describe Flipper::UI::Actions::File do
+RSpec.describe Flipper::UI::Actions::File do
   describe "GET /images/logo.png" do
     before do
       get '/images/logo.png'
     end
 
     it "responds with 200" do
-      last_response.status.should be(200)
+      expect(last_response.status).to be(200)
     end
   end
 
@@ -17,7 +17,7 @@ describe Flipper::UI::Actions::File do
     end
 
     it "responds with 200" do
-      last_response.status.should be(200)
+      expect(last_response.status).to be(200)
     end
   end
 
@@ -27,7 +27,7 @@ describe Flipper::UI::Actions::File do
     end
 
     it "responds with 200" do
-      last_response.status.should be(200)
+      expect(last_response.status).to be(200)
     end
   end
 
@@ -37,7 +37,7 @@ describe Flipper::UI::Actions::File do
     end
 
     it "responds with 200" do
-      last_response.status.should be(200)
+      expect(last_response.status).to be(200)
     end
   end
 end

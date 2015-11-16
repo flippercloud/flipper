@@ -1,17 +1,17 @@
 require 'helper'
 require 'flipper/ui/util'
 
-describe Flipper::UI::Util do
+RSpec.describe Flipper::UI::Util do
   describe "#blank?" do
     context "with a string" do
       it "returns true if blank" do
-        described_class.blank?(nil).should be(true)
-        described_class.blank?('').should be(true)
-        described_class.blank?('   ').should be(true)
+        expect(described_class.blank?(nil)).to be(true)
+        expect(described_class.blank?('')).to be(true)
+        expect(described_class.blank?('   ')).to be(true)
       end
 
       it "returns false if not blank" do
-        described_class.blank?('nope').should be(false)
+        expect(described_class.blank?('nope')).to be(false)
       end
     end
   end
