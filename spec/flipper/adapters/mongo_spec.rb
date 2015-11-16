@@ -1,5 +1,4 @@
 require 'helper'
-require 'timeout'
 require 'flipper/adapters/mongo'
 require 'flipper/spec/shared_adapter_specs'
 
@@ -17,19 +16,8 @@ RSpec.describe Flipper::Adapters::Mongo do
 
   before do
     begin
-      Timeout::timeout(1) do
-        collection.drop
-      end
-    rescue Mongo::Error::OperationFailure => e
-      puts
-      puts "Error executing operation on Mongo. Is Mongo running?"
-      puts
-      raise e
-    rescue Timeout::Error => e
-      puts
-      puts "Timeout connecting to Mongo. Is Mongo running?"
-      puts
-      raise e
+      collection.drop
+    rescue Mongo::Error::OperationFailure
     end
     collection.create
   end
