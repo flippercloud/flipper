@@ -1,7 +1,7 @@
 require 'helper'
 require 'flipper/registry'
 
-describe Flipper::Registry do
+RSpec.describe Flipper::Registry do
   subject { Flipper::Registry.new(source) }
 
   let(:source) { {} }
@@ -10,13 +10,13 @@ describe Flipper::Registry do
     it "adds to source" do
       value = 'thing'
       subject.add(:admins, value)
-      source[:admins].should eq(value)
+      expect(source[:admins]).to eq(value)
     end
 
     it "converts key to symbol" do
       value = 'thing'
       subject.add('admins', value)
-      source[:admins].should eq(value)
+      expect(source[:admins]).to eq(value)
     end
 
     it "raises exception if key already registered" do
@@ -35,11 +35,11 @@ describe Flipper::Registry do
       end
 
       it "returns value" do
-        subject.get(:admins).should eq('thing')
+        expect(subject.get(:admins)).to eq('thing')
       end
 
       it "returns value if given string key" do
-        subject.get('admins').should eq('thing')
+        expect(subject.get('admins')).to eq('thing')
       end
     end
 
@@ -58,11 +58,11 @@ describe Flipper::Registry do
     end
 
     it "returns true if the key exists" do
-      subject.key?(:admins).should eq true
+      expect(subject.key?(:admins)).to eq true
     end
 
     it "returns false if the key does not exists" do
-      subject.key?(:unknown_key).should eq false
+      expect(subject.key?(:unknown_key)).to eq false
     end
   end
 
@@ -77,10 +77,10 @@ describe Flipper::Registry do
       subject.each do |key, value|
         results[key] = value
       end
-      results.should eq({
-        :admins => 'admins',
-        :devs => 'devs',
-      })
+      expect(results).to eq({
+              :admins => 'admins',
+              :devs => 'devs',
+            })
     end
   end
 
@@ -91,12 +91,12 @@ describe Flipper::Registry do
     end
 
     it "returns the keys" do
-      subject.keys.map(&:to_s).sort.should eq(['admins', 'devs'])
+      expect(subject.keys.map(&:to_s).sort).to eq(['admins', 'devs'])
     end
 
     it "returns the keys as symbols" do
       subject.keys.each do |key|
-        key.should be_instance_of(Symbol)
+        expect(key).to be_instance_of(Symbol)
       end
     end
   end
@@ -108,7 +108,7 @@ describe Flipper::Registry do
     end
 
     it "returns the values" do
-      subject.values.map(&:to_s).sort.should eq(['admins', 'devs'])
+      expect(subject.values.map(&:to_s).sort).to eq(['admins', 'devs'])
     end
   end
 
@@ -127,8 +127,8 @@ describe Flipper::Registry do
         values << value
       end
 
-      keys.map(&:to_s).sort.should eq(['admins', 'devs'])
-      values.sort.should eq(['admins', 'devs'])
+      expect(keys.map(&:to_s).sort).to eq(['admins', 'devs'])
+      expect(values.sort).to eq(['admins', 'devs'])
     end
   end
 
@@ -139,7 +139,7 @@ describe Flipper::Registry do
 
     it "clears the source" do
       subject.clear
-      source.should be_empty
+      expect(source).to be_empty
     end
   end
 end

@@ -1,6 +1,6 @@
 require 'helper'
 
-describe Flipper::UI::Actions::Home do
+RSpec.describe Flipper::UI::Actions::Home do
   describe "GET /" do
     before do
       flipper[:stats].enable
@@ -9,8 +9,8 @@ describe Flipper::UI::Actions::Home do
     end
 
     it "responds with redirect" do
-      last_response.status.should be(302)
-      last_response.headers["Location"].should eq("/features")
+      expect(last_response.status).to be(302)
+      expect(last_response.headers["Location"]).to eq("/features")
     end
   end
 end

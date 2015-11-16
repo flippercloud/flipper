@@ -1,11 +1,11 @@
 require 'helper'
 require 'flipper/instrumenters/memory'
 
-describe Flipper::Instrumenters::Memory do
+RSpec.describe Flipper::Instrumenters::Memory do
   describe "#initialize" do
     it "sets events to empty array" do
       instrumenter = described_class.new
-      instrumenter.events.should eq([])
+      expect(instrumenter.events).to eq([])
     end
   end
 
@@ -17,10 +17,10 @@ describe Flipper::Instrumenters::Memory do
       block_result = :yielded
 
       result = instrumenter.instrument(name, payload) { block_result }
-      result.should eq(block_result)
+      expect(result).to eq(block_result)
 
       event = described_class::Event.new(name, payload, block_result)
-      instrumenter.events.should eq([event])
+      expect(instrumenter.events).to eq([event])
     end
   end
 end

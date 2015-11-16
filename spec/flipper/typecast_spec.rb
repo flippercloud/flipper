@@ -1,7 +1,7 @@
 require 'helper'
 require 'flipper/typecast'
 
-describe Flipper::Typecast do
+RSpec.describe Flipper::Typecast do
   {
     nil => false,
     "" => false,
@@ -16,7 +16,7 @@ describe Flipper::Typecast do
   }.each do |value, expected|
     context "#to_boolean for #{value.inspect}" do
       it "returns #{expected}" do
-        described_class.to_boolean(value).should be(expected)
+        expect(described_class.to_boolean(value)).to be(expected)
       end
     end
   end
@@ -31,7 +31,7 @@ describe Flipper::Typecast do
   }.each do |value, expected|
     context "#to_integer for #{value.inspect}" do
       it "returns #{expected}" do
-        described_class.to_integer(value).should be(expected)
+        expect(described_class.to_integer(value)).to be(expected)
       end
     end
   end
@@ -44,7 +44,7 @@ describe Flipper::Typecast do
   }.each do |value, expected|
     context "#to_set for #{value.inspect}" do
       it "returns #{expected}" do
-        described_class.to_set(value).should eq(expected)
+        expect(described_class.to_set(value)).to eq(expected)
       end
     end
   end

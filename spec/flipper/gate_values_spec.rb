@@ -1,7 +1,7 @@
 require 'helper'
 require 'flipper/gate_values'
 
-describe Flipper::GateValues do
+RSpec.describe Flipper::GateValues do
   {
     nil => false,
     "" => false,
@@ -16,7 +16,7 @@ describe Flipper::GateValues do
   }.each do |value, expected|
     context "with #{value.inspect} boolean" do
       it "returns #{expected}" do
-        described_class.new(boolean: value).boolean.should be(expected)
+        expect(described_class.new(boolean: value).boolean).to be(expected)
       end
     end
   end
@@ -31,7 +31,7 @@ describe Flipper::GateValues do
   }.each do |value, expected|
     context "with #{value.inspect} percentage of time" do
       it "returns #{expected}" do
-        described_class.new(percentage_of_time: value).percentage_of_time.should be(expected)
+        expect(described_class.new(percentage_of_time: value).percentage_of_time).to be(expected)
       end
     end
   end
@@ -46,7 +46,7 @@ describe Flipper::GateValues do
   }.each do |value, expected|
     context "with #{value.inspect} percentage of actors" do
       it "returns #{expected}" do
-        described_class.new(percentage_of_actors: value).percentage_of_actors.should be(expected)
+        expect(described_class.new(percentage_of_actors: value).percentage_of_actors).to be(expected)
       end
     end
   end
@@ -59,7 +59,7 @@ describe Flipper::GateValues do
   }.each do |value, expected|
     context "with #{value.inspect} actors" do
       it "returns #{expected}" do
-        described_class.new(actors: value).actors.should eq(expected)
+        expect(described_class.new(actors: value).actors).to eq(expected)
       end
     end
   end
@@ -72,7 +72,7 @@ describe Flipper::GateValues do
   }.each do |value, expected|
     context "with #{value.inspect} groups" do
       it "returns #{expected}" do
-        described_class.new(groups: value).groups.should eq(expected)
+        expect(described_class.new(groups: value).groups).to eq(expected)
       end
     end
   end
@@ -103,32 +103,32 @@ describe Flipper::GateValues do
 
   describe "#[]" do
     it "can read the boolean value" do
-      described_class.new(boolean: true)[:boolean].should be(true)
-      described_class.new(boolean: true)["boolean"].should be(true)
+      expect(described_class.new(boolean: true)[:boolean]).to be(true)
+      expect(described_class.new(boolean: true)["boolean"]).to be(true)
     end
 
     it "can read the actors value" do
-      described_class.new(actors: Set[1, 2])[:actors].should eq(Set[1, 2])
-      described_class.new(actors: Set[1, 2])["actors"].should eq(Set[1, 2])
+      expect(described_class.new(actors: Set[1, 2])[:actors]).to eq(Set[1, 2])
+      expect(described_class.new(actors: Set[1, 2])["actors"]).to eq(Set[1, 2])
     end
 
     it "can read the groups value" do
-      described_class.new(groups: Set[:admins])[:groups].should eq(Set[:admins])
-      described_class.new(groups: Set[:admins])["groups"].should eq(Set[:admins])
+      expect(described_class.new(groups: Set[:admins])[:groups]).to eq(Set[:admins])
+      expect(described_class.new(groups: Set[:admins])["groups"]).to eq(Set[:admins])
     end
 
     it "can read the percentage of time value" do
-      described_class.new(percentage_of_time: 15)[:percentage_of_time].should eq(15)
-      described_class.new(percentage_of_time: 15)["percentage_of_time"].should eq(15)
+      expect(described_class.new(percentage_of_time: 15)[:percentage_of_time]).to eq(15)
+      expect(described_class.new(percentage_of_time: 15)["percentage_of_time"]).to eq(15)
     end
 
     it "can read the percentage of actors value" do
-      described_class.new(percentage_of_actors: 15)[:percentage_of_actors].should eq(15)
-      described_class.new(percentage_of_actors: 15)["percentage_of_actors"].should eq(15)
+      expect(described_class.new(percentage_of_actors: 15)[:percentage_of_actors]).to eq(15)
+      expect(described_class.new(percentage_of_actors: 15)["percentage_of_actors"]).to eq(15)
     end
 
     it "returns nil for value that is not present" do
-      described_class.new({})["not legit"].should be(nil)
+      expect(described_class.new({})["not legit"]).to be(nil)
     end
   end
 end

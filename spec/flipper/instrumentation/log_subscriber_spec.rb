@@ -3,7 +3,7 @@ require 'helper'
 require 'flipper/adapters/memory'
 require 'flipper/instrumentation/log_subscriber'
 
-describe Flipper::Instrumentation::LogSubscriber do
+RSpec.describe Flipper::Instrumentation::LogSubscriber do
   let(:adapter) { Flipper::Adapters::Memory.new }
   let(:flipper) {
     Flipper.new(adapter, :instrumenter => ActiveSupport::Notifications)
@@ -34,18 +34,18 @@ describe Flipper::Instrumentation::LogSubscriber do
 
     it "logs feature calls with result after operation" do
       feature_line = find_line('Flipper feature(search) enabled? false')
-      feature_line.should include('[ thing=nil ]')
+      expect(feature_line).to include('[ thing=nil ]')
     end
 
     it "logs adapter calls" do
       adapter_line = find_line('Flipper feature(search) adapter(memory) get')
-      adapter_line.should include('[ result={')
-      adapter_line.should include('} ]')
+      expect(adapter_line).to include('[ result={')
+      expect(adapter_line).to include('} ]')
     end
 
     it "logs gate calls" do
       gate_line = find_line('Flipper feature(search) gate(boolean) open? false')
-      gate_line.should include('[ thing=nil ]')
+      expect(gate_line).to include('[ thing=nil ]')
     end
   end
 
@@ -59,12 +59,12 @@ describe Flipper::Instrumentation::LogSubscriber do
 
     it "logs thing for feature" do
       feature_line = find_line('Flipper feature(search) enabled?')
-      feature_line.should include(user.inspect)
+      expect(feature_line).to include(user.inspect)
     end
 
     it "logs thing for gate" do
       gate_line = find_line('Flipper feature(search) gate(boolean) open')
-      gate_line.should include(user.inspect)
+      expect(gate_line).to include(user.inspect)
     end
   end
 
@@ -78,12 +78,12 @@ describe Flipper::Instrumentation::LogSubscriber do
 
     it "logs feature calls with result in brackets" do
       feature_line = find_line('Flipper feature(search) enable true')
-      feature_line.should include("[ thing=#{user.inspect} gate_name=actor ]")
+      expect(feature_line).to include("[ thing=#{user.inspect} gate_name=actor ]")
     end
 
     it "logs adapter value" do
       adapter_line = find_line('Flipper feature(search) adapter(memory) enable')
-      adapter_line.should include("[ result=")
+      expect(adapter_line).to include("[ result=")
     end
   end
 
@@ -95,7 +95,7 @@ describe Flipper::Instrumentation::LogSubscriber do
 
     it "logs adapter calls" do
       adapter_line = find_line('Flipper adapter(memory) features')
-      adapter_line.should include('[ result=')
+      expect(adapter_line).to include('[ result=')
     end
   end
 

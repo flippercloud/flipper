@@ -1,6 +1,6 @@
 require 'helper'
 
-describe Flipper::Gates::PercentageOfTime do
+RSpec.describe Flipper::Gates::PercentageOfTime do
   let(:feature_name) { :search }
 
   subject {

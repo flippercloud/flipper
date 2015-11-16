@@ -1,6 +1,6 @@
 require 'helper'
 
-describe Flipper::Gates::Group do
+RSpec.describe Flipper::Gates::Group do
   let(:feature_name) { :search }
 
   subject {
@@ -15,7 +15,7 @@ describe Flipper::Gates::Group do
 
       it "ignores group" do
         thing = Struct.new(:flipper_id).new('5')
-        subject.open?(thing, Set[:newbs, :staff], feature_name: feature_name).should eq(true)
+        expect(subject.open?(thing, Set[:newbs, :staff], feature_name: feature_name)).to eq(true)
       end
     end
 
@@ -35,23 +35,23 @@ describe Flipper::Gates::Group do
   describe "#wrap" do
     it "returns group instance for symbol" do
       group = Flipper.register(:admins) {}
-      subject.wrap(:admins).should eq(group)
+      expect(subject.wrap(:admins)).to eq(group)
     end
 
     it "returns group instance for group instance" do
       group = Flipper.register(:admins) {}
-      subject.wrap(group).should eq(group)
+      expect(subject.wrap(group)).to eq(group)
     end
   end
 
   describe "#protects?" do
     it "returns true for group" do
       group = Flipper.register(:admins) {}
-      subject.protects?(group).should be(true)
+      expect(subject.protects?(group)).to be(true)
     end
 
     it "returns true for symbol" do
-      subject.protects?(:admins).should be(true)
+      expect(subject.protects?(:admins)).to be(true)
     end
   end
 end

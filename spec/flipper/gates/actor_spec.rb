@@ -1,6 +1,6 @@
 require 'helper'
 
-describe Flipper::Gates::Actor do
+RSpec.describe Flipper::Gates::Actor do
   let(:feature_name) { :search }
 
   subject {

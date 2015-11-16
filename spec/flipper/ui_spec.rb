@@ -1,14 +1,14 @@
 require 'helper'
 
-describe Flipper::UI do
+RSpec.describe Flipper::UI do
   describe "Initializing middleware with flipper instance" do
     let(:app) { build_app(flipper) }
 
     it "works" do
       flipper.enable :some_great_feature
       get "/features"
-      last_response.status.should be(200)
-      last_response.body.should include("some_great_feature")
+      expect(last_response.status).to be(200)
+      expect(last_response.body).to include("some_great_feature")
     end
   end
 
@@ -20,8 +20,8 @@ describe Flipper::UI do
     it "works" do
       flipper.enable :some_great_feature
       get "/features"
-      last_response.status.should be(200)
-      last_response.body.should include("some_great_feature")
+      expect(last_response.status).to be(200)
+      expect(last_response.body).to include("some_great_feature")
     end
   end
 
@@ -38,7 +38,7 @@ describe Flipper::UI do
     post "features/refactor-images/actors",
       {"value" => "User:6", "operation" => "enable", "authenticity_token" => "a"},
       "rack.session" => {:csrf => "a"}
-    last_response.status.should be(302)
-    last_response.headers["Location"].should eq("/features/refactor-images")
+    expect(last_response.status).to be(302)
+    expect(last_response.headers["Location"]).to eq("/features/refactor-images")
   end
 end

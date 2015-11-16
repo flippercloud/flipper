@@ -2,7 +2,7 @@ require 'helper'
 require 'flipper/adapters/memory'
 require 'flipper/instrumentation/statsd'
 
-describe Flipper::Instrumentation::StatsdSubscriber do
+RSpec.describe Flipper::Instrumentation::StatsdSubscriber do
   let(:statsd_client) { Statsd.new }
   let(:socket) { FakeUDPSocket.new }
   let(:adapter) { Flipper::Adapters::Memory.new }
@@ -24,11 +24,13 @@ describe Flipper::Instrumentation::StatsdSubscriber do
 
   def assert_timer(metric)
     regex = /#{Regexp.escape metric}\:\d+\|ms/
-    socket.buffer.detect { |op| op.first =~ regex }.should_not be_nil
+    result = socket.buffer.detect { |op| op.first =~ regex }
+    expect(result).not_to be_nil
   end
 
   def assert_counter(metric)
-    socket.buffer.detect { |op| op.first == "#{metric}:1|c" }.should_not be_nil
+    result = socket.buffer.detect { |op| op.first == "#{metric}:1|c" }
+    expect(result).not_to be_nil
   end
 
   context "for enabled feature" do
