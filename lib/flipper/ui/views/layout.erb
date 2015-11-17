@@ -18,6 +18,9 @@
   <body>
     <div class="container header">
       <a class="btn btn-sm right" href="<%= script_name %>/features/new">Add Feature</a>
+      <% if Flipper::UI.app_url %>
+        <a class="btn btn-sm right" href="<%= Flipper::UI.app_url %>">Back to App</a>
+      <% end %>
 
       <ol class="breadcrumb">
         <% @breadcrumbs.each do |breadcrumb| %>

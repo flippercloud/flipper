@@ -11,6 +11,10 @@ require 'flipper/ui/middleware'
 
 module Flipper
   module UI
+    class << self
+      attr_accessor :app_url
+    end
+
     def self.root
       @root ||= Pathname(__FILE__).dirname.expand_path.join('ui')
     end
