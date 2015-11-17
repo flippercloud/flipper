@@ -43,6 +43,7 @@ RSpec.describe Flipper::UI do
   end
 
   it "should not have an app_url by default" do
+    Flipper::UI.app_url = nil
     expect(Flipper::UI.app_url).to be(nil)
   end
 
