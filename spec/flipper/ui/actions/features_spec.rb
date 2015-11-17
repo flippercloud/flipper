@@ -16,6 +16,22 @@ RSpec.describe Flipper::UI::Actions::Features do
       expect(last_response.body).to include("stats")
       expect(last_response.body).to include("search")
     end
+
+    it "should not include a link back to the application" do
+      expect(last_response.body).to_not include('Back to App')
+    end
+
+    context "with an app_url" do
+      before do
+        Flipper::UI.app_url = "/admin"
+        flipper[:stats].enable
+        get "/features"
+      end
+
+      it "should render a link back to the parent app" do
+        expect(last_response.body).to include('<a class="btn btn-sm right" href="/admin">Back to App</a>')
+      end
+    end
   end
 
   describe "POST /features" do
