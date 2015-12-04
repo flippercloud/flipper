@@ -65,6 +65,10 @@ shared_examples_for 'a DSL feature' do
     expect(feature.instrumenter).to eq(dsl.instrumenter)
   end
 
+  it "sets read only mode" do
+    expect(feature.read_only).to eq(dsl.read_only)
+  end
+
   it "memoizes the feature" do
     expect(dsl.send(method_name, :stats)).to equal(feature)
   end

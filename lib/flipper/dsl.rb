@@ -10,6 +10,9 @@ module Flipper
     # Private: What is being used to instrument all the things.
     attr_reader :instrumenter
 
+    # Public: Features can not be enabled or disabled in read-only mode
+    attr_accessor :read_only
+
     # Public: Returns a new instance of the DSL.
     #
     # adapter - The adapter that this DSL instance should use.
@@ -25,6 +28,8 @@ module Flipper
       @adapter = memoized
 
       @memoized_features = {}
+
+      @read_only = options.fetch(:read_only, false)
     end
 
     # Public: Check if a feature is enabled.
@@ -157,6 +162,7 @@ module Flipper
 
       @memoized_features[name.to_sym] ||= Feature.new(name, @adapter, {
         :instrumenter => instrumenter,
+        :read_only => read_only
       })
     end
 

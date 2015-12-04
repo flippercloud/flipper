@@ -40,6 +40,14 @@ RSpec.describe Flipper::DSL do
       let(:feature) { dsl.send(method_name, :stats) }
       let(:dsl) { Flipper::DSL.new(adapter, :instrumenter => instrumenter) }
     end
+
+    context "in read only mode" do
+      subject { Flipper::DSL.new(adapter, read_only: true) }
+      it "creates feature with read only mode enabled" do
+        feature = subject.feature(:stats)
+        expect(feature.read_only).to be(true)
+      end
+    end
   end
 
   describe "#[]" do
