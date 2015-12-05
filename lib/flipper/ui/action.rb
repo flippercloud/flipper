@@ -57,6 +57,9 @@ module Flipper
         @code = 200
         @headers = {"Content-Type" => "text/plain"}
         @breadcrumbs = []
+        if app_path
+          @breadcrumbs << Breadcrumb.new("App", app_path)
+        end
       end
 
       # Public: Runs the request method for the provided request.
@@ -159,6 +162,10 @@ module Flipper
       # href - The String href for the anchor tag (optional). If nil, breadcrumb
       #        is assumed to be the end of the trail.
       def breadcrumb(text, href = nil)
+        if href != nil
+          href.prepend(script_name)
+        end
+
         @breadcrumbs << Breadcrumb.new(text, href)
       end
 
@@ -188,6 +195,17 @@ module Flipper
       # Internal: The path the app is mounted at.
       def script_name
         request.env['SCRIPT_NAME']
+      end
+
+      # Internal: Allows the "App" breadcrumb to be:
+      #
+      #  - Turned off via: `Flipper::UI.app_path = false`
+      #  - Set to a specific value via: `Flipper::UI.app_path = '/admin'`
+      #  - Set to the referer (if available) or root of the parent application
+      def app_path
+        if Flipper::UI.app_path != false
+          Flipper::UI.app_path || request.env['HTTP_REFERER'] || '/'
+        end
       end
 
       # Private

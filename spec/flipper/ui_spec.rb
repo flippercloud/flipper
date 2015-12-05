@@ -41,4 +41,14 @@ RSpec.describe Flipper::UI do
     expect(last_response.status).to be(302)
     expect(last_response.headers["Location"]).to eq("/features/refactor-images")
   end
+
+  it "should not have an app_url by default" do
+    expect(Flipper::UI.app_path).to be(nil)
+  end
+
+  it "should properly store an app_url" do
+    Flipper::UI.app_path = "/admin"
+    expect(Flipper::UI.app_path).to eq("/admin")
+    Flipper::UI.app_path = nil
+  end
 end
