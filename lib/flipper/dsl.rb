@@ -91,6 +91,16 @@ module Flipper
       feature(name).enable_percentage_of_actors(percentage)
     end
 
+    # Public: Check if a feature is disabled.
+    #
+    # name - The String or Symbol name of the feature.
+    # args - The args passed through to the enabled check.
+    #
+    # Returns true if feature is disabled, false if not.
+    def disabled?(name, *args)
+      feature(name).disabled?(*args)
+    end
+
     # Public: Disable a feature.
     #
     # name - The String or Symbol name of the feature.
