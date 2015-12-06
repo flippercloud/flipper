@@ -163,11 +163,8 @@ module Flipper
       # href - The String href for the anchor tag (optional). If nil, breadcrumb
       #        is assumed to be the end of the trail.
       def breadcrumb(text, href = nil)
-        if href != nil
-          href.prepend(script_name)
-        end
-
-        @breadcrumbs << Breadcrumb.new(text, href)
+        breadcrumb_href = href.nil? ? href : "#{script_name}#{href}"
+        @breadcrumbs << Breadcrumb.new(text, breadcrumb_href)
       end
 
       # Private
