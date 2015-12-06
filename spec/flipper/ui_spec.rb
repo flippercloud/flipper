@@ -42,13 +42,55 @@ RSpec.describe Flipper::UI do
     expect(last_response.headers["Location"]).to eq("/features/refactor-images")
   end
 
-  it "should not have an app_url by default" do
+  it "should not have an app_path by default" do
     expect(Flipper::UI.app_path).to be(nil)
   end
 
-  it "should properly store an app_url" do
-    Flipper::UI.app_path = "/admin"
-    expect(Flipper::UI.app_path).to eq("/admin")
-    Flipper::UI.app_path = nil
+  context "with app_path not set" do
+    before do
+      @original_app_path = Flipper::UI.app_path
+      Flipper::UI.app_path = nil
+    end
+
+    after do
+      Flipper::UI.app_path = @original_app_path
+    end
+
+    it 'does not add App breadcrumb' do
+      get "/features"
+      expect(last_response.body).to_not include('<a href="/myapp">App</a>')
+    end
+  end
+
+  context "with app_path set" do
+    before do
+      @original_app_path = Flipper::UI.app_path
+      Flipper::UI.app_path = "/myapp"
+    end
+
+    after do
+      Flipper::UI.app_path = @original_app_path
+    end
+
+    it 'does add App breadcrumb' do
+      get "/features"
+      expect(last_response.body).to include('<a href="/myapp">App</a>')
+    end
+  end
+
+  context "with app_path set to full url" do
+    before do
+      @original_app_path = Flipper::UI.app_path
+      Flipper::UI.app_path = "https://myapp.com/"
+    end
+
+    after do
+      Flipper::UI.app_path = @original_app_path
+    end
+
+    it 'does add App breadcrumb' do
+      get "/features"
+      expect(last_response.body).to include('<a href="https://myapp.com/">App</a>')
+    end
   end
 end
