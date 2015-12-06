@@ -1,3 +1,7 @@
+## 0.7.2
+
+* Add Flipper::UI.application_breadcrumb_href for setting breadcrumb back to original app from Flipper UI
+
 ## 0.7.1
 
 * Fix bug where features with names that match static file routes were incorrectly routing to the file action (https://github.com/jnunemaker/flipper/issues/80)
