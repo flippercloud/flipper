@@ -56,9 +56,10 @@ module Flipper
         @flipper, @request = flipper, request
         @code = 200
         @headers = {"Content-Type" => "text/plain"}
-        @breadcrumbs = []
-        if app_path
-          @breadcrumbs << Breadcrumb.new("App", app_path)
+        @breadcrumbs = if Flipper::UI.app_path
+          [Breadcrumb.new("App", Flipper::UI.app_path)]
+        else
+          []
         end
       end
 
@@ -195,17 +196,6 @@ module Flipper
       # Internal: The path the app is mounted at.
       def script_name
         request.env['SCRIPT_NAME']
-      end
-
-      # Internal: Allows the "App" breadcrumb to be:
-      #
-      #  - Turned off via: `Flipper::UI.app_path = false`
-      #  - Set to a specific value via: `Flipper::UI.app_path = '/admin'`
-      #  - Set to the referer (if available) or root of the parent application
-      def app_path
-        if Flipper::UI.app_path != false
-          Flipper::UI.app_path || request.env['HTTP_REFERER'] || '/'
-        end
       end
 
       # Private
