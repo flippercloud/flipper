@@ -42,18 +42,18 @@ RSpec.describe Flipper::UI do
     expect(last_response.headers["Location"]).to eq("/features/refactor-images")
   end
 
-  it "should not have an app_path by default" do
-    expect(Flipper::UI.app_path).to be(nil)
+  it "should not have an application_breadcrumb_href by default" do
+    expect(Flipper::UI.application_breadcrumb_href).to be(nil)
   end
 
-  context "with app_path not set" do
+  context "with application_breadcrumb_href not set" do
     before do
-      @original_app_path = Flipper::UI.app_path
-      Flipper::UI.app_path = nil
+      @original_application_breadcrumb_href = Flipper::UI.application_breadcrumb_href
+      Flipper::UI.application_breadcrumb_href = nil
     end
 
     after do
-      Flipper::UI.app_path = @original_app_path
+      Flipper::UI.application_breadcrumb_href = @original_application_breadcrumb_href
     end
 
     it 'does not add App breadcrumb' do
@@ -62,14 +62,14 @@ RSpec.describe Flipper::UI do
     end
   end
 
-  context "with app_path set" do
+  context "with application_breadcrumb_href set" do
     before do
-      @original_app_path = Flipper::UI.app_path
-      Flipper::UI.app_path = "/myapp"
+      @original_application_breadcrumb_href = Flipper::UI.application_breadcrumb_href
+      Flipper::UI.application_breadcrumb_href = "/myapp"
     end
 
     after do
-      Flipper::UI.app_path = @original_app_path
+      Flipper::UI.application_breadcrumb_href = @original_application_breadcrumb_href
     end
 
     it 'does add App breadcrumb' do
@@ -78,14 +78,14 @@ RSpec.describe Flipper::UI do
     end
   end
 
-  context "with app_path set to full url" do
+  context "with application_breadcrumb_href set to full url" do
     before do
-      @original_app_path = Flipper::UI.app_path
-      Flipper::UI.app_path = "https://myapp.com/"
+      @original_application_breadcrumb_href = Flipper::UI.application_breadcrumb_href
+      Flipper::UI.application_breadcrumb_href = "https://myapp.com/"
     end
 
     after do
-      Flipper::UI.app_path = @original_app_path
+      Flipper::UI.application_breadcrumb_href = @original_application_breadcrumb_href
     end
 
     it 'does add App breadcrumb' do

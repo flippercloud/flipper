@@ -12,7 +12,7 @@ require 'flipper/ui/middleware'
 module Flipper
   module UI
     class << self
-      attr_accessor :app_path
+      attr_accessor :application_breadcrumb_href
     end
 
     def self.root

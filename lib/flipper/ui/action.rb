@@ -56,8 +56,8 @@ module Flipper
         @flipper, @request = flipper, request
         @code = 200
         @headers = {"Content-Type" => "text/plain"}
-        @breadcrumbs = if Flipper::UI.app_path
-          [Breadcrumb.new("App", Flipper::UI.app_path)]
+        @breadcrumbs = if Flipper::UI.application_breadcrumb_href
+          [Breadcrumb.new("App", Flipper::UI.application_breadcrumb_href)]
         else
           []
         end
