@@ -65,7 +65,7 @@ shared_examples_for 'a flipper adapter' do
     expect(subject.enable(feature, actors_gate, flipper.actors(25))).to eq(true)
     expect(subject.enable(feature, time_gate, flipper.time(45))).to eq(true)
 
-    expect(subject.disable(feature, boolean_gate, flipper.boolean)).to eq(true)
+    expect(subject.disable(feature, boolean_gate, flipper.boolean(false))).to eq(true)
 
     expect(subject.get(feature)).to eq({
       :boolean => nil,
