@@ -7,10 +7,12 @@ module Flipper
     class ActiveRecord
       include Flipper::Adapter
 
+      # Private: Do not use outside of this adapter.
       class Feature < ::ActiveRecord::Base
         self.table_name = "flipper_features"
       end
 
+      # Private: Do not use outside of this adapter.
       class Gate < ::ActiveRecord::Base
         self.table_name = "flipper_gates"
       end
@@ -18,13 +20,27 @@ module Flipper
       # Public: The name of the adapter.
       attr_reader :name
 
-      def initialize
-        @name = :active_record
+      # Public: Initialize a new ActiveRecord adapter instance.
+      #
+      # name - The Symbol name for this adapter. Optional (default :active_record)
+      # feature_class - The AR class responsible for the features table.
+      # gate_class - The AR class responsible for the gates table.
+      #
+      # Allowing the overriding of name is so you can differentiate multiple
+      # instances of this adapter from each other, if, for some reason, that is
+      # a thing you do.
+      #
+      # Allowing the overriding of the default feature/gate classes means you
+      # can roll your own tables and what not, if you so desire.
+      def initialize(options = {})
+        @name = options.fetch(:name, :active_record)
+        @feature_class = options.fetch(:feature_class) { Feature }
+        @gate_class = options.fetch(:gate_class) { Gate }
       end
 
       # Public: The set of known features.
       def features
-        Feature.select(:key).map(&:key).to_set
+        @feature_class.select(:key).map(&:key).to_set
       end
 
       # Public: Adds a feature to the set of known features.
@@ -32,14 +48,14 @@ module Flipper
         attributes = {key: feature.key}
         # race condition, but add is only used by enable/disable which happen
         # super rarely, so it shouldn't matter in practice
-        Feature.where(attributes).first || Feature.create!(attributes)
+        @feature_class.where(attributes).first || @feature_class.create!(attributes)
         true
       end
 
       # Public: Removes a feature from the set of known features.
       def remove(feature)
-        Feature.transaction do
-          Feature.delete_all(key: feature.key)
+        @feature_class.transaction do
+          @feature_class.delete_all(key: feature.key)
           clear(feature)
         end
         true
@@ -47,7 +63,7 @@ module Flipper
 
       # Public: Clears the gate values for a feature.
       def clear(feature)
-        Gate.delete_all(feature_key: feature.key)
+        @gate_class.delete_all(feature_key: feature.key)
         true
       end
 
@@ -57,7 +73,7 @@ module Flipper
       def get(feature)
         result = {}
 
-        db_gates = Gate.where(feature_key: feature.key)
+        db_gates = @gate_class.where(feature_key: feature.key)
 
         feature.gates.each do |gate|
           result[gate.key] = case gate.data_type
@@ -89,13 +105,13 @@ module Flipper
       def enable(feature, gate, thing)
         case gate.data_type
         when :boolean, :integer
-          Gate.create!({
+          @gate_class.create!({
             feature_key: feature.key,
             key: gate.key,
             value: thing.value.to_s,
           })
         when :set
-          Gate.create!({
+          @gate_class.create!({
             feature_key: feature.key,
             key: gate.key,
             value: thing.value.to_s,
@@ -119,13 +135,13 @@ module Flipper
         when :boolean
           clear(feature)
         when :integer
-          Gate.create!({
+          @gate_class.create!({
             feature_key: feature.key,
             key: gate.key,
             value: thing.value.to_s,
           })
         when :set
-          Gate.delete_all(feature_key: feature.key, key: gate.key, value: thing.value)
+          @gate_class.delete_all(feature_key: feature.key, key: gate.key, value: thing.value)
         else
           unsupported_data_type gate.data_type
         end
