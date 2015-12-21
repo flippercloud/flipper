@@ -9,3 +9,6 @@ script: bundle exec rake
 services:
   - redis-server
   - mongodb
+gemfile:
+  - Gemfile
+  - Gemfile-rails32

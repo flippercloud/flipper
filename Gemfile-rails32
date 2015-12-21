@@ -1,0 +1,5 @@
+original_gemfile = File.join(File.dirname(__FILE__), 'Gemfile')
+
+eval IO.read(original_gemfile)
+
+gem 'rails', '~ 3.2.22'
