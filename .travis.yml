@@ -3,8 +3,6 @@ rvm:
   - 1.9.3
   - 2.1.0
   - 2.2.0
-notifications:
-  email: false
 bundler_args: --without guard
 before_script: sudo service redis-server status && sudo service mongodb status
 script: bundle exec rake
