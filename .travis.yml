@@ -7,6 +7,7 @@ notifications:
   email: false
 bundler_args: --without guard
 before_script: sudo service redis-server status && sudo service mongodb status
+script: bundle exec rake
 services:
   - redis-server
   - mongodb
