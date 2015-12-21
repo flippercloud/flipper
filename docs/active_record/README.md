@@ -18,6 +18,12 @@ Or install it yourself with:
 
 ## Usage
 
+For your convenience a migration generator is provided to create the necessary migrations for using the active record adapter:
+
+    $ rails g flipper:active_record
+
+Once you have created and executed the migration, you can use the active record adapter like so:
+
 ```ruby
 require 'flipper/adapters/active_record'
 adapter = Flipper::Adapters::ActiveRecord.new
