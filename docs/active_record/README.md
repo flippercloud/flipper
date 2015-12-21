@@ -2,6 +2,11 @@
 
 An ActiveRecord adapter for [Flipper](https://github.com/jnunemaker/flipper).
 
+Supported Active Record versions:
+
+* 3.2.x
+* 4.2.x
+
 ## Installation
 
 Add this line to your application's Gemfile:
