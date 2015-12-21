@@ -1,5 +1,4 @@
-
-require 'rails/generators/active_record'
+require "rails/generators/active_record"
 
 module Flipper
   module Generators
@@ -14,7 +13,7 @@ module Flipper
       end
 
       def self.next_migration_number(dirname)
-        ::ActiveRecord::Generators::Base.next_migration_number dirname
+        ::ActiveRecord::Generators::Base.next_migration_number(dirname)
       end
     end
   end
