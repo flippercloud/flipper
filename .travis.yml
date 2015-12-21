@@ -9,6 +9,6 @@ script: bundle exec rake
 services:
   - redis-server
   - mongodb
-gemfile:
-  - Gemfile
-  - Gemfile-rails32
+env:
+  - 4.2.0
+  - 3.2.0
