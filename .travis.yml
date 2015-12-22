@@ -10,5 +10,5 @@ services:
   - redis-server
   - mongodb
 env:
-  - RAILS_VERSION=4.2.0
-  - RAILS_VERSION=3.2.0
+  - RAILS_VERSION=4.2.5
+  - RAILS_VERSION=3.2.21
