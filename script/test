@@ -1,15 +1,7 @@
 #!/bin/sh
-#/ Usage: test [individual test file]
+#/ Usage: test
 #/
-#/ Bootstrap and run all tests or an individual test.
-#/
-#/ Examples:
-#/
-#/   # run all tests
-#/   test
-#/
-#/   # run individual test
-#/   test spec/qu_spec.rb
+#/ Bootstrap and run all tests.
 #/
 
 set -e
@@ -20,11 +12,4 @@ cd $(dirname "$0")/..
     exit 0
 }
 
-specs="spec/"
-
-if [ $# -gt 0 ]
-  then
-    specs=$@
-fi
-
-script/bootstrap && bundle exec rspec $specs
+script/bootstrap && bundle exec rake
