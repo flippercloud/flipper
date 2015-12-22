@@ -12,4 +12,10 @@ cd $(dirname "$0")/..
     exit 0
 }
 
-script/bootstrap && bundle exec rake
+export RAILS_VERSION=3.2.21
+script/bootstrap || bundle update
+bundle exec rake
+
+export RAILS_VERSION=4.2.5
+script/bootstrap || bundle update
+bundle exec rake
