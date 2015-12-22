@@ -12,7 +12,6 @@ gem 'shotgun', '~> 0.9'
 gem 'statsd-ruby', '~> 1.2.1'
 gem 'rspec', '~> 3.0'
 gem 'rack-test', '~> 0.6.3'
-gem 'activesupport', '~> 4.2.0'
 gem 'sqlite3', '~> 1.3.11'
 gem 'rails', "~> #{ENV["RAILS_VERSION"] || '4.2.0'}"
 
