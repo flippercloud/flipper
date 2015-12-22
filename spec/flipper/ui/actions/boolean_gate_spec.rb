@@ -7,7 +7,7 @@ RSpec.describe Flipper::UI::Actions::BooleanGate do
         flipper.disable :search
         post "features/search/boolean",
           {"action" => "Enable", "authenticity_token" => "a"},
-          "rack.session" => {:csrf => "a"}
+          "rack.session" => {"_csrf_token" => "a"}
       end
 
       it "enables the feature" do
@@ -25,7 +25,7 @@ RSpec.describe Flipper::UI::Actions::BooleanGate do
         flipper.enable :search
         post "features/search/boolean",
           {"action" => "Disable", "authenticity_token" => "a"},
-          "rack.session" => {:csrf => "a"}
+          "rack.session" => {"_csrf_token" => "a"}
       end
 
       it "disables the feature" do

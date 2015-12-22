@@ -37,7 +37,7 @@ RSpec.describe Flipper::UI do
   it "can route features with names that match static directories" do
     post "features/refactor-images/actors",
       {"value" => "User:6", "operation" => "enable", "authenticity_token" => "a"},
-      "rack.session" => {:csrf => "a"}
+      "rack.session" => {"_csrf_token" => "a"}
     expect(last_response.status).to be(302)
     expect(last_response.headers["Location"]).to eq("/features/refactor-images")
   end

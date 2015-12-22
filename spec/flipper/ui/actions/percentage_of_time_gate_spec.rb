@@ -6,7 +6,7 @@ RSpec.describe Flipper::UI::Actions::PercentageOfTimeGate do
       before do
         post "features/search/percentage_of_time",
           {"value" => "24", "authenticity_token" => "a"},
-          "rack.session" => {:csrf => "a"}
+          "rack.session" => {"_csrf_token" => "a"}
       end
 
       it "enables the feature" do
@@ -23,7 +23,7 @@ RSpec.describe Flipper::UI::Actions::PercentageOfTimeGate do
       before do
         post "features/search/percentage_of_time",
           {"value" => "555", "authenticity_token" => "a"},
-          "rack.session" => {:csrf => "a"}
+          "rack.session" => {"_csrf_token" => "a"}
       end
 
       it "does not change value" do

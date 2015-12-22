@@ -20,7 +20,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
       before do
         post "features/search/actors",
           {"value" => "User:6", "operation" => "enable", "authenticity_token" => "a"},
-          "rack.session" => {:csrf => "a"}
+          "rack.session" => {"_csrf_token" => "a"}
       end
 
       it "adds item to members" do
@@ -38,7 +38,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
         flipper[:search].enable_actor Flipper::UI::Actor.new("User:6")
         post "features/search/actors",
           {"value" => "User:6", "operation" => "disable", "authenticity_token" => "a"},
-          "rack.session" => {:csrf => "a"}
+          "rack.session" => {"_csrf_token" => "a"}
       end
 
       it "removes item from members" do
@@ -55,7 +55,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
       before do
         post "features/search/actors",
           {"value" => "", "operation" => "enable", "authenticity_token" => "a"},
-          "rack.session" => {:csrf => "a"}
+          "rack.session" => {"_csrf_token" => "a"}
       end
 
       it "redirects back to feature" do
