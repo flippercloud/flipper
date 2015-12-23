@@ -2,14 +2,22 @@
 
 I plan on supporting the adapters in the flipper repo. Other adapters are welcome, so please let me know if you create one.
 
+## Officially Supported
+
 * [memory adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb) – great for tests
 * [PStore adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/pstore.rb) – great for when a local file is enough
 * [Mongo adapter](https://github.com/jnunemaker/flipper/blob/master/docs/mongo)
 * [Redis adapter](https://github.com/jnunemaker/flipper/blob/master/docs/redis)
+* [ActiveRecord adapter](https://github.com/jnunemaker/flipper/blob/master/docs/active_record) - Rails 3 and 4.
 * [Cassanity adapter](https://github.com/jnunemaker/flipper-cassanity)
+
+## Community Supported
+
 * [Active Record 4 adapter](https://github.com/bgentry/flipper-activerecord)
 * [Active Record 3 adapter](https://github.com/blueboxjesse/flipper-activerecord)
 * [Consul adapter](https://github.com/gdavison/flipper-consul)
+
+## Roll Your Own
 
 The basic API for an adapter is this:
 
