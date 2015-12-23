@@ -5,7 +5,7 @@ RSpec.describe Flipper::UI::Actions::Gate do
     before do
       post "/features/search/non-existent-gate",
         {"authenticity_token" => "a"},
-        "rack.session" => {:csrf => "a"}
+        "rack.session" => {"_csrf_token" => "a"}
     end
 
     it "responds with redirect" do

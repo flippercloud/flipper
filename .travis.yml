@@ -1,12 +1,14 @@
 language: ruby
 rvm:
-  - 1.9.3
-  - 2.1.0
-  - 2.2.0
-notifications:
-  email: false
+  - 2.0.0
+  - 2.1.8
+  - 2.2.4
 bundler_args: --without guard
-before_script: sudo service redis-server status && sudo service mongodb status
+before_script: gem install bundler -v 1.10.6 && sudo service redis-server status && sudo service mongodb status
+script: bundle exec rake
 services:
   - redis-server
   - mongodb
+env:
+  - RAILS_VERSION=4.2.5
+  - RAILS_VERSION=3.2.21

@@ -36,3 +36,9 @@ namespace :spec do
 end
 
 task :default => :spec
+
+task :test do
+  sh "bundle exec ruby -Itest test/generators/flipper/active_record_generator_test.rb"
+end
+
+task :default => :test

@@ -6,7 +6,7 @@ RSpec.describe Flipper::UI::Actions::Feature do
       flipper.enable :search
       delete "/features/search",
         {"authenticity_token" => "a"},
-        "rack.session" => {:csrf => "a"}
+        "rack.session" => {"_csrf_token" => "a"}
     end
 
     it "removes feature" do
@@ -24,7 +24,7 @@ RSpec.describe Flipper::UI::Actions::Feature do
       flipper.enable :search
       post "/features/search",
         {"_method" => "DELETE", "authenticity_token" => "a"},
-        "rack.session" => {:csrf => "a"}
+        "rack.session" => {"_csrf_token" => "a"}
     end
 
     it "removes feature" do

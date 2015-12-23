@@ -22,7 +22,7 @@ RSpec.describe Flipper::UI::Actions::Features do
     before do
       post "/features",
         {"value" => "notifications_next", "authenticity_token" => "a"},
-        "rack.session" => {:csrf => "a"}
+        "rack.session" => {"_csrf_token" => "a"}
     end
 
     it "adds feature" do

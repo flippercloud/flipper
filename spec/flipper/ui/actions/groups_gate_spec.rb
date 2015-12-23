@@ -33,7 +33,7 @@ RSpec.describe Flipper::UI::Actions::GroupsGate do
       before do
         post "features/search/groups",
           {"value" => "admins", "operation" => "enable", "authenticity_token" => "a"},
-          "rack.session" => {:csrf => "a"}
+          "rack.session" => {"_csrf_token" => "a"}
       end
 
       it "adds item to members" do
@@ -51,7 +51,7 @@ RSpec.describe Flipper::UI::Actions::GroupsGate do
         flipper[:search].enable_group :admins
         post "features/search/groups",
           {"value" => "admins", "operation" => "disable", "authenticity_token" => "a"},
-          "rack.session" => {:csrf => "a"}
+          "rack.session" => {"_csrf_token" => "a"}
       end
 
       it "removes item from members" do
@@ -68,7 +68,7 @@ RSpec.describe Flipper::UI::Actions::GroupsGate do
       before do
         post "features/search/groups",
           {"value" => "not_here", "operation" => "enable", "authenticity_token" => "a"},
-          "rack.session" => {:csrf => "a"}
+          "rack.session" => {"_csrf_token" => "a"}
       end
 
       it "redirects back to feature" do
