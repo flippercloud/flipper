@@ -29,11 +29,24 @@ Or install it yourself as:
 ### Rails
 
 Given that you've already initialized `Flipper` as per the [flipper](https://github.com/jnunemaker/flipper) readme, you can mount `Flipper::UI` to a route of your choice:
+
 ```ruby
 # config/routes.rb
-
 YourRailsApp::Application.routes.draw do
   mount Flipper::UI.app(flipper) => '/flipper'
+end
+```
+
+If you'd like to lazy load flipper, you can pass a block instead:
+
+```ruby
+# config/routes.rb
+YourRailsApp::Application.routes.draw do
+  flipper_block = lambda {
+    # some flipper initialization here, for example:
+    # YourRailsApp.flipper
+  }
+  mount Flipper::UI.app(flipper_block) => '/flipper'
 end
 ```
 
