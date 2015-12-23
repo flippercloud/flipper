@@ -1,8 +1,8 @@
 language: ruby
 rvm:
-  - 2.0
-  - 2.1
-  - 2.2
+  - 2.0.0
+  - 2.1.8
+  - 2.2.4
 bundler_args: --without guard
 before_script: gem install bundler -v 1.10.6 && sudo service redis-server status && sudo service mongodb status
 script: bundle exec rake
