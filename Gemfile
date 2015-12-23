@@ -14,6 +14,7 @@ gem 'rspec', '~> 3.0'
 gem 'rack-test', '~> 0.6.3'
 gem 'sqlite3', '~> 1.3.11'
 gem 'rails', "~> #{ENV["RAILS_VERSION"] || '4.2.5'}"
+gem 'test-unit', '~> 3.0'
 
 group(:guard) do
   gem 'guard', '~> 2.12.5'
