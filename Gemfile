@@ -14,6 +14,8 @@ gem 'rspec', '~> 3.0'
 gem 'rack-test', '~> 0.6.3'
 gem 'sqlite3', '~> 1.3.11'
 gem 'rails', "~> #{ENV["RAILS_VERSION"] || '4.2.5'}"
+
+# for active support tests in test/ and only needed for ruby 2.2.x
 gem 'test-unit', '~> 3.0'
 
 group(:guard) do
