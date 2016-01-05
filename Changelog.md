@@ -1,3 +1,12 @@
+
+## 0.7.4
+
+* Add missing migration file to gemspec for flipper-active_record
+
+## 0.7.3
+
+* Add Flipper ActivRecord adapter
+
 ## 0.7.2
 
 * Add Flipper::UI.application_breadcrumb_href for setting breadcrumb back to original app from Flipper UI
