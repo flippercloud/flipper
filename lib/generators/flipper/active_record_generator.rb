@@ -2,8 +2,8 @@ require "rails/generators/active_record"
 
 module Flipper
   module Generators
-    class ActiveRecordGenerator < Rails::Generators::Base
-      include Rails::Generators::Migration
+    class ActiveRecordGenerator < ::Rails::Generators::Base
+      include ::Rails::Generators::Migration
       desc "Generates migration for flipper tables"
 
       source_paths << File.join(File.dirname(__FILE__), "templates")
