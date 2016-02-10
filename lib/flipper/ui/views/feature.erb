@@ -24,10 +24,10 @@
       <%== csrf_input_tag %>
 
       <% unless @feature.on? %>
-        <button type="submit" name="action" value="Enable" class="btn btn-danger tooltipped tooltipped-n" aria-label="Enable for everyone">Enable</button>
+        <button type="submit" name="action" value="Enable" class="btn btn-danger tooltipped tooltipped-n" data-warn-on-click aria-label="Enable for everyone">Enable</button>
       <% end %>
 
-      <button type="submit" name="action" value="Disable" class="btn tooltipped tooltipped-n" <% if @feature.off? %>disabled aria-label="Already disabled for everyone"<% else %>aria-label="Disable for everyone by clearing all percentages, groups and actors."<% end %>>Disable</button>
+      <button type="submit" name="action" value="Disable" class="btn tooltipped tooltipped-n" data-warn-on-click <% if @feature.off? %>disabled aria-label="Already disabled for everyone"<% else %>aria-label="Disable for everyone by clearing all percentages, groups and actors."<% end %>>Disable</button>
     </form>
   </div>
 </div>
