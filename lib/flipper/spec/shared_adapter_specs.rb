@@ -198,6 +198,9 @@ shared_examples_for 'a flipper adapter' do
 
   it "can clear all the gate values for a feature" do
     actor_22 = actor_class.new('22')
+    subject.add(feature)
+    expect(subject.features).to include(feature.key)
+
     expect(subject.enable(feature, boolean_gate, flipper.boolean)).to eq(true)
     expect(subject.enable(feature, group_gate, flipper.group(:admins))).to eq(true)
     expect(subject.enable(feature, actor_gate, flipper.actor(actor_22))).to eq(true)
@@ -205,7 +208,7 @@ shared_examples_for 'a flipper adapter' do
     expect(subject.enable(feature, time_gate, flipper.time(45))).to eq(true)
 
     expect(subject.clear(feature)).to eq(true)
-
+    expect(subject.features).to include(feature.key)
     expect(subject.get(feature)).to eq({
       :boolean => nil,
       :groups => Set.new,
