@@ -1,6 +1,11 @@
 require 'pathname'
 require 'rack'
-require 'rack/methodoverride'
+begin
+  # Rack 2
+  require 'rack/method_override'
+rescue LoadError
+  require 'rack/methodoverride'
+end
 require 'rack/protection'
 
 require 'flipper'
