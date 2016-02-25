@@ -55,7 +55,7 @@ module Flipper
       # Public: Removes a feature from the set of known features.
       def remove(feature)
         @feature_class.transaction do
-          @feature_class.delete_all(key: feature.key)
+          @feature_class.where(key: feature.key).delete_all
           clear(feature)
         end
         true
@@ -63,7 +63,7 @@ module Flipper
 
       # Public: Clears the gate values for a feature.
       def clear(feature)
-        @gate_class.delete_all(feature_key: feature.key)
+        @gate_class.where(feature_key: feature.key).delete_all
         true
       end
 
@@ -141,7 +141,7 @@ module Flipper
             value: thing.value.to_s,
           })
         when :set
-          @gate_class.delete_all(feature_key: feature.key, key: gate.key, value: thing.value)
+          @gate_class.where(feature_key: feature.key, key: gate.key, value: thing.value).delete_all
         else
           unsupported_data_type gate.data_type
         end
