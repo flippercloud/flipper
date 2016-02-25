@@ -1,3 +1,8 @@
+## 0.7.5
+
+* support for rails 5 beta/ rack 2 alpha
+* fix uninitialized constant in rails generators
+* fix adapter test for clear to ensure that feature is not deleted, only gates
 
 ## 0.7.4
 
