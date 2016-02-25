@@ -5,7 +5,9 @@ require 'flipper/spec/shared_adapter_specs'
 RSpec.describe Flipper::Adapters::PStore do
   subject {
     dir = FlipperRoot.join("tmp").tap { |d| d.mkpath }
-    described_class.new(dir.join("flipper.pstore"))
+    pstore_file = dir.join("flipper.pstore")
+    pstore_file.unlink if pstore_file.exist?
+    described_class.new(pstore_file)
   }
 
   it_should_behave_like 'a flipper adapter'
