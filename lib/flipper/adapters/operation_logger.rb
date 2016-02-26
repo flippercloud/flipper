@@ -1,5 +1,3 @@
-require 'flipper/adapters/decorator'
-
 module Flipper
   module Adapters
     # Public: Adapter that wraps another adapter and stores the operations.

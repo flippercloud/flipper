@@ -1,5 +1,3 @@
-require 'flipper/adapters/decorator'
-
 module Flipper
   module Adapters
     # Internal: Adapter that wraps another adapter with the ability to memoize

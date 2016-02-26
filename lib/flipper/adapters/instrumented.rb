@@ -1,4 +1,3 @@
-require 'flipper/adapters/decorator'
 require 'flipper/instrumenters/noop'
 
 module Flipper
