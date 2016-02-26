@@ -5,7 +5,9 @@ module Flipper
     # Public: Adapter that wraps another adapter and stores the operations.
     #
     # Useful in tests to verify calls and such. Never use outside of testing.
-    class OperationLogger < Decorator
+    class OperationLogger
+      include Adapter
+
       Operation = Struct.new(:type, :args)
 
       OperationTypes = [
@@ -21,9 +23,13 @@ module Flipper
       # Internal: An array of the operations that have happened.
       attr_reader :operations
 
+      # Internal: The name of the adapter.
+      attr_reader :name
+
       # Public
       def initialize(adapter, operations = nil)
-        super(adapter)
+        @adapter = adapter
+        @name = :operation_logger
         @operations = operations || []
       end
 
@@ -32,7 +38,7 @@ module Flipper
         class_eval <<-EOE
           def #{type}(*args)
             @operations << Operation.new(:#{type}, args)
-            super
+            @adapter.send(:#{type}, *args)
           end
         EOE
       end
