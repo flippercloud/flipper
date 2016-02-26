@@ -5,12 +5,17 @@ module Flipper
   module Adapters
     # Internal: Adapter that wraps another adapter and instruments all adapter
     # operations. Used by flipper dsl to provide instrumentatin for flipper.
-    class Instrumented < Decorator
+    class Instrumented
+      include Adapter
+
       # Private: The name of instrumentation events.
       InstrumentationName = "adapter_operation.#{InstrumentationNamespace}"
 
       # Private: What is used to instrument all the things.
       attr_reader :instrumenter
+
+      # Public: The name of the adapter.
+      attr_reader :name
 
       # Internal: Initializes a new adapter instance.
       #
@@ -20,7 +25,7 @@ module Flipper
       #           :instrumenter - What to use to instrument all the things.
       #
       def initialize(adapter, options = {})
-        super(adapter)
+        @adapter = adapter
         @name = :instrumented
         @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
       end
@@ -29,11 +34,11 @@ module Flipper
       def features
         payload = {
           :operation => :features,
-          :adapter_name => name,
+          :adapter_name => @adapter.name,
         }
 
         @instrumenter.instrument(InstrumentationName, payload) { |payload|
-          payload[:result] = super
+          payload[:result] = @adapter.features
         }
       end
 
@@ -41,12 +46,12 @@ module Flipper
       def add(feature)
         payload = {
           :operation => :add,
-          :adapter_name => name,
+          :adapter_name => @adapter.name,
           :feature_name => feature.name,
         }
 
         @instrumenter.instrument(InstrumentationName, payload) { |payload|
-          payload[:result] = super
+          payload[:result] = @adapter.add(feature)
         }
       end
 
@@ -54,12 +59,12 @@ module Flipper
       def remove(feature)
         payload = {
           :operation => :remove,
-          :adapter_name => name,
+          :adapter_name => @adapter.name,
           :feature_name => feature.name,
         }
 
         @instrumenter.instrument(InstrumentationName, payload) { |payload|
-          payload[:result] = super
+          payload[:result] = @adapter.remove(feature)
         }
       end
 
@@ -67,12 +72,12 @@ module Flipper
       def clear(feature)
         payload = {
           :operation => :clear,
-          :adapter_name => name,
+          :adapter_name => @adapter.name,
           :feature_name => feature.name,
         }
 
         @instrumenter.instrument(InstrumentationName, payload) { |payload|
-          payload[:result] = super
+          payload[:result] = @adapter.clear(feature)
         }
       end
 
@@ -80,12 +85,12 @@ module Flipper
       def get(feature)
         payload = {
           :operation => :get,
-          :adapter_name => name,
+          :adapter_name => @adapter.name,
           :feature_name => feature.name,
         }
 
         @instrumenter.instrument(InstrumentationName, payload) { |payload|
-          payload[:result] = super
+          payload[:result] = @adapter.get(feature)
         }
       end
 
@@ -93,13 +98,13 @@ module Flipper
       def enable(feature, gate, thing)
         payload = {
           :operation => :enable,
-          :adapter_name => name,
+          :adapter_name => @adapter.name,
           :feature_name => feature.name,
           :gate_name => gate.name,
         }
 
         @instrumenter.instrument(InstrumentationName, payload) { |payload|
-          payload[:result] = super
+          payload[:result] = @adapter.enable(feature, gate, thing)
         }
       end
 
@@ -107,13 +112,13 @@ module Flipper
       def disable(feature, gate, thing)
         payload = {
           :operation => :disable,
-          :adapter_name => name,
+          :adapter_name => @adapter.name,
           :feature_name => feature.name,
           :gate_name => gate.name,
         }
 
         @instrumenter.instrument(InstrumentationName, payload) { |payload|
-          payload[:result] = super
+          payload[:result] = @adapter.disable(feature, gate, thing)
         }
       end
     end
