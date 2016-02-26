@@ -5,7 +5,7 @@ require 'active_record'
 module Flipper
   module Adapters
     class ActiveRecord
-      include Flipper::Adapter
+      include ::Flipper::Adapter
 
       # Private: Do not use outside of this adapter.
       class Feature < ::ActiveRecord::Base

@@ -4,7 +4,7 @@ module Flipper
     #
     # Useful in tests to verify calls and such. Never use outside of testing.
     class OperationLogger
-      include Adapter
+      include ::Flipper::Adapter
 
       Operation = Struct.new(:type, :args)
 

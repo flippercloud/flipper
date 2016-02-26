@@ -4,7 +4,7 @@ module Flipper
     # adapter calls in memory. Used by flipper dsl and the memoizer middleware
     # to make it possible to memoize adapter calls for the duration of a request.
     class Memoizable
-      include Adapter
+      include ::Flipper::Adapter
 
       FeaturesKey = :flipper_features
 
