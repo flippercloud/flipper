@@ -1,3 +1,7 @@
+## master
+
+* removed Flipper::Decorator and Flipper::Adapters::Decorator in favor of just calling methods on wrapped adapter
+
 ## 0.7.5
 
 * support for rails 5 beta/ rack 2 alpha

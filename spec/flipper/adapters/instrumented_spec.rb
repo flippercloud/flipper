@@ -19,6 +19,12 @@ RSpec.describe Flipper::Adapters::Instrumented do
 
   it_should_behave_like 'a flipper adapter'
 
+  describe "#name" do
+    it "is instrumented" do
+      expect(subject.name).to be(:instrumented)
+    end
+  end
+
   describe "#get" do
     it "records instrumentation" do
       result = subject.get(feature)

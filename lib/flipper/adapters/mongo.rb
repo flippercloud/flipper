@@ -5,7 +5,7 @@ require 'mongo'
 module Flipper
   module Adapters
     class Mongo
-      include Flipper::Adapter
+      include ::Flipper::Adapter
 
       # Private: The key that stores the set of known features.
       FeaturesKey = :flipper_features

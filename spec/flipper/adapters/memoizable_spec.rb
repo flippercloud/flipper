@@ -13,6 +13,12 @@ RSpec.describe Flipper::Adapters::Memoizable do
 
   it_should_behave_like 'a flipper adapter'
 
+  describe "#name" do
+    it "is instrumented" do
+      expect(subject.name).to be(:memoizable)
+    end
+  end
+
   describe "#memoize=" do
     it "sets value" do
       subject.memoize = true

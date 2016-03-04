@@ -6,7 +6,7 @@ module Flipper
     # Public: Adapter based on Ruby's pstore database. Perfect for when a local
     # file is good enough for storing features.
     class PStore
-      include Adapter
+      include ::Flipper::Adapter
 
       FeaturesKey = :flipper_features
 

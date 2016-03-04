@@ -5,7 +5,7 @@ module Flipper
     # Public: Adapter for storing everything in memory (ie: Hash).
     # Useful for tests/specs.
     class Memory
-      include Adapter
+      include ::Flipper::Adapter
 
       FeaturesKey = :flipper_features
 

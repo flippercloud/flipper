@@ -1,19 +1,26 @@
-require 'flipper/adapters/decorator'
-
 module Flipper
   module Adapters
     # Internal: Adapter that wraps another adapter with the ability to memoize
     # adapter calls in memory. Used by flipper dsl and the memoizer middleware
     # to make it possible to memoize adapter calls for the duration of a request.
-    class Memoizable < Decorator
+    class Memoizable
+      include ::Flipper::Adapter
+
       FeaturesKey = :flipper_features
 
       # Internal
       attr_reader :cache
 
+      # Public: The name of the adapter.
+      attr_reader :name
+
+      # Internal: The adapter this adapter is wrapping.
+      attr_reader :adapter
+
       # Public
       def initialize(adapter, cache = nil)
-        super(adapter)
+        @adapter = adapter
+        @name = :memoizable
         @cache = cache || {}
         @memoize = false
       end
@@ -22,23 +29,23 @@ module Flipper
       def features
         if memoizing?
           cache.fetch(FeaturesKey) {
-            cache[FeaturesKey] = super
+            cache[FeaturesKey] = @adapter.features
           }
         else
-          super
+          @adapter.features
         end
       end
 
       # Public
       def add(feature)
-        result = super
+        result = @adapter.add(feature)
         cache.delete(FeaturesKey) if memoizing?
         result
       end
 
       # Public
       def remove(feature)
-        result = super
+        result = @adapter.remove(feature)
         if memoizing?
           cache.delete(FeaturesKey)
           cache.delete(feature)
@@ -48,7 +55,7 @@ module Flipper
 
       # Public
       def clear(feature)
-        result = super
+        result = @adapter.clear(feature)
         cache.delete(feature) if memoizing?
         result
       end
@@ -56,22 +63,22 @@ module Flipper
       # Public
       def get(feature)
         if memoizing?
-          cache.fetch(feature) { cache[feature] = super }
+          cache.fetch(feature) { cache[feature] = @adapter.get(feature) }
         else
-          super
+          @adapter.get(feature)
         end
       end
 
       # Public
       def enable(feature, gate, thing)
-        result = super
+        result = @adapter.enable(feature, gate, thing)
         cache.delete(feature) if memoizing?
         result
       end
 
       # Public
       def disable(feature, gate, thing)
-        result = super
+        result = @adapter.disable(feature, gate, thing)
         cache.delete(feature) if memoizing?
         result
       end
