@@ -9,11 +9,16 @@ RSpec.describe Flipper do
 
   let(:actor_class) { Struct.new(:flipper_id) }
 
-  let(:admin_group) { flipper.group(:admins) }
-  let(:dev_group)   { flipper.group(:devs) }
+  let(:admin_group)  { flipper.group(:admins) }
+  let(:dev_group)    { flipper.group(:devs) }
+  let(:truthy_group) { flipper.group(:truthy) }
+  let(:falsey_group) { flipper.group(:falsey) }
 
   let(:admin_thing) { double 'Non Flipper Thing', :flipper_id => 1,  :admin? => true, :dev? => false }
   let(:dev_thing)   { double 'Non Flipper Thing', :flipper_id => 10, :admin? => false, :dev? => true }
+
+  let(:admin_truthy_thing) { double 'Non Flipper Thing', :flipper_id => 1,  :admin? => "true-ish", :dev? => false }
+  let(:admin_falsey_thing) { double 'Non Flipper Thing', :flipper_id => 1,  :admin? => nil, :dev? => false }
 
   let(:pitt)        { actor_class.new(1) }
   let(:clooney)     { actor_class.new(10) }
@@ -347,12 +352,20 @@ RSpec.describe Flipper do
         expect(feature.enabled?(flipper.actor(admin_thing))).to eq(true)
         expect(feature.enabled?(admin_thing)).to eq(true)
       end
+
+      it "returns true for truthy block values" do
+        expect(feature.enabled?(flipper.actor(admin_truthy_thing))).to eq(true)
+      end
     end
 
     context "for actor in disabled group" do
       it "returns false" do
         expect(feature.enabled?(flipper.actor(dev_thing))).to eq(false)
         expect(feature.enabled?(dev_thing)).to eq(false)
+      end
+
+      it "returns false for falsey block values" do
+        expect(feature.enabled?(flipper.actor(admin_falsey_thing))).to eq(false)
       end
     end
 

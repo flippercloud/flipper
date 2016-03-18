@@ -48,5 +48,19 @@ RSpec.describe Flipper::Types::Group do
     it "returns false if block does not match" do
       expect(subject.match?(non_admin_actor)).to eq(false)
     end
+
+    it "returns true for truthy block results" do
+      group = Flipper::Types::Group.new(:examples) do |actor|
+        actor.email =~ /@example\.com/
+      end
+      expect(group.match?(double('Actor', :email => "foo@example.com"))).to be_truthy
+    end
+
+    it "returns false for falsey block results" do
+      group = Flipper::Types::Group.new(:examples) do |actor|
+        nil
+      end
+      expect(group.match?(double('Actor'))).to be_falsey
+    end
   end
 end

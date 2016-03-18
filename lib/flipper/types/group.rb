@@ -15,7 +15,7 @@ module Flipper
       end
 
       def match?(*args)
-        @block.call(*args) == true
+        @block.call(*args)
       end
     end
   end
