@@ -11,8 +11,6 @@ RSpec.describe Flipper do
 
   let(:admin_group)  { flipper.group(:admins) }
   let(:dev_group)    { flipper.group(:devs) }
-  let(:truthy_group) { flipper.group(:truthy) }
-  let(:falsey_group) { flipper.group(:falsey) }
 
   let(:admin_thing) { double 'Non Flipper Thing', :flipper_id => 1,  :admin? => true, :dev? => false }
   let(:dev_thing)   { double 'Non Flipper Thing', :flipper_id => 10, :admin? => false, :dev? => true }
