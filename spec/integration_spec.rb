@@ -9,8 +9,8 @@ RSpec.describe Flipper do
 
   let(:actor_class) { Struct.new(:flipper_id) }
 
-  let(:admin_group)  { flipper.group(:admins) }
-  let(:dev_group)    { flipper.group(:devs) }
+  let(:admin_group) { flipper.group(:admins) }
+  let(:dev_group)   { flipper.group(:devs) }
 
   let(:admin_thing) { double 'Non Flipper Thing', :flipper_id => 1,  :admin? => true, :dev? => false }
   let(:dev_thing)   { double 'Non Flipper Thing', :flipper_id => 10, :admin? => false, :dev? => true }
