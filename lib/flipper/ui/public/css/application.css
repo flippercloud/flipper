@@ -2601,3 +2601,6 @@ a.list-group-item-danger {
 
 .feature-enabled-gates {
   width: 380px; }
+
+p.help {
+  color: #999; }

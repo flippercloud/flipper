@@ -56,6 +56,7 @@
             <input type="text" name="value" <% if @feature.percentage_of_actors_value > 0 %>value="<%= @feature.percentage_of_actors_value %>"<% end %> placeholder="custom (ie: 26, 32, etc.)" class="input-mini">
             <input type="submit" name="action" value="Enable" class="btn btn-sm">
           </form>
+          <p class="help"><small>Percentage of actors functions independently of percentage of time. If you enable 50% of Actors and 25% of Time then the feature will always be enabled for 50% of users and occasionally enabled 25% of the time for everyone.</small></p>
         </div>
       </div>
     </div>
@@ -81,6 +82,8 @@
             <input type="text" name="value" <% if @feature.percentage_of_time_value > 0 %>value="<%= @feature.percentage_of_time_value %>"<% end %> placeholder="custom (ie: 26, 32, etc.)" class="input-mini">
             <input type="submit" name="action" value="Enable" class="btn btn-sm">
           </form>
+
+          <p class="help"><small>Percentage of time functions independently of percentage of actors. If you enable 50% of Actors and 25% of Time then the feature will always be enabled for 50% of users and occasionally enabled 25% of the time for everyone.</small></p>
         </div>
       </div>
     </div>
