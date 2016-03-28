@@ -14,6 +14,10 @@ module SpecHelpers
     }
   end
 
+  def build_api(flipper)
+    Flipper::Api.app(flipper)
+  end
+
   def build_flipper(adapter = build_memory_adapter)
     Flipper.new(adapter)
   end
