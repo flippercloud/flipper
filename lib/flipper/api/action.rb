@@ -26,7 +26,7 @@ module Flipper
       def self.regex
         @regex || raise("#{name}.route is not set")
       end
-      
+
       # Public: The instance of the Flipper::DSL the middleware was
       # initialized with.
       attr_reader :flipper

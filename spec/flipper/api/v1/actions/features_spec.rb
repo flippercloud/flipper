@@ -1,5 +1,6 @@
 require 'helper'
-RSpec.describe Flipper::Api::Actions::Features do
+
+RSpec.describe Flipper::Api::V1::Actions::Features do
   describe 'GET /alex' do
     let(:app) { build_api(flipper) }
 

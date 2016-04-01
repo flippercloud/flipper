@@ -1,9 +1,9 @@
 require 'rack'
 require 'flipper/api/action_collection'
 
-# Require all actions automatically.
-Pathname(__FILE__).dirname.join('actions').each_child(false) do |name|
-  require "flipper/api/actions/#{name}"
+# Require all V1 actions automatically.
+Pathname(__FILE__).dirname.join('v1/actions').each_child(false) do |name|
+  require "flipper/api/v1/actions/#{name}"
 end
 
 module Flipper
@@ -35,7 +35,7 @@ module Flipper
         end
 
         @action_collection = ActionCollection.new
-        @action_collection.add Api::Actions::Features
+        @action_collection.add Api::V1::Actions::Features
       end
 
       def flipper
