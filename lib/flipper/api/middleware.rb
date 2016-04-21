@@ -1,15 +1,15 @@
 require 'rack'
 require 'flipper/action_collection'
 
-# Require all actions automatically.
-Pathname(__FILE__).dirname.join('actions').each_child(false) do |name|
-  require "flipper/ui/actions/#{name}"
+# Require all V1 actions automatically.
+Pathname(__FILE__).dirname.join('v1/actions').each_child(false) do |name|
+  require "flipper/api/v1/actions/#{name}"
 end
 
 module Flipper
-  module UI
+  module Api 
     class Middleware
-      # Public: Initializes an instance of the UI middleware.
+      # Public: Initializes an instance of the API middleware.
       #
       # app - The app this middleware is included in.
       # flipper_or_block - The Flipper::DSL instance or a block that yields a
@@ -20,10 +20,10 @@ module Flipper
       #   flipper = Flipper.new(...)
       #
       #   # using with a normal flipper instance
-      #   use Flipper::UI::Middleware, flipper
+      #   use Flipper::Api::Middleware, flipper
       #
       #   # using with a block that yields a flipper instance
-      #   use Flipper::UI::Middleware, lambda { Flipper.new(...) }
+      #   use Flipper::Api::Middleware, lambda { Flipper.new(...) }
       #
       def initialize(app, flipper_or_block)
         @app = app
@@ -35,23 +35,7 @@ module Flipper
         end
 
         @action_collection = ActionCollection.new
-
-        # UI
-        @action_collection.add UI::Actions::Features
-        @action_collection.add UI::Actions::AddFeature
-        @action_collection.add UI::Actions::Feature
-        @action_collection.add UI::Actions::ActorsGate
-        @action_collection.add UI::Actions::GroupsGate
-        @action_collection.add UI::Actions::BooleanGate
-        @action_collection.add UI::Actions::PercentageOfTimeGate
-        @action_collection.add UI::Actions::PercentageOfActorsGate
-        @action_collection.add UI::Actions::Gate
-
-        # Static Assets/Files
-        @action_collection.add UI::Actions::File
-
-        # Catch all redirect to features
-        @action_collection.add UI::Actions::Home
+        @action_collection.add Api::V1::Actions::BooleanGate
       end
 
       def flipper
@@ -65,8 +49,8 @@ module Flipper
       def call!(env)
         request = Rack::Request.new(env)
         action_class = @action_collection.action_for_request(request)
-
         if action_class.nil?
+          @app.status = 404
           @app.call(env)
         else
           action_class.run(flipper, request)
