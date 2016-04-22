@@ -4,8 +4,10 @@ require 'flipper/api/middleware'
 
 module Flipper
   module Api
+    CONTENT_TYPE = 'application/json'.freeze
+
     def self.app(flipper)
-      app = App.new(200,{'Content-Type' => 'application/json'}, [''])
+      app = App.new(200,{ 'Content-Type' => CONTENT_TYPE }, [''])
       builder = Rack::Builder.new
       yield builder if block_given?
       builder.use Flipper::Api::Middleware, flipper

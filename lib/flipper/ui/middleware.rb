@@ -1,5 +1,5 @@
 require 'rack'
-require 'flipper/action_collection'
+require 'flipper/ui/action_collection'
 
 # Require all actions automatically.
 Pathname(__FILE__).dirname.join('actions').each_child(false) do |name|

@@ -40,7 +40,7 @@ module Flipper
       def initialize(flipper, request)
         @flipper, @request = flipper, request
         @code = 200
-        @headers = {"Content-Type" => "application/json"}
+        @headers = {"Content-Type" => Api::CONTENT_TYPE }
       end
 
       # Public: Runs the request method for the provided request.
@@ -77,9 +77,9 @@ module Flipper
         throw :halt, response
       end
 
-      def json_response(object)
-        header 'Content-Type', 'application/json'
-        status(200)
+      def json_response(object, status = 200)
+        header 'Content-Type', Api::CONTENT_TYPE
+        status(status)
         body = JSON.dump(object)
         halt [@code, @headers, [body]]
       end

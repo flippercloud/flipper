@@ -10,7 +10,7 @@ RSpec.describe Flipper::Api::V1::Actions::BooleanGate do
     end
 
     it 'enables feature' do
-      expect(last_response.status).to eq(200)
+      expect(last_response.status).to eq(204)
       expect(flipper[:my_feature].on?).to be_truthy
     end
   end
@@ -22,7 +22,7 @@ RSpec.describe Flipper::Api::V1::Actions::BooleanGate do
     end
 
     it 'disables feature' do
-      expect(last_response.status).to eq(200)
+      expect(last_response.status).to eq(204)
       expect(flipper[:my_feature].off?).to be_truthy
     end
   end
