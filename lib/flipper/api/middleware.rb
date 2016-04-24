@@ -36,6 +36,7 @@ module Flipper
 
         @action_collection = ActionCollection.new
         @action_collection.add Api::V1::Actions::BooleanGate
+        @action_collection.add Api::V1::Actions::Feature
       end
 
       def flipper
