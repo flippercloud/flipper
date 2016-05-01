@@ -9,9 +9,6 @@ module Flipper
     # Private: The name of feature instrumentation events.
     InstrumentationName = "feature_operation.#{InstrumentationNamespace}"
 
-    # Private: The name of gate instrumentation events.
-    GateInstrumentationName = "gate_operation.#{InstrumentationNamespace}"
-
     # Public: The name of the feature.
     attr_reader :name
 
@@ -85,9 +82,7 @@ module Flipper
         payload[:thing] = gate(:actor).wrap(thing) unless thing.nil?
 
         open_gate = gates.detect { |gate|
-          instrument_gate(gate, :open?, thing) { |gate_payload|
-            gate.open?(thing, values[gate.key], feature_name: @name)
-          }
+          gate.open?(thing, values[gate.key], feature_name: @name)
         }
 
         if open_gate.nil?
@@ -353,20 +348,6 @@ module Flipper
       @instrumenter.instrument(InstrumentationName) { |payload|
         payload[:feature_name] = name
         payload[:operation] = operation
-        payload[:result] = yield(payload) if block_given?
-      }
-    end
-
-    # Private: Intrument a gate operation.
-    def instrument_gate(gate, operation, thing)
-      payload = {
-        :feature_name => @name,
-        :gate_name => gate.name,
-        :operation => operation,
-        :thing => thing,
-      }
-
-      @instrumenter.instrument(GateInstrumentationName, payload) { |payload|
         payload[:result] = yield(payload) if block_given?
       }
     end

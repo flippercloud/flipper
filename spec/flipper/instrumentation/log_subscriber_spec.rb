@@ -42,11 +42,6 @@ RSpec.describe Flipper::Instrumentation::LogSubscriber do
       expect(adapter_line).to include('[ result={')
       expect(adapter_line).to include('} ]')
     end
-
-    it "logs gate calls" do
-      gate_line = find_line('Flipper feature(search) gate(boolean) open? false')
-      expect(gate_line).to include('[ thing=nil ]')
-    end
   end
 
   context "feature enabled checks with a thing" do
@@ -60,11 +55,6 @@ RSpec.describe Flipper::Instrumentation::LogSubscriber do
     it "logs thing for feature" do
       feature_line = find_line('Flipper feature(search) enabled?')
       expect(feature_line).to include(user.inspect)
-    end
-
-    it "logs thing for gate" do
-      gate_line = find_line('Flipper feature(search) gate(boolean) open')
-      expect(gate_line).to include(user.inspect)
     end
   end
 
