@@ -65,14 +65,4 @@ RSpec.describe Flipper::Instrumentation::StatsdSubscriber do
     flipper[:stats].disable(user)
     assert_timer 'flipper.adapter.memory.disable'
   end
-
-  it "updates gate metrics when calls happen" do
-    flipper[:stats].enable(user)
-    flipper[:stats].enabled?(user)
-
-    assert_timer 'flipper.gate_operation.boolean.open'
-    assert_timer 'flipper.feature.stats.gate_operation.boolean.open'
-    assert_counter 'flipper.feature.stats.gate.actor.open'
-    assert_counter 'flipper.feature.stats.gate.boolean.closed'
-  end
 end
