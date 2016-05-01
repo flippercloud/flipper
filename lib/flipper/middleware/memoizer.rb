@@ -11,9 +11,8 @@ module Flipper
       #
       # Examples
       #
-      #   flipper = Flipper.new(...)
-      #
       #   # using with a normal flipper instance
+      #   flipper = Flipper.new(...)
       #   use Flipper::Middleware::Memoizer, flipper
       #
       #   # using with a block that yields a flipper instance
