@@ -18,10 +18,16 @@ If you set your flipper instance up in an initializer, you can pass a block to t
 
 ```ruby
 # config/initializers/flipper.rb
-$flipper = Flipper.new(...)
+module MyRailsApp
+  def self.flipper
+    @flipper ||= Flipper.new(...)
+  end
+end
 
 # config/application.rb
-config.middleware.use Flipper::Middleware::Memoizer, lambda { $flipper }
+config.middleware.use Flipper::Middleware::Memoizer, lambda {
+  MyRailsApp.flipper
+}
 ```
 
 **Note**: Be sure that the middleware is high enough up in your stack that all feature checks are wrapped.
