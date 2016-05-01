@@ -46,14 +46,4 @@ RSpec.describe Flipper::Instrumentation::MetriksSubscriber do
     flipper[:stats].disable(user)
     expect(Metriks.timer("flipper.adapter.memory.disable").count).to be(1)
   end
-
-  it "updates gate metrics when calls happen" do
-    flipper[:stats].enable(user)
-    flipper[:stats].enabled?(user)
-
-    expect(Metriks.timer("flipper.gate_operation.boolean.open").count).to be(1)
-    expect(Metriks.timer("flipper.feature.stats.gate_operation.boolean.open").count).to be(1)
-    expect(Metriks.meter("flipper.feature.stats.gate.actor.open").count).to be(1)
-    expect(Metriks.meter("flipper.feature.stats.gate.boolean.closed").count).to be(1)
-  end
 end
