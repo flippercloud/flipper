@@ -27,6 +27,10 @@ module Flipper
         @adapter.get(feature)
       end
 
+      def get_control(control)
+        @adapter.get_control(control)
+      end
+
       def add(feature)
         raise WriteAttempted
       end
@@ -44,6 +48,10 @@ module Flipper
       end
 
       def disable(feature, gate, thing)
+        raise WriteAttempted
+      end
+
+      def set_control(control, value)
         raise WriteAttempted
       end
     end

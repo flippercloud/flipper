@@ -109,9 +109,29 @@ module Flipper
         true
       end
 
+      # Public
+      def get_control(control)
+        if doc = find(control_key(control))
+          doc["value"]
+        end
+      end
+
+      # Public
+      def set_control(control, value)
+        value = value.to_s
+        update control_key(control), '$set' => {"value" => value}
+        value
+      end
+
+      private
+
       # Private
       def unsupported_data_type(data_type)
         raise "#{data_type} is not supported by this adapter"
+      end
+
+      def control_key(control)
+        "control/#{control.key}"
       end
 
       # Private

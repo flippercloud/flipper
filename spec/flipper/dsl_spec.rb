@@ -235,4 +235,47 @@ RSpec.describe Flipper::DSL do
       expect(subject[:stats].percentage_of_actors_value).to be(0)
     end
   end
+
+  describe "#control" do
+    let(:instrumenter) { double('Instrumentor', :instrument => nil) }
+    let(:dsl) { Flipper::DSL.new(adapter, :instrumenter => instrumenter) }
+    let(:control) { dsl.control(:poll_interval) }
+
+    it "returns instance of control" do
+      expect(control).to be_instance_of(Flipper::Control)
+    end
+
+    it "sets name" do
+      expect(control.name).to eq(:poll_interval)
+    end
+
+    it "sets adapter" do
+      expect(control.adapter.name).to eq(dsl.adapter.name)
+    end
+
+    it "sets instrumenter" do
+      expect(control.instrumenter).to eq(dsl.instrumenter)
+    end
+
+    it "memoizes the control" do
+      expect(dsl.control(:poll_interval)).to equal(control)
+    end
+
+    it "raises argument error if not string or symbol" do
+      expect {
+        dsl.control(Object.new)
+      }.to raise_error(ArgumentError, /must be a String or Symbol/)
+    end
+  end
+
+  describe "#set_control" do
+    let(:dsl) { Flipper::DSL.new(adapter) }
+    let(:control) { dsl.control(:poll_interval) }
+
+    it "sets value" do
+      expect(control.value).to eq(nil)
+      dsl.set_control(:poll_interval, "10")
+      expect(control.value).to eq("10")
+    end
+  end
 end

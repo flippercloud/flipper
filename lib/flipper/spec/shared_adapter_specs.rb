@@ -4,7 +4,8 @@ shared_examples_for 'a flipper adapter' do
   let(:actor_class) { Struct.new(:flipper_id) }
 
   let(:flipper) { Flipper.new(subject) }
-  let(:feature) { flipper[:stats] }
+  let(:feature) { flipper.feature(:stats) }
+  let(:control) { flipper.control(:poll_interval) }
 
   let(:boolean_gate) { feature.gate(:boolean) }
   let(:group_gate)   { feature.gate(:group) }
@@ -220,5 +221,24 @@ shared_examples_for 'a flipper adapter' do
 
   it "does not complain clearing a feature that does not exist in adapter" do
     expect(subject.clear(flipper[:stats])).to eq(true)
+  end
+
+  it "returns nil for control with no value set" do
+    expect(subject.get_control(control)).to be(nil)
+  end
+
+  it "can write and read control value" do
+    subject.set_control(control, "10")
+    expect(subject.get_control(control)).to eq("10")
+  end
+
+  it "always stores string value for control" do
+    subject.set_control(control, 10)
+    expect(subject.get_control(control)).to eq("10")
+  end
+
+  it "returns value for set_control" do
+    result = subject.set_control(control, 10)
+    expect(result).to eq("10")
   end
 end

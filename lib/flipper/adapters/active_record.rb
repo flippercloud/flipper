@@ -17,6 +17,10 @@ module Flipper
         self.table_name = "flipper_gates"
       end
 
+      class Control < ::ActiveRecord::Base
+        self.table_name = "flipper_controls"
+      end
+
       # Public: The name of the adapter.
       attr_reader :name
 
@@ -36,6 +40,7 @@ module Flipper
         @name = options.fetch(:name, :active_record)
         @feature_class = options.fetch(:feature_class) { Feature }
         @gate_class = options.fetch(:gate_class) { Gate }
+        @control_class = options.fetch(:control_class) { Control }
       end
 
       # Public: The set of known features.
@@ -47,7 +52,8 @@ module Flipper
       def add(feature)
         attributes = {key: feature.key}
         # race condition, but add is only used by enable/disable which happen
-        # super rarely, so it shouldn't matter in practice
+        # super rarely, so it shouldn't matter in practice; also there is a
+        # unique index on key so it should just fail
         @feature_class.where(attributes).first || @feature_class.create!(attributes)
         true
       end
@@ -148,6 +154,32 @@ module Flipper
 
         true
       end
+
+      # Public
+      def get_control(control)
+        if control = @control_class.where(key: control.key).first
+          control.value
+        end
+      end
+
+      # Public
+      def set_control(control, value)
+        attributes = {key: control.key}
+        value = value.to_s
+
+        # race condition, but there is unique index on key so it should just
+        # fail and you can retry
+        if control = @control_class.where(attributes).first
+          control.update_attributes!(value: value.to_s)
+        else
+          attributes[:value] = value
+          @control_class.create!(attributes)
+        end
+
+        value
+      end
+
+      private
 
       # Private
       def unsupported_data_type(data_type)

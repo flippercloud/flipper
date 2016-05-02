@@ -82,6 +82,26 @@ RSpec.describe Flipper::Middleware::Memoizer do
 
       expect(adapter.count(:get)).to be(1)
     end
+
+    it "caches getting a control for duration of request" do
+      # clear the log of operations
+      adapter.reset
+
+      app = lambda { |env|
+        flipper.control(:poll_interval).value
+        flipper.control(:poll_interval).value
+        flipper.control(:poll_interval).value
+        flipper.control(:poll_interval).value
+        flipper.control(:poll_interval).value
+        flipper.control(:poll_interval).value
+        [200, {}, []]
+      }
+
+      middleware = described_class.new app, flipper
+      middleware.call({})
+
+      expect(adapter.count(:get_control)).to be(1)
+    end
   end
 
   context "with flipper instance" do

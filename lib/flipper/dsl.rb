@@ -25,6 +25,7 @@ module Flipper
       @adapter = memoized
 
       @memoized_features = {}
+      @memoized_controls = {}
     end
 
     # Public: Check if a feature is enabled.
@@ -176,7 +177,7 @@ module Flipper
       Types::Boolean.new(value)
     end
 
-    # Public: Event shorter shortcut for getting a boolean type instance.
+    # Public: Even shorter shortcut for getting a boolean type instance.
     #
     # value - The true or false value for the boolean.
     #
@@ -228,6 +229,31 @@ module Flipper
     # Returns Set of Flipper::Feature instances.
     def features
       adapter.features.map { |name| feature(name) }.to_set
+    end
+
+    # Public: Access a control instance by name.
+    #
+    # name - The String or Symbol name of the control.
+    #
+    # Returns an instance of Flipper::Control.
+    def control(name)
+      if !name.is_a?(String) && !name.is_a?(Symbol)
+        raise ArgumentError, "#{name} must be a String or Symbol"
+      end
+
+      @memoized_controls[name.to_sym] ||= Control.new(name, @adapter, {
+        :instrumenter => @instrumenter,
+      })
+    end
+
+    # Public: Set a control to a value.
+    #
+    # name - The String or Symbol name of the control.
+    # value - The value passed through to the control instance set call.
+    #
+    # Returns the result of the control instance set call.
+    def set_control(name, value)
+      control(name).set(value)
     end
   end
 end

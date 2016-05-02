@@ -99,6 +99,16 @@ module Flipper
       end
 
       # Public
+      def get_control(control)
+        read control_key(control)
+      end
+
+      # Public
+      def set_control(control, value)
+        write control_key(control), value.to_s
+      end
+
+      # Public
       def inspect
         attributes = [
           "name=#{@name.inspect}",
@@ -113,6 +123,11 @@ module Flipper
       # Private
       def key(feature, gate)
         "#{feature.key}/#{gate.key}"
+      end
+
+      # Private
+      def control_key(control)
+        "control/#{control.key}"
       end
 
       # Private

@@ -111,6 +111,22 @@ module Flipper
         true
       end
 
+      def get_control(control)
+        @client.get control_key(control)
+      end
+
+      def set_control(control, value)
+        value = value.to_s
+        @client.set control_key(control), value
+        value
+      end
+
+      private
+
+      def control_key(control)
+        "control/#{control.key}"
+      end
+
       # Private: Gets a hash of fields => values for the given feature.
       #
       # Returns a Hash of fields => values.

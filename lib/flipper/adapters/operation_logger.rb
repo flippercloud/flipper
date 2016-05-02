@@ -16,6 +16,8 @@ module Flipper
         :get,
         :enable,
         :disable,
+        :get_control,
+        :set_control,
       ]
 
       # Internal: An array of the operations that have happened.
@@ -72,6 +74,18 @@ module Flipper
       def disable(feature, gate, thing)
         @operations << Operation.new(:disable, [feature, gate, thing])
         @adapter.disable(feature, gate, thing)
+      end
+
+      # Public
+      def get_control(control)
+        @operations << Operation.new(:get_control, [control])
+        @adapter.get_control(control)
+      end
+
+      # Public
+      def set_control(control, value)
+        @operations << Operation.new(:set_control, [control, value])
+        @adapter.set_control(control, value)
       end
 
       # Public: Count the number of times a certain operation happened.

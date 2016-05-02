@@ -120,6 +120,32 @@ module Flipper
           payload[:result] = @adapter.disable(feature, gate, thing)
         }
       end
+
+      # Public
+      def get_control(control)
+        payload = {
+          :operation => :get_control,
+          :adapter_name => @adapter.name,
+          :control_name => control.name,
+        }
+
+        @instrumenter.instrument(InstrumentationName, payload) { |payload|
+          payload[:result] = @adapter.get_control(control)
+        }
+      end
+
+      # Public
+      def set_control(control, value)
+        payload = {
+          :operation => :set_control,
+          :adapter_name => @adapter.name,
+          :control_name => control.name,
+        }
+
+        @instrumenter.instrument(InstrumentationName, payload) { |payload|
+          payload[:result] = @adapter.set_control(control, value)
+        }
+      end
     end
   end
 end

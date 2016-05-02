@@ -83,6 +83,22 @@ module Flipper
         result
       end
 
+      # Public
+      def get_control(control)
+        if memoizing?
+          cache.fetch(control) { cache[control] = @adapter.get_control(control) }
+        else
+          @adapter.get_control(control)
+        end
+      end
+
+      # Public
+      def set_control(control, value)
+        result = @adapter.set_control(control, value)
+        cache.delete(control) if memoizing?
+        result
+      end
+
       # Internal: Turns local caching on/off.
       #
       # value - The Boolean that decides if local caching is on.

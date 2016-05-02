@@ -239,4 +239,59 @@ RSpec.describe Flipper::Adapters::Memoizable do
       end
     end
   end
+
+  describe "#get_control" do
+    context "with memoization enabled" do
+      before do
+        subject.memoize = true
+      end
+
+      it "memoizes control" do
+        control = flipper.control(:poll_interval)
+        result = subject.get_control(control)
+        expect(cache[control]).to be(result)
+      end
+    end
+
+    context "with memoization disabled" do
+      before do
+        subject.memoize = false
+      end
+
+      it "returns result" do
+        control = flipper.control(:poll_interval)
+        result = subject.get_control(control)
+        adapter_result = adapter.get_control(control)
+        expect(result).to eq(adapter_result)
+      end
+    end
+  end
+
+  describe "#set_control" do
+    context "with memoization enabled" do
+      before do
+        subject.memoize = true
+      end
+
+      it "unmemoizes control" do
+        control = flipper.control(:poll_interval)
+        cache[control] = "should be nil"
+        subject.set_control(control, "10")
+        expect(cache[control]).to be_nil
+      end
+    end
+
+    context "with memoization disabled" do
+      before do
+        subject.memoize = false
+      end
+
+      it "returns result" do
+        control = flipper.control(:poll_interval)
+        result = subject.set_control(control, "10")
+        adapter_result = adapter.set_control(control, "10")
+        expect(result).to eq(adapter_result)
+      end
+    end
+  end
 end
