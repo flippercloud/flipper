@@ -40,7 +40,7 @@ module Flipper
 
       # Public: The set of known features.
       def features
-        @feature_class.select(:key).map(&:key).to_set
+        @feature_class.all.map(&:key).to_set
       end
 
       # Public: Adds a feature to the set of known features.
