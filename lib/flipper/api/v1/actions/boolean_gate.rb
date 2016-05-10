@@ -14,12 +14,6 @@ module Flipper
             feature.send(action)
             json_response({}, 204)
           end
-
-          private
-
-          def path_parts
-            request.path.split("/")
-          end
         end
       end
     end

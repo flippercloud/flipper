@@ -99,9 +99,17 @@ module Flipper
         @headers[name] = value
       end
 
+      private
+
       # Private: Returns the request method converted to an action method.
       def request_method_name
         @request_method_name ||= @request.request_method.downcase
+      end
+
+      # Private: split request path by "/"
+      # Example: "api/v1/features/feature_name" => ['api', 'v1', 'features', 'feature_name']
+      def path_parts
+        @request.path.split("/")
       end
     end
   end
