@@ -18,7 +18,7 @@ module Flipper
             {
               'key' => gate.key.to_s,
               'name' => gate.name.to_s,
-              'value' => value_as_json
+              'value' => value_as_json,
             }
           end
 

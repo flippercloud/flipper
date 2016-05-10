@@ -21,27 +21,27 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
             {
               'key' => 'boolean',
               'name' => 'boolean',
-              'value' => true
+              'value' => true,
             },
             {
               'key' => 'groups',
               'name' => 'group',
-              'value' =>[]
+              'value' => [],
             },
             {
               'key' => 'actors',
               'name' => 'actor',
-              'value' => []
+              'value' => [],
             },
             {
               'key' => 'percentage_of_actors',
               'name' => 'percentage_of_actors',
-              'value' => 0
+              'value' => 0,
             },
             {
               'key' => 'percentage_of_time',
               'name' => 'percentage_of_time',
-              'value' => 0
+              'value' => 0,
             }
           ]
         }
@@ -65,27 +65,27 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
             {
               'key' => 'boolean',
               'name' => 'boolean',
-              'value' => false
+              'value' => false,
             },
             {
               'key'=> 'groups',
               'name'=> 'group',
-              'value'=>[]
+              'value'=> [],
             },
             {
               'key' => 'actors',
               'name' => 'actor',
-              'value' => []
+              'value' => [],
             },
             {
               'key' => 'percentage_of_actors',
               'name' => 'percentage_of_actors',
-              'value'=>0
+              'value'=> 0,
             },
             {
               'key' => 'percentage_of_time',
               'name' => 'percentage_of_time',
-              'value' => 0
+              'value' => 0,
             }
           ]
         }
