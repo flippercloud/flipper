@@ -9,22 +9,17 @@ module Flipper
 
           # Public: The feature being decorated.
           alias_method :feature, :__getobj__
-          
+
           # Public: Returns instance as hash that is ready to be json dumped.
           def as_json
+            gate_values = feature.gate_values
             {
               'id' => name.to_s,
               'state' => state.to_s,
               'gates' => gates.map { |gate|
                 Decorators::Gate.new(gate, gate_values[gate.key]).as_json
-              }
+              },
             }
-          end
-
-          private
-
-          def gate_values
-            feature.gate_values
           end
         end
       end
