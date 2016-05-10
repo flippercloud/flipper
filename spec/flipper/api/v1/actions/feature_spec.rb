@@ -107,12 +107,10 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
   end
 
   describe 'delete' do
-    before do
-      flipper[:my_feature].enable
-      delete 'api/v1/features/my_feature'
-    end
-
     it 'deletes feature' do
+      flipper[:my_feature].enable
+      expect(flipper.features.map(&:key)).to include('my_feature')
+      delete 'api/v1/features/my_feature'
       expect(last_response.status).to eq(204)
       expect(flipper.features.map(&:key)).not_to include('my_feature')
     end
