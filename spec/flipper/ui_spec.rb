@@ -93,4 +93,41 @@ RSpec.describe Flipper::UI do
       expect(last_response.body).to include('<a href="https://myapp.com/">App</a>')
     end
   end
+
+  it "should not have remove_add_feature_button by default" do
+    expect(Flipper::UI.remove_add_feature_button).to be(nil)
+  end
+
+  context "without remove_add_feature_button" do
+    before do
+      @original_remove_add_feature_button = Flipper::UI.remove_add_feature_button
+      Flipper::UI.remove_add_feature_button = nil
+    end
+
+    it 'has the add_feature button' do
+      get '/features'
+      expect(last_response.body).to include('Add Feature')
+    end
+
+    after do
+      Flipper::UI.remove_add_feature_button = @original_remove_add_feature_button
+    end
+  end
+
+  context "with remove_add_feature_button" do
+    before do
+      @original_remove_add_feature_button = Flipper::UI.remove_add_feature_button
+      Flipper::UI.remove_add_feature_button = true
+    end
+
+    it 'does not have the add_feature button' do
+      get '/features'
+      expect(last_response.body).to_not include('Add Feature')
+    end
+
+    after do
+      Flipper::UI.remove_add_feature_button = @original_remove_add_feature_button
+    end
+  end
+
 end
