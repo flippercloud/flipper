@@ -94,11 +94,11 @@ RSpec.describe Flipper::UI do
     end
   end
 
-  it "feature_creation_enabled should be enabled by default" do
+  it "should set feature_creation_enabled to true by default" do
     expect(Flipper::UI.feature_creation_enabled).to be(true)
   end
 
-  context "without feature_creation_enabled enabled" do
+  context "with feature_creation_enabled set to true" do
     before do
       @original_feature_creation_enabled = Flipper::UI.feature_creation_enabled
       Flipper::UI.feature_creation_enabled = true
@@ -114,7 +114,7 @@ RSpec.describe Flipper::UI do
     end
   end
 
-  context "with feature_creation_enabled disabled" do
+  context "with feature_creation_enabled set to false" do
     before do
       @original_feature_creation_enabled = Flipper::UI.feature_creation_enabled
       Flipper::UI.feature_creation_enabled = false
