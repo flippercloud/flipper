@@ -105,11 +105,18 @@ module Flipper
       def enable(feature, gate, thing)
         case gate.data_type
         when :boolean, :integer
-          @gate_class.where(
-            feature_key: feature.key,
-            key: gate.key).first_or_initialize.
-	    update_attributes!(
-            value: thing.value.to_s)
+          @gate_class.transaction do
+            @gate_class.where(
+              feature_key: feature.key,
+              key: gate.key
+            ).delete_all
+
+            @gate_class.create!({
+              feature_key: feature.key,
+              key: gate.key,
+              value: thing.value.to_s,
+            })
+          end
         when :set
           @gate_class.create!({
             feature_key: feature.key,
@@ -135,11 +142,18 @@ module Flipper
         when :boolean
           clear(feature)
         when :integer
-          @gate_class.create!({
-            feature_key: feature.key,
-            key: gate.key,
-            value: thing.value.to_s,
-          })
+          @gate_class.transaction do
+            @gate_class.where(
+              feature_key: feature.key,
+              key: gate.key
+            ).delete_all
+
+            @gate_class.create!({
+              feature_key: feature.key,
+              key: gate.key,
+              value: thing.value.to_s,
+            })
+          end
         when :set
           @gate_class.where(feature_key: feature.key, key: gate.key, value: thing.value).delete_all
         else

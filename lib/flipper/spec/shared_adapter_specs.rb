@@ -116,13 +116,25 @@ shared_examples_for 'a flipper adapter' do
     result = subject.get(feature)
     expect(result[:percentage_of_actors]).to eq('15')
 
-    expect(subject.enable(feature, actors_gate, flipper.actors(25))).to eq(true)
-    result = subject.get(feature)
-    expect(result[:percentage_of_actors]).to eq('25')
-
     expect(subject.disable(feature, actors_gate, flipper.actors(0))).to eq(true)
     result = subject.get(feature)
     expect(result[:percentage_of_actors]).to eq('0')
+  end
+
+  it "can enable percentage of actors gate many times and consistently return values" do
+    (1..100).each do |percentage|
+      expect(subject.enable(feature, actors_gate, flipper.actors(percentage))).to eq(true)
+      result = subject.get(feature)
+      expect(result[:percentage_of_actors]).to eq(percentage.to_s)
+    end
+  end
+
+  it "can disable percentage of actors gate many times and consistently return values" do
+    (1..100).each do |percentage|
+      expect(subject.disable(feature, actors_gate, flipper.actors(percentage))).to eq(true)
+      result = subject.get(feature)
+      expect(result[:percentage_of_actors]).to eq(percentage.to_s)
+    end
   end
 
   it "can enable, disable and get value for percentage of time gate" do
@@ -133,6 +145,22 @@ shared_examples_for 'a flipper adapter' do
     expect(subject.disable(feature, time_gate, flipper.time(0))).to eq(true)
     result = subject.get(feature)
     expect(result[:percentage_of_time]).to eq('0')
+  end
+
+  it "can enable percentage of time gate many times and consistently return values" do
+    (1..100).each do |percentage|
+      expect(subject.enable(feature, time_gate, flipper.time(percentage))).to eq(true)
+      result = subject.get(feature)
+      expect(result[:percentage_of_time]).to eq(percentage.to_s)
+    end
+  end
+
+  it "can disable percentage of time gate many times and consistently return values" do
+    (1..100).each do |percentage|
+      expect(subject.disable(feature, time_gate, flipper.time(percentage))).to eq(true)
+      result = subject.get(feature)
+      expect(result[:percentage_of_time]).to eq(percentage.to_s)
+    end
   end
 
   it "converts boolean value to a string" do
