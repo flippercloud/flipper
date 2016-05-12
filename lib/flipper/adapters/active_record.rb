@@ -105,11 +105,11 @@ module Flipper
       def enable(feature, gate, thing)
         case gate.data_type
         when :boolean, :integer
-          @gate_class.create!({
+          @gate_class.where(
             feature_key: feature.key,
-            key: gate.key,
-            value: thing.value.to_s,
-          })
+            key: gate.key).first_or_initialize.
+	    update_attributes!(
+            value: thing.value.to_s)
         when :set
           @gate_class.create!({
             feature_key: feature.key,
