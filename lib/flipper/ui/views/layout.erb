@@ -17,7 +17,9 @@
   </head>
   <body>
     <div class="container header">
-      <a class="btn btn-sm right" href="<%= script_name %>/features/new">Add Feature</a>
+      <% unless Flipper::UI.remove_add_feature_button %>
+        <a class="btn btn-sm right" href="<%= script_name %>/features/new">Add Feature</a>
+      <% end %>
 
       <ol class="breadcrumb">
         <% @breadcrumbs.each do |breadcrumb| %>

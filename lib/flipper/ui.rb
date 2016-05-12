@@ -21,6 +21,8 @@ module Flipper
       # says "App" which points to this href. The href can be a path (ie: "/")
       # or full url ("https://app.example.com/").
       attr_accessor :application_breadcrumb_href
+      #Public: If set, then the add_feature button will be removed
+      attr_accessor :remove_add_feature_button
     end
 
     def self.root
