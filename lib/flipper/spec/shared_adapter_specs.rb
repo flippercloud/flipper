@@ -116,6 +116,10 @@ shared_examples_for 'a flipper adapter' do
     result = subject.get(feature)
     expect(result[:percentage_of_actors]).to eq('15')
 
+    expect(subject.enable(feature, actors_gate, flipper.actors(25))).to eq(true)
+    result = subject.get(feature)
+    expect(result[:percentage_of_actors]).to eq('25')
+
     expect(subject.disable(feature, actors_gate, flipper.actors(0))).to eq(true)
     result = subject.get(feature)
     expect(result[:percentage_of_actors]).to eq('0')
