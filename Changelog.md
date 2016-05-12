@@ -1,7 +1,8 @@
 ## master
 
 * removed Flipper::Decorator and Flipper::Adapters::Decorator in favor of just calling methods on wrapped adapter
-* fixed bug where certain versions of AR left off quotes for key column which caused issues with MySQL https://github.com/jnunemaker/flipper/issues/120
+* fix bug where certain versions of AR left off quotes for key column which caused issues with MySQL https://github.com/jnunemaker/flipper/issues/120
+* fix bug where AR would store multiple gate values for percentage gates for each enable/disable and then nondeterministically pick one on read (https://github.com/jnunemaker/flipper/pull/122 and https://github.com/jnunemaker/flipper/pull/124)
 
 ## 0.7.5
 
