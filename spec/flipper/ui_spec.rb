@@ -94,14 +94,14 @@ RSpec.describe Flipper::UI do
     end
   end
 
-  it "should not have remove_add_feature_button by default" do
-    expect(Flipper::UI.remove_add_feature_button).to be(nil)
+  it "feature_creation_enabled should be enabled by default" do
+    expect(Flipper::UI.feature_creation_enabled).to be(true)
   end
 
-  context "without remove_add_feature_button" do
+  context "without feature_creation_enabled enabled" do
     before do
-      @original_remove_add_feature_button = Flipper::UI.remove_add_feature_button
-      Flipper::UI.remove_add_feature_button = nil
+      @original_feature_creation_enabled = Flipper::UI.feature_creation_enabled
+      Flipper::UI.feature_creation_enabled = true
     end
 
     it 'has the add_feature button' do
@@ -110,14 +110,14 @@ RSpec.describe Flipper::UI do
     end
 
     after do
-      Flipper::UI.remove_add_feature_button = @original_remove_add_feature_button
+      Flipper::UI.feature_creation_enabled = @original_feature_creation_enabled
     end
   end
 
-  context "with remove_add_feature_button" do
+  context "with feature_creation_enabled disabled" do
     before do
-      @original_remove_add_feature_button = Flipper::UI.remove_add_feature_button
-      Flipper::UI.remove_add_feature_button = true
+      @original_feature_creation_enabled = Flipper::UI.feature_creation_enabled
+      Flipper::UI.feature_creation_enabled = false
     end
 
     it 'does not have the add_feature button' do
@@ -126,7 +126,7 @@ RSpec.describe Flipper::UI do
     end
 
     after do
-      Flipper::UI.remove_add_feature_button = @original_remove_add_feature_button
+      Flipper::UI.feature_creation_enabled = @original_feature_creation_enabled
     end
   end
 

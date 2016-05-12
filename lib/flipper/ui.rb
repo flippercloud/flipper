@@ -21,9 +21,14 @@ module Flipper
       # says "App" which points to this href. The href can be a path (ie: "/")
       # or full url ("https://app.example.com/").
       attr_accessor :application_breadcrumb_href
-      #Public: If set, then the add_feature button will be removed
-      attr_accessor :remove_add_feature_button
+
+      # Public: Is feature creation allowed from the UI? Defaults to true. If
+      # set to false, users of the UI cannot create features. All feature
+      # creation will need to be done through the conigured flipper instance.
+      attr_accessor :feature_creation_enabled
     end
+
+    self.feature_creation_enabled = true
 
     def self.root
       @root ||= Pathname(__FILE__).dirname.expand_path.join('ui')
