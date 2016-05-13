@@ -14,7 +14,7 @@ module Flipper
           def as_json
             gate_values = feature.gate_values
             {
-              'id' => name.to_s,
+              'key' => key,
               'state' => state.to_s,
               'gates' => gates.map { |gate|
                 Decorators::Gate.new(gate, gate_values[gate.key]).as_json

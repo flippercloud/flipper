@@ -15,7 +15,7 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
 
       it 'responds with correct attributes' do
         response_body = {
-          'id' => 'my_feature',
+          'key' => 'my_feature',
           'state' => 'on',
           'gates' => [
             {
@@ -59,7 +59,7 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
 
       it 'responds with correct attributes' do
         response_body = {
-          'id' => 'my_feature',
+          'key' => 'my_feature',
           'state' => 'off',
           'gates' => [
             {
