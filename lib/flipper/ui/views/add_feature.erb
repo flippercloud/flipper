@@ -11,8 +11,13 @@
   <div class="panel-body">
     <form action="<%= script_name %>/features" method="post">
       <%== csrf_input_tag %>
-      <input type="text" name="value" placeholder="ie: admins, orgs_next, etc.">
+      <input type="text" name="value" size="30" placeholder="ie: search, new_pricing, etc.">
       <input type="submit" value="Add Feature" class="btn">
     </form>
+    <p class="help">
+      Recommended naming conventions: lower case, <a href="https://en.wikipedia.org/wiki/Snake_case">snake case</a>, underscores over dashes.
+      <strong>Good</strong>: foo_bar, foo.
+      <strong>Bad</strong>: FooBar, Foo Bar, foo bar, foo-bar.
+    </p>
   </div>
 </div>
