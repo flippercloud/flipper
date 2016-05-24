@@ -1,5 +1,6 @@
 #!/usr/bin/env rake
 $LOAD_PATH.push File.expand_path("../lib", __FILE__)
+require 'rake/testtask'
 require "flipper/version"
 
 # gem install pkg/*.gem
@@ -35,10 +36,9 @@ namespace :spec do
   end
 end
 
-task :default => :spec
-
-task :test do
-  sh "bundle exec ruby -Itest test/generators/flipper/active_record_generator_test.rb"
+Rake::TestTask.new do |t|
+  t.libs = ['lib', 'test']
+  t.pattern = "test/**/*_test.rb"
 end
 
-task :default => :test
+task :default => [:spec, :test]
