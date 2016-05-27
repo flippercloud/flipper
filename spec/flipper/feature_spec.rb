@@ -197,6 +197,17 @@ RSpec.describe Flipper::Feature do
       expect(event.payload[:thing]).to eq(Flipper::Types::Actor.new(thing))
     end
 
+    it "is recorded for remove" do
+      subject.remove
+
+      event = instrumenter.events.last
+      expect(event).not_to be_nil
+      expect(event.name).to eq('feature_operation.flipper')
+      expect(event.payload[:feature_name]).to eq(:search)
+      expect(event.payload[:operation]).to eq(:remove)
+      expect(event.payload[:result]).not_to be_nil
+    end
+
     it "is recorded for enabled?" do
       thing = Flipper::Types::Actor.new(Struct.new(:flipper_id).new("1"))
       gate = subject.gate_for(thing)

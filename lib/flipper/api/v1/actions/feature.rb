@@ -20,7 +20,7 @@ module Flipper
 
           def delete
             feature = flipper[feature_name]
-            flipper.adapter.remove(feature)
+            feature.remove
             json_response({}, 204)
           end
 
