@@ -19,13 +19,17 @@ module Flipper
           end
 
           def delete
-            feature = flipper[feature_name]
-            feature.remove
-            json_response({}, 204)
+            if feature_names.include?(feature_name)
+              flipper.remove(feature_name)
+
+              json_response({}, 204)
+            else
+              json_response({}, 404)
+            end
           end
 
           private
-          
+
           def feature_name
             @feature_name ||= Rack::Utils.unescape(path_parts.last)
           end
