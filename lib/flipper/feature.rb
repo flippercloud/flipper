@@ -72,6 +72,13 @@ module Flipper
       }
     end
 
+    # Public: Removes this feature.
+    #
+    # Returns the result of Adapter#remove.
+    def remove
+      instrument(:remove) { adapter.remove(self) }
+    end
+
     # Public: Check if a feature is enabled for a thing.
     #
     # Returns true if enabled, false if not.
