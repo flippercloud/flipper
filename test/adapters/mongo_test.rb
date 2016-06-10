@@ -8,8 +8,11 @@ class MongoTest < MiniTest::Test
     host = '127.0.0.1'
     port = '27017'
     collection = Mongo::Client.new(["#{host}:#{port}"], server_selection_timeout: 1, database: 'testing')['testing']
-    collection.drop
-    collection.create
+    begin
+      collection.drop
+      collection.create
+    rescue Mongo::Error::OperationFailure
+    end
     @adapter = Flipper::Adapters::Mongo.new(collection)
   end
 end

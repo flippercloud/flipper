@@ -1,19 +1,24 @@
 require 'test_helper'
 require 'flipper/adapters/active_record'
+require 'generators/flipper/templates/migration'
 
 # Turn off migration logging for specs
-require 'generators/flipper/templates/migration'
 ActiveRecord::Migration.verbose = false
 
 class ActiveRecordTest < MiniTest::Test
   prepend SharedAdapterTests
 
+  ActiveRecord::Base.establish_connection({
+    adapter: "sqlite3",
+    database: ":memory:",
+  })
+
   def setup
-    ActiveRecord::Base.establish_connection({
-      adapter: "sqlite3",
-      database: ":memory:",
-    })
     @adapter = Flipper::Adapters::ActiveRecord.new
     CreateFlipperTables.up
+  end
+
+  def teardown
+    CreateFlipperTables.down
   end
 end
