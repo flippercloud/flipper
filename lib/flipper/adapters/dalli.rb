@@ -1,68 +1,70 @@
-require 'pry'
 require 'dalli'
 
 module Flipper
   module Adapters
-    class Memcached
+    # Internal: Adapter that wraps another adapter with the ability to cache
+    # adapter calls in Memcached using the Dalli gem.
+    class Dalli
       include Flipper::Adapter
-      attr_accessor :cache
-      attr_accessor :name
-      FeaturesKey =  :flipper_features
+      FeaturesKey = :flipper_features
 
-      def initialize(adapter, address = 'localhost:11211', options = {})
+      #Internal
+      attr_accessor :cache
+
+      #Public: The name of the adapter.
+      attr_accessor :name
+
+      # Public
+      def initialize(adapter, cache, ttl = 0)
         @adapter = adapter
         @name = adapter.name
-        @cache = Dalli::Client.new(address, options) 
+        @cache = cache
+        @ttl = ttl
       end
 
+      # Public
       def features
-        result = @cache.get(FeaturesKey)
-        return result if result
-        features = @adapter.features
-        @cache.set(FeaturesKey, features)
-        features
+        @cache.fetch(FeaturesKey, @ttl) do
+          @adapter.features
+        end
       end
 
+      # Public
       def add(feature)
         result = @adapter.add(feature)
         @cache.delete(FeaturesKey)
         result
       end
 
+      # Public
       def remove(feature)
         result = @adapter.remove(feature)
         @cache.delete(FeaturesKey)
         result
       end
 
-      def clear(feature = nil)
-        return @cache.flush if feature.nil?
+      # Public
+      def clear(feature)
         result = @adapter.clear(feature)
         @cache.delete(feature)
         result
       end
 
+      # Public
       def get(feature)
-        @adapter.get(feature)
-        #if @cache.get(feature)
-        #  @cache.get(feature)
-        #else
-        #  result = @adapter.get(feature)
-        #  @cache.set(feature, result)
-        #  result
-        #end
+        @cache.fetch(feature, @ttl) do
+          @adapter.get(feature)
+        end
       end
 
-      def []=(key, value)
-        @cache.set(key, value)
-      end
-
+      # Public
       def enable(feature, gate, thing)
         result = @adapter.enable(feature, gate, thing)
         @cache.delete(feature)
         result
       end
 
+      # Public
       def disable(feature, gate, thing)
         result = @adapter.disable(feature, gate, thing)
         @cache.delete(feature)
