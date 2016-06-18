@@ -12,12 +12,24 @@ rspec_options = {
   :failed_mode    => :keep,
   :cmd            => "bundle exec rspec",
 }
-
 guard 'rspec', rspec_options do
   watch(%r{^spec/.+_spec\.rb$}) { "spec" }
   watch(%r{^lib/(.+)\.rb$}) { "spec" }
   watch(%r{shared_adapter_specs\.rb$}) { "spec" }
   watch('spec/helper.rb') { "spec" }
+end
+
+minitest_options = {
+  :all_after_pass => false,
+  :all_on_start   => false,
+  :failed_mode    => :keep,
+  :cmd            => "bundle exec test",
+  :test_folders => ["test"],
+}
+guard :minitest, minitest_options do
+  watch(%r{^test/(.*)\/?test_(.*)\.rb$})
+  watch(%r{^lib/(.*/)?([^/]+)\.rb$}) { |m| "test/#{m[1]}#{m[2]}_test.rb" }
+  watch(%r{^test/test_helper\.rb$}) { 'test' }
 end
 
 coffee_options = {

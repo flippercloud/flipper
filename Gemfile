@@ -23,6 +23,7 @@ group(:guard) do
   gem 'guard', '~> 2.12.5'
   gem 'guard-rspec', '~> 4.5.0'
   gem 'guard-bundler', '~> 2.1.0'
+  gem 'guard-minitest', '~> 2.4.5'
   gem 'guard-coffeescript', '~> 2.0.1'
   gem 'guard-sass', '~> 1.6.0'
   gem 'rb-fsevent', '~> 0.9.4'
