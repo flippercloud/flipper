@@ -7,7 +7,7 @@ class MongoTest < MiniTest::Test
   def setup
     host = '127.0.0.1'
     port = '27017'
-    collection = Mongo::Client.new(["#{host}:#{port}"], server_selection_timeout: 1, database: 'testing')['testing']
+    collection = Mongo::Client.new(["#{host}:#{port}"], server_selection_timeout: 1, database: 'testing', logger: Logger.new("/dev/null"))['testing']
     begin
       collection.drop
       collection.create
