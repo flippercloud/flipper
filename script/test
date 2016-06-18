@@ -20,6 +20,6 @@ export RAILS_VERSION=4.2.5
 script/bootstrap || bundle update
 bundle exec rake
 
-export RAILS_VERSION=5.0.0.beta3
+export RAILS_VERSION=5.0.0.rc1
 script/bootstrap || bundle update
 bundle exec rake
