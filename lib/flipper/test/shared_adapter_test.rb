@@ -33,6 +33,10 @@ module SharedAdapterTests
     assert_includes  @adapter.class.ancestors, Flipper::Adapter
   end
 
+  def test_knows_version
+    assert_equal Flipper::Adapter::V1, @adapter.version
+  end
+
   def test_returns_correct_default_values_for_gates_if_none_are_enabled
     expected = {
       :boolean => nil,

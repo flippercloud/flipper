@@ -35,6 +35,10 @@ shared_examples_for 'a flipper adapter' do
     expect(subject.class.ancestors).to include(Flipper::Adapter)
   end
 
+  it "knows version" do
+    expect(subject.version).to be(Flipper::Adapter::V1)
+  end
+
   it "returns correct default values for the gates if none are enabled" do
     expect(subject.get(feature)).to eq({
       :boolean => nil,
