@@ -10,7 +10,6 @@ rspec_options = {
   :all_after_pass => false,
   :all_on_start   => false,
   :failed_mode    => :keep,
-  :cmd            => "bundle exec rspec",
 }
 guard 'rspec', rspec_options do
   watch(%r{^spec/.+_spec\.rb$}) { "spec" }
@@ -23,7 +22,6 @@ minitest_options = {
   :all_after_pass => false,
   :all_on_start   => false,
   :failed_mode    => :keep,
-  :cmd            => "bundle exec test",
   :test_folders => ["test"],
 }
 guard :minitest, minitest_options do
