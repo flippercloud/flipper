@@ -13,6 +13,16 @@ RSpec.describe Flipper::Adapters::Memoizable do
 
   it_should_behave_like 'a flipper adapter'
 
+  it "forwards missing methods to underlying adapter" do
+    adapter = Class.new do
+      def foo
+        :foo
+      end
+    end.new
+    memoizable = described_class.new(adapter)
+    expect(memoizable.foo).to eq(:foo)
+  end
+
   describe "#name" do
     it "is instrumented" do
       expect(subject.name).to be(:memoizable)

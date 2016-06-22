@@ -12,6 +12,16 @@ RSpec.describe Flipper::Adapters::OperationLogger do
 
   it_should_behave_like 'a flipper adapter'
 
+  it "forwards missing methods to underlying adapter" do
+    adapter = Class.new do
+      def foo
+        :foo
+      end
+    end.new
+    operation_logger = described_class.new(adapter)
+    expect(operation_logger.foo).to eq(:foo)
+  end
+
   describe "#get" do
     before do
       @feature = flipper[:stats]
