@@ -1,10 +1,11 @@
+require 'delegate'
 require 'flipper/instrumenters/noop'
 
 module Flipper
   module Adapters
     # Internal: Adapter that wraps another adapter and instruments all adapter
     # operations. Used by flipper dsl to provide instrumentatin for flipper.
-    class Instrumented
+    class Instrumented < SimpleDelegator
       include ::Flipper::Adapter
 
       # Private: The name of instrumentation events.
@@ -24,6 +25,7 @@ module Flipper
       #           :instrumenter - What to use to instrument all the things.
       #
       def initialize(adapter, options = {})
+        super(adapter)
         @adapter = adapter
         @name = :instrumented
         @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)

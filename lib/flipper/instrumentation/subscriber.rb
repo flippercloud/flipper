@@ -71,9 +71,11 @@ module Flipper
         update_timer "flipper.adapter.#{adapter_name}.#{operation}"
       end
 
+      QUESTION_MARK = "?".freeze
+
       # Private
       def strip_trailing_question_mark(operation)
-        operation.to_s.chomp('?')
+        operation.to_s.chomp(QUESTION_MARK)
       end
     end
   end

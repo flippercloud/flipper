@@ -19,6 +19,16 @@ RSpec.describe Flipper::Adapters::Instrumented do
 
   it_should_behave_like 'a flipper adapter'
 
+  it "forwards missing methods to underlying adapter" do
+    adapter = Class.new do
+      def foo
+        :foo
+      end
+    end.new
+    instrumented = described_class.new(adapter)
+    expect(instrumented.foo).to eq(:foo)
+  end
+
   describe "#name" do
     it "is instrumented" do
       expect(subject.name).to be(:instrumented)

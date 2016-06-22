@@ -25,13 +25,6 @@ RSpec.describe Flipper::DSL do
         dsl = described_class.new(adapter, :instrumenter => instrumenter)
         expect(dsl.instrumenter).to be(instrumenter)
       end
-
-      it "passes overridden instrumenter to instrumented adapter" do
-        dsl = described_class.new(adapter, :instrumenter => instrumenter)
-        memoized = dsl.adapter
-        instrumented = memoized.adapter
-        expect(instrumented.instrumenter).to be(instrumenter)
-      end
     end
   end
 

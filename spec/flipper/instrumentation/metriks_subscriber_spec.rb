@@ -3,7 +3,10 @@ require 'flipper/adapters/memory'
 require 'flipper/instrumentation/metriks'
 
 RSpec.describe Flipper::Instrumentation::MetriksSubscriber do
-  let(:adapter) { Flipper::Adapters::Memory.new }
+  let(:adapter) {
+    memory = Flipper::Adapters::Memory.new
+    Flipper::Adapters::Instrumented.new(memory, :instrumenter => ActiveSupport::Notifications)
+  }
   let(:flipper) {
     Flipper.new(adapter, :instrumenter => ActiveSupport::Notifications)
   }
