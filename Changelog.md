@@ -1,3 +1,7 @@
+## master
+
+* Moves SharedAdapterTests module to Flipper::Test::SharedAdapterTests to avoid clobbering anything top level in apps that use Flipper
+
 ## 0.8
 
 * removed Flipper::Decorator and Flipper::Adapters::Decorator in favor of just calling methods on wrapped adapter
