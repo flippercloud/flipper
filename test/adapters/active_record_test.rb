@@ -6,7 +6,7 @@ require 'generators/flipper/templates/migration'
 ActiveRecord::Migration.verbose = false
 
 class ActiveRecordTest < MiniTest::Test
-  prepend SharedAdapterTests
+  prepend Flipper::Test::SharedAdapterTests
 
   ActiveRecord::Base.establish_connection({
     adapter: "sqlite3",
