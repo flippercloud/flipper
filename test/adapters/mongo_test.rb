@@ -2,7 +2,7 @@ require 'test_helper'
 require 'flipper/adapters/mongo'
 
 class MongoTest < MiniTest::Test
-  prepend SharedAdapterTests
+  prepend Flipper::Test::SharedAdapterTests
 
   def setup
     host = '127.0.0.1'

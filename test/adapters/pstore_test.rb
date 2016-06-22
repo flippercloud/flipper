@@ -2,7 +2,7 @@ require 'test_helper'
 require 'flipper/adapters/pstore'
 
 class PstoreTest < MiniTest::Test
-  prepend SharedAdapterTests
+  prepend Flipper::Test::SharedAdapterTests
 
   def setup
     dir = FlipperRoot.join("tmp").tap { |d| d.mkpath }
