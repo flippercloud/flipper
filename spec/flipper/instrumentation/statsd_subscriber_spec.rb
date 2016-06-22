@@ -5,7 +5,10 @@ require 'flipper/instrumentation/statsd'
 RSpec.describe Flipper::Instrumentation::StatsdSubscriber do
   let(:statsd_client) { Statsd.new }
   let(:socket) { FakeUDPSocket.new }
-  let(:adapter) { Flipper::Adapters::Memory.new }
+  let(:adapter) {
+    memory = Flipper::Adapters::Memory.new
+    Flipper::Adapters::Instrumented.new(memory, :instrumenter => ActiveSupport::Notifications)
+  }
   let(:flipper) {
     Flipper.new(adapter, :instrumenter => ActiveSupport::Notifications)
   }
