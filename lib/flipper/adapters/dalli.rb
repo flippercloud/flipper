@@ -5,19 +5,20 @@ module Flipper
     # Internal: Adapter that wraps another adapter with the ability to cache
     # adapter calls in Memcached using the Dalli gem.
     class Dalli
-      include Flipper::Adapter
+      include ::Flipper::Adapter
+
       FeaturesKey = :flipper_features
 
-      #Internal
-      attr_accessor :cache
+      # Internal
+      attr_reader :cache
 
-      #Public: The name of the adapter.
-      attr_accessor :name
+      # Public: The name of the adapter.
+      attr_reader :name
 
       # Public
       def initialize(adapter, cache, ttl = 0)
         @adapter = adapter
-        @name = adapter.name
+        @name = :dalli
         @cache = cache
         @ttl = ttl
       end

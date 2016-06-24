@@ -3,10 +3,11 @@ require 'flipper/adapters/memory'
 require 'flipper/adapters/dalli'
 
 class DalliTest < MiniTest::Test
-  prepend SharedAdapterTests
+  prepend Flipper::Test::SharedAdapterTests
 
   def setup
     @cache = Dalli::Client.new('localhost:11211')
+    @cache.flush
     memory_adapter = Flipper::Adapters::Memory.new
     @adapter = Flipper::Adapters::Dalli.new(memory_adapter, @cache)
   end
