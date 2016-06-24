@@ -2,7 +2,7 @@ require 'dalli'
 
 module Flipper
   module Adapters
-    # Internal: Adapter that wraps another adapter with the ability to cache
+    # Public: Adapter that wraps another adapter with the ability to cache
     # adapter calls in Memcached using the Dalli gem.
     class Dalli
       include ::Flipper::Adapter

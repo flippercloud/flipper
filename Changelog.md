@@ -3,6 +3,7 @@
 * Moves SharedAdapterTests module to Flipper::Test::SharedAdapterTests to avoid clobbering anything top level in apps that use Flipper
 * Memoizable, Instrumented and OperationLogger now delegate any missing methods to the original adapter. This was lost with the removal of the official decorator in 0.8, but is actually useful functionality for these "wrapping" adapters.
 * Instrumenting adapters is now off by default. Use Flipper::Adapters::Instrumented.new(adapter) to instrument adapters and maintain the old functionality.
+* Added dalli cache adapter (https://github.com/jnunemaker/flipper/pull/132)
 
 ## 0.8
 
