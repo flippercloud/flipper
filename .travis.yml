@@ -9,6 +9,7 @@ script: bundle exec rake
 services:
   - redis-server
   - mongodb
+  - memcached
 env:
   - RAILS_VERSION=5.0.0.beta3
   - RAILS_VERSION=4.2.5
