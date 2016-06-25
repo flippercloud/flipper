@@ -29,7 +29,7 @@
 
 ## 0.7.3
 
-* Add Flipper ActivRecord adapter
+* Add Flipper ActiveRecord adapter
 
 ## 0.7.2
 
