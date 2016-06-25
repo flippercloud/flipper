@@ -1,5 +1,4 @@
 require 'flipper/adapters/v2/set_interface'
-require 'flipper/adapters/v2/multi_interface'
 
 module Flipper
   module Adapters
@@ -9,7 +8,6 @@ module Flipper
       # to make it possible to memoize adapter calls for the duration of a request.
       class Memoizable
         include ::Flipper::Adapter
-        include ::Flipper::Adapters::V2::MultiInterface
         include ::Flipper::Adapters::V2::SetInterface
 
         # Internal

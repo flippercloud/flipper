@@ -1,5 +1,4 @@
 require 'flipper/adapters/v2/set_interface'
-require 'flipper/adapters/v2/multi_interface'
 
 module Flipper
   module Adapters
@@ -8,7 +7,6 @@ module Flipper
       # Useful for tests/specs.
       class Memory
         include ::Flipper::Adapter
-        include ::Flipper::Adapters::V2::MultiInterface
         include ::Flipper::Adapters::V2::SetInterface
 
         attr_reader :name
@@ -33,6 +31,34 @@ module Flipper
 
         def del(key)
           @source.delete(key)
+          true
+        end
+
+        # Public: Override with data store specific implementation that is
+        # more efficient/transactional.
+        def mget(keys)
+          hash = {}
+          keys.each do |key|
+            hash[key] = get(key)
+          end
+          hash
+        end
+
+        # Public: Override with data store specific implementation that is
+        # more efficient/transactional.
+        def mset(kvs)
+          kvs.each do |key, value|
+            set(key, value)
+          end
+
+          true
+        end
+
+        # Public: Override with data store specific implementation that is
+        # more efficient/transactional.
+        def mdel(keys)
+          keys.each { |key| del(key) }
+
           true
         end
 
