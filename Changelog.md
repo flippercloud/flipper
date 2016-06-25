@@ -1,8 +1,21 @@
-## master
+## 0.9.0
+
+* Moves SharedAdapterTests module to Flipper::Test::SharedAdapterTests to avoid clobbering anything top level in apps that use Flipper
+* Memoizable, Instrumented and OperationLogger now delegate any missing methods to the original adapter. This was lost with the removal of the official decorator in 0.8, but is actually useful functionality for these "wrapping" adapters.
+* Instrumenting adapters is now off by default. Use Flipper::Adapters::Instrumented.new(adapter) to instrument adapters and maintain the old functionality.
+* Added dalli cache adapter (https://github.com/jnunemaker/flipper/pull/132)
+
+## 0.8
 
 * removed Flipper::Decorator and Flipper::Adapters::Decorator in favor of just calling methods on wrapped adapter
 * fix bug where certain versions of AR left off quotes for key column which caused issues with MySQL https://github.com/jnunemaker/flipper/issues/120
 * fix bug where AR would store multiple gate values for percentage gates for each enable/disable and then nondeterministically pick one on read (https://github.com/jnunemaker/flipper/pull/122 and https://github.com/jnunemaker/flipper/pull/124)
+* added readonly adapter (https://github.com/jnunemaker/flipper/pull/111)
+* flipper groups now match for truthy values rather than explicitly only true (https://github.com/jnunemaker/flipper/issues/110)
+* removed gate operation instrumentation (https://github.com/jnunemaker/flipper/commit/32f14ed1fb25c64961b23c6be3dc6773143a06c8); I don't think it was useful and never found myself instrumenting it in reality
+* initial implementation of flipper api - very limited functionality right now (get/delete feature, boolean gate for feature) but more is on the way
+* made it easy to remove a feature (https://github.com/jnunemaker/flipper/pull/126)
+* add minitest shared tests for adapters that work the same as the shared specs for rspec (https://github.com/jnunemaker/flipper/pull/127)
 
 ## 0.7.5
 
@@ -16,7 +29,7 @@
 
 ## 0.7.3
 
-* Add Flipper ActivRecord adapter
+* Add Flipper ActiveRecord adapter
 
 ## 0.7.2
 

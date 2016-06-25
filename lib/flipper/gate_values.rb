@@ -4,13 +4,13 @@ module Flipper
   class GateValues
     # Private: Array of instance variables that are readable through the []
     # instance method.
-    LegitIvars = Set.new([
-      "boolean",
-      "actors",
-      "groups",
-      "percentage_of_time",
-      "percentage_of_actors",
-    ]).freeze
+    LegitIvars = {
+      "boolean" => "@boolean",
+      "actors" => "@actors",
+      "groups" => "@groups",
+      "percentage_of_time" => "@percentage_of_time",
+      "percentage_of_actors" => "@percentage_of_actors",
+    }.freeze
 
     attr_reader :boolean
     attr_reader :actors
@@ -27,8 +27,9 @@ module Flipper
     end
 
     def [](key)
-      return nil unless LegitIvars.include?(key.to_s)
-      instance_variable_get("@#{key}")
+      if ivar = LegitIvars[key.to_s]
+        instance_variable_get(ivar)
+      end
     end
 
     def eql?(other)

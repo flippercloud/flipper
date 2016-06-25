@@ -2,7 +2,7 @@ require 'test_helper'
 require 'flipper/adapters/redis'
 
 class RedisTest < MiniTest::Test
-  prepend SharedAdapterTests
+  prepend Flipper::Test::SharedAdapterTests
 
   def setup
    client = Redis.new({}).tap { |c| c.flushdb }

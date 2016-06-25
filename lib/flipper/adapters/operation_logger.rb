@@ -1,9 +1,11 @@
+require 'delegate'
+
 module Flipper
   module Adapters
     # Public: Adapter that wraps another adapter and stores the operations.
     #
     # Useful in tests to verify calls and such. Never use outside of testing.
-    class OperationLogger
+    class OperationLogger < SimpleDelegator
       include ::Flipper::Adapter
 
       Operation = Struct.new(:type, :args)
@@ -26,6 +28,7 @@ module Flipper
 
       # Public
       def initialize(adapter, operations = nil)
+        super(adapter)
         @adapter = adapter
         @name = :operation_logger
         @operations = operations || []

@@ -7,7 +7,7 @@ require 'flipper/instrumenters/noop'
 module Flipper
   class Feature
     # Private: The name of feature instrumentation events.
-    InstrumentationName = "feature_operation.#{InstrumentationNamespace}"
+    InstrumentationName = "feature_operation.#{InstrumentationNamespace}".freeze
 
     # Public: The name of the feature.
     attr_reader :name
