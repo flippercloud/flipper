@@ -300,11 +300,6 @@ shared_examples_for 'a v2 flipper adapter' do
     expect(subject.get("foo")).to be(nil)
   end
 
-  it "returns set when getting key that is set type" do
-    subject.sadd("features", "stats")
-    expect(subject.get("features")).to eq(Set["stats"])
-  end
-
   it "can get multiple keys" do
     subject.set("foo", "1")
     subject.set("bar", "2")
@@ -312,19 +307,6 @@ shared_examples_for 'a v2 flipper adapter' do
       "foo" => "1",
       "bar" => "2",
       "baz" => nil,
-    })
-  end
-
-  it "can get multiple keys even when key is set" do
-    subject.set("foo", "1")
-    subject.set("bar", "2")
-    subject.sadd("features", "stats")
-    subject.sadd("features", "search")
-    expect(subject.mget(["foo", "bar", "baz", "features"])).to eq({
-      "foo" => "1",
-      "bar" => "2",
-      "baz" => nil,
-      "features" => Set["stats", "search"],
     })
   end
 
@@ -344,28 +326,6 @@ shared_examples_for 'a v2 flipper adapter' do
   it "always sets value to string" do
     subject.set("foo", 22)
     expect(subject.get("foo")).to eq("22")
-  end
-
-  it "can set multiple keys" do
-    subject.mset({
-      "foo" => "1",
-      "bar" => "2",
-    })
-    expect(subject.mget(["foo", "bar"])).to eq({
-      "foo" => "1",
-      "bar" => "2",
-    })
-  end
-
-  it "always msets values to strings" do
-    subject.mset({
-      "foo" => 1,
-      "bar" => 2,
-    })
-    expect(subject.mget(["foo", "bar"])).to eq({
-      "foo" => "1",
-      "bar" => "2",
-    })
   end
 
   it "can delete a key" do
@@ -390,40 +350,5 @@ shared_examples_for 'a v2 flipper adapter' do
       "bar" => nil,
       "baz" => "3",
     })
-  end
-
-  it "can add, remove and read set members" do
-    expect(subject.smembers("foo")).to eq(Set.new)
-
-    expect(subject.sadd("foo", "1")).to be(true)
-    expect(subject.smembers("foo")).to eq(Set["1"])
-
-    # read from a different set that should still be empty
-    expect(subject.smembers("bar")).to eq(Set.new)
-
-    expect(subject.sadd("foo", "2")).to be(true)
-    expect(subject.smembers("foo")).to eq(Set["1", "2"])
-
-    expect(subject.sadd("foo", "3")).to be(true)
-    expect(subject.smembers("foo")).to eq(Set["1", "2", "3"])
-
-    expect(subject.srem("foo", "3")).to be(true)
-    expect(subject.smembers("foo")).to eq(Set["1", "2"])
-
-    expect(subject.srem("foo", "2")).to be(true)
-    expect(subject.smembers("foo")).to eq(Set["1"])
-
-    expect(subject.srem("foo", "1")).to be(true)
-    expect(subject.smembers("foo")).to eq(Set.new)
-  end
-
-  it "doesn't add value if already in set" do
-    expect(subject.sadd("foo", "1")).to be(true)
-    expect(subject.sadd("foo", "1")).to be(false)
-    expect(subject.smembers("foo")).to eq(Set["1"])
-  end
-
-  it "doesn't remove value if not in set" do
-    expect(subject.srem("foo", "1")).to be(false)
   end
 end

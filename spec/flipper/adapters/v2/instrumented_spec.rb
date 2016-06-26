@@ -33,11 +33,7 @@ RSpec.describe Flipper::Adapters::V2::Instrumented do
     :set => ["foo", "bar"],
     :del => ["foo"],
     :mget => [["foo"]],
-    :mset => [{"foo" => "bar"}],
     :mdel => [["foo"]],
-    :smembers => ["foo"],
-    :sadd => ["foo", "bar"],
-    :srem => ["foo", "bar"],
   }.each do |name, args|
     describe "##{name}" do
       it "records instrumentation" do

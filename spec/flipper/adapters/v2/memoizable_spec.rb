@@ -13,6 +13,16 @@ RSpec.describe Flipper::Adapters::V2::Memoizable do
 
   it_should_behave_like 'a v2 flipper adapter'
 
+  it "forwards missing methods to underlying adapter" do
+    adapter = Class.new do
+      def foo
+        :foo
+      end
+    end.new
+    memoizable = described_class.new(adapter)
+    expect(memoizable.foo).to eq(:foo)
+  end
+
   describe "#name" do
     it "is instrumented" do
       expect(subject.name).to be(:memoizable)
@@ -142,44 +152,6 @@ RSpec.describe Flipper::Adapters::V2::Memoizable do
         result = subject.set("foo", "new")
         adapter_result = adapter.set("foo", "new")
         expect(result).to eq(adapter_result)
-      end
-    end
-  end
-
-  describe "#mset" do
-    context "with memoization enabled" do
-      before do
-        subject.memoize = true
-      end
-
-      it "unmemoizes keys" do
-        cache["foo"] = "old"
-        cache["bar"] = "old"
-        subject.mset("foo" => "new", "bar" => "old")
-        expect(cache["foo"]).to be_nil
-        expect(cache["bar"]).to be_nil
-      end
-
-      it "calls mset on adapter" do
-        expect(adapter).to receive(:mset).with({"foo" => "value"}).and_return(true)
-        subject.mset({"foo" => "value"})
-      end
-    end
-
-    context "with memoization disabled" do
-      before do
-        subject.memoize = false
-      end
-
-      it "returns result" do
-        result = subject.mset("foo" => "new")
-        adapter_result = adapter.mset("foo" => "new")
-        expect(result).to eq(adapter_result)
-      end
-
-      it "calls mset on adapter" do
-        expect(adapter).to receive(:mset).with({"foo" => "value"}).and_return(true)
-        subject.mset({"foo" => "value"})
       end
     end
   end

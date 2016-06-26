@@ -1,4 +1,4 @@
-require 'flipper/adapters/v2/set_interface'
+require 'delegate'
 
 module Flipper
   module Adapters
@@ -6,9 +6,8 @@ module Flipper
       # Internal: Adapter that wraps another adapter with the ability to memoize
       # adapter calls in memory. Used by flipper dsl and the memoizer middleware
       # to make it possible to memoize adapter calls for the duration of a request.
-      class Memoizable
+      class Memoizable < SimpleDelegator
         include ::Flipper::Adapter
-        include ::Flipper::Adapters::V2::SetInterface
 
         # Internal
         attr_reader :cache
@@ -21,6 +20,7 @@ module Flipper
 
         # Public
         def initialize(adapter, cache = nil)
+          super(adapter)
           @adapter = adapter
           @name = :memoizable
           @cache = cache || {}
@@ -41,6 +41,16 @@ module Flipper
           end
         end
 
+        def set(key, value)
+          cache.delete(key) if memoizing?
+          @adapter.set(key, value)
+        end
+
+        def del(key)
+          cache.delete(key) if memoizing?
+          @adapter.del(key)
+        end
+
         def mget(keys)
           if memoizing?
             cached, missing = keys.partition { |key| cache.key?(key) }
@@ -59,21 +69,6 @@ module Flipper
           else
             @adapter.mget(keys)
           end
-        end
-
-        def set(key, value)
-          cache.delete(key) if memoizing?
-          @adapter.set(key, value)
-        end
-
-        def mset(kvs)
-          kvs.each { |key, value| cache.delete(key) } if memoizing?
-          @adapter.mset(kvs)
-        end
-
-        def del(key)
-          cache.delete(key) if memoizing?
-          @adapter.del(key)
         end
 
         def mdel(keys)

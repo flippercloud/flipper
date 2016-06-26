@@ -1,5 +1,4 @@
 require 'delegate'
-require 'flipper/adapters/v2/set_interface'
 
 module Flipper
   module Adapters
@@ -65,8 +64,6 @@ module Flipper
           }
         end
 
-        # Public: Override with data store specific implementation that is
-        # more efficient/transactional.
         def mget(keys)
           payload = {
             :operation => :mget,
@@ -78,21 +75,6 @@ module Flipper
           }
         end
 
-        # Public: Override with data store specific implementation that is
-        # more efficient/transactional.
-        def mset(kvs)
-          payload = {
-            :operation => :mset,
-            :adapter_name => @adapter.name,
-          }
-
-          @instrumenter.instrument(InstrumentationName, payload) { |payload|
-            payload[:result] = @adapter.mset(kvs)
-          }
-        end
-
-        # Public: Override with data store specific implementation that is
-        # more efficient/transactional.
         def mdel(keys)
           payload = {
             :operation => :mdel,
@@ -102,55 +84,6 @@ module Flipper
           @instrumenter.instrument(InstrumentationName, payload) { |payload|
             payload[:result] = @adapter.mdel(keys)
           }
-        end
-
-        # Public: Override with data store specific implementation that is
-        # more efficient/transactional.
-        def smembers(key)
-          payload = {
-            :operation => :smembers,
-            :adapter_name => @adapter.name,
-          }
-
-          @instrumenter.instrument(InstrumentationName, payload) { |payload|
-            payload[:result] = @adapter.smembers(key)
-          }
-        end
-
-        # Public: Override with data store specific implementation that is
-        # more efficient/transactional.
-        def sadd(key, value)
-          payload = {
-            :operation => :sadd,
-            :adapter_name => @adapter.name,
-          }
-
-          @instrumenter.instrument(InstrumentationName, payload) { |payload|
-            payload[:result] = @adapter.sadd(key, value)
-          }
-        end
-
-        # Public: Override with data store specific implementation that is
-        # more efficient/transactional.
-        def srem(key, value)
-          payload = {
-            :operation => :srem,
-            :adapter_name => @adapter.name,
-          }
-
-          @instrumenter.instrument(InstrumentationName, payload) { |payload|
-            payload[:result] = @adapter.srem(key, value)
-          }
-        end
-
-        # Private
-        def sdump(object)
-          @adapter.sdump(object)
-        end
-
-        # Private
-        def sload(object)
-          @adapter.sload(object)
         end
       end
     end
