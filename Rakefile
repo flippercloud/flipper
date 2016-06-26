@@ -41,4 +41,12 @@ Rake::TestTask.new do |t|
   t.pattern = "test/**/*_test.rb"
 end
 
-task :default => [:spec, :test]
+task :migration_generator do
+   system("bundle exec ruby test/generators/flipper/active_record_generator_test.rb ")
+end
+
+task :migration_v2_generator do
+   system("bundle exec ruby test/generators/flipper/active_record_v2_generator_test.rb ")
+end
+
+task :default => [:spec, :test, :migration_generator, :migration_v2_generator]
