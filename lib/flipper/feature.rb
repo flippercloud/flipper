@@ -41,13 +41,12 @@ module Flipper
     # Returns the result of Adapter#enable.
     def enable(thing = true)
       instrument(:enable) { |payload|
-        adapter.add self
-
         gate = gate_for(thing)
         wrapped_thing = gate.wrap(thing)
         payload[:gate_name] = gate.name
         payload[:thing] = wrapped_thing
 
+        adapter.add self
         adapter.enable self, gate, wrapped_thing
       }
     end
@@ -57,13 +56,12 @@ module Flipper
     # Returns the result of Adapter#disable.
     def disable(thing = false)
       instrument(:disable) { |payload|
-        adapter.add self
-
         gate = gate_for(thing)
         wrapped_thing = gate.wrap(thing)
         payload[:gate_name] = gate.name
         payload[:thing] = wrapped_thing
 
+        adapter.add self
         if gate.is_a?(Gates::Boolean)
           adapter.clear self
         else
