@@ -41,7 +41,7 @@ module Flipper
             redirect_to("/features/new?error=#{error}")
           end
 
-          flipper.adapter.add(flipper[value])
+          flipper.storage.add(flipper[value])
 
           redirect_to "/features/#{Rack::Utils.escape_path(value)}"
         end
