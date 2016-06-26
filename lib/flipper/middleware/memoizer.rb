@@ -33,12 +33,12 @@ module Flipper
       end
 
       def call(env)
-        original = flipper.adapter.memoizing?
-        flipper.adapter.memoize = true
+        original = flipper.storage.memoizing?
+        flipper.storage.memoize = true
 
         response = @app.call(env)
         response[2] = Rack::BodyProxy.new(response[2]) {
-          flipper.adapter.memoize = original
+          flipper.storage.memoize = original
         }
         response
       end

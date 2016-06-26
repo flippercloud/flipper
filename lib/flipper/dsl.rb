@@ -5,9 +5,6 @@ require 'flipper/instrumenters/noop'
 module Flipper
   class DSL
     # Private
-    attr_reader :adapter
-
-    # Private
     attr_reader :storage
 
     # Private: What is being used to instrument all the things.
@@ -20,13 +17,7 @@ module Flipper
     #           :instrumenter - What should be used to instrument all the things.
     def initialize(adapter, options = {})
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
-      @adapter = case adapter.version
-      when Adapter::V1
-        Adapters::Memoizable.new(adapter)
-      when Adapter::V2
-        Adapters::V2::Memoizable.new(adapter)
-      end
-      @storage = Storage.new(@adapter)
+      @storage = Storage.new(adapter)
       @memoized_features = {}
     end
 

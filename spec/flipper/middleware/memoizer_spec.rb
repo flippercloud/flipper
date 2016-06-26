@@ -14,7 +14,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
   let(:flipper)        { Flipper.new(adapter) }
 
   after do
-    flipper.adapter.memoize = nil
+    flipper.storage.memoize = nil
   end
 
   shared_examples_for "flipper middleware" do
@@ -34,9 +34,9 @@ RSpec.describe Flipper::Middleware::Memoizer do
       middleware = described_class.new app, flipper
       body = middleware.call({}).last
 
-      expect(flipper.adapter.memoizing?).to eq(true)
+      expect(flipper.storage.memoizing?).to eq(true)
       body.close
-      expect(flipper.adapter.memoizing?).to eq(false)
+      expect(flipper.storage.memoizing?).to eq(false)
     end
 
     it "clears local cache after body close" do
@@ -44,21 +44,21 @@ RSpec.describe Flipper::Middleware::Memoizer do
       middleware = described_class.new app, flipper
       body = middleware.call({}).last
 
-      flipper.adapter.cache['hello'] = 'world'
+      flipper.storage.cache['hello'] = 'world'
       body.close
-      expect(flipper.adapter.cache).to be_empty
+      expect(flipper.storage.cache).to be_empty
     end
 
     it "clears the local cache with a successful request" do
-      flipper.adapter.cache['hello'] = 'world'
+      flipper.storage.cache['hello'] = 'world'
       get '/'
-      expect(flipper.adapter.cache).to be_empty
+      expect(flipper.storage.cache).to be_empty
     end
 
     it "clears the local cache even when the request raises an error" do
-      flipper.adapter.cache['hello'] = 'world'
+      flipper.storage.cache['hello'] = 'world'
       get '/fail' rescue nil
-      expect(flipper.adapter.cache).to be_empty
+      expect(flipper.storage.cache).to be_empty
     end
 
     it "caches getting a feature for duration of request" do

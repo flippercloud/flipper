@@ -1,9 +1,19 @@
+require "forwardable"
 require "flipper/adapter"
 
 module Flipper
   class Storage
+    extend Forwardable
+
+    def_delegators :@adapter, :memoize=, :memoizing?, :cache
+
     def initialize(adapter)
-      @adapter = adapter
+      @adapter = case adapter.version
+      when Adapter::V1
+        Adapters::Memoizable.new(adapter)
+      when Adapter::V2
+        Adapters::V2::Memoizable.new(adapter)
+      end
     end
 
     def features

@@ -8,9 +8,9 @@ RSpec.describe Flipper::DSL do
   let(:adapter) { Flipper::Adapters::Memory.new }
 
   describe "#initialize" do
-    it "sets adapter" do
+    it "sets storage" do
       dsl = described_class.new(adapter)
-      expect(dsl.adapter).not_to be_nil
+      expect(dsl.storage).not_to be_nil
     end
 
     it "defaults instrumenter to noop" do
