@@ -304,24 +304,6 @@ shared_examples_for 'a v2 flipper adapter' do
     expect(subject.get("foo")).to be(nil)
   end
 
-  it "can get multiple keys" do
-    subject.set("foo", "1")
-    subject.set("bar", "2")
-    expect(subject.mget(["foo", "bar", "baz"])).to eq({
-      "foo" => "1",
-      "bar" => "2",
-      "baz" => nil,
-    })
-  end
-
-  it "returns nil for each missing key when getting multiple keys" do
-    expect(subject.mget(["foo", "bar", "baz"])).to eq({
-      "foo" => nil,
-      "bar" => nil,
-      "baz" => nil,
-    })
-  end
-
   it "can set a key" do
     subject.set("foo", "bar")
     expect(subject.get("foo")).to eq("bar")
@@ -337,22 +319,5 @@ shared_examples_for 'a v2 flipper adapter' do
     expect(subject.get("foo")).to eq("1")
     subject.del("foo")
     expect(subject.get("foo")).to be(nil)
-  end
-
-  it "can delete multiple keys" do
-    subject.set("foo", "1")
-    subject.set("bar", "2")
-    subject.set("baz", "3")
-    expect(subject.mget(["foo", "bar", "baz"])).to eq({
-      "foo" => "1",
-      "bar" => "2",
-      "baz" => "3",
-    })
-    subject.mdel(["foo", "bar"])
-    expect(subject.mget(["foo", "bar", "baz"])).to eq({
-      "foo" => nil,
-      "bar" => nil,
-      "baz" => "3",
-    })
   end
 end

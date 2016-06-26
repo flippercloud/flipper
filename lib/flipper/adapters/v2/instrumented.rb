@@ -67,28 +67,6 @@ module Flipper
             payload[:result] = @adapter.del(key)
           }
         end
-
-        def mget(keys)
-          payload = {
-            :operation => :mget,
-            :adapter_name => @adapter.name,
-          }
-
-          @instrumenter.instrument(InstrumentationName, payload) { |payload|
-            payload[:result] = @adapter.mget(keys)
-          }
-        end
-
-        def mdel(keys)
-          payload = {
-            :operation => :mdel,
-            :adapter_name => @adapter.name,
-          }
-
-          @instrumenter.instrument(InstrumentationName, payload) { |payload|
-            payload[:result] = @adapter.mdel(keys)
-          }
-        end
       end
     end
   end

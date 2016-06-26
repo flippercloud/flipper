@@ -51,31 +51,6 @@ module Flipper
           @adapter.del(key)
         end
 
-        def mget(keys)
-          if memoizing?
-            cached, missing = keys.partition { |key| cache.key?(key) }
-            result = {}
-            cached.each { |key| result[key] = cache[key] }
-
-            if missing.any?
-              adapter_values = @adapter.mget(missing)
-              adapter_values.each { |key, value|
-                result[key] = value
-                cache[key] = value
-              }
-            end
-
-            result
-          else
-            @adapter.mget(keys)
-          end
-        end
-
-        def mdel(keys)
-          keys.each { |key| cache.delete(key) } if memoizing?
-          @adapter.mdel(keys)
-        end
-
         # Internal: Turns local caching on/off.
         #
         # value - The Boolean that decides if local caching is on.

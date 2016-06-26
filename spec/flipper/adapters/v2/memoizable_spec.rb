@@ -84,52 +84,6 @@ RSpec.describe Flipper::Adapters::V2::Memoizable do
     end
   end
 
-  describe "#mget" do
-    context "with memoization enabled" do
-      before do
-        subject.memoize = true
-      end
-
-      it "memoizes value" do
-        adapter.set("foo", "foo_value")
-        adapter.set("bar", "bar_value")
-        result = subject.mget(["foo", "bar"])
-        expect(cache["foo"]).to eq("foo_value")
-        expect(cache["bar"]).to eq("bar_value")
-      end
-
-      it "only mgets keys that are not memoized" do
-        cache["foo"] = "foo_value"
-        expect(adapter).to receive(:mget).with(["bar"]).and_return({"bar" => "bar_value"})
-        result = subject.mget(["foo", "bar"])
-        expect(cache["foo"]).to eq("foo_value")
-        expect(cache["bar"]).to eq("bar_value")
-      end
-
-      it "doesn't mget if all memoized" do
-        cache["foo"] = "foo_value"
-        cache["bar"] = "bar_value"
-        expect(adapter).to_not receive(:mget)
-        result = subject.mget(["foo", "bar"])
-        expect(cache["foo"]).to eq("foo_value")
-        expect(cache["bar"]).to eq("bar_value")
-      end
-    end
-
-    context "with memoization disabled" do
-      before do
-        subject.memoize = false
-      end
-
-      it "returns result" do
-        adapter.set("foo", "bar")
-        result = subject.mget(["foo"])
-        adapter_result = adapter.mget(["foo"])
-        expect(result).to eq(adapter_result)
-      end
-    end
-  end
-
   describe "#set" do
     context "with memoization enabled" do
       before do
@@ -178,44 +132,6 @@ RSpec.describe Flipper::Adapters::V2::Memoizable do
         result = subject.del("foo")
         adapter_result = adapter.set("foo", "new")
         expect(result).to eq(adapter_result)
-      end
-    end
-  end
-
-  describe "#mdel" do
-    context "with memoization enabled" do
-      before do
-        subject.memoize = true
-      end
-
-      it "unmemoizes keys" do
-        cache["foo"] = "old"
-        cache["bar"] = "old"
-        subject.mdel(["foo", "bar"])
-        expect(cache["foo"]).to be_nil
-        expect(cache["bar"]).to be_nil
-      end
-
-      it "calls mdel on adapter" do
-        expect(adapter).to receive(:mdel).with({"foo" => "value"}).and_return(true)
-        subject.mdel({"foo" => "value"})
-      end
-    end
-
-    context "with memoization disabled" do
-      before do
-        subject.memoize = false
-      end
-
-      it "returns result" do
-        result = subject.mdel(["foo"])
-        adapter_result = adapter.mdel(["foo"])
-        expect(result).to eq(adapter_result)
-      end
-
-      it "calls mdel on adapter" do
-        expect(adapter).to receive(:mdel).with(["foo"]).and_return(true)
-        subject.mdel(["foo"])
       end
     end
   end
