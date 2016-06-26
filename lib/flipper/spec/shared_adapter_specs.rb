@@ -300,24 +300,31 @@ shared_examples_for 'a v2 flipper adapter' do
     expect(subject.class.ancestors).to include(Flipper::Adapter)
   end
 
-  it "returns nil when getting key" do
+  it "returns nil when getting key that is not set" do
     expect(subject.get("foo")).to be(nil)
   end
 
-  it "can set a key" do
-    subject.set("foo", "bar")
-    expect(subject.get("foo")).to eq("bar")
+  it "can set, get and delete a key" do
+    subject.set("foo", "1")
+    expect(subject.get("foo")).to eq("1")
+    subject.del("foo")
+    expect(subject.get("foo")).to be(nil)
+  end
+
+  it "can set already set keys" do
+    subject.set("foo", "old")
+    expect(subject.get("foo")).to eq("old")
+    subject.set("foo", "new")
+    expect(subject.get("foo")).to eq("new")
+  end
+
+  it "does not error when deleting a missing key" do
+    expect(subject.get("foo")).to be(nil)
+    subject.del("foo")
   end
 
   it "always sets value to string" do
     subject.set("foo", 22)
     expect(subject.get("foo")).to eq("22")
-  end
-
-  it "can delete a key" do
-    subject.set("foo", "1")
-    expect(subject.get("foo")).to eq("1")
-    subject.del("foo")
-    expect(subject.get("foo")).to be(nil)
   end
 end
