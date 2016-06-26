@@ -18,7 +18,7 @@ RSpec.describe Flipper::Adapters::Dalli do
   it_should_behave_like 'a flipper adapter'
 
   describe "#name" do
-    it "is instrumented" do
+    it "is dalli" do
       expect(subject.name).to be(:dalli)
     end
   end
