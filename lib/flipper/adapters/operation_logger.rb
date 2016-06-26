@@ -10,16 +10,6 @@ module Flipper
 
       Operation = Struct.new(:type, :args)
 
-      OperationTypes = [
-        :features,
-        :add,
-        :remove,
-        :clear,
-        :get,
-        :enable,
-        :disable,
-      ]
-
       # Internal: An array of the operations that have happened.
       attr_reader :operations
 
