@@ -39,6 +39,10 @@ RSpec.describe Flipper::Adapters::ReadOnly do
     expect(subject.class.ancestors).to include(Flipper::Adapter)
   end
 
+  it "knows its version" do
+    expect(subject.version).to eq(Flipper::Adapter::V1)
+  end
+
   it "returns correct default values for the gates if none are enabled" do
     expect(subject.get(feature)).to eq({
       :boolean => nil,
