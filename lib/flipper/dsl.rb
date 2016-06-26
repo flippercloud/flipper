@@ -1,3 +1,4 @@
+require 'flipper/storage'
 require 'flipper/adapters/memoizable'
 require 'flipper/instrumenters/noop'
 
@@ -5,6 +6,9 @@ module Flipper
   class DSL
     # Private
     attr_reader :adapter
+
+    # Private
+    attr_reader :storage
 
     # Private: What is being used to instrument all the things.
     attr_reader :instrumenter
@@ -16,8 +20,13 @@ module Flipper
     #           :instrumenter - What should be used to instrument all the things.
     def initialize(adapter, options = {})
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
-      memoized = Adapters::Memoizable.new(adapter)
-      @adapter = memoized
+      @adapter = case adapter.version
+      when Adapter::V1
+        Adapters::Memoizable.new(adapter)
+      when Adapter::V2
+        Adapters::V2::Memoizable.new(adapter)
+      end
+      @storage = Storage.new(@adapter)
       @memoized_features = {}
     end
 
@@ -158,7 +167,7 @@ module Flipper
         raise ArgumentError, "#{name} must be a String or Symbol"
       end
 
-      @memoized_features[name.to_sym] ||= Feature.new(name, @adapter, {
+      @memoized_features[name.to_sym] ||= Feature.new(name, @storage, {
         :instrumenter => instrumenter,
       })
     end
@@ -230,7 +239,7 @@ module Flipper
     #
     # Returns Set of Flipper::Feature instances.
     def features
-      adapter.features.map { |name| feature(name) }.to_set
+      @storage.features.map { |name| feature(name) }.to_set
     end
   end
 end

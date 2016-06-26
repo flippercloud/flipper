@@ -13,6 +13,10 @@ module Flipper
           @name = :memory
         end
 
+        def version
+          Adapter::V2
+        end
+
         def get(key)
           @source[key]
         end

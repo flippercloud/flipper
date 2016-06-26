@@ -31,6 +31,10 @@ module Flipper
           @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
         end
 
+        def version
+          Adapter::V2
+        end
+
         def get(key)
           payload = {
             :operation => :get,

@@ -1,5 +1,6 @@
 require 'helper'
 require 'flipper/feature'
+require 'flipper/storage'
 require 'flipper/adapters/memory'
 require 'flipper/instrumenters/memory'
 
@@ -7,20 +8,21 @@ RSpec.describe Flipper::Feature do
   subject { described_class.new(:search, adapter) }
 
   let(:adapter) { Flipper::Adapters::Memory.new }
+  let(:storage) { Flipper::Storage.new(adapter) }
 
   describe "#initialize" do
     it "sets name" do
-      feature = described_class.new(:search, adapter)
+      feature = described_class.new(:search, storage)
       expect(feature.name).to eq(:search)
     end
 
-    it "sets adapter" do
-      feature = described_class.new(:search, adapter)
-      expect(feature.adapter).to eq(adapter)
+    it "sets storage" do
+      feature = described_class.new(:search, storage)
+      expect(feature.storage).to eq(storage)
     end
 
     it "defaults instrumenter" do
-      feature = described_class.new(:search, adapter)
+      feature = described_class.new(:search, storage)
       expect(feature.instrumenter).to be(Flipper::Instrumenters::Noop)
     end
 
@@ -28,7 +30,7 @@ RSpec.describe Flipper::Feature do
       let(:instrumenter) { double('Instrumentor', :instrument => nil) }
 
       it "overrides default instrumenter" do
-        feature = described_class.new(:search, adapter, {
+        feature = described_class.new(:search, storage, {
           :instrumenter => instrumenter,
         })
         expect(feature.instrumenter).to be(instrumenter)
@@ -38,14 +40,14 @@ RSpec.describe Flipper::Feature do
 
   describe "#to_s" do
     it "returns name as string" do
-      feature = described_class.new(:search, adapter)
+      feature = described_class.new(:search, storage)
       expect(feature.to_s).to eq("search")
     end
   end
 
   describe "#to_param" do
     it "returns name as string" do
-      feature = described_class.new(:search, adapter)
+      feature = described_class.new(:search, storage)
       expect(feature.to_param).to eq("search")
     end
   end
@@ -62,7 +64,7 @@ RSpec.describe Flipper::Feature do
 
   describe "#gates" do
     it "returns array of gates" do
-      instance = described_class.new(:search, adapter)
+      instance = described_class.new(:search, storage)
       expect(instance.gates).to be_instance_of(Array)
       instance.gates.each do |gate|
         expect(gate).to be_a(Flipper::Gate)
@@ -98,7 +100,6 @@ RSpec.describe Flipper::Feature do
       expect(string).to include('name=:search')
       expect(string).to include('state=:off')
       expect(string).to include('enabled_gate_names=[]')
-      expect(string).to include("adapter=#{subject.adapter.name.inspect}")
 
       subject.enable
       string = subject.inspect
@@ -111,7 +112,7 @@ RSpec.describe Flipper::Feature do
     let(:instrumenter) { Flipper::Instrumenters::Memory.new }
 
     subject {
-      described_class.new(:search, adapter, :instrumenter => instrumenter)
+      described_class.new(:search, storage, :instrumenter => instrumenter)
     }
 
     it "is recorded for enable" do
@@ -558,7 +559,7 @@ RSpec.describe Flipper::Feature do
   end
 
   describe "#gate_values" do
-    context "when no gates are set in adapter" do
+    context "when no gate values are set" do
       it "returns default gate values" do
         expect(subject.gate_values).to eq(Flipper::GateValues.new({
                   :actors => Set.new,
@@ -570,7 +571,7 @@ RSpec.describe Flipper::Feature do
       end
     end
 
-    context "with gate values set in adapter" do
+    context "when gate values are set" do
       before do
         subject.enable Flipper::Types::Boolean.new(true)
         subject.enable Flipper::Types::Actor.new(Struct.new(:flipper_id).new(5))

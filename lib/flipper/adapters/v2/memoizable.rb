@@ -28,7 +28,7 @@ module Flipper
         end
 
         def version
-          V2
+          Adapter::V2
         end
 
         def get(key)

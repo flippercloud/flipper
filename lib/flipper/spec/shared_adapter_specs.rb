@@ -292,6 +292,10 @@ shared_examples_for 'a v2 flipper adapter' do
     expect(subject.name).to be_instance_of(Symbol)
   end
 
+  it "knows version" do
+    expect(subject.version).to be(Flipper::Adapter::V2)
+  end
+
   it "has included the flipper adapter module" do
     expect(subject.class.ancestors).to include(Flipper::Adapter)
   end

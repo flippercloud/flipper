@@ -1,6 +1,7 @@
 require 'flipper/errors'
 require 'flipper/type'
 require 'flipper/gate'
+require 'flipper/storage'
 require 'flipper/gate_values'
 require 'flipper/instrumenters/noop'
 
@@ -15,8 +16,8 @@ module Flipper
     # Public: Name converted to value safe for adapter.
     attr_reader :key
 
-    # Private: The adapter this feature should use.
-    attr_reader :adapter
+    # Private: The storage that should be used to talk to the adapter.
+    attr_reader :storage
 
     # Private: What is being used to instrument all the things.
     attr_reader :instrumenter
@@ -24,16 +25,16 @@ module Flipper
     # Internal: Initializes a new feature instance.
     #
     # name - The Symbol or String name of the feature.
-    # adapter - The adapter that will be used to store details about this feature.
+    # storage - The storage that will be used to store details about this feature.
     #
     # options - The Hash of options.
     #           :instrumenter - What to use to instrument all the things.
     #
-    def initialize(name, adapter, options = {})
+    def initialize(name, storage, options = {})
       @name = name
       @key = name.to_s
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
-      @adapter = adapter
+      @storage = storage
     end
 
     # Public: Enable this feature for something.
@@ -46,8 +47,7 @@ module Flipper
         payload[:gate_name] = gate.name
         payload[:thing] = wrapped_thing
 
-        adapter.add self
-        adapter.enable self, gate, wrapped_thing
+        @storage.enable(self, gate, wrapped_thing)
       }
     end
 
@@ -61,12 +61,7 @@ module Flipper
         payload[:gate_name] = gate.name
         payload[:thing] = wrapped_thing
 
-        adapter.add self
-        if gate.is_a?(Gates::Boolean)
-          adapter.clear self
-        else
-          adapter.disable self, gate, wrapped_thing
-        end
+        @storage.disable(self, gate, wrapped_thing)
       }
     end
 
@@ -74,7 +69,7 @@ module Flipper
     #
     # Returns the result of Adapter#remove.
     def remove
-      instrument(:remove) { adapter.remove(self) }
+      instrument(:remove) { @storage.remove(self) }
     end
 
     # Public: Check if a feature is enabled for a thing.
@@ -210,9 +205,9 @@ module Flipper
       state == :conditional
     end
 
-    # Public: Returns the raw gate values stored by the adapter.
+    # Public: Returns the raw gate values stored.
     def gate_values
-      GateValues.new(adapter.get(self))
+      GateValues.new(@storage.get(self))
     end
 
     # Public: Get groups enabled for this feature.
@@ -230,35 +225,35 @@ module Flipper
       Flipper.groups - enabled_groups
     end
 
-    # Public: Get the adapter value for the groups gate.
+    # Public: Get the value for the groups gate.
     #
     # Returns Set of String group names.
     def groups_value
       gate_values.groups
     end
 
-    # Public: Get the adapter value for the actors gate.
+    # Public: Get the value for the actors gate.
     #
     # Returns Set of String flipper_id's.
     def actors_value
       gate_values.actors
     end
 
-    # Public: Get the adapter value for the boolean gate.
+    # Public: Get the value for the boolean gate.
     #
     # Returns true or false.
     def boolean_value
       gate_values.boolean
     end
 
-    # Public: Get the adapter value for the percentage of actors gate.
+    # Public: Get the value for the percentage of actors gate.
     #
     # Returns Integer greater than or equal to 0 and less than or equal to 100.
     def percentage_of_actors_value
       gate_values.percentage_of_actors
     end
 
-    # Public: Get the adapter value for the percentage of time gate.
+    # Public: Get the value for the percentage of time gate.
     #
     # Returns Integer greater than or equal to 0 and less than or equal to 100.
     def percentage_of_time_value
@@ -310,7 +305,6 @@ module Flipper
         "name=#{name.inspect}",
         "state=#{state.inspect}",
         "enabled_gate_names=#{enabled_gate_names.inspect}",
-        "adapter=#{adapter.name.inspect}",
       ]
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
     end

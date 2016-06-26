@@ -61,8 +61,8 @@ shared_examples_for 'a DSL feature' do
     expect(feature.name).to eq(:stats)
   end
 
-  it "sets adapter" do
-    expect(feature.adapter.name).to eq(dsl.adapter.name)
+  it "sets storage" do
+    expect(feature.storage).to eq(dsl.storage)
   end
 
   it "sets instrumenter" do
