@@ -1,4 +1,15 @@
-require 'helper'
+require 'rubygems'
+require 'bundler'
+Bundler.setup(:default)
+require 'rails'
+require 'rails/test_help'
+
+begin
+  ActiveSupport::TestCase.test_order = :random
+rescue NoMethodError => boom
+  # no biggie, means we are on older version of AS that doesn't have this option
+end
+
 require 'active_record'
 require 'rails/generators/test_case'
 require 'generators/flipper/active_record_generator'

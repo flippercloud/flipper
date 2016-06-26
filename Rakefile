@@ -41,9 +41,4 @@ Rake::TestTask.new do |t|
   t.pattern = "test/**/*_test.rb"
 end
 
-Rake::TestTask.new(:shared_test) do |t|
-  t.libs = ['lib', 'test']
-  t.pattern = "lib/flipper/shared/test/**_test.rb"
-end
-
-task :default => [:spec, :test, :shared_test]
+task :default => [:spec, :test]
