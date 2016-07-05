@@ -37,9 +37,10 @@ config.middleware.use Flipper::Middleware::Memoizer, lambda {
 ## Cache Adapters
 
 Cache adapters allow you to cache adapter calls for longer than a single request and should be used alongside the memoization middleware to add another caching layer.
+
 ### Dalli
 
-"Dalli is a high performance pure Ruby client for accessing memcached servers"
+> Dalli is a high performance pure Ruby client for accessing memcached servers.
 
 https://github.com/petergoldstein/dalli
 
