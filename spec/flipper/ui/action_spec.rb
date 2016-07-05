@@ -25,7 +25,7 @@ RSpec.describe Flipper::UI::Action do
     end
   }
 
-  it "won't run exit method" do
+  it "won't run method that isn't whitelisted" do
     fake_request = Struct.new(:request_method, :env, :session).new("NOOOOPE", {}, {})
     action = action_subclass.new(flipper, fake_request)
     expect {
