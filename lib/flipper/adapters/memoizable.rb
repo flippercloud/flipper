@@ -19,7 +19,6 @@ module Flipper
       # Internal: The adapter this adapter is wrapping.
       attr_reader :adapter
 
-      # Public
       def initialize(adapter, cache = nil)
         super(adapter)
         @adapter = adapter
@@ -28,7 +27,6 @@ module Flipper
         @memoize = false
       end
 
-      # Public
       def features
         if memoizing?
           cache.fetch(FeaturesKey) {
@@ -39,14 +37,12 @@ module Flipper
         end
       end
 
-      # Public
       def add(feature)
         result = @adapter.add(feature)
         cache.delete(FeaturesKey) if memoizing?
         result
       end
 
-      # Public
       def remove(feature)
         result = @adapter.remove(feature)
         if memoizing?
@@ -56,14 +52,12 @@ module Flipper
         result
       end
 
-      # Public
       def clear(feature)
         result = @adapter.clear(feature)
         cache.delete(feature) if memoizing?
         result
       end
 
-      # Public
       def get(feature)
         if memoizing?
           cache.fetch(feature) { cache[feature] = @adapter.get(feature) }
@@ -72,14 +66,12 @@ module Flipper
         end
       end
 
-      # Public
       def enable(feature, gate, thing)
         result = @adapter.enable(feature, gate, thing)
         cache.delete(feature) if memoizing?
         result
       end
 
-      # Public
       def disable(feature, gate, thing)
         result = @adapter.disable(feature, gate, thing)
         cache.delete(feature) if memoizing?

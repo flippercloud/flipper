@@ -3,8 +3,8 @@ require 'flipper/instrumenters/noop'
 
 module Flipper
   module Adapters
-    # Internal: Adapter that wraps another adapter and instruments all adapter
-    # operations. Used by flipper dsl to provide instrumentatin for flipper.
+    # Public: Adapter that wraps another adapter and instruments all adapter
+    # operations.
     class Instrumented < SimpleDelegator
       include ::Flipper::Adapter
 
@@ -17,7 +17,7 @@ module Flipper
       # Public: The name of the adapter.
       attr_reader :name
 
-      # Internal: Initializes a new adapter instance.
+      # Public: Initializes a new adapter instance.
       #
       # adapter - Vanilla adapter instance to wrap.
       #
@@ -31,7 +31,6 @@ module Flipper
         @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
       end
 
-      # Public
       def features
         payload = {
           :operation => :features,
@@ -43,7 +42,6 @@ module Flipper
         }
       end
 
-      # Public
       def add(feature)
         payload = {
           :operation => :add,
@@ -56,7 +54,6 @@ module Flipper
         }
       end
 
-      # Public
       def remove(feature)
         payload = {
           :operation => :remove,
@@ -69,7 +66,6 @@ module Flipper
         }
       end
 
-      # Public
       def clear(feature)
         payload = {
           :operation => :clear,
@@ -82,7 +78,6 @@ module Flipper
         }
       end
 
-      # Public
       def get(feature)
         payload = {
           :operation => :get,
@@ -95,7 +90,6 @@ module Flipper
         }
       end
 
-      # Public
       def enable(feature, gate, thing)
         payload = {
           :operation => :enable,
@@ -109,7 +103,6 @@ module Flipper
         }
       end
 
-      # Public
       def disable(feature, gate, thing)
         payload = {
           :operation => :disable,
