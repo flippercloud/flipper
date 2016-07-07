@@ -1,3 +1,7 @@
+## 0.9.1
+
+* bump flipper-active_record to officially support rails 5
+
 ## 0.9.0
 
 * Moves SharedAdapterTests module to Flipper::Test::SharedAdapterTests to avoid clobbering anything top level in apps that use Flipper
