@@ -24,5 +24,5 @@ Gem::Specification.new do |gem|
   gem.version       = Flipper::VERSION
 
   gem.add_dependency 'flipper', "~> #{Flipper::VERSION}"
-  gem.add_dependency 'activerecord', ">= 3.2", "< 5"
+  gem.add_dependency 'activerecord', ">= 3.2", "< 6"
 end
