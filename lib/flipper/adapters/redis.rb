@@ -21,18 +21,15 @@ module Flipper
         @name = :redis
       end
 
-      # Public: The set of known features.
       def features
         @client.smembers(FeaturesKey).to_set
       end
 
-      # Public: Adds a feature to the set of known features.
       def add(feature)
         @client.sadd FeaturesKey, feature.key
         true
       end
 
-      # Public: Removes a feature from the set of known features.
       def remove(feature)
         @client.multi do
           @client.srem FeaturesKey, feature.key
@@ -41,15 +38,11 @@ module Flipper
         true
       end
 
-      # Public: Clears the gate values for a feature.
       def clear(feature)
         @client.del feature.key
         true
       end
 
-      # Public: Gets the values for all gates for a given feature.
-      #
-      # Returns a Hash of Flipper::Gate#key => value.
       def get(feature)
         result = {}
         doc = doc_for(feature)
@@ -69,13 +62,6 @@ module Flipper
         result
       end
 
-      # Public: Enables a gate for a given thing.
-      #
-      # feature - The Flipper::Feature for the gate.
-      # gate - The Flipper::Gate to disable.
-      # thing - The Flipper::Type being disabled for the gate.
-      #
-      # Returns true.
       def enable(feature, gate, thing)
         case gate.data_type
         when :boolean, :integer
@@ -89,13 +75,6 @@ module Flipper
         true
       end
 
-      # Public: Disables a gate for a given thing.
-      #
-      # feature - The Flipper::Feature for the gate.
-      # gate - The Flipper::Gate to disable.
-      # thing - The Flipper::Type being disabled for the gate.
-      #
-      # Returns true.
       def disable(feature, gate, thing)
         case gate.data_type
         when :boolean
@@ -110,6 +89,8 @@ module Flipper
 
         true
       end
+
+      private
 
       # Private: Gets a hash of fields => values for the given feature.
       #

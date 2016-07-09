@@ -16,33 +16,27 @@ module Flipper
       # Public: The path to where the file is stored.
       attr_reader :path
 
-      # Public
       def initialize(path = "flipper.pstore")
         @path = path
         @store = ::PStore.new(path)
         @name = :pstore
       end
 
-      # Public: The set of known features.
       def features
         set_members FeaturesKey
       end
 
-      # Public: Adds a feature to the set of known features.
       def add(feature)
         set_add FeaturesKey, feature.key
         true
       end
 
-      # Public: Removes a feature from the set of known features and clears
-      # all the values for the feature.
       def remove(feature)
         set_delete FeaturesKey, feature.key
         clear(feature)
         true
       end
 
-      # Public: Clears all the gate values for a feature.
       def clear(feature)
         feature.gates.each do |gate|
           delete key(feature, gate)
@@ -50,7 +44,6 @@ module Flipper
         true
       end
 
-      # Public
       def get(feature)
         result = {}
 
@@ -68,7 +61,6 @@ module Flipper
         result
       end
 
-      # Public
       def enable(feature, gate, thing)
         case gate.data_type
         when :boolean, :integer
@@ -82,7 +74,6 @@ module Flipper
         true
       end
 
-      # Public
       def disable(feature, gate, thing)
         case gate.data_type
         when :boolean
@@ -98,7 +89,6 @@ module Flipper
         true
       end
 
-      # Public
       def inspect
         attributes = [
           "name=#{@name.inspect}",
@@ -110,47 +100,40 @@ module Flipper
 
       private
 
-      # Private
       def key(feature, gate)
         "#{feature.key}/#{gate.key}"
       end
 
-      # Private
       def read(key)
         @store.transaction do
           @store[key.to_s]
         end
       end
 
-      # Private
       def write(key, value)
         @store.transaction do
           @store[key.to_s] = value.to_s
         end
       end
 
-      # Private
       def delete(key)
         @store.transaction do
           @store.delete(key.to_s)
         end
       end
 
-      # Private
       def set_add(key, value)
         set_members(key) do |members|
           members.add(value.to_s)
         end
       end
 
-      # Private
       def set_delete(key, value)
         set_members(key) do |members|
           members.delete(value.to_s)
         end
       end
 
-      # Private
       def set_members(key)
         key = key.to_s
         @store.transaction do
