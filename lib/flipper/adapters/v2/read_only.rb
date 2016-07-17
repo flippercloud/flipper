@@ -1,3 +1,6 @@
+require 'flipper'
+require 'flipper/adapters/read_only'
+
 module Flipper
   module Adapters
     module V2

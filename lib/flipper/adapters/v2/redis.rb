@@ -1,3 +1,6 @@
+require 'flipper'
+require 'redis'
+
 module Flipper
   module Adapters
     module V2

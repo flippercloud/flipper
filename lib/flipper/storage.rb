@@ -1,5 +1,7 @@
 require "forwardable"
 require "flipper/adapter"
+require "flipper/adapters/memoizable"
+require "flipper/adapters/v2/memoizable"
 
 module Flipper
   class Storage

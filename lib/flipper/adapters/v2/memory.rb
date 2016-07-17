@@ -1,3 +1,5 @@
+require 'flipper'
+
 module Flipper
   module Adapters
     module V2

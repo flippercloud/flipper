@@ -1,4 +1,5 @@
 require 'delegate'
+require 'flipper'
 
 module Flipper
   module Adapters

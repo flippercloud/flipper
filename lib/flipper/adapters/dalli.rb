@@ -1,3 +1,4 @@
+require 'flipper'
 require 'dalli'
 
 module Flipper

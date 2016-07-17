@@ -1,5 +1,6 @@
-require "pstore"
-require "set"
+require 'set'
+require 'pstore'
+require 'flipper'
 
 module Flipper
   module Adapters

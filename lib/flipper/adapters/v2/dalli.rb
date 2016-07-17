@@ -1,4 +1,6 @@
 require 'delegate'
+require 'flipper'
+require 'dalli'
 
 module Flipper
   module Adapters

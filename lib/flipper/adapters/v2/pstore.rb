@@ -1,3 +1,6 @@
+require 'flipper'
+require 'pstore'
+
 module Flipper
   module Adapters
     module V2

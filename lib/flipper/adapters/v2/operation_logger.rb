@@ -1,3 +1,6 @@
+require 'flipper'
+require 'delegate'
+
 module Flipper
   module Adapters
     module V2
