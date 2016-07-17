@@ -12,11 +12,11 @@ ActiveRecord::Base.establish_connection({
   database: ':memory:',
 })
 
-require 'generators/flipper/templates/migration'
-CreateFlipperTables.up
+require 'generators/flipper/templates/v2_migration'
+CreateFlipperV2Tables.up
 
-require 'flipper/adapters/active_record'
-adapter = Flipper::Adapters::ActiveRecord.new
+require 'flipper/adapters/v2/active_record'
+adapter = Flipper::Adapters::V2::ActiveRecord.new
 flipper = Flipper.new(adapter)
 
 # Register a few groups.
@@ -37,87 +37,36 @@ flipper[:stats].enable_percentage_of_actors 45
 
 flipper[:search].enable
 
-puts 'all rows in features table'
-pp Flipper::Adapters::ActiveRecord::Feature.all
-# [#<Flipper::Adapters::ActiveRecord::Feature:0x007fd259b47110
+puts 'all rows in keys table'
+pp Flipper::Adapters::V2::ActiveRecord::Key.all
+# [#<Flipper::Adapters::V2::ActiveRecord::Key:0x007ff4422adb98
 #   id: 1,
-#   key: "stats",
-#   created_at: 2015-12-21 16:26:29 UTC,
-#   updated_at: 2015-12-21 16:26:29 UTC>,
-#  #<Flipper::Adapters::ActiveRecord::Feature:0x007fd259b46cd8
+#   key: "features",
+#   value:
+#    "\u0004\bo:\bSet\u0006:\n@hash{\aI\"\nstats\u0006:\u0006EFTI\"\vsearch\u0006;\aFT",
+#   created_at: 2016-07-17 17:32:17 UTC,
+#   updated_at: 2016-07-17 17:32:17 UTC>,
+#  #<Flipper::Adapters::V2::ActiveRecord::Key:0x007ff4422ada58
 #   id: 2,
-#   key: "search",
-#   created_at: 2015-12-21 16:26:29 UTC,
-#   updated_at: 2015-12-21 16:26:29 UTC>]
-puts
-
-puts 'all rows in gates table'
-pp Flipper::Adapters::ActiveRecord::Gate.all
-# [#<Flipper::Adapters::ActiveRecord::Gate:0x007fd259b0f0f8
-#   id: 1,
-#   feature_key: "stats",
-#   key: "boolean",
-#   value: "true",
-#   created_at: 2015-12-21 16:26:29 UTC,
-#   updated_at: 2015-12-21 16:26:29 UTC>,
-#  #<Flipper::Adapters::ActiveRecord::Gate:0x007fd259b0ebd0
-#   id: 2,
-#   feature_key: "stats",
-#   key: "groups",
-#   value: "admins",
-#   created_at: 2015-12-21 16:26:29 UTC,
-#   updated_at: 2015-12-21 16:26:29 UTC>,
-#  #<Flipper::Adapters::ActiveRecord::Gate:0x007fd259b0e748
+#   key: "feature/stats",
+#   value:
+#    "\u0004\b{\n:\fbooleanT:\vgroupso:\bSet\u0006:\n@hash{\a:\vadminsT:\u0011early_accessT:\vactorso;\a\u0006;\b{\bI\"\a25\u0006:\u0006ETTI\"\a90\u0006;\fTTI\"\b180\u0006;\fTT:\u0019percentage_of_actorsi2:\u0017percentage_of_timei\u0014",
+#   created_at: 2016-07-17 17:32:17 UTC,
+#   updated_at: 2016-07-17 17:32:17 UTC>,
+#  #<Flipper::Adapters::V2::ActiveRecord::Key:0x007ff4422ad8f0
 #   id: 3,
-#   feature_key: "stats",
-#   key: "groups",
-#   value: "early_access",
-#   created_at: 2015-12-21 16:26:29 UTC,
-#   updated_at: 2015-12-21 16:26:29 UTC>,
-#  #<Flipper::Adapters::ActiveRecord::Gate:0x007fd259b0e568
-#   id: 4,
-#   feature_key: "stats",
-#   key: "actors",
-#   value: "25",
-#   created_at: 2015-12-21 16:26:29 UTC,
-#   updated_at: 2015-12-21 16:26:29 UTC>,
-#  #<Flipper::Adapters::ActiveRecord::Gate:0x007fd259b0e0b8
-#   id: 5,
-#   feature_key: "stats",
-#   key: "actors",
-#   value: "90",
-#   created_at: 2015-12-21 16:26:29 UTC,
-#   updated_at: 2015-12-21 16:26:29 UTC>,
-#  #<Flipper::Adapters::ActiveRecord::Gate:0x007fd259b0da50
-#   id: 6,
-#   feature_key: "stats",
-#   key: "actors",
-#   value: "180",
-#   created_at: 2015-12-21 16:26:29 UTC,
-#   updated_at: 2015-12-21 16:26:29 UTC>,
-#  #<Flipper::Adapters::ActiveRecord::Gate:0x007fd259b0d3c0
-#   id: 7,
-#   feature_key: "stats",
-#   key: "percentage_of_time",
-#   value: "15",
-#   created_at: 2015-12-21 16:26:29 UTC,
-#   updated_at: 2015-12-21 16:26:29 UTC>,
-#  #<Flipper::Adapters::ActiveRecord::Gate:0x007fd259b0cdf8
-#   id: 8,
-#   feature_key: "stats",
-#   key: "percentage_of_actors",
-#   value: "45",
-#   created_at: 2015-12-21 16:26:29 UTC,
-#   updated_at: 2015-12-21 16:26:29 UTC>,
-#  #<Flipper::Adapters::ActiveRecord::Gate:0x007fd259b0cbf0
-#   id: 9,
-#   feature_key: "search",
-#   key: "boolean",
-#   value: "true",
-#   created_at: 2015-12-21 16:26:29 UTC,
-#   updated_at: 2015-12-21 16:26:29 UTC>]
+#   key: "feature/search",
+#   value:
+#    "\u0004\b{\n:\fbooleanT:\vgroupso:\bSet\u0006:\n@hash{\u0000:\vactorso;\a\u0006;\b{\u0000:\u0019percentage_of_actors0:\u0017percentage_of_time0",
+#   created_at: 2016-07-17 17:32:17 UTC,
+#   updated_at: 2016-07-17 17:32:17 UTC>]
 puts
 
 puts 'flipper get of feature'
-pp adapter.get(flipper[:stats])
+pp Marshal.load(adapter.get("feature/#{flipper[:stats].key}"))
 # flipper get of feature
+# {:boolean=>true,
+#  :groups=>#<Set: {:admins, :early_access}>,
+#  :actors=>#<Set: {"25", "90", "180"}>,
+#  :percentage_of_actors=>45,
+#  :percentage_of_time=>15}

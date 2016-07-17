@@ -11,11 +11,11 @@ ActiveRecord::Base.establish_connection({
   database: ':memory:',
 })
 
-require 'generators/flipper/templates/v2_migration'
-CreateFlipperV2Tables.up
+require 'generators/flipper/templates/migration'
+CreateFlipperTables.up
 
-require 'flipper/adapters/v2/active_record'
-adapter = Flipper::Adapters::V2::ActiveRecord.new
+require 'flipper/adapters/active_record'
+adapter = Flipper::Adapters::ActiveRecord.new
 flipper = Flipper.new(adapter)
 
 flipper[:stats].enable
