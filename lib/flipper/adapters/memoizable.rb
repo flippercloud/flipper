@@ -11,11 +11,11 @@ module Flipper
 
       FeaturesKey = :flipper_features
 
-      # Internal
-      attr_reader :cache
-
       # Public: The name of the adapter.
       attr_reader :name
+
+      # Internal
+      attr_reader :cache
 
       # Internal: The adapter this adapter is wrapping.
       attr_reader :adapter

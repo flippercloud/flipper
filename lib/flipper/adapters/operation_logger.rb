@@ -14,10 +14,9 @@ module Flipper
       # Internal: An array of the operations that have happened.
       attr_reader :operations
 
-      # Internal: The name of the adapter.
+      # Public: The name of the adapter.
       attr_reader :name
 
-      # Public
       def initialize(adapter, operations = nil)
         super(adapter)
         @adapter = adapter

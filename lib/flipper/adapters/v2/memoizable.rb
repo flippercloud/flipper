@@ -10,11 +10,11 @@ module Flipper
       class Memoizable < SimpleDelegator
         include ::Flipper::Adapter
 
-        # Internal
-        attr_reader :cache
-
         # Public: The name of the adapter.
         attr_reader :name
+
+        # Internal
+        attr_reader :cache
 
         # Internal: The adapter this adapter is wrapping.
         attr_reader :adapter

@@ -12,6 +12,7 @@ module Flipper
           self.table_name = "flipper_keys"
         end
 
+        # Public: The name of the adapter.
         attr_reader :name
 
         def initialize

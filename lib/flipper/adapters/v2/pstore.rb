@@ -7,7 +7,11 @@ module Flipper
       class PStore
         include ::Flipper::Adapter
 
-        attr_reader :name, :path
+        # Public: The name of the adapter.
+        attr_reader :name
+
+        # Public: The path to where the file is stored.
+        attr_reader :path
 
         def initialize(path = "flipper.pstore")
           @path = path

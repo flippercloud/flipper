@@ -7,6 +7,7 @@ module Flipper
       class OperationLogger < SimpleDelegator
         include ::Flipper::Adapter
 
+        # Public: The name of the adapter.
         attr_reader :name
 
         def initialize(adapter, operations = nil)

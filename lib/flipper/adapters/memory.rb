@@ -13,7 +13,6 @@ module Flipper
       # Public: The name of the adapter.
       attr_reader :name
 
-      # Public
       def initialize(source = nil)
         @source = source || {}
         @name = :memory

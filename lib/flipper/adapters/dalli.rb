@@ -10,11 +10,14 @@ module Flipper
 
       FeaturesKey = :flipper_features
 
+      # Public: The name of the adapter.
+      attr_reader :name
+
       # Internal
       attr_reader :cache
 
-      # Public: The name of the adapter.
-      attr_reader :name
+      # Internal: The adapter this adapter is wrapping.
+      attr_reader :adapter
 
       def initialize(adapter, cache, ttl = 0)
         @adapter = adapter
