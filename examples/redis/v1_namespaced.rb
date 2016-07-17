@@ -1,20 +1,25 @@
 require 'pp'
 require 'pathname'
 require 'logger'
+begin
+  require 'redis-namespace'
+rescue LoadError
+  puts 'you must have redis-namespace gem installed'
+  exit 1
+end
 
 root_path = Pathname(__FILE__).dirname.join('..').expand_path
 lib_path  = root_path.join('lib')
 $:.unshift(lib_path)
 
-require 'flipper/adapters/v2/redis'
-
-options = {}
+require 'flipper/adapters/redis'
+options = {url: 'redis://127.0.0.1:6379'}
 if ENV['BOXEN_REDIS_URL']
   options[:url] = ENV['BOXEN_REDIS_URL']
 end
 client = Redis.new(options)
-client.flushdb
-adapter = Flipper::Adapters::V2::Redis.new(client)
+namespaced_client = Redis::Namespace.new(:flipper_namespace, redis: client)
+adapter = Flipper::Adapters::Redis.new(namespaced_client)
 flipper = Flipper.new(adapter)
 
 # Register a few groups.
@@ -37,14 +42,7 @@ flipper[:search].enable
 
 print 'all keys: '
 pp client.keys
-# all keys: ["features", "feature/stats", "feature/search"]
+# all keys: ["stats", "flipper_features", "search"]
 puts
 
-puts 'flipper get of feature'
-pp Marshal.load(adapter.get("feature/#{flipper[:stats].key}"))
-# flipper get of feature
-# {:boolean=>true,
-#  :groups=>#<Set: {:admins, :early_access}>,
-#  :actors=>#<Set: {"25", "90", "180"}>,
-#  :percentage_of_actors=>45,
-#  :percentage_of_time=>15}
+puts 'notice how all the keys are namespaced'

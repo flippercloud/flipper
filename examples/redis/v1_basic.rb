@@ -5,10 +5,13 @@ root_path = Pathname(__FILE__).dirname.join('..').expand_path
 lib_path  = root_path.join('lib')
 $:.unshift(lib_path)
 
-require 'flipper/adapters/v2/mongo'
-Mongo::Logger.logger.level = Logger::INFO
-collection = Mongo::Client.new(["127.0.0.1:#{ENV["BOXEN_MONGODB_PORT"] || 27017}"], :database => 'testing')['flipper']
-adapter = Flipper::Adapters::V2::Mongo.new(collection)
+require 'flipper/adapters/redis'
+options = {}
+if ENV['BOXEN_REDIS_URL']
+  options[:url] = ENV['BOXEN_REDIS_URL']
+end
+client = Redis.new(options)
+adapter = Flipper::Adapters::Redis.new(client)
 flipper = Flipper.new(adapter)
 
 flipper[:stats].enable

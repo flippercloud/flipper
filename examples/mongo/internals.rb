@@ -6,10 +6,10 @@ root_path = Pathname(__FILE__).dirname.join('..').expand_path
 lib_path  = root_path.join('lib')
 $:.unshift(lib_path)
 
-require 'flipper/adapters/mongo'
+require 'flipper/adapters/v2/mongo'
 Mongo::Logger.logger.level = Logger::INFO
 collection = Mongo::Client.new(["127.0.0.1:#{ENV["BOXEN_MONGODB_PORT"] || 27017}"], :database => 'testing')['flipper']
-adapter = Flipper::Adapters::Mongo.new(collection)
+adapter = Flipper::Adapters::V2::Mongo.new(collection)
 flipper = Flipper.new(adapter)
 
 # Register a few groups.
@@ -33,21 +33,22 @@ flipper[:search].enable
 puts 'all docs in collection'
 pp collection.find.to_a
 # all docs in collection
-# [{"_id"=>"stats",
-#   "actors"=>["25", "90", "180"],
-#   "boolean"=>"true",
-#   "groups"=>["admins", "early_access"],
-#   "percentage_of_actors"=>"45",
-#   "percentage_of_time"=>"15"},
-#  {"_id"=>"flipper_features", "features"=>["stats", "search"]},
-#  {"_id"=>"search", "boolean"=>"true"}]
+# [{"_id"=>"features",
+#   "value"=>
+#    "\u0004\bo:\bSet\u0006:\n@hash{\aI\"\nstats\u0006:\u0006EFTI\"\vsearch\u0006;\aFT"},
+#  {"_id"=>"feature/stats",
+#   "value"=>
+#    "\u0004\b{\n:\fbooleanT:\vgroupso:\bSet\u0006:\n@hash{\a:\vadminsT:\u0011early_accessT:\vactorso;\a\u0006;\b{\bI\"\a25\u0006:\u0006ETTI\"\a90\u0006;\fTTI\"\b180\u0006;\fTT:\u0019percentage_of_actorsi2:\u0017percentage_of_timei\u0014"},
+#  {"_id"=>"feature/search",
+#   "value"=>
+#    "\u0004\b{\n:\fbooleanT:\vgroupso:\bSet\u0006:\n@hash{\u0000:\vactorso;\a\u0006;\b{\u0000:\u0019percentage_of_actors0:\u0017percentage_of_time0"}]
 puts
 
 puts 'flipper get of feature'
-pp adapter.get(flipper[:stats])
+pp Marshal.load(adapter.get("feature/#{flipper[:stats].key}"))
 # flipper get of feature
-# {:boolean=>"true",
-#  :groups=>#<Set: {"admins", "early_access"}>,
+# {:boolean=>true,
+#  :groups=>#<Set: {:admins, :early_access}>,
 #  :actors=>#<Set: {"25", "90", "180"}>,
-#  :percentage_of_actors=>"45",
-#  :percentage_of_time=>"15"}
+#  :percentage_of_actors=>45,
+#  :percentage_of_time=>15}

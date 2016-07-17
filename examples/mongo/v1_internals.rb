@@ -6,15 +6,10 @@ root_path = Pathname(__FILE__).dirname.join('..').expand_path
 lib_path  = root_path.join('lib')
 $:.unshift(lib_path)
 
-require 'flipper/adapters/v2/redis'
-
-options = {}
-if ENV['BOXEN_REDIS_URL']
-  options[:url] = ENV['BOXEN_REDIS_URL']
-end
-client = Redis.new(options)
-client.flushdb
-adapter = Flipper::Adapters::V2::Redis.new(client)
+require 'flipper/adapters/mongo'
+Mongo::Logger.logger.level = Logger::INFO
+collection = Mongo::Client.new(["127.0.0.1:#{ENV["BOXEN_MONGODB_PORT"] || 27017}"], :database => 'testing')['flipper']
+adapter = Flipper::Adapters::Mongo.new(collection)
 flipper = Flipper.new(adapter)
 
 # Register a few groups.
@@ -35,16 +30,24 @@ flipper[:stats].enable_percentage_of_actors 45
 
 flipper[:search].enable
 
-print 'all keys: '
-pp client.keys
-# all keys: ["features", "feature/stats", "feature/search"]
+puts 'all docs in collection'
+pp collection.find.to_a
+# all docs in collection
+# [{"_id"=>"stats",
+#   "actors"=>["25", "90", "180"],
+#   "boolean"=>"true",
+#   "groups"=>["admins", "early_access"],
+#   "percentage_of_actors"=>"45",
+#   "percentage_of_time"=>"15"},
+#  {"_id"=>"flipper_features", "features"=>["stats", "search"]},
+#  {"_id"=>"search", "boolean"=>"true"}]
 puts
 
 puts 'flipper get of feature'
-pp Marshal.load(adapter.get("feature/#{flipper[:stats].key}"))
+pp adapter.get(flipper[:stats])
 # flipper get of feature
-# {:boolean=>true,
-#  :groups=>#<Set: {:admins, :early_access}>,
+# {:boolean=>"true",
+#  :groups=>#<Set: {"admins", "early_access"}>,
 #  :actors=>#<Set: {"25", "90", "180"}>,
-#  :percentage_of_actors=>45,
-#  :percentage_of_time=>15}
+#  :percentage_of_actors=>"45",
+#  :percentage_of_time=>"15"}

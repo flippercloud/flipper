@@ -5,13 +5,13 @@ root_path = Pathname(__FILE__).dirname.join('..').expand_path
 lib_path  = root_path.join('lib')
 $:.unshift(lib_path)
 
-require 'flipper/adapters/redis'
+require 'flipper/adapters/v2/redis'
 options = {}
 if ENV['BOXEN_REDIS_URL']
   options[:url] = ENV['BOXEN_REDIS_URL']
 end
 client = Redis.new(options)
-adapter = Flipper::Adapters::Redis.new(client)
+adapter = Flipper::Adapters::V2::Redis.new(client)
 flipper = Flipper.new(adapter)
 
 flipper[:stats].enable

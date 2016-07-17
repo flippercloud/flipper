@@ -6,15 +6,14 @@ root_path = Pathname(__FILE__).dirname.join('..').expand_path
 lib_path  = root_path.join('lib')
 $:.unshift(lib_path)
 
-require 'flipper/adapters/v2/redis'
+require 'flipper/adapters/redis'
 
 options = {}
 if ENV['BOXEN_REDIS_URL']
   options[:url] = ENV['BOXEN_REDIS_URL']
 end
 client = Redis.new(options)
-client.flushdb
-adapter = Flipper::Adapters::V2::Redis.new(client)
+adapter = Flipper::Adapters::Redis.new(client)
 flipper = Flipper.new(adapter)
 
 # Register a few groups.
@@ -37,14 +36,38 @@ flipper[:search].enable
 
 print 'all keys: '
 pp client.keys
-# all keys: ["features", "feature/stats", "feature/search"]
+# all keys: ["stats", "flipper_features", "search"]
+puts
+
+print "known flipper features: "
+pp client.smembers("flipper_features")
+# known flipper features: ["stats", "search"]
+puts
+
+puts 'stats keys'
+pp client.hgetall('stats')
+# stats keys
+# {"boolean"=>"true",
+#  "groups/admins"=>"1",
+#  "actors/25"=>"1",
+#  "percentage_of_time"=>"15",
+#  "percentage_of_actors"=>"45",
+#  "groups/early_access"=>"1",
+#  "actors/90"=>"1",
+#  "actors/180"=>"1"}
+puts
+
+puts 'search keys'
+pp client.hgetall('search')
+# search keys
+# {"boolean"=>"true"}
 puts
 
 puts 'flipper get of feature'
-pp Marshal.load(adapter.get("feature/#{flipper[:stats].key}"))
+pp adapter.get(flipper[:stats])
 # flipper get of feature
-# {:boolean=>true,
-#  :groups=>#<Set: {:admins, :early_access}>,
+# {:boolean=>"true",
+#  :groups=>#<Set: {"admins", "early_access"}>,
 #  :actors=>#<Set: {"25", "90", "180"}>,
-#  :percentage_of_actors=>45,
-#  :percentage_of_time=>15}
+#  :percentage_of_actors=>"45",
+#  :percentage_of_time=>"15"}

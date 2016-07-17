@@ -12,14 +12,14 @@ root_path = Pathname(__FILE__).dirname.join('..').expand_path
 lib_path  = root_path.join('lib')
 $:.unshift(lib_path)
 
-require 'flipper/adapters/redis'
+require 'flipper/adapters/v2/redis'
 options = {url: 'redis://127.0.0.1:6379'}
 if ENV['BOXEN_REDIS_URL']
   options[:url] = ENV['BOXEN_REDIS_URL']
 end
 client = Redis.new(options)
 namespaced_client = Redis::Namespace.new(:flipper_namespace, redis: client)
-adapter = Flipper::Adapters::Redis.new(namespaced_client)
+adapter = Flipper::Adapters::V2::Redis.new(namespaced_client)
 flipper = Flipper.new(adapter)
 
 # Register a few groups.
