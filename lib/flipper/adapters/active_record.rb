@@ -37,12 +37,10 @@ module Flipper
         @gate_class = options.fetch(:gate_class) { Gate }
       end
 
-      # Public: The set of known features.
       def features
         @feature_class.all.map(&:key).to_set
       end
 
-      # Public: Adds a feature to the set of known features.
       def add(feature)
         attributes = {key: feature.key}
         # race condition, but add is only used by enable/disable which happen
@@ -51,7 +49,6 @@ module Flipper
         true
       end
 
-      # Public: Removes a feature from the set of known features.
       def remove(feature)
         @feature_class.transaction do
           @feature_class.where(key: feature.key).delete_all
@@ -60,15 +57,11 @@ module Flipper
         true
       end
 
-      # Public: Clears the gate values for a feature.
       def clear(feature)
         @gate_class.where(feature_key: feature.key).delete_all
         true
       end
 
-      # Public: Gets the values for all gates for a given feature.
-      #
-      # Returns a Hash of Flipper::Gate#key => value.
       def get(feature)
         result = {}
 
@@ -94,13 +87,6 @@ module Flipper
         result
       end
 
-      # Public: Enables a gate for a given thing.
-      #
-      # feature - The Flipper::Feature for the gate.
-      # gate - The Flipper::Gate to disable.
-      # thing - The Flipper::Type being disabled for the gate.
-      #
-      # Returns true.
       def enable(feature, gate, thing)
         case gate.data_type
         when :boolean, :integer
@@ -129,13 +115,6 @@ module Flipper
         true
       end
 
-      # Public: Disables a gate for a given thing.
-      #
-      # feature - The Flipper::Feature for the gate.
-      # gate - The Flipper::Gate to disable.
-      # thing - The Flipper::Type being disabled for the gate.
-      #
-      # Returns true.
       def disable(feature, gate, thing)
         case gate.data_type
         when :boolean
@@ -162,7 +141,8 @@ module Flipper
         true
       end
 
-      # Private
+      private
+
       def unsupported_data_type(data_type)
         raise "#{data_type} is not supported by this adapter"
       end
