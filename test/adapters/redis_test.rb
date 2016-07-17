@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'flipper/test/shared_adapter_test'
 require 'flipper/adapters/redis'
 
 class RedisTest < MiniTest::Test

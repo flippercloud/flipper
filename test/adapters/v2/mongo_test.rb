@@ -1,7 +1,8 @@
 require 'test_helper'
+require 'flipper/test/v2_shared_adapter_test'
 require 'flipper/adapters/v2/mongo'
 
-class MongoTest < MiniTest::Test
+class V2MongoTest < MiniTest::Test
   prepend Flipper::Test::V2SharedAdapterTests
 
   def setup

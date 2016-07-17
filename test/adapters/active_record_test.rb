@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'flipper/test/shared_adapter_test'
 require 'flipper/adapters/active_record'
 require 'generators/flipper/templates/migration'
 

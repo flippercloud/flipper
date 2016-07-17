@@ -12,6 +12,8 @@ module Flipper
         @actors_gate = @feature.gate(:percentage_of_actors)
         @time_gate = @feature.gate(:percentage_of_time)
 
+        Flipper.unregister_groups
+
         Flipper.register(:admins) do |actor|
           actor.respond_to?(:admin?) && actor.admin?
         end
