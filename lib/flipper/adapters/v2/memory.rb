@@ -27,12 +27,10 @@ module Flipper
 
         def set(key, value)
           @source[key] = value.to_s
-          true
         end
 
         def del(key)
           @source.delete(key)
-          true
         end
       end
     end
