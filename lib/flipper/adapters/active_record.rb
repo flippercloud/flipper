@@ -1,4 +1,3 @@
-require 'set'
 require 'flipper'
 require 'active_record'
 
