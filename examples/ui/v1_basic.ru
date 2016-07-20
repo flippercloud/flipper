@@ -13,7 +13,7 @@ lib_path  = root_path.join("lib")
 $:.unshift(lib_path)
 
 require "flipper-ui"
-require "flipper/adapters/v2/pstore"
+require "flipper/adapters/pstore"
 
 Flipper.register(:admins) { |actor|
   actor.respond_to?(:admin?) && actor.admin?
@@ -29,7 +29,7 @@ require "active_support/notifications"
 require "flipper/instrumentation/log_subscriber"
 Flipper::Instrumentation::LogSubscriber.logger = $logger
 
-adapter = Flipper::Adapters::V2::PStore.new
+adapter = Flipper::Adapters::PStore.new
 flipper = Flipper.new(adapter, instrumenter: ActiveSupport::Notifications)
 
 # You can uncomment these to get some default data:
