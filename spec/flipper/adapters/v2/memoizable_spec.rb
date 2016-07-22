@@ -130,7 +130,7 @@ RSpec.describe Flipper::Adapters::V2::Memoizable do
 
       it "returns result" do
         result = subject.del("foo")
-        adapter_result = adapter.set("foo", "new")
+        adapter_result = adapter.del("foo")
         expect(result).to eq(adapter_result)
       end
     end
