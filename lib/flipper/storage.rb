@@ -61,7 +61,7 @@ module Flipper
         if raw = @adapter.get("feature/#{feature.key}")
           Marshal.load(raw)
         else
-          v2_default_gate_values
+          default_gate_values
         end
       end
     end
@@ -99,7 +99,7 @@ module Flipper
         hash = get(feature)
         case gate.data_type
         when :boolean
-          hash = v2_default_gate_values
+          hash = default_gate_values
         when :integer
           hash[gate.key] = thing.value
         when :set
@@ -112,7 +112,7 @@ module Flipper
 
     private
 
-    def v2_default_gate_values
+    def default_gate_values
       {
         :boolean => nil,
         :groups => Set.new,
