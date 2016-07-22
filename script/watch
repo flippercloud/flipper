@@ -1,0 +1,15 @@
+#!/bin/sh
+#/ Usage: watch
+#/
+#/ Run the tests/specs when files change.
+#/
+
+set -e
+cd $(dirname "$0")/..
+
+[ "$1" = "--help" -o "$1" = "-h" -o "$1" = "help" ] && {
+    grep '^#/' <"$0"| cut -c4-
+    exit 0
+}
+
+bundle exec guard
