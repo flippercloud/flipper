@@ -8,11 +8,7 @@ $:.unshift(lib_path)
 
 require 'flipper/adapters/v2/redis'
 
-options = {}
-if ENV['BOXEN_REDIS_URL']
-  options[:url] = ENV['BOXEN_REDIS_URL']
-end
-client = Redis.new(options)
+client = Redis.new
 client.flushdb
 adapter = Flipper::Adapters::V2::Redis.new(client)
 flipper = Flipper.new(adapter)
