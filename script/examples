@@ -1,0 +1,23 @@
+#!/bin/sh
+#/ Usage: examples
+#/
+#/ Run all the examples to ensure none are broken.
+#/
+#/ Examples:
+#/
+#/   examples
+#/
+
+set -e
+cd $(dirname "$0")/..
+
+[ "$1" = "--help" -o "$1" = "-h" -o "$1" = "help" ] && {
+    grep '^#/' <"$0"| cut -c4-
+    exit 0
+}
+
+for f in $(find ./examples/* -type f -name '*.rb' -d 0 -not -name "example_setup.rb")
+do
+  echo "\n\nRunning $f ..."
+  bundle exec ruby $f
+done
