@@ -18,6 +18,20 @@ Or install it yourself with:
 
 ## Usage
 
+You can read more about [adapter versioning](../Adapters.md#versioning) here if you are confused. The tl;dr is use the highest version number as that is the latest and greatest.
+
+### V2
+
+```ruby
+require 'flipper/adapters/v2/redis'
+client = Redis.new
+adapter = Flipper::Adapters::V2::Redis.new(client)
+flipper = Flipper.new(adapter)
+# profit...
+```
+
+### V1
+
 ```ruby
 require 'flipper/adapters/redis'
 client = Redis.new

@@ -18,6 +18,20 @@ Or install it yourself with:
 
 ## Usage
 
+You can read more about [adapter versioning](../Adapters.md#versioning) here if you are confused. The tl;dr is use the highest version number as that is the latest and greatest.
+
+### V2
+
+```ruby
+require 'flipper/adapters/v2/mongo'
+collection = Mongo::Client.new(["127.0.0.1:27017"], database: 'testing')['flipper']
+adapter = Flipper::Adapters::V2::Mongo.new(collection)
+flipper = Flipper.new(adapter)
+# profit...
+```
+
+### V1
+
 ```ruby
 require 'flipper/adapters/mongo'
 collection = Mongo::Client.new(["127.0.0.1:27017"], database: 'testing')['flipper']

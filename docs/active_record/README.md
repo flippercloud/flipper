@@ -23,20 +23,7 @@ Or install it yourself with:
 
 ## Usage
 
-### V1
-
-For your convenience a migration generator is provided to create the necessary migrations for using the active record adapter:
-
-    $ rails g flipper:active_record
-
-Once you have created and executed the migration, you can use the active record adapter like so:
-
-```ruby
-require 'flipper/adapters/active_record'
-adapter = Flipper::Adapters::ActiveRecord.new
-flipper = Flipper.new(adapter)
-# profit...
-```
+You can read more about [adapter versioning](../Adapters.md#versioning) here if you are confused. The tl;dr is use the highest version number as that is the latest and greatest.
 
 ### V2
 
@@ -49,6 +36,21 @@ Once you have created and executed the migration, you can use the active record 
 ```ruby
 require 'flipper/adapters/v2/active_record'
 adapter = Flipper::Adapters::V2::ActiveRecord.new
+flipper = Flipper.new(adapter)
+# profit...
+```
+
+### V1
+
+For your convenience a migration generator is provided to create the necessary migrations for using the active record adapter:
+
+    $ rails g flipper:active_record
+
+Once you have created and executed the migration, you can use the active record adapter like so:
+
+```ruby
+require 'flipper/adapters/active_record'
+adapter = Flipper::Adapters::ActiveRecord.new
 flipper = Flipper.new(adapter)
 # profit...
 ```
