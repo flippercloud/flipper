@@ -81,6 +81,7 @@ module Flipper
           hash[gate.key].add(thing.value)
         end
         @adapter.set("feature/#{feature.key}", Marshal.dump(hash))
+        true
       end
     end
 
@@ -105,6 +106,7 @@ module Flipper
           hash[gate.key].delete(thing.value)
         end
         @adapter.set("feature/#{feature.key}", Marshal.dump(hash))
+        true
       end
     end
 
