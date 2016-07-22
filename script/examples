@@ -16,7 +16,8 @@ cd $(dirname "$0")/..
     exit 0
 }
 
-for f in $(find ./examples/* -type f -name '*.rb' -d 0 -not -name "example_setup.rb")
+FILES=$(find ./examples/* -type f -name '*.rb' -maxdepth 1 -not -name "example_setup.rb")
+for f in $FILES
 do
   echo "\n\nRunning $f ..."
   bundle exec ruby $f
