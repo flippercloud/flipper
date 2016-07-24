@@ -482,6 +482,13 @@ RSpec.describe Flipper do
           expect(flipper.features.map(&:key)).to include(feature.key)
           flipper.remove(feature.key)
         end
+
+        it "disables the feature" do
+          feature.enable
+          expect(feature.enabled?).to be(true)
+          flipper.remove(feature.key)
+          expect(feature.enabled?).to be(false)
+        end
       end
     end
   end

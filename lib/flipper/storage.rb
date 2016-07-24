@@ -50,6 +50,7 @@ module Flipper
         if set.include?(feature.key)
           set.delete(feature.key)
           @adapter.set("features", JSON.generate(set.to_a))
+          @adapter.del("feature/#{feature.key}")
         end
       end
     end
