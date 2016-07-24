@@ -1,3 +1,4 @@
+require "json"
 require "forwardable"
 require "flipper/adapter"
 require "flipper/adapters/memoizable"
@@ -35,7 +36,7 @@ module Flipper
         set = v2_features
         unless set.include?(feature.key)
           set.add(feature.key)
-          @adapter.set("features", Marshal.dump(set))
+          @adapter.set("features", JSON.generate(set.to_a))
         end
       end
     end
@@ -47,8 +48,8 @@ module Flipper
       when Adapter::V2
         set = v2_features
         if set.include?(feature.key)
-          set.remove(feature.key)
-          @adapter.set("features", Marshal.dump(set))
+          set.delete(feature.key)
+          @adapter.set("features", JSON.generate(set.to_a))
         end
       end
     end
@@ -59,7 +60,14 @@ module Flipper
         @adapter.get(feature)
       when Adapter::V2
         if raw = @adapter.get("feature/#{feature.key}")
-          Marshal.load(raw)
+          hash = JSON.parse(raw)
+          symbolized_hash = {}
+          hash.each_key do |key|
+            symbolized_hash[key.to_sym] = hash[key]
+          end
+          symbolized_hash[:groups] = Set.new(symbolized_hash[:groups].map(&:to_sym))
+          symbolized_hash[:actors] = Set.new(symbolized_hash[:actors])
+          symbolized_hash
         else
           default_gate_values
         end
@@ -80,7 +88,9 @@ module Flipper
         when :set
           hash[gate.key].add(thing.value)
         end
-        @adapter.set("feature/#{feature.key}", Marshal.dump(hash))
+        hash[:groups] = hash[:groups].to_a
+        hash[:actors] = hash[:actors].to_a
+        @adapter.set("feature/#{feature.key}", JSON.generate(hash))
         true
       end
     end
@@ -105,7 +115,9 @@ module Flipper
         when :set
           hash[gate.key].delete(thing.value)
         end
-        @adapter.set("feature/#{feature.key}", Marshal.dump(hash))
+        hash[:groups] = hash[:groups].to_a
+        hash[:actors] = hash[:actors].to_a
+        @adapter.set("feature/#{feature.key}", JSON.generate(hash))
         true
       end
     end
@@ -124,7 +136,7 @@ module Flipper
 
     def v2_features
       if raw = @adapter.get("features")
-        Marshal.load(raw)
+        Set.new(JSON.parse(raw))
       else
         Set.new
       end
