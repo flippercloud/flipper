@@ -232,9 +232,7 @@ RSpec.describe Flipper::DSL do
   describe '#remove' do
     it "removes the feature" do
       subject.enable(:stats)
-
       expect { subject.remove(:stats) }.to change { subject.enabled?(:stats) }.to(false)
-
       expect(subject.features).to be_empty
     end
   end
