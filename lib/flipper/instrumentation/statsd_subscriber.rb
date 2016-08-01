@@ -3,7 +3,6 @@
 # that lives in the same directory as this file. The benefit is that it
 # subscribes to the correct events and does everything for your.
 require 'flipper/instrumentation/subscriber'
-require 'statsd'
 
 module Flipper
   module Instrumentation
