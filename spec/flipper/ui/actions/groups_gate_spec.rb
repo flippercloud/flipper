@@ -1,6 +1,15 @@
 require 'helper'
 
 RSpec.describe Flipper::UI::Actions::GroupsGate do
+  let(:token) {
+  if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
+    Rack::Protection::AuthenticityToken.random_token
+  else
+    "a"
+  end
+}
+  let(:session) { {:csrf => token} }
+
   describe "GET /features/:feature/groups" do
     before do
       Flipper.register(:admins) { |user| user.admin? }
@@ -32,8 +41,8 @@ RSpec.describe Flipper::UI::Actions::GroupsGate do
     context "enabling a group" do
       before do
         post "features/search/groups",
-          {"value" => "admins", "operation" => "enable", "authenticity_token" => "a"},
-          "rack.session" => {"_csrf_token" => "a"}
+          {"value" => "admins", "operation" => "enable", "authenticity_token" => token},
+          "rack.session" => session
       end
 
       it "adds item to members" do
@@ -50,8 +59,8 @@ RSpec.describe Flipper::UI::Actions::GroupsGate do
       before do
         flipper[:search].enable_group :admins
         post "features/search/groups",
-          {"value" => "admins", "operation" => "disable", "authenticity_token" => "a"},
-          "rack.session" => {"_csrf_token" => "a"}
+          {"value" => "admins", "operation" => "disable", "authenticity_token" => token},
+          "rack.session" => session
       end
 
       it "removes item from members" do
@@ -67,8 +76,8 @@ RSpec.describe Flipper::UI::Actions::GroupsGate do
     context "for an unregistered group" do
       before do
         post "features/search/groups",
-          {"value" => "not_here", "operation" => "enable", "authenticity_token" => "a"},
-          "rack.session" => {"_csrf_token" => "a"}
+          {"value" => "not_here", "operation" => "enable", "authenticity_token" => token},
+          "rack.session" => session
       end
 
       it "redirects back to feature" do

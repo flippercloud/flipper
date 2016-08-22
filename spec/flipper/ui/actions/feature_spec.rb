@@ -1,12 +1,21 @@
 require 'helper'
 
 RSpec.describe Flipper::UI::Actions::Feature do
+  let(:token) {
+  if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
+    Rack::Protection::AuthenticityToken.random_token
+  else
+    "a"
+  end
+}
+  let(:session) { {:csrf => token} }
+
   describe "DELETE /features/:feature" do
     before do
       flipper.enable :search
       delete "/features/search",
-        {"authenticity_token" => "a"},
-        "rack.session" => {"_csrf_token" => "a"}
+        {"authenticity_token" => token},
+        "rack.session" => session
     end
 
     it "removes feature" do
@@ -23,8 +32,8 @@ RSpec.describe Flipper::UI::Actions::Feature do
     before do
       flipper.enable :search
       post "/features/search",
-        {"_method" => "DELETE", "authenticity_token" => "a"},
-        "rack.session" => {"_csrf_token" => "a"}
+        {"_method" => "DELETE", "authenticity_token" => token},
+        "rack.session" => session
     end
 
     it "removes feature" do
