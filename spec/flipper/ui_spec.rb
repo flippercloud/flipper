@@ -1,6 +1,21 @@
 require 'helper'
 
 RSpec.describe Flipper::UI do
+  let(:token) {
+    if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
+      Rack::Protection::AuthenticityToken.random_token
+    else
+      "a"
+    end
+  }
+  let(:session) {
+    if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
+      {:csrf => token}
+    else
+      {"_csrf_token" => token}
+    end
+  }
+
   describe "Initializing middleware with flipper instance" do
     let(:app) { build_app(flipper) }
 
@@ -36,8 +51,8 @@ RSpec.describe Flipper::UI do
   # See https://github.com/jnunemaker/flipper/issues/80
   it "can route features with names that match static directories" do
     post "features/refactor-images/actors",
-      {"value" => "User:6", "operation" => "enable", "authenticity_token" => "a"},
-      "rack.session" => {"_csrf_token" => "a"}
+      {"value" => "User:6", "operation" => "enable", "authenticity_token" => token},
+      "rack.session" => session
     expect(last_response.status).to be(302)
     expect(last_response.headers["Location"]).to eq("/features/refactor-images")
   end

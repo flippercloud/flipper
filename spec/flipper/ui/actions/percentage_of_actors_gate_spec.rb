@@ -1,12 +1,27 @@
 require 'helper'
 
 RSpec.describe Flipper::UI::Actions::PercentageOfActorsGate do
+  let(:token) {
+    if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
+      Rack::Protection::AuthenticityToken.random_token
+    else
+      "a"
+    end
+  }
+  let(:session) {
+    if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
+      {:csrf => token}
+    else
+      {"_csrf_token" => token}
+    end
+  }
+
   describe "POST /features/:feature/percentage_of_actors" do
     context "with valid value" do
       before do
         post "features/search/percentage_of_actors",
-          {"value" => "24", "authenticity_token" => "a"},
-          "rack.session" => {"_csrf_token" => "a"}
+          {"value" => "24", "authenticity_token" => token},
+          "rack.session" => session
       end
 
       it "enables the feature" do
@@ -22,8 +37,8 @@ RSpec.describe Flipper::UI::Actions::PercentageOfActorsGate do
     context "with invalid value" do
       before do
         post "features/search/percentage_of_actors",
-          {"value" => "555", "authenticity_token" => "a"},
-          "rack.session" => {"_csrf_token" => "a"}
+          {"value" => "555", "authenticity_token" => token},
+          "rack.session" => session
       end
 
       it "does not change value" do
