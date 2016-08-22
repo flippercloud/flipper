@@ -1,6 +1,8 @@
 require 'helper'
 require 'flipper/adapters/memory'
+require 'flipper/adapters/instrumented'
 require 'flipper/instrumentation/statsd'
+require 'statsd'
 
 RSpec.describe Flipper::Instrumentation::StatsdSubscriber do
   let(:statsd_client) { Statsd.new }
