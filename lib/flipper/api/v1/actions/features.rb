@@ -19,6 +19,19 @@ module Flipper
               features: features
             })
           end
+
+          def post
+            feature_name = params.fetch('name') do
+              json_response({
+                errors: [{
+                  message: 'Missing post parameter: name',
+                }]
+              }, 422)
+            end
+
+            flipper.adapter.add(flipper[feature_name])
+            json_response({}, 200)
+          end
         end
       end
     end
