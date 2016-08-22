@@ -8,7 +8,13 @@ RSpec.describe Flipper::UI do
       "a"
     end
   }
-  let(:session) { {:csrf => token} }
+  let(:session) {
+    if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
+      {:csrf => token}
+    else
+      {"_csrf_token" => token}
+    end
+  }
 
   describe "Initializing middleware with flipper instance" do
     let(:app) { build_app(flipper) }

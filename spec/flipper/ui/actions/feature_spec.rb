@@ -8,7 +8,13 @@ RSpec.describe Flipper::UI::Actions::Feature do
       "a"
     end
   }
-  let(:session) { {:csrf => token} }
+  let(:session) {
+    if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
+      {:csrf => token}
+    else
+      {"_csrf_token" => token}
+    end
+  }
 
   describe "DELETE /features/:feature" do
     before do
