@@ -2,12 +2,12 @@ require 'helper'
 
 RSpec.describe Flipper::UI::Actions::Feature do
   let(:token) {
-  if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
-    Rack::Protection::AuthenticityToken.random_token
-  else
-    "a"
-  end
-}
+    if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
+      Rack::Protection::AuthenticityToken.random_token
+    else
+      "a"
+    end
+  }
   let(:session) { {:csrf => token} }
 
   describe "DELETE /features/:feature" do
