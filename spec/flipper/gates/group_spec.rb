@@ -9,7 +9,6 @@ RSpec.describe Flipper::Gates::Group do
 
   def context(set)
     Flipper::GateContext.new(
-      gates: [],
       values: Flipper::GateValues.new({groups: set}),
       feature_name: feature_name
     )

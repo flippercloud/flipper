@@ -9,7 +9,6 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
 
   def context(integer, feature = feature_name)
     Flipper::GateContext.new(
-      gates: [],
       values: Flipper::GateValues.new({percentage_of_actors: integer}),
       feature_name: feature
     )

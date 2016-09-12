@@ -90,7 +90,6 @@ module Flipper
         payload[:thing] = gate(:actor).wrap(thing) unless thing.nil?
 
         context = GateContext.new(
-          gates: gates,
           values: values,
           feature_name: @name
         )
