@@ -7,9 +7,9 @@ module Flipper
     # gates for the feature.
     attr_reader :values
 
-    def initialize(feature_name:, values:)
-      @feature_name = feature_name
-      @values = values
+    def initialize(options = {})
+      @feature_name = options.fetch(:feature_name)
+      @values = options.fetch(:values)
     end
   end
 end
