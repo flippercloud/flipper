@@ -66,20 +66,24 @@ feature_flags = Team.new(:feature_flags, [aroben, jnunemaker])
 
 stats.enable_actor jbarnette
 
-do_enabled_checks = ->(*actors) {
-  actors.each do |actor|
-    if stats.enabled?(actor)
-      puts "stats are enabled for #{actor.id}"
-    else
-      puts "stats are NOT enabled for #{actor.id}"
-    end
-  end
-}
+actors = [jbarnette, jnunemaker, aroben]
 
-do_enabled_checks.call(jbarnette, jnunemaker, aroben)
+actors.each do |actor|
+  if stats.enabled?(actor)
+    puts "stats are enabled for #{actor.id}"
+  else
+    puts "stats are NOT enabled for #{actor.id}"
+  end
+end
 
 puts "enabling team_actor group"
 stats.enable_actor core_app
 stats.enable_group :enabled_team_member
 
-do_enabled_checks.call(jbarnette, jnunemaker, aroben)
+actors.each do |actor|
+  if stats.enabled?(actor)
+    puts "stats are enabled for #{actor.id}"
+  else
+    puts "stats are NOT enabled for #{actor.id}"
+  end
+end
