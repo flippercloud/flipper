@@ -8,9 +8,9 @@ RSpec.describe Flipper::Gates::Group do
   }
 
   def context(set)
-    Flipper::GateContext.new(
-      values: Flipper::GateValues.new({groups: set}),
-      feature_name: feature_name
+    Flipper::FeatureCheckContext.new(
+      feature_name: feature_name,
+      values: Flipper::GateValues.new({groups: set})
     )
   end
 

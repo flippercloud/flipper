@@ -8,9 +8,9 @@ RSpec.describe Flipper::Gates::Boolean do
   }
 
   def context(bool)
-    Flipper::GateContext.new(
-      values: Flipper::GateValues.new({boolean: bool}),
-      feature_name: feature_name
+    Flipper::FeatureCheckContext.new(
+      feature_name: feature_name,
+      values: Flipper::GateValues.new({boolean: bool})
     )
   end
 
