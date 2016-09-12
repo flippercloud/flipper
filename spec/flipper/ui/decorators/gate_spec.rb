@@ -2,7 +2,7 @@ require 'helper'
 require 'flipper/adapters/memory'
 require 'flipper/ui/decorators/gate'
 
-describe Flipper::UI::Decorators::Gate do
+RSpec.describe Flipper::UI::Decorators::Gate do
   let(:source)  { {} }
   let(:adapter) { Flipper::Adapters::Memory.new(source) }
   let(:flipper) { build_flipper }
@@ -15,11 +15,11 @@ describe Flipper::UI::Decorators::Gate do
 
   describe "#initialize" do
     it "sets gate" do
-      subject.gate.should be(gate)
+      expect(subject.gate).to be(gate)
     end
 
     it "sets value" do
-      subject.value.should eq(false)
+      expect(subject.value).to eq(false)
     end
   end
 
@@ -29,19 +29,19 @@ describe Flipper::UI::Decorators::Gate do
     end
 
     it "returns Hash" do
-      @result.should be_instance_of(Hash)
+      expect(@result).to be_instance_of(Hash)
     end
 
     it "includes key" do
-      @result['key'].should eq('boolean')
+      expect(@result['key']).to eq('boolean')
     end
 
     it "includes pretty name" do
-      @result['name'].should eq('boolean')
+      expect(@result['name']).to eq('boolean')
     end
 
     it "includes value" do
-      @result['value'].should be(false)
+      expect(@result['value']).to be(false)
     end
   end
 end

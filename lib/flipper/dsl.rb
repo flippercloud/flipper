@@ -1,4 +1,3 @@
-require 'flipper/adapters/instrumented'
 require 'flipper/adapters/memoizable'
 require 'flipper/instrumenters/noop'
 
@@ -17,13 +16,8 @@ module Flipper
     #           :instrumenter - What should be used to instrument all the things.
     def initialize(adapter, options = {})
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
-
-      instrumented = Adapters::Instrumented.new(adapter, {
-        :instrumenter => @instrumenter,
-      })
-      memoized = Adapters::Memoizable.new(instrumented)
+      memoized = Adapters::Memoizable.new(adapter)
       @adapter = memoized
-
       @memoized_features = {}
     end
 
@@ -143,6 +137,15 @@ module Flipper
     # Returns result of disable.
     def disable_percentage_of_actors(name)
       feature(name).disable_percentage_of_actors
+    end
+
+    # Public: Remove a feature.
+    #
+    # name - The String or Symbol name of the feature.
+    #
+    # Returns result of remove.
+    def remove(name)
+      feature(name).remove
     end
 
     # Public: Access a feature instance by name.

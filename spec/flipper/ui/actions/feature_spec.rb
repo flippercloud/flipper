@@ -1,21 +1,36 @@
 require 'helper'
 
-describe Flipper::UI::Actions::Feature do
+RSpec.describe Flipper::UI::Actions::Feature do
+  let(:token) {
+    if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
+      Rack::Protection::AuthenticityToken.random_token
+    else
+      "a"
+    end
+  }
+  let(:session) {
+    if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
+      {:csrf => token}
+    else
+      {"_csrf_token" => token}
+    end
+  }
+
   describe "DELETE /features/:feature" do
     before do
       flipper.enable :search
       delete "/features/search",
-        {"authenticity_token" => "a"},
-        "rack.session" => {:csrf => "a"}
+        {"authenticity_token" => token},
+        "rack.session" => session
     end
 
     it "removes feature" do
-      flipper.features.map(&:key).should_not include("search")
+      expect(flipper.features.map(&:key)).not_to include("search")
     end
 
     it "redirects to features" do
-      last_response.status.should be(302)
-      last_response.headers["Location"].should eq("/features")
+      expect(last_response.status).to be(302)
+      expect(last_response.headers["Location"]).to eq("/features")
     end
   end
 
@@ -23,17 +38,17 @@ describe Flipper::UI::Actions::Feature do
     before do
       flipper.enable :search
       post "/features/search",
-        {"_method" => "DELETE", "authenticity_token" => "a"},
-        "rack.session" => {:csrf => "a"}
+        {"_method" => "DELETE", "authenticity_token" => token},
+        "rack.session" => session
     end
 
     it "removes feature" do
-      flipper.features.map(&:key).should_not include("search")
+      expect(flipper.features.map(&:key)).not_to include("search")
     end
 
     it "redirects to features" do
-      last_response.status.should be(302)
-      last_response.headers["Location"].should eq("/features")
+      expect(last_response.status).to be(302)
+      expect(last_response.headers["Location"]).to eq("/features")
     end
   end
 
@@ -43,17 +58,17 @@ describe Flipper::UI::Actions::Feature do
     end
 
     it "responds with success" do
-      last_response.status.should be(200)
+      expect(last_response.status).to be(200)
     end
 
     it "renders template" do
-      last_response.body.should include("search")
-      last_response.body.should include("Enable")
-      last_response.body.should include("Disable")
-      last_response.body.should include("Actors")
-      last_response.body.should include("Groups")
-      last_response.body.should include("Percentage of Time")
-      last_response.body.should include("Percentage of Actors")
+      expect(last_response.body).to include("search")
+      expect(last_response.body).to include("Enable")
+      expect(last_response.body).to include("Disable")
+      expect(last_response.body).to include("Actors")
+      expect(last_response.body).to include("Groups")
+      expect(last_response.body).to include("Percentage of Time")
+      expect(last_response.body).to include("Percentage of Actors")
     end
   end
 end

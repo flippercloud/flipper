@@ -1,11 +1,16 @@
 require 'helper'
 require 'flipper/adapters/memory'
+require 'flipper/adapters/instrumented'
 require 'flipper/instrumentation/statsd'
+require 'statsd'
 
-describe Flipper::Instrumentation::StatsdSubscriber do
+RSpec.describe Flipper::Instrumentation::StatsdSubscriber do
   let(:statsd_client) { Statsd.new }
   let(:socket) { FakeUDPSocket.new }
-  let(:adapter) { Flipper::Adapters::Memory.new }
+  let(:adapter) {
+    memory = Flipper::Adapters::Memory.new
+    Flipper::Adapters::Instrumented.new(memory, :instrumenter => ActiveSupport::Notifications)
+  }
   let(:flipper) {
     Flipper.new(adapter, :instrumenter => ActiveSupport::Notifications)
   }
@@ -24,11 +29,13 @@ describe Flipper::Instrumentation::StatsdSubscriber do
 
   def assert_timer(metric)
     regex = /#{Regexp.escape metric}\:\d+\|ms/
-    socket.buffer.detect { |op| op.first =~ regex }.should_not be_nil
+    result = socket.buffer.detect { |op| op.first =~ regex }
+    expect(result).not_to be_nil
   end
 
   def assert_counter(metric)
-    socket.buffer.detect { |op| op.first == "#{metric}:1|c" }.should_not be_nil
+    result = socket.buffer.detect { |op| op.first == "#{metric}:1|c" }
+    expect(result).not_to be_nil
   end
 
   context "for enabled feature" do
@@ -62,15 +69,5 @@ describe Flipper::Instrumentation::StatsdSubscriber do
 
     flipper[:stats].disable(user)
     assert_timer 'flipper.adapter.memory.disable'
-  end
-
-  it "updates gate metrics when calls happen" do
-    flipper[:stats].enable(user)
-    flipper[:stats].enabled?(user)
-
-    assert_timer 'flipper.gate_operation.boolean.open'
-    assert_timer 'flipper.feature.stats.gate_operation.boolean.open'
-    assert_counter 'flipper.feature.stats.gate.actor.open'
-    assert_counter 'flipper.feature.stats.gate.boolean.closed'
   end
 end

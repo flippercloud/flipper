@@ -71,31 +71,11 @@ module Flipper
         update_timer "flipper.adapter.#{adapter_name}.#{operation}"
       end
 
-      # Private
-      def update_gate_operation_metrics
-        feature_name = @payload[:feature_name]
-        gate_name = @payload[:gate_name]
-        operation = strip_trailing_question_mark(@payload[:operation])
-        result = @payload[:result]
-        thing = @payload[:thing]
-
-        update_timer "flipper.gate_operation.#{gate_name}.#{operation}"
-        update_timer "flipper.feature.#{feature_name}.gate_operation.#{gate_name}.#{operation}"
-
-        if @payload[:operation] == :open?
-          metric_name = if result
-            "flipper.feature.#{feature_name}.gate.#{gate_name}.open"
-          else
-            "flipper.feature.#{feature_name}.gate.#{gate_name}.closed"
-          end
-
-          update_counter metric_name
-        end
-      end
+      QUESTION_MARK = "?".freeze
 
       # Private
       def strip_trailing_question_mark(operation)
-        operation.to_s.chomp('?')
+        operation.to_s.chomp(QUESTION_MARK)
       end
     end
   end

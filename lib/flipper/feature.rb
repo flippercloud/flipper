@@ -8,10 +8,7 @@ require 'flipper/instrumenters/noop'
 module Flipper
   class Feature
     # Private: The name of feature instrumentation events.
-    InstrumentationName = "feature_operation.#{InstrumentationNamespace}"
-
-    # Private: The name of gate instrumentation events.
-    GateInstrumentationName = "gate_operation.#{InstrumentationNamespace}"
+    InstrumentationName = "feature_operation.#{InstrumentationNamespace}".freeze
 
     # Public: The name of the feature.
     attr_reader :name
@@ -76,6 +73,13 @@ module Flipper
       }
     end
 
+    # Public: Removes this feature.
+    #
+    # Returns the result of Adapter#remove.
+    def remove
+      instrument(:remove) { adapter.remove(self) }
+    end
+
     # Public: Check if a feature is enabled for a thing.
     #
     # Returns true if enabled, false if not.
@@ -86,14 +90,12 @@ module Flipper
         payload[:thing] = gate(:actor).wrap(thing) unless thing.nil?
 
         open_gate = gates.detect { |gate|
-          instrument_gate(gate, :open?, thing) { |gate_payload|
-            context = GateContext.new(
-              gates: gates,
-              values: values,
-              feature_name: @name
-            )
-            gate.open?(thing, context)
-          }
+          context = GateContext.new(
+            gates: gates,
+            values: values,
+            feature_name: @name
+          )
+          gate.open?(thing, context)
         }
 
         if open_gate.nil?
@@ -359,20 +361,6 @@ module Flipper
       @instrumenter.instrument(InstrumentationName) { |payload|
         payload[:feature_name] = name
         payload[:operation] = operation
-        payload[:result] = yield(payload) if block_given?
-      }
-    end
-
-    # Private: Intrument a gate operation.
-    def instrument_gate(gate, operation, thing)
-      payload = {
-        :feature_name => @name,
-        :gate_name => gate.name,
-        :operation => operation,
-        :thing => thing,
-      }
-
-      @instrumenter.instrument(GateInstrumentationName, payload) { |payload|
         payload[:result] = yield(payload) if block_given?
       }
     end

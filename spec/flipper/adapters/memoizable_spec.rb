@@ -3,7 +3,7 @@ require 'flipper/adapters/memoizable'
 require 'flipper/adapters/memory'
 require 'flipper/spec/shared_adapter_specs'
 
-describe Flipper::Adapters::Memoizable do
+RSpec.describe Flipper::Adapters::Memoizable do
   let(:features_key) { described_class::FeaturesKey }
   let(:adapter) { Flipper::Adapters::Memory.new }
   let(:flipper) { Flipper.new(adapter) }
@@ -13,31 +13,47 @@ describe Flipper::Adapters::Memoizable do
 
   it_should_behave_like 'a flipper adapter'
 
+  it "forwards missing methods to underlying adapter" do
+    adapter = Class.new do
+      def foo
+        :foo
+      end
+    end.new
+    memoizable = described_class.new(adapter)
+    expect(memoizable.foo).to eq(:foo)
+  end
+
+  describe "#name" do
+    it "is instrumented" do
+      expect(subject.name).to be(:memoizable)
+    end
+  end
+
   describe "#memoize=" do
     it "sets value" do
       subject.memoize = true
-      subject.memoizing?.should eq(true)
+      expect(subject.memoizing?).to eq(true)
 
       subject.memoize = false
-      subject.memoizing?.should eq(false)
+      expect(subject.memoizing?).to eq(false)
     end
 
     it "clears the local cache" do
       subject.cache['some'] = 'thing'
       subject.memoize = true
-      subject.cache.should be_empty
+      expect(subject.cache).to be_empty
     end
   end
 
   describe "#memoizing?" do
     it "returns true if enabled" do
       subject.memoize = true
-      subject.memoizing?.should eq(true)
+      expect(subject.memoizing?).to eq(true)
     end
 
     it "returns false if disabled" do
       subject.memoize = false
-      subject.memoizing?.should eq(false)
+      expect(subject.memoizing?).to eq(false)
     end
   end
 
@@ -50,7 +66,7 @@ describe Flipper::Adapters::Memoizable do
       it "memoizes feature" do
         feature = flipper[:stats]
         result = subject.get(feature)
-        cache[feature].should be(result)
+        expect(cache[feature]).to be(result)
       end
     end
 
@@ -63,7 +79,7 @@ describe Flipper::Adapters::Memoizable do
         feature = flipper[:stats]
         result = subject.get(feature)
         adapter_result = adapter.get(feature)
-        result.should eq(adapter_result)
+        expect(result).to eq(adapter_result)
       end
     end
   end
@@ -79,7 +95,7 @@ describe Flipper::Adapters::Memoizable do
         gate = feature.gate(:boolean)
         cache[feature] = {:some => 'thing'}
         subject.enable(feature, gate, flipper.bool)
-        cache[feature].should be_nil
+        expect(cache[feature]).to be_nil
       end
     end
 
@@ -93,7 +109,7 @@ describe Flipper::Adapters::Memoizable do
         gate = feature.gate(:boolean)
         result = subject.enable(feature, gate, flipper.bool)
         adapter_result = adapter.enable(feature, gate, flipper.bool)
-        result.should eq(adapter_result)
+        expect(result).to eq(adapter_result)
       end
     end
   end
@@ -109,7 +125,7 @@ describe Flipper::Adapters::Memoizable do
         gate = feature.gate(:boolean)
         cache[feature] = {:some => 'thing'}
         subject.disable(feature, gate, flipper.bool)
-        cache[feature].should be_nil
+        expect(cache[feature]).to be_nil
       end
     end
 
@@ -123,7 +139,7 @@ describe Flipper::Adapters::Memoizable do
         gate = feature.gate(:boolean)
         result = subject.disable(feature, gate, flipper.bool)
         adapter_result = adapter.disable(feature, gate, flipper.bool)
-        result.should eq(adapter_result)
+        expect(result).to eq(adapter_result)
       end
     end
   end
@@ -138,7 +154,7 @@ describe Flipper::Adapters::Memoizable do
         flipper[:stats].enable
         flipper[:search].disable
         result = subject.features
-        cache[:flipper_features].should be(result)
+        expect(cache[:flipper_features]).to be(result)
       end
     end
 
@@ -148,7 +164,7 @@ describe Flipper::Adapters::Memoizable do
       end
 
       it "returns result" do
-        subject.features.should eq(adapter.features)
+        expect(subject.features).to eq(adapter.features)
       end
     end
   end
@@ -162,7 +178,7 @@ describe Flipper::Adapters::Memoizable do
       it "unmemoizes the known features" do
         cache[features_key] = {:some => 'thing'}
         subject.add(flipper[:stats])
-        cache.should be_empty
+        expect(cache).to be_empty
       end
     end
 
@@ -172,7 +188,7 @@ describe Flipper::Adapters::Memoizable do
       end
 
       it "returns result" do
-        subject.add(flipper[:stats]).should eq(adapter.add(flipper[:stats]))
+        expect(subject.add(flipper[:stats])).to eq(adapter.add(flipper[:stats]))
       end
     end
   end
@@ -186,14 +202,14 @@ describe Flipper::Adapters::Memoizable do
       it "unmemoizes the known features" do
         cache[features_key] = {:some => 'thing'}
         subject.remove(flipper[:stats])
-        cache.should be_empty
+        expect(cache).to be_empty
       end
 
       it "unmemoizes the feature" do
         feature = flipper[:stats]
         cache[feature] = {:some => 'thing'}
         subject.remove(feature)
-        cache[feature].should be_nil
+        expect(cache[feature]).to be_nil
       end
     end
 
@@ -203,7 +219,7 @@ describe Flipper::Adapters::Memoizable do
       end
 
       it "returns result" do
-        subject.remove(flipper[:stats]).should eq(adapter.remove(flipper[:stats]))
+        expect(subject.remove(flipper[:stats])).to eq(adapter.remove(flipper[:stats]))
       end
     end
   end
@@ -218,7 +234,7 @@ describe Flipper::Adapters::Memoizable do
         feature = flipper[:stats]
         cache[feature] = {:some => 'thing'}
         subject.clear(feature)
-        cache[feature].should be_nil
+        expect(cache[feature]).to be_nil
       end
     end
 
@@ -229,7 +245,7 @@ describe Flipper::Adapters::Memoizable do
 
       it "returns result" do
         feature = flipper[:stats]
-        subject.clear(feature).should eq(adapter.clear(feature))
+        expect(subject.clear(feature)).to eq(adapter.clear(feature))
       end
     end
   end

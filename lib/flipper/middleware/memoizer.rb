@@ -3,7 +3,7 @@ require 'rack/body_proxy'
 module Flipper
   module Middleware
     class Memoizer
-      # Public: Initializes an instance of the UI middleware.
+      # Public: Initializes an instance of the Memoizer middleware.
       #
       # app - The app this middleware is included in.
       # flipper_or_block - The Flipper::DSL instance or a block that yields a
@@ -11,9 +11,8 @@ module Flipper
       #
       # Examples
       #
-      #   flipper = Flipper.new(...)
-      #
       #   # using with a normal flipper instance
+      #   flipper = Flipper.new(...)
       #   use Flipper::Middleware::Memoizer, flipper
       #
       #   # using with a block that yields a flipper instance

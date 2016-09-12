@@ -1,6 +1,6 @@
 require 'helper'
 
-describe Flipper::Gates::Boolean do
+RSpec.describe Flipper::Gates::Boolean do
   let(:feature_name) { :search }
 
   subject {
@@ -18,13 +18,13 @@ describe Flipper::Gates::Boolean do
   describe "#enabled?" do
     context "for true value" do
       it "returns true" do
-        subject.enabled?(true).should eq(true)
+        expect(subject.enabled?(true)).to eq(true)
       end
     end
 
     context "for false value" do
       it "returns false" do
-        subject.enabled?(false).should eq(false)
+        expect(subject.enabled?(false)).to eq(false)
       end
     end
   end
@@ -32,44 +32,44 @@ describe Flipper::Gates::Boolean do
   describe "#open?" do
     context "for true value" do
       it "returns true" do
-        subject.open?(Object.new, context(true)).should eq(true)
+        expect(subject.open?(Object.new, context(true))).to be(true)
       end
     end
 
     context "for false value" do
       it "returns false" do
-        subject.open?(Object.new, context(false)).should eq(false)
+        expect(subject.open?(Object.new, context(false))).to be(false)
       end
     end
   end
 
   describe "#protects?" do
     it "returns true for boolean type" do
-      subject.protects?(Flipper::Types::Boolean.new(true)).should be(true)
+      expect(subject.protects?(Flipper::Types::Boolean.new(true))).to be(true)
     end
 
     it "returns true for true" do
-      subject.protects?(true).should be(true)
+      expect(subject.protects?(true)).to be(true)
     end
 
     it "returns true for false" do
-      subject.protects?(false).should be(true)
+      expect(subject.protects?(false)).to be(true)
     end
   end
 
   describe "#wrap" do
     it "returns boolean type for boolean type" do
-      subject.wrap(Flipper::Types::Boolean.new(true)).should be_instance_of(Flipper::Types::Boolean)
+      expect(subject.wrap(Flipper::Types::Boolean.new(true))).to be_instance_of(Flipper::Types::Boolean)
     end
 
     it "returns boolean type for true" do
-      subject.wrap(true).should be_instance_of(Flipper::Types::Boolean)
-      subject.wrap(true).value.should be(true)
+      expect(subject.wrap(true)).to be_instance_of(Flipper::Types::Boolean)
+      expect(subject.wrap(true).value).to be(true)
     end
 
     it "returns boolean type for true" do
-      subject.wrap(false).should be_instance_of(Flipper::Types::Boolean)
-      subject.wrap(false).value.should be(false)
+      expect(subject.wrap(false)).to be_instance_of(Flipper::Types::Boolean)
+      expect(subject.wrap(false).value).to be(false)
     end
   end
 end

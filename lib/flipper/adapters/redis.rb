@@ -5,7 +5,7 @@ require 'flipper'
 module Flipper
   module Adapters
     class Redis
-      include Flipper::Adapter
+      include ::Flipper::Adapter
 
       # Private: The key that stores the set of known features.
       FeaturesKey = :flipper_features

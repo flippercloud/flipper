@@ -17,7 +17,9 @@
   </head>
   <body>
     <div class="container header">
-      <a class="btn btn-sm right" href="<%= script_name %>/features/new">Add Feature</a>
+      <%- if Flipper::UI.feature_creation_enabled -%>
+        <a class="btn btn-sm right" href="<%= script_name %>/features/new">Add Feature</a>
+      <%- end -%>
 
       <ol class="breadcrumb">
         <% @breadcrumbs.each do |breadcrumb| %>
@@ -25,7 +27,7 @@
             <% if breadcrumb.active? %>
               <%= breadcrumb.text %>
             <% else %>
-              <a href="<%= script_name %><%= breadcrumb.href %>"><%= breadcrumb.text %></a>
+              <a href="<%= breadcrumb.href %>"><%= breadcrumb.text %></a>
             <% end %>
           </li>
         <% end %>

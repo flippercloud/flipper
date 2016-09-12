@@ -5,7 +5,7 @@ module Flipper
       1       => true,
       "true"  => true,
       "1"     => true,
-    }
+    }.freeze
 
     # Internal: Convert value to a boolean.
     #

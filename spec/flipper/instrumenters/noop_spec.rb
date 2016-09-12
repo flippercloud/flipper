@@ -1,13 +1,13 @@
 require 'helper'
 require 'flipper/instrumenters/noop'
 
-describe Flipper::Instrumenters::Noop do
+RSpec.describe Flipper::Instrumenters::Noop do
   describe ".instrument" do
     context "with name" do
       it "yields block" do
         yielded = false
         described_class.instrument(:foo) { yielded = true }
-        yielded.should eq(true)
+        expect(yielded).to eq(true)
       end
     end
 
@@ -15,7 +15,7 @@ describe Flipper::Instrumenters::Noop do
       it "yields block" do
         yielded = false
         described_class.instrument(:foo, {:pay => :load}) { yielded = true }
-        yielded.should eq(true)
+        expect(yielded).to eq(true)
       end
     end
   end

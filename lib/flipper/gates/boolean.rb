@@ -16,7 +16,7 @@ module Flipper
       end
 
       def enabled?(value)
-        Typecast.to_boolean(value)
+        !!value
       end
 
       # Internal: Checks if the gate is open for a thing.

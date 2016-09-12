@@ -14,12 +14,16 @@ end
 
 require 'flipper'
 require 'flipper/adapters/memory'
+require 'flipper/adapters/instrumented'
 
 # pick an adapter
 adapter = Flipper::Adapters::Memory.new
 
+# instrument it if you want, if not you still get the feature instrumentation
+instrumented = Flipper::Adapters::Instrumented.new(adapter, :instrumenter => ActiveSupport::Notifications)
+
 # get a handy dsl instance
-flipper = Flipper.new(adapter, :instrumenter => ActiveSupport::Notifications)
+flipper = Flipper.new(instrumented, :instrumenter => ActiveSupport::Notifications)
 
 # grab a feature
 search = flipper[:search]

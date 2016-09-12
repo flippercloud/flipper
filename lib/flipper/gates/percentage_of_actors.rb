@@ -18,15 +18,14 @@ module Flipper
       end
 
       def enabled?(value)
-        Typecast.to_integer(value) > 0
+        value > 0
       end
 
       # Internal: Checks if the gate is open for a thing.
       #
       # Returns true if gate open for thing, false if not.
       def open?(thing, context)
-        value = context.values[key]
-        percentage = Typecast.to_integer(value)
+        percentage = context.values[key]
 
         if Types::Actor.wrappable?(thing)
           actor = Types::Actor.wrap(thing)

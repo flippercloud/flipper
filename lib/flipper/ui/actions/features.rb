@@ -24,6 +24,16 @@ module Flipper
         end
 
         def post
+          unless Flipper::UI.feature_creation_enabled
+            status 403
+
+            breadcrumb "Home", "/"
+            breadcrumb "Features", "/features"
+            breadcrumb "Noooooope"
+
+            halt view_response(:feature_creation_disabled)
+          end
+
           value = params["value"]
 
           if Util.blank?(value)

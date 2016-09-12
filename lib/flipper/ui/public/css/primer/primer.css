@@ -4,7 +4,7 @@
  *
  * Released under MIT license. Copyright 2015 GitHub, Inc.
  */
-/* normalize.css v3.0.1 | MIT License | git.io/normalize */
+/*! normalize.css v3.0.1 | MIT License | git.io/normalize */
 /**
  * 1. Set default font family to sans-serif.
  * 2. Prevent iOS text size adjust after orientation change, without disabling
@@ -320,7 +320,7 @@ input[type="search"]::-webkit-search-decoration {
  * Define consistent border, margin, and padding.
  */
 fieldset {
-  border: 1px solid silver;
+  border: 1px solid #c0c0c0;
   margin: 0 2px;
   padding: 0.35em 0.625em 0.75em; }
 
@@ -371,7 +371,7 @@ button {
 
 body {
   font: 13px/1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
-  color: #333333;
+  color: #333;
   background-color: #fff; }
 
 a {
@@ -387,7 +387,7 @@ hr,
   overflow: hidden;
   background: transparent;
   border: 0;
-  border-bottom: 1px solid #dddddd; }
+  border-bottom: 1px solid #ddd; }
   hr:before,
   .rule:before {
     display: table;
@@ -562,7 +562,7 @@ textarea {
   background-color: #fff;
   background-repeat: no-repeat;
   background-position: right center;
-  border: 1px solid #cccccc;
+  border: 1px solid #ccc;
   border-radius: 3px;
   outline: none;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075); }
@@ -806,7 +806,7 @@ html.no-dnd-uploads .drag-and-drop {
   html.no-dnd-uploads .drag-and-drop .default {
     display: none; }
 html.no-dnd-uploads .upload-enabled textarea {
-  border-bottom: 1px solid #dddddd; }
+  border-bottom: 1px solid #ddd; }
 
 .drag-and-drop {
   padding: 7px 10px;
@@ -815,7 +815,7 @@ html.no-dnd-uploads .upload-enabled textarea {
   line-height: 16px;
   color: #aaa;
   background-color: #fafafa;
-  border: 1px solid #cccccc;
+  border: 1px solid #ccc;
   border-top: 0;
   border-bottom-right-radius: 3px;
   border-bottom-left-radius: 3px; }
@@ -873,7 +873,7 @@ html.no-dnd-uploads .upload-enabled textarea {
 
 .upload-enabled textarea {
   display: block;
-  border-bottom: 1px dashed #dddddd;
+  border-bottom: 1px dashed #ddd;
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0; }
 
@@ -924,7 +924,7 @@ div.composer {
   height: 35px;
   padding: 0 10px;
   margin-bottom: 10px;
-  border-bottom: 1px solid #eeeeee; }
+  border-bottom: 1px solid #eee; }
 
 .composer .tabnav {
   margin: 0 0 10px; }
@@ -1016,7 +1016,7 @@ p.explain {
 .options-content p.explain {
   padding: 10px 10px 0;
   margin-top: 0;
-  border-top: 1px solid #dddddd; }
+  border-top: 1px solid #ddd; }
 
 .form-actions:before {
   display: table;
@@ -1283,7 +1283,7 @@ p.explain {
     padding: 2px 5px 3px;
     font-size: 14px;
     background: #fff;
-    border: 1px solid #eeeeee;
+    border: 1px solid #eee;
     border-radius: 3px; }
   .blankslate > .mega-octicon {
     color: #aaa; }
@@ -1332,7 +1332,7 @@ p.explain {
   vertical-align: middle;
   cursor: pointer;
   background-color: #eee;
-  background-image: linear-gradient(#fcfcfc, #eeeeee);
+  background-image: linear-gradient(#fcfcfc, #eee);
   border: 1px solid #d5d5d5;
   border-radius: 3px;
   user-select: none;
@@ -1354,7 +1354,7 @@ p.explain {
   .btn:hover, .btn:active, .btn.zeroclipboard-is-hover, .btn.zeroclipboard-is-active {
     text-decoration: none;
     background-color: #ddd;
-    background-image: linear-gradient(#eeeeee, #dddddd);
+    background-image: linear-gradient(#eee, #ddd);
     border-color: #ccc; }
   .btn:active, .btn.selected, .btn.selected:hover, .btn.zeroclipboard-is-active {
     background-color: #dcdcdc;
@@ -1477,10 +1477,10 @@ p.explain {
   font-size: 11px;
   font-weight: bold;
   line-height: 20px;
-  color: #333333;
+  color: #333;
   vertical-align: middle;
   background-color: #fff;
-  border: 1px solid #dddddd;
+  border: 1px solid #ddd;
   border-left: 0;
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px; }
@@ -1569,8 +1569,8 @@ p.explain {
   position: relative;
   display: block;
   padding: 8px 10px;
-  text-shadow: 0 1px 0 white;
-  border-bottom: 1px solid #eeeeee; }
+  text-shadow: 0 1px 0 #fff;
+  border-bottom: 1px solid #eee; }
   .menu-item:first-child {
     border-top: 0;
     border-top-right-radius: 2px;
@@ -1602,7 +1602,7 @@ p.explain {
   .menu-item .octicon {
     margin-right: 5px;
     width: 16px;
-    color: #333333;
+    color: #333;
     text-align: center; }
   .menu-item .counter {
     float: right;
@@ -1626,7 +1626,7 @@ p.explain {
   line-height: 20px;
   color: #555;
   background-color: #f7f7f7;
-  border-bottom: 1px solid #eeeeee; }
+  border-bottom: 1px solid #eee; }
   .menu-heading:hover {
     text-decoration: none; }
   .menu-heading:first-child {
@@ -1640,7 +1640,7 @@ p.explain {
 .tabnav {
   margin-top: 0;
   margin-bottom: 15px;
-  border-bottom: 1px solid #dddddd; }
+  border-bottom: 1px solid #ddd; }
   .tabnav .counter {
     margin-left: 5px; }
 
@@ -1760,7 +1760,7 @@ a.tabnav-extra:hover {
   display: none;
   padding: 5px 8px;
   font: normal normal 11px/1.5 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
-  color: white;
+  color: #fff;
   text-align: center;
   text-decoration: none;
   text-shadow: none;
@@ -1887,7 +1887,7 @@ a.tabnav-extra:hover {
 .tooltipped-multiline.tooltipped-w:after, .tooltipped-multiline.tooltipped-e:after {
   right: 100%; }
 
-@media screen and (min-width: 0 \0) {
+@media screen and (min-width: 0\0) {
   .tooltipped-multiline:after {
     width: 250px; } }
 .tooltipped-sticky:before, .tooltipped-sticky:after {
@@ -1896,7 +1896,7 @@ a.tabnav-extra:hover {
   display: table-cell; }
 
 .fullscreen-overlay-enabled.dark-theme .tooltipped:after {
-  color: black;
+  color: #000;
   background: rgba(255, 255, 255, 0.8); }
 .fullscreen-overlay-enabled.dark-theme .tooltipped .tooltipped-s:before,
 .fullscreen-overlay-enabled.dark-theme .tooltipped .tooltipped-se:before,

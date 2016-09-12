@@ -19,8 +19,8 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = Flipper::VERSION
 
-  gem.add_dependency 'rack', '~> 1.4', '< 1.7'
-  gem.add_dependency 'rack-protection', '~> 1.5.3'
+  gem.add_dependency 'rack', '>= 1.4', '< 3'
+  gem.add_dependency 'rack-protection', '>= 1.5.3', '< 2.1.0'
   gem.add_dependency 'flipper', "~> #{Flipper::VERSION}"
   gem.add_dependency 'erubis', '~> 2.7.0'
 end

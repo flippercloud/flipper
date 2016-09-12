@@ -1,6 +1,6 @@
 require 'helper'
 
-describe Flipper::Gate do
+RSpec.describe Flipper::Gate do
   let(:feature_name) { :stats }
 
   subject {
@@ -31,10 +31,10 @@ describe Flipper::Gate do
 
       it "includes attributes" do
         string = subject.inspect
-        string.should include(subject.object_id.to_s)
-        string.should include('name=:name')
-        string.should include('key=:key')
-        string.should include('data_type=:set')
+        expect(string).to include(subject.object_id.to_s)
+        expect(string).to include('name=:name')
+        expect(string).to include('key=:key')
+        expect(string).to include('data_type=:set')
       end
     end
   end

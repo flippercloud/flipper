@@ -4,7 +4,7 @@ require 'flipper/adapters/instrumented'
 require 'flipper/instrumenters/memory'
 require 'flipper/spec/shared_adapter_specs'
 
-describe Flipper::Adapters::Instrumented do
+RSpec.describe Flipper::Adapters::Instrumented do
   let(:instrumenter) { Flipper::Instrumenters::Memory.new }
   let(:adapter) { Flipper::Adapters::Memory.new }
   let(:flipper) { Flipper.new(adapter) }
@@ -19,17 +19,33 @@ describe Flipper::Adapters::Instrumented do
 
   it_should_behave_like 'a flipper adapter'
 
+  it "forwards missing methods to underlying adapter" do
+    adapter = Class.new do
+      def foo
+        :foo
+      end
+    end.new
+    instrumented = described_class.new(adapter)
+    expect(instrumented.foo).to eq(:foo)
+  end
+
+  describe "#name" do
+    it "is instrumented" do
+      expect(subject.name).to be(:instrumented)
+    end
+  end
+
   describe "#get" do
     it "records instrumentation" do
       result = subject.get(feature)
 
       event = instrumenter.events.last
-      event.should_not be_nil
-      event.name.should eq('adapter_operation.flipper')
-      event.payload[:operation].should eq(:get)
-      event.payload[:adapter_name].should eq(:memory)
-      event.payload[:feature_name].should eq(:stats)
-      event.payload[:result].should be(result)
+      expect(event).not_to be_nil
+      expect(event.name).to eq('adapter_operation.flipper')
+      expect(event.payload[:operation]).to eq(:get)
+      expect(event.payload[:adapter_name]).to eq(:memory)
+      expect(event.payload[:feature_name]).to eq(:stats)
+      expect(event.payload[:result]).to be(result)
     end
   end
 
@@ -38,13 +54,13 @@ describe Flipper::Adapters::Instrumented do
       result = subject.enable(feature, gate, thing)
 
       event = instrumenter.events.last
-      event.should_not be_nil
-      event.name.should eq('adapter_operation.flipper')
-      event.payload[:operation].should eq(:enable)
-      event.payload[:adapter_name].should eq(:memory)
-      event.payload[:feature_name].should eq(:stats)
-      event.payload[:gate_name].should eq(:percentage_of_actors)
-      event.payload[:result].should be(result)
+      expect(event).not_to be_nil
+      expect(event.name).to eq('adapter_operation.flipper')
+      expect(event.payload[:operation]).to eq(:enable)
+      expect(event.payload[:adapter_name]).to eq(:memory)
+      expect(event.payload[:feature_name]).to eq(:stats)
+      expect(event.payload[:gate_name]).to eq(:percentage_of_actors)
+      expect(event.payload[:result]).to be(result)
     end
   end
 
@@ -53,13 +69,13 @@ describe Flipper::Adapters::Instrumented do
       result = subject.disable(feature, gate, thing)
 
       event = instrumenter.events.last
-      event.should_not be_nil
-      event.name.should eq('adapter_operation.flipper')
-      event.payload[:operation].should eq(:disable)
-      event.payload[:adapter_name].should eq(:memory)
-      event.payload[:feature_name].should eq(:stats)
-      event.payload[:gate_name].should eq(:percentage_of_actors)
-      event.payload[:result].should be(result)
+      expect(event).not_to be_nil
+      expect(event.name).to eq('adapter_operation.flipper')
+      expect(event.payload[:operation]).to eq(:disable)
+      expect(event.payload[:adapter_name]).to eq(:memory)
+      expect(event.payload[:feature_name]).to eq(:stats)
+      expect(event.payload[:gate_name]).to eq(:percentage_of_actors)
+      expect(event.payload[:result]).to be(result)
     end
   end
 
@@ -68,12 +84,12 @@ describe Flipper::Adapters::Instrumented do
       result = subject.add(feature)
 
       event = instrumenter.events.last
-      event.should_not be_nil
-      event.name.should eq('adapter_operation.flipper')
-      event.payload[:operation].should eq(:add)
-      event.payload[:adapter_name].should eq(:memory)
-      event.payload[:feature_name].should eq(:stats)
-      event.payload[:result].should be(result)
+      expect(event).not_to be_nil
+      expect(event.name).to eq('adapter_operation.flipper')
+      expect(event.payload[:operation]).to eq(:add)
+      expect(event.payload[:adapter_name]).to eq(:memory)
+      expect(event.payload[:feature_name]).to eq(:stats)
+      expect(event.payload[:result]).to be(result)
     end
   end
 
@@ -82,12 +98,12 @@ describe Flipper::Adapters::Instrumented do
       result = subject.remove(feature)
 
       event = instrumenter.events.last
-      event.should_not be_nil
-      event.name.should eq('adapter_operation.flipper')
-      event.payload[:operation].should eq(:remove)
-      event.payload[:adapter_name].should eq(:memory)
-      event.payload[:feature_name].should eq(:stats)
-      event.payload[:result].should be(result)
+      expect(event).not_to be_nil
+      expect(event.name).to eq('adapter_operation.flipper')
+      expect(event.payload[:operation]).to eq(:remove)
+      expect(event.payload[:adapter_name]).to eq(:memory)
+      expect(event.payload[:feature_name]).to eq(:stats)
+      expect(event.payload[:result]).to be(result)
     end
   end
 
@@ -96,12 +112,12 @@ describe Flipper::Adapters::Instrumented do
       result = subject.clear(feature)
 
       event = instrumenter.events.last
-      event.should_not be_nil
-      event.name.should eq('adapter_operation.flipper')
-      event.payload[:operation].should eq(:clear)
-      event.payload[:adapter_name].should eq(:memory)
-      event.payload[:feature_name].should eq(:stats)
-      event.payload[:result].should be(result)
+      expect(event).not_to be_nil
+      expect(event.name).to eq('adapter_operation.flipper')
+      expect(event.payload[:operation]).to eq(:clear)
+      expect(event.payload[:adapter_name]).to eq(:memory)
+      expect(event.payload[:feature_name]).to eq(:stats)
+      expect(event.payload[:result]).to be(result)
     end
   end
 
@@ -110,11 +126,11 @@ describe Flipper::Adapters::Instrumented do
       result = subject.features
 
       event = instrumenter.events.last
-      event.should_not be_nil
-      event.name.should eq('adapter_operation.flipper')
-      event.payload[:operation].should eq(:features)
-      event.payload[:adapter_name].should eq(:memory)
-      event.payload[:result].should be(result)
+      expect(event).not_to be_nil
+      expect(event.name).to eq('adapter_operation.flipper')
+      expect(event.payload[:operation]).to eq(:features)
+      expect(event.payload[:adapter_name]).to eq(:memory)
+      expect(event.payload[:result]).to be(result)
     end
   end
 end

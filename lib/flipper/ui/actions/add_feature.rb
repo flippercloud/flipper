@@ -8,6 +8,16 @@ module Flipper
         route %r{features/new/?\Z}
 
         def get
+          unless Flipper::UI.feature_creation_enabled
+            status 403
+
+            breadcrumb "Home", "/"
+            breadcrumb "Features", "/features"
+            breadcrumb "Noooooope"
+
+            halt view_response(:feature_creation_disabled)
+          end
+
           breadcrumb "Home", "/"
           breadcrumb "Features", "/features"
           breadcrumb "Add"

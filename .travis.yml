@@ -1,12 +1,23 @@
 language: ruby
 rvm:
-  - 1.9.3
-  - 2.1.0
-  - 2.2.0
-notifications:
-  email: false
+  - 2.0.0
+  - 2.1.8
+  - 2.2.4
 bundler_args: --without guard
-before_script: sudo service redis-server status && sudo service mongodb status
+before_script: gem install bundler -v 1.10.6 && sudo service redis-server status && sudo service mongodb status
+script: bundle exec rake
 services:
   - redis-server
   - mongodb
+  - memcached
+env:
+  - RAILS_VERSION=5.0.0
+  - RAILS_VERSION=4.2.5
+  - RAILS_VERSION=3.2.21
+matrix:
+  # don't run rails 5 on ruby versions that can't install rack 2
+  exclude:
+    - rvm: 2.0.0
+      env: RAILS_VERSION=5.0.0
+    - rvm: 2.1.8
+      env: RAILS_VERSION=5.0.0

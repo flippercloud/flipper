@@ -8,6 +8,13 @@ module Flipper
     class Action
       extend Forwardable
 
+      VALID_REQUEST_METHOD_NAMES = Set.new([
+        "get".freeze,
+        "post".freeze,
+        "put".freeze,
+        "delete".freeze,
+      ]).freeze
+
       # Public: Call this in subclasses so the action knows its route.
       #
       # regex - The Regexp that this action should run for.
@@ -56,14 +63,18 @@ module Flipper
         @flipper, @request = flipper, request
         @code = 200
         @headers = {"Content-Type" => "text/plain"}
-        @breadcrumbs = []
+        @breadcrumbs = if Flipper::UI.application_breadcrumb_href
+          [Breadcrumb.new("App", Flipper::UI.application_breadcrumb_href)]
+        else
+          []
+        end
       end
 
       # Public: Runs the request method for the provided request.
       #
       # Returns whatever the request method returns in the action.
       def run
-        if respond_to?(request_method_name)
+        if valid_request_method? && respond_to?(request_method_name)
           catch(:halt) { send(request_method_name) }
         else
           raise UI::RequestMethodNotSupported, "#{self.class} does not support request method #{request_method_name.inspect}"
@@ -159,7 +170,8 @@ module Flipper
       # href - The String href for the anchor tag (optional). If nil, breadcrumb
       #        is assumed to be the end of the trail.
       def breadcrumb(text, href = nil)
-        @breadcrumbs << Breadcrumb.new(text, href)
+        breadcrumb_href = href.nil? ? href : "#{script_name}#{href}"
+        @breadcrumbs << Breadcrumb.new(text, breadcrumb_href)
       end
 
       # Private
@@ -207,6 +219,10 @@ module Flipper
 
       def csrf_input_tag
         %Q(<input type="hidden" name="authenticity_token" value="#{@request.session[:csrf]}">)
+      end
+
+      def valid_request_method?
+        VALID_REQUEST_METHOD_NAMES.include?(request_method_name)
       end
     end
   end

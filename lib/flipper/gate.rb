@@ -1,9 +1,5 @@
-require 'forwardable'
-
 module Flipper
   class Gate
-    extend Forwardable
-
     # Public
     def initialize(options = {})
     end

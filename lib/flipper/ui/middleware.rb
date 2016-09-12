@@ -36,9 +36,6 @@ module Flipper
 
         @action_collection = ActionCollection.new
 
-        # Static Assets/Files
-        @action_collection.add UI::Actions::File
-
         # UI
         @action_collection.add UI::Actions::Features
         @action_collection.add UI::Actions::AddFeature
@@ -49,6 +46,11 @@ module Flipper
         @action_collection.add UI::Actions::PercentageOfTimeGate
         @action_collection.add UI::Actions::PercentageOfActorsGate
         @action_collection.add UI::Actions::Gate
+
+        # Static Assets/Files
+        @action_collection.add UI::Actions::File
+
+        # Catch all redirect to features
         @action_collection.add UI::Actions::Home
       end
 

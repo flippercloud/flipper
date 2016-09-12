@@ -10,29 +10,33 @@ Bundler.setup(:default)
 
 require 'flipper'
 require 'flipper-ui'
+require 'flipper-api'
 
 Dir[FlipperRoot.join("spec/support/**/*.rb")].each { |f| require f }
 
 RSpec.configure do |config|
-  config.before(:each) do
+  config.before(:example) do
     Flipper.unregister_groups
   end
+
+  config.filter_run focus: true
+  config.run_all_when_everything_filtered = true
 end
 
-shared_examples_for 'a percentage' do
+RSpec.shared_examples_for 'a percentage' do
   it "initializes with value" do
     percentage = described_class.new(12)
-    percentage.should be_instance_of(described_class)
+    expect(percentage).to be_instance_of(described_class)
   end
 
   it "converts string values to integers when initializing" do
     percentage = described_class.new('15')
-    percentage.value.should eq(15)
+    expect(percentage.value).to eq(15)
   end
 
   it "has a value" do
     percentage = described_class.new(19)
-    percentage.value.should eq(19)
+    expect(percentage.value).to eq(19)
   end
 
   it "raises exception for value higher than 100" do
@@ -50,23 +54,23 @@ end
 
 shared_examples_for 'a DSL feature' do
   it "returns instance of feature" do
-    feature.should be_instance_of(Flipper::Feature)
+    expect(feature).to be_instance_of(Flipper::Feature)
   end
 
   it "sets name" do
-    feature.name.should eq(:stats)
+    expect(feature.name).to eq(:stats)
   end
 
   it "sets adapter" do
-    feature.adapter.name.should eq(dsl.adapter.name)
+    expect(feature.adapter.name).to eq(dsl.adapter.name)
   end
 
   it "sets instrumenter" do
-    feature.instrumenter.should eq(dsl.instrumenter)
+    expect(feature.instrumenter).to eq(dsl.instrumenter)
   end
 
   it "memoizes the feature" do
-    dsl.send(method_name, :stats).should equal(feature)
+    expect(dsl.send(method_name, :stats)).to equal(feature)
   end
 
   it "raises argument error if not string or symbol" do
@@ -79,11 +83,11 @@ end
 shared_examples_for "a DSL boolean method" do
   it "returns boolean with value set" do
     result = subject.send(method_name, true)
-    result.should be_instance_of(Flipper::Types::Boolean)
-    result.value.should be(true)
+    expect(result).to be_instance_of(Flipper::Types::Boolean)
+    expect(result.value).to be(true)
 
     result = subject.send(method_name, false)
-    result.should be_instance_of(Flipper::Types::Boolean)
-    result.value.should be(false)
+    expect(result).to be_instance_of(Flipper::Types::Boolean)
+    expect(result.value).to be(false)
   end
 end

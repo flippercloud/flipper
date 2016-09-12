@@ -3,7 +3,7 @@ require 'flipper/feature'
 require 'flipper/adapters/memory'
 require 'flipper/instrumenters/memory'
 
-describe Flipper::Feature do
+RSpec.describe Flipper::Feature do
   subject { described_class.new(:search, adapter) }
 
   let(:adapter) { Flipper::Adapters::Memory.new }
@@ -11,17 +11,17 @@ describe Flipper::Feature do
   describe "#initialize" do
     it "sets name" do
       feature = described_class.new(:search, adapter)
-      feature.name.should eq(:search)
+      expect(feature.name).to eq(:search)
     end
 
     it "sets adapter" do
       feature = described_class.new(:search, adapter)
-      feature.adapter.should eq(adapter)
+      expect(feature.adapter).to eq(adapter)
     end
 
     it "defaults instrumenter" do
       feature = described_class.new(:search, adapter)
-      feature.instrumenter.should be(Flipper::Instrumenters::Noop)
+      expect(feature.instrumenter).to be(Flipper::Instrumenters::Noop)
     end
 
     context "with overriden instrumenter" do
@@ -31,7 +31,7 @@ describe Flipper::Feature do
         feature = described_class.new(:search, adapter, {
           :instrumenter => instrumenter,
         })
-        feature.instrumenter.should be(instrumenter)
+        expect(feature.instrumenter).to be(instrumenter)
       end
     end
   end
@@ -39,14 +39,14 @@ describe Flipper::Feature do
   describe "#to_s" do
     it "returns name as string" do
       feature = described_class.new(:search, adapter)
-      feature.to_s.should eq("search")
+      expect(feature.to_s).to eq("search")
     end
   end
 
   describe "#to_param" do
     it "returns name as string" do
       feature = described_class.new(:search, adapter)
-      feature.to_param.should eq("search")
+      expect(feature.to_param).to eq("search")
     end
   end
 
@@ -55,7 +55,7 @@ describe Flipper::Feature do
       it "returns percentage of actors gate" do
         percentage = Flipper::Types::PercentageOfActors.new(10)
         gate = subject.gate_for(percentage)
-        gate.should be_instance_of(Flipper::Gates::PercentageOfActors)
+        expect(gate).to be_instance_of(Flipper::Gates::PercentageOfActors)
       end
     end
   end
@@ -63,30 +63,30 @@ describe Flipper::Feature do
   describe "#gates" do
     it "returns array of gates" do
       instance = described_class.new(:search, adapter)
-      instance.gates.should be_instance_of(Array)
+      expect(instance.gates).to be_instance_of(Array)
       instance.gates.each do |gate|
-        gate.should be_a(Flipper::Gate)
+        expect(gate).to be_a(Flipper::Gate)
       end
-      instance.gates.size.should be(5)
+      expect(instance.gates.size).to be(5)
     end
   end
 
   describe "#gate" do
     context "with symbol name" do
       it "returns gate by name" do
-        subject.gate(:boolean).should be_instance_of(Flipper::Gates::Boolean)
+        expect(subject.gate(:boolean)).to be_instance_of(Flipper::Gates::Boolean)
       end
     end
 
     context "with string name" do
       it "returns gate by name" do
-        subject.gate('boolean').should be_instance_of(Flipper::Gates::Boolean)
+        expect(subject.gate('boolean')).to be_instance_of(Flipper::Gates::Boolean)
       end
     end
 
     context "with name that does not exist" do
       it "returns nil" do
-        subject.gate(:poo).should be_nil
+        expect(subject.gate(:poo)).to be_nil
       end
     end
   end
@@ -94,16 +94,16 @@ describe Flipper::Feature do
   describe "#inspect" do
     it "returns easy to read string representation" do
       string = subject.inspect
-      string.should include('Flipper::Feature')
-      string.should include('name=:search')
-      string.should include('state=:off')
-      string.should include('enabled_gate_names=[]')
-      string.should include("adapter=#{subject.adapter.name.inspect}")
+      expect(string).to include('Flipper::Feature')
+      expect(string).to include('name=:search')
+      expect(string).to include('state=:off')
+      expect(string).to include('enabled_gate_names=[]')
+      expect(string).to include("adapter=#{subject.adapter.name.inspect}")
 
       subject.enable
       string = subject.inspect
-      string.should include('state=:on')
-      string.should include('enabled_gate_names=[:boolean]')
+      expect(string).to include('state=:on')
+      expect(string).to include('enabled_gate_names=[:boolean]')
     end
   end
 
@@ -121,12 +121,12 @@ describe Flipper::Feature do
       subject.enable(thing)
 
       event = instrumenter.events.last
-      event.should_not be_nil
-      event.name.should eq('feature_operation.flipper')
-      event.payload[:feature_name].should eq(:search)
-      event.payload[:operation].should eq(:enable)
-      event.payload[:thing].should eq(thing)
-      event.payload[:result].should_not be_nil
+      expect(event).not_to be_nil
+      expect(event.name).to eq('feature_operation.flipper')
+      expect(event.payload[:feature_name]).to eq(:search)
+      expect(event.payload[:operation]).to eq(:enable)
+      expect(event.payload[:thing]).to eq(thing)
+      expect(event.payload[:result]).not_to be_nil
     end
 
     it "always instruments flipper type instance for enable" do
@@ -136,8 +136,8 @@ describe Flipper::Feature do
       subject.enable(thing)
 
       event = instrumenter.events.last
-      event.should_not be_nil
-      event.payload[:thing].should eq(Flipper::Types::Actor.new(thing))
+      expect(event).not_to be_nil
+      expect(event.payload[:thing]).to eq(Flipper::Types::Actor.new(thing))
     end
 
     it "is recorded for disable" do
@@ -147,12 +147,12 @@ describe Flipper::Feature do
       subject.disable(thing)
 
       event = instrumenter.events.last
-      event.should_not be_nil
-      event.name.should eq('feature_operation.flipper')
-      event.payload[:feature_name].should eq(:search)
-      event.payload[:operation].should eq(:disable)
-      event.payload[:thing].should eq(thing)
-      event.payload[:result].should_not be_nil
+      expect(event).not_to be_nil
+      expect(event.name).to eq('feature_operation.flipper')
+      expect(event.payload[:feature_name]).to eq(:search)
+      expect(event.payload[:operation]).to eq(:disable)
+      expect(event.payload[:thing]).to eq(thing)
+      expect(event.payload[:result]).not_to be_nil
     end
 
     user = Struct.new(:flipper_id).new("1")
@@ -179,9 +179,9 @@ describe Flipper::Feature do
         subject.enable(thing)
 
         event = instrumenter.events.last
-        event.should_not be_nil
-        event.payload[:operation].should eq(:enable)
-        event.payload[:thing].should eq(wrapped_thing)
+        expect(event).not_to be_nil
+        expect(event.payload[:operation]).to eq(:enable)
+        expect(event.payload[:thing]).to eq(wrapped_thing)
       end
     end
 
@@ -192,9 +192,20 @@ describe Flipper::Feature do
       subject.disable(thing)
 
       event = instrumenter.events.last
-      event.should_not be_nil
-      event.payload[:operation].should eq(:disable)
-      event.payload[:thing].should eq(Flipper::Types::Actor.new(thing))
+      expect(event).not_to be_nil
+      expect(event.payload[:operation]).to eq(:disable)
+      expect(event.payload[:thing]).to eq(Flipper::Types::Actor.new(thing))
+    end
+
+    it "is recorded for remove" do
+      subject.remove
+
+      event = instrumenter.events.last
+      expect(event).not_to be_nil
+      expect(event.name).to eq('feature_operation.flipper')
+      expect(event.payload[:feature_name]).to eq(:search)
+      expect(event.payload[:operation]).to eq(:remove)
+      expect(event.payload[:result]).not_to be_nil
     end
 
     it "is recorded for enabled?" do
@@ -204,12 +215,12 @@ describe Flipper::Feature do
       subject.enabled?(thing)
 
       event = instrumenter.events.last
-      event.should_not be_nil
-      event.name.should eq('feature_operation.flipper')
-      event.payload[:feature_name].should eq(:search)
-      event.payload[:operation].should eq(:enabled?)
-      event.payload[:thing].should eq(thing)
-      event.payload[:result].should eq(false)
+      expect(event).not_to be_nil
+      expect(event.name).to eq('feature_operation.flipper')
+      expect(event.payload[:feature_name]).to eq(:search)
+      expect(event.payload[:operation]).to eq(:enabled?)
+      expect(event.payload[:thing]).to eq(thing)
+      expect(event.payload[:result]).to eq(false)
     end
 
     user = Struct.new(:flipper_id).new("1")
@@ -223,9 +234,9 @@ describe Flipper::Feature do
         subject.enabled?(thing)
 
         event = instrumenter.events.last
-        event.should_not be_nil
-        event.payload[:operation].should eq(:enabled?)
-        event.payload[:thing].should eq(wrapped_thing)
+        expect(event).not_to be_nil
+        expect(event.payload[:operation]).to eq(:enabled?)
+        expect(event.payload[:thing]).to eq(wrapped_thing)
       end
     end
   end
@@ -237,19 +248,19 @@ describe Flipper::Feature do
       end
 
       it "returns :on" do
-        subject.state.should be(:on)
+        expect(subject.state).to be(:on)
       end
 
       it "returns true for on?" do
-        subject.on?.should be(true)
+        expect(subject.on?).to be(true)
       end
 
       it "returns false for off?" do
-        subject.off?.should be(false)
+        expect(subject.off?).to be(false)
       end
 
       it "returns false for conditional?" do
-        subject.conditional?.should be(false)
+        expect(subject.conditional?).to be(false)
       end
     end
 
@@ -259,19 +270,19 @@ describe Flipper::Feature do
       end
 
       it "returns :on" do
-        subject.state.should be(:on)
+        expect(subject.state).to be(:on)
       end
 
       it "returns true for on?" do
-        subject.on?.should be(true)
+        expect(subject.on?).to be(true)
       end
 
       it "returns false for off?" do
-        subject.off?.should be(false)
+        expect(subject.off?).to be(false)
       end
 
       it "returns false for conditional?" do
-        subject.conditional?.should be(false)
+        expect(subject.conditional?).to be(false)
       end
     end
 
@@ -281,19 +292,19 @@ describe Flipper::Feature do
       end
 
       it "returns :on" do
-        subject.state.should be(:on)
+        expect(subject.state).to be(:on)
       end
 
       it "returns true for on?" do
-        subject.on?.should be(true)
+        expect(subject.on?).to be(true)
       end
 
       it "returns false for off?" do
-        subject.off?.should be(false)
+        expect(subject.off?).to be(false)
       end
 
       it "returns false for conditional?" do
-        subject.conditional?.should be(false)
+        expect(subject.conditional?).to be(false)
       end
     end
 
@@ -303,19 +314,19 @@ describe Flipper::Feature do
       end
 
       it "returns :off" do
-        subject.state.should be(:off)
+        expect(subject.state).to be(:off)
       end
 
       it "returns false for on?" do
-        subject.on?.should be(false)
+        expect(subject.on?).to be(false)
       end
 
       it "returns true for off?" do
-        subject.off?.should be(true)
+        expect(subject.off?).to be(true)
       end
 
       it "returns false for conditional?" do
-        subject.conditional?.should be(false)
+        expect(subject.conditional?).to be(false)
       end
     end
 
@@ -325,19 +336,19 @@ describe Flipper::Feature do
       end
 
       it "returns :conditional" do
-        subject.state.should be(:conditional)
+        expect(subject.state).to be(:conditional)
       end
 
       it "returns false for on?" do
-        subject.on?.should be(false)
+        expect(subject.on?).to be(false)
       end
 
       it "returns false for off?" do
-        subject.off?.should be(false)
+        expect(subject.off?).to be(false)
       end
 
       it "returns true for conditional?" do
-        subject.conditional?.should be(true)
+        expect(subject.conditional?).to be(true)
       end
     end
   end
@@ -345,7 +356,7 @@ describe Flipper::Feature do
   describe "#enabled_groups" do
     context "when no groups enabled" do
       it "returns empty set" do
-        subject.enabled_groups.should eq(Set.new)
+        expect(subject.enabled_groups).to eq(Set.new)
       end
     end
 
@@ -361,22 +372,22 @@ describe Flipper::Feature do
       end
 
       it "returns set of enabled groups" do
-        subject.enabled_groups.should eq(Set.new([
-          @staff,
-          @preview_features,
-        ]))
+        expect(subject.enabled_groups).to eq(Set.new([
+                  @staff,
+                  @preview_features,
+                ]))
       end
 
       it "does not include groups that have not been enabled" do
-        subject.enabled_groups.should_not include(@not_enabled)
+        expect(subject.enabled_groups).not_to include(@not_enabled)
       end
 
       it "does not include disabled groups" do
-        subject.enabled_groups.should_not include(@disabled)
+        expect(subject.enabled_groups).not_to include(@disabled)
       end
 
       it "is aliased to groups" do
-        subject.enabled_groups.should eq(subject.groups)
+        expect(subject.enabled_groups).to eq(subject.groups)
       end
     end
   end
@@ -384,7 +395,7 @@ describe Flipper::Feature do
   describe "#disabled_groups" do
     context "when no groups enabled" do
       it "returns empty set" do
-        subject.disabled_groups.should eq(Set.new)
+        expect(subject.disabled_groups).to eq(Set.new)
       end
     end
 
@@ -400,10 +411,10 @@ describe Flipper::Feature do
       end
 
       it "returns set of groups that are not enabled" do
-        subject.disabled_groups.should eq(Set[
-          @not_enabled,
-          @disabled,
-        ])
+        expect(subject.disabled_groups).to eq(Set[
+                  @not_enabled,
+                  @disabled,
+                ])
       end
     end
   end
@@ -411,7 +422,7 @@ describe Flipper::Feature do
   describe "#groups_value" do
     context "when no groups enabled" do
       it "returns empty set" do
-        subject.groups_value.should eq(Set.new)
+        expect(subject.groups_value).to eq(Set.new)
       end
     end
 
@@ -427,18 +438,18 @@ describe Flipper::Feature do
       end
 
       it "returns set of enabled groups" do
-        subject.groups_value.should eq(Set.new([
-          @staff.name.to_s,
-          @preview_features.name.to_s,
-        ]))
+        expect(subject.groups_value).to eq(Set.new([
+                  @staff.name.to_s,
+                  @preview_features.name.to_s,
+                ]))
       end
 
       it "does not include groups that have not been enabled" do
-        subject.groups_value.should_not include(@not_enabled.name.to_s)
+        expect(subject.groups_value).not_to include(@not_enabled.name.to_s)
       end
 
       it "does not include disabled groups" do
-        subject.groups_value.should_not include(@disabled.name.to_s)
+        expect(subject.groups_value).not_to include(@disabled.name.to_s)
       end
     end
   end
@@ -446,7 +457,7 @@ describe Flipper::Feature do
   describe "#actors_value" do
     context "when no groups enabled" do
       it "returns empty set" do
-        subject.actors_value.should eq(Set.new)
+        expect(subject.actors_value).to eq(Set.new)
       end
     end
 
@@ -457,7 +468,7 @@ describe Flipper::Feature do
       end
 
       it "returns set of actor ids" do
-        subject.actors_value.should eq(Set.new(["User:5", "User:22"]))
+        expect(subject.actors_value).to eq(Set.new(["User:5", "User:22"]))
       end
     end
   end
@@ -465,7 +476,7 @@ describe Flipper::Feature do
   describe "#boolean_value" do
     context "when not enabled or disabled" do
       it "returns false" do
-        subject.boolean_value.should be(false)
+        expect(subject.boolean_value).to be(false)
       end
     end
 
@@ -475,7 +486,7 @@ describe Flipper::Feature do
       end
 
       it "returns true" do
-        subject.boolean_value.should be(true)
+        expect(subject.boolean_value).to be(true)
       end
     end
 
@@ -485,7 +496,7 @@ describe Flipper::Feature do
       end
 
       it "returns false" do
-        subject.boolean_value.should be(false)
+        expect(subject.boolean_value).to be(false)
       end
     end
   end
@@ -493,7 +504,7 @@ describe Flipper::Feature do
   describe "#percentage_of_actors_value" do
     context "when not enabled or disabled" do
       it "returns nil" do
-        subject.percentage_of_actors_value.should be(0)
+        expect(subject.percentage_of_actors_value).to be(0)
       end
     end
 
@@ -503,7 +514,7 @@ describe Flipper::Feature do
       end
 
       it "returns true" do
-        subject.percentage_of_actors_value.should eq(5)
+        expect(subject.percentage_of_actors_value).to eq(5)
       end
     end
 
@@ -513,7 +524,7 @@ describe Flipper::Feature do
       end
 
       it "returns nil" do
-        subject.percentage_of_actors_value.should be(0)
+        expect(subject.percentage_of_actors_value).to be(0)
       end
     end
   end
@@ -521,7 +532,7 @@ describe Flipper::Feature do
   describe "#percentage_of_time_value" do
     context "when not enabled or disabled" do
       it "returns nil" do
-        subject.percentage_of_time_value.should be(0)
+        expect(subject.percentage_of_time_value).to be(0)
       end
     end
 
@@ -531,7 +542,7 @@ describe Flipper::Feature do
       end
 
       it "returns true" do
-        subject.percentage_of_time_value.should eq(5)
+        expect(subject.percentage_of_time_value).to eq(5)
       end
     end
 
@@ -541,7 +552,7 @@ describe Flipper::Feature do
       end
 
       it "returns nil" do
-        subject.percentage_of_time_value.should be(0)
+        expect(subject.percentage_of_time_value).to be(0)
       end
     end
   end
@@ -549,13 +560,13 @@ describe Flipper::Feature do
   describe "#gate_values" do
     context "when no gates are set in adapter" do
       it "returns default gate values" do
-        subject.gate_values.should eq(Flipper::GateValues.new({
-          :actors => Set.new,
-          :groups => Set.new,
-          :boolean => nil,
-          :percentage_of_actors => nil,
-          :percentage_of_time => nil,
-        }))
+        expect(subject.gate_values).to eq(Flipper::GateValues.new({
+                  :actors => Set.new,
+                  :groups => Set.new,
+                  :boolean => nil,
+                  :percentage_of_actors => nil,
+                  :percentage_of_time => nil,
+                }))
       end
     end
 
@@ -569,13 +580,13 @@ describe Flipper::Feature do
       end
 
       it "returns gate values" do
-        subject.gate_values.should eq(Flipper::GateValues.new({
-          :actors => Set.new(["5"]),
-          :groups => Set.new(["admins"]),
-          :boolean => "true",
-          :percentage_of_time => "50",
-          :percentage_of_actors => "25",
-        }))
+        expect(subject.gate_values).to eq(Flipper::GateValues.new({
+                  :actors => Set.new(["5"]),
+                  :groups => Set.new(["admins"]),
+                  :boolean => "true",
+                  :percentage_of_time => "50",
+                  :percentage_of_actors => "25",
+                }))
       end
     end
   end
@@ -584,11 +595,11 @@ describe Flipper::Feature do
     context "with object that responds to flipper_id" do
       it "updates the gate values to include the actor" do
         actor = Struct.new(:flipper_id).new(5)
-        subject.gate_values.actors.should be_empty
+        expect(subject.gate_values.actors).to be_empty
         subject.enable_actor(actor)
-        subject.gate_values.actors.should eq(Set["5"])
+        expect(subject.gate_values.actors).to eq(Set["5"])
         subject.disable_actor(actor)
-        subject.gate_values.actors.should be_empty
+        expect(subject.gate_values.actors).to be_empty
       end
     end
 
@@ -596,11 +607,11 @@ describe Flipper::Feature do
       it "updates the gate values to include the actor" do
         actor = Struct.new(:flipper_id).new(5)
         instance = Flipper::Types::Actor.wrap(actor)
-        subject.gate_values.actors.should be_empty
+        expect(subject.gate_values.actors).to be_empty
         subject.enable_actor(instance)
-        subject.gate_values.actors.should eq(Set["5"])
+        expect(subject.gate_values.actors).to eq(Set["5"])
         subject.disable_actor(instance)
-        subject.gate_values.actors.should be_empty
+        expect(subject.gate_values.actors).to be_empty
       end
     end
   end
@@ -610,11 +621,11 @@ describe Flipper::Feature do
       it "updates the gate values to include the group" do
         actor = Struct.new(:flipper_id).new(5)
         group = Flipper.register(:five_only) { |actor| actor.flipper_id == 5 }
-        subject.gate_values.groups.should be_empty
+        expect(subject.gate_values.groups).to be_empty
         subject.enable_group(:five_only)
-        subject.gate_values.groups.should eq(Set["five_only"])
+        expect(subject.gate_values.groups).to eq(Set["five_only"])
         subject.disable_group(:five_only)
-        subject.gate_values.groups.should be_empty
+        expect(subject.gate_values.groups).to be_empty
       end
     end
 
@@ -622,11 +633,11 @@ describe Flipper::Feature do
       it "updates the gate values to include the group" do
         actor = Struct.new(:flipper_id).new(5)
         group = Flipper.register(:five_only) { |actor| actor.flipper_id == 5 }
-        subject.gate_values.groups.should be_empty
+        expect(subject.gate_values.groups).to be_empty
         subject.enable_group("five_only")
-        subject.gate_values.groups.should eq(Set["five_only"])
+        expect(subject.gate_values.groups).to eq(Set["five_only"])
         subject.disable_group("five_only")
-        subject.gate_values.groups.should be_empty
+        expect(subject.gate_values.groups).to be_empty
       end
     end
 
@@ -634,11 +645,11 @@ describe Flipper::Feature do
       it "updates the gate values for the group" do
         actor = Struct.new(:flipper_id).new(5)
         group = Flipper.register(:five_only) { |actor| actor.flipper_id == 5 }
-        subject.gate_values.groups.should be_empty
+        expect(subject.gate_values.groups).to be_empty
         subject.enable_group(group)
-        subject.gate_values.groups.should eq(Set["five_only"])
+        expect(subject.gate_values.groups).to eq(Set["five_only"])
         subject.disable_group(group)
-        subject.gate_values.groups.should be_empty
+        expect(subject.gate_values.groups).to be_empty
       end
     end
   end
@@ -646,32 +657,32 @@ describe Flipper::Feature do
   describe "#enable_percentage_of_time/disable_percentage_of_time" do
     context "with integer" do
       it "updates the gate values" do
-        subject.gate_values.percentage_of_time.should be(0)
+        expect(subject.gate_values.percentage_of_time).to be(0)
         subject.enable_percentage_of_time(56)
-        subject.gate_values.percentage_of_time.should be(56)
+        expect(subject.gate_values.percentage_of_time).to be(56)
         subject.disable_percentage_of_time
-        subject.gate_values.percentage_of_time.should be(0)
+        expect(subject.gate_values.percentage_of_time).to be(0)
       end
     end
 
     context "with string" do
       it "updates the gate values" do
-        subject.gate_values.percentage_of_time.should be(0)
+        expect(subject.gate_values.percentage_of_time).to be(0)
         subject.enable_percentage_of_time("56")
-        subject.gate_values.percentage_of_time.should be(56)
+        expect(subject.gate_values.percentage_of_time).to be(56)
         subject.disable_percentage_of_time
-        subject.gate_values.percentage_of_time.should be(0)
+        expect(subject.gate_values.percentage_of_time).to be(0)
       end
     end
 
     context "with percentage of time instance" do
       it "updates the gate values" do
         percentage = Flipper::Types::PercentageOfTime.new(56)
-        subject.gate_values.percentage_of_time.should be(0)
+        expect(subject.gate_values.percentage_of_time).to be(0)
         subject.enable_percentage_of_time(percentage)
-        subject.gate_values.percentage_of_time.should be(56)
+        expect(subject.gate_values.percentage_of_time).to be(56)
         subject.disable_percentage_of_time
-        subject.gate_values.percentage_of_time.should be(0)
+        expect(subject.gate_values.percentage_of_time).to be(0)
       end
     end
   end
@@ -679,32 +690,32 @@ describe Flipper::Feature do
   describe "#enable_percentage_of_actors/disable_percentage_of_actors" do
     context "with integer" do
       it "updates the gate values" do
-        subject.gate_values.percentage_of_actors.should be(0)
+        expect(subject.gate_values.percentage_of_actors).to be(0)
         subject.enable_percentage_of_actors(56)
-        subject.gate_values.percentage_of_actors.should be(56)
+        expect(subject.gate_values.percentage_of_actors).to be(56)
         subject.disable_percentage_of_actors
-        subject.gate_values.percentage_of_actors.should be(0)
+        expect(subject.gate_values.percentage_of_actors).to be(0)
       end
     end
 
     context "with string" do
       it "updates the gate values" do
-        subject.gate_values.percentage_of_actors.should be(0)
+        expect(subject.gate_values.percentage_of_actors).to be(0)
         subject.enable_percentage_of_actors("56")
-        subject.gate_values.percentage_of_actors.should be(56)
+        expect(subject.gate_values.percentage_of_actors).to be(56)
         subject.disable_percentage_of_actors
-        subject.gate_values.percentage_of_actors.should be(0)
+        expect(subject.gate_values.percentage_of_actors).to be(0)
       end
     end
 
     context "with percentage of actors instance" do
       it "updates the gate values" do
         percentage = Flipper::Types::PercentageOfActors.new(56)
-        subject.gate_values.percentage_of_actors.should be(0)
+        expect(subject.gate_values.percentage_of_actors).to be(0)
         subject.enable_percentage_of_actors(percentage)
-        subject.gate_values.percentage_of_actors.should be(56)
+        expect(subject.gate_values.percentage_of_actors).to be(56)
         subject.disable_percentage_of_actors
-        subject.gate_values.percentage_of_actors.should be(0)
+        expect(subject.gate_values.percentage_of_actors).to be(0)
       end
     end
   end
@@ -716,29 +727,29 @@ describe Flipper::Feature do
     end
 
     it "can return enabled gates" do
-      subject.enabled_gates.map(&:name).to_set.should eq(Set[
-        :percentage_of_actors,
-        :percentage_of_time,
-      ])
+      expect(subject.enabled_gates.map(&:name).to_set).to eq(Set[
+              :percentage_of_actors,
+              :percentage_of_time,
+            ])
 
-      subject.enabled_gate_names.to_set.should eq(Set[
-        :percentage_of_actors,
-        :percentage_of_time,
-      ])
+      expect(subject.enabled_gate_names.to_set).to eq(Set[
+              :percentage_of_actors,
+              :percentage_of_time,
+            ])
     end
 
     it "can return disabled gates" do
-      subject.disabled_gates.map(&:name).to_set.should eq(Set[
-        :actor,
-        :boolean,
-        :group,
-      ])
+      expect(subject.disabled_gates.map(&:name).to_set).to eq(Set[
+              :actor,
+              :boolean,
+              :group,
+            ])
 
-      subject.disabled_gate_names.to_set.should eq(Set[
-        :actor,
-        :boolean,
-        :group,
-      ])
+      expect(subject.disabled_gate_names.to_set).to eq(Set[
+              :actor,
+              :boolean,
+              :group,
+            ])
     end
   end
 end

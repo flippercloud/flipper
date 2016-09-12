@@ -1,11 +1,13 @@
-require 'flipper/adapters/decorator'
+require 'delegate'
 
 module Flipper
   module Adapters
     # Public: Adapter that wraps another adapter and stores the operations.
     #
     # Useful in tests to verify calls and such. Never use outside of testing.
-    class OperationLogger < Decorator
+    class OperationLogger < SimpleDelegator
+      include ::Flipper::Adapter
+
       Operation = Struct.new(:type, :args)
 
       OperationTypes = [
@@ -21,20 +23,58 @@ module Flipper
       # Internal: An array of the operations that have happened.
       attr_reader :operations
 
+      # Internal: The name of the adapter.
+      attr_reader :name
+
       # Public
       def initialize(adapter, operations = nil)
         super(adapter)
+        @adapter = adapter
+        @name = :operation_logger
         @operations = operations || []
       end
 
-      # Wraps original method with in memory log of operations performed.
-      OperationTypes.each do |type|
-        class_eval <<-EOE
-          def #{type}(*args)
-            @operations << Operation.new(:#{type}, args)
-            super
-          end
-        EOE
+      # Public: The set of known features.
+      def features
+        @operations << Operation.new(:features, [])
+        @adapter.features
+      end
+
+      # Public: Adds a feature to the set of known features.
+      def add(feature)
+        @operations << Operation.new(:add, [feature])
+        @adapter.add(feature)
+      end
+
+      # Public: Removes a feature from the set of known features and clears
+      # all the values for the feature.
+      def remove(feature)
+        @operations << Operation.new(:remove, [feature])
+        @adapter.remove(feature)
+      end
+
+      # Public: Clears all the gate values for a feature.
+      def clear(feature)
+        @operations << Operation.new(:clear, [feature])
+        @adapter.clear(feature)
+      end
+
+      # Public
+      def get(feature)
+        @operations << Operation.new(:get, [feature])
+        @adapter.get(feature)
+      end
+
+      # Public
+      def enable(feature, gate, thing)
+        @operations << Operation.new(:enable, [feature, gate, thing])
+        @adapter.enable(feature, gate, thing)
+      end
+
+      # Public
+      def disable(feature, gate, thing)
+        @operations << Operation.new(:disable, [feature, gate, thing])
+        @adapter.disable(feature, gate, thing)
       end
 
       # Public: Count the number of times a certain operation happened.

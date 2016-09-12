@@ -1,17 +1,17 @@
 require 'helper'
 
-describe Flipper::Gates::PercentageOfActors do
+RSpec.describe Flipper::Gates::PercentageOfActors do
   let(:feature_name) { :search }
 
   subject {
     described_class.new
   }
 
-  def context(integer, feature_name = feature_name)
+  def context(integer, feature = feature_name)
     Flipper::GateContext.new(
       gates: [],
       values: Flipper::GateValues.new({percentage_of_actors: integer}),
-      feature_name: feature_name
+      feature_name: feature
     )
   end
 
@@ -36,7 +36,7 @@ describe Flipper::Gates::PercentageOfActors do
       end
 
       it "does not enable both features for same set of actors" do
-        feature_one_enabled_actors.should_not eq(feature_two_enabled_actors)
+        expect(feature_one_enabled_actors).not_to eq(feature_two_enabled_actors)
       end
 
       it "enables feature for accurate number of actors for each feature" do
@@ -47,7 +47,7 @@ describe Flipper::Gates::PercentageOfActors do
           feature_one_enabled_actors.size,
           feature_two_enabled_actors.size,
         ].each do |actual_enabled_size|
-          actual_enabled_size.should be_within(margin_of_error).of(expected_enabled_size)
+          expect(actual_enabled_size).to be_within(margin_of_error).of(expected_enabled_size)
         end
       end
     end

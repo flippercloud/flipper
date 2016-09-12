@@ -1,5 +1,6 @@
 #!/usr/bin/env rake
 $LOAD_PATH.push File.expand_path("../lib", __FILE__)
+require 'rake/testtask'
 require "flipper/version"
 
 # gem install pkg/*.gem
@@ -35,4 +36,14 @@ namespace :spec do
   end
 end
 
-task :default => :spec
+Rake::TestTask.new do |t|
+  t.libs = ['lib', 'test']
+  t.pattern = "test/**/*_test.rb"
+end
+
+Rake::TestTask.new(:shared_test) do |t|
+  t.libs = ['lib', 'test']
+  t.pattern = "lib/flipper/shared/test/**_test.rb"
+end
+
+task :default => [:spec, :test, :shared_test]
