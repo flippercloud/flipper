@@ -23,8 +23,9 @@ class User
     @id = id
   end
 
-  # Must respond to flipper_id
-  alias_method :flipper_id, :id
+  def flipper_id
+    "User:#{@id}"
+  end
 end
 
 class Team
