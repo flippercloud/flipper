@@ -86,13 +86,15 @@ module Flipper
     def enabled?(thing = nil)
       instrument(:enabled?) { |payload|
         values = gate_values
-        payload[:thing] = gate(:actor).wrap(thing) unless thing.nil?
+        thing = gate(:actor).wrap(thing) unless thing.nil?
+        payload[:thing] = thing
         context = FeatureCheckContext.new(
           feature_name: @name,
-          values: values
+          values: values,
+          thing: thing,
         )
 
-        if open_gate = gates.detect { |gate| gate.open?(thing, context) }
+        if open_gate = gates.detect { |gate| gate.open?(context) }
           payload[:gate_name] = open_gate.name
           true
         else
