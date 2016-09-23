@@ -39,4 +39,29 @@ RSpec.describe Flipper::FeatureCheckContext do
       described_class.new(options)
     }.to raise_error(KeyError)
   end
+
+  it "knows actors_value" do
+    instance = described_class.new(options.merge(values: Flipper::GateValues.new({actors: Set["User:1"]})))
+    expect(instance.actors_value).to eq(Set["User:1"])
+  end
+
+  it "knows groups_value" do
+    instance = described_class.new(options.merge(values: Flipper::GateValues.new({groups: Set["admins"]})))
+    expect(instance.groups_value).to eq(Set["admins"])
+  end
+
+  it "knows boolean_value" do
+    instance = described_class.new(options.merge(values: Flipper::GateValues.new({boolean: true})))
+    expect(instance.boolean_value).to eq(true)
+  end
+
+  it "knows percentage_of_actors_value" do
+    instance = described_class.new(options.merge(values: Flipper::GateValues.new({percentage_of_actors: 14})))
+    expect(instance.percentage_of_actors_value).to eq(14)
+  end
+
+  it "knows percentage_of_time_value" do
+    instance = described_class.new(options.merge(values: Flipper::GateValues.new({percentage_of_time: 41})))
+    expect(instance.percentage_of_time_value).to eq(41)
+  end
 end
