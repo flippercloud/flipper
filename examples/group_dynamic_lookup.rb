@@ -9,7 +9,7 @@ stats = flipper[:stats]
 
 # Register group
 Flipper.register(:enabled_team_member) do |actor, context|
-  combos = context.values[:actors].map { |flipper_id| flipper_id.split(":", 2) }
+  combos = context.actors_value.map { |flipper_id| flipper_id.split(":", 2) }
   team_names = combos.select { |class_name, id| class_name == "Team" }.map { |class_name, id| id }
   teams = team_names.map { |name| Team.find(name) }
   teams.any? { |team| team.member?(actor) }
