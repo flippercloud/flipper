@@ -22,12 +22,13 @@ module Flipper
       # Internal: Checks if the gate is open for a thing.
       #
       # Returns true if gate open for thing, false if not.
-      def open?(thing, value, options = {})
-        if thing.nil?
+      def open?(context)
+        value = context.values[key]
+        if context.thing.nil?
           false
         else
-          if protects?(thing)
-            actor = wrap(thing)
+          if protects?(context.thing)
+            actor = wrap(context.thing)
             enabled_actor_ids = value
             enabled_actor_ids.include?(actor.value)
           else

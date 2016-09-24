@@ -22,14 +22,15 @@ module Flipper
       # Internal: Checks if the gate is open for a thing.
       #
       # Returns true if gate open for thing, false if not.
-      def open?(thing, value, options = {})
-        if thing.nil?
+      def open?(context)
+        value = context.values[key]
+        if context.thing.nil?
           false
         else
           value.any? { |name|
             begin
               group = Flipper.group(name)
-              group.match?(thing)
+              group.match?(context.thing, context)
             rescue GroupNotRegistered
               false
             end

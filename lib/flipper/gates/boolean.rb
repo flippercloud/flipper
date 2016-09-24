@@ -23,8 +23,8 @@ module Flipper
       #
       # Returns true if explicitly set to true, false if explicitly set to false
       # or nil if not explicitly set.
-      def open?(thing, value, options = {})
-        value
+      def open?(context)
+        context.values[key]
       end
 
       def wrap(thing)
