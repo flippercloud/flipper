@@ -11,11 +11,22 @@ module Flipper
       def initialize(name, &block)
         @name = name.to_sym
         @value = @name
-        @block = block
+
+        if block_given?
+          @block = block
+          @single_argument = @block.arity == 1
+        else
+          @block = lambda { |thing, context| false }
+          @single_argument = false
+        end
       end
 
-      def match?(*args)
-        @block.call(*args)
+      def match?(thing, context)
+        if @single_argument
+          @block.call(thing)
+        else
+          @block.call(thing, context)
+        end
       end
     end
   end
