@@ -90,7 +90,7 @@ Of course there are more [examples for you to peruse](examples/). You could also
 
 ## Brought To You By
 
-| | |
+| pic | @mention |
 |---|---|
 | ![@jnunemaker](https://avatars3.githubusercontent.com/u/235?s=64) | [@jnunemaker](https://github.com/jnunemaker) |
 | ![@alexwheeler](https://avatars3.githubusercontent.com/u/3260042?s=64) | [@alexwheeler](https://github.com/alexwheeler) |
