@@ -23,7 +23,7 @@ Or install it yourself with:
 
 ## Usage
 
-For your convenience a migration generator is provided to create the necessary migrations for using the active record adapter:
+For your convenience a migration generator is provided to create the necessary migrations for using the active record adapter. By default this generates a migration that will create two database tables - flipper_features and flipper_gates.   
 
     $ rails g flipper:active_record
 
