@@ -87,3 +87,10 @@ Of course there are more [examples for you to peruse](examples/). You could also
 1. Update the version to be whatever it should be and commit.
 2. `script/release`
 3. Profit.
+
+## Brought To You By
+
+| | |
+|---|---|
+| ![@jnunemaker](https://avatars3.githubusercontent.com/u/235?s=64) | [@jnunemaker](https://github.com/jnunemaker) |
+| ![@alexwheeler](https://avatars3.githubusercontent.com/u/3260042?s=64) | [@alexwheeler](https://github.com/alexwheeler) |
