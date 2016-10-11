@@ -72,6 +72,7 @@ Of course there are more [examples for you to peruse](examples/). You could also
 * [Instrumentation](docs/Instrumentation.md) - ActiveSupport::Notifications, Statsd and Metriks
 * [Optimization](docs/Optimization.md) - Memoization middleware and Cache adapters
 * [Web Interface](docs/ui/README.md) - Point and click...
+* [API](docs/api/README.md) - HTTP API interface
 * [Caveats](docs/Caveats.md) - Flipper beware! (see what I did there)
 
 ## Contributing
