@@ -5,13 +5,19 @@ module Flipper
     module V1
       module Actions
         class BooleanGate < Api::Action
-          route %r{api/v1/features/[^/]*/(enable|disable)/?\Z}
-          
-          def put
+          route %r{api/v1/features/[^/]*/boolean/?\Z}
+
+          def post
             feature_name = Rack::Utils.unescape(path_parts[-2])
             feature = flipper[feature_name.to_sym]
-            action = Rack::Utils.unescape(path_parts.last)
-            feature.send(action)
+            feature.enable
+            json_response({}, 204)
+          end
+
+          def delete
+            feature_name = Rack::Utils.unescape(path_parts[-2])
+            feature = flipper[feature_name.to_sym]
+            feature.disable
             json_response({}, 204)
           end
         end
