@@ -48,6 +48,12 @@ RSpec.describe Flipper::UI do
     end
   end
 
+  describe "Inspecting the built Rack app" do
+    it "returns a String" do
+      expect(build_app(flipper).inspect).to be_a(String)
+    end
+  end
+
   # See https://github.com/jnunemaker/flipper/issues/80
   it "can route features with names that match static directories" do
     post "features/refactor-images/actors",
