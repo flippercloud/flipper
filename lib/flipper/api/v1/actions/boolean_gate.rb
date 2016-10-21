@@ -1,4 +1,5 @@
 require 'flipper/api/action'
+require 'flipper/api/v1/decorators/feature'
 
 module Flipper
   module Api
@@ -9,16 +10,18 @@ module Flipper
 
           def post
             feature_name = Rack::Utils.unescape(path_parts[-2])
-            feature = flipper[feature_name.to_sym]
+            feature = flipper[feature_name]
             feature.enable
-            json_response({}, 204)
+            decorated_feature = Decorators::Feature.new(feature)
+            json_response(decorated_feature.as_json, 200)
           end
 
           def delete
             feature_name = Rack::Utils.unescape(path_parts[-2])
             feature = flipper[feature_name.to_sym]
             feature.disable
-            json_response({}, 204)
+            decorated_feature = Decorators::Feature.new(feature)
+            json_response(decorated_feature.as_json, 200)
           end
         end
       end

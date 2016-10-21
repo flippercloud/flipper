@@ -10,8 +10,13 @@ RSpec.describe Flipper::Api::V1::Actions::BooleanGate do
     end
 
     it 'enables feature' do
-      expect(last_response.status).to eq(204)
+      expect(last_response.status).to eq(200)
       expect(flipper[:my_feature].on?).to be_truthy
+    end
+
+    it 'returns decorated feature with boolean gate enabled' do
+      boolean_gate = json_response['gates'].find { |gate| gate['key'] == 'boolean' }
+      expect(boolean_gate['value']).to be_truthy
     end
   end
 
@@ -22,8 +27,13 @@ RSpec.describe Flipper::Api::V1::Actions::BooleanGate do
     end
 
     it 'disables feature' do
-      expect(last_response.status).to eq(204)
+      expect(last_response.status).to eq(200)
       expect(flipper[:my_feature].off?).to be_truthy
+    end
+
+    it 'returns decorated feature with boolean gate disabled' do
+      boolean_gate = json_response['gates'].find { |gate| gate['key'] == 'boolean' }
+      expect(boolean_gate['value']).to be_falsy
     end
   end
 end
