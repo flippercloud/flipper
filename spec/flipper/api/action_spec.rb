@@ -25,35 +25,84 @@ RSpec.describe Flipper::Api::Action do
     end
   }
 
-  it "won't run method that isn't whitelisted" do
-    fake_request = Struct.new(:request_method, :env, :session).new("NOOOOPE", {}, {})
-    action = action_subclass.new(flipper, fake_request)
-    expect {
-      action.run
-    }.to raise_error(Flipper::Api::RequestMethodNotSupported)
+  describe 'https verbs' do
+
+    it "won't run method that isn't whitelisted" do
+      fake_request = Struct.new(:request_method, :env, :session).new("NOOOOPE", {}, {})
+      action = action_subclass.new(flipper, fake_request)
+      expect {
+        action.run
+      }.to raise_error(Flipper::Api::RequestMethodNotSupported)
+    end
+
+    it "will run get" do
+      fake_request = Struct.new(:request_method, :env, :session).new("GET", {}, {})
+      action = action_subclass.new(flipper, fake_request)
+      expect(action.run).to eq([200, {}, "get"])
+    end
+
+    it "will run post" do
+      fake_request = Struct.new(:request_method, :env, :session).new("POST", {}, {})
+      action = action_subclass.new(flipper, fake_request)
+      expect(action.run).to eq([200, {}, "post"])
+    end
+
+    it "will run put" do
+      fake_request = Struct.new(:request_method, :env, :session).new("PUT", {}, {})
+      action = action_subclass.new(flipper, fake_request)
+      expect(action.run).to eq([200, {}, "put"])
+    end
+
+    it "will run delete" do
+      fake_request = Struct.new(:request_method, :env, :session).new("DELETE", {}, {})
+      action = action_subclass.new(flipper, fake_request)
+      expect(action.run).to eq([200, {}, "delete"])
+    end
   end
 
-  it "will run get" do
-    fake_request = Struct.new(:request_method, :env, :session).new("GET", {}, {})
-    action = action_subclass.new(flipper, fake_request)
-    expect(action.run).to eq([200, {}, "get"])
-  end
+  describe '#json_error_response' do
+    describe ":feature_not_found" do
 
-  it "will run post" do
-    fake_request = Struct.new(:request_method, :env, :session).new("POST", {}, {})
-    action = action_subclass.new(flipper, fake_request)
-    expect(action.run).to eq([200, {}, "post"])
-  end
+      it 'locates and serializes error correctly' do
+        action = action_subclass.new({}, {})
+        response = catch(:halt) do
+          action.json_error_response(:feature_not_found)
+        end
+        status, headers, body = response
+        parsed_body = JSON.parse(body[0])
 
-  it "will run put" do
-    fake_request = Struct.new(:request_method, :env, :session).new("PUT", {}, {})
-    action = action_subclass.new(flipper, fake_request)
-    expect(action.run).to eq([200, {}, "put"])
-  end
+        expect(headers["Content-Type"]).to eq("application/json")
+        expect(parsed_body["code"]).to eq(1)
+        expect(parsed_body["message"]).to eq("Feature not found.")
+        expect(parsed_body["more_info"]).to eq("")
+      end
+    end
 
-  it "will run delete" do
-    fake_request = Struct.new(:request_method, :env, :session).new("DELETE", {}, {})
-    action = action_subclass.new(flipper, fake_request)
-    expect(action.run).to eq([200, {}, "delete"])
+    describe ':group_not_registered' do
+
+      it 'locates and serializes error correctly' do
+        action = action_subclass.new({}, {})
+        response = catch(:halt) do
+          action.json_error_response(:group_not_registered)
+        end
+        status, headers, body = response
+        parsed_body = JSON.parse(body[0])
+
+        expect(headers["Content-Type"]).to eq("application/json")
+        expect(parsed_body["code"]).to eq(2)
+        expect(parsed_body["message"]).to eq("Group not registered.")
+        expect(parsed_body["more_info"]).to eq("")
+      end
+    end
+
+    describe 'invalid error key' do
+
+      it 'raises descriptive error' do
+        action = action_subclass.new({}, {})
+        catch(:halt) do
+          expect{ action.json_error_response(:invalid_error_key) }.to raise_error(KeyError)
+        end
+      end
+    end
   end
 end

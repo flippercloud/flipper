@@ -27,8 +27,8 @@ module Flipper
           private
 
           def ensure_valid_params
-            json_response({ code: 1, message: 'Feature not found.', more_info: '' }, 404) unless feature_names.include?(feature_name)
-            json_response({ code: 2, message: 'Group not registered.', more_info: '' }, 404) unless Flipper.group_exists?(group_name)
+            json_error_response(:feature_not_found) unless feature_names.include?(feature_name)
+            json_error_response(:group_not_registered) unless Flipper.group_exists?(group_name)
           end
 
           def feature_name
