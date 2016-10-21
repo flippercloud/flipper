@@ -1,5 +1,6 @@
 require 'forwardable'
 require 'flipper/api/error'
+require 'flipper/api/error_response'
 require 'json'
 
 module Flipper
@@ -88,11 +89,27 @@ module Flipper
         throw :halt, response
       end
 
+      # Public: Call this with a json serializable object (i.e. Hash)
+      # to serialize object and respond to request
+      #
+      # object - json serializable object
+      # status - http status code
+
       def json_response(object, status = 200)
         header 'Content-Type', Api::CONTENT_TYPE
         status(status)
         body = JSON.dump(object)
         halt [@code, @headers, [body]]
+      end
+
+      # Public: Call this with an ErrorResponse::ERRORS key to respond
+      # with the serialized error object as response body
+      #
+      # error_key - key to lookup error object
+
+      def json_error_response(error_key)
+        error = ErrorResponse::ERRORS.fetch(error_key.to_sym)
+        json_response(error.as_json, error.http_status)
       end
 
       # Public: Set the status code for the response.
