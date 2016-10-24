@@ -48,10 +48,10 @@ module Flipper
 
           def percentage
             @percentage ||= begin
-                              Integer(params['percentage'])
-                            rescue ArgumentError, TypeError
-                              -1
-                            end
+              Integer(params['percentage'])
+            rescue ArgumentError, TypeError
+              -1
+            end
           end
 
             def feature_names
