@@ -37,7 +37,9 @@ module Flipper
           end
 
           def ensure_valid_disable_params
-            json_error_response(:feature_not_found) unless feature_names.include?(feature_name)
+            unless feature_names.include?(feature_name)
+              json_error_response(:feature_not_found)
+            end
           end
 
           def feature_name
