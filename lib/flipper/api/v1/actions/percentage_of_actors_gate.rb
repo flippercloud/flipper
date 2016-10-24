@@ -27,8 +27,13 @@ module Flipper
           private
 
           def ensure_valid_enable_params
-            json_error_response(:feature_not_found) unless feature_names.include?(feature_name)
-            json_error_response(:percentage_invalid) unless percentage >= 0 && percentage <= 100
+            unless feature_names.include?(feature_name)
+              json_error_response(:feature_not_found)
+            end
+
+            if percentage < 0 || percentage > 100
+              json_error_response(:percentage_invalid)
+            end
           end
 
           def ensure_valid_disable_params
