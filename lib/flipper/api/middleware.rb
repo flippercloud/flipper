@@ -35,6 +35,7 @@ module Flipper
         end
 
         @action_collection = ActionCollection.new
+        @action_collection.add Api::V1::Actions::PercentageOfTimeGate
         @action_collection.add Api::V1::Actions::PercentageOfActorsGate
         @action_collection.add Api::V1::Actions::GroupsGate
         @action_collection.add Api::V1::Actions::BooleanGate
