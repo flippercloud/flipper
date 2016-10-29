@@ -50,7 +50,7 @@ RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
     end
 
     it 'returns correct error response' do
-      expect(last_response.status).to eq(400)
+      expect(last_response.status).to eq(422)
       expect(json_response).to eq({ 'code' => 4, 'message' => 'Required parameter flipper_id is missing.', 'more_info' => '' })
     end
   end
@@ -62,7 +62,7 @@ RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
     end
 
     it 'returns correct error response' do
-      expect(last_response.status).to eq(400)
+      expect(last_response.status).to eq(422)
       expect(json_response).to eq({ 'code' => 4, 'message' => 'Required parameter flipper_id is missing.', 'more_info' => '' })
     end
   end
@@ -74,7 +74,7 @@ RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
     end
 
     it 'returns correct error response' do
-      expect(last_response.status).to eq(400)
+      expect(last_response.status).to eq(422)
       expect(json_response).to eq({ 'code' => 4, 'message' => 'Required parameter flipper_id is missing.', 'more_info' => '' })
     end
   end
@@ -86,7 +86,7 @@ RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
     end
 
     it 'returns correct error response' do
-      expect(last_response.status).to eq(400)
+      expect(last_response.status).to eq(422)
       expect(json_response).to eq({ 'code' => 4, 'message' => 'Required parameter flipper_id is missing.', 'more_info' => '' })
     end
   end
