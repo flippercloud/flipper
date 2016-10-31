@@ -52,8 +52,8 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfTimeGate do
       post '/api/v1/features/my_feature/percentage_of_time', { percentage: '300' }
     end
 
-    it '400s with correct error response when percentage parameter is invalid' do
-      expect(last_response.status).to eq(400)
+    it '422s with correct error response when percentage parameter is invalid' do
+      expect(last_response.status).to eq(422)
       expect(json_response).to eq({ 'code' => 3, 'message' => 'Percentage must be a positive number less than or equal to 100.', 'more_info' => '' })
     end
   end
@@ -64,8 +64,8 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfTimeGate do
       post '/api/v1/features/my_feature/percentage_of_time', { percentage: 'foo' }
     end
 
-    it '400s with correct error response when percentage parameter is invalid' do
-      expect(last_response.status).to eq(400)
+    it '422s with correct error response when percentage parameter is invalid' do
+      expect(last_response.status).to eq(422)
       expect(json_response).to eq({ 'code' => 3, 'message' => 'Percentage must be a positive number less than or equal to 100.', 'more_info' => '' })
     end
   end
@@ -76,8 +76,8 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfTimeGate do
       post '/api/v1/features/my_feature/percentage_of_time'
     end
 
-    it '400s with correct error response when percentage parameter is missing' do
-      expect(last_response.status).to eq(400)
+    it '422s with correct error response when percentage parameter is missing' do
+      expect(last_response.status).to eq(422)
       expect(json_response).to eq({ 'code' => 3, 'message' => 'Percentage must be a positive number less than or equal to 100.', 'more_info' => '' })
     end
   end
