@@ -14,17 +14,16 @@ module Flipper
               feature = Decorators::Feature.new(flipper[feature_name])
               json_response(feature.as_json)
             else
-              json_response({}, 404)
+              json_error_response(:feature_not_found)
             end
           end
 
           def delete
             if feature_names.include?(feature_name)
               flipper.remove(feature_name)
-
               json_response({}, 204)
             else
-              json_response({}, 404)
+              json_error_response(:feature_not_found)
             end
           end
 

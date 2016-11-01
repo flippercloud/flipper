@@ -21,16 +21,11 @@ module Flipper
           end
 
           def post
-            feature_name = params.fetch('name') do
-              json_response({
-                errors: [{
-                  message: 'Missing post parameter: name',
-                }]
-              }, 422)
-            end
-
-            flipper.adapter.add(flipper[feature_name])
-            json_response({}, 200)
+            feature_name = params.fetch('name') { json_error_response(:name_invalid) }
+            feature = flipper[feature_name]
+            flipper.adapter.add(feature)
+            decorated_feature = Decorators::Feature.new(feature)
+            json_response(decorated_feature.as_json, 200)
           end
         end
       end
