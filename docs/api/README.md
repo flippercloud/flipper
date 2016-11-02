@@ -230,7 +230,7 @@ and on a succesful request return a 200 HTTP status and the feature object as th
 
 **URL**
 
-`POST /api/v1/feature/{feature_name}/boolean`
+`POST /api/v1/features/{feature_name}/boolean`
 
 **Parameters**
 
@@ -246,6 +246,7 @@ curl -X POST http://example.com/flipper-api/api/v1/features/reports/boolean
 
 Successful enabling of the boolean gate will return a 200 HTTP status and the feature object as the response body.
 
+```json
 {
   "key": "reports",
   "state": "on",
@@ -277,13 +278,14 @@ Successful enabling of the boolean gate will return a 200 HTTP status and the fe
     }
   ]
 }
+```
 
 
 ### Boolean disable a feature
 
 **URL**
 
-`DELETE /api/v1/feature/{feature_name}/boolean`
+`DELETE /api/v1/features/{feature_name}/boolean`
 
 **Parameters**
 
@@ -299,6 +301,7 @@ curl -X DELETE http://example.com/flipper-api/api/v1/features/reports/boolean
 
 Successful disabling of the boolean gate will return a 200 HTTP status and the feature object.
 
+```json
 {
   "key": "reports",
   "state": "off",
@@ -330,3 +333,116 @@ Successful disabling of the boolean gate will return a 200 HTTP status and the f
     }
   ]
 }
+```
+
+### Enable Group
+
+**URL**
+
+`POST /api/v1/features/{feature_name}/groups`
+
+**Parameters**
+
+* `feature_name` - The name of the feature
+
+* `name` - The name of a registered group to enable
+
+**Request**
+
+```
+curl -X POST -d "name=admins" http://example.com/flipper-api/api/v1/features/reports/groups
+```
+
+**Response**
+
+Successful enabling of the group will return a 200 HTTP status and the feature object as the response body.
+
+```json
+{
+  "key": "reports",
+  "state": "conditional",
+  "gates": [
+    {
+      "key": "boolean",
+      "name": "boolean",
+      "value": false
+    },
+    {
+      "key": "groups",
+      "name": "group",
+      "value": ["admins"]
+    },
+    {
+      "key": "actors",
+      "name": "actor",
+      "value": []
+    },
+    {
+      "key": "percentage_of_actors",
+      "name": "percentage_of_actors",
+      "value": 0
+    },
+    {
+      "key": "percentage_of_time",
+      "name": "percentage_of_time",
+      "value": 0
+    }
+  ]
+}
+```
+
+### Disable Group
+
+**URL**
+
+`DELETE /api/v1/features/{feature_name}/groups`
+
+**Parameters**
+
+* `feature_name` - The name of the feature
+
+* `name` - The name of a registered group to disable
+
+**Request**
+
+```
+curl -X DELETE -d "name=admins" http://example.com/flipper-api/api/v1/features/reports/groups
+```
+
+**Response**
+
+Successful disabling of the group will return a 200 HTTP status and the feature object as the response body.
+
+```json
+{
+  "key": "reports",
+  "state": "off",
+  "gates": [
+    {
+      "key": "boolean",
+      "name": "boolean",
+      "value": false
+    },
+    {
+      "key": "groups",
+      "name": "group",
+      "value": []
+    },
+    {
+      "key": "actors",
+      "name": "actor",
+      "value": []
+    },
+    {
+      "key": "percentage_of_actors",
+      "name": "percentage_of_actors",
+      "value": 0
+    },
+    {
+      "key": "percentage_of_time",
+      "name": "percentage_of_time",
+      "value": 0
+    }
+  ]
+}
+```
