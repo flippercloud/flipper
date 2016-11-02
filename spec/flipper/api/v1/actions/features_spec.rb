@@ -17,22 +17,23 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
         expected_response = {
           "features" => [
             {
-              "key" =>"my_feature",
+              "key" => "my_feature",
               "state" => "on",
               "gates" => [
                 {
                   "key"=> "boolean",
                   "name"=> "boolean",
-                  "value" => true},
-                  {
-                  "key" =>"groups",
+                  "value" => true
+                },
+                {
+                  "key" => "groups",
                   "name" => "group",
-                  "value" =>[],
+                  "value" => [],
                 },
                 {
                   "key" => "actors",
-                  "name"=>"actor",
-                  "value"=>["10"],
+                  "name" => "actor",
+                  "value" => ["10"],
                 },
                 {
                   "key" => "percentage_of_actors",
@@ -44,7 +45,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
                   "name"=> "percentage_of_time",
                   "value"=> 0,
                 },
-            ],
+              ],
             },
           ]
         }
@@ -74,9 +75,44 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
         post 'api/v1/features', { name: 'my_feature' }
       end
 
-      it 'responds 200 on success' do
+      it 'responds 200 ' do
         expect(last_response.status).to eq(200)
-        expect(json_response).to eq({})
+      end
+
+      it 'returns decorated feature' do
+        expected_response = {
+
+          "key" => "my_feature",
+          "state" => "off",
+          "gates" => [
+            {
+              "key"=> "boolean",
+              "name"=> "boolean",
+              "value" => false,
+            },
+            {
+              "key" => "groups",
+              "name" => "group",
+              "value" => [],
+            },
+            {
+              "key" => "actors",
+              "name" => "actor",
+              "value" => [],
+            },
+            {
+              "key" => "percentage_of_actors",
+              "name" => "percentage_of_actors",
+              "value" => 0,
+            },
+            {
+              "key"=> "percentage_of_time",
+              "name"=> "percentage_of_time",
+              "value"=> 0,
+            },
+          ],
+        }
+        expect(json_response).to eq(expected_response)
       end
 
       it 'adds feature' do
@@ -98,8 +134,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
       end
 
       it 'returns formatted error' do
-        errors = json_response['errors']
-        expect(errors.first['message']).to eq('Missing post parameter: name')
+        expect(json_response).to eq({ 'code' => 5, 'message' => 'Required parameter name is missing.', 'more_info' => '' })
       end
     end
   end
