@@ -17,7 +17,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
     flipper.adapter.memoize = nil
   end
 
-  shared_examples_for "flipper middleware" do
+  RSpec.shared_examples_for "flipper middleware" do
     it "delegates" do
       called = false
       app = lambda { |env|

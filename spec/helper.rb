@@ -19,6 +19,8 @@ RSpec.configure do |config|
     Flipper.unregister_groups
   end
 
+  config.disable_monkey_patching!
+
   config.filter_run focus: true
   config.run_all_when_everything_filtered = true
 end
@@ -52,7 +54,7 @@ RSpec.shared_examples_for 'a percentage' do
   end
 end
 
-shared_examples_for 'a DSL feature' do
+RSpec.shared_examples_for 'a DSL feature' do
   it "returns instance of feature" do
     expect(feature).to be_instance_of(Flipper::Feature)
   end
@@ -80,7 +82,7 @@ shared_examples_for 'a DSL feature' do
   end
 end
 
-shared_examples_for "a DSL boolean method" do
+RSpec.shared_examples_for "a DSL boolean method" do
   it "returns boolean with value set" do
     result = subject.send(method_name, true)
     expect(result).to be_instance_of(Flipper::Types::Boolean)
