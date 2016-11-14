@@ -45,7 +45,7 @@ module Flipper
           end
 
           def feature_names
-            @feature_names ||= flipper.adapter.features
+            @feature_names ||= flipper.storage.features
           end
         end
       end
