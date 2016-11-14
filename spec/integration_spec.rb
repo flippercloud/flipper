@@ -1,13 +1,25 @@
 require 'helper'
 require 'flipper/feature'
+require 'flipper/adapters/active_record'
+require 'flipper/adapters/v2/active_record'
 require 'flipper/adapters/memory'
-require 'flipper/adapters/redis'
-require 'flipper/adapters/mongo'
 require 'flipper/adapters/v2/memory'
-require 'flipper/adapters/v2/redis'
+require 'flipper/adapters/mongo'
 require 'flipper/adapters/v2/mongo'
+require 'flipper/adapters/pstore'
+require 'flipper/adapters/v2/pstore'
+require 'flipper/adapters/redis'
+require 'flipper/adapters/v2/redis'
 
+# Turn off most logging for mongo client
 Mongo::Logger.logger.level = Logger::INFO
+
+# Turn off migration logging for specs
+ActiveRecord::Migration.verbose = false
+
+# Require the migrations so we can use them
+require 'generators/flipper/templates/migration'
+require 'generators/flipper/templates/v2_migration'
 
 module ClientInstance
   def self.redis
@@ -16,6 +28,30 @@ module ClientInstance
 
   def self.mongo
     @mongo ||= Mongo::Client.new(["127.0.0.1:27017"], :server_selection_timeout => 1, :database => 'testing')['testing']
+  end
+
+  def self.pstore
+    @pstore ||= FlipperRoot.join("tmp").tap { |d| d.mkpath }.join("flipper.pstore")
+  end
+
+  def self.before_each
+    ActiveRecord::Base.establish_connection({
+      adapter: "sqlite3",
+      database: ":memory:",
+    })
+
+    mongo.delete_many
+    redis.flushdb
+    if pstore.exist?
+      pstore.unlink
+    end
+    CreateFlipperTables.up
+    CreateFlipperV2Tables.up
+  end
+
+  def self.after_each
+    CreateFlipperTables.down
+    CreateFlipperV2Tables.down
   end
 end
 
@@ -27,6 +63,10 @@ RSpec.describe Flipper do
     [:v2, -> { Flipper::Adapters::V2::Redis.new(ClientInstance.redis) }],
     [:v1, -> { Flipper::Adapters::Mongo.new(ClientInstance.mongo) }],
     [:v2, -> { Flipper::Adapters::V2::Mongo.new(ClientInstance.mongo) }],
+    [:v1, -> { Flipper::Adapters::ActiveRecord.new }],
+    [:v2, -> { Flipper::Adapters::V2::ActiveRecord.new }],
+    [:v1, -> { Flipper::Adapters::PStore.new(ClientInstance.pstore) }],
+    [:v2, -> { Flipper::Adapters::V2::PStore.new(ClientInstance.pstore) }],
   ].each do |(version, adapter_builder)|
     context "#{version} #{adapter_builder.call.name}" do
       let(:adapter)     { adapter_builder.call }
@@ -50,11 +90,14 @@ RSpec.describe Flipper do
       let(:five_percent_of_actors) { flipper.actors(5) }
       let(:five_percent_of_time) { flipper.time(5) }
 
-      before do
+      before(:each) do
         Flipper.register(:admins) { |thing| thing.admin? }
         Flipper.register(:devs)   { |thing| thing.dev? }
-        ClientInstance.mongo.delete_many
-        ClientInstance.redis.flushdb
+        ClientInstance.before_each
+      end
+
+      after(:each) do
+        ClientInstance.after_each
       end
 
       describe "#enable" do
