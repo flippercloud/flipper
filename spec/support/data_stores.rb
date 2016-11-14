@@ -78,5 +78,6 @@ module DataStores
     reset_pstore
     reset_redis
     reset_mongo
+    reset_dalli
   end
 end

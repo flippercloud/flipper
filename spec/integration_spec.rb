@@ -10,6 +10,8 @@ require 'flipper/adapters/pstore'
 require 'flipper/adapters/v2/pstore'
 require 'flipper/adapters/redis'
 require 'flipper/adapters/v2/redis'
+require 'flipper/adapters/dalli'
+require 'flipper/adapters/v2/dalli'
 
 RSpec.describe Flipper do
   [
@@ -23,6 +25,8 @@ RSpec.describe Flipper do
     [:v2, -> { Flipper::Adapters::V2::ActiveRecord.new }],
     [:v1, -> { Flipper::Adapters::PStore.new(DataStores.pstore) }],
     [:v2, -> { Flipper::Adapters::V2::PStore.new(DataStores.pstore) }],
+    [:v1, -> { Flipper::Adapters::Dalli.new(Flipper::Adapters::Memory.new, DataStores.dalli) }],
+    [:v2, -> { Flipper::Adapters::V2::Dalli.new(Flipper::Adapters::V2::Memory.new, DataStores.dalli) }],
   ].each do |(version, adapter_builder)|
     context "#{version} #{adapter_builder.call.name}" do
       let(:adapter)     { adapter_builder.call }
