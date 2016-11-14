@@ -5,11 +5,11 @@ require 'flipper/adapters/v2/memory'
 
 RSpec.describe Flipper do
   {
-    :v1 => Flipper::Adapters::Memory,
-    :v2 => Flipper::Adapters::V2::Memory,
-  }.each do |version, adapter_class|
+    :v1 => -> { Flipper::Adapters::Memory.new },
+    :v2 => -> { Flipper::Adapters::V2::Memory.new },
+  }.each do |version, adapter_builder|
     context version do
-      let(:adapter)     { adapter_class.new }
+      let(:adapter)     { adapter_builder.call }
       let(:flipper)     { Flipper.new(adapter) }
       let(:feature)     { flipper[:search] }
 
