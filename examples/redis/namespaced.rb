@@ -15,6 +15,7 @@ $:.unshift(lib_path)
 require 'flipper/adapters/v2/redis'
 
 client = Redis.new
+client.flushdb
 namespaced_client = Redis::Namespace.new(:flipper_namespace, redis: client)
 adapter = Flipper::Adapters::V2::Redis.new(namespaced_client)
 flipper = Flipper.new(adapter)

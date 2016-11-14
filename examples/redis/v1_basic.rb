@@ -7,6 +7,7 @@ $:.unshift(lib_path)
 
 require 'flipper/adapters/redis'
 client = Redis.new
+client.flushdb
 adapter = Flipper::Adapters::Redis.new(client)
 flipper = Flipper.new(adapter)
 

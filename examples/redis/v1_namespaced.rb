@@ -18,6 +18,7 @@ if ENV['BOXEN_REDIS_URL']
   options[:url] = ENV['BOXEN_REDIS_URL']
 end
 client = Redis.new(options)
+client.flushdb
 namespaced_client = Redis::Namespace.new(:flipper_namespace, redis: client)
 adapter = Flipper::Adapters::Redis.new(namespaced_client)
 flipper = Flipper.new(adapter)

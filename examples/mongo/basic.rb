@@ -8,6 +8,7 @@ $:.unshift(lib_path)
 require 'flipper/adapters/v2/mongo'
 Mongo::Logger.logger.level = Logger::INFO
 collection = Mongo::Client.new(["127.0.0.1:#{ENV["BOXEN_MONGODB_PORT"] || 27017}"], :database => 'testing')['flipper']
+collection.delete_many
 adapter = Flipper::Adapters::V2::Mongo.new(collection)
 flipper = Flipper.new(adapter)
 

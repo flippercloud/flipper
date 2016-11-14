@@ -63,7 +63,7 @@ pp Flipper::Adapters::V2::ActiveRecord::Key.all
 puts
 
 puts 'flipper get of feature'
-pp Marshal.load(adapter.get("feature/#{flipper[:stats].key}"))
+pp JSON.parse(adapter.get("feature/#{flipper[:stats].key}"))
 # flipper get of feature
 # {:boolean=>true,
 #  :groups=>#<Set: {:admins, :early_access}>,
