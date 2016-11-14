@@ -7,6 +7,14 @@ RSpec.describe Flipper::Gates::Boolean do
     described_class.new
   }
 
+  def context(bool)
+    Flipper::FeatureCheckContext.new(
+      feature_name: feature_name,
+      values: Flipper::GateValues.new({boolean: bool}),
+      thing: Flipper::Types::Actor.new(Struct.new(:flipper_id).new(1)),
+    )
+  end
+
   describe "#enabled?" do
     context "for true value" do
       it "returns true" do
@@ -24,13 +32,13 @@ RSpec.describe Flipper::Gates::Boolean do
   describe "#open?" do
     context "for true value" do
       it "returns true" do
-        expect(subject.open?(Object.new, true, feature_name: feature_name)).to eq(true)
+        expect(subject.open?(context(true))).to be(true)
       end
     end
 
     context "for false value" do
       it "returns false" do
-        expect(subject.open?(Object.new, false, feature_name: feature_name)).to eq(false)
+        expect(subject.open?(context(false))).to be(false)
       end
     end
   end

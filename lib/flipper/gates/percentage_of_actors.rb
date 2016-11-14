@@ -24,12 +24,13 @@ module Flipper
       # Internal: Checks if the gate is open for a thing.
       #
       # Returns true if gate open for thing, false if not.
-      def open?(thing, value, options = {})
-        if Types::Actor.wrappable?(thing)
-          actor = Types::Actor.wrap(thing)
-          feature_name = options.fetch(:feature_name)
-          key = "#{feature_name}#{actor.value}"
-          Zlib.crc32(key) % 100 < value
+      def open?(context)
+        percentage = context.values[key]
+
+        if Types::Actor.wrappable?(context.thing)
+          actor = Types::Actor.wrap(context.thing)
+          key = "#{context.feature_name}#{actor.value}"
+          Zlib.crc32(key) % 100 < percentage
         else
           false
         end

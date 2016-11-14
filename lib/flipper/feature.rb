@@ -2,6 +2,7 @@ require 'flipper/errors'
 require 'flipper/type'
 require 'flipper/gate'
 require 'flipper/storage'
+require 'flipper/feature_check_context'
 require 'flipper/gate_values'
 require 'flipper/instrumenters/noop'
 
@@ -78,18 +79,19 @@ module Flipper
     def enabled?(thing = nil)
       instrument(:enabled?) { |payload|
         values = gate_values
+        thing = gate(:actor).wrap(thing) unless thing.nil?
+        payload[:thing] = thing
+        context = FeatureCheckContext.new(
+          feature_name: @name,
+          values: values,
+          thing: thing,
+        )
 
-        payload[:thing] = gate(:actor).wrap(thing) unless thing.nil?
-
-        open_gate = gates.detect { |gate|
-          gate.open?(thing, values[gate.key], feature_name: @name)
-        }
-
-        if open_gate.nil?
-          false
-        else
+        if open_gate = gates.detect { |gate| gate.open?(context) }
           payload[:gate_name] = open_gate.name
           true
+        else
+          false
         end
       }
     end

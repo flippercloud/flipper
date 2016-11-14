@@ -1,6 +1,21 @@
 require 'helper'
 
 RSpec.describe Flipper::UI::Actions::Features do
+  let(:token) {
+    if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
+      Rack::Protection::AuthenticityToken.random_token
+    else
+      "a"
+    end
+  }
+  let(:session) {
+    if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
+      {:csrf => token}
+    else
+      {"_csrf_token" => token}
+    end
+  }
+
   describe "GET /features" do
     before do
       flipper[:stats].enable
@@ -23,8 +38,8 @@ RSpec.describe Flipper::UI::Actions::Features do
       @original_feature_creation_enabled = Flipper::UI.feature_creation_enabled
       Flipper::UI.feature_creation_enabled = true
       post "/features",
-        {"value" => "notifications_next", "authenticity_token" => "a"},
-        "rack.session" => {"_csrf_token" => "a"}
+        {"value" => "notifications_next", "authenticity_token" => token},
+        "rack.session" => session
     end
 
     after do
@@ -46,8 +61,8 @@ RSpec.describe Flipper::UI::Actions::Features do
       @original_feature_creation_enabled = Flipper::UI.feature_creation_enabled
       Flipper::UI.feature_creation_enabled = false
       post "/features",
-        {"value" => "notifications_next", "authenticity_token" => "a"},
-        "rack.session" => {"_csrf_token" => "a"}
+        {"value" => "notifications_next", "authenticity_token" => token},
+        "rack.session" => session
     end
 
     after do

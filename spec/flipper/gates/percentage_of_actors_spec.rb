@@ -7,6 +7,14 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
     described_class.new
   }
 
+  def context(integer, feature = feature_name, thing = nil)
+    Flipper::FeatureCheckContext.new(
+      feature_name: feature,
+      values: Flipper::GateValues.new({percentage_of_actors: integer}),
+      thing: thing || Flipper::Types::Actor.new(Struct.new(:flipper_id).new(1)),
+    )
+  end
+
   describe "#open?" do
     context "when compared against two features" do
       let(:percentage) { 0.05 }
@@ -19,12 +27,12 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
 
       let(:feature_one_enabled_actors) do
         gate = described_class.new
-        actors.select { |actor| gate.open? actor, percentage_as_integer, feature_name: :name_one }
+        actors.select { |actor| gate.open? context(percentage_as_integer, :name_one, actor) }
       end
 
       let(:feature_two_enabled_actors) do
         gate = described_class.new
-        actors.select { |actor| gate.open? actor, percentage_as_integer, feature_name: :name_two }
+        actors.select { |actor| gate.open? context(percentage_as_integer, :name_two, actor) }
       end
 
       it "does not enable both features for same set of actors" do

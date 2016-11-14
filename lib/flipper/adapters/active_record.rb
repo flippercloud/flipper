@@ -42,10 +42,11 @@ module Flipper
       end
 
       def add(feature)
-        attributes = {key: feature.key}
         # race condition, but add is only used by enable/disable which happen
         # super rarely, so it shouldn't matter in practice
-        @feature_class.where(attributes).first || @feature_class.create!(attributes)
+        unless @feature_class.where(key: feature.key).first
+          @feature_class.create! { |f| f.key = feature.key }
+        end
         true
       end
 
@@ -96,18 +97,18 @@ module Flipper
               key: gate.key
             ).delete_all
 
-            @gate_class.create!({
-              feature_key: feature.key,
-              key: gate.key,
-              value: thing.value.to_s,
-            })
+            @gate_class.create! do |g|
+              g.feature_key = feature.key
+              g.key = gate.key
+              g.value = thing.value.to_s
+            end
           end
         when :set
-          @gate_class.create!({
-            feature_key: feature.key,
-            key: gate.key,
-            value: thing.value.to_s,
-          })
+          @gate_class.create! do |g|
+            g.feature_key = feature.key
+            g.key = gate.key
+            g.value = thing.value.to_s
+          end
         else
           unsupported_data_type gate.data_type
         end
@@ -126,11 +127,11 @@ module Flipper
               key: gate.key
             ).delete_all
 
-            @gate_class.create!({
-              feature_key: feature.key,
-              key: gate.key,
-              value: thing.value.to_s,
-            })
+            @gate_class.create! do |g|
+              g.feature_key = feature.key
+              g.key = gate.key
+              g.value = thing.value.to_s
+            end
           end
         when :set
           @gate_class.where(feature_key: feature.key, key: gate.key, value: thing.value).delete_all

@@ -28,7 +28,7 @@ You can read more about [adapter versioning](../Adapters.md#versioning) here if 
 
 ### V2
 
-For your convenience a migration generator is provided to create the necessary migrations for using the active record adapter:
+For your convenience a migration generator is provided to create the necessary migrations for using the active record adapter. By default this generates a migration that will create one database table - flipper_keys.
 
     $ rails g flipper:active_record_v2
 
@@ -43,7 +43,7 @@ flipper = Flipper.new(adapter)
 
 ### V1
 
-For your convenience a migration generator is provided to create the necessary migrations for using the active record adapter:
+For your convenience a migration generator is provided to create the necessary migrations for using the active record adapter. By default this generates a migration that will create two database tables - flipper_features and flipper_gates.
 
     $ rails g flipper:active_record
 

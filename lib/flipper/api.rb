@@ -1,6 +1,7 @@
 require 'rack'
 require 'flipper'
 require 'flipper/api/middleware'
+require 'flipper/api/actor'
 
 module Flipper
   module Api

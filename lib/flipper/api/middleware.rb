@@ -7,7 +7,7 @@ Pathname(__FILE__).dirname.join('v1/actions').each_child(false) do |name|
 end
 
 module Flipper
-  module Api 
+  module Api
     class Middleware
       # Public: Initializes an instance of the API middleware.
       #
@@ -35,8 +35,13 @@ module Flipper
         end
 
         @action_collection = ActionCollection.new
+        @action_collection.add Api::V1::Actions::PercentageOfTimeGate
+        @action_collection.add Api::V1::Actions::PercentageOfActorsGate
+        @action_collection.add Api::V1::Actions::ActorsGate
+        @action_collection.add Api::V1::Actions::GroupsGate
         @action_collection.add Api::V1::Actions::BooleanGate
         @action_collection.add Api::V1::Actions::Feature
+        @action_collection.add Api::V1::Actions::Features
       end
 
       def flipper

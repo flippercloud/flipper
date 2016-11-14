@@ -1,6 +1,21 @@
 require 'helper'
 
 RSpec.describe Flipper::UI::Actions::ActorsGate do
+  let(:token) {
+    if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
+      Rack::Protection::AuthenticityToken.random_token
+    else
+      "a"
+    end
+  }
+  let(:session) {
+    if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
+      {:csrf => token}
+    else
+      {"_csrf_token" => token}
+    end
+  }
+
   describe "GET /features/:feature/actors" do
     before do
       get "features/search/actors"
@@ -19,8 +34,8 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
     context "enabling an actor" do
       before do
         post "features/search/actors",
-          {"value" => "User:6", "operation" => "enable", "authenticity_token" => "a"},
-          "rack.session" => {"_csrf_token" => "a"}
+          {"value" => "User:6", "operation" => "enable", "authenticity_token" => token},
+          "rack.session" => session
       end
 
       it "adds item to members" do
@@ -37,8 +52,8 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
       before do
         flipper[:search].enable_actor Flipper::UI::Actor.new("User:6")
         post "features/search/actors",
-          {"value" => "User:6", "operation" => "disable", "authenticity_token" => "a"},
-          "rack.session" => {"_csrf_token" => "a"}
+          {"value" => "User:6", "operation" => "disable", "authenticity_token" => token},
+          "rack.session" => session
       end
 
       it "removes item from members" do
@@ -54,8 +69,8 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
     context "for an invalid actor value" do
       before do
         post "features/search/actors",
-          {"value" => "", "operation" => "enable", "authenticity_token" => "a"},
-          "rack.session" => {"_csrf_token" => "a"}
+          {"value" => "", "operation" => "enable", "authenticity_token" => token},
+          "rack.session" => session
       end
 
       it "redirects back to feature" do

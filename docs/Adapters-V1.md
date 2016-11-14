@@ -8,7 +8,7 @@ V1 adapters support listing, adding, removing, enabling and disabling features. 
 * [PStore adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/pstore.rb) – great for when a local file is enough
 * [Mongo adapter](https://github.com/jnunemaker/flipper/blob/master/docs/mongo)
 * [Redis adapter](https://github.com/jnunemaker/flipper/blob/master/docs/redis)
-* [ActiveRecord adapter](https://github.com/jnunemaker/flipper/blob/master/docs/active_record) - Rails 3 and 4.
+* [ActiveRecord adapter](https://github.com/jnunemaker/flipper/blob/master/docs/active_record) - Rails 3, 4 and 5.
 * [Cassanity adapter](https://github.com/jnunemaker/flipper-cassanity)
 
 ## Community Supported

@@ -1,6 +1,6 @@
 # Requires the following methods:
 # * subject - The instance of the adapter
-shared_examples_for 'a flipper adapter' do
+RSpec.shared_examples_for 'a flipper adapter' do
   let(:actor_class) { Struct.new(:flipper_id) }
 
   let(:flipper) { Flipper.new(subject) }

@@ -11,13 +11,13 @@ services:
   - mongodb
   - memcached
 env:
-  - RAILS_VERSION=5.0.0.beta3
+  - RAILS_VERSION=5.0.0
   - RAILS_VERSION=4.2.5
   - RAILS_VERSION=3.2.21
 matrix:
   # don't run rails 5 on ruby versions that can't install rack 2
   exclude:
     - rvm: 2.0.0
-      env: RAILS_VERSION=5.0.0.beta3
+      env: RAILS_VERSION=5.0.0
     - rvm: 2.1.8
-      env: RAILS_VERSION=5.0.0.beta3
+      env: RAILS_VERSION=5.0.0

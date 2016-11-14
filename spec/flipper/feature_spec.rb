@@ -607,7 +607,7 @@ RSpec.describe Flipper::Feature do
     context "with actor instance" do
       it "updates the gate values to include the actor" do
         actor = Struct.new(:flipper_id).new(5)
-        instance = Flipper::Types::Actor.wrap(actor)
+        instance = Flipper::Types::Actor.new(actor)
         expect(subject.gate_values.actors).to be_empty
         subject.enable_actor(instance)
         expect(subject.gate_values.actors).to eq(Set["5"])

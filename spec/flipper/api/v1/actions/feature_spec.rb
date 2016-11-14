@@ -103,16 +103,36 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
       it 'returns 404' do
         expect(last_response.status).to eq(404)
       end
+
+      it 'returns formatted error response body' do
+        expect(json_response).to eq({ "code" => 1, "message" => "Feature not found.", "more_info" => "" })
+      end
     end
   end
 
   describe 'delete' do
-    it 'deletes feature' do
-      flipper[:my_feature].enable
-      expect(flipper.features.map(&:key)).to include('my_feature')
-      delete 'api/v1/features/my_feature'
-      expect(last_response.status).to eq(204)
-      expect(flipper.features.map(&:key)).not_to include('my_feature')
+    context 'succesful request' do
+      it 'deletes feature' do
+        flipper[:my_feature].enable
+        expect(flipper.features.map(&:key)).to include('my_feature')
+        delete 'api/v1/features/my_feature'
+        expect(last_response.status).to eq(204)
+        expect(flipper.features.map(&:key)).not_to include('my_feature')
+      end
+    end
+
+    context 'feature not found' do
+      before do
+        delete 'api/v1/features/my_feature'
+      end
+
+      it 'returns 404' do
+        expect(last_response.status).to eq(404)
+      end
+
+      it 'returns formatted error response body' do
+        expect(json_response).to eq({ "code" => 1, "message" => "Feature not found.", "more_info" => "" })
+      end
     end
   end
 end

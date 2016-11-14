@@ -7,6 +7,14 @@ RSpec.describe Flipper::Gates::Group do
     described_class.new
   }
 
+  def context(set)
+    Flipper::FeatureCheckContext.new(
+      feature_name: feature_name,
+      values: Flipper::GateValues.new({groups: set}),
+      thing: Flipper::Types::Actor.new(Struct.new(:flipper_id).new("5")),
+    )
+  end
+
   describe "#open?" do
     context "with a group in adapter, but not registered" do
       before do
@@ -15,7 +23,7 @@ RSpec.describe Flipper::Gates::Group do
 
       it "ignores group" do
         thing = Struct.new(:flipper_id).new('5')
-        expect(subject.open?(thing, Set[:newbs, :staff], feature_name: feature_name)).to eq(true)
+        expect(subject.open?(context(Set[:newbs, :staff]))).to be(true)
       end
     end
 
@@ -26,7 +34,7 @@ RSpec.describe Flipper::Gates::Group do
 
       it "raises error" do
         expect {
-          subject.open?(Object.new, Set[:stinkers], feature_name: feature_name)
+          subject.open?(context(Set[:stinkers]))
         }.to raise_error(NoMethodError)
       end
     end

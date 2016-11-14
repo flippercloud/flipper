@@ -6,34 +6,34 @@ RSpec.describe Flipper::Api::V1::Actions::BooleanGate do
   describe 'enable' do
     before do
       flipper[:my_feature].disable
-      put '/api/v1/features/my_feature/enable'
+      post '/api/v1/features/my_feature/boolean'
     end
 
     it 'enables feature' do
-      expect(last_response.status).to eq(204)
+      expect(last_response.status).to eq(200)
       expect(flipper[:my_feature].on?).to be_truthy
+    end
+
+    it 'returns decorated feature with boolean gate enabled' do
+      boolean_gate = json_response['gates'].find { |gate| gate['key'] == 'boolean' }
+      expect(boolean_gate['value']).to be_truthy
     end
   end
 
   describe 'disable' do
     before do
       flipper[:my_feature].enable
-      put '/api/v1/features/my_feature/disable'
+      delete '/api/v1/features/my_feature/boolean'
     end
 
     it 'disables feature' do
-      expect(last_response.status).to eq(204)
+      expect(last_response.status).to eq(200)
       expect(flipper[:my_feature].off?).to be_truthy
     end
-  end
 
-  describe 'invalid paremeter' do
-    before do
-      put '/api/v1/features/my_feature/invalid_param'
-    end
-
-    it 'responds with 404 when not sent enable or disable parameter' do
-      expect(last_response.status).to eq(404)
+    it 'returns decorated feature with boolean gate disabled' do
+      boolean_gate = json_response['gates'].find { |gate| gate['key'] == 'boolean' }
+      expect(boolean_gate['value']).to be_falsy
     end
   end
 end

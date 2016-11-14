@@ -44,6 +44,8 @@ module Flipper
       builder.use Flipper::Middleware::Memoizer, flipper
       builder.use Middleware, flipper
       builder.run app
+      klass = self
+      builder.define_singleton_method(:inspect) { klass.inspect } # pretty rake routes output
       builder
     end
   end

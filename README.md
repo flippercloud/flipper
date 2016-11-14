@@ -70,8 +70,9 @@ Of course there are more [examples for you to peruse](examples/). You could also
 * [Gates](docs/Gates.md) - Boolean, Groups, Actors, % of Actors, and % of Time
 * [Adapters](docs/Adapters.md) - Mongo, Redis, Cassandra, Active Record...
 * [Instrumentation](docs/Instrumentation.md) - ActiveSupport::Notifications, Statsd and Metriks
-* [Optimization](docs/Optimization.md) - Memoization middleware
+* [Optimization](docs/Optimization.md) - Memoization middleware and Cache adapters
 * [Web Interface](docs/ui/README.md) - Point and click...
+* [API](docs/api/README.md) - HTTP API interface
 * [Caveats](docs/Caveats.md) - Flipper beware! (see what I did there)
 
 ## Contributing
@@ -87,3 +88,10 @@ Of course there are more [examples for you to peruse](examples/). You could also
 1. Update the version to be whatever it should be and commit.
 2. `script/release`
 3. Profit.
+
+## Brought To You By
+
+| pic | @mention |
+|---|---|
+| ![@jnunemaker](https://avatars3.githubusercontent.com/u/235?s=64) | [@jnunemaker](https://github.com/jnunemaker) |
+| ![@alexwheeler](https://avatars3.githubusercontent.com/u/3260042?s=64) | [@alexwheeler](https://github.com/alexwheeler) |

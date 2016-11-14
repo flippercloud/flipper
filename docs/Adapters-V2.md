@@ -8,7 +8,7 @@ V2 adapters are dramatically easier to build than V1 and support more functional
 * [PStore adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/v2/pstore.rb) – great for when a local file is enough
 * [Mongo adapter](https://github.com/jnunemaker/flipper/blob/master/docs/mongo)
 * [Redis adapter](https://github.com/jnunemaker/flipper/blob/master/docs/redis)
-* [ActiveRecord adapter](https://github.com/jnunemaker/flipper/blob/master/docs/active_record) - Rails 3 and 4.
+* [ActiveRecord adapter](https://github.com/jnunemaker/flipper/blob/master/docs/active_record) - Rails 3, 4 and 5.
 
 ## Community Supported
 
