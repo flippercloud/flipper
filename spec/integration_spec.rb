@@ -2,15 +2,31 @@ require 'helper'
 require 'flipper/feature'
 require 'flipper/adapters/memory'
 require 'flipper/adapters/redis'
+require 'flipper/adapters/mongo'
 require 'flipper/adapters/v2/memory'
 require 'flipper/adapters/v2/redis'
+require 'flipper/adapters/v2/mongo'
+
+Mongo::Logger.logger.level = Logger::INFO
+
+module ClientInstance
+  def self.redis
+    @redis ||= Redis.new
+  end
+
+  def self.mongo
+    @mongo ||= Mongo::Client.new(["127.0.0.1:27017"], :server_selection_timeout => 1, :database => 'testing')['testing']
+  end
+end
 
 RSpec.describe Flipper do
   [
     [:v1, -> { Flipper::Adapters::Memory.new }],
     [:v2, -> { Flipper::Adapters::V2::Memory.new }],
-    [:v1, -> { Flipper::Adapters::Redis.new(Redis.new.tap { |r| r.flushdb }) }],
-    [:v2, -> { Flipper::Adapters::V2::Redis.new(Redis.new.tap { |r| r.flushdb }) }],
+    [:v1, -> { Flipper::Adapters::Redis.new(ClientInstance.redis) }],
+    [:v2, -> { Flipper::Adapters::V2::Redis.new(ClientInstance.redis) }],
+    [:v1, -> { Flipper::Adapters::Mongo.new(ClientInstance.mongo) }],
+    [:v2, -> { Flipper::Adapters::V2::Mongo.new(ClientInstance.mongo) }],
   ].each do |(version, adapter_builder)|
     context "#{version} #{adapter_builder.call.name}" do
       let(:adapter)     { adapter_builder.call }
@@ -37,6 +53,8 @@ RSpec.describe Flipper do
       before do
         Flipper.register(:admins) { |thing| thing.admin? }
         Flipper.register(:devs)   { |thing| thing.dev? }
+        ClientInstance.mongo.delete_many
+        ClientInstance.redis.flushdb
       end
 
       describe "#enable" do
