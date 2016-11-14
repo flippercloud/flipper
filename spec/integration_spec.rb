@@ -1,14 +1,18 @@
 require 'helper'
 require 'flipper/feature'
 require 'flipper/adapters/memory'
+require 'flipper/adapters/redis'
 require 'flipper/adapters/v2/memory'
+require 'flipper/adapters/v2/redis'
 
 RSpec.describe Flipper do
-  {
-    :v1 => -> { Flipper::Adapters::Memory.new },
-    :v2 => -> { Flipper::Adapters::V2::Memory.new },
-  }.each do |version, adapter_builder|
-    context version do
+  [
+    [:v1, -> { Flipper::Adapters::Memory.new }],
+    [:v2, -> { Flipper::Adapters::V2::Memory.new }],
+    [:v1, -> { Flipper::Adapters::Redis.new(Redis.new.tap { |r| r.flushdb }) }],
+    [:v2, -> { Flipper::Adapters::V2::Redis.new(Redis.new.tap { |r| r.flushdb }) }],
+  ].each do |(version, adapter_builder)|
+    context "#{version} #{adapter_builder.call.name}" do
       let(:adapter)     { adapter_builder.call }
       let(:flipper)     { Flipper.new(adapter) }
       let(:feature)     { flipper[:search] }
