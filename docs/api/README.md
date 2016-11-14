@@ -446,3 +446,113 @@ Successful disabling of the group will return a 200 HTTP status and the feature 
   ]
 }
 ```
+### Enable Actor
+
+**URL**
+
+`POST /api/v1/features/{feature_name}/actors`
+
+**Parameters**
+
+* `feature_name` - The name of the feature
+
+* `flipper_id` - The flipper_id of actor to enable
+
+**Request**
+
+```
+curl -X POST -d "flipper_id=User:1" http://example.com/flipper-api/api/v1/features/reports/actors
+```
+
+**Response**
+
+Successful enabling of the actor will return a 200 HTTP status and the feature object as the response body.
+
+```json
+{
+  "key": "reports",
+  "state": "conditional",
+  "gates": [
+    {
+      "key": "boolean",
+      "name": "boolean",
+      "value": false
+    },
+    {
+      "key": "groups",
+      "name": "group",
+      "value": []
+    },
+    {
+      "key": "actors",
+      "name": "actor",
+      "value": ["User:1"]
+    },
+    {
+      "key": "percentage_of_actors",
+      "name": "percentage_of_actors",
+      "value": 0
+    },
+    {
+      "key": "percentage_of_time",
+      "name": "percentage_of_time",
+      "value": 0
+    }
+  ]
+}
+```
+### Disable Actor
+
+**URL**
+
+`DELETE /api/v1/features/{feature_name}/actors`
+
+**Parameters**
+
+* `feature_name` - The name of the feature
+
+* `flipper_id` - The flipper_id of actor to disable
+
+**Request**
+
+```
+curl -X DELETE -d "flipper_id=User:1" http://example.com/flipper-api/api/v1/features/reports/actors
+```
+
+**Response**
+
+Successful disabling of the actor will return a 200 HTTP status and the feature object as the response body.
+
+```json
+{
+  "key": "reports",
+  "state": "off",
+  "gates": [
+    {
+      "key": "boolean",
+      "name": "boolean",
+      "value": false
+    },
+    {
+      "key": "groups",
+      "name": "group",
+      "value": []
+    },
+    {
+      "key": "actors",
+      "name": "actor",
+      "value": []
+    },
+    {
+      "key": "percentage_of_actors",
+      "name": "percentage_of_actors",
+      "value": 0
+    },
+    {
+      "key": "percentage_of_time",
+      "name": "percentage_of_time",
+      "value": 0
+    }
+  ]
+}
+```
