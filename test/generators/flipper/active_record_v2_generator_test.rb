@@ -3,6 +3,8 @@ require 'active_record'
 require 'rails/generators/test_case'
 require 'generators/flipper/active_record_v2_generator'
 
+DataStores.reset_active_record
+
 class FlipperActiveRecordV2GeneratorTest < Rails::Generators::TestCase
   tests Flipper::Generators::ActiveRecordV2Generator
   destination File.expand_path("../../../../tmp", __FILE__)

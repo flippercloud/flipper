@@ -1,4 +1,5 @@
 require 'flipper'
+require_relative '../spec/support/data_stores'
 require 'minitest/autorun'
 require 'minitest/unit'
 

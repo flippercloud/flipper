@@ -6,8 +6,7 @@ class V2RedisTest < MiniTest::Test
   prepend Flipper::Test::V2SharedAdapterTests
 
   def setup
-   client = Redis.new
-   client.flushdb
-   @adapter = Flipper::Adapters::V2::Redis.new(client)
+    DataStores.reset_redis
+    @adapter = Flipper::Adapters::V2::Redis.new(DataStores.redis)
   end
 end

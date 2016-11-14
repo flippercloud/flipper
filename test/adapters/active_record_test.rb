@@ -10,16 +10,7 @@ class ActiveRecordTest < MiniTest::Test
   prepend Flipper::Test::SharedAdapterTests
 
   def setup
-    ActiveRecord::Base.establish_connection({
-      adapter: "sqlite3",
-      database: ":memory:",
-    })
-
+    DataStores.reset_active_record
     @adapter = Flipper::Adapters::ActiveRecord.new
-    CreateFlipperTables.up
-  end
-
-  def teardown
-    CreateFlipperTables.down
   end
 end

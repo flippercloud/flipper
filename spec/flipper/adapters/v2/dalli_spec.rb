@@ -5,14 +5,13 @@ require 'flipper/spec/shared_adapter_specs'
 
 RSpec.describe Flipper::Adapters::V2::Dalli do
   let(:memory_adapter) { Flipper::Adapters::V2::Memory.new }
-  let(:cache)   { Dalli::Client.new('localhost:11211') }
-  let(:adapter) { Flipper::Adapters::V2::Dalli.new(memory_adapter, cache) }
+  let(:adapter) { Flipper::Adapters::V2::Dalli.new(memory_adapter, DataStores.dalli) }
   let(:flipper) { Flipper.new(adapter) }
 
-  subject { described_class.new(adapter, cache) }
+  subject { described_class.new(adapter, DataStores.dalli) }
 
   before do
-    cache.flush
+    DataStores.reset_dalli
   end
 
   it_should_behave_like 'a v2 flipper adapter'
