@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative '../../test_helper'
 require 'active_record'
 require 'rails/generators/test_case'
 require 'generators/flipper/active_record_generator'
