@@ -665,3 +665,111 @@ Successful disabling of a percentage of actors will set the percentage to 0 and 
   ]
 }
 ```
+### Enable Percentage of Time
+
+**URL**
+
+`POST /api/v1/features/{feature_name}/percentage_of_time`
+
+**Parameters**
+
+* `feature_name` - The name of the feature
+
+* `percentage` - The percentage of time to enable
+
+**Request**
+
+```
+curl -X POST -d "percentage=20" http://example.com/flipper-api/api/v1/features/reports/percentage_of_time
+```
+
+**Response**
+
+Successful enabling of a percentage of time will return a 200 HTTP status and the feature object as the response body.
+
+```json
+{
+  "key": "reports",
+  "state": "conditional",
+  "gates": [
+    {
+      "key": "boolean",
+      "name": "boolean",
+      "value": false
+    },
+    {
+      "key": "groups",
+      "name": "group",
+      "value": []
+    },
+    {
+      "key": "actors",
+      "name": "actor",
+      "value": []
+    },
+    {
+      "key": "percentage_of_actors",
+      "name": "percentage_of_actors",
+      "value": 0
+    },
+    {
+      "key": "percentage_of_time",
+      "name": "percentage_of_time",
+      "value": 20
+    }
+  ]
+}
+```
+### Disable Percentage of Time
+
+**URL**
+
+`DELETE /api/v1/features/{feature_name}/percentage_of_time`
+
+**Parameters**
+
+* `feature_name` - The name of the feature
+
+**Request**
+
+```
+curl -X DELETE http://example.com/flipper-api/api/v1/features/reports/percentage_of_time
+```
+
+**Response**
+
+Successful disabling of a percentage of time will set the percentage to 0 and return a 200 HTTP status and the feature object as the response body.
+
+```json
+{
+  "key": "reports",
+  "state": "off",
+  "gates": [
+    {
+      "key": "boolean",
+      "name": "boolean",
+      "value": false
+    },
+    {
+      "key": "groups",
+      "name": "group",
+      "value": []
+    },
+    {
+      "key": "actors",
+      "name": "actor",
+      "value": []
+    },
+    {
+      "key": "percentage_of_actors",
+      "name": "percentage_of_actors",
+      "value": 0
+    },
+    {
+      "key": "percentage_of_time",
+      "name": "percentage_of_time",
+      "value": 0
+    }
+  ]
+}
+```
