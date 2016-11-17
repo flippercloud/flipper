@@ -2,7 +2,7 @@ require 'rack/body_proxy'
 
 module Flipper
   module Middleware
-    class Memoizer
+    class EagerMemoizer
       # Public: Initializes an instance of the Memoizer middleware.
       #
       # app - The app this middleware is included in.
