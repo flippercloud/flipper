@@ -773,3 +773,36 @@ Successful disabling of a percentage of time will set the percentage to 0 and re
   ]
 }
 ```
+
+## Errors
+In the event of an error the Flipper API will return an error object.  The error object will contain a Flipper-specific error code, an error message, and a link to the documentation for the given error code.
+
+*example error object*
+```json
+{
+    "code": 1,
+    "message": "Feature not found",
+    "more_info": "https://github.com/jnunemaker/flipper/...",
+}
+```
+
+### Error Code Reference
+
+#### 1: Feature Not Found
+
+The requested feature does not exist.  Make sure the feature name is spelled correctly and exists in your application's database.
+
+#### 2: Group Not Registered
+
+The requested group specified by the `name` parameter is not registered.  Information on registering groups can be found in the [Gates documentation](https://github.com/jnunemaker/flipper/blob/master/docs/Gates.md).
+
+#### 3: Percentage Invalid
+
+The `percentage` parameter is invalid or missing.  `percentage` must be an integer between 0-100 inclusive and cannot be blank.
+
+#### 4: Flipper ID Invalid
+
+The `flipper_id` parameter is invalid or missing.  `flipper_id` cannot be empty.
+
+####  5: Name Invalid
+The `name` parameter is missing.  Make sure your request's body contains a `name` parameter.
