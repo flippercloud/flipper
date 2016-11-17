@@ -72,6 +72,23 @@ module Flipper
         end
       end
 
+      def get_multi(features)
+        if memoizing?
+          missing_features = features.reject { |feature| cache[feature] }
+
+          if missing_features.any?
+            missing_hashes = @adapter.get_multi(missing_features)
+            missing_features.zip(missing_hashes).each do |feature, hash|
+              cache[feature] = hash
+            end
+          end
+
+          features.map { |feature| cache[feature] }
+        else
+          @adapter.get_multi(features)
+        end
+      end
+
       # Public
       def enable(feature, gate, thing)
         result = @adapter.enable(feature, gate, thing)

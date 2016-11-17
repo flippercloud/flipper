@@ -51,22 +51,16 @@ module Flipper
       #
       # Returns a Hash of Flipper::Gate#key => value.
       def get(feature)
-        result = {}
         doc = doc_for(feature)
-        fields = doc.keys
+        result_for_feature(feature, doc)
+      end
 
-        feature.gates.each do |gate|
-          result[gate.key] = case gate.data_type
-          when :boolean, :integer
-            doc[gate.key.to_s]
-          when :set
-            fields_to_gate_value fields, gate
-          else
-            unsupported_data_type gate.data_type
-          end
+      def get_multi(features)
+        docs = docs_for(features)
+
+        features.zip(docs).map do |feature, doc|
+          result_for_feature(feature, doc)
         end
-
-        result
       end
 
       # Public: Enables a gate for a given thing.
@@ -116,6 +110,32 @@ module Flipper
       # Returns a Hash of fields => values.
       def doc_for(feature)
         @client.hgetall(feature.key)
+      end
+
+      def docs_for(features)
+        @client.pipelined do
+          features.each do |feature|
+            doc_for(feature)
+          end
+        end
+      end
+
+      def result_for_feature(feature, doc)
+        result = {}
+        fields = doc.keys
+
+        feature.gates.each do |gate|
+          result[gate.key] = case gate.data_type
+          when :boolean, :integer
+            doc[gate.key.to_s]
+          when :set
+            fields_to_gate_value fields, gate
+          else
+            unsupported_data_type gate.data_type
+          end
+        end
+
+        result
       end
 
       # Private: Converts gate and thing to hash key.
