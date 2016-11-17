@@ -1,3 +1,15 @@
+## 0.10.0
+
+* Added feature check context (https://github.com/jnunemaker/flipper/pull/158)
+* Do not use mass assignment for active record adapter (https://github.com/jnunemaker/flipper/pull/171)
+* Several documentation improvements
+* Make Flipper::UI.app.inspect return a String (https://github.com/jnunemaker/flipper/pull/176)
+* changes boolean gate route to api/v1/features/boolean (https://github.com/jnunemaker/flipper/pull/175)
+* add api v1 percentage_of_actors endpoint (https://github.com/jnunemaker/flipper/pull/179)
+* add api v1 percentage_of_time endpoint (https://github.com/jnunemaker/flipper/pull/180)
+* add api v1 actors gate endpoint  (https://github.com/jnunemaker/flipper/pull/181)
+* wait for activesupport to tell us when active record is loaded for active record adapter (https://github.com/jnunemaker/flipper/pull/192)
+
 ## 0.9.2
 
 * GET /api/v1/features
