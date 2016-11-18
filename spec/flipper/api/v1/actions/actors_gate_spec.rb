@@ -51,7 +51,7 @@ RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
 
     it 'returns correct error response' do
       expect(last_response.status).to eq(422)
-      expect(json_response).to eq({ 'code' => 4, 'message' => 'Required parameter flipper_id is missing.', 'more_info' => '' })
+      expect(json_response).to eq({ 'code' => 4, 'message' => 'Required parameter flipper_id is missing.', 'more_info' => 'https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference' })
     end
   end
 
@@ -63,7 +63,7 @@ RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
 
     it 'returns correct error response' do
       expect(last_response.status).to eq(422)
-      expect(json_response).to eq({ 'code' => 4, 'message' => 'Required parameter flipper_id is missing.', 'more_info' => '' })
+      expect(json_response).to eq({ 'code' => 4, 'message' => 'Required parameter flipper_id is missing.', 'more_info' => 'https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference' })
     end
   end
 
@@ -75,7 +75,7 @@ RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
 
     it 'returns correct error response' do
       expect(last_response.status).to eq(422)
-      expect(json_response).to eq({ 'code' => 4, 'message' => 'Required parameter flipper_id is missing.', 'more_info' => '' })
+      expect(json_response).to eq({ 'code' => 4, 'message' => 'Required parameter flipper_id is missing.', 'more_info' => 'https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference' })
     end
   end
 
@@ -87,7 +87,7 @@ RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
 
     it 'returns correct error response' do
       expect(last_response.status).to eq(422)
-      expect(json_response).to eq({ 'code' => 4, 'message' => 'Required parameter flipper_id is missing.', 'more_info' => '' })
+      expect(json_response).to eq({ 'code' => 4, 'message' => 'Required parameter flipper_id is missing.', 'more_info' => 'https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference' })
     end
   end
 
@@ -98,7 +98,7 @@ RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
 
     it 'returns correct error response' do
       expect(last_response.status).to eq(404)
-      expect(json_response).to eq({ 'code' => 1, 'message' => 'Feature not found.', 'more_info' => '' })
+      expect(json_response).to eq({ 'code' => 1, 'message' => 'Feature not found.', 'more_info' => 'https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference' })
     end
   end
 
@@ -109,7 +109,7 @@ RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
 
     it 'returns correct error response' do
       expect(last_response.status).to eq(404)
-      expect(json_response).to eq({ 'code' => 1, 'message' => 'Feature not found.', 'more_info' => '' })
+      expect(json_response).to eq({ 'code' => 1, 'message' => 'Feature not found.', 'more_info' => 'https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference' })
     end
   end
 end

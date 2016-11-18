@@ -43,7 +43,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
 
     it  '404s with correct error response when feature does not exist' do
       expect(last_response.status).to eq(404)
-      expect(json_response).to eq({ 'code' => 1, 'message' => 'Feature not found.', 'more_info' => '' })
+      expect(json_response).to eq({ 'code' => 1, 'message' => 'Feature not found.', 'more_info' => 'https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference' })
     end
   end
 
@@ -55,7 +55,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
 
     it '422s with correct error response when percentage parameter is invalid' do
       expect(last_response.status).to eq(422)
-      expect(json_response).to eq({ 'code' => 3, 'message' => 'Percentage must be a positive number less than or equal to 100.', 'more_info' => '' })
+      expect(json_response).to eq({ 'code' => 3, 'message' => 'Percentage must be a positive number less than or equal to 100.', 'more_info' => 'https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference' })
     end
   end
 
@@ -67,7 +67,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
 
     it '422s with correct error response when percentage parameter is invalid' do
       expect(last_response.status).to eq(422)
-      expect(json_response).to eq({ 'code' => 3, 'message' => 'Percentage must be a positive number less than or equal to 100.', 'more_info' => '' })
+      expect(json_response).to eq({ 'code' => 3, 'message' => 'Percentage must be a positive number less than or equal to 100.', 'more_info' => 'https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference' })
     end
   end
 
@@ -79,7 +79,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
 
     it '422s with correct error response when percentage parameter is missing' do
       expect(last_response.status).to eq(422)
-      expect(json_response).to eq({ 'code' => 3, 'message' => 'Percentage must be a positive number less than or equal to 100.', 'more_info' => '' })
+      expect(json_response).to eq({ 'code' => 3, 'message' => 'Percentage must be a positive number less than or equal to 100.', 'more_info' => 'https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference' })
     end
   end
 end

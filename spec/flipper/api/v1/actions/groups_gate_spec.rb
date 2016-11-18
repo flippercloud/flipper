@@ -57,7 +57,7 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
 
     it  '404s with correct error response when feature does not exist' do
       expect(last_response.status).to eq(404)
-      expect(json_response).to eq({ 'code' => 1, 'message' => 'Feature not found.', 'more_info' => '' })
+      expect(json_response).to eq({ 'code' => 1, 'message' => 'Feature not found.', 'more_info' => 'https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference' })
     end
   end
 
@@ -69,7 +69,7 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
 
     it '404s with correct error response when group not registered' do
       expect(last_response.status).to eq(404)
-      expect(json_response).to eq({ 'code' => 2, 'message' => 'Group not registered.', 'more_info' => '' })
+      expect(json_response).to eq({ 'code' => 2, 'message' => 'Group not registered.', 'more_info' => 'https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference' })
     end
   end
 end
