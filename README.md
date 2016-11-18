@@ -74,6 +74,7 @@ Of course there are more [examples for you to peruse](examples/). You could also
 * [Web Interface](docs/ui/README.md) - Point and click...
 * [API](docs/api/README.md) - HTTP API interface
 * [Caveats](docs/Caveats.md) - Flipper beware! (see what I did there)
+* [Docker-Compose](docs/DockerCompose.md) - Using docker-compose in contributing
 
 ## Contributing
 
