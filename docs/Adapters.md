@@ -9,6 +9,7 @@ I plan on supporting the adapters in the flipper repo. Other adapters are welcom
 * [Mongo adapter](https://github.com/jnunemaker/flipper/blob/master/docs/mongo)
 * [Redis adapter](https://github.com/jnunemaker/flipper/blob/master/docs/redis)
 * [ActiveRecord adapter](https://github.com/jnunemaker/flipper/blob/master/docs/active_record) - Rails 3, 4, and 5.
+* [Sequel adapter](https://github.com/jnunemaker/flipper/blob/master/docs/sequel)
 * [Cassanity adapter](https://github.com/jnunemaker/flipper-cassanity)
 
 ## Community Supported
