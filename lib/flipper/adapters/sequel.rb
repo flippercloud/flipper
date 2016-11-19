@@ -1,0 +1,167 @@
+require 'set'
+require 'flipper'
+require 'sequel'
+
+module Flipper
+  module Adapters
+    class Sequel
+      include ::Flipper::Adapter
+
+      # Private: Do not use outside of this adapter.
+      class Feature < ::Sequel::Model(:flipper_features)
+        plugin :timestamps, update_on_create: true
+      end
+
+      # Private: Do not use outside of this adapter.
+      class Gate < ::Sequel::Model(:flipper_gates)
+        plugin :timestamps, update_on_create: true
+      end
+
+      # Public: The name of the adapter.
+      attr_reader :name
+
+      # Public: Initialize a new Sequel adapter instance.
+      #
+      # name - The Symbol name for this adapter. Optional (default :active_record)
+      # feature_class - The AR class responsible for the features table.
+      # gate_class - The AR class responsible for the gates table.
+      #
+      # Allowing the overriding of name is so you can differentiate multiple
+      # instances of this adapter from each other, if, for some reason, that is
+      # a thing you do.
+      #
+      # Allowing the overriding of the default feature/gate classes means you
+      # can roll your own tables and what not, if you so desire.
+      def initialize(options = {})
+        @name = options.fetch(:name, :sequel)
+        @feature_class = options.fetch(:feature_class) { Feature }
+        @gate_class = options.fetch(:gate_class) { Gate }
+      end
+
+      # Public: The set of known features.
+      def features
+        @feature_class.all.map(&:key).to_set
+      end
+
+      # Public: Adds a feature to the set of known features.
+      def add(feature)
+        # race condition, but add is only used by enable/disable which happen
+        # super rarely, so it shouldn't matter in practice
+        @feature_class.find_or_create(key: feature.key.to_s)
+        true
+      end
+
+      # Public: Removes a feature from the set of known features.
+      def remove(feature)
+        @feature_class.db.transaction do
+          @feature_class.where(key: feature.key.to_s).delete
+          clear(feature)
+        end
+        true
+      end
+
+      # Public: Clears the gate values for a feature.
+      def clear(feature)
+        @gate_class.where(feature_key: feature.key.to_s).delete
+        true
+      end
+
+      # Public: Gets the values for all gates for a given feature.
+      #
+      # Returns a Hash of Flipper::Gate#key => value.
+      def get(feature)
+        db_gates = @gate_class.where(feature_key: feature.key.to_s).all
+
+        feature.gates.each_with_object({}) do |gate, result|
+          result[gate.key] = case gate.data_type
+          when :boolean
+            if db_gate = db_gates.detect { |db_gate| db_gate.key == gate.key.to_s }
+              db_gate.value
+            end
+          when :integer
+            if db_gate = db_gates.detect { |db_gate| db_gate.key == gate.key.to_s }
+              db_gate.value
+            end
+          when :set
+            db_gates.select { |db_gate| db_gate.key == gate.key.to_s }.map(&:value).to_set
+          else
+            unsupported_data_type gate.data_type
+          end
+        end
+      end
+
+      # Public: Enables a gate for a given thing.
+      #
+      # feature - The Flipper::Feature for the gate.
+      # gate - The Flipper::Gate to disable.
+      # thing - The Flipper::Type being disabled for the gate.
+      #
+      # Returns true.
+      def enable(feature, gate, thing)
+        case gate.data_type
+        when :boolean, :integer
+          @gate_class.db.transaction do
+            args = {
+              feature_key: feature.key,
+              key: gate.key.to_s
+            }
+            @gate_class.where(args).delete
+
+            @gate_class.create(gate_attrs(feature, gate, thing))
+          end
+        when :set
+          @gate_class.create(gate_attrs(feature, gate, thing))
+        else
+          unsupported_data_type gate.data_type
+        end
+
+        true
+      end
+
+      # Public: Disables a gate for a given thing.
+      #
+      # feature - The Flipper::Feature for the gate.
+      # gate - The Flipper::Gate to disable.
+      # thing - The Flipper::Type being disabled for the gate.
+      #
+      # Returns true.
+      def disable(feature, gate, thing)
+        case gate.data_type
+        when :boolean
+          clear(feature)
+        when :integer
+          @gate_class.db.transaction do
+            args = {
+              feature_key: feature.key.to_s,
+              key: gate.key.to_s
+            }
+            @gate_class.where(args).delete
+
+            @gate_class.create(gate_attrs(feature, gate, thing))
+          end
+        when :set
+          @gate_class.where(gate_attrs(feature, gate, thing))
+                     .delete
+        else
+          unsupported_data_type gate.data_type
+        end
+
+        true
+      end
+
+      private
+
+      def unsupported_data_type(data_type)
+        raise "#{data_type} is not supported by this adapter"
+      end
+
+      def gate_attrs(feature, gate, thing)
+        {
+          feature_key: feature.key.to_s,
+          key: gate.key.to_s,
+          value: thing.value.to_s
+        }
+      end
+    end
+  end
+end
