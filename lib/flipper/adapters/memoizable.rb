@@ -72,6 +72,7 @@ module Flipper
         end
       end
 
+      # Public
       def get_multi(features)
         if memoizing?
           missing_features = features.reject { |feature| cache[feature] }

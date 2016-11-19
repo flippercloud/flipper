@@ -84,6 +84,38 @@ RSpec.describe Flipper::Adapters::Memoizable do
     end
   end
 
+  describe "#get_multi" do
+    context "with memoization enabled" do
+      before do
+        subject.memoize = true
+      end
+
+      it "memoizes feature" do
+        names = %i{stats shiny}
+        features = names.map { |name| flipper[name] }
+        results = subject.get_multi(features)
+
+        features.zip(results).each do |feature, result|
+          expect(cache[feature]).to be(result)
+        end
+      end
+    end
+
+    context "with memoization disabled" do
+      before do
+        subject.memoize = false
+      end
+
+      it "returns result" do
+        names = %i{stats shiny}
+        features = names.map { |name| flipper[name] }
+        result = subject.get_multi(features)
+        adapter_result = adapter.get_multi(features)
+        expect(result).to eq(adapter_result)
+      end
+    end
+  end
+
   describe "#enable" do
     context "with memoization enabled" do
       before do
