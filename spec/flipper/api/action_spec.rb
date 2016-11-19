@@ -74,7 +74,7 @@ RSpec.describe Flipper::Api::Action do
         expect(headers["Content-Type"]).to eq("application/json")
         expect(parsed_body["code"]).to eq(1)
         expect(parsed_body["message"]).to eq("Feature not found.")
-        expect(parsed_body["more_info"]).to eq("")
+        expect(parsed_body["more_info"]).to eq("https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference")
       end
     end
 
@@ -91,7 +91,7 @@ RSpec.describe Flipper::Api::Action do
         expect(headers["Content-Type"]).to eq("application/json")
         expect(parsed_body["code"]).to eq(2)
         expect(parsed_body["message"]).to eq("Group not registered.")
-        expect(parsed_body["more_info"]).to eq("")
+        expect(parsed_body["more_info"]).to eq("https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference")
       end
     end
 

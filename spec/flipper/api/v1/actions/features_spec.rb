@@ -134,7 +134,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
       end
 
       it 'returns formatted error' do
-        expect(json_response).to eq({ 'code' => 5, 'message' => 'Required parameter name is missing.', 'more_info' => '' })
+        expect(json_response).to eq({ 'code' => 5, 'message' => 'Required parameter name is missing.', 'more_info' => 'https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference' })
       end
     end
   end

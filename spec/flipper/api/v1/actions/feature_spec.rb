@@ -105,7 +105,7 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
       end
 
       it 'returns formatted error response body' do
-        expect(json_response).to eq({ "code" => 1, "message" => "Feature not found.", "more_info" => "" })
+        expect(json_response).to eq({ "code" => 1, "message" => "Feature not found.", "more_info" => "https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference" })
       end
     end
   end
@@ -131,7 +131,7 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
       end
 
       it 'returns formatted error response body' do
-        expect(json_response).to eq({ "code" => 1, "message" => "Feature not found.", "more_info" => "" })
+        expect(json_response).to eq({ "code" => 1, "message" => "Feature not found.", "more_info" => "https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference" })
       end
     end
   end
