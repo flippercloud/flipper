@@ -253,4 +253,25 @@ shared_examples_for 'a flipper adapter' do
   it "does not complain clearing a feature that does not exist in adapter" do
     expect(subject.clear(flipper[:stats])).to eq(true)
   end
+
+  it "can get multiple features" do
+    expect(subject.add(flipper[:stats])).to eq(true)
+    expect(subject.enable(flipper[:stats], boolean_gate, flipper.boolean)).to eq(true)
+
+    expect(subject.add(flipper[:search])).to eq(true)
+
+    stats, search, other = subject.get_multi([flipper[:stats], flipper[:search], flipper[:other]])
+
+    default_config = {
+      :boolean => nil,
+      :groups => Set.new,
+      :actors => Set.new,
+      :percentage_of_actors => nil,
+      :percentage_of_time => nil,
+    }
+
+    expect(stats).to eq(default_config.merge(boolean: "true"))
+    expect(search).to eq(default_config)
+    expect(other).to eq(default_config)
+  end
 end
