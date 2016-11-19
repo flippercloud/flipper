@@ -1,3 +1,8 @@
+## 0.10.1
+
+* add docker compose support for contributing
+* add sequel adapter
+
 ## 0.10.0
 
 * Added feature check context (https://github.com/jnunemaker/flipper/pull/158)
