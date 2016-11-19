@@ -1,7 +1,8 @@
 ## 0.10.1
 
-* add docker compose support for contributing
-* add sequel adapter
+* Add docker compose support for contributing
+* Add sequel adapter
+* Show confirmation dialog when deleting a feature in flipper-ui
 
 ## 0.10.0
 
