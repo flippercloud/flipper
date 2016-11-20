@@ -9,7 +9,7 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
       Flipper.register(:admins) do |actor|
         actor.respond_to?(:admin?) && actor.admin?
       end
-      post '/api/v1/features/my_feature/groups', { name: 'admins' }
+      post '/api/v1/features/my_feature/groups', name: 'admins'
     end
 
     it 'enables feature for group' do
@@ -33,7 +33,7 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
         actor.respond_to?(:admin?) && actor.admin?
       end
       flipper[:my_feature].enable_group(:admins)
-      delete '/api/v1/features/my_feature/groups', { name: 'admins' }
+      delete '/api/v1/features/my_feature/groups', name: 'admins'
     end
 
     it 'disables feature for group' do
@@ -52,24 +52,29 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
 
   describe 'non-existent feature' do
     before do
-      delete '/api/v1/features/my_feature/groups', { name:  'admins' }
+      delete '/api/v1/features/my_feature/groups', name: 'admins'
     end
 
-    it  '404s with correct error response when feature does not exist' do
+    it '404s with correct error response when feature does not exist' do
       expect(last_response.status).to eq(404)
-      expect(json_response).to eq({ 'code' => 1, 'message' => 'Feature not found.', 'more_info' => 'https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference' })
+      expect(json_response).to eq(api_not_found_response)
     end
   end
 
   describe 'group not registered' do
     before do
       flipper[:my_feature].disable
-      delete '/api/v1/features/my_feature/groups', { name: 'admins' }
+      delete '/api/v1/features/my_feature/groups', name: 'admins'
     end
 
     it '404s with correct error response when group not registered' do
       expect(last_response.status).to eq(404)
-      expect(json_response).to eq({ 'code' => 2, 'message' => 'Group not registered.', 'more_info' => 'https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference' })
+      expected = {
+        'code' => 2,
+        'message' => 'Group not registered.',
+        'more_info' => api_error_code_reference_url,
+      }
+      expect(json_response).to eq(expected)
     end
   end
 end

@@ -9,12 +9,10 @@ module Flipper
       attr_reader :thing
 
       def initialize(thing)
-        if thing.nil?
-          raise ArgumentError.new("thing cannot be nil")
-        end
+        raise ArgumentError, 'thing cannot be nil' if thing.nil?
 
         unless thing.respond_to?(:flipper_id)
-          raise ArgumentError.new("#{thing.inspect} must respond to flipper_id, but does not")
+          raise ArgumentError, "#{thing.inspect} must respond to flipper_id, but does not"
         end
 
         @thing = thing

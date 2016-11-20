@@ -2,18 +2,18 @@ require 'helper'
 require 'flipper/instrumenters/memory'
 
 RSpec.describe Flipper::Instrumenters::Memory do
-  describe "#initialize" do
-    it "sets events to empty array" do
+  describe '#initialize' do
+    it 'sets events to empty array' do
       instrumenter = described_class.new
       expect(instrumenter.events).to eq([])
     end
   end
 
-  describe "#instrument" do
-    it "adds to events" do
+  describe '#instrument' do
+    it 'adds to events' do
       instrumenter = described_class.new
       name         = 'user.signup'
-      payload      = {:email => 'john@doe.com'}
+      payload      = { email: 'john@doe.com' }
       block_result = :yielded
 
       result = instrumenter.instrument(name, payload) { block_result }

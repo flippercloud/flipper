@@ -9,9 +9,9 @@ module SpecHelpers
   end
 
   def build_app(flipper)
-    Flipper::UI.app(flipper) { |builder|
-      builder.use Rack::Session::Cookie, secret: "test"
-    }
+    Flipper::UI.app(flipper) do |builder|
+      builder.use Rack::Session::Cookie, secret: 'test'
+    end
   end
 
   def build_api(flipper)
@@ -27,7 +27,35 @@ module SpecHelpers
   end
 
   def json_response
-    JSON.load(last_response.body)
+    JSON.parse(last_response.body)
+  end
+
+  def api_error_code_reference_url
+    'https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference'
+  end
+
+  def api_not_found_response
+    {
+      'code' => 1,
+      'message' => 'Feature not found.',
+      'more_info' => api_error_code_reference_url,
+    }
+  end
+
+  def api_flipper_id_is_missing_response
+    {
+      'code' => 4,
+      'message' => 'Required parameter flipper_id is missing.',
+      'more_info' => api_error_code_reference_url,
+    }
+  end
+
+  def api_positive_percentage_error_response
+    {
+      'code' => 3,
+      'message' => 'Percentage must be a positive number less than or equal to 100.',
+      'more_info' => api_error_code_reference_url,
+    }
   end
 end
 

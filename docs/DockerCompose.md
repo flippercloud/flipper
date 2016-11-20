@@ -9,7 +9,8 @@ new contributor could start working on code with a minumum efforts.
 1. Install Docker Compose https://docs.docker.com/compose/install
 2. Install gems `docker-compose run --rm app bundle install`
 3. Run specs `docker-compose run --rm app bundle exec rspec`
-4. Optional: log in to container an using a bash for running specs
+4. Clear and check files with Rubocop `docker-compose run --rm  app bundle exec rubocop -D`
+5. Optional: log in to container an using a bash for running specs
 ```sh
 docker-compose run --rm app bash
 bundle exec rspec

@@ -5,7 +5,6 @@ module Flipper
   module UI
     module Actions
       class File < UI::Action
-
         route %r{(images|css|js|octicons|fonts)/.*\Z}
 
         def get

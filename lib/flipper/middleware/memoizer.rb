@@ -48,14 +48,12 @@ module Flipper
           flipper.preload(names)
         end
 
-        if @opts[:preload]
-          flipper.preload(@opts[:preload])
-        end
+        flipper.preload(@opts[:preload]) if @opts[:preload]
 
         response = @app.call(env)
-        response[2] = Rack::BodyProxy.new(response[2]) {
+        response[2] = Rack::BodyProxy.new(response[2]) do
           flipper.adapter.memoize = original
-        }
+        end
         response
       rescue
         flipper.adapter.memoize = original

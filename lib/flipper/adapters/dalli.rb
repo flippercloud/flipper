@@ -7,7 +7,7 @@ module Flipper
     class Dalli
       include ::Flipper::Adapter
 
-      Version = "v1".freeze
+      Version = 'v1'.freeze
       Namespace = "flipper/#{Version}".freeze
       FeaturesKey = "#{Namespace}/features".freeze
 

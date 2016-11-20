@@ -6,7 +6,7 @@ module Flipper
 
       class WriteAttempted < Error
         def initialize(message = nil)
-          super(message || "write attempted while in read only mode")
+          super(message || 'write attempted while in read only mode')
         end
       end
 
@@ -27,23 +27,23 @@ module Flipper
         @adapter.get(feature)
       end
 
-      def add(feature)
+      def add(_feature)
         raise WriteAttempted
       end
 
-      def remove(feature)
+      def remove(_feature)
         raise WriteAttempted
       end
 
-      def clear(feature)
+      def clear(_feature)
         raise WriteAttempted
       end
 
-      def enable(feature, gate, thing)
+      def enable(_feature, _gate, _thing)
         raise WriteAttempted
       end
 
-      def disable(feature, gate, thing)
+      def disable(_feature, _gate, _thing)
         raise WriteAttempted
       end
     end

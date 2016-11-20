@@ -6,19 +6,18 @@ module Flipper
   module UI
     module Actions
       class Features < UI::Action
-
         route %r{features/?\Z}
 
         def get
-          @page_title = "Features"
-          @features = flipper.features.map { |feature|
+          @page_title = 'Features'
+          @features = flipper.features.map do |feature|
             Decorators::Feature.new(feature)
-          }.sort
+          end.sort
 
           @show_blank_slate = @features.empty?
 
-          breadcrumb "Home", "/"
-          breadcrumb "Features"
+          breadcrumb 'Home', '/'
+          breadcrumb 'Features'
 
           view_response :features
         end
@@ -27,14 +26,14 @@ module Flipper
           unless Flipper::UI.feature_creation_enabled
             status 403
 
-            breadcrumb "Home", "/"
-            breadcrumb "Features", "/features"
-            breadcrumb "Noooooope"
+            breadcrumb 'Home', '/'
+            breadcrumb 'Features', '/features'
+            breadcrumb 'Noooooope'
 
             halt view_response(:feature_creation_disabled)
           end
 
-          value = params["value"].to_s.strip
+          value = params['value'].to_s.strip
 
           if Util.blank?(value)
             error = Rack::Utils.escape("#{value.inspect} is not a valid feature name.")

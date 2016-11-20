@@ -1,54 +1,56 @@
 require 'helper'
 
 RSpec.describe Flipper::UI::Actions::PercentageOfTimeGate do
-  let(:token) {
+  let(:token) do
     if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
       Rack::Protection::AuthenticityToken.random_token
     else
-      "a"
+      'a'
     end
-  }
-  let(:session) {
+  end
+  let(:session) do
     if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
-      {:csrf => token}
+      { csrf: token }
     else
-      {"_csrf_token" => token}
+      { '_csrf_token' => token }
     end
-  }
+  end
 
-  describe "POST /features/:feature/percentage_of_time" do
-    context "with valid value" do
+  describe 'POST /features/:feature/percentage_of_time' do
+    context 'with valid value' do
       before do
-        post "features/search/percentage_of_time",
-          {"value" => "24", "authenticity_token" => token},
-          "rack.session" => session
+        post 'features/search/percentage_of_time',
+             { 'value' => '24', 'authenticity_token' => token },
+             'rack.session' => session
       end
 
-      it "enables the feature" do
+      it 'enables the feature' do
         expect(flipper[:search].percentage_of_time_value).to be(24)
       end
 
-      it "redirects back to feature" do
+      it 'redirects back to feature' do
         expect(last_response.status).to be(302)
-        expect(last_response.headers["Location"]).to eq("/features/search")
+        expect(last_response.headers['Location']).to eq('/features/search')
       end
     end
 
-    context "with invalid value" do
+    context 'with invalid value' do
       before do
-        post "features/search/percentage_of_time",
-          {"value" => "555", "authenticity_token" => token},
-          "rack.session" => session
+        post 'features/search/percentage_of_time',
+             { 'value' => '555', 'authenticity_token' => token },
+             'rack.session' => session
       end
 
-      it "does not change value" do
+      it 'does not change value' do
         expect(flipper[:search].percentage_of_time_value).to be(0)
       end
 
-      it "redirects back to feature" do
+      # rubocop:disable Metrics/LineLength
+      it 'redirects back to feature' do
         expect(last_response.status).to be(302)
-        expect(last_response.headers["Location"]).to eq("/features/search?error=Invalid+percentage+of+time+value%3A+value+must+be+a+positive+number+less+than+or+equal+to+100%2C+but+was+555")
+        expect(last_response.headers['Location']).to eq('/features/search?error=Invalid+percentage+of+time+value%3A+value+must+be+a+positive+number+less+than+or+equal+to+100%2C+but+was+555')
       end
+      # rubocop:enable Metrics/LineLength
     end
   end
 end

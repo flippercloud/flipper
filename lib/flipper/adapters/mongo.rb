@@ -25,13 +25,13 @@ module Flipper
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
-        update FeaturesKey, '$addToSet' => {'features' => feature.key}
+        update FeaturesKey, '$addToSet' => { 'features' => feature.key }
         true
       end
 
       # Public: Removes a feature from the set of known features.
       def remove(feature)
-        update FeaturesKey, '$pull' => {'features' => feature.key}
+        update FeaturesKey, '$pull' => { 'features' => feature.key }
         clear feature
         true
       end
@@ -95,9 +95,9 @@ module Flipper
         when :boolean
           delete feature.key
         when :integer
-          update feature.key, '$set' => {gate.key.to_s => thing.value.to_s}
+          update feature.key, '$set' => { gate.key.to_s => thing.value.to_s }
         when :set
-          update feature.key, '$pull' => {gate.key.to_s => thing.value.to_s}
+          update feature.key, '$pull' => { gate.key.to_s => thing.value.to_s }
         else
           unsupported_data_type gate.data_type
         end
@@ -112,40 +112,41 @@ module Flipper
 
       # Private
       def find(key)
-        @collection.find({:_id => key.to_s}).limit(1).first || {}
+        @collection.find(_id: key.to_s).limit(1).first || {}
       end
 
       def find_many(keys)
-        docs = @collection.find({_id: {'$in' => keys}}).to_a
+        docs = @collection.find(_id: { '$in' => keys }).to_a
         result = Hash.new { |hash, key| hash[key] = {} }
         docs.each do |doc|
-          result[doc["_id"]] = doc
+          result[doc['_id']] = doc
         end
         result
       end
 
       # Private
       def update(key, updates)
-        options = {:upsert => true}
-        @collection.find({:_id => key.to_s}).update_one(updates, options)
+        options = { upsert: true }
+        @collection.find(_id: key.to_s).update_one(updates, options)
       end
 
       # Private
       def delete(key)
-        @collection.find({:_id => key.to_s}).delete_one
+        @collection.find(_id: key.to_s).delete_one
       end
 
       def result_for_feature(feature, doc)
         result = {}
         feature.gates.each do |gate|
-          result[gate.key] = case gate.data_type
-          when :boolean, :integer
-            doc[gate.key.to_s]
-          when :set
-            doc.fetch(gate.key.to_s) { Set.new }.to_set
-          else
-            unsupported_data_type gate.data_type
-          end
+          result[gate.key] =
+            case gate.data_type
+            when :boolean, :integer
+              doc[gate.key.to_s]
+            when :set
+              doc.fetch(gate.key.to_s) { Set.new }.to_set
+            else
+              unsupported_data_type gate.data_type
+            end
         end
         result
       end

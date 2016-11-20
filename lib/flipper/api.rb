@@ -8,7 +8,7 @@ module Flipper
     CONTENT_TYPE = 'application/json'.freeze
 
     def self.app(flipper)
-      app = App.new(200,{ 'Content-Type' => CONTENT_TYPE }, [''])
+      app = App.new(200, { 'Content-Type' => CONTENT_TYPE }, [''])
       builder = Rack::Builder.new
       yield builder if block_given?
       builder.use Flipper::Api::Middleware, flipper
@@ -29,7 +29,7 @@ module Flipper
 
       # Public : Rack expects object that responds to call
       # env - environment hash
-      def call(env)
+      def call(_env)
         response
       end
 

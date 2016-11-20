@@ -6,7 +6,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfTimeGate do
   describe 'enable' do
     before do
       flipper[:my_feature].disable
-      post '/api/v1/features/my_feature/percentage_of_time', { percentage: '10' }
+      post '/api/v1/features/my_feature/percentage_of_time', percentage: '10'
     end
 
     it 'enables gate for feature' do
@@ -40,33 +40,33 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfTimeGate do
       delete '/api/v1/features/my_feature/percentage_of_time'
     end
 
-    it  '404s with correct error response when feature does not exist' do
+    it '404s with correct error response when feature does not exist' do
       expect(last_response.status).to eq(404)
-      expect(json_response).to eq({ 'code' => 1, 'message' => 'Feature not found.', 'more_info' => 'https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference' })
+      expect(json_response).to eq(api_not_found_response)
     end
   end
 
   describe 'out of range parameter percentage parameter' do
     before do
       flipper[:my_feature].disable
-      post '/api/v1/features/my_feature/percentage_of_time', { percentage: '300' }
+      post '/api/v1/features/my_feature/percentage_of_time', percentage: '300'
     end
 
     it '422s with correct error response when percentage parameter is invalid' do
       expect(last_response.status).to eq(422)
-      expect(json_response).to eq({ 'code' => 3, 'message' => 'Percentage must be a positive number less than or equal to 100.', 'more_info' => 'https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference' })
+      expect(json_response).to eq(api_positive_percentage_error_response)
     end
   end
 
   describe 'percentage parameter not an integer' do
     before do
       flipper[:my_feature].disable
-      post '/api/v1/features/my_feature/percentage_of_time', { percentage: 'foo' }
+      post '/api/v1/features/my_feature/percentage_of_time', percentage: 'foo'
     end
 
     it '422s with correct error response when percentage parameter is invalid' do
       expect(last_response.status).to eq(422)
-      expect(json_response).to eq({ 'code' => 3, 'message' => 'Percentage must be a positive number less than or equal to 100.', 'more_info' => 'https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference' })
+      expect(json_response).to eq(api_positive_percentage_error_response)
     end
   end
 
@@ -78,7 +78,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfTimeGate do
 
     it '422s with correct error response when percentage parameter is missing' do
       expect(last_response.status).to eq(422)
-      expect(json_response).to eq({ 'code' => 3, 'message' => 'Percentage must be a positive number less than or equal to 100.', 'more_info' => 'https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference' })
+      expect(json_response).to eq(api_positive_percentage_error_response)
     end
   end
 end

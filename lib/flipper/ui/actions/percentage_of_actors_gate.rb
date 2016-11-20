@@ -8,12 +8,12 @@ module Flipper
         route %r{features/[^/]*/percentage_of_actors/?\Z}
 
         def post
-          feature_name = Rack::Utils.unescape(request.path.split("/")[-2])
+          feature_name = Rack::Utils.unescape(request.path.split('/')[-2])
           feature = flipper[feature_name.to_sym]
           @feature = Decorators::Feature.new(feature)
 
           begin
-            feature.enable_percentage_of_actors params["value"]
+            feature.enable_percentage_of_actors params['value']
           rescue ArgumentError => exception
             error = Rack::Utils.escape("Invalid percentage of actors value: #{exception.message}")
             redirect_to("/features/#{@feature.key}?error=#{error}")

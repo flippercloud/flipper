@@ -25,9 +25,7 @@ module Flipper
         description = "Flipper feature(#{feature_name}) #{operation} #{result.inspect}"
         details = "thing=#{thing.inspect}"
 
-        unless gate_name.nil?
-          details += " gate_name=#{gate_name}"
-        end
+        details += " gate_name=#{gate_name}" unless gate_name.nil?
 
         name = '%s (%.1fms)' % [description, event.duration]
         debug "  #{color(name, CYAN, true)}  [ #{details} ]"
@@ -54,7 +52,7 @@ module Flipper
         operation = event.payload[:operation]
         result = event.payload[:result]
 
-        description = "Flipper "
+        description = 'Flipper '
         description << "feature(#{feature_name}) " unless feature_name.nil?
         description << "adapter(#{adapter_name}) "
         description << "#{operation} "

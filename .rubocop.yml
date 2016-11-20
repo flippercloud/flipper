@@ -1,0 +1,36 @@
+# This is the configuration used to check the rubocop source code.
+
+require: rubocop-rspec
+inherit_from:
+  - .rubocop_todo.yml
+
+AllCops:
+  Exclude:
+    - 'docker-compose/**/*'
+    - 'examples/**/*'
+    - 'tmp/**/*'
+  TargetRubyVersion: 2.0
+  # DefaultFormatter: fuubar
+Style/Alias:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/Encoding:
+  Enabled: false
+
+Style/NumericLiterals:
+  Enabled: false
+
+Metrics/LineLength:
+  Max: 100
+  Exclude:
+    - '*.gemspec'
+
+Style/RegexpLiteral:
+  EnforcedStyle: mixed
+
+Style/TrailingCommaInLiteral:
+  EnforcedStyleForMultiline: consistent_comma
+

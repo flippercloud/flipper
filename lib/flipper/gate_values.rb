@@ -1,15 +1,15 @@
-require "set"
+require 'set'
 
 module Flipper
   class GateValues
     # Private: Array of instance variables that are readable through the []
     # instance method.
     LegitIvars = {
-      "boolean" => "@boolean",
-      "actors" => "@actors",
-      "groups" => "@groups",
-      "percentage_of_time" => "@percentage_of_time",
-      "percentage_of_actors" => "@percentage_of_actors",
+      'boolean' => '@boolean',
+      'actors' => '@actors',
+      'groups' => '@groups',
+      'percentage_of_time' => '@percentage_of_time',
+      'percentage_of_actors' => '@percentage_of_actors',
     }.freeze
 
     attr_reader :boolean

@@ -5,7 +5,7 @@ class FakeUDPSocket
     @buffer = []
   end
 
-  def send(message, *rest)
+  def send(message, *_rest)
     @buffer.push [message]
   end
 

@@ -13,10 +13,10 @@ module Flipper
           feature = flipper[feature_name.to_sym]
           @feature = Decorators::Feature.new(feature)
 
-          breadcrumb "Home", "/"
-          breadcrumb "Features", "/features"
+          breadcrumb 'Home', '/'
+          breadcrumb 'Features', '/features'
           breadcrumb @feature.key, "/features/#{@feature.key}"
-          breadcrumb "Add Actor"
+          breadcrumb 'Add Actor'
 
           view_response :add_actor
         end
@@ -24,7 +24,7 @@ module Flipper
         def post
           feature_name = Rack::Utils.unescape(request.path.split('/')[-2])
           feature = flipper[feature_name.to_sym]
-          value = params["value"].to_s.strip
+          value = params['value'].to_s.strip
 
           if Util.blank?(value)
             error = Rack::Utils.escape("#{value.inspect} is not a valid actor value.")
@@ -33,10 +33,10 @@ module Flipper
 
           actor = Flipper::UI::Actor.new(value)
 
-          case params["operation"]
-          when "enable"
+          case params['operation']
+          when 'enable'
             feature.enable_actor actor
-          when "disable"
+          when 'disable'
             feature.disable_actor actor
           end
 

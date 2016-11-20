@@ -34,93 +34,93 @@ module Flipper
       # Public
       def features
         payload = {
-          :operation => :features,
-          :adapter_name => @adapter.name,
+          operation: :features,
+          adapter_name: @adapter.name,
         }
 
-        @instrumenter.instrument(InstrumentationName, payload) { |payload|
+        @instrumenter.instrument(InstrumentationName, payload) do |payload|
           payload[:result] = @adapter.features
-        }
+        end
       end
 
       # Public
       def add(feature)
         payload = {
-          :operation => :add,
-          :adapter_name => @adapter.name,
-          :feature_name => feature.name,
+          operation: :add,
+          adapter_name: @adapter.name,
+          feature_name: feature.name,
         }
 
-        @instrumenter.instrument(InstrumentationName, payload) { |payload|
+        @instrumenter.instrument(InstrumentationName, payload) do |payload|
           payload[:result] = @adapter.add(feature)
-        }
+        end
       end
 
       # Public
       def remove(feature)
         payload = {
-          :operation => :remove,
-          :adapter_name => @adapter.name,
-          :feature_name => feature.name,
+          operation: :remove,
+          adapter_name: @adapter.name,
+          feature_name: feature.name,
         }
 
-        @instrumenter.instrument(InstrumentationName, payload) { |payload|
+        @instrumenter.instrument(InstrumentationName, payload) do |payload|
           payload[:result] = @adapter.remove(feature)
-        }
+        end
       end
 
       # Public
       def clear(feature)
         payload = {
-          :operation => :clear,
-          :adapter_name => @adapter.name,
-          :feature_name => feature.name,
+          operation: :clear,
+          adapter_name: @adapter.name,
+          feature_name: feature.name,
         }
 
-        @instrumenter.instrument(InstrumentationName, payload) { |payload|
+        @instrumenter.instrument(InstrumentationName, payload) do |payload|
           payload[:result] = @adapter.clear(feature)
-        }
+        end
       end
 
       # Public
       def get(feature)
         payload = {
-          :operation => :get,
-          :adapter_name => @adapter.name,
-          :feature_name => feature.name,
+          operation: :get,
+          adapter_name: @adapter.name,
+          feature_name: feature.name,
         }
 
-        @instrumenter.instrument(InstrumentationName, payload) { |payload|
+        @instrumenter.instrument(InstrumentationName, payload) do |payload|
           payload[:result] = @adapter.get(feature)
-        }
+        end
       end
 
       # Public
       def enable(feature, gate, thing)
         payload = {
-          :operation => :enable,
-          :adapter_name => @adapter.name,
-          :feature_name => feature.name,
-          :gate_name => gate.name,
+          operation: :enable,
+          adapter_name: @adapter.name,
+          feature_name: feature.name,
+          gate_name: gate.name,
         }
 
-        @instrumenter.instrument(InstrumentationName, payload) { |payload|
+        @instrumenter.instrument(InstrumentationName, payload) do |payload|
           payload[:result] = @adapter.enable(feature, gate, thing)
-        }
+        end
       end
 
       # Public
       def disable(feature, gate, thing)
         payload = {
-          :operation => :disable,
-          :adapter_name => @adapter.name,
-          :feature_name => feature.name,
-          :gate_name => gate.name,
+          operation: :disable,
+          adapter_name: @adapter.name,
+          feature_name: feature.name,
+          gate_name: gate.name,
         }
 
-        @instrumenter.instrument(InstrumentationName, payload) { |payload|
+        @instrumenter.instrument(InstrumentationName, payload) do |payload|
           payload[:result] = @adapter.disable(feature, gate, thing)
-        }
+        end
       end
     end
   end

@@ -3,14 +3,14 @@ require 'helper'
 RSpec.describe Flipper::Gate do
   let(:feature_name) { :stats }
 
-  subject {
+  subject do
     described_class.new
-  }
+  end
 
-  describe "#inspect" do
-    context "for subclass" do
-      let(:subclass) {
-        Class.new(described_class) {
+  describe '#inspect' do
+    context 'for subclass' do
+      let(:subclass) do
+        Class.new(described_class) do
           def name
             :name
           end
@@ -22,14 +22,14 @@ RSpec.describe Flipper::Gate do
           def data_type
             :set
           end
-        }
-      }
+        end
+      end
 
-      subject {
+      subject do
         subclass.new
-      }
+      end
 
-      it "includes attributes" do
+      it 'includes attributes' do
         string = subject.inspect
         expect(string).to include(subject.object_id.to_s)
         expect(string).to include('name=:name')

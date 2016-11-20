@@ -1,5 +1,5 @@
-require "pstore"
-require "set"
+require 'pstore'
+require 'set'
 
 module Flipper
   module Adapters
@@ -17,7 +17,7 @@ module Flipper
       attr_reader :path
 
       # Public
-      def initialize(path = "flipper.pstore")
+      def initialize(path = 'flipper.pstore')
         @path = path
         @store = ::PStore.new(path)
         @name = :pstore
@@ -55,14 +55,15 @@ module Flipper
         result = {}
 
         feature.gates.each do |gate|
-          result[gate.key] = case gate.data_type
-          when :boolean, :integer
-            read key(feature, gate)
-          when :set
-            set_members key(feature, gate)
-          else
-            raise "#{gate} is not supported by this adapter yet"
-          end
+          result[gate.key] =
+            case gate.data_type
+            when :boolean, :integer
+              read key(feature, gate)
+            when :set
+              set_members key(feature, gate)
+            else
+              raise "#{gate} is not supported by this adapter yet"
+            end
         end
 
         result

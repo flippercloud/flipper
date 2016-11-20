@@ -1,7 +1,7 @@
 require 'helper'
 require 'sequel'
 
-Sequel::Model.db =  Sequel.sqlite(':memory:')
+Sequel::Model.db = Sequel.sqlite(':memory:')
 Sequel.extension :migration, :core_extensions
 
 require 'flipper/adapters/sequel'

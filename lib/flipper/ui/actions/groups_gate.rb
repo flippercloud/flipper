@@ -12,10 +12,10 @@ module Flipper
           feature = flipper[feature_name.to_sym]
           @feature = Decorators::Feature.new(feature)
 
-          breadcrumb "Home", "/"
-          breadcrumb "Features", "/features"
+          breadcrumb 'Home', '/'
+          breadcrumb 'Features', '/features'
           breadcrumb @feature.key, "/features/#{@feature.key}"
-          breadcrumb "Add Group"
+          breadcrumb 'Add Group'
 
           view_response :add_group
         end
@@ -23,12 +23,12 @@ module Flipper
         def post
           feature_name = Rack::Utils.unescape(request.path.split('/')[-2])
           feature = flipper[feature_name.to_sym]
-          value = params["value"].to_s.strip
+          value = params['value'].to_s.strip
 
-          case params["operation"]
-          when "enable"
+          case params['operation']
+          when 'enable'
             feature.enable_group value
-          when "disable"
+          when 'disable'
             feature.disable_group value
           end
 

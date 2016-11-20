@@ -1,3 +1,4 @@
+# rubocop:disable Metrics/ModuleLength
 module Flipper
   module Test
     module SharedAdapterTests
@@ -9,24 +10,24 @@ module Flipper
         @boolean_gate = @feature.gate(:boolean)
         @group_gate = @feature.gate(:group)
         @actor_gate = @feature.gate(:actor)
-        @actors_gate =  @feature.gate(:percentage_of_actors)
-        @time_gate =  @feature.gate(:percentage_of_time)
+        @actors_gate = @feature.gate(:percentage_of_actors)
+        @time_gate = @feature.gate(:percentage_of_time)
 
         @default_config = {
-          :boolean => nil,
-          :groups => Set.new,
-          :actors => Set.new,
-          :percentage_of_actors => nil,
-          :percentage_of_time => nil,
+          boolean: nil,
+          groups: Set.new,
+          actors: Set.new,
+          percentage_of_actors: nil,
+          percentage_of_time: nil,
         }
 
         Flipper.register(:admins) do |actor|
           actor.respond_to?(:admin?) && actor.admin?
         end
 
-        Flipper.register(:early_access) { |actor|
+        Flipper.register(:early_access) do |actor|
           actor.respond_to?(:early_access?) && actor.early_access?
-        }
+        end
       end
 
       def teardown
@@ -35,12 +36,12 @@ module Flipper
       end
 
       def test_has_name_that_is_a_symbol
-        refute_empty  @adapter.name
+        refute_empty @adapter.name
         assert_kind_of Symbol, @adapter.name
       end
 
       def test_has_included_the_flipper_adapter_module
-        assert_includes  @adapter.class.ancestors, Flipper::Adapter
+        assert_includes @adapter.class.ancestors, Flipper::Adapter
       end
 
       def test_returns_correct_default_values_for_gates_if_none_are_enabled
@@ -55,10 +56,10 @@ module Flipper
       end
 
       def test_fully_disables_all_enabled_things_when_boolean_gate_disabled
-        actor_22 = @actor_class.new('22')
+        actor22 = @actor_class.new('22')
         assert_equal true, @adapter.enable(@feature, @boolean_gate, @flipper.boolean)
         assert_equal true, @adapter.enable(@feature, @group_gate, @flipper.group(:admins))
-        assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor_22))
+        assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor22))
         assert_equal true, @adapter.enable(@feature, @actors_gate, @flipper.actors(25))
         assert_equal true, @adapter.enable(@feature, @time_gate, @flipper.time(45))
         assert_equal true, @adapter.disable(@feature, @boolean_gate, @flipper.boolean(false))
@@ -82,16 +83,16 @@ module Flipper
       end
 
       def test_can_enable_disable_and_get_value_for_an_actor_gate
-        actor_22 = @actor_class.new('22')
+        actor22 = @actor_class.new('22')
         actor_asdf = @actor_class.new('asdf')
 
-        assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor_22))
+        assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor22))
         assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor_asdf))
 
         result = @adapter.get(@feature)
         assert_equal Set['22', 'asdf'], result[:actors]
 
-        assert true, @adapter.disable(@feature, @actor_gate, @flipper.actor(actor_22))
+        assert true, @adapter.disable(@feature, @actor_gate, @flipper.actor(actor22))
         result = @adapter.get(@feature)
         assert_equal Set['asdf'], result[:actors]
 
@@ -159,7 +160,8 @@ module Flipper
       end
 
       def test_converts_the_actor_value_to_a_string
-        assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(@actor_class.new(22)))
+        assert_equal true,
+                     @adapter.enable(@feature, @actor_gate, @flipper.actor(@actor_class.new(22)))
         result = @adapter.get(@feature)
         assert_equal Set['22'], result[:actors]
       end
@@ -199,10 +201,10 @@ module Flipper
       end
 
       def test_clears_all_the_gate_values_for_the_feature_on_remove
-        actor_22 = @actor_class.new('22')
+        actor22 = @actor_class.new('22')
         assert_equal true, @adapter.enable(@feature, @boolean_gate, @flipper.boolean)
         assert_equal true, @adapter.enable(@feature, @group_gate, @flipper.group(:admins))
-        assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor_22))
+        assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor22))
         assert_equal true, @adapter.enable(@feature, @actors_gate, @flipper.actors(25))
         assert_equal true, @adapter.enable(@feature, @time_gate, @flipper.time(45))
 
@@ -212,13 +214,13 @@ module Flipper
       end
 
       def test_can_clear_all_the_gate_values_for_a_feature
-        actor_22 = @actor_class.new('22')
+        actor22 = @actor_class.new('22')
         @adapter.add(@feature)
         assert_includes @adapter.features, @feature.key
 
         assert_equal true, @adapter.enable(@feature, @boolean_gate, @flipper.boolean)
         assert_equal true, @adapter.enable(@feature, @group_gate, @flipper.group(:admins))
-        assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor_22))
+        assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor22))
         assert_equal true, @adapter.enable(@feature, @actors_gate, @flipper.actors(25))
         assert_equal true, @adapter.enable(@feature, @time_gate, @flipper.time(45))
 
@@ -240,7 +242,7 @@ module Flipper
         assert_instance_of Hash, result
 
         stats, search, other = result.values
-        assert_equal @default_config.merge(boolean: "true"), stats
+        assert_equal @default_config.merge(boolean: 'true'), stats
         assert_equal @default_config, search
         assert_equal @default_config, other
       end

@@ -8,7 +8,8 @@ module Flipper
         route %r{features/[^/]*/[^/]*/?\Z}
 
         def post
-          feature_name, gate_name = request.path.split('/').pop(2).map{ |value| Rack::Utils.unescape value }
+          feature_name, gate_name = request.path.split('/').pop(2)
+                                           .map(&Rack::Utils.method(:unescape))
           update_gate_method_name = "update_#{gate_name}"
 
           feature = flipper[feature_name.to_sym]
@@ -27,7 +28,9 @@ module Flipper
 
         # Private: Returns error response that gate update method is not defined.
         def update_gate_method_undefined(gate_name)
-          error = Rack::Utils.escape("#{gate_name.inspect} gate does not exist therefore it cannot be updated.")
+          error = Rack::Utils.escape(
+            "#{gate_name.inspect} gate does not exist therefore it cannot be updated."
+          )
           redirect_to("/features/#{@feature.key}?error=#{error}")
         end
       end

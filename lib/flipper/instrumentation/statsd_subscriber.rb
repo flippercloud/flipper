@@ -18,9 +18,7 @@ module Flipper
       end
 
       def update_counter(metric)
-        if self.class.client
-          self.class.client.increment metric
-        end
+        self.class.client.increment metric if self.class.client
       end
     end
   end

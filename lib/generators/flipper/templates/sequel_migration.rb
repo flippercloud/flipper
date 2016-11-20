@@ -1,13 +1,13 @@
 class CreateFlipperTablesSequel < Sequel::Migration
   def up
-    create_table :flipper_features do |t|
+    create_table :flipper_features do |_t|
       String :key, null: false
       DateTime :created_at, null: false
       DateTime :updated_at, null: false
     end
     add_index :flipper_features, :key, unique: true
 
-    create_table :flipper_gates do |t|
+    create_table :flipper_gates do |_t|
       String :feature_key, null: false
       String :key, null: false
       String :value

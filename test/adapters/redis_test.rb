@@ -5,7 +5,7 @@ class RedisTest < MiniTest::Test
   prepend Flipper::Test::SharedAdapterTests
 
   def setup
-   client = Redis.new({}).tap { |c| c.flushdb }
-   @adapter = Flipper::Adapters::Redis.new(client)
+    client = Redis.new({}).tap(&:flushdb)
+    @adapter = Flipper::Adapters::Redis.new(client)
   end
 end

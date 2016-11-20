@@ -11,10 +11,8 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
   subject { described_class.new }
 
   before(:all) do
-    ActiveRecord::Base.establish_connection({
-      adapter: "sqlite3",
-      database: ":memory:",
-    })
+    ActiveRecord::Base.establish_connection(adapter: 'sqlite3',
+                                            database: ':memory:')
   end
 
   before(:each) do
