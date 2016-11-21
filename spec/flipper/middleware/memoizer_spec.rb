@@ -226,6 +226,18 @@ RSpec.describe Flipper::Middleware::Memoizer do
     end
   end
 
+  context "when an app raises an exception" do
+    it "resets memoize" do
+      begin
+        app = lambda { |env| raise }
+        middleware = described_class.new app, flipper
+        middleware.call({})
+      rescue RuntimeError
+        expect(flipper.adapter.memoizing?).to be(false)
+      end
+    end
+  end
+
   context "with block that yields flipper instance" do
     let(:app) {
       # ensure scoped for builder block, annoying...
