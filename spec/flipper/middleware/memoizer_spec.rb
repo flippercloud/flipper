@@ -106,6 +106,126 @@ RSpec.describe Flipper::Middleware::Memoizer do
     include_examples "flipper middleware"
   end
 
+  context "with preload_all" do
+    let(:app) {
+      # ensure scoped for builder block, annoying...
+      instance = flipper
+      middleware = described_class
+
+      Rack::Builder.new do
+        use middleware, instance, preload_all: true
+
+        map "/" do
+          run lambda {|env| [200, {}, []] }
+        end
+
+        map "/fail" do
+          run lambda {|env| raise "FAIL!" }
+        end
+      end.to_app
+    }
+
+    include_examples "flipper middleware"
+
+    it "eagerly caches known features for duration of request" do
+      flipper[:stats].enable
+      flipper[:shiny].enable
+
+      # clear the log of operations
+      adapter.reset
+
+      app = lambda { |env|
+        flipper[:stats].enabled?
+        flipper[:stats].enabled?
+        flipper[:shiny].enabled?
+        flipper[:shiny].enabled?
+        [200, {}, []]
+      }
+
+      middleware = described_class.new app, flipper, preload_all: true
+      middleware.call({})
+
+      expect(adapter.count(:features)).to be(1)
+      expect(adapter.count(:get_multi)).to be(1)
+      expect(adapter.last(:get_multi).args).to eq([[flipper[:stats], flipper[:shiny]]])
+    end
+
+    it "caches unknown features for duration of request" do
+      # clear the log of operations
+      adapter.reset
+
+      app = lambda { |env|
+        flipper[:other].enabled?
+        flipper[:other].enabled?
+        [200, {}, []]
+      }
+
+      middleware = described_class.new app, flipper, preload_all: true
+      middleware.call({})
+
+      expect(adapter.count(:get)).to be(1)
+      expect(adapter.last(:get).args).to eq([flipper[:other]])
+    end
+  end
+
+  context "with preload specific" do
+    let(:app) {
+      # ensure scoped for builder block, annoying...
+      instance = flipper
+      middleware = described_class
+
+      Rack::Builder.new do
+        use middleware, instance, preload: %i{stats}
+
+        map "/" do
+          run lambda {|env| [200, {}, []] }
+        end
+
+        map "/fail" do
+          run lambda {|env| raise "FAIL!" }
+        end
+      end.to_app
+    }
+
+    include_examples "flipper middleware"
+
+    it "eagerly caches specified features for duration of request" do
+      # clear the log of operations
+      adapter.reset
+
+      app = lambda { |env|
+        flipper[:stats].enabled?
+        flipper[:stats].enabled?
+        flipper[:shiny].enabled?
+        flipper[:shiny].enabled?
+        [200, {}, []]
+      }
+
+      middleware = described_class.new app, flipper, preload: %i{stats}
+      middleware.call({})
+
+      expect(adapter.count(:get_multi)).to be(1)
+      expect(adapter.last(:get_multi).args).to eq([[flipper[:stats]]])
+    end
+
+    it "caches unknown features for duration of request" do
+      # clear the log of operations
+      adapter.reset
+
+      app = lambda { |env|
+        flipper[:other].enabled?
+        flipper[:other].enabled?
+        [200, {}, []]
+      }
+
+      middleware = described_class.new app, flipper, preload: %i{stats}
+      middleware.call({})
+
+      expect(adapter.count(:get)).to be(1)
+      expect(adapter.last(:get).args).to eq([flipper[:other]])
+    end
+  end
+
   context "with block that yields flipper instance" do
     let(:app) {
       # ensure scoped for builder block, annoying...

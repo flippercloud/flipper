@@ -163,6 +163,17 @@ module Flipper
       })
     end
 
+    # Public: Preload the features with the given names.
+    #
+    # names - An Array of String or Symbol names of the features.
+    #
+    # Returns an Array of Flipper::Feature.
+    def preload(names)
+      features = names.map { |name| feature(name) }
+      @adapter.get_multi(features)
+      features
+    end
+
     # Public: Shortcut access to a feature instance by name.
     #
     # name - The String or Symbol name of the feature.

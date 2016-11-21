@@ -18,8 +18,9 @@ module Flipper
       #   # using with a block that yields a flipper instance
       #   use Flipper::Middleware::Memoizer, lambda { Flipper.new(...) }
       #
-      def initialize(app, flipper_or_block)
+      def initialize(app, flipper_or_block, opts = {})
         @app = app
+        @opts = opts
 
         if flipper_or_block.respond_to?(:call)
           @flipper_block = flipper_or_block
@@ -36,11 +37,23 @@ module Flipper
         original = flipper.adapter.memoizing?
         flipper.adapter.memoize = true
 
+        if @opts[:preload_all]
+          names = flipper.features.map(&:name)
+          flipper.preload(names)
+        end
+
+        if @opts[:preload]
+          flipper.preload(@opts[:preload])
+        end
+
         response = @app.call(env)
         response[2] = Rack::BodyProxy.new(response[2]) {
           flipper.adapter.memoize = original
         }
         response
+      rescue
+        flipper.adapter.memoize = original
+        raise
       end
     end
   end
