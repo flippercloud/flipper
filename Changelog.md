@@ -1,3 +1,9 @@
+## master
+
+* Add Adapter#get_multi to allow for efficient loading of more than one feature at a time (https://github.com/jnunemaker/flipper/pull/198)
+* Add DSL#preload for efficiently loading several features at once using get_mutli (https://github.com/jnunemaker/flipper/pull/198)
+* Add :preload and :preload_all options to memoizer as a way of efficiently loading several features for a request in one network call instead of N where N is the number of features checked (https://github.com/jnunemaker/flipper/pull/198)
+
 ## 0.10.1
 
 * Add docker compose support for contributing
