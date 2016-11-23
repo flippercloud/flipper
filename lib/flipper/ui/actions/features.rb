@@ -34,7 +34,7 @@ module Flipper
             halt view_response(:feature_creation_disabled)
           end
 
-          value = params["value"]
+          value = params["value"].strip
 
           if Util.blank?(value)
             error = Rack::Utils.escape("#{value.inspect} is not a valid feature name.")

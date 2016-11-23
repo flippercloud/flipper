@@ -36,6 +36,8 @@ RSpec.describe Flipper::UI::Actions::GroupsGate do
   end
 
   describe "POST /features/:feature/groups" do
+    let(:group_name) { "admins" }
+
     before do
       Flipper.register(:admins) { |user| user.admin? }
     end
@@ -47,7 +49,7 @@ RSpec.describe Flipper::UI::Actions::GroupsGate do
     context "enabling a group" do
       before do
         post "features/search/groups",
-          {"value" => "admins", "operation" => "enable", "authenticity_token" => token},
+          {"value" => group_name, "operation" => "enable", "authenticity_token" => token},
           "rack.session" => session
       end
 
@@ -59,13 +61,23 @@ RSpec.describe Flipper::UI::Actions::GroupsGate do
         expect(last_response.status).to be(302)
         expect(last_response.headers["Location"]).to eq("/features/search")
       end
+
+      context 'group name contains whitespace' do
+        let(:group_name) { "  admins  " }
+
+        it "adds item without whitespace" do
+          expect(flipper[:search].groups_value).to include("admins")
+        end
+      end
     end
 
     context "disabling a group" do
+      let(:group_name) { "admins" }
+
       before do
         flipper[:search].enable_group :admins
         post "features/search/groups",
-          {"value" => "admins", "operation" => "disable", "authenticity_token" => token},
+          {"value" => group_name, "operation" => "disable", "authenticity_token" => token},
           "rack.session" => session
       end
 
@@ -76,6 +88,14 @@ RSpec.describe Flipper::UI::Actions::GroupsGate do
       it "redirects back to feature" do
         expect(last_response.status).to be(302)
         expect(last_response.headers["Location"]).to eq("/features/search")
+      end
+
+      context 'group name contains whitespace' do
+        let(:group_name) { "  admins  " }
+
+        it "removes item without whitespace" do
+          expect(flipper[:search].groups_value).not_to include("admins")
+        end
       end
     end
 
