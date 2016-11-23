@@ -24,7 +24,7 @@ module Flipper
         def post
           feature_name = Rack::Utils.unescape(request.path.split('/')[-2])
           feature = flipper[feature_name.to_sym]
-          value = params["value"].strip
+          value = params["value"].to_s.strip
 
           if Util.blank?(value)
             error = Rack::Utils.escape("#{value.inspect} is not a valid actor value.")

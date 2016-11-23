@@ -67,6 +67,34 @@ RSpec.describe Flipper::UI::Actions::Features do
           expect(flipper.features.map(&:key)).to include("notifications_next")
         end
       end
+
+      context "for an invalid feature name" do
+        context "empty feature name" do
+          let(:feature_name) { "" }
+
+          it "does not add feature" do
+            expect(flipper.features.map(&:key)).to eq([])
+          end
+
+          it "redirects back to feature" do
+            expect(last_response.status).to be(302)
+            expect(last_response.headers["Location"]).to eq("/features/new?error=%22%22+is+not+a+valid+feature+name.")
+          end
+        end
+
+        context "nil feature name" do
+          let(:feature_name) { nil }
+
+          it "does not add feature" do
+            expect(flipper.features.map(&:key)).to eq([])
+          end
+
+          it "redirects back to feature" do
+            expect(last_response.status).to be(302)
+            expect(last_response.headers["Location"]).to eq("/features/new?error=%22%22+is+not+a+valid+feature+name.")
+          end
+        end
+      end
     end
 
     context 'feature_creation_enabled set to false' do
