@@ -72,27 +72,17 @@ module Flipper
       #
       # Returns a Hash of Flipper::Gate#key => value.
       def get(feature)
-        result = {}
-
         db_gates = @gate_class.where(feature_key: feature.key)
+        result_for_feature(feature, db_gates)
+      end
 
-        feature.gates.each do |gate|
-          result[gate.key] = case gate.data_type
-          when :boolean
-            if db_gate = db_gates.detect { |db_gate| db_gate.key == gate.key.to_s }
-              db_gate.value
-            end
-          when :integer
-            if db_gate = db_gates.detect { |db_gate| db_gate.key == gate.key.to_s }
-              db_gate.value
-            end
-          when :set
-            db_gates.select { |db_gate| db_gate.key == gate.key.to_s }.map(&:value).to_set
-          else
-            unsupported_data_type gate.data_type
-          end
+      def get_multi(features)
+        result = []
+        db_gates = @gate_class.where(feature_key: features.map(&:key))
+        grouped_db_gates = db_gates.group_by { |gate| gate.feature_key }
+        features.each do |feature|
+          result << result_for_feature(feature, grouped_db_gates[feature.key])
         end
-
         result
       end
 
@@ -167,6 +157,30 @@ module Flipper
       # Private
       def unsupported_data_type(data_type)
         raise "#{data_type} is not supported by this adapter"
+      end
+
+      private
+
+      def result_for_feature(feature, db_gates)
+        db_gates = db_gates || []
+        result = {}
+        feature.gates.each do |gate|
+          result[gate.key] = case gate.data_type
+          when :boolean
+            if db_gate = db_gates.detect { |db_gate| db_gate.key == gate.key.to_s }
+              db_gate.value
+            end
+          when :integer
+            if db_gate = db_gates.detect { |db_gate| db_gate.key == gate.key.to_s }
+              db_gate.value
+            end
+          when :set
+            db_gates.select { |db_gate| db_gate.key == gate.key.to_s }.map(&:value).to_set
+          else
+            unsupported_data_type gate.data_type
+          end
+        end
+        result
       end
     end
   end
