@@ -12,6 +12,16 @@ RSpec.shared_examples_for 'a flipper adapter' do
   let(:actors_gate)  { feature.gate(:percentage_of_actors) }
   let(:time_gate)  { feature.gate(:percentage_of_time) }
 
+  let(:default_config) {
+    {
+      :boolean => nil,
+      :groups => Set.new,
+      :actors => Set.new,
+      :percentage_of_actors => nil,
+      :percentage_of_time => nil,
+    }
+  }
+
   before do
     Flipper.register(:admins) { |actor|
       actor.respond_to?(:admin?) && actor.admin?
@@ -36,13 +46,7 @@ RSpec.shared_examples_for 'a flipper adapter' do
   end
 
   it "returns correct default values for the gates if none are enabled" do
-    expect(subject.get(feature)).to eq({
-      :boolean => nil,
-      :groups => Set.new,
-      :actors => Set.new,
-      :percentage_of_actors => nil,
-      :percentage_of_time => nil,
-    })
+    expect(subject.get(feature)).to eq(default_config)
   end
 
   it "can enable, disable and get value for boolean gate" do
@@ -241,13 +245,7 @@ RSpec.shared_examples_for 'a flipper adapter' do
 
     expect(subject.clear(feature)).to eq(true)
     expect(subject.features).to include(feature.key)
-    expect(subject.get(feature)).to eq({
-      :boolean => nil,
-      :groups => Set.new,
-      :actors => Set.new,
-      :percentage_of_actors => nil,
-      :percentage_of_time => nil,
-    })
+    expect(subject.get(feature)).to eq(default_config)
   end
 
   it "does not complain clearing a feature that does not exist in adapter" do
@@ -261,14 +259,6 @@ RSpec.shared_examples_for 'a flipper adapter' do
     expect(subject.add(flipper[:search])).to eq(true)
 
     stats, search, other = subject.get_multi([flipper[:stats], flipper[:search], flipper[:other]])
-
-    default_config = {
-      :boolean => nil,
-      :groups => Set.new,
-      :actors => Set.new,
-      :percentage_of_actors => nil,
-      :percentage_of_time => nil,
-    }
 
     expect(stats).to eq(default_config.merge(boolean: "true"))
     expect(search).to eq(default_config)
