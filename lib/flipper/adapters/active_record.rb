@@ -162,7 +162,7 @@ module Flipper
       private
 
       def result_for_feature(feature, db_gates)
-        db_gates = db_gates || []
+        db_gates ||= []
         result = {}
         feature.gates.each do |gate|
           result[gate.key] = case gate.data_type
