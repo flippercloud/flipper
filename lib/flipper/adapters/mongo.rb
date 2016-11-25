@@ -46,20 +46,16 @@ module Flipper
       #
       # Returns a Hash of Flipper::Gate#key => value.
       def get(feature)
-        result = {}
         doc = find(feature.key)
+        result_for_feature(feature, doc)
+      end
 
-        feature.gates.each do |gate|
-          result[gate.key] = case gate.data_type
-          when :boolean, :integer
-            doc[gate.key.to_s]
-          when :set
-            doc.fetch(gate.key.to_s) { Set.new }.to_set
-          else
-            unsupported_data_type gate.data_type
-          end
+      def get_multi(features)
+        result = []
+        docs = find_many(features.map(&:key))
+        features.each do |feature|
+          result << result_for_feature(feature, docs[feature.key])
         end
-
         result
       end
 
@@ -116,23 +112,42 @@ module Flipper
 
       # Private
       def find(key)
-        @collection.find(criteria(key)).limit(1).first || {}
+        @collection.find({:_id => key.to_s}).limit(1).first || {}
+      end
+
+      def find_many(keys)
+        docs = @collection.find({_id: {'$in' => keys}}).to_a
+        result = Hash.new { |hash, key| hash[key] = {} }
+        docs.each do |doc|
+          result[doc["_id"]] = doc
+        end
+        result
       end
 
       # Private
       def update(key, updates)
         options = {:upsert => true}
-        @collection.find(criteria(key)).update_one(updates, options)
+        @collection.find({:_id => key.to_s}).update_one(updates, options)
       end
 
       # Private
       def delete(key)
-        @collection.find(criteria(key)).delete_one
+        @collection.find({:_id => key.to_s}).delete_one
       end
 
-      # Private
-      def criteria(key)
-        {:_id => key.to_s}
+      def result_for_feature(feature, doc)
+        result = {}
+        feature.gates.each do |gate|
+          result[gate.key] = case gate.data_type
+          when :boolean, :integer
+            doc[gate.key.to_s]
+          when :set
+            doc.fetch(gate.key.to_s) { Set.new }.to_set
+          else
+            unsupported_data_type gate.data_type
+          end
+        end
+        result
       end
     end
   end
