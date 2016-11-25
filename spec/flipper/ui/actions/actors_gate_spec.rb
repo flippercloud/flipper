@@ -32,9 +32,11 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
 
   describe "POST /features/:feature/actors" do
     context "enabling an actor" do
+      let(:value) { "User:6" }
+
       before do
         post "features/search/actors",
-          {"value" => "User:6", "operation" => "enable", "authenticity_token" => token},
+          {"value" => value, "operation" => "enable", "authenticity_token" => token},
           "rack.session" => session
       end
 
@@ -46,13 +48,43 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
         expect(last_response.status).to be(302)
         expect(last_response.headers["Location"]).to eq("/features/search")
       end
+
+      context 'value contains whitespace' do
+        let(:value) { "  User:6  " }
+
+        it "adds item without whitespace" do
+          expect(flipper[:search].actors_value).to include("User:6")
+        end
+      end
+
+      context "for an invalid actor value" do
+        context "empty value" do
+          let(:value) { "" }
+
+          it "redirects back to feature" do
+            expect(last_response.status).to be(302)
+            expect(last_response.headers["Location"]).to eq("/features/search/actors?error=%22%22+is+not+a+valid+actor+value.")
+          end
+        end
+
+        context "nil value" do
+          let(:value) { nil }
+
+          it "redirects back to feature" do
+            expect(last_response.status).to be(302)
+            expect(last_response.headers["Location"]).to eq("/features/search/actors?error=%22%22+is+not+a+valid+actor+value.")
+          end
+        end
+      end
     end
 
     context "disabling an actor" do
+      let(:value) { "User:6" }
+
       before do
         flipper[:search].enable_actor Flipper::UI::Actor.new("User:6")
         post "features/search/actors",
-          {"value" => "User:6", "operation" => "disable", "authenticity_token" => token},
+          {"value" => value, "operation" => "disable", "authenticity_token" => token},
           "rack.session" => session
       end
 
@@ -64,18 +96,13 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
         expect(last_response.status).to be(302)
         expect(last_response.headers["Location"]).to eq("/features/search")
       end
-    end
 
-    context "for an invalid actor value" do
-      before do
-        post "features/search/actors",
-          {"value" => "", "operation" => "enable", "authenticity_token" => token},
-          "rack.session" => session
-      end
+      context 'value contains whitespace' do
+        let(:value) { "  User:6  " }
 
-      it "redirects back to feature" do
-        expect(last_response.status).to be(302)
-        expect(last_response.headers["Location"]).to eq("/features/search/actors?error=%22%22+is+not+a+valid+actor+value.")
+        it "removes item whitout whitespace" do
+          expect(flipper[:search].actors_value).not_to include("User:6")
+        end
       end
     end
   end

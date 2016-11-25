@@ -23,7 +23,7 @@ module Flipper
         def post
           feature_name = Rack::Utils.unescape(request.path.split('/')[-2])
           feature = flipper[feature_name.to_sym]
-          value = params["value"]
+          value = params["value"].to_s.strip
 
           case params["operation"]
           when "enable"
