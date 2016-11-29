@@ -7,7 +7,7 @@ module Flipper
     class Dalli
       include ::Flipper::Adapter
 
-      FeaturesKey = "flipper/features"
+      FeaturesKey = "flipper/features".freeze
 
       # Internal
       attr_reader :cache
