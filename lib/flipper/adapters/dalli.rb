@@ -59,6 +59,21 @@ module Flipper
         end
       end
 
+      def get_multi(features)
+        result = @cache.get_multi(features)
+        uncached_features = features.reject { |feature| result[feature] }
+
+        if uncached_features.any?
+          response = @adapter.get_multi(uncached_features)
+          response.each do |key, value|
+            @cache.set(key, value, @ttl)
+            result[key] = value
+          end
+        end
+
+        result
+      end
+
       # Public
       def enable(feature, gate, thing)
         result = @adapter.enable(feature, gate, thing)

@@ -26,6 +26,25 @@ RSpec.describe Flipper::Adapters::Dalli do
     end
   end
 
+  describe "#get_multi" do
+    it "warms uncached features" do
+      stats = flipper[:stats]
+      search = flipper[:search]
+      other = flipper[:other]
+      stats.enable
+      search.enable
+
+      adapter.get(stats)
+      expect(cache.get(search)).to be(nil)
+      expect(cache.get(other)).to be(nil)
+
+      adapter.get_multi([stats, search, other])
+
+      expect(cache.get(search)[:boolean]).to eq("true")
+      expect(cache.get(other)[:boolean]).to be(nil)
+    end
+  end
+
   describe "#name" do
     it "is dalli" do
       expect(subject.name).to be(:dalli)
