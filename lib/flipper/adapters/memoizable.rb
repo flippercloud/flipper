@@ -31,9 +31,7 @@ module Flipper
       # Public
       def features
         if memoizing?
-          cache.fetch(FeaturesKey) {
-            cache[FeaturesKey] = @adapter.features
-          }
+          cache.fetch(FeaturesKey) { cache[FeaturesKey] = @adapter.features }
         else
           @adapter.features
         end
@@ -42,24 +40,22 @@ module Flipper
       # Public
       def add(feature)
         result = @adapter.add(feature)
-        cache.delete(FeaturesKey) if memoizing?
+        expire_features_set
         result
       end
 
       # Public
       def remove(feature)
         result = @adapter.remove(feature)
-        if memoizing?
-          cache.delete(FeaturesKey)
-          cache.delete(feature.key)
-        end
+        expire_features_set
+        expire_feature(feature)
         result
       end
 
       # Public
       def clear(feature)
         result = @adapter.clear(feature)
-        cache.delete(feature.key) if memoizing?
+        expire_feature(feature)
         result
       end
 
@@ -75,10 +71,10 @@ module Flipper
       # Public
       def get_multi(features)
         if memoizing?
-          missing_features = features.reject { |feature| cache[feature.key] }
+          uncached_features = features.reject { |feature| cache[feature.key] }
 
-          if missing_features.any?
-            response = @adapter.get_multi(missing_features)
+          if uncached_features.any?
+            response = @adapter.get_multi(uncached_features)
             response.each do |key, hash|
               cache[key] = hash
             end
@@ -97,14 +93,14 @@ module Flipper
       # Public
       def enable(feature, gate, thing)
         result = @adapter.enable(feature, gate, thing)
-        cache.delete(feature.key) if memoizing?
+        expire_feature(feature)
         result
       end
 
       # Public
       def disable(feature, gate, thing)
         result = @adapter.disable(feature, gate, thing)
-        cache.delete(feature.key) if memoizing?
+        expire_feature(feature)
         result
       end
 
@@ -119,6 +115,20 @@ module Flipper
       # Internal: Returns true for using local cache, false for not.
       def memoizing?
         !!@memoize
+      end
+
+      private
+
+      def expire_feature(feature)
+        if memoizing?
+          cache.delete(feature.key)
+        end
+      end
+
+      def expire_features_set
+        if memoizing?
+          cache.delete(FeaturesKey)
+        end
       end
     end
   end
