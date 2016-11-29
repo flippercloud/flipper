@@ -51,7 +51,7 @@ module Flipper
         result = @adapter.remove(feature)
         if memoizing?
           cache.delete(FeaturesKey)
-          cache.delete(feature)
+          cache.delete(feature.key)
         end
         result
       end
@@ -59,14 +59,14 @@ module Flipper
       # Public
       def clear(feature)
         result = @adapter.clear(feature)
-        cache.delete(feature) if memoizing?
+        cache.delete(feature.key) if memoizing?
         result
       end
 
       # Public
       def get(feature)
         if memoizing?
-          cache.fetch(feature) { cache[feature] = @adapter.get(feature) }
+          cache.fetch(feature.key) { cache[feature.key] = @adapter.get(feature) }
         else
           @adapter.get(feature)
         end
@@ -75,20 +75,18 @@ module Flipper
       # Public
       def get_multi(features)
         if memoizing?
-          missing_features = features.reject { |feature| cache[feature] }
+          missing_features = features.reject { |feature| cache[feature.key] }
 
           if missing_features.any?
-            features_by_key = features.inject({}) { |hash, feature| hash[feature.key] = feature; hash }
-            multi_response = @adapter.get_multi(missing_features)
-            multi_response.each do |key, hash|
-              feature = features_by_key[key]
-              cache[feature] = hash
+            response = @adapter.get_multi(missing_features)
+            response.each do |key, hash|
+              cache[key] = hash
             end
           end
 
           result = {}
           features.each do |feature|
-            result[feature.key] = cache[feature]
+            result[feature.key] = cache[feature.key]
           end
           result
         else
@@ -99,14 +97,14 @@ module Flipper
       # Public
       def enable(feature, gate, thing)
         result = @adapter.enable(feature, gate, thing)
-        cache.delete(feature) if memoizing?
+        cache.delete(feature.key) if memoizing?
         result
       end
 
       # Public
       def disable(feature, gate, thing)
         result = @adapter.disable(feature, gate, thing)
-        cache.delete(feature) if memoizing?
+        cache.delete(feature.key) if memoizing?
         result
       end
 
