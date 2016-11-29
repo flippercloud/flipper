@@ -51,10 +51,10 @@ module Flipper
       end
 
       def get_multi(features)
-        result = []
         docs = find_many(features.map(&:key))
+        result = {}
         features.each do |feature|
-          result << result_for_feature(feature, docs[feature.key])
+          result[feature.key] = result_for_feature(feature, docs[feature.key])
         end
         result
       end

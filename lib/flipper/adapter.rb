@@ -5,7 +5,11 @@ module Flipper
     # feature. Feel free to override per adapter to make this more efficient and
     # reduce network calls.
     def get_multi(features)
-      features.map { |feature| get(feature) }
+      result = {}
+      features.each do |feature|
+        result[feature.key] = get(feature)
+      end
+      result
     end
   end
 end

@@ -57,10 +57,11 @@ module Flipper
 
       def get_multi(features)
         docs = docs_for(features)
-
-        features.zip(docs).map do |feature, doc|
-          result_for_feature(feature, doc)
+        result = {}
+        features.zip(docs) do |feature, doc|
+          result[feature.key] = result_for_feature(feature, doc)
         end
+        result
       end
 
       # Public: Enables a gate for a given thing.

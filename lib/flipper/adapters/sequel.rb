@@ -76,11 +76,11 @@ module Flipper
       end
 
       def get_multi(features)
-        result = []
         db_gates = @gate_class.where(feature_key: features.map(&:key)).to_a
         grouped_db_gates = db_gates.group_by { |gate| gate.feature_key }
+        result = {}
         features.each do |feature|
-          result << result_for_feature(feature, grouped_db_gates[feature.key])
+          result[feature.key] = result_for_feature(feature, grouped_db_gates[feature.key])
         end
         result
       end

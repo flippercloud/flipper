@@ -78,13 +78,19 @@ module Flipper
           missing_features = features.reject { |feature| cache[feature] }
 
           if missing_features.any?
-            missing_hashes = @adapter.get_multi(missing_features)
-            missing_features.zip(missing_hashes).each do |feature, hash|
+            features_by_key = features.inject({}) { |hash, feature| hash[feature.key] = feature; hash }
+            multi_response = @adapter.get_multi(missing_features)
+            multi_response.each do |key, hash|
+              feature = features_by_key[key]
               cache[feature] = hash
             end
           end
 
-          features.map { |feature| cache[feature] }
+          result = {}
+          features.each do |feature|
+            result[feature.key] = cache[feature]
+          end
+          result
         else
           @adapter.get_multi(features)
         end

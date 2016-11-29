@@ -236,7 +236,11 @@ module Flipper
         assert @adapter.enable(@flipper[:stats], @boolean_gate, @flipper.boolean)
         assert @adapter.add(@flipper[:search])
 
-        stats, search, other = @adapter.get_multi([@flipper[:stats], @flipper[:search], @flipper[:other]])
+        result = @adapter.get_multi([@flipper[:stats], @flipper[:search], @flipper[:other]])
+        assert_instance_of Hash, result
+        stats = result["stats"]
+        search = result["search"]
+        other = result["other"]
 
         assert_equal @default_config.merge(boolean: "true"), stats
         assert_equal @default_config, search

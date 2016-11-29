@@ -94,9 +94,9 @@ RSpec.describe Flipper::Adapters::Memoizable do
         names = %i{stats shiny}
         features = names.map { |name| flipper[name] }
         results = subject.get_multi(features)
-
-        features.zip(results).each do |feature, result|
-          expect(cache[feature]).to be(result)
+        features.each do |feature|
+          expect(cache[feature]).to_not be(nil)
+          expect(cache[feature]).to be(results[feature.key])
         end
       end
     end
