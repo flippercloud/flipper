@@ -17,6 +17,15 @@ RSpec.describe Flipper::Adapters::Dalli do
 
   it_should_behave_like 'a flipper adapter'
 
+  describe "#remove" do
+    it "expires feature" do
+      feature = flipper[:stats]
+      adapter.get(feature)
+      adapter.remove(feature)
+      expect(cache.get(feature)).to be(nil)
+    end
+  end
+
   describe "#name" do
     it "is dalli" do
       expect(subject.name).to be(:dalli)
