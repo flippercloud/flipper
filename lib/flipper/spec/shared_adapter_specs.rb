@@ -259,12 +259,9 @@ RSpec.shared_examples_for 'a flipper adapter' do
     expect(subject.add(flipper[:search])).to eq(true)
 
     result = subject.get_multi([flipper[:stats], flipper[:search], flipper[:other]])
-
     expect(result).to be_instance_of(Hash)
-    stats = result["stats"]
-    search = result["search"]
-    other = result["other"]
 
+    stats, search, other = result.values
     expect(stats).to eq(default_config.merge(boolean: "true"))
     expect(search).to eq(default_config)
     expect(other).to eq(default_config)

@@ -238,10 +238,8 @@ module Flipper
 
         result = @adapter.get_multi([@flipper[:stats], @flipper[:search], @flipper[:other]])
         assert_instance_of Hash, result
-        stats = result["stats"]
-        search = result["search"]
-        other = result["other"]
 
+        stats, search, other = result.values
         assert_equal @default_config.merge(boolean: "true"), stats
         assert_equal @default_config, search
         assert_equal @default_config, other
