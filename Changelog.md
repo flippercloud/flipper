@@ -5,6 +5,7 @@
 * Add :preload and :preload_all options to memoizer as a way of efficiently loading several features for a request in one network call instead of N where N is the number of features checked (https://github.com/jnunemaker/flipper/pull/198)
 * Strip whitespace out of feature/actor/group values posted by UI (https://github.com/jnunemaker/flipper/pull/205)
 * Fix bug with dalli adapter where deleting a feature using the UI or API was not clearing the cache in the dalli adapter which meant the feature would continue to use whatever cached enabled state was present until the TTL was hit (1cd96f6)
+* Change cache keys for dalli adapter. Backwards compatible in that it will just repopulate new keys on first check with this version, but old keys are not expired, so if you used the default ttl of 0, you'll have to expire them on your own. The primary reason for the change was safer namespacing of the cache keys to avoid collisions.
 
 ## 0.10.1
 
