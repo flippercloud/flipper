@@ -92,7 +92,7 @@ module Flipper
       private
 
       def key_for(feature)
-        feature
+        feature.to_s
       end
     end
   end
