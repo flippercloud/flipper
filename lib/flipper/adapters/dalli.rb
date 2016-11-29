@@ -7,7 +7,14 @@ module Flipper
     class Dalli
       include ::Flipper::Adapter
 
-      FeaturesKey = "flipper/features".freeze
+      Version = "v1".freeze
+      Namespace = "flipper/#{Version}".freeze
+      FeaturesKey = "#{Namespace}/features".freeze
+
+      # Private
+      def self.key_for(key)
+        "#{Namespace}/feature/#{key}"
+      end
 
       # Internal
       attr_reader :cache
@@ -41,33 +48,33 @@ module Flipper
       def remove(feature)
         result = @adapter.remove(feature)
         @cache.delete(FeaturesKey)
-        @cache.delete(key_for(feature))
+        @cache.delete(key_for(feature.key))
         result
       end
 
       # Public
       def clear(feature)
         result = @adapter.clear(feature)
-        @cache.delete(key_for(feature))
+        @cache.delete(key_for(feature.key))
         result
       end
 
       # Public
       def get(feature)
-        @cache.fetch(key_for(feature), @ttl) do
+        @cache.fetch(key_for(feature.key), @ttl) do
           @adapter.get(feature)
         end
       end
 
       def get_multi(features)
-        keys = features.map { |feature| key_for(feature) }
+        keys = features.map { |feature| key_for(feature.key) }
         result = @cache.get_multi(keys)
-        uncached_features = features.reject { |feature| result[key_for(feature)] }
+        uncached_features = features.reject { |feature| result[key_for(feature.key)] }
 
         if uncached_features.any?
           response = @adapter.get_multi(uncached_features)
           response.each do |key, value|
-            @cache.set(key, value, @ttl)
+            @cache.set(key_for(key), value, @ttl)
             result[key] = value
           end
         end
@@ -78,21 +85,21 @@ module Flipper
       # Public
       def enable(feature, gate, thing)
         result = @adapter.enable(feature, gate, thing)
-        @cache.delete(key_for(feature))
+        @cache.delete(key_for(feature.key))
         result
       end
 
       # Public
       def disable(feature, gate, thing)
         result = @adapter.disable(feature, gate, thing)
-        @cache.delete(key_for(feature))
+        @cache.delete(key_for(feature.key))
         result
       end
 
       private
 
-      def key_for(feature)
-        "flipper/#{feature.key}"
+      def key_for(key)
+        self.class.key_for(key)
       end
     end
   end

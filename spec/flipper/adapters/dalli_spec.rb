@@ -22,7 +22,7 @@ RSpec.describe Flipper::Adapters::Dalli do
       feature = flipper[:stats]
       adapter.get(feature)
       adapter.remove(feature)
-      expect(cache.get(feature)).to be(nil)
+      expect(cache.get(described_class.key_for(feature))).to be(nil)
     end
   end
 
@@ -35,13 +35,13 @@ RSpec.describe Flipper::Adapters::Dalli do
       search.enable
 
       adapter.get(stats)
-      expect(cache.get(search)).to be(nil)
-      expect(cache.get(other)).to be(nil)
+      expect(cache.get(described_class.key_for(search))).to be(nil)
+      expect(cache.get(described_class.key_for(other))).to be(nil)
 
       adapter.get_multi([stats, search, other])
 
-      expect(cache.get(search)[:boolean]).to eq("true")
-      expect(cache.get(other)[:boolean]).to be(nil)
+      expect(cache.get(described_class.key_for(search))[:boolean]).to eq("true")
+      expect(cache.get(described_class.key_for(other))[:boolean]).to be(nil)
     end
   end
 
