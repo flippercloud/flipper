@@ -34,6 +34,21 @@ config.middleware.use Flipper::Middleware::Memoizer, lambda {
 
 **Note**: Be sure that the middleware is high enough up in your stack that all feature checks are wrapped.
 
+### Options
+
+The Memoizer middleware also supports a few options. Use either `preload` or `preload_all`, not both.
+
+* **`:preload`** - An `Array` of feature names (`Symbol`) to preload for every request. Useful if you have features that are used on every endpoint. `preload` uses `Adapter#get_multi` to attempt to load the features in one network call instead of N+1 network calls.
+    ```ruby
+    config.middleware.use Flipper::Middleware::Memoizer, flipper,
+      preload: [:stats, :search, :some_feature]
+    ```
+* **`:preload_all`** - A Boolean value (default: false) of whether or not all features should be preloaded. Using this results in a `preload` call with the result of `Adapter#features`. Any subsequent feature checks will be memoized and perform no network calls. I wouldn't recommend using this unless you have few features (< 30?) and nearly all of them are used on every request.  
+    ```ruby
+    config.middleware.use Flipper::Middleware::Memoizer, flipper,
+      preload_all: true
+    ```
+
 ## Cache Adapters
 
 Cache adapters allow you to cache adapter calls for longer than a single request and should be used alongside the memoization middleware to add another caching layer.
