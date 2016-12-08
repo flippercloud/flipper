@@ -18,6 +18,12 @@ module Flipper
       #   # using with a block that yields a flipper instance
       #   use Flipper::Middleware::Memoizer, lambda { Flipper.new(...) }
       #
+      #   # using with preload_all features
+      #   use Flipper::Middleware::Memoizer, flipper, preload_all: true
+      #
+      #   # using with preload specific features
+      #   use Flipper::Middleware::Memoizer, flipper, preload: [:stats, :search, :some_feature]
+      #
       def initialize(app, flipper_or_block, opts = {})
         @app = app
         @opts = opts
