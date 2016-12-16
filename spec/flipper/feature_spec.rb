@@ -614,6 +614,25 @@ RSpec.describe Flipper::Feature do
         expect(subject.gate_values.actors).to be_empty
       end
     end
+
+    context "in read only mode" do
+      subject { described_class.new(:search, adapter, read_only: true) }
+      it "raises an error when enabling" do
+        actor = Struct.new(:flipper_id).new(5)
+        instance = Flipper::Types::Actor.wrap(actor)
+        expect(subject.gate_values.actors).to be_empty
+
+        expect { subject.enable_actor(instance) }.to raise_error(Flipper::ReadOnlyUpdate)
+        expect(subject.gate_values.actors).to be_empty
+      end
+
+      it "raises an error when disabling" do
+        actor = Struct.new(:flipper_id).new(5)
+        instance = Flipper::Types::Actor.wrap(actor)
+
+        expect { subject.disable_actor(instance) }.to raise_error(Flipper::ReadOnlyUpdate)
+      end
+    end
   end
 
   describe "#enable_group/disable_group" do

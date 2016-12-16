@@ -16,6 +16,9 @@ module Flipper
     # Public: Name converted to value safe for adapter.
     attr_reader :key
 
+    # Public: Features can not be enabled or disabled in read-only mode
+    attr_accessor :read_only
+
     # Private: The adapter this feature should use.
     attr_reader :adapter
 
@@ -34,6 +37,7 @@ module Flipper
       @name = name
       @key = name.to_s
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
+      @read_only = options.fetch(:read_only, false)
       @adapter = adapter
     end
 
@@ -41,6 +45,7 @@ module Flipper
     #
     # Returns the result of Adapter#enable.
     def enable(thing = true)
+      raise Flipper::ReadOnlyUpdate.new('Cannot enable features in read only mode') if read_only
       instrument(:enable) { |payload|
         adapter.add self
 
@@ -57,6 +62,7 @@ module Flipper
     #
     # Returns the result of Adapter#disable.
     def disable(thing = false)
+      raise Flipper::ReadOnlyUpdate.new('Cannot disable features in read only mode') if read_only
       instrument(:disable) { |payload|
         adapter.add self
 
@@ -315,6 +321,7 @@ module Flipper
         "state=#{state.inspect}",
         "enabled_gate_names=#{enabled_gate_names.inspect}",
         "adapter=#{adapter.name.inspect}",
+        "read_only=#{read_only.inspect}"
       ]
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
     end

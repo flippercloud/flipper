@@ -128,3 +128,20 @@ flipper[:search].disable_percentage_of_time # sets to 0
 ```
 
 Timeness is not a good idea for enabling new features in the UI. Most of the time you want a feature on or off for a user, but there are definitely times when I have found percentage of time to be very useful.
+
+# Read Only Mode
+
+If you are using flipper to read the state of features, but using a separate application (ie flipper-ui) to manage which features are enabled, you may want to set flipper to read only mode so you don't accidentally override changes made by the separate application.
+
+```ruby
+flipper = Flipper.new(adapter, read_only: true)
+
+# Querying features and their state still works
+flipper[:stats].enabled?
+flipper[:stats].enabled? user
+
+# Enabling and disabling raises a Flipper::ReadOnlyUpdate error
+flipper[:stats].enable # Flipper::ReadOnlyUpdate: Cannot enable features in read only mode
+
+flipper[:stats].disable # Flipper::ReadOnlyUpdate: Cannot disable features in read only mode
+```

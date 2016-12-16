@@ -14,4 +14,7 @@ module Flipper
 
   # Raised when attempting to access a group that is not registered.
   class GroupNotRegistered < Error; end
+
+  # Raised when trying to enable or disable features when in read only mode
+  class ReadOnlyUpdate < Error; end
 end
