@@ -6,7 +6,8 @@ class DalliTest < MiniTest::Test
   prepend Flipper::Test::SharedAdapterTests
 
   def setup
-    @cache = Dalli::Client.new('localhost:11211')
+    url = ENV.fetch('BOXEN_MEMCACHED_URL', 'localhost:11211')
+    @cache = Dalli::Client.new(url)
     @cache.flush
     memory_adapter = Flipper::Adapters::Memory.new
     @adapter = Flipper::Adapters::Dalli.new(memory_adapter, @cache)
