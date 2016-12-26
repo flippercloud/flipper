@@ -9,11 +9,15 @@ module Flipper
 
       # Private: Do not use outside of this adapter.
       class Feature < ::Sequel::Model(:flipper_features)
+        unrestrict_primary_key
+
         plugin :timestamps, update_on_create: true
       end
 
       # Private: Do not use outside of this adapter.
       class Gate < ::Sequel::Model(:flipper_gates)
+        unrestrict_primary_key
+
         plugin :timestamps, update_on_create: true
       end
 
