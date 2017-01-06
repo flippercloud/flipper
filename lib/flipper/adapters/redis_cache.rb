@@ -47,8 +47,8 @@ module Flipper
       # Public
       def remove(feature)
         result = @adapter.remove(feature)
-        @cache.delete(FeaturesKey)
-        @cache.delete(key_for(feature.key))
+        @cache.del(FeaturesKey)
+        @cache.del(key_for(feature.key))
         result
       end
 
