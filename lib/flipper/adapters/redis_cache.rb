@@ -32,7 +32,7 @@ module Flipper
 
       # Public
       def features
-        @cache.fetch(FeaturesKey, @ttl) do
+        fetch(FeaturesKey) do
           @adapter.features
         end
       end
@@ -61,7 +61,7 @@ module Flipper
 
       # Public
       def get(feature)
-        @cache.fetch(key_for(feature.key), @ttl) do
+        fetch(key_for(feature.key)) do
           @adapter.get(feature)
         end
       end
@@ -100,6 +100,16 @@ module Flipper
 
       def key_for(key)
         self.class.key_for(key)
+      end
+
+      def fetch(key, &block)
+        if cached = @cache.get(key)
+          return Marshal.load(cached)
+        else
+          to_cache = block.call
+          @cache.setex(key, @ttl, Marshal.dump(to_cache))
+          to_cache
+        end
       end
     end
   end
