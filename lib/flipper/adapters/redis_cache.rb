@@ -25,7 +25,7 @@ module Flipper
       # Public
       def initialize(adapter, cache, ttl = 3600)
         @adapter = adapter
-        @name = :redis
+        @name = :redis_cache
         @cache = cache
         @ttl = ttl
       end
@@ -40,7 +40,7 @@ module Flipper
       # Public
       def add(feature)
         result = @adapter.add(feature)
-        @cache.delete(FeaturesKey)
+        @cache.del(FeaturesKey)
         result
       end
 
@@ -55,7 +55,7 @@ module Flipper
       # Public
       def clear(feature)
         result = @adapter.clear(feature)
-        @cache.delete(key_for(feature.key))
+        @cache.del(key_for(feature.key))
         result
       end
 
@@ -67,32 +67,35 @@ module Flipper
       end
 
       def get_multi(features)
-        keys = features.map { |feature| key_for(feature.key) }
-        result = @cache.get_multi(keys)
-        uncached_features = features.reject { |feature| result[key_for(feature.key)] }
+        keys = features.map { |feature| feature.key }
+        cache_keys = keys.map { |key| key_for(key) }
+        cached_features = @cache.mget(cache_keys).map do |value|
+          value ? Marshal.load(value) : nil
+        end
+        result = Hash[keys.zip(cached_features)]
+        uncached_features = features.reject { |feature| result[feature.key] }
 
         if uncached_features.any?
           response = @adapter.get_multi(uncached_features)
           response.each do |key, value|
-            @cache.set(key_for(key), value, @ttl)
+            set_with_ttl(key_for(key), value)
             result[key] = value
           end
         end
-
         result
       end
 
       # Public
       def enable(feature, gate, thing)
         result = @adapter.enable(feature, gate, thing)
-        @cache.delete(key_for(feature.key))
+        @cache.del(key_for(feature.key))
         result
       end
 
       # Public
       def disable(feature, gate, thing)
         result = @adapter.disable(feature, gate, thing)
-        @cache.delete(key_for(feature.key))
+        @cache.del(key_for(feature.key))
         result
       end
 
@@ -107,9 +110,13 @@ module Flipper
           return Marshal.load(cached)
         else
           to_cache = block.call
-          @cache.setex(key, @ttl, Marshal.dump(to_cache))
+          set_with_ttl(key, to_cache)
           to_cache
         end
+      end
+
+      def set_with_ttl(key, value)
+        @cache.setex(key, @ttl, Marshal.dump(value))
       end
     end
   end
