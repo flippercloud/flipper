@@ -23,7 +23,7 @@ module Flipper
       attr_reader :name
 
       # Public
-      def initialize(adapter, cache, ttl = 0)
+      def initialize(adapter, cache, ttl = 3600)
         @adapter = adapter
         @name = :redis
         @cache = cache
