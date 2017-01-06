@@ -68,12 +68,10 @@ module Flipper
 
       def get_multi(features)
         keys = features.map { |feature| feature.key }
-        cache_keys = keys.map { |key| key_for(key) }
-        cached_features = @cache.mget(cache_keys).map do |value|
-          value ? Marshal.load(value) : nil
+        result = Hash[keys.zip(multi_cache_get(keys))]
+        uncached_features = features.reject do |feature|
+          result[feature.key]
         end
-        result = Hash[keys.zip(cached_features)]
-        uncached_features = features.reject { |feature| result[feature.key] }
 
         if uncached_features.any?
           response = @adapter.get_multi(uncached_features)
@@ -117,6 +115,13 @@ module Flipper
 
       def set_with_ttl(key, value)
         @cache.setex(key, @ttl, Marshal.dump(value))
+      end
+
+      def multi_cache_get(keys)
+        cache_keys = keys.map { |key| key_for(key) }
+        @cache.mget(cache_keys).map do |value|
+          value ? Marshal.load(value) : nil
+        end
       end
     end
   end
