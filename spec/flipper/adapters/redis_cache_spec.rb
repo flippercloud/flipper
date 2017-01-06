@@ -14,7 +14,7 @@ RSpec.describe Flipper::Adapters::RedisCache do
   }
 
   let(:memory_adapter) { Flipper::Adapters::Memory.new }
-  let(:cache)   { Redis.new({url: ENV.fetch('BOXEN_REDIS_URL', 'localhost:6379')}) }
+  let(:cache)   { Redis.new({url: ENV.fetch('BOXEN_REDIS_URL', 'redis://localhost:6379')}) }
   let(:adapter) { Flipper::Adapters::RedisCache.new(memory_adapter, cache) }
   let(:flipper) { Flipper.new(adapter) }
 
