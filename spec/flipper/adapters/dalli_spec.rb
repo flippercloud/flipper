@@ -9,7 +9,7 @@ RSpec.describe Flipper::Adapters::Dalli do
   let(:adapter) { Flipper::Adapters::Dalli.new(memory_adapter, cache) }
   let(:flipper) { Flipper.new(adapter) }
 
-  subject { described_class.new(adapter, cache) }
+  subject { adapter }
 
   before do
     cache.flush
