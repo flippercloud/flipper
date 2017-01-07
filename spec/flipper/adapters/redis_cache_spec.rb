@@ -1,4 +1,5 @@
 require 'helper'
+require 'flipper/adapters/memory'
 require 'flipper/adapters/redis_cache'
 require 'flipper/spec/shared_adapter_specs'
 
