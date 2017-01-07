@@ -5,7 +5,8 @@ class RedisTest < MiniTest::Test
   prepend Flipper::Test::SharedAdapterTests
 
   def setup
-   client = Redis.new({}).tap { |c| c.flushdb }
-   @adapter = Flipper::Adapters::Redis.new(client)
+    url = ENV.fetch('BOXEN_REDIS_URL', 'redis://localhost:6379')
+    client = Redis.new({url: url}).tap { |c| c.flushdb }
+    @adapter = Flipper::Adapters::Redis.new(client)
   end
 end

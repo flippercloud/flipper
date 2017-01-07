@@ -1,18 +1,27 @@
 require 'helper'
-require 'flipper/adapters/memory'
-require 'flipper/adapters/dalli'
+require 'flipper/adapters/redis_cache'
 require 'flipper/spec/shared_adapter_specs'
 
-RSpec.describe Flipper::Adapters::Dalli do
+RSpec.describe Flipper::Adapters::RedisCache do
+  let(:client) {
+    options = {}
+
+    if ENV['BOXEN_REDIS_URL']
+      options[:url] = ENV['BOXEN_REDIS_URL']
+    end
+
+    Redis.new(options)
+  }
+
   let(:memory_adapter) { Flipper::Adapters::Memory.new }
-  let(:cache)   { Dalli::Client.new(ENV["BOXEN_MEMCACHED_URL"] || '127.0.0.1:11211') }
-  let(:adapter) { Flipper::Adapters::Dalli.new(memory_adapter, cache) }
+  let(:cache)   { Redis.new({url: ENV.fetch('BOXEN_REDIS_URL', 'redis://localhost:6379')}) }
+  let(:adapter) { Flipper::Adapters::RedisCache.new(memory_adapter, cache) }
   let(:flipper) { Flipper.new(adapter) }
 
   subject { adapter }
 
   before do
-    cache.flush
+    client.flushdb
   end
 
   it_should_behave_like 'a flipper adapter'
@@ -40,14 +49,17 @@ RSpec.describe Flipper::Adapters::Dalli do
 
       adapter.get_multi([stats, search, other])
 
-      expect(cache.get(described_class.key_for(search))[:boolean]).to eq("true")
-      expect(cache.get(described_class.key_for(other))[:boolean]).to be(nil)
+      search_cache_value, other_cache_value = [search, other].map do |f|
+        Marshal.load(cache.get(described_class.key_for(f)))
+      end
+      expect(search_cache_value[:boolean]).to eq("true")
+      expect(other_cache_value[:boolean]).to be(nil)
     end
   end
 
   describe "#name" do
-    it "is dalli" do
-      expect(subject.name).to be(:dalli)
+    it "is redis_cache" do
+      expect(subject.name).to be(:redis_cache)
     end
   end
 end
