@@ -104,7 +104,8 @@ module Flipper
       end
 
       def fetch(key)
-        if cached = @cache.get(key)
+        cached = @cache.get(key)
+        if cached
           Marshal.load(cached)
         else
           to_cache = yield
