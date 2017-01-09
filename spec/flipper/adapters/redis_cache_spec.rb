@@ -4,19 +4,17 @@ require 'flipper/adapters/redis_cache'
 require 'flipper/spec/shared_adapter_specs'
 
 RSpec.describe Flipper::Adapters::RedisCache do
-  let(:client) {
+  let(:client) do
     options = {}
 
-    if ENV['BOXEN_REDIS_URL']
-      options[:url] = ENV['BOXEN_REDIS_URL']
-    end
+    options[:url] = ENV['BOXEN_REDIS_URL'] if ENV['BOXEN_REDIS_URL']
 
     Redis.new(options)
-  }
+  end
 
   let(:memory_adapter) { Flipper::Adapters::Memory.new }
-  let(:cache)   { Redis.new({url: ENV.fetch('BOXEN_REDIS_URL', 'redis://localhost:6379')}) }
-  let(:adapter) { Flipper::Adapters::RedisCache.new(memory_adapter, cache) }
+  let(:cache)   { Redis.new(url: ENV.fetch('BOXEN_REDIS_URL', 'redis://localhost:6379')) }
+  let(:adapter) { described_class.new(memory_adapter, cache) }
   let(:flipper) { Flipper.new(adapter) }
 
   subject { adapter }
@@ -27,8 +25,8 @@ RSpec.describe Flipper::Adapters::RedisCache do
 
   it_should_behave_like 'a flipper adapter'
 
-  describe "#remove" do
-    it "expires feature" do
+  describe '#remove' do
+    it 'expires feature' do
       feature = flipper[:stats]
       adapter.get(feature)
       adapter.remove(feature)
@@ -36,8 +34,8 @@ RSpec.describe Flipper::Adapters::RedisCache do
     end
   end
 
-  describe "#get_multi" do
-    it "warms uncached features" do
+  describe '#get_multi' do
+    it 'warms uncached features' do
       stats = flipper[:stats]
       search = flipper[:search]
       other = flipper[:other]
@@ -53,13 +51,13 @@ RSpec.describe Flipper::Adapters::RedisCache do
       search_cache_value, other_cache_value = [search, other].map do |f|
         Marshal.load(cache.get(described_class.key_for(f)))
       end
-      expect(search_cache_value[:boolean]).to eq("true")
+      expect(search_cache_value[:boolean]).to eq('true')
       expect(other_cache_value[:boolean]).to be(nil)
     end
   end
 
-  describe "#name" do
-    it "is redis_cache" do
+  describe '#name' do
+    it 'is redis_cache' do
       expect(subject.name).to be(:redis_cache)
     end
   end

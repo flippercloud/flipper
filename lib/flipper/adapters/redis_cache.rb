@@ -7,7 +7,7 @@ module Flipper
     class RedisCache
       include ::Flipper::Adapter
 
-      Version = "v1".freeze
+      Version = 'v1'.freeze
       Namespace = "flipper/#{Version}".freeze
       FeaturesKey = "#{Namespace}/features".freeze
 
@@ -67,7 +67,7 @@ module Flipper
       end
 
       def get_multi(features)
-        keys = features.map { |feature| feature.key }
+        keys = features.map(&:key)
         result = Hash[keys.zip(multi_cache_get(keys))]
         uncached_features = features.reject do |feature|
           result[feature.key]
@@ -103,11 +103,11 @@ module Flipper
         self.class.key_for(key)
       end
 
-      def fetch(key, &block)
+      def fetch(key)
         if cached = @cache.get(key)
-          return Marshal.load(cached)
+          Marshal.load(cached)
         else
-          to_cache = block.call
+          to_cache = yield
           set_with_ttl(key, to_cache)
           to_cache
         end
