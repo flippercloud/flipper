@@ -17,5 +17,5 @@ env:
 matrix:
   # don't run rails 5 on ruby versions that can't install rack 2
   exclude:
-    - rvm: 2.1.8
+    - rvm: 2.1
       env: RAILS_VERSION=5.0.0
