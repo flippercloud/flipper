@@ -34,29 +34,29 @@ module Flipper
     def add(key, value)
       key = key.to_sym
 
-      @mutex.synchronize {
+      @mutex.synchronize do
         if @source[key]
           raise DuplicateKey, "#{key} is already registered"
         else
           @source[key] = value
         end
-      }
+      end
     end
 
     def get(key)
       key = key.to_sym
-      @mutex.synchronize {
-        @source.fetch(key) {
-          raise KeyNotFound.new(key)
-        }
-      }
+      @mutex.synchronize do
+        @source.fetch(key) do
+          raise KeyNotFound, key
+        end
+      end
     end
 
     def key?(key)
       key = key.to_sym
-      @mutex.synchronize {
-        @source.has_key?(key)
-      }
+      @mutex.synchronize do
+        @source.key?(key)
+      end
     end
 
     def each(&block)

@@ -9,11 +9,11 @@ module Flipper
       extend Forwardable
 
       VALID_REQUEST_METHOD_NAMES = Set.new([
-        "get".freeze,
-        "post".freeze,
-        "put".freeze,
-        "delete".freeze,
-      ]).freeze
+                                             'get'.freeze,
+                                             'post'.freeze,
+                                             'put'.freeze,
+                                             'delete'.freeze,
+                                           ]).freeze
 
       # Public: Call this in subclasses so the action knows its route.
       #
@@ -60,14 +60,16 @@ module Flipper
       def_delegator :@request, :params
 
       def initialize(flipper, request)
-        @flipper, @request = flipper, request
+        @flipper = flipper
+        @request = request
         @code = 200
-        @headers = {"Content-Type" => "text/plain"}
-        @breadcrumbs = if Flipper::UI.application_breadcrumb_href
-          [Breadcrumb.new("App", Flipper::UI.application_breadcrumb_href)]
-        else
-          []
-        end
+        @headers = { 'Content-Type' => 'text/plain' }
+        @breadcrumbs =
+          if Flipper::UI.application_breadcrumb_href
+            [Breadcrumb.new('App', Flipper::UI.application_breadcrumb_href)]
+          else
+            []
+          end
       end
 
       # Public: Runs the request method for the provided request.
@@ -77,7 +79,8 @@ module Flipper
         if valid_request_method? && respond_to?(request_method_name)
           catch(:halt) { send(request_method_name) }
         else
-          raise UI::RequestMethodNotSupported, "#{self.class} does not support request method #{request_method_name.inspect}"
+          raise UI::RequestMethodNotSupported,
+                "#{self.class} does not support request method #{request_method_name.inspect}"
         end
       end
 
@@ -110,7 +113,7 @@ module Flipper
       #
       # Returns a response.
       def view_response(name)
-        header "Content-Type", "text/html"
+        header 'Content-Type', 'text/html'
         body = view_with_layout { view_without_layout name }
         halt [@code, @headers, [body]]
       end
@@ -132,8 +135,8 @@ module Flipper
       # location - The String location to set the Location header to.
       def redirect_to(location)
         status 302
-        header "Location", "#{script_name}#{location}"
-        halt [@code, @headers, [""]]
+        header 'Location', "#{script_name}#{location}"
+        halt [@code, @headers, ['']]
       end
 
       # Public: Set the status code for the response.
@@ -188,13 +191,11 @@ module Flipper
       def view(name)
         path = views_path.join("#{name}.erb")
 
-        unless path.exist?
-          raise "Template does not exist: #{path}"
-        end
+        raise "Template does not exist: #{path}" unless path.exist?
 
         contents = path.read
         compiled = Eruby.new(contents)
-        compiled.result Proc.new {}.binding
+        compiled.result proc {}.binding
       end
 
       # Internal: The path the app is mounted at.
@@ -218,7 +219,7 @@ module Flipper
       end
 
       def csrf_input_tag
-        %Q(<input type="hidden" name="authenticity_token" value="#{@request.session[:csrf]}">)
+        %(<input type="hidden" name="authenticity_token" value="#{@request.session[:csrf]}">)
       end
 
       def valid_request_method?

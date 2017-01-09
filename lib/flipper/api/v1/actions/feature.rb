@@ -6,7 +6,6 @@ module Flipper
     module V1
       module Actions
         class Feature < Api::Action
-
           route %r{api/v1/features/[^/]*/?\Z}
 
           def get

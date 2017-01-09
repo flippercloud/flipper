@@ -5,11 +5,10 @@ module Flipper
   module UI
     module Actions
       class Home < UI::Action
-
         route %r{/?\Z}
 
         def get
-          redirect_to "/features"
+          redirect_to '/features'
         end
       end
     end

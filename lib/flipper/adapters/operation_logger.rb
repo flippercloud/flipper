@@ -19,7 +19,7 @@ module Flipper
         :get_multi,
         :enable,
         :disable,
-      ]
+      ].freeze
 
       # Internal: An array of the operations that have happened.
       attr_reader :operations

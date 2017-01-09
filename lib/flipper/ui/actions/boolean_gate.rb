@@ -8,11 +8,11 @@ module Flipper
         route %r{features/[^/]*/boolean/?\Z}
 
         def post
-          feature_name = Rack::Utils.unescape(request.path.split("/")[-2])
+          feature_name = Rack::Utils.unescape(request.path.split('/')[-2])
           feature = flipper[feature_name.to_sym]
           @feature = Decorators::Feature.new(feature)
 
-          if params["action"] == "Enable"
+          if params['action'] == 'Enable'
             feature.enable
           else
             feature.disable

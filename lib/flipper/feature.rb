@@ -41,7 +41,7 @@ module Flipper
     #
     # Returns the result of Adapter#enable.
     def enable(thing = true)
-      instrument(:enable) { |payload|
+      instrument(:enable) do |payload|
         adapter.add self
 
         gate = gate_for(thing)
@@ -50,14 +50,14 @@ module Flipper
         payload[:thing] = wrapped_thing
 
         adapter.enable self, gate, wrapped_thing
-      }
+      end
     end
 
     # Public: Disable this feature for something.
     #
     # Returns the result of Adapter#disable.
     def disable(thing = false)
-      instrument(:disable) { |payload|
+      instrument(:disable) do |payload|
         adapter.add self
 
         gate = gate_for(thing)
@@ -70,7 +70,7 @@ module Flipper
         else
           adapter.disable self, gate, wrapped_thing
         end
-      }
+      end
     end
 
     # Public: Removes this feature.
@@ -84,14 +84,14 @@ module Flipper
     #
     # Returns true if enabled, false if not.
     def enabled?(thing = nil)
-      instrument(:enabled?) { |payload|
+      instrument(:enabled?) do |payload|
         values = gate_values
         thing = gate(:actor).wrap(thing) unless thing.nil?
         payload[:thing] = thing
         context = FeatureCheckContext.new(
           feature_name: @name,
           values: values,
-          thing: thing,
+          thing: thing
         )
 
         if open_gate = gates.detect { |gate| gate.open?(context) }
@@ -100,7 +100,7 @@ module Flipper
         else
           false
         end
-      }
+      end
     end
 
     # Public: Enables a feature for an actor.
@@ -346,19 +346,18 @@ module Flipper
     # Returns a Flipper::Gate.
     # Raises Flipper::GateNotFound if no gate found for thing
     def gate_for(thing)
-      gates.detect { |gate| gate.protects?(thing) } ||
-        raise(GateNotFound.new(thing))
+      gates.detect { |gate| gate.protects?(thing) } || raise(GateNotFound, thing)
     end
 
     private
 
     # Private: Instrument a feature operation.
     def instrument(operation)
-      @instrumenter.instrument(InstrumentationName) { |payload|
+      @instrumenter.instrument(InstrumentationName) do |payload|
         payload[:feature_name] = name
         payload[:operation] = operation
         payload[:result] = yield(payload) if block_given?
-      }
+      end
     end
   end
 end

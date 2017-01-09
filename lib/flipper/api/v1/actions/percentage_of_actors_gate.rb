@@ -54,11 +54,11 @@ module Flipper
             end
           end
 
-            def feature_names
-              @feature_names ||= flipper.adapter.features
-            end
+          def feature_names
+            @feature_names ||= flipper.adapter.features
           end
         end
       end
     end
   end
+end

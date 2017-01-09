@@ -126,14 +126,15 @@ module Flipper
         fields = doc.keys
 
         feature.gates.each do |gate|
-          result[gate.key] = case gate.data_type
-          when :boolean, :integer
-            doc[gate.key.to_s]
-          when :set
-            fields_to_gate_value fields, gate
-          else
-            unsupported_data_type gate.data_type
-          end
+          result[gate.key] =
+            case gate.data_type
+            when :boolean, :integer
+              doc[gate.key.to_s]
+            when :set
+              fields_to_gate_value fields, gate
+            else
+              unsupported_data_type gate.data_type
+            end
         end
 
         result
@@ -148,7 +149,7 @@ module Flipper
       #
       # Returns a Set of the values enabled for the gate.
       def fields_to_gate_value(fields, gate)
-        regex = /^#{Regexp.escape(gate.key.to_s)}\//
+        regex = %r{^#{Regexp.escape(gate.key.to_s)}/}
         keys = fields.grep(regex)
         values = keys.map { |key| key.split('/', 2).last }
         values.to_set

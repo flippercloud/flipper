@@ -3,15 +3,13 @@ require 'flipper/adapters/redis'
 require 'flipper/spec/shared_adapter_specs'
 
 RSpec.describe Flipper::Adapters::Redis do
-  let(:client) {
+  let(:client) do
     options = {}
 
-    if ENV['BOXEN_REDIS_URL']
-      options[:url] = ENV['BOXEN_REDIS_URL']
-    end
+    options[:url] = ENV['BOXEN_REDIS_URL'] if ENV['BOXEN_REDIS_URL']
 
     Redis.new(options)
-  }
+  end
 
   subject { described_class.new(client) }
 

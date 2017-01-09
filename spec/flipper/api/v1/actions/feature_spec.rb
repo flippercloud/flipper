@@ -7,7 +7,6 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
 
   describe 'get' do
     context 'enabled feature' do
-
       before do
         flipper[:my_feature].enable
         get 'api/v1/features/my_feature'
@@ -42,8 +41,8 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
               'key' => 'percentage_of_time',
               'name' => 'percentage_of_time',
               'value' => 0,
-            }
-          ]
+            },
+          ],
         }
 
         expect(last_response.status).to eq(200)
@@ -68,9 +67,9 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
               'value' => false,
             },
             {
-              'key'=> 'groups',
-              'name'=> 'group',
-              'value'=> [],
+              'key' => 'groups',
+              'name' => 'group',
+              'value' => [],
             },
             {
               'key' => 'actors',
@@ -80,14 +79,14 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
             {
               'key' => 'percentage_of_actors',
               'name' => 'percentage_of_actors',
-              'value'=> 0,
+              'value' => 0,
             },
             {
               'key' => 'percentage_of_time',
               'name' => 'percentage_of_time',
               'value' => 0,
-            }
-          ]
+            },
+          ],
         }
 
         expect(last_response.status).to eq(200)
@@ -105,7 +104,7 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
       end
 
       it 'returns formatted error response body' do
-        expect(json_response).to eq({ "code" => 1, "message" => "Feature not found.", "more_info" => "https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference" })
+        expect(json_response).to eq(api_not_found_response)
       end
     end
   end
@@ -131,7 +130,7 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
       end
 
       it 'returns formatted error response body' do
-        expect(json_response).to eq({ "code" => 1, "message" => "Feature not found.", "more_info" => "https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference" })
+        expect(json_response).to eq(api_not_found_response)
       end
     end
   end

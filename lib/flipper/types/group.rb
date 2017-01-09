@@ -16,7 +16,7 @@ module Flipper
           @block = block
           @single_argument = @block.arity == 1
         else
-          @block = lambda { |thing, context| false }
+          @block = ->(_thing, _context) { false }
           @single_argument = false
         end
       end

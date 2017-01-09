@@ -8,10 +8,8 @@ ActiveRecord::Migration.verbose = false
 class ActiveRecordTest < MiniTest::Test
   prepend Flipper::Test::SharedAdapterTests
 
-  ActiveRecord::Base.establish_connection({
-    adapter: "sqlite3",
-    database: ":memory:",
-  })
+  ActiveRecord::Base.establish_connection(adapter: 'sqlite3',
+                                          database: ':memory:')
 
   def setup
     @adapter = Flipper::Adapters::ActiveRecord.new

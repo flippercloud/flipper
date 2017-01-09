@@ -17,12 +17,12 @@ module Flipper
       end
 
       # Internal: Override in subclass.
-      def update_timer(metric)
+      def update_timer(_metric)
         raise 'not implemented'
       end
 
       # Internal: Override in subclass.
-      def update_counter(metric)
+      def update_counter(_metric)
         raise 'not implemented'
       end
 
@@ -34,7 +34,8 @@ module Flipper
         if respond_to?(method_name)
           send(method_name)
         else
-          puts "Could not update #{operation_type} metrics as #{self.class} did not respond to `#{method_name}`"
+          puts "Could not update #{operation_type} metrics as #{self.class} " \
+               "did not respond to `#{method_name}`"
         end
       end
 
@@ -49,11 +50,12 @@ module Flipper
         update_timer "flipper.feature_operation.#{operation}"
 
         if @payload[:operation] == :enabled?
-          metric_name = if result
-            "flipper.feature.#{feature_name}.enabled"
-          else
-            "flipper.feature.#{feature_name}.disabled"
-          end
+          metric_name =
+            if result
+              "flipper.feature.#{feature_name}.enabled"
+            else
+              "flipper.feature.#{feature_name}.disabled"
+            end
 
           update_counter metric_name
         end
@@ -67,11 +69,10 @@ module Flipper
         value = @payload[:value]
         key = @payload[:key]
 
-
         update_timer "flipper.adapter.#{adapter_name}.#{operation}"
       end
 
-      QUESTION_MARK = "?".freeze
+      QUESTION_MARK = '?'.freeze
 
       # Private
       def strip_trailing_question_mark(operation)

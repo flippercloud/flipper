@@ -7,85 +7,85 @@ RSpec.describe Flipper::UI::Decorators::Feature do
   let(:flipper) { build_flipper }
   let(:feature) { flipper[:some_awesome_feature] }
 
-  subject {
+  subject do
     described_class.new(feature)
-  }
+  end
 
-  describe "#initialize" do
-    it "sets the feature" do
+  describe '#initialize' do
+    it 'sets the feature' do
       expect(subject.feature).to be(feature)
     end
   end
 
-  describe "#pretty_name" do
-    it "capitalizes each word separated by underscores" do
+  describe '#pretty_name' do
+    it 'capitalizes each word separated by underscores' do
       expect(subject.pretty_name).to eq('Some Awesome Feature')
     end
   end
 
-  describe "#as_json" do
+  describe '#as_json' do
     before do
       @result = subject.as_json
     end
 
-    it "returns Hash" do
+    it 'returns Hash' do
       expect(@result).to be_instance_of(Hash)
     end
 
-    it "includes id" do
+    it 'includes id' do
       expect(@result['id']).to eq('some_awesome_feature')
     end
 
-    it "includes pretty name" do
+    it 'includes pretty name' do
       expect(@result['name']).to eq('Some Awesome Feature')
     end
 
-    it "includes state" do
+    it 'includes state' do
       expect(@result['state']).to eq('off')
     end
 
-    it "includes gates" do
-      gates = subject.gates.map { |gate|
+    it 'includes gates' do
+      gates = subject.gates.map do |gate|
         value = subject.gate_values[gate.key]
         Flipper::UI::Decorators::Gate.new(gate, value).as_json
-      }
+      end
       expect(@result['gates']).to eq(gates)
     end
   end
 
-  describe "#<=>" do
-    let(:on) {
+  describe '#<=>' do
+    let(:on) do
       flipper.enable(:on_a)
       described_class.new(flipper[:on_a])
-    }
+    end
 
-    let(:on_b) {
+    let(:on_b) do
       flipper.enable(:on_b)
       described_class.new(flipper[:on_b])
-    }
+    end
 
-    let(:conditional) {
+    let(:conditional) do
       flipper.enable_percentage_of_time :conditional_a, 5
       described_class.new(flipper[:conditional_a])
-    }
+    end
 
-    let(:off) {
+    let(:off) do
       described_class.new(flipper[:off_a])
-    }
+    end
 
-    it "sorts :on before :conditional" do
+    it 'sorts :on before :conditional' do
       expect((on <=> conditional)).to be(-1)
     end
 
-    it "sorts :on before :off" do
+    it 'sorts :on before :off' do
       expect((on <=> conditional)).to be(-1)
     end
 
-    it "sorts :conditional before :off" do
+    it 'sorts :conditional before :off' do
       expect((on <=> conditional)).to be(-1)
     end
 
-    it "sorts on key for identical states" do
+    it 'sorts on key for identical states' do
       expect((on <=> on_b)).to be(-1)
     end
   end

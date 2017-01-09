@@ -34,8 +34,8 @@ module Flipper
       @root ||= Pathname(__FILE__).dirname.expand_path.join('ui')
     end
 
-    def self.app(flipper, options = {})
-      app = lambda { |env| [200, {'Content-Type' => 'text/html'}, ['']] }
+    def self.app(flipper, _options = {})
+      app = ->(_env) { [200, { 'Content-Type' => 'text/html' }, ['']] }
       builder = Rack::Builder.new
       yield builder if block_given?
       builder.use Rack::Protection

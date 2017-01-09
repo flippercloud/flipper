@@ -17,11 +17,7 @@ module Flipper
         # block rather than the one passed to #instrument.
         payload = payload.dup
 
-        result = if block_given?
-          yield payload
-        else
-          nil
-        end
+        result = (yield payload if block_given?)
         @events << Event.new(name, payload, result)
         result
       end

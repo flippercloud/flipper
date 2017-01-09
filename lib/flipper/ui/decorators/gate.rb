@@ -17,12 +17,13 @@ module Flipper
 
         # Public: Returns instance as hash that is ready to be json dumped.
         def as_json
-          value_as_json = case data_type
-          when :set
-            value.to_a # json doesn't like sets
-          else
-            value
-          end
+          value_as_json =
+            case data_type
+            when :set
+              value.to_a # json doesn't like sets
+            else
+              value
+            end
 
           {
             'key' => gate.key.to_s,

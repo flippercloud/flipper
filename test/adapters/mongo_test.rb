@@ -7,8 +7,12 @@ class MongoTest < MiniTest::Test
   def setup
     host = ENV.fetch('BOXEN_MONGODB_HOST', '127.0.0.1')
     port = '27017'
-    logger = Logger.new("/dev/null")
-    collection = Mongo::Client.new(["#{host}:#{port}"], server_selection_timeout: 1, database: 'testing', logger: logger)['testing']
+    logger = Logger.new('/dev/null')
+    client = Mongo::Client.new(["#{host}:#{port}"],
+                               server_selection_timeout: 1,
+                               database: 'testing',
+                               logger: logger)
+    collection = client['testing']
     begin
       collection.drop
       collection.create

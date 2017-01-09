@@ -27,14 +27,14 @@ module Flipper
         if context.thing.nil?
           false
         else
-          value.any? { |name|
+          value.any? do |name|
             begin
               group = Flipper.group(name)
               group.match?(context.thing, context)
             rescue GroupNotRegistered
               false
             end
-          }
+          end
         end
       end
 
