@@ -62,7 +62,12 @@ module Flipper
       # Get one feature
       def get(feature)
         response = get_request(@path + "/api/v1/features/#{feature}")
-        # JSON.parse(response.body)
+        parsed_response = JSON.parse(response.body)
+        parsed_response['gates'].reduce({}) do |acc, gate|
+          key = gate["key"].to_sym
+          acc[key] = gate['value'].is_a?(Array) ? gate['value'].to_set : gate['value']
+          acc
+        end
       end
 
       # Add a feature
@@ -79,7 +84,8 @@ module Flipper
       # Get all features
       def features
         response = get_request(@path + '/api/v1/features')
-        # JSON.parse(response.body)
+        parsed_response = JSON.parse(response.body)
+        parsed_response['features'].map { |feature| feature['key'] }.to_set
       end
 
       # Remove a feature

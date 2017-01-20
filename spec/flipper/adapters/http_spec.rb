@@ -12,6 +12,18 @@ RSpec.describe Flipper::Adapters::Http do
         subject.get('name')
         expect(a_request(:get, 'http://app.com/mount-point/api/v1/features/name')).to have_been_made.once
       end
+
+      it 'returns hash according to adapter spec' do
+        stub_request(:get, %r{\Ahttp://app.com*}).to_return(body: fixture_file('feature.json'))
+        response = subject.get('name')
+        expect(response).to eq(
+          { :boolean => true,
+            :groups => Set.new,
+            :actors => Set.new,
+            :percentage_of_actors => 0,
+            :percentage_of_time => 0
+        })
+      end
     end
 
     describe '#add' do
@@ -24,9 +36,15 @@ RSpec.describe Flipper::Adapters::Http do
 
     describe '#features' do
       it 'requests correct url' do
-        stub_request(:get, %r{\Ahttp://app.com*})
+        stub_request(:get, %r{\Ahttp://app.com*}).to_return(body: fixture_file('features.json'))
         subject.features
         expect(a_request(:get, 'http://app.com/mount-point/api/v1/features')).to have_been_made.once
+      end
+
+      it 'returns set of feature keys' do
+        stub_request(:get, %r{\Ahttp://app.com*}).to_return(body: fixture_file('features.json'))
+        response = subject.features
+        expect(response).to eq(%w(my_feature).to_set)
       end
     end
 
