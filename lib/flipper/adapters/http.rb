@@ -31,14 +31,32 @@ module Flipper
       end
     end
 
+    # allow user to configure client
+    # Http.configure { |c| c.headers = {} }
+    #
+    class Configuration
+      attr_accessor :headers, :basic_auth
+    end
+
     class Http
       include Flipper::Adapter
       include Request
       attr_reader :name
 
+      class << self
+        attr_accessor :configuration
+      end
+
       def initialize(path_to_mount)
+        @configuration = self.class.configuration
         @path = path_to_mount
         @name = :http
+      end
+
+
+      def self.configure
+        self.configuration ||= Configuration.new
+        yield(configuration)
       end
 
       # Get one feature
