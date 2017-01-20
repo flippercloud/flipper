@@ -17,12 +17,12 @@ RSpec.describe Flipper::Adapters::Http do
         stub_request(:get, %r{\Ahttp://app.com*}).to_return(body: fixture_file('feature.json'))
         response = subject.get('name')
         expect(response).to eq(
-          { :boolean => true,
-            :groups => Set.new,
-            :actors => Set.new,
-            :percentage_of_actors => 0,
-            :percentage_of_time => 0
-        })
+          boolean: true,
+          groups: Set.new,
+          actors: Set.new,
+          percentage_of_actors: 0,
+          percentage_of_time: 0
+        )
       end
     end
 
@@ -32,6 +32,13 @@ RSpec.describe Flipper::Adapters::Http do
         subject.add('name')
         expect(a_request(:post, 'http://app.com/mount-point/api/v1/features')).to have_been_made.once
       end
+
+      it 'returns true on succesful request' do
+        stub_request(:post, %r{\Ahttp://app.com*}).to_return(body: fixture_file('feature.json'))
+        expect(subject.add('name')).to be true
+      end
+
+      it 'returns false on error'
     end
 
     describe '#features' do
@@ -54,6 +61,13 @@ RSpec.describe Flipper::Adapters::Http do
         subject.remove('pane')
         expect(a_request(:delete, 'http://app.com/mount-point/api/v1/features/pane')).to have_been_made.once
       end
+
+      it 'returns true on succesful request' do
+        stub_request(:delete, %r{\Ahttp://app.com*})
+        expect(subject.remove('pane')).to be true
+      end
+
+      it 'returns false on error'
     end
 
     describe '#enable' do
@@ -69,6 +83,19 @@ RSpec.describe Flipper::Adapters::Http do
           subject.enable(feature, gate, thing)
           expect(a_request(:post, 'http://app.com/mount-point/api/v1/features/admin/groups').with(body: { name: 'admins' }.to_json)).to have_been_made.once
         end
+
+        it 'returns true on successful requests' do
+          gate = instance_double('Gate', name: :group,
+                                         key: :groups)
+
+          feature = instance_double('Feature', key: :admin)
+          thing = instance_double('Thing', value: 'admins')
+
+          stub_request(:post, %r{\Ahttp://app.com*})
+          expect(subject.enable(feature, gate, thing)).to be true
+        end
+
+        it 'returns false on error'
       end
 
       context 'actors gate' do
@@ -89,10 +116,20 @@ RSpec.describe Flipper::Adapters::Http do
         gate = instance_double('Gate', name: :group, key: :groups)
         feature = instance_double('Feature', key: :admin)
         thing = instance_double('Thing', value: 'admins')
-        stub_request(:post, %r{\Ahttp://app.com*})
-        subject.enable(feature, gate, thing)
-        expect(a_request(:delete, 'http://app.com/mount-point/api/v1/features/admin/groups'))
+        stub_request(:delete, %r{\Ahttp://app.com*})
+        subject.disable(feature, gate, thing)
+        expect(a_request(:post, 'http://app.com/mount-point/api/v1/features/admin/groups'))
       end
+
+      it 'returns true on succesful request' do
+        gate = instance_double('Gate', name: :group, key: :groups)
+        feature = instance_double('Feature', key: :admin)
+        thing = instance_double('Thing', value: 'admins')
+        stub_request(:delete, %r{\Ahttp://app.com*})
+        expect(subject.disable(feature, gate, thing)).to be true
+      end
+
+      it 'returns false on error'
     end
   end
 

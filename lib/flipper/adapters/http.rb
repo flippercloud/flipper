@@ -53,7 +53,6 @@ module Flipper
         @name = :http
       end
 
-
       def self.configure
         self.configuration ||= Configuration.new
         yield(configuration)
@@ -64,7 +63,7 @@ module Flipper
         response = get_request(@path + "/api/v1/features/#{feature}")
         parsed_response = JSON.parse(response.body)
         parsed_response['gates'].reduce({}) do |acc, gate|
-          key = gate["key"].to_sym
+          key = gate['key'].to_sym
           acc[key] = gate['value'].is_a?(Array) ? gate['value'].to_set : gate['value']
           acc
         end
@@ -73,7 +72,7 @@ module Flipper
       # Add a feature
       def add(feature)
         response = post_request(@path + '/api/v1/features', name: feature)
-        # JSON.parse(response.body)
+        true
       end
 
       def get_multi(features)
@@ -91,6 +90,7 @@ module Flipper
       # Remove a feature
       def remove(feature)
         response = delete_request(@path + "/api/v1/features/#{feature}")
+        true
         # JSON.parse(response.body)
       end
 
@@ -98,13 +98,13 @@ module Flipper
       def enable(feature, gate, thing)
         body = gate_request_body(gate.key, thing.value.to_s)
         response = post_request(@path + "/api/v1/features/#{feature.key}/#{gate.key}", body)
-        # JSON.parse(response)
+        true
       end
 
       # Disable gate thing for feature
       def disable(feature, gate, _thing)
         response = delete_request(@path + "/api/v1/features/#{feature.key}/#{gate.key}")
-        # JSON.parse(response)
+        true
       end
 
       private
