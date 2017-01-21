@@ -47,6 +47,8 @@ module Flipper
       attr_accessor :headers, :basic_auth
     end
 
+    # Flipper API HTTP Adapter
+    # Flipper::Adapters::Http.new('http://www.app.com/mount-point')
     class Http
       include Flipper::Adapter
 
@@ -59,7 +61,7 @@ module Flipper
       # Public: initialize with api url
       # http://www.myapp.com/api-mount-point
       def initialize(path_to_mount)
-        configuration = self.class.configuration
+        configuration = self.class.configuration || Configuration.new
         @request = Request.new(configuration.headers, configuration.basic_auth)
         @path = path_to_mount
         @name = :http

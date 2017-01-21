@@ -3,10 +3,6 @@ require 'flipper/adapters/http'
 require 'webmock/rspec'
 
 RSpec.describe Flipper::Adapters::Http do
-  before do
-    described_class.configure do |c|
-    end
-  end
 
   subject { described_class.new('http://app.com/mount-point') }
 
