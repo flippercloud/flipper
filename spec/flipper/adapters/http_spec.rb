@@ -3,7 +3,6 @@ require 'flipper/adapters/http'
 require 'webmock/rspec'
 
 RSpec.describe Flipper::Adapters::Http do
-
   subject { described_class.new('http://app.com/mount-point') }
 
   let(:feature) { instance_double('Feature', key: 'feature_panel') }
@@ -118,7 +117,6 @@ RSpec.describe Flipper::Adapters::Http do
           stub_request(:delete, %r{\Ahttp://app.com*}).to_return(status: 500)
           expect(subject.disable(feature, gate, thing)).to be false
         end
-
       end
     end
 
@@ -270,7 +268,6 @@ RSpec.describe Flipper::Adapters::Http do
           stub_request(:post, %r{\Ahttp://app.com*})
           subject.enable(feature, gate, thing)
           expect(a_request(:post, 'http://app.com/mount-point/api/v1/features/admin/percentage_of_time').with(body: { percentage: '20' }.to_json)).to have_been_made.once
-
         end
 
         it 'returns true on succesful request' do
@@ -313,7 +310,7 @@ RSpec.describe Flipper::Adapters::Http do
 
         described_class.configure do |c|
           c.headers = { 'X-Custom-Header' => 'foo' }
-          c.basic_auth = {'username' => 'password'}
+          c.basic_auth = { 'username' => 'password' }
         end
       end
 
@@ -321,12 +318,12 @@ RSpec.describe Flipper::Adapters::Http do
 
       it 'allows client to set request headers' do
         subject.get(feature)
-        expect(a_request(:get, 'http://app.com/mount-point/api/v1/features/feature_panel').with(headers: { 'X-Custom-Header' => 'foo'})).to have_been_made.once
+        expect(a_request(:get, 'http://app.com/mount-point/api/v1/features/feature_panel').with(headers: { 'X-Custom-Header' => 'foo' })).to have_been_made.once
       end
 
       it 'allows client to set basic auth' do
         subject.get(feature)
-        expect(a_request(:get, 'http://app.com/mount-point/api/v1/features/feature_panel').with(basic_auth: [ 'username', 'password' ])).to have_been_made.once
+        expect(a_request(:get, 'http://app.com/mount-point/api/v1/features/feature_panel').with(basic_auth: %w(username password))).to have_been_made.once
       end
     end
   end

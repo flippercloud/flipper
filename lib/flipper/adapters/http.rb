@@ -1,15 +1,16 @@
 require 'net/http'
 require 'json'
+require 'set'
 
 module Flipper
   module Adapters
     # class for handling http requests.
     # Initialize with headers / basic_auth and use intance to make any requests
     # headers and basic_auth will be sent in every request
-
     class  Request
-      DEFAULT_HEADERS = { 'Content-Type' => 'application/json',
-                          'Accept' => 'application/json',
+      DEFAULT_HEADERS = {
+        'Content-Type' => 'application/json',
+        'Accept' => 'application/json',
       }.freeze
 
       def initialize(headers, basic_auth)
@@ -21,7 +22,7 @@ module Flipper
         uri = URI.parse(path)
         http = Net::HTTP.new(uri.host, uri.port)
         request = Net::HTTP::Get.new(uri.request_uri, @headers)
-        request.basic_auth *@basic_auth if @basic_auth
+        request.basic_auth(*@basic_auth) if @basic_auth
         http.request(request)
       end
 
@@ -30,7 +31,7 @@ module Flipper
         http = Net::HTTP.new(uri.host, uri.port)
         request = Net::HTTP::Post.new(uri.request_uri, @headers)
         request.body = data.to_json
-        request.basic_auth *@basic_auth if @basic_auth
+        request.basic_auth(*@basic_auth) if @basic_auth
         http.request(request)
       end
 
@@ -38,7 +39,7 @@ module Flipper
         uri = URI.parse(path)
         http = Net::HTTP.new(uri.host, uri.port)
         request = Net::HTTP::Delete.new(uri.request_uri, @headers)
-        request.basic_auth *@basic_auth if @basic_auth
+        request.basic_auth(*@basic_auth) if @basic_auth
         http.request(request)
       end
     end
