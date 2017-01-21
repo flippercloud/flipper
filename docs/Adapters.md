@@ -14,7 +14,6 @@ I plan on supporting the adapters in the flipper repo. Other adapters are welcom
 
 ## Community Supported
 
-* [Active Record 4 adapter](https://github.com/bgentry/flipper-activerecord)
 * [Active Record 3 adapter](https://github.com/blueboxjesse/flipper-activerecord)
 * [Consul adapter](https://github.com/gdavison/flipper-consul)
 
