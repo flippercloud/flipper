@@ -72,7 +72,7 @@ module Flipper
       # Add a feature
       def add(feature)
         response = post_request(@path + '/api/v1/features', name: feature)
-        true
+        response.is_a?(Net::HTTPOK)
       end
 
       def get_multi(features)
@@ -90,21 +90,20 @@ module Flipper
       # Remove a feature
       def remove(feature)
         response = delete_request(@path + "/api/v1/features/#{feature}")
-        true
-        # JSON.parse(response.body)
+        response.is_a?(Net::HTTPOK)
       end
 
       # Enable gate thing for feature
       def enable(feature, gate, thing)
         body = gate_request_body(gate.key, thing.value.to_s)
         response = post_request(@path + "/api/v1/features/#{feature.key}/#{gate.key}", body)
-        true
+        response.is_a?(Net::HTTPOK)
       end
 
       # Disable gate thing for feature
       def disable(feature, gate, _thing)
         response = delete_request(@path + "/api/v1/features/#{feature.key}/#{gate.key}")
-        true
+        response.is_a?(Net::HTTPOK)
       end
 
       private
@@ -112,23 +111,20 @@ module Flipper
       # Returns request body for enabling/disabling a gate
       # i.e gate_request_body(:percentage_of_actors, 10)
       # returns { 'percentage' => 10 }
-      def gate_request_body(gate_key, value)
-        parameter = gate_parameter(gate_key)
-        { parameter.to_s => value }
-      end
-
-      def gate_parameter(gate_name)
-        case gate_name.to_sym
+      def gate_request_body(key, value)
+        case key.to_sym
+        when :boolean
+          {}
         when :groups
-          :name
+          { name: value }
         when :actors
-          :flipper_id
+          { flipper_id: value }
         when :percentage_of_actors
-          :percentage
+          { percentage: value }
         when :percentage_of_time
-          :percentage
+          { percentage: value }
         else
-          raise "#{gate_name} is not a valid flipper gate name"
+          raise "#{key} is not a valid flipper gate name"
         end
       end
     end
