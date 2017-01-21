@@ -22,7 +22,7 @@ module Flipper
         http = Net::HTTP.new(uri.host, uri.port)
         request = Net::HTTP::Get.new(uri.request_uri, @headers)
         request.basic_auth *@basic_auth if @basic_auth
-        response = http.request(request)
+        http.request(request)
       end
 
       def post(path, data)
@@ -31,7 +31,7 @@ module Flipper
         request = Net::HTTP::Post.new(uri.request_uri, @headers)
         request.body = data.to_json
         request.basic_auth *@basic_auth if @basic_auth
-        response = http.request(request)
+        http.request(request)
       end
 
       def delete(path)
@@ -39,7 +39,7 @@ module Flipper
         http = Net::HTTP.new(uri.host, uri.port)
         request = Net::HTTP::Delete.new(uri.request_uri, @headers)
         request.basic_auth *@basic_auth if @basic_auth
-        response = http.request(request)
+        http.request(request)
       end
     end
 
@@ -56,6 +56,8 @@ module Flipper
         attr_accessor :configuration
       end
 
+      # Public: initialize with api url
+      # http://www.myapp.com/api-mount-point
       def initialize(path_to_mount)
         configuration = self.class.configuration
         @request = Request.new(configuration.headers, configuration.basic_auth)
@@ -68,10 +70,10 @@ module Flipper
         yield(configuration)
       end
 
-      # Get one feature
+      # Public: Get one feature
+      # feature - Feature instance
       def get(feature)
-        #response = get_request(@path + "/api/v1/features/#{feature}")
-        response = @request.get(@path + "/api/v1/features/#{feature}")
+        response = @request.get(@path + "/api/v1/features/#{feature.key}")
         parsed_response = JSON.parse(response.body)
         parsed_response['gates'].reduce({}) do |acc, gate|
           key = gate['key'].to_sym
@@ -80,9 +82,10 @@ module Flipper
         end
       end
 
-      # Add a feature
+      # Public: Add a feature
+      # feature - Feature instance
       def add(feature)
-        response = @request.post(@path + '/api/v1/features', name: feature)
+        response = @request.post(@path + '/api/v1/features', name: feature.key)
         response.is_a?(Net::HTTPOK)
       end
 
@@ -91,27 +94,27 @@ module Flipper
         # or alternatively use a persistent connection and send multiple requests
       end
 
-      # Get all features
+      # Public: Get all features
       def features
         response = @request.get(@path + '/api/v1/features')
         parsed_response = JSON.parse(response.body)
         parsed_response['features'].map { |feature| feature['key'] }.to_set
       end
 
-      # Remove a feature
+      # Public: Remove a feature
       def remove(feature)
-        response = @request.delete(@path + "/api/v1/features/#{feature}")
+        response = @request.delete(@path + "/api/v1/features/#{feature.key}")
         response.is_a?(Net::HTTPOK)
       end
 
-      # Enable gate thing for feature
+      # Public: Enable gate thing for feature
       def enable(feature, gate, thing)
         body = gate_request_body(gate.key, thing.value.to_s)
         response = @request.post(@path + "/api/v1/features/#{feature.key}/#{gate.key}", body)
         response.is_a?(Net::HTTPOK)
       end
 
-      # Disable gate thing for feature
+      # Public: Disable gate thing for feature
       def disable(feature, gate, _thing)
         response = @request.delete(@path + "/api/v1/features/#{feature.key}/#{gate.key}")
         response.is_a?(Net::HTTPOK)
@@ -119,9 +122,9 @@ module Flipper
 
       private
 
-      # Returns request body for enabling/disabling a gate
-      # i.e gate_request_body(:percentage_of_actors, 10)
-      # returns { 'percentage' => 10 }
+      # Returns request body for enabling/disabling  gate
+      # gate_request_body(:percentage_of_actors, 10)
+      # => { 'percentage' => 10 }
       def gate_request_body(key, value)
         case key.to_sym
         when :boolean
@@ -135,7 +138,7 @@ module Flipper
         when :percentage_of_time
           { percentage: value }
         else
-          raise "#{key} is not a valid flipper gate name"
+          raise "#{key} is not a valid flipper gate key"
         end
       end
     end
