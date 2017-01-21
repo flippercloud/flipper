@@ -3,6 +3,10 @@ require 'flipper/adapters/http'
 require 'webmock/rspec'
 
 RSpec.describe Flipper::Adapters::Http do
+  before do
+    described_class.configure do |c|
+    end
+  end
   subject { described_class.new('http://app.com/mount-point') }
 
   describe '#get' do
@@ -301,6 +305,29 @@ RSpec.describe Flipper::Adapters::Http do
           response = subject.disable(feature, gate, thing)
           expect(response).to be false
         end
+      end
+    end
+
+    describe 'configuration' do
+      before do
+        stub_request(:get, %r{\Ahttp://app.com*}).to_return(body: fixture_file('feature.json'))
+
+        described_class.configure do |c|
+          c.headers = { 'X-Custom-Header' => 'foo' }
+          c.basic_auth = {'user' => 'password'}
+        end
+      end
+
+      subject { described_class.new('http://app.com/mount-point') }
+
+      it 'allows client to set request headers' do
+        subject.get('some_feature')
+        expect(a_request(:get, 'http://app.com/mount-point/api/v1/features/some_feature').with(headers: { 'X-Custom-Header' => 'foo'})).to have_been_made.once
+      end
+
+      it 'allows client to set basic auth' do
+        subject.get('some_feature')
+        expect(a_request(:get, 'http://app.com/mount-point/api/v1/features/some_feature').with(basic_auth: [ 'username', 'password' ])).to have_been_made.once
       end
     end
   end
