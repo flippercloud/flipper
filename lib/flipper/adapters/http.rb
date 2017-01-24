@@ -18,6 +18,8 @@ module Flipper
         @basic_auth = basic_auth.to_h.first
       end
 
+
+      # Public: GET http request
       def get(path)
         uri = URI.parse(path)
         http = Net::HTTP.new(uri.host, uri.port)
@@ -26,6 +28,8 @@ module Flipper
         http.request(request)
       end
 
+
+      # Public: POST http request
       def post(path, data)
         uri = URI.parse(path)
         http = Net::HTTP.new(uri.host, uri.port)
@@ -35,10 +39,12 @@ module Flipper
         http.request(request)
       end
 
-      def delete(path)
+      # Public: DELETE http request
+      def delete(path, data = {})
         uri = URI.parse(path)
         http = Net::HTTP.new(uri.host, uri.port)
         request = Net::HTTP::Delete.new(uri.request_uri, @headers)
+        request.body = data.to_h.to_json
         request.basic_auth(*@basic_auth) if @basic_auth
         http.request(request)
       end
@@ -52,6 +58,7 @@ module Flipper
     # Flipper::Adapters::Http.new('http://www.app.com/mount-point')
     class Http
       include Flipper::Adapter
+      FEATURE_NOT_FOUND = 1
 
       attr_reader :name
 
@@ -78,10 +85,14 @@ module Flipper
       def get(feature)
         response = @request.get(@path + "/api/v1/features/#{feature.key}")
         parsed_response = JSON.parse(response.body)
-        parsed_response['gates'].reduce({}) do |acc, gate|
-          key = gate['key'].to_sym
-          acc[key] = gate['value'].is_a?(Array) ? gate['value'].to_set : gate['value']
-          acc
+        if parsed_response['code'] == FEATURE_NOT_FOUND
+          default_feature_value
+        else
+          parsed_response['gates'].reduce({}) do |acc, gate|
+            key = gate['key'].to_sym
+            acc[key] = result_for_feature(gate['key'], gate['value'])
+            acc
+          end
         end
       end
 
@@ -118,14 +129,21 @@ module Flipper
       end
 
       # Public: Disable gate thing for feature
-      def disable(feature, gate, _thing)
-        response = @request.delete(@path + "/api/v1/features/#{feature.key}/#{gate.key}")
+      def disable(feature, gate, thing)
+        body = delete_request_body(gate.key, thing.value)
+        response = @request.delete(@path + "/api/v1/features/#{feature.key}/#{gate.key}", body)
+        response.is_a?(Net::HTTPOK)
+      end
+
+      # Public: Clear all gate values for feature
+      def clear(feature)
+        response = @request.delete(@path + "/api/v1/features/#{feature.key}/boolean")
         response.is_a?(Net::HTTPOK)
       end
 
       private
 
-      # Returns request body for enabling/disabling  gate
+      # Returns request body for enabling/disabling gate
       # gate_request_body(:percentage_of_actors, 10)
       # => { 'percentage' => 10 }
       def gate_request_body(key, value)
@@ -143,6 +161,40 @@ module Flipper
         else
           raise "#{key} is not a valid flipper gate key"
         end
+      end
+
+      def delete_request_body(key, value)
+        return unless gates_with_delete_request_body.include?(key)
+        gate_request_body(key, value)
+      end
+
+      def result_for_feature(key, value)
+        case key.to_sym
+        when :boolean
+          value == true || nil
+        when :groups
+          value.to_set
+        when :actors
+          value.to_set
+        when :percentage_of_actors
+          value == 0 ? nil : value
+        when :percentage_of_time
+          value == 0 ? nil : value
+        end
+      end
+
+      def default_feature_value
+        {
+          boolean: nil,
+         groups: Set.new,
+         actors: Set.new,
+         percentage_of_actors: nil,
+         percentage_of_time: nil,
+        }
+      end
+
+      def gates_with_delete_request_body
+        %i(groups actors)
       end
     end
   end
