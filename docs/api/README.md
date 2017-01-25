@@ -27,6 +27,26 @@ YourRailsApp::Application.routes.draw do
 end
 ```
 
+### Mount Priority - important if using Flipper::UI
+
+There can be more than one router in your application. Make sure if you choose a path that begins with the same pattern as where Flipper::UI is mounted that the app with the longer pattern is mounted first.
+
+*bad:*
+```ruby
+YourRailsApp::Application.routes.draw do
+  mount Flipper::UI.app(flipper) => '/flipper'
+  mount Flipper::Api.app(flipper) => '/flipper-api'
+end
+````
+In this case any requests to /flipper\* will be routed to Flipper::UI - including /flipper-api* requests.  Simply swap these two to make sure that any requests that don't match /flipper-api\* will be routed to Flipper::UI.
+
+*good:*
+```ruby
+YourRailsApp::Application.routes.draw do
+  mount Flipper::Api.app(flipper) => '/flipper-api'
+  mount Flipper::UI.app(flipper) => '/flipper'
+end
+````
 For more advanced mounting techniques and for suggestions on how to mount in a non-Rails application, it is recommend that you review the [`Flipper::UI` usage documentation](https://github.com/jnunemaker/flipper/blob/master/docs/ui/README.md#usage) as the same approaches apply to `Flipper::Api`.
 
 ## Endpoints
