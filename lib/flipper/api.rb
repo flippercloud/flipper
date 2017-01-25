@@ -1,6 +1,7 @@
 require 'rack'
 require 'flipper'
 require 'flipper/api/middleware'
+require 'flipper/api/json_params'
 require 'flipper/api/actor'
 
 module Flipper
@@ -11,6 +12,7 @@ module Flipper
       app = App.new(200, { 'Content-Type' => CONTENT_TYPE }, [''])
       builder = Rack::Builder.new
       yield builder if block_given?
+      builder.use Flipper::Api::JsonParams
       builder.use Flipper::Api::Middleware, flipper
       builder.run app
       builder

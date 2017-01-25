@@ -4,18 +4,38 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
   let(:app) { build_api(flipper) }
 
   describe 'enable' do
-    before do
-      flipper[:my_feature].disable
-      post '/api/v1/features/my_feature/percentage_of_actors', percentage: '10'
+    context 'url-encoded request' do
+      before do
+        flipper[:my_feature].disable
+        post '/api/v1/features/my_feature/percentage_of_actors', percentage: '10'
+      end
+
+      it 'enables gate for feature' do
+        expect(flipper[:my_feature].enabled_gate_names).to include(:percentage_of_actors)
+      end
+
+      it 'returns decorated feature with gate enabled for 10 percent of actors' do
+        gate = json_response['gates'].find { |gate| gate['name'] == 'percentage_of_actors' }
+        expect(gate['value']).to eq(10)
+      end
     end
 
-    it 'enables gate for feature' do
-      expect(flipper[:my_feature].enabled_gate_names).to include(:percentage_of_actors)
-    end
+    context 'json request' do
+      before do
+        flipper[:my_feature].disable
+        post '/api/v1/features/my_feature/percentage_of_actors',
+             { percentage: '10' }.to_json,
+             'CONTENT_TYPE' => 'application/json'
+      end
 
-    it 'returns decorated feature with gate enabled for 10 percent of actors' do
-      gate = json_response['gates'].find { |gate| gate['name'] == 'percentage_of_actors' }
-      expect(gate['value']).to eq(10)
+      it 'enables gate for feature' do
+        expect(flipper[:my_feature].enabled_gate_names).to include(:percentage_of_actors)
+      end
+
+      it 'returns decorated feature with gate enabled for 10 percent of actors' do
+        gate = json_response['gates'].find { |gate| gate['name'] == 'percentage_of_actors' }
+        expect(gate['value']).to eq(10)
+      end
     end
   end
 
