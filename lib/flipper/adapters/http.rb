@@ -7,7 +7,8 @@ module Flipper
     # class for handling http requests.
     # Initialize with headers / basic_auth and use intance to make any requests
     # headers and basic_auth will be sent in every request
-    class  Request
+    # Request.new("X-Header" => "value", { "auth_username" => "auth_password" }c
+    class Request
       DEFAULT_HEADERS = {
         'Content-Type' => 'application/json',
         'Accept' => 'application/json',
@@ -15,16 +16,15 @@ module Flipper
 
       def initialize(headers, basic_auth)
         @headers = DEFAULT_HEADERS.merge(headers.to_h)
-        @basic_auth = basic_auth.to_h.first
+        @basic_auth_username, @basic_auth_password = basic_auth.to_h.first
       end
-
 
       # Public: GET http request
       def get(path)
         uri = URI.parse(path)
         http = Net::HTTP.new(uri.host, uri.port)
         request = Net::HTTP::Get.new(uri.request_uri, @headers)
-        request.basic_auth(*@basic_auth) if @basic_auth
+        request.basic_auth(@basic_auth_username, @basic_auth_password) if basic_auth?
         http.request(request)
       end
 
@@ -35,7 +35,7 @@ module Flipper
         http = Net::HTTP.new(uri.host, uri.port)
         request = Net::HTTP::Post.new(uri.request_uri, @headers)
         request.body = data.to_json
-        request.basic_auth(*@basic_auth) if @basic_auth
+        request.basic_auth(@basic_auth_username, @basic_auth_password) if basic_auth?
         http.request(request)
       end
 
@@ -45,8 +45,12 @@ module Flipper
         http = Net::HTTP.new(uri.host, uri.port)
         request = Net::HTTP::Delete.new(uri.request_uri, @headers)
         request.body = data.to_h.to_json
-        request.basic_auth(*@basic_auth) if @basic_auth
+        request.basic_auth(@basic_auth_username, @basic_auth_password) if basic_auth?
         http.request(request)
+      end
+
+      def basic_auth?
+        @basic_auth_username && @basic_auth_password
       end
     end
 
@@ -177,19 +181,19 @@ module Flipper
         when :actors
           value.to_set
         when :percentage_of_actors
-          value == 0 ? nil : value
+          value.zero? ? nil : value
         when :percentage_of_time
-          value == 0 ? nil : value
+          value.zero? ? nil : value
         end
       end
 
       def default_feature_value
         {
           boolean: nil,
-         groups: Set.new,
-         actors: Set.new,
-         percentage_of_actors: nil,
-         percentage_of_time: nil,
+          groups: Set.new,
+          actors: Set.new,
+          percentage_of_actors: nil,
+          percentage_of_time: nil,
         }
       end
 
