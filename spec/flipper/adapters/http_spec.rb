@@ -12,7 +12,9 @@ RSpec.describe Flipper::Adapters::Http do
     it 'requests correct url' do
       stub_request(:get, %r{\Ahttp://app.com*}).to_return(body: fixture_file('feature.json'))
       subject.get(feature)
-      expect(a_request(:get, 'http://app.com/mount-point/api/v1/features/feature_panel')).to have_been_made.once
+      expect(
+        a_request(:get, 'http://app.com/mount-point/api/v1/features/feature_panel')
+      ).to have_been_made.once
     end
 
     it 'returns hash according to adapter spec' do
@@ -32,7 +34,10 @@ RSpec.describe Flipper::Adapters::Http do
     it 'requests correct url' do
       stub_request(:post, %r{\Ahttp://app.com*}).to_return(body: fixture_file('feature.json'))
       subject.add(feature)
-      expect(a_request(:post, 'http://app.com/mount-point/api/v1/features')).to have_been_made.once
+      expect(
+        a_request(:post, 'http://app.com/mount-point/api/v1/features')
+        .with(body: { name: 'feature_panel' })
+      ).to have_been_made.once
     end
 
     it 'returns true on succesful request' do
@@ -50,7 +55,9 @@ RSpec.describe Flipper::Adapters::Http do
     it 'requests correct url' do
       stub_request(:get, %r{\Ahttp://app.com*}).to_return(body: fixture_file('features.json'))
       subject.features
-      expect(a_request(:get, 'http://app.com/mount-point/api/v1/features')).to have_been_made.once
+      expect(
+        a_request(:get, 'http://app.com/mount-point/api/v1/features')
+      ).to have_been_made.once
     end
 
     it 'returns set of feature keys' do
@@ -62,13 +69,15 @@ RSpec.describe Flipper::Adapters::Http do
 
   describe '#remove' do
     it 'requests correct url' do
-      stub_request(:delete, %r{\Ahttp://app.com*})
+      stub_request(:delete, %r{\Ahttp://app.com*}).to_return(status: 204)
       subject.remove(feature)
-      expect(a_request(:delete, 'http://app.com/mount-point/api/v1/features/feature_panel')).to have_been_made.once
+      expect(
+        a_request(:delete, 'http://app.com/mount-point/api/v1/features/feature_panel')
+      ).to have_been_made.once
     end
 
     it 'returns true on succesful request' do
-      stub_request(:delete, %r{\Ahttp://app.com*})
+      stub_request(:delete, %r{\Ahttp://app.com*}).to_return(status: 204)
       expect(subject.remove(feature)).to be true
     end
 
@@ -82,7 +91,9 @@ RSpec.describe Flipper::Adapters::Http do
     it 'requests correct url' do
       stub_request(:delete, %r{\Ahttp://app.com*})
       subject.clear(feature)
-      expect(a_request(:delete, 'http://app.com/mount-point/api/v1/features/feature_panel/boolean')).to have_been_made.once
+      expect(
+        a_request(:delete, 'http://app.com/mount-point/api/v1/features/feature_panel/boolean')
+      ).to have_been_made.once
     end
 
     it 'returns true on succesful request' do
@@ -107,7 +118,10 @@ RSpec.describe Flipper::Adapters::Http do
       it 'requests correct url' do
         stub_request(:post, %r{\Ahttp://app.com*})
         subject.enable(feature, gate, thing)
-        expect(a_request(:post, 'http://app.com/mount-point/api/v1/features/admin_panel/groups').with(body: { name: 'admins' }.to_json)).to have_been_made.once
+        expect(
+          a_request(:post, 'http://app.com/mount-point/api/v1/features/admin_panel/groups')
+          .with(body: { name: 'admins' }.to_json)
+        ).to have_been_made.once
       end
 
       it 'returns true on successful request' do
@@ -125,7 +139,9 @@ RSpec.describe Flipper::Adapters::Http do
       it 'requests correct url' do
         stub_request(:delete, %r{\Ahttp://app.com*})
         subject.disable(feature, gate, thing)
-        expect(a_request(:delete, 'http://app.com/mount-point/api/v1/features/admin_panel/groups')).to have_been_made.once
+        expect(
+          a_request(:delete, 'http://app.com/mount-point/api/v1/features/admin_panel/groups')
+        ).to have_been_made.once
       end
 
       it 'returns true on successful request' do
@@ -148,7 +164,10 @@ RSpec.describe Flipper::Adapters::Http do
         it 'requests correct url' do
           stub_request(:post, %r{\Ahttp://app.com*})
           subject.enable(feature, gate, thing)
-          expect(a_request(:post, 'http://app.com/mount-point/api/v1/features/admin_panel/actors').with(body: { flipper_id: 'user:22' }.to_json)).to have_been_made.once
+          expect(
+            a_request(:post, 'http://app.com/mount-point/api/v1/features/admin_panel/actors')
+            .with(body: { flipper_id: 'user:22' }.to_json)
+          ).to have_been_made.once
         end
 
         it 'returns true on succesful request' do
@@ -168,7 +187,9 @@ RSpec.describe Flipper::Adapters::Http do
         it 'requests correct url' do
           stub_request(:delete, %r{\Ahttp://app.com*})
           subject.disable(feature, gate, thing)
-          expect(a_request(:delete, 'http://app.com/mount-point/api/v1/features/admin_panel/actors')).to have_been_made.once
+          expect(
+            a_request(:delete, 'http://app.com/mount-point/api/v1/features/admin_panel/actors')
+          ).to have_been_made.once
         end
 
         it 'returns true on succesful request' do
@@ -194,7 +215,10 @@ RSpec.describe Flipper::Adapters::Http do
         it 'requests correct url' do
           stub_request(:post, %r{\Ahttp://app.com*})
           subject.enable(feature, gate, thing)
-          expect(a_request(:post, 'http://app.com/mount-point/api/v1/features/admin_panel/boolean').with(body: {})).to have_been_made.once
+          expect(
+            a_request(:post, 'http://app.com/mount-point/api/v1/features/admin_panel/boolean')
+            .with(body: {})
+          ).to have_been_made.once
         end
 
         it 'returns true on succesful request' do
@@ -214,7 +238,10 @@ RSpec.describe Flipper::Adapters::Http do
         it 'requests correct url' do
           stub_request(:delete, %r{\Ahttp://app.com*})
           subject.disable(feature, gate, thing)
-          expect(a_request(:delete, 'http://app.com/mount-point/api/v1/features/admin_panel/boolean').with(body: {})).to have_been_made.once
+          expect(
+            a_request(:delete, 'http://app.com/mount-point/api/v1/features/admin_panel/boolean')
+            .with(body: {})
+          ).to have_been_made.once
         end
 
         it 'returns true on succesful request' do
@@ -240,7 +267,10 @@ RSpec.describe Flipper::Adapters::Http do
         it 'requests correct url' do
           stub_request(:post, %r{\Ahttp://app.com*})
           subject.enable(feature, gate, thing)
-          expect(a_request(:post, 'http://app.com/mount-point/api/v1/features/admin_panel/percentage_of_actors').with(body: { percentage: '10' }.to_json)).to have_been_made.once
+          expect(
+            a_request(:post, 'http://app.com/mount-point/api/v1/features/admin_panel/percentage_of_actors')
+            .with(body: { percentage: '10' }.to_json)
+          ).to have_been_made.once
         end
 
         it 'returns true on succesful request' do
@@ -260,7 +290,10 @@ RSpec.describe Flipper::Adapters::Http do
         it 'requests correct url' do
           stub_request(:delete, %r{\Ahttp://app.com*})
           subject.disable(feature, gate, thing)
-          expect(a_request(:delete, 'http://app.com/mount-point/api/v1/features/admin_panel/percentage_of_actors').with(body: {})).to have_been_made.once
+          expect(
+            a_request(:delete, 'http://app.com/mount-point/api/v1/features/admin_panel/percentage_of_actors')
+            .with(body: {})
+          ).to have_been_made.once
         end
 
         it 'returns true on succesful request' do
@@ -286,7 +319,10 @@ RSpec.describe Flipper::Adapters::Http do
         it 'requests correct url' do
           stub_request(:post, %r{\Ahttp://app.com*})
           subject.enable(feature, gate, thing)
-          expect(a_request(:post, 'http://app.com/mount-point/api/v1/features/admin_panel/percentage_of_time').with(body: { percentage: '20' }.to_json)).to have_been_made.once
+          expect(
+            a_request(:post, 'http://app.com/mount-point/api/v1/features/admin_panel/percentage_of_time')
+            .with(body: { percentage: '20' }.to_json)
+          ).to have_been_made.once
         end
 
         it 'returns true on succesful request' do
@@ -306,7 +342,10 @@ RSpec.describe Flipper::Adapters::Http do
         it 'requests correct url' do
           stub_request(:delete, %r{\Ahttp://app.com*})
           subject.disable(feature, gate, thing)
-          expect(a_request(:delete, 'http://app.com/mount-point/api/v1/features/admin_panel/percentage_of_time').with(body: {})).to have_been_made.once
+          expect(
+            a_request(:delete, 'http://app.com/mount-point/api/v1/features/admin_panel/percentage_of_time')
+            .with(body: {})
+          ).to have_been_made.once
         end
 
         it 'returns true on succesful request' do
@@ -337,12 +376,18 @@ RSpec.describe Flipper::Adapters::Http do
 
       it 'allows client to set request headers' do
         subject.get(feature)
-        expect(a_request(:get, 'http://app.com/mount-point/api/v1/features/admin_panel').with(headers: { 'X-Custom-Header' => 'foo' })).to have_been_made.once
+        expect(
+          a_request(:get, 'http://app.com/mount-point/api/v1/features/admin_panel')
+          .with(headers: { 'X-Custom-Header' => 'foo' })
+        ).to have_been_made.once
       end
 
       it 'allows client to set basic auth' do
         subject.get(feature)
-        expect(a_request(:get, 'http://app.com/mount-point/api/v1/features/admin_panel').with(basic_auth: %w(username password))).to have_been_made.once
+        expect(
+          a_request(:get, 'http://app.com/mount-point/api/v1/features/admin_panel')
+          .with(basic_auth: %w(username password))
+        ).to have_been_made.once
       end
     end
   end

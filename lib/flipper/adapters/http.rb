@@ -7,7 +7,7 @@ module Flipper
     # class for handling http requests.
     # Initialize with headers / basic_auth and use intance to make any requests
     # headers and basic_auth will be sent in every request
-    # Request.new("X-Header" => "value", { "auth_username" => "auth_password" }c
+    # Request.new({ "X-Header" => "value" }, { "auth_username" => "auth_password" })
     class Request
       DEFAULT_HEADERS = {
         'Content-Type' => 'application/json',
@@ -27,7 +27,6 @@ module Flipper
         request.basic_auth(@basic_auth_username, @basic_auth_password) if basic_auth?
         http.request(request)
       end
-
 
       # Public: POST http request
       def post(path, data)
@@ -92,10 +91,9 @@ module Flipper
         if parsed_response['code'] == FEATURE_NOT_FOUND
           default_feature_value
         else
-          parsed_response['gates'].reduce({}) do |acc, gate|
+          parsed_response['gates'].each_with_object({}) do |gate, feature_result|
             key = gate['key'].to_sym
-            acc[key] = result_for_feature(gate['key'], gate['value'])
-            acc
+            feature_result[key] = result_for_feature(gate['key'], gate['value'])
           end
         end
       end
@@ -122,7 +120,7 @@ module Flipper
       # Public: Remove a feature
       def remove(feature)
         response = @request.delete(@path + "/api/v1/features/#{feature.key}")
-        response.is_a?(Net::HTTPOK)
+        response.is_a?(Net::HTTPNoContent)
       end
 
       # Public: Enable gate thing for feature
@@ -158,9 +156,7 @@ module Flipper
           { name: value }
         when :actors
           { flipper_id: value }
-        when :percentage_of_actors
-          { percentage: value }
-        when :percentage_of_time
+        when :percentage_of_actors, :percentage_of_time
           { percentage: value }
         else
           raise "#{key} is not a valid flipper gate key"
@@ -176,13 +172,9 @@ module Flipper
         case key.to_sym
         when :boolean
           value == true || nil
-        when :groups
+        when :groups, :actors
           value.to_set
-        when :actors
-          value.to_set
-        when :percentage_of_actors
-          value.zero? ? nil : value
-        when :percentage_of_time
+        when :percentage_of_actors, :percentage_of_time
           value.zero? ? nil : value
         end
       end
