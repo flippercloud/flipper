@@ -5,9 +5,8 @@ require 'set'
 module Flipper
   module Adapters
     # class for handling http requests.
-    # Initialize with headers / basic_auth and use intance to make any requests
-    # headers and basic_auth will be sent in every request
-    # Request.new({ "X-Header" => "value" }, { "auth_username" => "auth_password" })
+    # Initialize with Configuration instance
+    # Configuration attributes will be sent in every request
     class Request
       DEFAULT_HEADERS = {
         'Content-Type' => 'application/json',
@@ -69,7 +68,8 @@ module Flipper
     end
 
     # Flipper API HTTP Adapter
-    # Flipper::Adapters::Http.new('http://www.app.com/mount-point')
+    # uri = URI('http://www.app.com/mount-point')
+    # Flipper::Adapters::Http.new(uri)
     class Http
       include Flipper::Adapter
       attr_reader :name
@@ -80,10 +80,10 @@ module Flipper
 
       # Public: initialize with api url
       # http://www.myapp.com/api-mount-point
-      def initialize(mount_path_uri)
+      def initialize(uri)
         configuration = self.class.configuration || Configuration.new
         @request = Request.new(configuration)
-        @path = mount_path_uri.to_s
+        @uri = uri.to_s
         @name = :http
       end
 
@@ -95,7 +95,7 @@ module Flipper
       # Public: Get one feature
       # feature - Feature instance
       def get(feature)
-        response = @request.get(@path + "/api/v1/features/#{feature.key}")
+        response = @request.get(@uri + "/api/v1/features/#{feature.key}")
         parsed_response = JSON.parse(response.body)
         if response.is_a?(Net::HTTPNotFound) || parsed_response['state'] == 'off'
           default_feature_value
@@ -110,7 +110,7 @@ module Flipper
       # Public: Add a feature
       # feature - Feature instance
       def add(feature)
-        response = @request.post(@path + '/api/v1/features', name: feature.key)
+        response = @request.post(@uri + '/api/v1/features', name: feature.key)
         response.is_a?(Net::HTTPOK)
       end
 
@@ -121,34 +121,34 @@ module Flipper
 
       # Public: Get all features
       def features
-        response = @request.get(@path + '/api/v1/features')
+        response = @request.get(@uri + '/api/v1/features')
         parsed_response = JSON.parse(response.body)
         parsed_response['features'].map { |feature| feature['key'] }.to_set
       end
 
       # Public: Remove a feature
       def remove(feature)
-        response = @request.delete(@path + "/api/v1/features/#{feature.key}")
+        response = @request.delete(@uri + "/api/v1/features/#{feature.key}")
         response.is_a?(Net::HTTPNoContent)
       end
 
       # Public: Enable gate thing for feature
       def enable(feature, gate, thing)
         body = gate_request_body(gate.key, thing.value.to_s)
-        response = @request.post(@path + "/api/v1/features/#{feature.key}/#{gate.key}", body)
+        response = @request.post(@uri + "/api/v1/features/#{feature.key}/#{gate.key}", body)
         response.is_a?(Net::HTTPOK)
       end
 
       # Public: Disable gate thing for feature
       def disable(feature, gate, thing)
         body = delete_request_body(gate.key, thing.value)
-        response = @request.delete(@path + "/api/v1/features/#{feature.key}/#{gate.key}", body)
+        response = @request.delete(@uri + "/api/v1/features/#{feature.key}/#{gate.key}", body)
         response.is_a?(Net::HTTPOK) || response.is_a?(Net::HTTPNotFound)
       end
 
       # Public: Clear all gate values for feature
       def clear(feature)
-        response = @request.delete(@path + "/api/v1/features/#{feature.key}/boolean")
+        response = @request.delete(@uri + "/api/v1/features/#{feature.key}/boolean")
         response.is_a?(Net::HTTPOK)
       end
 

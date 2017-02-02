@@ -5,8 +5,8 @@ require 'flipper/spec/shared_adapter_specs'
 
 RSpec.describe Flipper::Adapters::Http do
   context 'adapter' do
-    let(:mount_path) { URI('http://localhost:8080/') }
-    subject { described_class.new(mount_path) }
+    let(:uri) { URI('http://localhost:8080/') }
+    subject { described_class.new(uri) }
     let(:memory_adapter) {  Flipper::Adapters::Memory.new }
     let(:flipper_api) { Flipper.new(memory_adapter) }
     let(:app) {  Flipper::Api.app(flipper_api) }
