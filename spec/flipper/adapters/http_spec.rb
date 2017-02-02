@@ -1,10 +1,10 @@
 require 'helper'
 require 'flipper/adapters/http'
 require 'webmock/rspec'
-require 'flipper/spec/shared_adapter_specs'
 
 RSpec.describe Flipper::Adapters::Http do
-  subject { described_class.new('http://app.com/mount-point') }
+  let(:uri) { 'http://app.com/mount-point' }
+  subject { described_class.new(uri) }
 
   let(:feature) { instance_double('Feature', key: 'feature_panel') }
 
@@ -15,18 +15,6 @@ RSpec.describe Flipper::Adapters::Http do
       expect(
         a_request(:get, 'http://app.com/mount-point/api/v1/features/feature_panel')
       ).to have_been_made.once
-    end
-
-    it 'returns hash according to adapter spec' do
-      stub_request(:get, %r{\Ahttp://app.com*}).to_return(body: fixture_file('feature.json'))
-      response = subject.get(feature)
-      expect(response).to eq(
-        boolean: true,
-        groups: Set.new,
-        actors: Set.new,
-        percentage_of_actors: nil,
-        percentage_of_time: nil
-      )
     end
   end
 
@@ -137,7 +125,7 @@ RSpec.describe Flipper::Adapters::Http do
 
     describe '#disable' do
       it 'requests correct url' do
-        stub_request(:delete, %r{\Ahttp://app.com*})
+        stub_request(:delete, %r{\Ahttp://app.com*}).to_return(body: {}.to_json, status: 404)
         subject.disable(feature, gate, thing)
         expect(
           a_request(:delete, 'http://app.com/mount-point/api/v1/features/admin_panel/groups')
@@ -369,6 +357,8 @@ RSpec.describe Flipper::Adapters::Http do
         described_class.configure do |c|
           c.headers = { 'X-Custom-Header' => 'foo' }
           c.basic_auth = { 'username' => 'password' }
+          c.read_timeout = 100
+          c.open_timeout = 40
         end
       end
 
