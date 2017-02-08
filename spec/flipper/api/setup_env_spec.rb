@@ -55,4 +55,22 @@ RSpec.describe Flipper::Api::SetupEnv do
       expect(last_response.body).to eq(env_flipper.object_id.to_s)
     end
   end
+
+  context "when flipper instance is nil" do
+    let(:app) do
+      app = lambda do |env|
+        [200, { 'Content-Type' => 'text/html' }, [env["flipper"].object_id.to_s]]
+      end
+      builder = Rack::Builder.new
+      builder.use described_class, nil
+      builder.run app
+      builder
+    end
+
+    it "leaves env flipper alone" do
+      env_flipper = build_flipper
+      get "/", {}, {"flipper" => env_flipper}
+      expect(last_response.body).to eq(env_flipper.object_id.to_s)
+    end
+  end
 end
