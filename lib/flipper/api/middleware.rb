@@ -33,7 +33,7 @@ module Flipper
           @app.status = 404
           @app.call(env)
         else
-          flipper = env.fetch("flipper")
+          flipper = env.fetch('flipper')
           action_class.run(flipper, request)
         end
       end

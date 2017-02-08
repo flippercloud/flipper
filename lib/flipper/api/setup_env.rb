@@ -30,7 +30,7 @@ module Flipper
       end
 
       def call(env)
-        env["flipper".freeze] ||= flipper
+        env['flipper'.freeze] ||= flipper
         @app.call(env)
       end
 

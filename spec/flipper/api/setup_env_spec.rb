@@ -1,10 +1,10 @@
 require 'helper'
 
 RSpec.describe Flipper::Api::SetupEnv do
-  context "with flipper instance" do
+  context 'with flipper instance' do
     let(:app) do
       app = lambda do |env|
-        [200, { 'Content-Type' => 'text/html' }, [env["flipper"].object_id.to_s]]
+        [200, { 'Content-Type' => 'text/html' }, [env['flipper'].object_id.to_s]]
       end
       builder = Rack::Builder.new
       builder.use described_class, flipper
@@ -12,19 +12,19 @@ RSpec.describe Flipper::Api::SetupEnv do
       builder
     end
 
-    it "sets flipper in env" do
-      get "/"
+    it 'sets flipper in env' do
+      get '/'
       expect(last_response.body).to eq(flipper.object_id.to_s)
     end
   end
 
-  context "with block that returns flipper instance" do
-    let(:flipper_block) {
-      ->{ flipper }
-    }
+  context 'with block that returns flipper instance' do
+    let(:flipper_block) do
+      -> { flipper }
+    end
     let(:app) do
       app = lambda do |env|
-        [200, { 'Content-Type' => 'text/html' }, [env["flipper"].object_id.to_s]]
+        [200, { 'Content-Type' => 'text/html' }, [env['flipper'].object_id.to_s]]
       end
       builder = Rack::Builder.new
       builder.use described_class, flipper_block
@@ -32,16 +32,16 @@ RSpec.describe Flipper::Api::SetupEnv do
       builder
     end
 
-    it "sets flipper in env" do
-      get "/"
+    it 'sets flipper in env' do
+      get '/'
       expect(last_response.body).to eq(flipper.object_id.to_s)
     end
   end
 
-  context "when env already has flipper setup" do
+  context 'when env already has flipper setup' do
     let(:app) do
       app = lambda do |env|
-        [200, { 'Content-Type' => 'text/html' }, [env["flipper"].object_id.to_s]]
+        [200, { 'Content-Type' => 'text/html' }, [env['flipper'].object_id.to_s]]
       end
       builder = Rack::Builder.new
       builder.use described_class, flipper
@@ -49,17 +49,17 @@ RSpec.describe Flipper::Api::SetupEnv do
       builder
     end
 
-    it "leaves env flipper alone" do
+    it 'leaves env flipper alone' do
       env_flipper = build_flipper
-      get "/", {}, {"flipper" => env_flipper}
+      get '/', {}, 'flipper' => env_flipper
       expect(last_response.body).to eq(env_flipper.object_id.to_s)
     end
   end
 
-  context "when flipper instance is nil" do
+  context 'when flipper instance is nil' do
     let(:app) do
       app = lambda do |env|
-        [200, { 'Content-Type' => 'text/html' }, [env["flipper"].object_id.to_s]]
+        [200, { 'Content-Type' => 'text/html' }, [env['flipper'].object_id.to_s]]
       end
       builder = Rack::Builder.new
       builder.use described_class, nil
@@ -67,9 +67,9 @@ RSpec.describe Flipper::Api::SetupEnv do
       builder
     end
 
-    it "leaves env flipper alone" do
+    it 'leaves env flipper alone' do
       env_flipper = build_flipper
-      get "/", {}, {"flipper" => env_flipper}
+      get '/', {}, 'flipper' => env_flipper
       expect(last_response.body).to eq(env_flipper.object_id.to_s)
     end
   end
