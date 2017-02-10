@@ -96,14 +96,11 @@ module Flipper
       # feature - Feature instance
       def get(feature)
         response = @request.get(@uri + "/api/v1/features/#{feature.key}")
-        parsed_response = JSON.parse(response.body)
-        if response.is_a?(Net::HTTPNotFound) || parsed_response['state'] == 'off'
+        if response.is_a?(Net::HTTPNotFound)
           default_feature_value
         else
-          parsed_response['gates'].each_with_object({}) do |gate, feature_result|
-            key = gate['key'].to_sym
-            feature_result[key] = result_for_feature(gate['key'], gate['value'])
-          end
+          parsed_response = JSON.parse(response.body)
+          result_for_feature(feature, parsed_response.fetch("gates"))
         end
       end
 
@@ -115,8 +112,20 @@ module Flipper
       end
 
       def get_multi(features)
-        # could be cool to add this feature as an api endpoint requesting multiple features
-        # or alternatively use a persistent connection and send multiple requests
+        csv_keys = features.map(&:key).join(',')
+        response = @request.get(@uri + "/api/v1/features?keys=#{csv_keys}")
+        parsed_response = JSON.parse(response.body)
+        parsed_features = parsed_response.fetch('features')
+        gates_by_key = parsed_features.inject({}) { |hash, parsed_feature|
+          hash[parsed_feature["key"]] = parsed_feature["gates"]
+          hash
+        }
+
+        result = {}
+        features.each do |feature|
+          result[feature.key] = result_for_feature(feature, gates_by_key[feature.key])
+        end
+        result
       end
 
       # Public: Get all features
@@ -143,7 +152,7 @@ module Flipper
       def disable(feature, gate, thing)
         body = delete_request_body(gate.key, thing.value)
         response = @request.delete(@uri + "/api/v1/features/#{feature.key}/#{gate.key}", body)
-        response.is_a?(Net::HTTPOK) || response.is_a?(Net::HTTPNotFound)
+        response.is_a?(Net::HTTPOK)
       end
 
       # Public: Clear all gate values for feature
@@ -173,19 +182,43 @@ module Flipper
       end
 
       def delete_request_body(key, value)
-        return unless gates_with_delete_request_body.include?(key)
         gate_request_body(key, value)
       end
 
-      def result_for_feature(key, value)
-        case key.to_sym
-        when :boolean
-          true.to_s if value == true
-        when :groups, :actors
-          value.to_set
-        when :percentage_of_actors, :percentage_of_time
-          value.zero? ? '0' : value.to_s
+      def result_for_feature(feature, api_gates)
+        api_gates ||= []
+        result = {}
+
+        feature.gates.each do |gate|
+          result[gate.key] = case gate.data_type
+          when :boolean, :integer
+            api_gate = api_gates.detect { |api_gate| api_gate["key"] == gate.key.to_s }
+            if api_gate
+              value = api_gate["value"]
+              if value
+                value.to_s
+              end
+            end
+          when :set
+            api_gate = api_gates.detect { |api_gate| api_gate["key"] == gate.key.to_s }
+            set_value = if api_gate
+              value = api_gate["value"]
+              if value
+                value.to_set
+              end
+            end
+
+            set_value || Set.new
+          else
+            unsupported_data_type(gate.data_type)
+          end
         end
+
+        result
+      end
+
+      def unsupported_data_type(data_type)
+        raise "#{data_type} is not supported by this adapter"
       end
 
       def default_feature_value

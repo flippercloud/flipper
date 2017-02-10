@@ -20,7 +20,7 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
             {
               'key' => 'boolean',
               'name' => 'boolean',
-              'value' => true,
+              'value' => "true",
             },
             {
               'key' => 'groups',
@@ -35,12 +35,12 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
             {
               'key' => 'percentage_of_actors',
               'name' => 'percentage_of_actors',
-              'value' => 0,
+              'value' => nil,
             },
             {
               'key' => 'percentage_of_time',
               'name' => 'percentage_of_time',
-              'value' => 0,
+              'value' => nil,
             },
           ],
         }
@@ -64,7 +64,7 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
             {
               'key' => 'boolean',
               'name' => 'boolean',
-              'value' => false,
+              'value' => nil,
             },
             {
               'key' => 'groups',
@@ -79,12 +79,12 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
             {
               'key' => 'percentage_of_actors',
               'name' => 'percentage_of_actors',
-              'value' => 0,
+              'value' => nil,
             },
             {
               'key' => 'percentage_of_time',
               'name' => 'percentage_of_time',
-              'value' => 0,
+              'value' => nil,
             },
           ],
         }
@@ -99,12 +99,41 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
         get 'api/v1/features/not_a_feature'
       end
 
-      it 'returns 404' do
-        expect(last_response.status).to eq(404)
-      end
+      it 'responds with correct attributes' do
+        response_body = {
+          'key' => 'not_a_feature',
+          'state' => 'off',
+          'gates' => [
+            {
+              'key' => 'boolean',
+              'name' => 'boolean',
+              'value' => nil,
+            },
+            {
+              'key' => 'groups',
+              'name' => 'group',
+              'value' => [],
+            },
+            {
+              'key' => 'actors',
+              'name' => 'actor',
+              'value' => [],
+            },
+            {
+              'key' => 'percentage_of_actors',
+              'name' => 'percentage_of_actors',
+              'value' => nil,
+            },
+            {
+              'key' => 'percentage_of_time',
+              'name' => 'percentage_of_time',
+              'value' => nil,
+            },
+          ],
+        }
 
-      it 'returns formatted error response body' do
-        expect(json_response).to eq(api_not_found_response)
+        expect(last_response.status).to eq(200)
+        expect(json_response).to eq(response_body)
       end
     end
   end
@@ -125,12 +154,9 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
         delete 'api/v1/features/my_feature'
       end
 
-      it 'returns 404' do
-        expect(last_response.status).to eq(404)
-      end
-
-      it 'returns formatted error response body' do
-        expect(json_response).to eq(api_not_found_response)
+      it 'responds with 204' do
+        expect(last_response.status).to eq(204)
+        expect(flipper.features.map(&:key)).not_to include('my_feature')
       end
     end
   end

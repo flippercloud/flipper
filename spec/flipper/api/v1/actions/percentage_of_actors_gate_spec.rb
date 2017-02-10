@@ -16,7 +16,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
 
       it 'returns decorated feature with gate enabled for 10 percent of actors' do
         gate = json_response['gates'].find { |gate| gate['name'] == 'percentage_of_actors' }
-        expect(gate['value']).to eq(10)
+        expect(gate['value']).to eq("10")
       end
     end
 
@@ -34,12 +34,12 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
 
       it 'returns decorated feature with gate enabled for 10 percent of actors' do
         gate = json_response['gates'].find { |gate| gate['name'] == 'percentage_of_actors' }
-        expect(gate['value']).to eq(10)
+        expect(gate['value']).to eq("10")
       end
     end
   end
 
-  describe 'disable' do
+  describe 'disable without percentage' do
     before do
       flipper[:my_feature].enable_percentage_of_actors(10)
       delete '/api/v1/features/my_feature/percentage_of_actors'
@@ -51,7 +51,21 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
 
     it 'returns decorated feature with gate disabled' do
       gate = json_response['gates'].find { |gate| gate['name'] == 'percentage_of_actors' }
-      expect(gate['value']).to eq(0)
+      expect(gate['value']).to eq('0')
+    end
+  end
+
+  describe 'disable with percentage' do
+    before do
+      flipper[:my_feature].enable_percentage_of_actors(10)
+      delete '/api/v1/features/my_feature/percentage_of_actors',
+        {percentage: '5'}.to_json,
+        'CONTENT_TYPE' => 'application/json'
+    end
+
+    it 'returns decorated feature with gate disabled' do
+      gate = json_response['gates'].find { |gate| gate['name'] == 'percentage_of_actors' }
+      expect(gate['value']).to eq('5')
     end
   end
 
@@ -60,9 +74,14 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
       delete '/api/v1/features/my_feature/percentage_of_actors'
     end
 
-    it '404s with correct error response when feature does not exist' do
-      expect(last_response.status).to eq(404)
-      expect(json_response).to eq(api_not_found_response)
+    it 'disables gate for feature' do
+      expect(flipper[:my_feature].enabled_gates).to be_empty
+    end
+
+    it 'returns decorated feature with gate disabled' do
+      expect(last_response.status).to eq(200)
+      gate = json_response['gates'].find { |gate| gate['name'] == 'percentage_of_actors' }
+      expect(gate['value']).to eq('0')
     end
   end
 
