@@ -54,6 +54,22 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
       end
     end
 
+    context 'with keys specified' do
+      before do
+        flipper[:audit_log].enable
+        flipper[:issues].enable
+        flipper[:search].enable
+        flipper[:stats].disable
+        get 'api/v1/features', 'keys' => 'search,stats'
+      end
+
+      it 'responds with correct attributes' do
+        expect(last_response.status).to eq(200)
+        keys = json_response.fetch('features').map { |feature| feature.fetch('key') }.sort
+        expect(keys).to eq(%w(search stats))
+      end
+    end
+
     context 'with no flipper features' do
       before do
         get 'api/v1/features'
