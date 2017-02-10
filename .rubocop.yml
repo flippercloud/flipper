@@ -24,6 +24,9 @@ Style/Encoding:
 Style/NumericLiterals:
   Enabled: false
 
+Style/StringLiterals:
+  Enabled: false
+
 Metrics/LineLength:
   Max: 100
   Exclude:
