@@ -23,7 +23,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
                 {
                   'key' => 'boolean',
                   'name' => 'boolean',
-                  'value' => "true",
+                  'value' => 'true',
                 },
                 {
                   'key' => 'groups',

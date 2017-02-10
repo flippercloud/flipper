@@ -100,7 +100,7 @@ module Flipper
           default_feature_value
         else
           parsed_response = JSON.parse(response.body)
-          result_for_feature(feature, parsed_response.fetch("gates"))
+          result_for_feature(feature, parsed_response.fetch('gates'))
         end
       end
 
@@ -116,10 +116,10 @@ module Flipper
         response = @request.get(@uri + "/api/v1/features?keys=#{csv_keys}")
         parsed_response = JSON.parse(response.body)
         parsed_features = parsed_response.fetch('features')
-        gates_by_key = parsed_features.inject({}) { |hash, parsed_feature|
-          hash[parsed_feature["key"]] = parsed_feature["gates"]
+        gates_by_key = parsed_features.each_with_object({}) do |parsed_feature, hash|
+          hash[parsed_feature['key']] = parsed_feature['gates']
           hash
-        }
+        end
 
         result = {}
         features.each do |feature|
@@ -190,31 +190,25 @@ module Flipper
         result = {}
 
         feature.gates.each do |gate|
-          result[gate.key] = case gate.data_type
-          when :boolean, :integer
-            api_gate = api_gates.detect { |api_gate| api_gate["key"] == gate.key.to_s }
-            if api_gate
-              value = api_gate["value"]
-              if value
-                value.to_s
-              end
-            end
-          when :set
-            api_gate = api_gates.detect { |api_gate| api_gate["key"] == gate.key.to_s }
-            set_value = if api_gate
-              value = api_gate["value"]
-              if value
-                value.to_set
-              end
-            end
-
-            set_value || Set.new
-          else
-            unsupported_data_type(gate.data_type)
-          end
+          result[gate.key] = value_for_gate(gate, api_gates)
         end
 
         result
+      end
+
+      def value_for_gate(gate, api_gates)
+        api_gate = api_gates.detect { |ag| ag['key'] == gate.key.to_s }
+        return unless api_gate
+        value = api_gate['value']
+
+        case gate.data_type
+        when :boolean, :integer
+          value.to_s if value
+        when :set
+          value ? value.to_set : Set.new
+        else
+          unsupported_data_type(gate.data_type)
+        end
       end
 
       def unsupported_data_type(data_type)

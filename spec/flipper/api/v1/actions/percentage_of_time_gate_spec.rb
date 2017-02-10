@@ -39,8 +39,8 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfTimeGate do
     before do
       flipper[:my_feature].enable_percentage_of_time(10)
       delete '/api/v1/features/my_feature/percentage_of_time',
-        {percentage: '5'}.to_json,
-        'CONTENT_TYPE' => 'application/json'
+             { percentage: '5' }.to_json,
+             'CONTENT_TYPE' => 'application/json'
     end
 
     it 'returns decorated feature with gate disabled' do

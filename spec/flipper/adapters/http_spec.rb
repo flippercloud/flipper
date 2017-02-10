@@ -4,41 +4,41 @@ require 'flipper/adapters/pstore'
 require 'flipper/spec/shared_adapter_specs'
 require 'rack/handler/webrick'
 
-FLIPPER_SPEC_API_PORT = ENV.fetch("FLIPPER_SPEC_API_PORT", 9001).to_i
+FLIPPER_SPEC_API_PORT = ENV.fetch('FLIPPER_SPEC_API_PORT', 9001).to_i
+
+dir = FlipperRoot.join('tmp').tap(&:mkpath)
+log_path = dir.join('flipper_adapters_http_spec.log')
+pstore_file = dir.join('flipper.pstore')
+api_adapter = Flipper::Adapters::PStore.new(pstore_file)
+flipper_api = Flipper.new(api_adapter)
+app = Flipper::Api.app(flipper_api)
+started = false
+server_options = {
+  Port: FLIPPER_SPEC_API_PORT,
+  StartCallback: -> { started = true },
+  Logger: WEBrick::Log.new(log_path.to_s, WEBrick::Log::INFO),
+  AccessLog: [
+    [log_path.open('w'), WEBrick::AccessLog::COMBINED_LOG_FORMAT],
+  ],
+}
+server = WEBrick::HTTPServer.new(server_options)
+server.mount '/', Rack::Handler::WEBrick, app
 
 RSpec.describe Flipper::Adapters::Http do
   context 'adapter' do
     subject { described_class.new(URI("http://localhost:#{FLIPPER_SPEC_API_PORT}")) }
 
     before :all do
-      dir = FlipperRoot.join('tmp').tap(&:mkpath)
-      log_path = dir.join("flipper_adapters_http_spec.log")
-      @pstore_file = dir.join('flipper.pstore')
-      @pstore_file.unlink if @pstore_file.exist?
-
-      api_adapter =  Flipper::Adapters::PStore.new(@pstore_file)
-      flipper_api = Flipper.new(api_adapter)
-      app = Flipper::Api.app(flipper_api)
-      @server = WEBrick::HTTPServer.new({
-        Port: FLIPPER_SPEC_API_PORT,
-        StartCallback: -> { @started = true },
-        Logger: WEBrick::Log.new(log_path.to_s, WEBrick::Log::INFO),
-        AccessLog: [
-          [log_path.open('w'), WEBrick::AccessLog::COMBINED_LOG_FORMAT]
-        ],
-      })
-      @server.mount '/', Rack::Handler::WEBrick, app
-
-      Thread.new { @server.start }
-      Timeout.timeout(1) { :wait until @started }
+      Thread.new { server.start }
+      Timeout.timeout(1) { :wait until started }
     end
 
     after :all do
-      @server.shutdown if @server
+      server.shutdown
     end
 
     before(:each) do
-      @pstore_file.unlink if @pstore_file.exist?
+      pstore_file.unlink if pstore_file.exist?
     end
 
     it_should_behave_like 'a flipper adapter'
