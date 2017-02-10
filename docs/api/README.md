@@ -23,7 +23,7 @@ Or install it yourself as:
 ```ruby
 # config/routes.rb
 YourRailsApp::Application.routes.draw do
-  mount Flipper::Api.app(flipper) => '/flipper-api'
+  mount Flipper::Api.app(flipper) => '/flipper/api'
 end
 ```
 
@@ -35,15 +35,16 @@ There can be more than one router in your application. Make sure if you choose a
 ```ruby
 YourRailsApp::Application.routes.draw do
   mount Flipper::UI.app(flipper) => '/flipper'
-  mount Flipper::Api.app(flipper) => '/flipper-api'
+  mount Flipper::Api.app(flipper) => '/flipper/api'
 end
-````
-In this case any requests to /flipper\* will be routed to Flipper::UI - including /flipper-api* requests.  Simply swap these two to make sure that any requests that don't match /flipper-api\* will be routed to Flipper::UI.
+```
+
+In this case any requests to /flipper\* will be routed to Flipper::UI - including /flipper/api* requests.  Simply swap these two to make sure that any requests that don't match /flipper/api\* will be routed to Flipper::UI.
 
 *good:*
 ```ruby
 YourRailsApp::Application.routes.draw do
-  mount Flipper::Api.app(flipper) => '/flipper-api'
+  mount Flipper::Api.app(flipper) => '/flipper/api'
   mount Flipper::UI.app(flipper) => '/flipper'
 end
 ````
@@ -51,7 +52,7 @@ For more advanced mounting techniques and for suggestions on how to mount in a n
 
 ## Endpoints
 
-**Note:** Example CURL requests below assume a mount point of `/flipper-api`.
+**Note:** Example CURL requests below assume a mount point of `/flipper/api`.
 
 ### Get all features
 
@@ -62,7 +63,7 @@ For more advanced mounting techniques and for suggestions on how to mount in a n
 **Request**
 
 ```
-curl http://example.com/flipper-api/features
+curl http://example.com/flipper/api/features
 ```
 
 **Response**
@@ -151,7 +152,7 @@ Returns an array of feature objects:
 **Request**
 
 ```
-curl -X POST -d "name=reports" http://example.com/flipper-api/features
+curl -X POST -d "name=reports" http://example.com/flipper/api/features
 ```
 
 **Response**
@@ -171,7 +172,7 @@ On successful creation, the API will respond with an empty JSON response.
 **Request**
 
 ```
-curl http://example.com/flipper-api/features/reports
+curl http://example.com/flipper/api/features/reports
 ```
 
 **Response**
@@ -225,7 +226,7 @@ Returns an individual feature object:
 **Request**
 
 ```
-curl -X DELETE http://example.com/flipper-api/features/reports
+curl -X DELETE http://example.com/flipper/api/features/reports
 ```
 
 **Response**
@@ -259,7 +260,7 @@ and on a succesful request return a 200 HTTP status and the feature object as th
 **Request**
 
 ```
-curl -X POST http://example.com/flipper-api/features/reports/boolean
+curl -X POST http://example.com/flipper/api/features/reports/boolean
 ```
 
 **Response**
@@ -314,7 +315,7 @@ Successful enabling of the boolean gate will return a 200 HTTP status and the fe
 **Request**
 
 ```
-curl -X DELETE http://example.com/flipper-api/features/reports/boolean
+curl -X DELETE http://example.com/flipper/api/features/reports/boolean
 ```
 
 **Response**
@@ -370,7 +371,7 @@ Successful disabling of the boolean gate will return a 200 HTTP status and the f
 **Request**
 
 ```
-curl -X POST -d "name=admins" http://example.com/flipper-api/features/reports/groups
+curl -X POST -d "name=admins" http://example.com/flipper/api/features/reports/groups
 ```
 
 **Response**
@@ -426,7 +427,7 @@ Successful enabling of the group will return a 200 HTTP status and the feature o
 **Request**
 
 ```
-curl -X DELETE -d "name=admins" http://example.com/flipper-api/features/reports/groups
+curl -X DELETE -d "name=admins" http://example.com/flipper/api/features/reports/groups
 ```
 
 **Response**
@@ -481,7 +482,7 @@ Successful disabling of the group will return a 200 HTTP status and the feature 
 **Request**
 
 ```
-curl -X POST -d "flipper_id=User:1" http://example.com/flipper-api/features/reports/actors
+curl -X POST -d "flipper_id=User:1" http://example.com/flipper/api/features/reports/actors
 ```
 
 **Response**
@@ -536,7 +537,7 @@ Successful enabling of the actor will return a 200 HTTP status and the feature o
 **Request**
 
 ```
-curl -X DELETE -d "flipper_id=User:1" http://example.com/flipper-api/features/reports/actors
+curl -X DELETE -d "flipper_id=User:1" http://example.com/flipper/api/features/reports/actors
 ```
 
 **Response**
@@ -592,7 +593,7 @@ Successful disabling of the actor will return a 200 HTTP status and the feature 
 **Request**
 
 ```
-curl -X POST -d "percentage=20" http://example.com/flipper-api/features/reports/percentage_of_actors
+curl -X POST -d "percentage=20" http://example.com/flipper/api/features/reports/percentage_of_actors
 ```
 
 **Response**
@@ -645,7 +646,7 @@ Successful enabling of a percentage of actors will return a 200 HTTP status and 
 **Request**
 
 ```
-curl -X DELETE http://example.com/flipper-api/features/reports/percentage_of_actors
+curl -X DELETE http://example.com/flipper/api/features/reports/percentage_of_actors
 ```
 
 **Response**
@@ -700,7 +701,7 @@ Successful disabling of a percentage of actors will set the percentage to 0 and 
 **Request**
 
 ```
-curl -X POST -d "percentage=20" http://example.com/flipper-api/features/reports/percentage_of_time
+curl -X POST -d "percentage=20" http://example.com/flipper/api/features/reports/percentage_of_time
 ```
 
 **Response**
@@ -753,7 +754,7 @@ Successful enabling of a percentage of time will return a 200 HTTP status and th
 **Request**
 
 ```
-curl -X DELETE http://example.com/flipper-api/features/reports/percentage_of_time
+curl -X DELETE http://example.com/flipper/api/features/reports/percentage_of_time
 ```
 
 **Response**
