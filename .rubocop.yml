@@ -9,6 +9,7 @@ AllCops:
     - 'docker-compose/**/*'
     - 'examples/**/*'
     - 'tmp/**/*'
+    - 'bin/**/*'
   TargetRubyVersion: 2.0
   # DefaultFormatter: fuubar
 Style/Alias:
@@ -33,4 +34,3 @@ Style/RegexpLiteral:
 
 Style/TrailingCommaInLiteral:
   EnforcedStyleForMultiline: consistent_comma
-
