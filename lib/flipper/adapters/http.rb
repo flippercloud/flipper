@@ -187,23 +187,21 @@ module Flipper
 
       def result_for_feature(feature, api_gates)
         api_gates ||= []
-        result = {}
+        result = default_feature_value
 
         feature.gates.each do |gate|
-          result[gate.key] = value_for_gate(gate, api_gates)
+          api_gate = api_gates.detect { |ag| ag['key'] == gate.key.to_s }
+          result[gate.key] = value_for_gate(gate, api_gate) if api_gate
         end
 
         result
       end
 
-      def value_for_gate(gate, api_gates)
-        api_gate = api_gates.detect { |ag| ag['key'] == gate.key.to_s }
-        return unless api_gate
+      def value_for_gate(gate, api_gate)
         value = api_gate['value']
-
         case gate.data_type
         when :boolean, :integer
-          value.to_s if value
+          value ? value.to_s : value
         when :set
           value ? value.to_set : Set.new
         else
