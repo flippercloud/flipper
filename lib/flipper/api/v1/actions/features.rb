@@ -1,6 +1,5 @@
 require 'flipper/api/action'
 require 'flipper/api/v1/decorators/feature'
-require 'json'
 
 module Flipper
   module Api
