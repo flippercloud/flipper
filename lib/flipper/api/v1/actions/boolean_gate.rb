@@ -6,7 +6,7 @@ module Flipper
     module V1
       module Actions
         class BooleanGate < Api::Action
-          route %r{api/v1/features/[^/]*/boolean/?\Z}
+          route %r{features/[^/]*/boolean/?\Z}
 
           def post
             feature_name = Rack::Utils.unescape(path_parts[-2])

@@ -6,7 +6,7 @@ module Flipper
     module V1
       module Actions
         class GroupsGate < Api::Action
-          route %r{api/v1/features/[^/]*/groups/?\Z}
+          route %r{features/[^/]*/groups/?\Z}
 
           def post
             ensure_valid_params

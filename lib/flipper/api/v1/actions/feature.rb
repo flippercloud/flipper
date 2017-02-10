@@ -6,7 +6,7 @@ module Flipper
     module V1
       module Actions
         class Feature < Api::Action
-          route %r{api/v1/features/[^/]*/?\Z}
+          route %r{features/[^/]*/?\Z}
 
           def get
             if feature_names.include?(feature_name)

@@ -10,7 +10,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
       before do
         flipper[:my_feature].enable
         flipper[:my_feature].enable(admin)
-        get 'api/v1/features'
+        get '/features'
       end
 
       it 'responds with correct attributes' do
@@ -56,7 +56,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
 
     context 'with no flipper features' do
       before do
-        get 'api/v1/features'
+        get '/features'
       end
 
       it 'returns empty array for features key' do
@@ -72,7 +72,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
   describe 'post' do
     context 'succesful request' do
       before do
-        post 'api/v1/features', name: 'my_feature'
+        post '/features', name: 'my_feature'
       end
 
       it 'responds 200 ' do
@@ -126,7 +126,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
 
     context 'bad request' do
       before do
-        post 'api/v1/features'
+        post '/features'
       end
 
       it 'returns correct status code' do

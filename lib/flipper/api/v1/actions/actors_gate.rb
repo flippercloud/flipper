@@ -6,7 +6,7 @@ module Flipper
     module V1
       module Actions
         class ActorsGate < Api::Action
-          route %r{api/v1/features/[^/]*/actors/?\Z}
+          route %r{features/[^/]*/actors/?\Z}
 
           def post
             ensure_valid_params

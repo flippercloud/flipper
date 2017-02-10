@@ -7,7 +7,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
     context 'url-encoded request' do
       before do
         flipper[:my_feature].disable
-        post '/api/v1/features/my_feature/percentage_of_actors', percentage: '10'
+        post '/features/my_feature/percentage_of_actors', percentage: '10'
       end
 
       it 'enables gate for feature' do
@@ -23,7 +23,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
     context 'json request' do
       before do
         flipper[:my_feature].disable
-        post '/api/v1/features/my_feature/percentage_of_actors',
+        post '/features/my_feature/percentage_of_actors',
              { percentage: '10' }.to_json,
              'CONTENT_TYPE' => 'application/json'
       end
@@ -42,7 +42,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
   describe 'disable' do
     before do
       flipper[:my_feature].enable_percentage_of_actors(10)
-      delete '/api/v1/features/my_feature/percentage_of_actors'
+      delete '/features/my_feature/percentage_of_actors'
     end
 
     it 'disables gate for feature' do
@@ -57,7 +57,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
 
   describe 'non-existent feature' do
     before do
-      delete '/api/v1/features/my_feature/percentage_of_actors'
+      delete '/features/my_feature/percentage_of_actors'
     end
 
     it '404s with correct error response when feature does not exist' do
@@ -69,7 +69,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
   describe 'out of range parameter percentage parameter' do
     before do
       flipper[:my_feature].disable
-      post '/api/v1/features/my_feature/percentage_of_actors', percentage: '300'
+      post '/features/my_feature/percentage_of_actors', percentage: '300'
     end
 
     it '422s with correct error response when percentage parameter is invalid' do
@@ -81,7 +81,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
   describe 'percentage parameter not an integer' do
     before do
       flipper[:my_feature].disable
-      post '/api/v1/features/my_feature/percentage_of_actors', percentage: 'foo'
+      post '/features/my_feature/percentage_of_actors', percentage: 'foo'
     end
 
     it '422s with correct error response when percentage parameter is invalid' do
@@ -93,7 +93,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
   describe 'missing percentage parameter' do
     before do
       flipper[:my_feature].disable
-      post '/api/v1/features/my_feature/percentage_of_actors'
+      post '/features/my_feature/percentage_of_actors'
     end
 
     it '422s with correct error response when percentage parameter is missing' do

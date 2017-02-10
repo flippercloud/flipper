@@ -9,7 +9,7 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
     context 'enabled feature' do
       before do
         flipper[:my_feature].enable
-        get 'api/v1/features/my_feature'
+        get '/features/my_feature'
       end
 
       it 'responds with correct attributes' do
@@ -53,7 +53,7 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
     context 'disabled feature' do
       before do
         flipper[:my_feature].disable
-        get 'api/v1/features/my_feature'
+        get '/features/my_feature'
       end
 
       it 'responds with correct attributes' do
@@ -96,7 +96,7 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
 
     context 'feature does not exist' do
       before do
-        get 'api/v1/features/not_a_feature'
+        get '/features/not_a_feature'
       end
 
       it 'returns 404' do
@@ -114,7 +114,7 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
       it 'deletes feature' do
         flipper[:my_feature].enable
         expect(flipper.features.map(&:key)).to include('my_feature')
-        delete 'api/v1/features/my_feature'
+        delete '/features/my_feature'
         expect(last_response.status).to eq(204)
         expect(flipper.features.map(&:key)).not_to include('my_feature')
       end
@@ -122,7 +122,7 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
 
     context 'feature not found' do
       before do
-        delete 'api/v1/features/my_feature'
+        delete '/features/my_feature'
       end
 
       it 'returns 404' do

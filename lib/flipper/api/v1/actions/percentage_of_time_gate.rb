@@ -6,7 +6,7 @@ module Flipper
     module V1
       module Actions
         class PercentageOfTimeGate < Api::Action
-          route %r{api/v1/features/[^/]*/percentage_of_time/?\Z}
+          route %r{features/[^/]*/percentage_of_time/?\Z}
 
           def post
             ensure_valid_enable_params

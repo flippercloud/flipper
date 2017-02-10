@@ -8,7 +8,7 @@ RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
 
     before do
       flipper[:my_feature].disable_actor(actor)
-      post '/api/v1/features/my_feature/actors', flipper_id: actor.flipper_id
+      post '/features/my_feature/actors', flipper_id: actor.flipper_id
     end
 
     it 'enables feature for actor' do
@@ -28,7 +28,7 @@ RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
 
     before do
       flipper[:my_feature].enable_actor(actor)
-      delete '/api/v1/features/my_feature/actors', flipper_id: actor.flipper_id
+      delete '/features/my_feature/actors', flipper_id: actor.flipper_id
     end
 
     it 'disables feature' do
@@ -46,7 +46,7 @@ RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
   describe 'enable missing flipper_id parameter' do
     before do
       flipper[:my_feature].enable
-      post '/api/v1/features/my_feature/actors'
+      post '/features/my_feature/actors'
     end
 
     it 'returns correct error response' do
@@ -58,7 +58,7 @@ RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
   describe 'disable missing flipper_id parameter' do
     before do
       flipper[:my_feature].enable
-      delete '/api/v1/features/my_feature/actors'
+      delete '/features/my_feature/actors'
     end
 
     it 'returns correct error response' do
@@ -70,7 +70,7 @@ RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
   describe 'enable nil flipper_id parameter' do
     before do
       flipper[:my_feature].enable
-      post '/api/v1/features/my_feature/actors', flipper_id: nil
+      post '/features/my_feature/actors', flipper_id: nil
     end
 
     it 'returns correct error response' do
@@ -82,7 +82,7 @@ RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
   describe 'disable nil flipper_id parameter' do
     before do
       flipper[:my_feature].enable
-      delete '/api/v1/features/my_feature/actors', flipper_id: nil
+      delete '/features/my_feature/actors', flipper_id: nil
     end
 
     it 'returns correct error response' do
@@ -93,7 +93,7 @@ RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
 
   describe 'enable missing feature' do
     before do
-      post '/api/v1/features/my_feature/actors'
+      post '/features/my_feature/actors'
     end
 
     it 'returns correct error response' do
@@ -104,7 +104,7 @@ RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
 
   describe 'disable missing feature' do
     before do
-      delete '/api/v1/features/my_feature/actors'
+      delete '/features/my_feature/actors'
     end
 
     it 'returns correct error response' do

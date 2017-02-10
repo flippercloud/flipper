@@ -6,7 +6,7 @@ RSpec.describe Flipper::Api::V1::Actions::BooleanGate do
   describe 'enable' do
     before do
       flipper[:my_feature].disable
-      post '/api/v1/features/my_feature/boolean'
+      post '/features/my_feature/boolean'
     end
 
     it 'enables feature' do
@@ -23,7 +23,7 @@ RSpec.describe Flipper::Api::V1::Actions::BooleanGate do
   describe 'disable' do
     before do
       flipper[:my_feature].enable
-      delete '/api/v1/features/my_feature/boolean'
+      delete '/features/my_feature/boolean'
     end
 
     it 'disables feature' do

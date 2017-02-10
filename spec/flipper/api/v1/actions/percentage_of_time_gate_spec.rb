@@ -6,7 +6,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfTimeGate do
   describe 'enable' do
     before do
       flipper[:my_feature].disable
-      post '/api/v1/features/my_feature/percentage_of_time', percentage: '10'
+      post '/features/my_feature/percentage_of_time', percentage: '10'
     end
 
     it 'enables gate for feature' do
@@ -22,7 +22,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfTimeGate do
   describe 'disable' do
     before do
       flipper[:my_feature].enable_percentage_of_time(10)
-      delete '/api/v1/features/my_feature/percentage_of_time'
+      delete '/features/my_feature/percentage_of_time'
     end
 
     it 'disables gate for feature' do
@@ -37,7 +37,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfTimeGate do
 
   describe 'non-existent feature' do
     before do
-      delete '/api/v1/features/my_feature/percentage_of_time'
+      delete '/features/my_feature/percentage_of_time'
     end
 
     it '404s with correct error response when feature does not exist' do
@@ -49,7 +49,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfTimeGate do
   describe 'out of range parameter percentage parameter' do
     before do
       flipper[:my_feature].disable
-      post '/api/v1/features/my_feature/percentage_of_time', percentage: '300'
+      post '/features/my_feature/percentage_of_time', percentage: '300'
     end
 
     it '422s with correct error response when percentage parameter is invalid' do
@@ -61,7 +61,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfTimeGate do
   describe 'percentage parameter not an integer' do
     before do
       flipper[:my_feature].disable
-      post '/api/v1/features/my_feature/percentage_of_time', percentage: 'foo'
+      post '/features/my_feature/percentage_of_time', percentage: 'foo'
     end
 
     it '422s with correct error response when percentage parameter is invalid' do
@@ -73,7 +73,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfTimeGate do
   describe 'missing percentage parameter' do
     before do
       flipper[:my_feature].disable
-      post '/api/v1/features/my_feature/percentage_of_time'
+      post '/features/my_feature/percentage_of_time'
     end
 
     it '422s with correct error response when percentage parameter is missing' do

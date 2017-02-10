@@ -9,7 +9,7 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
       Flipper.register(:admins) do |actor|
         actor.respond_to?(:admin?) && actor.admin?
       end
-      post '/api/v1/features/my_feature/groups', name: 'admins'
+      post '/features/my_feature/groups', name: 'admins'
     end
 
     it 'enables feature for group' do
@@ -33,7 +33,7 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
         actor.respond_to?(:admin?) && actor.admin?
       end
       flipper[:my_feature].enable_group(:admins)
-      delete '/api/v1/features/my_feature/groups', name: 'admins'
+      delete '/features/my_feature/groups', name: 'admins'
     end
 
     it 'disables feature for group' do
@@ -52,7 +52,7 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
 
   describe 'non-existent feature' do
     before do
-      delete '/api/v1/features/my_feature/groups', name: 'admins'
+      delete '/features/my_feature/groups', name: 'admins'
     end
 
     it '404s with correct error response when feature does not exist' do
@@ -64,7 +64,7 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
   describe 'group not registered' do
     before do
       flipper[:my_feature].disable
-      delete '/api/v1/features/my_feature/groups', name: 'admins'
+      delete '/features/my_feature/groups', name: 'admins'
     end
 
     it '404s with correct error response when group not registered' do

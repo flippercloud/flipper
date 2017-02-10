@@ -6,7 +6,7 @@ module Flipper
     module V1
       module Actions
         class Features < Api::Action
-          route %r{api/v1/features\Z}
+          route %r{features\Z}
 
           def get
             features = flipper.features.map do |feature|

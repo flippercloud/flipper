@@ -6,7 +6,7 @@ module Flipper
     module V1
       module Actions
         class PercentageOfActorsGate < Api::Action
-          route %r{api/v1/features/[^/]*/percentage_of_actors/?\Z}
+          route %r{features/[^/]*/percentage_of_actors/?\Z}
 
           def post
             ensure_valid_enable_params
