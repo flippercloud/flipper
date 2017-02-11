@@ -69,6 +69,18 @@ RSpec.describe Flipper::Adapters::Http do
     end
   end
 
+  describe "#features" do
+    it "raises error when not successful response" do
+      stub_request(:get, "http://app.com/flipper/api/v1/features").
+         to_return(:status => 503, :body => "", :headers => {})
+
+      adapter = described_class.new('http://app.com/flipper')
+      expect {
+        adapter.features
+      }.to raise_error(Flipper::Adapters::Http::Error)
+    end
+  end
+
   describe 'configuration' do
     subject { described_class.new('http://app.com/mount-point') }
     let(:feature) { flipper[:feature_panel] }

@@ -140,6 +140,8 @@ module Flipper
       # Public: Get all features
       def features
         response = @request.get(@uri + '/api/v1/features')
+        raise Error.new(response) unless response.is_a?(Net::HTTPOK)
+
         parsed_response = JSON.parse(response.body)
         parsed_response['features'].map { |feature| feature['key'] }.to_set
       end
