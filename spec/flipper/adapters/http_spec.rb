@@ -46,8 +46,7 @@ RSpec.describe Flipper::Adapters::Http do
   end
 
   describe 'configuration' do
-    let(:uri) { 'http://app.com/mount-point' }
-    subject { described_class.new(uri) }
+    subject { described_class.new('http://app.com/mount-point') }
     let(:feature) { flipper[:feature_panel] }
 
     before do
@@ -60,8 +59,6 @@ RSpec.describe Flipper::Adapters::Http do
         c.open_timeout = 40
       end
     end
-
-    subject { described_class.new('http://app.com/mount-point') }
 
     it 'allows client to set request headers' do
       subject.get(feature)
