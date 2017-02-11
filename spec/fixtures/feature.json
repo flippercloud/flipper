@@ -5,7 +5,7 @@
     {
       "key": "boolean",
       "name": "boolean",
-      "value": true
+      "value": "true"
     },
     {
       "key": "groups",
@@ -20,12 +20,12 @@
     {
       "key": "percentage_of_actors",
       "name": "percentage_of_actors",
-      "value": 0
+      "value": null
     },
     {
       "key": "percentage_of_time",
       "name": "percentage_of_time",
-      "value": 0
+      "value": null
     }
   ]
 }
