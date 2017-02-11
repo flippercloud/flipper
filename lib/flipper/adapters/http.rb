@@ -103,7 +103,7 @@ module Flipper
 
       def get(feature)
         response = @request.get(@uri + "/api/v1/features/#{feature.key}")
-        raise Error.new(response) unless response.is_a?(Net::HTTPOK)
+        raise Error, response unless response.is_a?(Net::HTTPOK)
 
         parsed_response = JSON.parse(response.body)
         result_for_feature(feature, parsed_response.fetch('gates'))
@@ -117,7 +117,7 @@ module Flipper
       def get_multi(features)
         csv_keys = features.map(&:key).join(',')
         response = @request.get(@uri + "/api/v1/features?keys=#{csv_keys}")
-        raise Error.new(response) unless response.is_a?(Net::HTTPOK)
+        raise Error, response unless response.is_a?(Net::HTTPOK)
 
         parsed_response = JSON.parse(response.body)
         parsed_features = parsed_response.fetch('features')
@@ -135,7 +135,7 @@ module Flipper
 
       def features
         response = @request.get(@uri + '/api/v1/features')
-        raise Error.new(response) unless response.is_a?(Net::HTTPOK)
+        raise Error, response unless response.is_a?(Net::HTTPOK)
 
         parsed_response = JSON.parse(response.body)
         parsed_response['features'].map { |feature| feature['key'] }.to_set
