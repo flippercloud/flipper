@@ -185,7 +185,7 @@ module Flipper
 
       def result_for_feature(feature, api_gates)
         api_gates ||= []
-        result = default_feature_value
+        result = default_config
 
         feature.gates.each do |gate|
           api_gate = api_gates.detect { |ag| ag['key'] == gate.key.to_s }
@@ -209,16 +209,6 @@ module Flipper
 
       def unsupported_data_type(data_type)
         raise "#{data_type} is not supported by this adapter"
-      end
-
-      def default_feature_value
-        {
-          boolean: nil,
-          groups: Set.new,
-          actors: Set.new,
-          percentage_of_actors: nil,
-          percentage_of_time: nil,
-        }
       end
     end
   end

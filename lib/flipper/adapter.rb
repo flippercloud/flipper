@@ -11,5 +11,15 @@ module Flipper
       end
       result
     end
+
+    def default_config
+      {
+        boolean: nil,
+        groups: Set.new,
+        actors: Set.new,
+        percentage_of_actors: nil,
+        percentage_of_time: nil,
+      }
+    end
   end
 end

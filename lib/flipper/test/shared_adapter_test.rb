@@ -13,14 +13,6 @@ module Flipper
         @actors_gate = @feature.gate(:percentage_of_actors)
         @time_gate = @feature.gate(:percentage_of_time)
 
-        @default_config = {
-          boolean: nil,
-          groups: Set.new,
-          actors: Set.new,
-          percentage_of_actors: nil,
-          percentage_of_time: nil,
-        }
-
         Flipper.register(:admins) do |actor|
           actor.respond_to?(:admin?) && actor.admin?
         end
@@ -45,7 +37,7 @@ module Flipper
       end
 
       def test_returns_correct_default_values_for_gates_if_none_are_enabled
-        assert_equal @default_config, @adapter.get(@feature)
+        assert_equal @adapter.default_config, @adapter.get(@feature)
       end
 
       def test_can_enable_disable_and_get_value_for_boolean_gate
@@ -63,7 +55,7 @@ module Flipper
         assert_equal true, @adapter.enable(@feature, @actors_gate, @flipper.actors(25))
         assert_equal true, @adapter.enable(@feature, @time_gate, @flipper.time(45))
         assert_equal true, @adapter.disable(@feature, @boolean_gate, @flipper.boolean(false))
-        assert_equal @default_config, @adapter.get(@feature)
+        assert_equal @adapter.default_config, @adapter.get(@feature)
       end
 
       def test_can_enable_disable_get_value_for_group_gate
@@ -210,7 +202,7 @@ module Flipper
 
         assert_equal true, @adapter.remove(@feature)
 
-        assert_equal @default_config, @adapter.get(@feature)
+        assert_equal @adapter.default_config, @adapter.get(@feature)
       end
 
       def test_can_clear_all_the_gate_values_for_a_feature
@@ -226,7 +218,7 @@ module Flipper
 
         assert_equal true, @adapter.clear(@feature)
         assert_includes @adapter.features, @feature.key
-        assert_equal @default_config, @adapter.get(@feature)
+        assert_equal @adapter.default_config, @adapter.get(@feature)
       end
 
       def test_does_not_complain_clearing_a_feature_that_does_not_exist_in_adapter
@@ -242,9 +234,9 @@ module Flipper
         assert_instance_of Hash, result
 
         stats, search, other = result.values
-        assert_equal @default_config.merge(boolean: 'true'), stats
-        assert_equal @default_config, search
-        assert_equal @default_config, other
+        assert_equal @adapter.default_config.merge(boolean: 'true'), stats
+        assert_equal @adapter.default_config, search
+        assert_equal @adapter.default_config, other
       end
     end
   end
