@@ -3,7 +3,7 @@ require 'helper'
 RSpec.describe Flipper do
   describe ".new" do
     it "returns new instance of dsl" do
-      instance = Flipper.new(double('Adapter', :version => Flipper::Adapter::V1))
+      instance = described_class.new(double('Adapter', version: Flipper::Adapter::V1))
       expect(instance).to be_instance_of(Flipper::DSL)
     end
   end

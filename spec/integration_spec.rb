@@ -30,7 +30,7 @@ RSpec.describe Flipper do
   ].each do |(version, adapter_builder)|
     context "#{version} #{adapter_builder.call.name}" do
       let(:adapter)     { adapter_builder.call }
-      let(:flipper)     { Flipper.new(adapter) }
+      let(:flipper)     { described_class.new(adapter) }
       let(:feature)     { flipper[:search] }
 
       let(:actor_class) { Struct.new(:flipper_id) }
@@ -38,11 +38,11 @@ RSpec.describe Flipper do
       let(:admin_group) { flipper.group(:admins) }
       let(:dev_group)   { flipper.group(:devs) }
 
-      let(:admin_thing) { double 'Non Flipper Thing', :flipper_id => 1,  :admin? => true, :dev? => false }
-      let(:dev_thing)   { double 'Non Flipper Thing', :flipper_id => 10, :admin? => false, :dev? => true }
+      let(:admin_thing) { double 'Non Flipper Thing', flipper_id: 1,  admin?: true, dev?: false }
+      let(:dev_thing)   { double 'Non Flipper Thing', flipper_id: 10, admin?: false, dev?: true }
 
-      let(:admin_truthy_thing) { double 'Non Flipper Thing', :flipper_id => 1,  :admin? => "true-ish", :dev? => false }
-      let(:admin_falsey_thing) { double 'Non Flipper Thing', :flipper_id => 1,  :admin? => nil, :dev? => false }
+      let(:admin_truthy_thing) { double 'Non Flipper Thing', flipper_id: 1,  admin?: "true-ish", dev?: false }
+      let(:admin_falsey_thing) { double 'Non Flipper Thing', flipper_id: 1,  admin?: nil, dev?: false }
 
       let(:pitt)        { actor_class.new(1) }
       let(:clooney)     { actor_class.new(10) }
@@ -51,8 +51,8 @@ RSpec.describe Flipper do
       let(:five_percent_of_time) { flipper.time(5) }
 
       before(:each) do
-        Flipper.register(:admins) { |thing| thing.admin? }
-        Flipper.register(:devs)   { |thing| thing.dev? }
+        described_class.register(:admins, &:admin?)
+        described_class.register(:devs, &:dev?)
         DataStores.reset
       end
 
@@ -141,10 +141,10 @@ RSpec.describe Flipper do
           end
 
           it "enables feature for actor within percentage" do
-            enabled = (1..100).select { |i|
+            enabled = (1..100).select do |i|
               thing = actor_class.new(i)
               feature.enabled?(thing)
-            }.size
+            end.size
 
             expect(enabled).to be_within(2).of(5)
           end
@@ -165,12 +165,12 @@ RSpec.describe Flipper do
           end
 
           it "enables feature for time within percentage" do
-            allow(@gate).to receive_messages(:rand => 0.04)
+            allow(@gate).to receive_messages(rand: 0.04)
             expect(feature.enabled?).to eq(true)
           end
 
           it "does not enable feature for time not within percentage" do
-            allow(@gate).to receive_messages(:rand => 0.10)
+            allow(@gate).to receive_messages(rand: 0.10)
             expect(feature.enabled?).to eq(false)
           end
 
@@ -182,9 +182,9 @@ RSpec.describe Flipper do
         context "with argument that has no gate" do
           it "raises error" do
             thing = Object.new
-            expect {
+            expect do
               feature.enable(thing)
-            }.to raise_error(Flipper::GateNotFound, "Could not find gate for #{thing.inspect}")
+            end.to raise_error(Flipper::GateNotFound, "Could not find gate for #{thing.inspect}")
           end
         end
       end
@@ -194,7 +194,7 @@ RSpec.describe Flipper do
           before do
             # ensures that time gate is stubbed with result that would be true for pitt
             @gate = feature.gate(:percentage_of_time)
-            allow(@gate).to receive_messages(:rand => 0.04)
+            allow(@gate).to receive_messages(rand: 0.04)
 
             feature.enable admin_group
             feature.enable pitt
@@ -220,10 +220,10 @@ RSpec.describe Flipper do
           end
 
           it "disables actor in percentage of actors" do
-            enabled = (1..100).select { |i|
+            enabled = (1..100).select do |i|
               thing = actor_class.new(i)
               feature.enabled?(thing)
-            }.size
+            end.size
 
             expect(enabled).to be(0)
           end
@@ -303,10 +303,10 @@ RSpec.describe Flipper do
           end
 
           it "disables feature" do
-            enabled = (1..100).select { |i|
+            enabled = (1..100).select do |i|
               thing = actor_class.new(i)
               feature.enabled?(thing)
-            }.size
+            end.size
 
             expect(enabled).to be(0)
           end
@@ -327,12 +327,12 @@ RSpec.describe Flipper do
           end
 
           it "disables feature for time within percentage" do
-            allow(@gate).to receive_messages(:rand => 0.04)
+            allow(@gate).to receive_messages(rand: 0.04)
             expect(feature.enabled?).to eq(false)
           end
 
           it "disables feature for time not within percentage" do
-            allow(@gate).to receive_messages(:rand => 0.10)
+            allow(@gate).to receive_messages(rand: 0.10)
             expect(feature.enabled?).to eq(false)
           end
 
@@ -344,9 +344,9 @@ RSpec.describe Flipper do
         context "with argument that has no gate" do
           it "raises error" do
             thing = Object.new
-            expect {
+            expect do
               feature.disable(thing)
-            }.to raise_error(Flipper::GateNotFound, "Could not find gate for #{thing.inspect}")
+            end.to raise_error(Flipper::GateNotFound, "Could not find gate for #{thing.inspect}")
           end
         end
       end
@@ -420,7 +420,7 @@ RSpec.describe Flipper do
             # ensure percentage of time returns percentage that makes five percent
             # of time true
             @gate = feature.gate(:percentage_of_time)
-            allow(@gate).to receive_messages(:rand => 0.04)
+            allow(@gate).to receive_messages(rand: 0.04)
 
             feature.enable five_percent_of_time
           end
@@ -438,7 +438,7 @@ RSpec.describe Flipper do
             # ensure percentage of time returns percentage that makes five percent
             # of time false
             @gate = feature.gate(:percentage_of_time)
-            allow(@gate).to receive_messages(:rand => 0.10)
+            allow(@gate).to receive_messages(rand: 0.10)
 
             feature.enable five_percent_of_time
           end

@@ -158,9 +158,7 @@ module Flipper
         raise ArgumentError, "#{name} must be a String or Symbol"
       end
 
-      @memoized_features[name.to_sym] ||= Feature.new(name, @storage, {
-        :instrumenter => instrumenter,
-      })
+      @memoized_features[name.to_sym] ||= Feature.new(name, @storage, instrumenter: instrumenter)
     end
 
     # Public: Preload the features with the given names.

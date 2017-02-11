@@ -24,22 +24,22 @@ module Flipper
         end
 
         def get(key)
-          if row = Key.where(:key => key).limit(1).first
+          if row = Key.where(key: key).limit(1).first
             row.value
           end
         end
 
         def set(key, value)
-          if row = Key.where(:key => key).limit(1).first
+          if row = Key.where(key: key).limit(1).first
             row.value = value.to_s
             row.save!
           else
-            Key.create!(:key => key, :value => value.to_s)
+            Key.create!(key: key, value: value.to_s)
           end
         end
 
         def del(key)
-          Key.where(:key => key).delete_all
+          Key.where(key: key).delete_all
         end
       end
     end

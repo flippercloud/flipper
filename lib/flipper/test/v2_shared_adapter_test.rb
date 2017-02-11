@@ -18,9 +18,9 @@ module Flipper
           actor.respond_to?(:admin?) && actor.admin?
         end
 
-        Flipper.register(:early_access) { |actor|
+        Flipper.register(:early_access) do |actor|
           actor.respond_to?(:early_access?) && actor.early_access?
-        }
+        end
       end
 
       def teardown

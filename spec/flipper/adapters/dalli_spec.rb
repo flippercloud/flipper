@@ -5,7 +5,7 @@ require 'flipper/spec/shared_adapter_specs'
 
 RSpec.describe Flipper::Adapters::Dalli do
   let(:memory_adapter) { Flipper::Adapters::Memory.new }
-  let(:adapter) { Flipper::Adapters::Dalli.new(memory_adapter, DataStores.dalli) }
+  let(:adapter) { described_class.new(memory_adapter, DataStores.dalli) }
   let(:flipper) { Flipper.new(adapter) }
 
   subject { described_class.new(adapter, DataStores.dalli) }

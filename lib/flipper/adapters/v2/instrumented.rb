@@ -11,7 +11,7 @@ module Flipper
         include ::Flipper::Adapter
 
         # Private: The name of instrumentation events.
-        InstrumentationName = "adapter_operation.#{InstrumentationNamespace}"
+        InstrumentationName = "adapter_operation.#{InstrumentationNamespace}".freeze
 
         # Private: What is used to instrument all the things.
         attr_reader :instrumenter
@@ -39,35 +39,35 @@ module Flipper
 
         def get(key)
           payload = {
-            :operation => :get,
-            :adapter_name => @adapter.name,
+            operation: :get,
+            adapter_name: @adapter.name,
           }
 
-          @instrumenter.instrument(InstrumentationName, payload) { |payload|
+          @instrumenter.instrument(InstrumentationName, payload) do |payload|
             payload[:result] = @adapter.get(key)
-          }
+          end
         end
 
         def set(key, value)
           payload = {
-            :operation => :set,
-            :adapter_name => @adapter.name,
+            operation: :set,
+            adapter_name: @adapter.name,
           }
 
-          @instrumenter.instrument(InstrumentationName, payload) { |payload|
+          @instrumenter.instrument(InstrumentationName, payload) do |payload|
             payload[:result] = @adapter.set(key, value)
-          }
+          end
         end
 
         def del(key)
           payload = {
-            :operation => :del,
-            :adapter_name => @adapter.name,
+            operation: :del,
+            adapter_name: @adapter.name,
           }
 
-          @instrumenter.instrument(InstrumentationName, payload) { |payload|
+          @instrumenter.instrument(InstrumentationName, payload) do |payload|
             payload[:result] = @adapter.del(key)
-          }
+          end
         end
       end
     end

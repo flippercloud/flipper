@@ -57,7 +57,11 @@ RSpec.describe Flipper::Middleware::Memoizer do
 
     it "clears the local cache even when the request raises an error" do
       flipper.storage.cache['hello'] = 'world'
-      get '/fail' rescue nil
+      begin
+        get '/fail'
+      rescue
+        nil
+      end
       expect(flipper.storage.cache).to be_empty
     end
 

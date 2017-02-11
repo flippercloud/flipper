@@ -30,9 +30,7 @@ RSpec.describe Flipper::Feature do
       let(:instrumenter) { double('Instrumentor', instrument: nil) }
 
       it "overrides default instrumenter" do
-        feature = described_class.new(:search, storage, {
-          :instrumenter => instrumenter,
-        })
+        feature = described_class.new(:search, storage, instrumenter: instrumenter)
         expect(feature.instrumenter).to be(instrumenter)
       end
     end
@@ -111,9 +109,9 @@ RSpec.describe Flipper::Feature do
   describe 'instrumentation' do
     let(:instrumenter) { Flipper::Instrumenters::Memory.new }
 
-    subject {
-      described_class.new(:search, storage, :instrumenter => instrumenter)
-    }
+    subject do
+      described_class.new(:search, storage, instrumenter: instrumenter)
+    end
 
     it 'is recorded for enable' do
       thing = Flipper::Types::Actor.new(Struct.new(:flipper_id).new('1'))

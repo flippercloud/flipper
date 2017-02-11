@@ -8,7 +8,6 @@ module Flipper
       class Memory
         include ::Flipper::Adapter
 
-
         # Public: The name of the adapter.
         attr_reader :name
 

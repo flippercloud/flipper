@@ -15,29 +15,29 @@ rspec_options = {
 guard 'rspec', rspec_options do
   watch(%r{^spec/.+_spec\.rb$})
   watch(%r{^lib/(.*/)?([^/]+)\.rb$}) { |m| "spec/#{m[1]}#{m[2]}_spec.rb" }
-  watch(%r{shared_adapter_specs}) {
+  watch(/shared_adapter_specs/) do
     Dir.glob("spec/flipper/adapters/*_spec.rb") +
       Dir.glob("spec/flipper/adapters/v2/*_spec.rb")
-  }
+  end
   watch('spec/helper.rb') { "spec" }
 end
 
 minitest_options = {
-  :all_after_pass => false,
-  :all_on_start   => false,
-  :failed_mode    => :keep,
-  :test_folders => ["test"],
+  all_after_pass: false,
+  all_on_start: false,
+  failed_mode: :keep,
+  test_folders: ["test"],
 }
 guard :minitest, minitest_options do
   watch(%r{^test/(.*)\/?(.*)_test\.rb$})
   watch(%r{^lib/(.*/)?([^/]+)\.rb$}) { |m| "test/#{m[1]}#{m[2]}_test.rb" }
   watch(%r{^test/test_helper\.rb$}) { "test" }
-  watch("lib/flipper/test/shared_adapter_test.rb") {
+  watch("lib/flipper/test/shared_adapter_test.rb") do
     Dir.glob("test/adapters/*_test.rb")
-  }
-  watch("lib/flipper/test/v2_shared_adapter_test.rb") {
+  end
+  watch("lib/flipper/test/v2_shared_adapter_test.rb") do
     Dir.glob("test/adapters/v2/*_test.rb")
-  }
+  end
 end
 
 coffee_options = {

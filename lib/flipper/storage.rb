@@ -14,10 +14,10 @@ module Flipper
 
     def initialize(adapter)
       @adapter = case adapter.version
-      when Adapter::V1
-        Adapters::Memoizable.new(adapter)
-      when Adapter::V2
-        Adapters::V2::Memoizable.new(adapter)
+                 when Adapter::V1
+                   Adapters::Memoizable.new(adapter)
+                 when Adapter::V2
+                   Adapters::V2::Memoizable.new(adapter)
       end
     end
 
@@ -142,11 +142,11 @@ module Flipper
 
     def default_gate_values
       {
-        :boolean => nil,
-        :groups => Set.new,
-        :actors => Set.new,
-        :percentage_of_actors => nil,
-        :percentage_of_time => nil,
+        boolean: nil,
+        groups: Set.new,
+        actors: Set.new,
+        percentage_of_actors: nil,
+        percentage_of_time: nil,
       }
     end
 

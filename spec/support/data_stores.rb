@@ -19,7 +19,7 @@ module DataStores
   end
 
   def self.mongo
-    @mongo ||= Mongo::Client.new(["127.0.0.1:27017"], :server_selection_timeout => 1, :database => 'testing')['testing']
+    @mongo ||= Mongo::Client.new(["127.0.0.1:27017"], server_selection_timeout: 1, database: 'testing')['testing']
   end
 
   def self.reset_mongo
@@ -36,10 +36,8 @@ module DataStores
 
   def self.reset_active_record_connection
     unless ActiveRecord::Base.connected?
-      ActiveRecord::Base.establish_connection({
-        adapter: "sqlite3",
-        database: ":memory:",
-      })
+      ActiveRecord::Base.establish_connection(adapter: "sqlite3",
+                                              database: ":memory:")
     end
   end
 
@@ -64,13 +62,11 @@ module DataStores
   end
 
   def self.pstore
-    @pstore ||= FlipperRoot.join("tmp").tap { |d| d.mkpath }.join("flipper.pstore")
+    @pstore ||= FlipperRoot.join("tmp").tap(&:mkpath).join("flipper.pstore")
   end
 
   def self.reset_pstore
-    if pstore.exist?
-      pstore.unlink
-    end
+    pstore.unlink if pstore.exist?
   end
 
   def self.reset

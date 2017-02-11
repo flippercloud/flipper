@@ -42,28 +42,28 @@ module Flipper
     #
     # Returns the result of Adapter#enable.
     def enable(thing = true)
-      instrument(:enable) { |payload|
+      instrument(:enable) do |payload|
         gate = gate_for(thing)
         wrapped_thing = gate.wrap(thing)
         payload[:gate_name] = gate.name
         payload[:thing] = wrapped_thing
 
         @storage.enable(self, gate, wrapped_thing)
-      }
+      end
     end
 
     # Public: Disable this feature for something.
     #
     # Returns the result of Adapter#disable.
     def disable(thing = false)
-      instrument(:disable) { |payload|
+      instrument(:disable) do |payload|
         gate = gate_for(thing)
         wrapped_thing = gate.wrap(thing)
         payload[:gate_name] = gate.name
         payload[:thing] = wrapped_thing
 
         @storage.disable(self, gate, wrapped_thing)
-      }
+      end
     end
 
     # Public: Removes this feature.

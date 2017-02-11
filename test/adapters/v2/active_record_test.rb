@@ -10,10 +10,8 @@ class V2ActiveRecordTest < MiniTest::Test
   prepend Flipper::Test::V2SharedAdapterTests
 
   def setup
-    ActiveRecord::Base.establish_connection({
-      adapter: "sqlite3",
-      database: ":memory:",
-    })
+    ActiveRecord::Base.establish_connection(adapter: "sqlite3",
+                                            database: ":memory:")
 
     @adapter = Flipper::Adapters::V2::ActiveRecord.new
     CreateFlipperV2Tables.up

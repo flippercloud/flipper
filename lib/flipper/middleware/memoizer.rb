@@ -51,9 +51,9 @@ module Flipper
         flipper.preload(@opts[:preload]) if @opts[:preload]
 
         response = @app.call(env)
-        response[2] = Rack::BodyProxy.new(response[2]) {
+        response[2] = Rack::BodyProxy.new(response[2]) do
           flipper.storage.memoize = original
-        }
+        end
         response
       rescue
         flipper.storage.memoize = original

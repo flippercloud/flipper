@@ -23,11 +23,11 @@ module Flipper
           @adapter.get(key)
         end
 
-        def set(key, value)
+        def set(_key, _value)
           raise Flipper::Adapters::ReadOnly::WriteAttempted
         end
 
-        def del(key)
+        def del(_key)
           raise Flipper::Adapters::ReadOnly::WriteAttempted
         end
       end

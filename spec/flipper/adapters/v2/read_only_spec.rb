@@ -27,13 +27,13 @@ RSpec.describe Flipper::Adapters::V2::ReadOnly do
   let(:time_gate)    { feature.gate(:percentage_of_time) }
 
   before do
-    Flipper.register(:admins) { |actor|
+    Flipper.register(:admins) do |actor|
       actor.respond_to?(:admin?) && actor.admin?
-    }
+    end
 
-    Flipper.register(:early_access) { |actor|
+    Flipper.register(:early_access) do |actor|
       actor.respond_to?(:early_access?) && actor.early_access?
-    }
+    end
   end
 
   after do
@@ -41,7 +41,7 @@ RSpec.describe Flipper::Adapters::V2::ReadOnly do
   end
 
   it "has name that is a symbol" do
-    expect(subject.name).to_not be_nil
+    expect(subject.name).not_to be_nil
     expect(subject.name).to be_instance_of(Symbol)
   end
 

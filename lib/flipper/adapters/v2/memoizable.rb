@@ -34,9 +34,9 @@ module Flipper
 
         def get(key)
           if memoizing?
-            cache.fetch(key) {
+            cache.fetch(key) do
               cache[key] = @adapter.get(key)
-            }
+            end
           else
             @adapter.get(key)
           end
