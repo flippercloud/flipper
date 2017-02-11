@@ -101,8 +101,6 @@ module Flipper
         yield(configuration)
       end
 
-      # Public: Get one feature
-      # feature - Feature instance
       def get(feature)
         response = @request.get(@uri + "/api/v1/features/#{feature.key}")
         raise Error.new(response) unless response.is_a?(Net::HTTPOK)
@@ -111,8 +109,6 @@ module Flipper
         result_for_feature(feature, parsed_response.fetch('gates'))
       end
 
-      # Public: Add a feature
-      # feature - Feature instance
       def add(feature)
         response = @request.post(@uri + '/api/v1/features', name: feature.key)
         response.is_a?(Net::HTTPOK)
@@ -137,7 +133,6 @@ module Flipper
         result
       end
 
-      # Public: Get all features
       def features
         response = @request.get(@uri + '/api/v1/features')
         raise Error.new(response) unless response.is_a?(Net::HTTPOK)
@@ -146,27 +141,23 @@ module Flipper
         parsed_response['features'].map { |feature| feature['key'] }.to_set
       end
 
-      # Public: Remove a feature
       def remove(feature)
         response = @request.delete(@uri + "/api/v1/features/#{feature.key}")
         response.is_a?(Net::HTTPNoContent)
       end
 
-      # Public: Enable gate thing for feature
       def enable(feature, gate, thing)
         body = gate_request_body(gate.key, thing.value.to_s)
         response = @request.post(@uri + "/api/v1/features/#{feature.key}/#{gate.key}", body)
         response.is_a?(Net::HTTPOK)
       end
 
-      # Public: Disable gate thing for feature
       def disable(feature, gate, thing)
-        body = delete_request_body(gate.key, thing.value)
+        body = gate_request_body(gate.key, thing.value)
         response = @request.delete(@uri + "/api/v1/features/#{feature.key}/#{gate.key}", body)
         response.is_a?(Net::HTTPOK)
       end
 
-      # Public: Clear all gate values for feature
       def clear(feature)
         response = @request.delete(@uri + "/api/v1/features/#{feature.key}/boolean")
         response.is_a?(Net::HTTPOK)
@@ -190,10 +181,6 @@ module Flipper
         else
           raise "#{key} is not a valid flipper gate key"
         end
-      end
-
-      def delete_request_body(key, value)
-        gate_request_body(key, value)
       end
 
       def result_for_feature(feature, api_gates)
@@ -232,10 +219,6 @@ module Flipper
           percentage_of_actors: nil,
           percentage_of_time: nil,
         }
-      end
-
-      def gates_with_delete_request_body
-        %i(groups actors)
       end
     end
   end
