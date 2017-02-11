@@ -12,7 +12,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
     Flipper::Adapters::OperationLogger.new(memory_adapter)
   end
   let(:flipper) { Flipper.new(adapter) }
-  let(:env) { {'flipper' => flipper} }
+  let(:env) { { 'flipper' => flipper } }
 
   after do
     flipper.adapter.memoize = nil
@@ -52,14 +52,14 @@ RSpec.describe Flipper::Middleware::Memoizer do
 
     it 'clears the local cache with a successful request' do
       flipper.adapter.cache['hello'] = 'world'
-      get '/', {}, {'flipper' => flipper}
+      get '/', {}, 'flipper' => flipper
       expect(flipper.adapter.cache).to be_empty
     end
 
     it 'clears the local cache even when the request raises an error' do
       flipper.adapter.cache['hello'] = 'world'
       begin
-        get '/fail', {}, {'flipper' => flipper}
+        get '/fail', {}, 'flipper' => flipper
       rescue
         nil
       end
