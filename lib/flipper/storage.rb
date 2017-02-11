@@ -18,7 +18,7 @@ module Flipper
                    Adapters::Memoizable.new(adapter)
                  when Adapter::V2
                    Adapters::V2::Memoizable.new(adapter)
-      end
+                 end
     end
 
     def features
@@ -62,7 +62,8 @@ module Flipper
       when Adapter::V1
         @adapter.get(feature)
       when Adapter::V2
-        if raw = @adapter.get("feature/#{feature.key}")
+        raw = @adapter.get("feature/#{feature.key}")
+        if raw
           hash = JSON.parse(raw)
           symbolized_hash = {}
           hash.each_key do |key|
@@ -114,31 +115,39 @@ module Flipper
     def disable(feature, gate, thing)
       case @adapter.version
       when Adapter::V1
-        add(feature)
-        if gate.is_a?(Gates::Boolean)
-          @adapter.clear feature
-        else
-          @adapter.disable feature, gate, thing
-        end
+        disable_v1(feature, gate, thing)
       when Adapter::V2
-        add(feature)
-        hash = get(feature)
-        case gate.data_type
-        when :boolean
-          hash = default_gate_values
-        when :integer
-          hash[gate.key] = thing.value
-        when :set
-          hash[gate.key].delete(thing.value)
-        end
-        hash[:groups] = hash[:groups].to_a
-        hash[:actors] = hash[:actors].to_a
-        @adapter.set("feature/#{feature.key}", JSON.generate(hash))
-        true
+        disable_v2(feature, gate, thing)
       end
     end
 
     private
+
+    def disable_v1(feature, gate, thing)
+      add(feature)
+      if gate.is_a?(Gates::Boolean)
+        @adapter.clear feature
+      else
+        @adapter.disable feature, gate, thing
+      end
+    end
+
+    def disable_v2(feature, gate, thing)
+      add(feature)
+      hash = get(feature)
+      case gate.data_type
+      when :boolean
+        hash = default_gate_values
+      when :integer
+        hash[gate.key] = thing.value
+      when :set
+        hash[gate.key].delete(thing.value)
+      end
+      hash[:groups] = hash[:groups].to_a
+      hash[:actors] = hash[:actors].to_a
+      @adapter.set("feature/#{feature.key}", JSON.generate(hash))
+      true
+    end
 
     def default_gate_values
       {
@@ -151,7 +160,8 @@ module Flipper
     end
 
     def v2_features
-      if raw = @adapter.get("features")
+      raw = @adapter.get("features")
+      if raw
         Set.new(JSON.parse(raw))
       else
         Set.new

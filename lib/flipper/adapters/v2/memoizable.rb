@@ -62,7 +62,7 @@ module Flipper
 
         # Internal: Returns true for using local cache, false for not.
         def memoizing?
-          !!@memoize
+          @memoize
         end
       end
     end

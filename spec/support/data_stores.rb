@@ -19,7 +19,14 @@ module DataStores
   end
 
   def self.mongo
-    @mongo ||= Mongo::Client.new(["127.0.0.1:27017"], server_selection_timeout: 1, database: 'testing')['testing']
+    @mongo ||= begin
+      options = {
+        server_selection_timeout: 1,
+        database: 'testing',
+      }
+      client = Mongo::Client.new(["127.0.0.1:27017"], options)
+      client['testing']
+    end
   end
 
   def self.reset_mongo
@@ -35,10 +42,9 @@ module DataStores
   end
 
   def self.reset_active_record_connection
-    unless ActiveRecord::Base.connected?
-      ActiveRecord::Base.establish_connection(adapter: "sqlite3",
-                                              database: ":memory:")
-    end
+    return if ActiveRecord::Base.connected?
+    ActiveRecord::Base.establish_connection(adapter: "sqlite3",
+                                            database: ":memory:")
   end
 
   def self.reset_active_record

@@ -24,13 +24,13 @@ module Flipper
         end
 
         def get(key)
-          if row = Key.where(key: key).limit(1).first
-            row.value
-          end
+          row = Key.where(key: key).limit(1).first
+          row.value if row
         end
 
         def set(key, value)
-          if row = Key.where(key: key).limit(1).first
+          row = Key.where(key: key).limit(1).first
+          if row
             row.value = value.to_s
             row.save!
           else

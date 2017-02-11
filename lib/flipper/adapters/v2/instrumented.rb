@@ -43,8 +43,8 @@ module Flipper
             adapter_name: @adapter.name,
           }
 
-          @instrumenter.instrument(InstrumentationName, payload) do |payload|
-            payload[:result] = @adapter.get(key)
+          @instrumenter.instrument(InstrumentationName, payload) do |ipayload|
+            ipayload[:result] = @adapter.get(key)
           end
         end
 
@@ -54,8 +54,8 @@ module Flipper
             adapter_name: @adapter.name,
           }
 
-          @instrumenter.instrument(InstrumentationName, payload) do |payload|
-            payload[:result] = @adapter.set(key, value)
+          @instrumenter.instrument(InstrumentationName, payload) do |ipayload|
+            ipayload[:result] = @adapter.set(key, value)
           end
         end
 
@@ -65,8 +65,8 @@ module Flipper
             adapter_name: @adapter.name,
           }
 
-          @instrumenter.instrument(InstrumentationName, payload) do |payload|
-            payload[:result] = @adapter.del(key)
+          @instrumenter.instrument(InstrumentationName, payload) do |ipayload|
+            ipayload[:result] = @adapter.del(key)
           end
         end
       end

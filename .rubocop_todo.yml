@@ -92,6 +92,7 @@ RSpec/ExampleLength:
 RSpec/FilePath:
   Exclude:
     - 'spec/flipper/adapters/pstore_spec.rb'
+    - 'spec/flipper/adapters/v2/pstore_spec.rb'
     - 'spec/integration_spec.rb'
 
 # Offense count: 91

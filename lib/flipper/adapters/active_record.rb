@@ -138,8 +138,6 @@ module Flipper
         raise "#{data_type} is not supported by this adapter"
       end
 
-      private
-
       def result_for_feature(feature, db_gates)
         db_gates ||= []
         result = {}

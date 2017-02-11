@@ -21,9 +21,8 @@ module Flipper
 
         def get(key)
           criteria = { _id: key.to_s }
-          if doc = @collection.find(criteria).limit(1).first
-            doc["value"]
-          end
+          doc = @collection.find(criteria).limit(1).first
+          doc["value"] if doc
         end
 
         def set(key, value)

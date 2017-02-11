@@ -26,7 +26,11 @@ RSpec.describe Flipper do
     [:v1, -> { Flipper::Adapters::PStore.new(DataStores.pstore) }],
     [:v2, -> { Flipper::Adapters::V2::PStore.new(DataStores.pstore) }],
     [:v1, -> { Flipper::Adapters::Dalli.new(Flipper::Adapters::Memory.new, DataStores.dalli) }],
-    [:v2, -> { Flipper::Adapters::V2::Dalli.new(Flipper::Adapters::V2::Memory.new, DataStores.dalli) }],
+    [
+      :v2, lambda do
+        Flipper::Adapters::V2::Dalli.new(Flipper::Adapters::V2::Memory.new, DataStores.dalli)
+      end,
+    ],
   ].each do |(version, adapter_builder)|
     context "#{version} #{adapter_builder.call.name}" do
       let(:adapter)     { adapter_builder.call }
@@ -41,8 +45,12 @@ RSpec.describe Flipper do
       let(:admin_thing) { double 'Non Flipper Thing', flipper_id: 1,  admin?: true, dev?: false }
       let(:dev_thing)   { double 'Non Flipper Thing', flipper_id: 10, admin?: false, dev?: true }
 
-      let(:admin_truthy_thing) { double 'Non Flipper Thing', flipper_id: 1,  admin?: "true-ish", dev?: false }
-      let(:admin_falsey_thing) { double 'Non Flipper Thing', flipper_id: 1,  admin?: nil, dev?: false }
+      let(:admin_truthy_thing) do
+        double 'Non Flipper Thing', flipper_id: 1,  admin?: "true-ish", dev?: false
+      end
+      let(:admin_falsey_thing) do
+        double 'Non Flipper Thing', flipper_id: 1,  admin?: nil, dev?: false
+      end
 
       let(:pitt)        { actor_class.new(1) }
       let(:clooney)     { actor_class.new(10) }
