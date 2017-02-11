@@ -42,4 +42,14 @@ RSpec.describe Flipper::Api do
       expect(feature_names).to eq(%w(a b))
     end
   end
+
+  context "when request does not match any api routes" do
+    let(:app) { build_api(flipper) }
+
+    it "returns 404" do
+      get '/gibberish'
+      expect(last_response.status).to eq(404)
+      expect(json_response).to eq({})
+    end
+  end
 end

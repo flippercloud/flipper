@@ -10,7 +10,7 @@ module Flipper
     CONTENT_TYPE = 'application/json'.freeze
 
     def self.app(flipper = nil)
-      app = App.new(200, { 'Content-Type' => CONTENT_TYPE }, [''])
+      app = ->(_) { [404, { 'Content-Type'.freeze => CONTENT_TYPE }, ['{}'.freeze]] }
       builder = Rack::Builder.new
       yield builder if block_given?
       builder.use Flipper::Api::SetupEnv, flipper
@@ -20,30 +20,6 @@ module Flipper
       klass = self
       builder.define_singleton_method(:inspect) { klass.inspect } # pretty rake routes output
       builder
-    end
-
-    class App
-      # Public: HTTP response code
-      # Use this method to update status code before responding
-      attr_writer :status
-
-      def initialize(status, headers, body)
-        @status = status
-        @headers = headers
-        @body = body
-      end
-
-      # Public : Rack expects object that responds to call
-      # env - environment hash
-      def call(_env)
-        response
-      end
-
-      private
-
-      def response
-        [@status, @headers, @body]
-      end
     end
   end
 end
