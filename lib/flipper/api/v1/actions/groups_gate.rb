@@ -27,7 +27,6 @@ module Flipper
           private
 
           def ensure_valid_params
-            json_error_response(:feature_not_found) unless feature_names.include?(feature_name)
             json_error_response(:group_not_registered) unless Flipper.group_exists?(group_name)
           end
 
@@ -37,10 +36,6 @@ module Flipper
 
           def group_name
             @group_name ||= params['name']
-          end
-
-          def feature_names
-            @feature_names ||= flipper.adapter.features
           end
         end
       end
