@@ -74,6 +74,15 @@ module Flipper
       include Flipper::Adapter
       attr_reader :name
 
+      class Error < StandardError
+        attr_reader :response
+
+        def initialize(response)
+          @response = response
+          super("Failed with status: #{response.code}")
+        end
+      end
+
       class << self
         attr_accessor :configuration
       end
@@ -96,12 +105,10 @@ module Flipper
       # feature - Feature instance
       def get(feature)
         response = @request.get(@uri + "/api/v1/features/#{feature.key}")
-        if response.is_a?(Net::HTTPNotFound)
-          default_feature_value
-        else
-          parsed_response = JSON.parse(response.body)
-          result_for_feature(feature, parsed_response.fetch('gates'))
-        end
+        raise Error.new(response) unless response.is_a?(Net::HTTPOK)
+
+        parsed_response = JSON.parse(response.body)
+        result_for_feature(feature, parsed_response.fetch('gates'))
       end
 
       # Public: Add a feature
@@ -114,6 +121,8 @@ module Flipper
       def get_multi(features)
         csv_keys = features.map(&:key).join(',')
         response = @request.get(@uri + "/api/v1/features?keys=#{csv_keys}")
+        raise Error.new(response) unless response.is_a?(Net::HTTPOK)
+
         parsed_response = JSON.parse(response.body)
         parsed_features = parsed_response.fetch('features')
         gates_by_key = parsed_features.each_with_object({}) do |parsed_feature, hash|
