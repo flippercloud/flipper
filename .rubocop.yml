@@ -9,6 +9,7 @@ AllCops:
     - 'docker-compose/**/*'
     - 'examples/**/*'
     - 'tmp/**/*'
+    - 'bin/**/*'
   TargetRubyVersion: 2.0
   # DefaultFormatter: fuubar
 Style/Alias:
@@ -21,6 +22,9 @@ Style/Encoding:
   Enabled: false
 
 Style/NumericLiterals:
+  Enabled: false
+
+Style/StringLiterals:
   Enabled: false
 
 Metrics/LineLength:

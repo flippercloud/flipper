@@ -10,11 +10,23 @@ module Flipper
           route %r{api/v1/features\Z}
 
           def get
-            features = flipper.features.map do |feature|
+            keys = params['keys']
+            features = if keys
+                         names = keys.split(',')
+                         if names.empty?
+                           []
+                         else
+                           flipper.preload(names)
+                         end
+                       else
+                         flipper.features
+                       end
+
+            decorated_features = features.map do |feature|
               Decorators::Feature.new(feature).as_json
             end
 
-            json_response(features: features)
+            json_response(features: decorated_features)
           end
 
           def post
