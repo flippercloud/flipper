@@ -52,12 +52,23 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
 
   describe 'non-existent feature' do
     before do
+      Flipper.register(:admins) do |actor|
+        actor.respond_to?(:admin?) && actor.admin?
+      end
       delete '/features/my_feature/groups', name: 'admins'
     end
 
-    it '404s with correct error response when feature does not exist' do
-      expect(last_response.status).to eq(404)
-      expect(json_response).to eq(api_not_found_response)
+    it 'disables feature for group' do
+      person = double
+      allow(person).to receive(:flipper_id).and_return(1)
+      allow(person).to receive(:admin?).and_return(true)
+      expect(last_response.status).to eq(200)
+      expect(flipper[:my_feature].enabled?(person)).to be_falsey
+    end
+
+    it 'returns decorated feature with group disabled' do
+      group_gate = json_response['gates'].find { |m| m['name'] == 'group' }
+      expect(group_gate['value']).to eq([])
     end
   end
 

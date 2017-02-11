@@ -558,11 +558,7 @@ RSpec.describe Flipper::Feature do
   describe '#gate_values' do
     context 'when no gates are set in adapter' do
       it 'returns default gate values' do
-        expect(subject.gate_values).to eq(Flipper::GateValues.new(actors: Set.new,
-                                                                  groups: Set.new,
-                                                                  boolean: nil,
-                                                                  percentage_of_actors: nil,
-                                                                  percentage_of_time: nil))
+        expect(subject.gate_values).to eq(Flipper::GateValues.new(adapter.default_config))
       end
     end
 

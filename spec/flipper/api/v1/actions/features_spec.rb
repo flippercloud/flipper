@@ -23,7 +23,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
                 {
                   'key' => 'boolean',
                   'name' => 'boolean',
-                  'value' => true,
+                  'value' => 'true',
                 },
                 {
                   'key' => 'groups',
@@ -38,12 +38,12 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
                 {
                   'key' => 'percentage_of_actors',
                   'name' => 'percentage_of_actors',
-                  'value' => 0,
+                  'value' => nil,
                 },
                 {
                   'key' => 'percentage_of_time',
                   'name' => 'percentage_of_time',
-                  'value' => 0,
+                  'value' => nil,
                 },
               ],
             },
@@ -51,6 +51,22 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
         }
         expect(last_response.status).to eq(200)
         expect(json_response).to eq(expected_response)
+      end
+    end
+
+    context 'with keys specified' do
+      before do
+        flipper[:audit_log].enable
+        flipper[:issues].enable
+        flipper[:search].enable
+        flipper[:stats].disable
+        get 'api/v1/features', 'keys' => 'search,stats'
+      end
+
+      it 'responds with correct attributes' do
+        expect(last_response.status).to eq(200)
+        keys = json_response.fetch('features').map { |feature| feature.fetch('key') }.sort
+        expect(keys).to eq(%w(search stats))
       end
     end
 
@@ -88,7 +104,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
             {
               'key' => 'boolean',
               'name' => 'boolean',
-              'value' => false,
+              'value' => nil,
             },
             {
               'key' => 'groups',
@@ -103,12 +119,12 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
             {
               'key' => 'percentage_of_actors',
               'name' => 'percentage_of_actors',
-              'value' => 0,
+              'value' => nil,
             },
             {
               'key' => 'percentage_of_time',
               'name' => 'percentage_of_time',
-              'value' => 0,
+              'value' => nil,
             },
           ],
         }

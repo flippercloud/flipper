@@ -40,11 +40,7 @@ RSpec.describe Flipper::Adapters::ReadOnly do
   end
 
   it 'returns correct default values for the gates if none are enabled' do
-    expect(subject.get(feature)).to eq(boolean: nil,
-                                       groups: Set.new,
-                                       actors: Set.new,
-                                       percentage_of_actors: nil,
-                                       percentage_of_time: nil)
+    expect(subject.get(feature)).to eq(subject.default_config)
   end
 
   it 'can get feature' do

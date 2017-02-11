@@ -29,10 +29,6 @@ module Flipper
           private
 
           def ensure_valid_params
-            unless feature_names.include?(feature_name)
-              json_error_response(:feature_not_found)
-            end
-
             json_error_response(:flipper_id_invalid) if flipper_id.nil?
           end
 
@@ -42,10 +38,6 @@ module Flipper
 
           def flipper_id
             @flipper_id ||= params['flipper_id']
-          end
-
-          def feature_names
-            @feature_names ||= flipper.adapter.features
           end
         end
       end

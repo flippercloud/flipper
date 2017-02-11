@@ -1,6 +1,5 @@
 # Requires the following methods:
 # * subject - The instance of the adapter
-# rubocop:disable Metrics/BlockLength
 RSpec.shared_examples_for 'a flipper adapter' do
   let(:actor_class) { Struct.new(:flipper_id) }
 
@@ -12,16 +11,6 @@ RSpec.shared_examples_for 'a flipper adapter' do
   let(:actor_gate)   { feature.gate(:actor) }
   let(:actors_gate)  { feature.gate(:percentage_of_actors) }
   let(:time_gate) { feature.gate(:percentage_of_time) }
-
-  let(:default_config) do
-    {
-      boolean: nil,
-      groups: Set.new,
-      actors: Set.new,
-      percentage_of_actors: nil,
-      percentage_of_time: nil,
-    }
-  end
 
   before do
     Flipper.register(:admins) do |actor|
@@ -47,7 +36,7 @@ RSpec.shared_examples_for 'a flipper adapter' do
   end
 
   it 'returns correct default values for the gates if none are enabled' do
-    expect(subject.get(feature)).to eq(default_config)
+    expect(subject.get(feature)).to eq(subject.default_config)
   end
 
   it 'can enable, disable and get value for boolean gate' do
@@ -72,11 +61,7 @@ RSpec.shared_examples_for 'a flipper adapter' do
 
     expect(subject.disable(feature, boolean_gate, flipper.boolean(false))).to eq(true)
 
-    expect(subject.get(feature)).to eq(boolean: nil,
-                                       groups: Set.new,
-                                       actors: Set.new,
-                                       percentage_of_actors: nil,
-                                       percentage_of_time: nil)
+    expect(subject.get(feature)).to eq(subject.default_config)
   end
 
   it 'can enable, disable and get value for group gate' do
@@ -222,11 +207,7 @@ RSpec.shared_examples_for 'a flipper adapter' do
 
     expect(subject.remove(feature)).to eq(true)
 
-    expect(subject.get(feature)).to eq(boolean: nil,
-                                       groups: Set.new,
-                                       actors: Set.new,
-                                       percentage_of_actors: nil,
-                                       percentage_of_time: nil)
+    expect(subject.get(feature)).to eq(subject.default_config)
   end
 
   it 'can clear all the gate values for a feature' do
@@ -242,7 +223,7 @@ RSpec.shared_examples_for 'a flipper adapter' do
 
     expect(subject.clear(feature)).to eq(true)
     expect(subject.features).to include(feature.key)
-    expect(subject.get(feature)).to eq(default_config)
+    expect(subject.get(feature)).to eq(subject.default_config)
   end
 
   it 'does not complain clearing a feature that does not exist in adapter' do
@@ -259,8 +240,8 @@ RSpec.shared_examples_for 'a flipper adapter' do
     expect(result).to be_instance_of(Hash)
 
     stats, search, other = result.values
-    expect(stats).to eq(default_config.merge(boolean: 'true'))
-    expect(search).to eq(default_config)
-    expect(other).to eq(default_config)
+    expect(stats).to eq(subject.default_config.merge(boolean: 'true'))
+    expect(search).to eq(subject.default_config)
+    expect(other).to eq(subject.default_config)
   end
 end
