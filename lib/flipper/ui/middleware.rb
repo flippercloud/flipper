@@ -9,30 +9,8 @@ end
 module Flipper
   module UI
     class Middleware
-      # Public: Initializes an instance of the UI middleware.
-      #
-      # app - The app this middleware is included in.
-      # flipper_or_block - The Flipper::DSL instance or a block that yields a
-      #                    Flipper::DSL instance to use for all operations.
-      #
-      # Examples
-      #
-      #   flipper = Flipper.new(...)
-      #
-      #   # using with a normal flipper instance
-      #   use Flipper::UI::Middleware, flipper
-      #
-      #   # using with a block that yields a flipper instance
-      #   use Flipper::UI::Middleware, lambda { Flipper.new(...) }
-      #
-      def initialize(app, flipper_or_block)
+      def initialize(app)
         @app = app
-
-        if flipper_or_block.respond_to?(:call)
-          @flipper_block = flipper_or_block
-        else
-          @flipper = flipper_or_block
-        end
 
         @action_collection = ActionCollection.new
 
@@ -54,10 +32,6 @@ module Flipper
         @action_collection.add UI::Actions::Home
       end
 
-      def flipper
-        @flipper ||= @flipper_block.call
-      end
-
       def call(env)
         dup.call!(env)
       end
@@ -69,6 +43,7 @@ module Flipper
         if action_class.nil?
           @app.call(env)
         else
+          flipper = env.fetch('flipper')
           action_class.run(flipper, request)
         end
       end
