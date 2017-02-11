@@ -1,6 +1,6 @@
 require 'helper'
 
-RSpec.describe Flipper::Api::SetupEnv do
+RSpec.describe Flipper::Middleware::SetupEnv do
   context 'with flipper instance' do
     let(:app) do
       app = lambda do |env|
