@@ -8,12 +8,13 @@ V1 adapters support listing, adding, removing, enabling and disabling features. 
 * [PStore adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/pstore.rb) – great for when a local file is enough
 * [Mongo adapter](https://github.com/jnunemaker/flipper/blob/master/docs/mongo)
 * [Redis adapter](https://github.com/jnunemaker/flipper/blob/master/docs/redis)
-* [ActiveRecord adapter](https://github.com/jnunemaker/flipper/blob/master/docs/active_record) - Rails 3, 4 and 5.
+* [ActiveRecord adapter](https://github.com/jnunemaker/flipper/blob/master/docs/active_record) - Rails 3, 4, and 5.
+* [Sequel adapter](https://github.com/jnunemaker/flipper/blob/master/docs/sequel)
 * [Cassanity adapter](https://github.com/jnunemaker/flipper-cassanity)
+* [read-only adapter](https://github.com/jnunemaker/flipper/blob/master/docs/read-only)
 
 ## Community Supported
 
-* [Active Record 4 adapter](https://github.com/bgentry/flipper-activerecord)
 * [Active Record 3 adapter](https://github.com/blueboxjesse/flipper-activerecord)
 * [Consul adapter](https://github.com/gdavison/flipper-consul)
 
@@ -28,10 +29,9 @@ The basic API for an adapter is this:
 * `get(feature)` - Get all gate values for a feature.
 * `enable(feature, gate, thing)` - Enable a gate for a thing.
 * `disable(feature, gate, thing)` - Disable a gate for a thing.
+* `get_multi(features)` - Get all gate values for several features at once. Implementation is optional. If none provided, default implementation performs N+1 `get` calls where N is the number of elements in the features parameter.
 
 If you would like to make your own adapter, there are shared adapter specs (RSpec) and tests (MiniTest) that you can use to verify that you have everything working correctly.
-
-A good place to start when creating your own adapter is to copy one of the adapters mentioned above and replace the client specific code with whatever client you are attempting to adapt.
 
 ### RSpec
 For example, here is what the in-memory adapter spec looks like:
@@ -64,11 +64,10 @@ Here is what an in-memory adapter MiniTest looks like:
 
 ```ruby
 require 'test_helper'
-require 'flipper/test/shared_adapter_test'
 require 'flipper/adapters/memory'
 
 class MemoryTest < MiniTest::Test
-  prepend Flipper::Test::SharedAdapterTests
+  prepend SharedAdapterTests
 
   def setup
     # Any code here will run before each test
@@ -80,3 +79,14 @@ class MemoryTest < MiniTest::Test
   end
 end
 ```
+1. Create a file under `test/adapters` that inherits from MiniTest::Test.
+
+2. `prepend SharedAdapterTests`.
+
+3. Initialize an instance variable `@adapter` referencing an instance of the adapter.
+
+4. Add any code to run before each test in a `setup` method and any code to run after each test in a `teardown` method.
+
+A good place to start when creating your own adapter is to copy one of the adapters mentioned above and replace the client specific code with whatever client you are attempting to adapt.
+
+I would also recommend setting `fail_fast = true` in your RSpec configuration as that will just give you one failure at a time to work through. It is also handy to have the shared adapter spec file open.

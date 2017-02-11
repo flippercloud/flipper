@@ -7,17 +7,26 @@ module Flipper
     module V1
       module Actions
         class Features < Api::Action
-
           route %r{api/v1/features\Z}
 
           def get
-            features = flipper.features.map { |feature|
-              Decorators::Feature.new(feature).as_json
-            }
+            keys = params['keys']
+            features = if keys
+                         names = keys.split(',')
+                         if names.empty?
+                           []
+                         else
+                           flipper.preload(names)
+                         end
+                       else
+                         flipper.features
+                       end
 
-            json_response({
-              features: features
-            })
+            decorated_features = features.map do |feature|
+              Decorators::Feature.new(feature).as_json
+            end
+
+            json_response(features: decorated_features)
           end
 
           def post

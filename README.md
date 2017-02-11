@@ -74,14 +74,16 @@ Of course there are more [examples for you to peruse](examples/). You could also
 * [Web Interface](docs/ui/README.md) - Point and click...
 * [API](docs/api/README.md) - HTTP API interface
 * [Caveats](docs/Caveats.md) - Flipper beware! (see what I did there)
+* [Docker-Compose](docs/DockerCompose.md) - Using docker-compose in contributing
 
 ## Contributing
 
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Added some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+3. Check your changes with Rubocop tests (`script/rubocop`)
+4. Commit your changes (`git commit -am 'Added some feature'`)
+5. Push to the branch (`git push origin my-new-feature`)
+6. Create new Pull Request
 
 ## Releasing
 
@@ -91,7 +93,8 @@ Of course there are more [examples for you to peruse](examples/). You could also
 
 ## Brought To You By
 
-| pic | @mention |
-|---|---|
-| ![@jnunemaker](https://avatars3.githubusercontent.com/u/235?s=64) | [@jnunemaker](https://github.com/jnunemaker) |
-| ![@alexwheeler](https://avatars3.githubusercontent.com/u/3260042?s=64) | [@alexwheeler](https://github.com/alexwheeler) |
+| pic | @mention | area |
+|---|---|---|
+| ![@jnunemaker](https://avatars3.githubusercontent.com/u/235?s=64) | [@jnunemaker](https://github.com/jnunemaker) | most things |
+| ![@alexwheeler](https://avatars3.githubusercontent.com/u/3260042?s=64) | [@alexwheeler](https://github.com/alexwheeler) | api |
+| ![@lazebny](https://avatars1.githubusercontent.com/u/6276766?s=64) | [@lazebny](https://github.com/lazebny) | docker |

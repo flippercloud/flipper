@@ -13,7 +13,7 @@ RSpec.describe Flipper::Adapters::Memoizable do
 
   it_should_behave_like 'a flipper adapter'
 
-  it "forwards missing methods to underlying adapter" do
+  it 'forwards missing methods to underlying adapter' do
     adapter = Class.new do
       def foo
         :foo
@@ -23,14 +23,14 @@ RSpec.describe Flipper::Adapters::Memoizable do
     expect(memoizable.foo).to eq(:foo)
   end
 
-  describe "#name" do
-    it "is instrumented" do
+  describe '#name' do
+    it 'is instrumented' do
       expect(subject.name).to be(:memoizable)
     end
   end
 
-  describe "#memoize=" do
-    it "sets value" do
+  describe '#memoize=' do
+    it 'sets value' do
       subject.memoize = true
       expect(subject.memoizing?).to eq(true)
 
@@ -38,44 +38,44 @@ RSpec.describe Flipper::Adapters::Memoizable do
       expect(subject.memoizing?).to eq(false)
     end
 
-    it "clears the local cache" do
+    it 'clears the local cache' do
       subject.cache['some'] = 'thing'
       subject.memoize = true
       expect(subject.cache).to be_empty
     end
   end
 
-  describe "#memoizing?" do
-    it "returns true if enabled" do
+  describe '#memoizing?' do
+    it 'returns true if enabled' do
       subject.memoize = true
       expect(subject.memoizing?).to eq(true)
     end
 
-    it "returns false if disabled" do
+    it 'returns false if disabled' do
       subject.memoize = false
       expect(subject.memoizing?).to eq(false)
     end
   end
 
-  describe "#get" do
-    context "with memoization enabled" do
+  describe '#get' do
+    context 'with memoization enabled' do
       before do
         subject.memoize = true
       end
 
-      it "memoizes feature" do
+      it 'memoizes feature' do
         feature = flipper[:stats]
         result = subject.get(feature)
-        expect(cache[feature]).to be(result)
+        expect(cache[feature.key]).to be(result)
       end
     end
 
-    context "with memoization disabled" do
+    context 'with memoization disabled' do
       before do
         subject.memoize = false
       end
 
-      it "returns result" do
+      it 'returns result' do
         feature = flipper[:stats]
         result = subject.get(feature)
         adapter_result = adapter.get(feature)
@@ -84,27 +84,59 @@ RSpec.describe Flipper::Adapters::Memoizable do
     end
   end
 
-  describe "#enable" do
-    context "with memoization enabled" do
+  describe '#get_multi' do
+    context 'with memoization enabled' do
       before do
         subject.memoize = true
       end
 
-      it "unmemoizes feature" do
-        feature = flipper[:stats]
-        gate = feature.gate(:boolean)
-        cache[feature] = {:some => 'thing'}
-        subject.enable(feature, gate, flipper.bool)
-        expect(cache[feature]).to be_nil
+      it 'memoizes feature' do
+        names = %i(stats shiny)
+        features = names.map { |name| flipper[name] }
+        results = subject.get_multi(features)
+        features.each do |feature|
+          expect(cache[feature.key]).not_to be(nil)
+          expect(cache[feature.key]).to be(results[feature.key])
+        end
       end
     end
 
-    context "with memoization disabled" do
+    context 'with memoization disabled' do
       before do
         subject.memoize = false
       end
 
-      it "returns result" do
+      it 'returns result' do
+        names = %i(stats shiny)
+        features = names.map { |name| flipper[name] }
+        result = subject.get_multi(features)
+        adapter_result = adapter.get_multi(features)
+        expect(result).to eq(adapter_result)
+      end
+    end
+  end
+
+  describe '#enable' do
+    context 'with memoization enabled' do
+      before do
+        subject.memoize = true
+      end
+
+      it 'unmemoizes feature' do
+        feature = flipper[:stats]
+        gate = feature.gate(:boolean)
+        cache[feature.key] = { some: 'thing' }
+        subject.enable(feature, gate, flipper.bool)
+        expect(cache[feature.key]).to be_nil
+      end
+    end
+
+    context 'with memoization disabled' do
+      before do
+        subject.memoize = false
+      end
+
+      it 'returns result' do
         feature = flipper[:stats]
         gate = feature.gate(:boolean)
         result = subject.enable(feature, gate, flipper.bool)
@@ -114,27 +146,27 @@ RSpec.describe Flipper::Adapters::Memoizable do
     end
   end
 
-  describe "#disable" do
-    context "with memoization enabled" do
+  describe '#disable' do
+    context 'with memoization enabled' do
       before do
         subject.memoize = true
       end
 
-      it "unmemoizes feature" do
+      it 'unmemoizes feature' do
         feature = flipper[:stats]
         gate = feature.gate(:boolean)
-        cache[feature] = {:some => 'thing'}
+        cache[feature.key] = { some: 'thing' }
         subject.disable(feature, gate, flipper.bool)
-        expect(cache[feature]).to be_nil
+        expect(cache[feature.key]).to be_nil
       end
     end
 
-    context "with memoization disabled" do
+    context 'with memoization disabled' do
       before do
         subject.memoize = false
       end
 
-      it "returns result" do
+      it 'returns result' do
         feature = flipper[:stats]
         gate = feature.gate(:boolean)
         result = subject.disable(feature, gate, flipper.bool)
@@ -144,13 +176,13 @@ RSpec.describe Flipper::Adapters::Memoizable do
     end
   end
 
-  describe "#features" do
-    context "with memoization enabled" do
+  describe '#features' do
+    context 'with memoization enabled' do
       before do
         subject.memoize = true
       end
 
-      it "memoizes features" do
+      it 'memoizes features' do
         flipper[:stats].enable
         flipper[:search].disable
         result = subject.features
@@ -158,92 +190,92 @@ RSpec.describe Flipper::Adapters::Memoizable do
       end
     end
 
-    context "with memoization disabled" do
+    context 'with memoization disabled' do
       before do
         subject.memoize = false
       end
 
-      it "returns result" do
+      it 'returns result' do
         expect(subject.features).to eq(adapter.features)
       end
     end
   end
 
-  describe "#add" do
-    context "with memoization enabled" do
+  describe '#add' do
+    context 'with memoization enabled' do
       before do
         subject.memoize = true
       end
 
-      it "unmemoizes the known features" do
-        cache[features_key] = {:some => 'thing'}
+      it 'unmemoizes the known features' do
+        cache[features_key] = { some: 'thing' }
         subject.add(flipper[:stats])
         expect(cache).to be_empty
       end
     end
 
-    context "with memoization disabled" do
+    context 'with memoization disabled' do
       before do
         subject.memoize = false
       end
 
-      it "returns result" do
+      it 'returns result' do
         expect(subject.add(flipper[:stats])).to eq(adapter.add(flipper[:stats]))
       end
     end
   end
 
-  describe "#remove" do
-    context "with memoization enabled" do
+  describe '#remove' do
+    context 'with memoization enabled' do
       before do
         subject.memoize = true
       end
 
-      it "unmemoizes the known features" do
-        cache[features_key] = {:some => 'thing'}
+      it 'unmemoizes the known features' do
+        cache[features_key] = { some: 'thing' }
         subject.remove(flipper[:stats])
         expect(cache).to be_empty
       end
 
-      it "unmemoizes the feature" do
+      it 'unmemoizes the feature' do
         feature = flipper[:stats]
-        cache[feature] = {:some => 'thing'}
+        cache[feature.key] = { some: 'thing' }
         subject.remove(feature)
-        expect(cache[feature]).to be_nil
+        expect(cache[feature.key]).to be_nil
       end
     end
 
-    context "with memoization disabled" do
+    context 'with memoization disabled' do
       before do
         subject.memoize = false
       end
 
-      it "returns result" do
+      it 'returns result' do
         expect(subject.remove(flipper[:stats])).to eq(adapter.remove(flipper[:stats]))
       end
     end
   end
 
-  describe "#clear" do
-    context "with memoization enabled" do
+  describe '#clear' do
+    context 'with memoization enabled' do
       before do
         subject.memoize = true
       end
 
-      it "unmemoizes feature" do
+      it 'unmemoizes feature' do
         feature = flipper[:stats]
-        cache[feature] = {:some => 'thing'}
+        cache[feature.key] = { some: 'thing' }
         subject.clear(feature)
-        expect(cache[feature]).to be_nil
+        expect(cache[feature.key]).to be_nil
       end
     end
 
-    context "with memoization disabled" do
+    context 'with memoization disabled' do
       before do
         subject.memoize = false
       end
 
-      it "returns result" do
+      it 'returns result' do
         feature = flipper[:stats]
         expect(subject.clear(feature)).to eq(adapter.clear(feature))
       end

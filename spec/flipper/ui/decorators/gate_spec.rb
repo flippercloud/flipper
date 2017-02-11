@@ -9,38 +9,38 @@ RSpec.describe Flipper::UI::Decorators::Gate do
   let(:feature) { flipper[:some_awesome_feature] }
   let(:gate) { feature.gate(:boolean) }
 
-  subject {
+  subject do
     described_class.new(gate, false)
-  }
+  end
 
-  describe "#initialize" do
-    it "sets gate" do
+  describe '#initialize' do
+    it 'sets gate' do
       expect(subject.gate).to be(gate)
     end
 
-    it "sets value" do
+    it 'sets value' do
       expect(subject.value).to eq(false)
     end
   end
 
-  describe "#as_json" do
+  describe '#as_json' do
     before do
       @result = subject.as_json
     end
 
-    it "returns Hash" do
+    it 'returns Hash' do
       expect(@result).to be_instance_of(Hash)
     end
 
-    it "includes key" do
+    it 'includes key' do
       expect(@result['key']).to eq('boolean')
     end
 
-    it "includes pretty name" do
+    it 'includes pretty name' do
       expect(@result['name']).to eq('boolean')
     end
 
-    it "includes value" do
+    it 'includes value' do
       expect(@result['value']).to be(false)
     end
   end

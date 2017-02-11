@@ -49,14 +49,15 @@ module Flipper
         result = {}
 
         feature.gates.each do |gate|
-          result[gate.key] = case gate.data_type
-          when :boolean, :integer
-            read key(feature, gate)
-          when :set
-            set_members key(feature, gate)
-          else
-            raise "#{gate} is not supported by this adapter yet"
-          end
+          result[gate.key] =
+            case gate.data_type
+            when :boolean, :integer
+              read key(feature, gate)
+            when :set
+              set_members key(feature, gate)
+            else
+              raise "#{gate} is not supported by this adapter yet"
+            end
         end
 
         result

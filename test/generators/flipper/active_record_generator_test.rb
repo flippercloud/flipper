@@ -7,12 +7,12 @@ DataStores.reset_active_record
 
 class FlipperActiveRecordGeneratorTest < Rails::Generators::TestCase
   tests Flipper::Generators::ActiveRecordGenerator
-  destination File.expand_path("../../../../tmp", __FILE__)
+  destination File.expand_path('../../../../tmp', __FILE__)
   setup :prepare_destination
 
   def test_generates_migration
     run_generator
-    assert_migration "db/migrate/create_flipper_tables.rb", <<-EOM
+    assert_migration 'db/migrate/create_flipper_tables.rb', <<-EOM
 class CreateFlipperTables < ActiveRecord::Migration
   def self.up
     create_table :flipper_features do |t|

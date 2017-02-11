@@ -23,20 +23,20 @@ module Flipper
             'id' => name.to_s,
             'name' => pretty_name,
             'state' => state.to_s,
-            'gates' => gates.map { |gate|
+            'gates' => gates.map do |gate|
               Decorators::Gate.new(gate, gate_values[gate.key]).as_json
-            },
+            end,
           }
         end
 
         def color_class
           case feature.state
           when :on
-            "text-open"
+            'text-open'
           when :off
-            "text-closed"
+            'text-closed'
           when :conditional
-            "text-pending"
+            'text-pending'
           end
         end
 
@@ -45,10 +45,10 @@ module Flipper
         end
 
         StateSortMap = {
-          :on => 1,
-          :conditional => 2,
-          :off => 3,
-        }
+          on: 1,
+          conditional: 2,
+          off: 3,
+        }.freeze
 
         def <=>(other)
           if state == other.state

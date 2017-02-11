@@ -15,42 +15,58 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
 
       it 'responds with correct attributes' do
         expected_response = {
-          "features" => [
+          'features' => [
             {
-              "key" => "my_feature",
-              "state" => "on",
-              "gates" => [
+              'key' => 'my_feature',
+              'state' => 'on',
+              'gates' => [
                 {
-                  "key"=> "boolean",
-                  "name"=> "boolean",
-                  "value" => true
+                  'key' => 'boolean',
+                  'name' => 'boolean',
+                  'value' => 'true',
                 },
                 {
-                  "key" => "groups",
-                  "name" => "group",
-                  "value" => [],
+                  'key' => 'groups',
+                  'name' => 'group',
+                  'value' => [],
                 },
                 {
-                  "key" => "actors",
-                  "name" => "actor",
-                  "value" => ["10"],
+                  'key' => 'actors',
+                  'name' => 'actor',
+                  'value' => ['10'],
                 },
                 {
-                  "key" => "percentage_of_actors",
-                  "name" => "percentage_of_actors",
-                  "value" => 0,
+                  'key' => 'percentage_of_actors',
+                  'name' => 'percentage_of_actors',
+                  'value' => nil,
                 },
                 {
-                  "key"=> "percentage_of_time",
-                  "name"=> "percentage_of_time",
-                  "value"=> 0,
+                  'key' => 'percentage_of_time',
+                  'name' => 'percentage_of_time',
+                  'value' => nil,
                 },
               ],
             },
-          ]
+          ],
         }
         expect(last_response.status).to eq(200)
         expect(json_response).to eq(expected_response)
+      end
+    end
+
+    context 'with keys specified' do
+      before do
+        flipper[:audit_log].enable
+        flipper[:issues].enable
+        flipper[:search].enable
+        flipper[:stats].disable
+        get 'api/v1/features', 'keys' => 'search,stats'
+      end
+
+      it 'responds with correct attributes' do
+        expect(last_response.status).to eq(200)
+        keys = json_response.fetch('features').map { |feature| feature.fetch('key') }.sort
+        expect(keys).to eq(%w(search stats))
       end
     end
 
@@ -61,7 +77,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
 
       it 'returns empty array for features key' do
         expected_response = {
-          "features" => []
+          'features' => [],
         }
         expect(last_response.status).to eq(200)
         expect(json_response).to eq(expected_response)
@@ -72,7 +88,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
   describe 'post' do
     context 'succesful request' do
       before do
-        post 'api/v1/features', { name: 'my_feature' }
+        post 'api/v1/features', name: 'my_feature'
       end
 
       it 'responds 200 ' do
@@ -82,33 +98,33 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
       it 'returns decorated feature' do
         expected_response = {
 
-          "key" => "my_feature",
-          "state" => "off",
-          "gates" => [
+          'key' => 'my_feature',
+          'state' => 'off',
+          'gates' => [
             {
-              "key"=> "boolean",
-              "name"=> "boolean",
-              "value" => false,
+              'key' => 'boolean',
+              'name' => 'boolean',
+              'value' => nil,
             },
             {
-              "key" => "groups",
-              "name" => "group",
-              "value" => [],
+              'key' => 'groups',
+              'name' => 'group',
+              'value' => [],
             },
             {
-              "key" => "actors",
-              "name" => "actor",
-              "value" => [],
+              'key' => 'actors',
+              'name' => 'actor',
+              'value' => [],
             },
             {
-              "key" => "percentage_of_actors",
-              "name" => "percentage_of_actors",
-              "value" => 0,
+              'key' => 'percentage_of_actors',
+              'name' => 'percentage_of_actors',
+              'value' => nil,
             },
             {
-              "key"=> "percentage_of_time",
-              "name"=> "percentage_of_time",
-              "value"=> 0,
+              'key' => 'percentage_of_time',
+              'name' => 'percentage_of_time',
+              'value' => nil,
             },
           ],
         }
@@ -134,7 +150,12 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
       end
 
       it 'returns formatted error' do
-        expect(json_response).to eq({ 'code' => 5, 'message' => 'Required parameter name is missing.', 'more_info' => '' })
+        expected = {
+          'code' => 5,
+          'message' => 'Required parameter name is missing.',
+          'more_info' => api_error_code_reference_url,
+        }
+        expect(json_response).to eq(expected)
       end
     end
   end

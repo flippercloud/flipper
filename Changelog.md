@@ -1,3 +1,30 @@
+## 0.10.2
+
+* Add Adapter#get_multi to allow for efficient loading of more than one feature at a time (https://github.com/jnunemaker/flipper/pull/198)
+* Add DSL#preload for efficiently loading several features at once using get_mutli (https://github.com/jnunemaker/flipper/pull/198)
+* Add :preload and :preload_all options to memoizer as a way of efficiently loading several features for a request in one network call instead of N where N is the number of features checked (https://github.com/jnunemaker/flipper/pull/198)
+* Strip whitespace out of feature/actor/group values posted by UI (https://github.com/jnunemaker/flipper/pull/205)
+* Fix bug with dalli adapter where deleting a feature using the UI or API was not clearing the cache in the dalli adapter which meant the feature would continue to use whatever cached enabled state was present until the TTL was hit (1cd96f6)
+* Change cache keys for dalli adapter. Backwards compatible in that it will just repopulate new keys on first check with this version, but old keys are not expired, so if you used the default ttl of 0, you'll have to expire them on your own. The primary reason for the change was safer namespacing of the cache keys to avoid collisions.
+
+## 0.10.1
+
+* Add docker compose support for contributing
+* Add sequel adapter
+* Show confirmation dialog when deleting a feature in flipper-ui
+
+## 0.10.0
+
+* Added feature check context (https://github.com/jnunemaker/flipper/pull/158)
+* Do not use mass assignment for active record adapter (https://github.com/jnunemaker/flipper/pull/171)
+* Several documentation improvements
+* Make Flipper::UI.app.inspect return a String (https://github.com/jnunemaker/flipper/pull/176)
+* changes boolean gate route to api/v1/features/boolean (https://github.com/jnunemaker/flipper/pull/175)
+* add api v1 percentage_of_actors endpoint (https://github.com/jnunemaker/flipper/pull/179)
+* add api v1 percentage_of_time endpoint (https://github.com/jnunemaker/flipper/pull/180)
+* add api v1 actors gate endpoint  (https://github.com/jnunemaker/flipper/pull/181)
+* wait for activesupport to tell us when active record is loaded for active record adapter (https://github.com/jnunemaker/flipper/pull/192)
+
 ## 0.9.2
 
 * GET /api/v1/features

@@ -49,6 +49,13 @@ module Flipper
         @adapter.get(feature)
       end
 
+      # Public
+      def get_multi(features)
+        @operations << Operation.new(:get_multi, [features])
+        @adapter.get_multi(features)
+      end
+
+      # Public
       def enable(feature, gate, thing)
         @operations << Operation.new(:enable, [feature, gate, thing])
         @adapter.enable(feature, gate, thing)
@@ -62,6 +69,11 @@ module Flipper
       # Public: Count the number of times a certain operation happened.
       def count(type)
         @operations.select { |operation| operation.type == type }.size
+      end
+
+      # Public: Get the last operation of a certain type.
+      def last(type)
+        @operations.reverse.find { |operation| operation.type == type }
       end
 
       # Public: Resets the operation log to empty

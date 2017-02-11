@@ -6,19 +6,18 @@ module Flipper
     module V1
       module Decorators
         class Feature < SimpleDelegator
-
           # Public: The feature being decorated.
           alias_method :feature, :__getobj__
 
           # Public: Returns instance as hash that is ready to be json dumped.
           def as_json
-            gate_values = feature.gate_values
+            gate_values = feature.storage.get(self)
             {
               'key' => key,
               'state' => state.to_s,
-              'gates' => gates.map { |gate|
+              'gates' => gates.map do |gate|
                 Decorators::Gate.new(gate, gate_values[gate.key]).as_json
-              },
+              end,
             }
           end
         end

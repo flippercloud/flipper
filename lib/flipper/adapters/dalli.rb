@@ -8,7 +8,14 @@ module Flipper
     class Dalli
       include ::Flipper::Adapter
 
-      FeaturesKey = :flipper_features
+      Version = 'v1'.freeze
+      Namespace = "flipper/#{Version}".freeze
+      FeaturesKey = "#{Namespace}/features".freeze
+
+      # Private
+      def self.key_for(key)
+        "#{Namespace}/feature/#{key}"
+      end
 
       # Public: The name of the adapter.
       attr_reader :name
@@ -42,31 +49,55 @@ module Flipper
         result = @adapter.remove(feature)
         @cache.delete(feature)
         @cache.delete(FeaturesKey)
+        @cache.delete(key_for(feature.key))
         result
       end
 
       def clear(feature)
         result = @adapter.clear(feature)
-        @cache.delete(feature)
+        @cache.delete(key_for(feature.key))
         result
       end
 
       def get(feature)
-        @cache.fetch(feature, @ttl) do
+        @cache.fetch(key_for(feature.key), @ttl) do
           @adapter.get(feature)
         end
       end
 
+      def get_multi(features)
+        keys = features.map { |feature| key_for(feature.key) }
+        result = @cache.get_multi(keys)
+        uncached_features = features.reject { |feature| result[key_for(feature.key)] }
+
+        if uncached_features.any?
+          response = @adapter.get_multi(uncached_features)
+          response.each do |key, value|
+            @cache.set(key_for(key), value, @ttl)
+            result[key] = value
+          end
+        end
+
+        result
+      end
+
+      # Public
       def enable(feature, gate, thing)
         result = @adapter.enable(feature, gate, thing)
-        @cache.delete(feature)
+        @cache.delete(key_for(feature.key))
         result
       end
 
       def disable(feature, gate, thing)
         result = @adapter.disable(feature, gate, thing)
-        @cache.delete(feature)
+        @cache.delete(key_for(feature.key))
         result
+      end
+
+      private
+
+      def key_for(key)
+        self.class.key_for(key)
       end
     end
   end

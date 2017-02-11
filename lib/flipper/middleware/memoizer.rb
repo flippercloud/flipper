@@ -18,8 +18,15 @@ module Flipper
       #   # using with a block that yields a flipper instance
       #   use Flipper::Middleware::Memoizer, lambda { Flipper.new(...) }
       #
-      def initialize(app, flipper_or_block)
+      #   # using with preload_all features
+      #   use Flipper::Middleware::Memoizer, flipper, preload_all: true
+      #
+      #   # using with preload specific features
+      #   use Flipper::Middleware::Memoizer, flipper, preload: [:stats, :search, :some_feature]
+      #
+      def initialize(app, flipper_or_block, opts = {})
         @app = app
+        @opts = opts
 
         if flipper_or_block.respond_to?(:call)
           @flipper_block = flipper_or_block
@@ -36,11 +43,21 @@ module Flipper
         original = flipper.storage.memoizing?
         flipper.storage.memoize = true
 
+        if @opts[:preload_all]
+          names = flipper.features.map(&:name)
+          flipper.preload(names)
+        end
+
+        flipper.preload(@opts[:preload]) if @opts[:preload]
+
         response = @app.call(env)
         response[2] = Rack::BodyProxy.new(response[2]) {
           flipper.storage.memoize = original
         }
         response
+      rescue
+        flipper.storage.memoize = original
+        raise
       end
     end
   end

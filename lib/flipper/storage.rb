@@ -8,6 +8,8 @@ module Flipper
   class Storage
     extend Forwardable
 
+    attr_reader :adapter
+
     def_delegators :@adapter, :memoize=, :memoizing?, :cache
 
     def initialize(adapter)
@@ -72,6 +74,19 @@ module Flipper
         else
           default_gate_values
         end
+      end
+    end
+
+    def get_multi(features)
+      case @adapter.version
+      when Adapter::V1
+        @adapter.get_multi(features)
+      when Adapter::V2
+        result = {}
+        features.each do |feature|
+          result[feature.key] = get(feature)
+        end
+        result
       end
     end
 

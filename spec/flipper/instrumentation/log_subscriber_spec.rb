@@ -5,22 +5,22 @@ require 'flipper/adapters/memory'
 require 'flipper/instrumentation/log_subscriber'
 
 RSpec.describe Flipper::Instrumentation::LogSubscriber do
-  let(:adapter) {
+  let(:adapter) do
     memory = Flipper::Adapters::Memory.new
-    Flipper::Adapters::Instrumented.new(memory, :instrumenter => ActiveSupport::Notifications)
-  }
-  let(:flipper) {
-    Flipper.new(adapter, :instrumenter => ActiveSupport::Notifications)
-  }
+    Flipper::Adapters::Instrumented.new(memory, instrumenter: ActiveSupport::Notifications)
+  end
+  let(:flipper) do
+    Flipper.new(adapter, instrumenter: ActiveSupport::Notifications)
+  end
 
   before do
-    Flipper.register(:admins) { |thing|
+    Flipper.register(:admins) do |thing|
       thing.respond_to?(:admin?) && thing.admin?
-    }
+    end
 
     @io = StringIO.new
     logger = Logger.new(@io)
-    logger.formatter = proc { |severity, datetime, progname, msg| "#{msg}\n" }
+    logger.formatter = proc { |_severity, _datetime, _progname, msg| "#{msg}\n" }
     described_class.logger = logger
   end
 
@@ -30,25 +30,25 @@ RSpec.describe Flipper::Instrumentation::LogSubscriber do
 
   let(:log) { @io.string }
 
-  context "feature enabled checks" do
+  context 'feature enabled checks' do
     before do
       clear_logs
       flipper[:search].enabled?
     end
 
-    it "logs feature calls with result after operation" do
+    it 'logs feature calls with result after operation' do
       feature_line = find_line('Flipper feature(search) enabled? false')
       expect(feature_line).to include('[ thing=nil ]')
     end
 
-    it "logs adapter calls" do
+    it 'logs adapter calls' do
       adapter_line = find_line('Flipper feature(search) adapter(memory) get')
       expect(adapter_line).to include('[ result={')
       expect(adapter_line).to include('} ]')
     end
   end
 
-  context "feature enabled checks with a thing" do
+  context 'feature enabled checks with a thing' do
     let(:user) { Flipper::Types::Actor.new(Struct.new(:flipper_id).new('1')) }
 
     before do
@@ -56,13 +56,13 @@ RSpec.describe Flipper::Instrumentation::LogSubscriber do
       flipper[:search].enabled?(user)
     end
 
-    it "logs thing for feature" do
+    it 'logs thing for feature' do
       feature_line = find_line('Flipper feature(search) enabled?')
       expect(feature_line).to include(user.inspect)
     end
   end
 
-  context "changing feature enabled state" do
+  context 'changing feature enabled state' do
     let(:user) { Flipper::Types::Actor.new(Struct.new(:flipper_id).new('1')) }
 
     before do
@@ -70,24 +70,24 @@ RSpec.describe Flipper::Instrumentation::LogSubscriber do
       flipper[:search].enable(user)
     end
 
-    it "logs feature calls with result in brackets" do
+    it 'logs feature calls with result in brackets' do
       feature_line = find_line('Flipper feature(search) enable true')
       expect(feature_line).to include("[ thing=#{user.inspect} gate_name=actor ]")
     end
 
-    it "logs adapter value" do
+    it 'logs adapter value' do
       adapter_line = find_line('Flipper feature(search) adapter(memory) enable')
-      expect(adapter_line).to include("[ result=")
+      expect(adapter_line).to include('[ result=')
     end
   end
 
-  context "getting all the features from the adapter" do
+  context 'getting all the features from the adapter' do
     before do
       clear_logs
       flipper.features
     end
 
-    it "logs adapter calls" do
+    it 'logs adapter calls' do
       adapter_line = find_line('Flipper adapter(memory) features')
       expect(adapter_line).to include('[ result=')
     end

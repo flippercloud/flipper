@@ -16,8 +16,36 @@ RSpec.describe Flipper::Adapters::Dalli do
 
   it_should_behave_like 'a flipper adapter'
 
-  describe "#name" do
-    it "is dalli" do
+  describe '#remove' do
+    it 'expires feature' do
+      feature = flipper[:stats]
+      adapter.get(feature)
+      adapter.remove(feature)
+      expect(DataStores.dalli.get(described_class.key_for(feature))).to be(nil)
+    end
+  end
+
+  describe '#get_multi' do
+    it 'warms uncached features' do
+      stats = flipper[:stats]
+      search = flipper[:search]
+      other = flipper[:other]
+      stats.enable
+      search.enable
+
+      adapter.get(stats)
+      expect(DataStores.dalli.get(described_class.key_for(search))).to be(nil)
+      expect(DataStores.dalli.get(described_class.key_for(other))).to be(nil)
+
+      adapter.get_multi([stats, search, other])
+
+      expect(DataStores.dalli.get(described_class.key_for(search))[:boolean]).to eq('true')
+      expect(DataStores.dalli.get(described_class.key_for(other))[:boolean]).to be(nil)
+    end
+  end
+
+  describe '#name' do
+    it 'is dalli' do
       expect(subject.name).to be(:dalli)
     end
   end

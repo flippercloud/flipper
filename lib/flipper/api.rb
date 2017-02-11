@@ -1,18 +1,24 @@
 require 'rack'
 require 'flipper'
 require 'flipper/api/middleware'
+require 'flipper/api/json_params'
+require 'flipper/api/setup_env'
 require 'flipper/api/actor'
 
 module Flipper
   module Api
     CONTENT_TYPE = 'application/json'.freeze
 
-    def self.app(flipper)
-      app = App.new(200,{ 'Content-Type' => CONTENT_TYPE }, [''])
+    def self.app(flipper = nil)
+      app = App.new(200, { 'Content-Type' => CONTENT_TYPE }, [''])
       builder = Rack::Builder.new
       yield builder if block_given?
-      builder.use Flipper::Api::Middleware, flipper
+      builder.use Flipper::Api::SetupEnv, flipper
+      builder.use Flipper::Api::JsonParams
+      builder.use Flipper::Api::Middleware
       builder.run app
+      klass = self
+      builder.define_singleton_method(:inspect) { klass.inspect } # pretty rake routes output
       builder
     end
 
@@ -29,7 +35,7 @@ module Flipper
 
       # Public : Rack expects object that responds to call
       # env - environment hash
-      def call(env)
+      def call(_env)
         response
       end
 

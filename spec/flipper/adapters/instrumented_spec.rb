@@ -13,13 +13,13 @@ RSpec.describe Flipper::Adapters::Instrumented do
   let(:gate) { feature.gate(:percentage_of_actors) }
   let(:thing) { flipper.actors(22) }
 
-  subject {
-    described_class.new(adapter, :instrumenter => instrumenter)
-  }
+  subject do
+    described_class.new(adapter, instrumenter: instrumenter)
+  end
 
   it_should_behave_like 'a flipper adapter'
 
-  it "forwards missing methods to underlying adapter" do
+  it 'forwards missing methods to underlying adapter' do
     adapter = Class.new do
       def foo
         :foo
@@ -29,14 +29,14 @@ RSpec.describe Flipper::Adapters::Instrumented do
     expect(instrumented.foo).to eq(:foo)
   end
 
-  describe "#name" do
-    it "is instrumented" do
+  describe '#name' do
+    it 'is instrumented' do
       expect(subject.name).to be(:instrumented)
     end
   end
 
-  describe "#get" do
-    it "records instrumentation" do
+  describe '#get' do
+    it 'records instrumentation' do
       result = subject.get(feature)
 
       event = instrumenter.events.last
@@ -49,8 +49,8 @@ RSpec.describe Flipper::Adapters::Instrumented do
     end
   end
 
-  describe "#enable" do
-    it "records instrumentation" do
+  describe '#enable' do
+    it 'records instrumentation' do
       result = subject.enable(feature, gate, thing)
 
       event = instrumenter.events.last
@@ -64,8 +64,8 @@ RSpec.describe Flipper::Adapters::Instrumented do
     end
   end
 
-  describe "#disable" do
-    it "records instrumentation" do
+  describe '#disable' do
+    it 'records instrumentation' do
       result = subject.disable(feature, gate, thing)
 
       event = instrumenter.events.last
@@ -79,8 +79,8 @@ RSpec.describe Flipper::Adapters::Instrumented do
     end
   end
 
-  describe "#add" do
-    it "records instrumentation" do
+  describe '#add' do
+    it 'records instrumentation' do
       result = subject.add(feature)
 
       event = instrumenter.events.last
@@ -93,8 +93,8 @@ RSpec.describe Flipper::Adapters::Instrumented do
     end
   end
 
-  describe "#remove" do
-    it "records instrumentation" do
+  describe '#remove' do
+    it 'records instrumentation' do
       result = subject.remove(feature)
 
       event = instrumenter.events.last
@@ -107,8 +107,8 @@ RSpec.describe Flipper::Adapters::Instrumented do
     end
   end
 
-  describe "#clear" do
-    it "records instrumentation" do
+  describe '#clear' do
+    it 'records instrumentation' do
       result = subject.clear(feature)
 
       event = instrumenter.events.last
@@ -121,8 +121,8 @@ RSpec.describe Flipper::Adapters::Instrumented do
     end
   end
 
-  describe "#features" do
-    it "records instrumentation" do
+  describe '#features' do
+    it 'records instrumentation' do
       result = subject.features
 
       event = instrumenter.events.last

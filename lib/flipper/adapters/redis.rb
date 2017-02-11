@@ -44,21 +44,16 @@ module Flipper
       end
 
       def get(feature)
-        result = {}
         doc = doc_for(feature)
-        fields = doc.keys
+        result_for_feature(feature, doc)
+      end
 
-        feature.gates.each do |gate|
-          result[gate.key] = case gate.data_type
-          when :boolean, :integer
-            doc[gate.key.to_s]
-          when :set
-            fields_to_gate_value fields, gate
-          else
-            unsupported_data_type gate.data_type
-          end
+      def get_multi(features)
+        docs = docs_for(features)
+        result = {}
+        features.zip(docs) do |feature, doc|
+          result[feature.key] = result_for_feature(feature, doc)
         end
-
         result
       end
 
@@ -99,6 +94,33 @@ module Flipper
         @client.hgetall(feature.key)
       end
 
+      def docs_for(features)
+        @client.pipelined do
+          features.each do |feature|
+            doc_for(feature)
+          end
+        end
+      end
+
+      def result_for_feature(feature, doc)
+        result = {}
+        fields = doc.keys
+
+        feature.gates.each do |gate|
+          result[gate.key] =
+            case gate.data_type
+            when :boolean, :integer
+              doc[gate.key.to_s]
+            when :set
+              fields_to_gate_value fields, gate
+            else
+              unsupported_data_type gate.data_type
+            end
+        end
+
+        result
+      end
+
       # Private: Converts gate and thing to hash key.
       def to_field(gate, thing)
         "#{gate.key}/#{thing.value}"
@@ -108,7 +130,7 @@ module Flipper
       #
       # Returns a Set of the values enabled for the gate.
       def fields_to_gate_value(fields, gate)
-        regex = /^#{Regexp.escape(gate.key.to_s)}\//
+        regex = %r{^#{Regexp.escape(gate.key.to_s)}/}
         keys = fields.grep(regex)
         values = keys.map { |key| key.split('/', 2).last }
         values.to_set

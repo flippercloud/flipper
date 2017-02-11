@@ -11,9 +11,9 @@ module Flipper
       end
 
       def action_for_request(request)
-        @action_classes.detect { |action_class|
+        @action_classes.detect do |action_class|
           request.path_info =~ action_class.regex
-        }
+        end
       end
     end
   end

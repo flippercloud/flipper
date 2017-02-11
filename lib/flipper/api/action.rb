@@ -9,11 +9,11 @@ module Flipper
       extend Forwardable
 
       VALID_REQUEST_METHOD_NAMES = Set.new([
-        "get".freeze,
-        "post".freeze,
-        "put".freeze,
-        "delete".freeze,
-      ]).freeze
+                                             'get'.freeze,
+                                             'post'.freeze,
+                                             'put'.freeze,
+                                             'delete'.freeze,
+                                           ]).freeze
 
       # Public: Call this in subclasses so the action knows its route.
       #
@@ -50,9 +50,10 @@ module Flipper
       def_delegator :@request, :params
 
       def initialize(flipper, request)
-        @flipper, @request = flipper, request
+        @flipper = flipper
+        @request = request
         @code = 200
-        @headers = {"Content-Type" => Api::CONTENT_TYPE }
+        @headers = { 'Content-Type' => Api::CONTENT_TYPE }
       end
 
       # Public: Runs the request method for the provided request.
@@ -62,7 +63,8 @@ module Flipper
         if valid_request_method? && respond_to?(request_method_name)
           catch(:halt) { send(request_method_name) }
         else
-          raise Api::RequestMethodNotSupported, "#{self.class} does not support request method #{request_method_name.inspect}"
+          raise Api::RequestMethodNotSupported,
+                "#{self.class} does not support request method #{request_method_name.inspect}"
         end
       end
 
@@ -137,7 +139,7 @@ module Flipper
       # Private: split request path by "/"
       # Example: "api/v1/features/feature_name" => ['api', 'v1', 'features', 'feature_name']
       def path_parts
-        @request.path.split("/")
+        @request.path.split('/')
       end
 
       def valid_request_method?
