@@ -9,6 +9,7 @@ end
 require 'rack/protection'
 
 require 'flipper'
+require 'flipper/middleware/setup_env'
 require 'flipper/middleware/memoizer'
 
 require 'flipper/ui/actor'
@@ -34,15 +35,16 @@ module Flipper
       @root ||= Pathname(__FILE__).dirname.expand_path.join('ui')
     end
 
-    def self.app(flipper, _options = {})
-      app = ->(_env) { [200, { 'Content-Type' => 'text/html' }, ['']] }
+    def self.app(flipper = nil)
+      app = ->() { [200, { 'Content-Type' => 'text/html' }, ['']] }
       builder = Rack::Builder.new
       yield builder if block_given?
       builder.use Rack::Protection
       builder.use Rack::Protection::AuthenticityToken
       builder.use Rack::MethodOverride
-      builder.use Flipper::Middleware::Memoizer, flipper
-      builder.use Middleware, flipper
+      builder.use Flipper::Middleware::SetupEnv, flipper
+      builder.use Flipper::Middleware::Memoizer
+      builder.use Middleware
       builder.run app
       klass = self
       builder.define_singleton_method(:inspect) { klass.inspect } # pretty rake routes output

@@ -61,6 +61,7 @@ Lint/UselessAssignment:
     - 'spec/flipper/instrumentation/metriks_subscriber_spec.rb'
     - 'spec/flipper/instrumentation/statsd_subscriber_spec.rb'
     - 'spec/flipper_spec.rb'
+    - 'spec/flipper/middleware/memoizer_spec.rb'
     - 'test/helper.rb'
 
 # Offense count: 27

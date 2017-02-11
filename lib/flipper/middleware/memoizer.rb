@@ -3,43 +3,29 @@ require 'rack/body_proxy'
 module Flipper
   module Middleware
     class Memoizer
-      # Public: Initializes an instance of the Memoizer middleware.
+      # Public: Initializes an instance of the Memoizer middleware. The flipper
+      # instance must be setup in the env of the request. You can do this by
+      # using the Flipper::Middleware::SetupEnv middleware.
       #
       # app - The app this middleware is included in.
-      # flipper_or_block - The Flipper::DSL instance or a block that yields a
-      #                    Flipper::DSL instance to use for all operations.
       #
       # Examples
       #
-      #   # using with a normal flipper instance
-      #   flipper = Flipper.new(...)
-      #   use Flipper::Middleware::Memoizer, flipper
-      #
-      #   # using with a block that yields a flipper instance
-      #   use Flipper::Middleware::Memoizer, lambda { Flipper.new(...) }
+      #   use Flipper::Middleware::Memoizer
       #
       #   # using with preload_all features
-      #   use Flipper::Middleware::Memoizer, flipper, preload_all: true
+      #   use Flipper::Middleware::Memoizer, preload_all: true
       #
       #   # using with preload specific features
-      #   use Flipper::Middleware::Memoizer, flipper, preload: [:stats, :search, :some_feature]
+      #   use Flipper::Middleware::Memoizer, preload: [:stats, :search, :some_feature]
       #
-      def initialize(app, flipper_or_block, opts = {})
+      def initialize(app, opts = {})
         @app = app
         @opts = opts
-
-        if flipper_or_block.respond_to?(:call)
-          @flipper_block = flipper_or_block
-        else
-          @flipper = flipper_or_block
-        end
-      end
-
-      def flipper
-        @flipper ||= @flipper_block.call
       end
 
       def call(env)
+        flipper = env.fetch('flipper')
         original = flipper.adapter.memoizing?
         flipper.adapter.memoize = true
 

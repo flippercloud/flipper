@@ -1,8 +1,8 @@
 require 'rack'
 require 'flipper'
+require 'flipper/middleware/setup_env'
 require 'flipper/api/middleware'
 require 'flipper/api/json_params'
-require 'flipper/api/setup_env'
 require 'flipper/api/actor'
 
 module Flipper
@@ -13,7 +13,8 @@ module Flipper
       app = ->(_) { [404, { 'Content-Type'.freeze => CONTENT_TYPE }, ['{}'.freeze]] }
       builder = Rack::Builder.new
       yield builder if block_given?
-      builder.use Flipper::Api::SetupEnv, flipper
+      builder.use Flipper::Middleware::SetupEnv, flipper
+      builder.use Flipper::Middleware::Memoizer
       builder.use Flipper::Api::JsonParams
       builder.use Flipper::Api::Middleware
       builder.run app

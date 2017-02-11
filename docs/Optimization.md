@@ -12,8 +12,10 @@ You can use the middleware from a Rails initializer like so:
 # create flipper dsl instance, see above Usage for more details
 flipper = Flipper.new(...)
 
+require 'flipper/middleware/setup_env'
 require 'flipper/middleware/memoizer'
-config.middleware.use Flipper::Middleware::Memoizer, flipper
+config.middleware.use Flipper::Middleware::SetupEnv, flipper
+config.middleware.use Flipper::Middleware::Memoizer
 ```
 
 If you set your flipper instance up in an initializer, you can pass a block to the middleware and it will lazily load the instance the first time the middleware is invoked.
@@ -27,9 +29,12 @@ module MyRailsApp
 end
 
 # config/application.rb
-config.middleware.use Flipper::Middleware::Memoizer, lambda {
+require 'flipper/middleware/setup_env'
+require 'flipper/middleware/memoizer'
+config.middleware.use Flipper::Middleware::SetupEnv, lambda {
   MyRailsApp.flipper
 }
+config.middleware.use Flipper::Middleware::Memoizer
 ```
 
 **Note**: Be sure that the middleware is high enough up in your stack that all feature checks are wrapped.
@@ -40,12 +45,12 @@ The Memoizer middleware also supports a few options. Use either `preload` or `pr
 
 * **`:preload`** - An `Array` of feature names (`Symbol`) to preload for every request. Useful if you have features that are used on every endpoint. `preload` uses `Adapter#get_multi` to attempt to load the features in one network call instead of N+1 network calls.
     ```ruby
-    config.middleware.use Flipper::Middleware::Memoizer, flipper,
+    config.middleware.use Flipper::Middleware::Memoizer,
       preload: [:stats, :search, :some_feature]
     ```
 * **`:preload_all`** - A Boolean value (default: false) of whether or not all features should be preloaded. Using this results in a `preload` call with the result of `Adapter#features`. Any subsequent feature checks will be memoized and perform no network calls. I wouldn't recommend using this unless you have few features (< 30?) and nearly all of them are used on every request.  
     ```ruby
-    config.middleware.use Flipper::Middleware::Memoizer, flipper,
+    config.middleware.use Flipper::Middleware::Memoizer,
       preload_all: true
     ```
 

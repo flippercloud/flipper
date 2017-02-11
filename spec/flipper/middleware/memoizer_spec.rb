@@ -12,6 +12,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
     Flipper::Adapters::OperationLogger.new(memory_adapter)
   end
   let(:flipper) { Flipper.new(adapter) }
+  let(:env) { { 'flipper' => flipper } }
 
   after do
     flipper.adapter.memoize = nil
@@ -24,15 +25,15 @@ RSpec.describe Flipper::Middleware::Memoizer do
         called = true
         [200, {}, nil]
       end
-      middleware = described_class.new app, flipper
-      middleware.call({})
+      middleware = described_class.new(app)
+      middleware.call(env)
       expect(called).to eq(true)
     end
 
     it 'disables local cache after body close' do
       app = ->(_env) { [200, {}, []] }
-      middleware = described_class.new app, flipper
-      body = middleware.call({}).last
+      middleware = described_class.new(app)
+      body = middleware.call(env).last
 
       expect(flipper.adapter.memoizing?).to eq(true)
       body.close
@@ -41,8 +42,8 @@ RSpec.describe Flipper::Middleware::Memoizer do
 
     it 'clears local cache after body close' do
       app = ->(_env) { [200, {}, []] }
-      middleware = described_class.new app, flipper
-      body = middleware.call({}).last
+      middleware = described_class.new(app)
+      body = middleware.call(env).last
 
       flipper.adapter.cache['hello'] = 'world'
       body.close
@@ -51,14 +52,14 @@ RSpec.describe Flipper::Middleware::Memoizer do
 
     it 'clears the local cache with a successful request' do
       flipper.adapter.cache['hello'] = 'world'
-      get '/'
+      get '/', {}, 'flipper' => flipper
       expect(flipper.adapter.cache).to be_empty
     end
 
     it 'clears the local cache even when the request raises an error' do
       flipper.adapter.cache['hello'] = 'world'
       begin
-        get '/fail'
+        get '/fail', {}, 'flipper' => flipper
       rescue
         nil
       end
@@ -81,33 +82,11 @@ RSpec.describe Flipper::Middleware::Memoizer do
         [200, {}, []]
       end
 
-      middleware = described_class.new app, flipper
-      middleware.call({})
+      middleware = described_class.new(app)
+      middleware.call(env)
 
       expect(adapter.count(:get)).to be(1)
     end
-  end
-
-  context 'with flipper instance' do
-    let(:app) do
-      # ensure scoped for builder block, annoying...
-      instance = flipper
-      middleware = described_class
-
-      Rack::Builder.new do
-        use middleware, instance
-
-        map '/' do
-          run ->(_env) { [200, {}, []] }
-        end
-
-        map '/fail' do
-          run ->(_env) { raise 'FAIL!' }
-        end
-      end.to_app
-    end
-
-    include_examples 'flipper middleware'
   end
 
   context 'with preload_all' do
@@ -117,7 +96,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
       middleware = described_class
 
       Rack::Builder.new do
-        use middleware, instance, preload_all: true
+        use middleware, preload_all: true
 
         map '/' do
           run ->(_env) { [200, {}, []] }
@@ -146,8 +125,8 @@ RSpec.describe Flipper::Middleware::Memoizer do
         [200, {}, []]
       end
 
-      middleware = described_class.new app, flipper, preload_all: true
-      middleware.call({})
+      middleware = described_class.new(app, preload_all: true)
+      middleware.call(env)
 
       expect(adapter.count(:features)).to be(1)
       expect(adapter.count(:get_multi)).to be(1)
@@ -164,8 +143,8 @@ RSpec.describe Flipper::Middleware::Memoizer do
         [200, {}, []]
       end
 
-      middleware = described_class.new app, flipper, preload_all: true
-      middleware.call({})
+      middleware = described_class.new(app, preload_all: true)
+      middleware.call(env)
 
       expect(adapter.count(:get)).to be(1)
       expect(adapter.last(:get).args).to eq([flipper[:other]])
@@ -179,7 +158,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
       middleware = described_class
 
       Rack::Builder.new do
-        use middleware, instance, preload: %i(stats)
+        use middleware, preload: %i(stats)
 
         map '/' do
           run ->(_env) { [200, {}, []] }
@@ -205,8 +184,8 @@ RSpec.describe Flipper::Middleware::Memoizer do
         [200, {}, []]
       end
 
-      middleware = described_class.new app, flipper, preload: %i(stats)
-      middleware.call({})
+      middleware = described_class.new app, preload: %i(stats)
+      middleware.call(env)
 
       expect(adapter.count(:get_multi)).to be(1)
       expect(adapter.last(:get_multi).args).to eq([[flipper[:stats]]])
@@ -222,8 +201,8 @@ RSpec.describe Flipper::Middleware::Memoizer do
         [200, {}, []]
       end
 
-      middleware = described_class.new app, flipper, preload: %i(stats)
-      middleware.call({})
+      middleware = described_class.new app, preload: %i(stats)
+      middleware.call(env)
 
       expect(adapter.count(:get)).to be(1)
       expect(adapter.last(:get).args).to eq([flipper[:other]])
@@ -234,22 +213,22 @@ RSpec.describe Flipper::Middleware::Memoizer do
     it 'resets memoize' do
       begin
         app = ->(_env) { raise }
-        middleware = described_class.new app, flipper
-        middleware.call({})
+        middleware = described_class.new(app)
+        middleware.call(env)
       rescue RuntimeError
         expect(flipper.adapter.memoizing?).to be(false)
       end
     end
   end
 
-  context 'with block that yields flipper instance' do
+  context 'with flipper setup in env' do
     let(:app) do
       # ensure scoped for builder block, annoying...
       instance = flipper
       middleware = described_class
 
       Rack::Builder.new do
-        use middleware, -> { instance }
+        use middleware
 
         map '/' do
           run ->(_env) { [200, {}, []] }

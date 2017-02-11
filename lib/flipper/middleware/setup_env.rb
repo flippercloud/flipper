@@ -1,5 +1,5 @@
 module Flipper
-  module Api
+  module Middleware
     class SetupEnv
       # Public: Initializes an instance of the SetEnv middleware. Allows for
       # lazy initialization of the flipper instance being set in the env by
@@ -14,10 +14,10 @@ module Flipper
       #   flipper = Flipper.new(...)
       #
       #   # using with a normal flipper instance
-      #   use Flipper::Api::SetEnv, flipper
+      #   use Flipper::Middleware::SetEnv, flipper
       #
       #   # using with a block that yields a flipper instance
-      #   use Flipper::Api::SetEnv, lambda { Flipper.new(...) }
+      #   use Flipper::Middleware::SetEnv, lambda { Flipper.new(...) }
       #
       def initialize(app, flipper_or_block)
         @app = app
