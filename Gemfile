@@ -17,6 +17,7 @@ gem 'rails', "~> #{ENV['RAILS_VERSION'] || '4.2.5'}"
 gem 'minitest', '~> 5.8.0'
 gem 'rubocop', '~> 0.45.0'
 gem 'rubocop-rspec', '= 1.5.1'
+gem 'webmock', '~> 2.0'
 
 # for active support tests in test/ and only needed for ruby 2.2.x
 gem 'test-unit', '~> 3.0'

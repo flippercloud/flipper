@@ -11,7 +11,7 @@ module Flipper
 
           # Public: Returns instance as hash that is ready to be json dumped.
           def as_json
-            gate_values = feature.gate_values
+            gate_values = feature.adapter.get(self)
             {
               'key' => key,
               'state' => state.to_s,
