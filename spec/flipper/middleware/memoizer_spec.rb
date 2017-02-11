@@ -221,7 +221,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
     end
   end
 
-  context 'with flipper instance' do
+  context 'with flipper setup in env' do
     let(:app) do
       # ensure scoped for builder block, annoying...
       instance = flipper
