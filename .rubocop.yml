@@ -34,3 +34,5 @@ Style/RegexpLiteral:
 Style/TrailingCommaInLiteral:
   EnforcedStyleForMultiline: consistent_comma
 
+RSpec/InstanceVariable:
+  Enabled: false

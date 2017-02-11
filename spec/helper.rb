@@ -9,6 +9,9 @@ require 'bundler'
 
 Bundler.setup(:default)
 
+require 'webmock/rspec'
+WebMock.disable_net_connect!(allow_localhost: true)
+
 require 'flipper'
 require 'flipper-ui'
 require 'flipper-api'
