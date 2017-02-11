@@ -73,7 +73,7 @@ module Flipper
           symbolized_hash[:actors] = Set.new(symbolized_hash[:actors])
           symbolized_hash
         else
-          default_gate_values
+          @adapter.default_config
         end
       end
     end
@@ -137,7 +137,7 @@ module Flipper
       hash = get(feature)
       case gate.data_type
       when :boolean
-        hash = default_gate_values
+        hash = @adapter.default_config
       when :integer
         hash[gate.key] = thing.value
       when :set
@@ -147,16 +147,6 @@ module Flipper
       hash[:actors] = hash[:actors].to_a
       @adapter.set("feature/#{feature.key}", JSON.generate(hash))
       true
-    end
-
-    def default_gate_values
-      {
-        boolean: nil,
-        groups: Set.new,
-        actors: Set.new,
-        percentage_of_actors: nil,
-        percentage_of_time: nil,
-      }
     end
 
     def v2_features
