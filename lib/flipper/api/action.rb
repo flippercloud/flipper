@@ -137,7 +137,7 @@ module Flipper
       end
 
       # Private: split request path by "/"
-      # Example: "api/v1/features/feature_name" => ['api', 'v1', 'features', 'feature_name']
+      # Example: "features/feature_name" => ['features', 'feature_name']
       def path_parts
         @request.path.split('/')
       end

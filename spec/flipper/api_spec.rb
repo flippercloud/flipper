@@ -16,7 +16,7 @@ RSpec.describe Flipper::Api do
       env = {
         'flipper' => env_flipper,
       }
-      get 'api/v1/features', params, env
+      get '/features', params, env
 
       expect(last_response.status).to eq(200)
       feature_names = json_response.fetch('features').map { |feature| feature.fetch('key') }
@@ -35,7 +35,7 @@ RSpec.describe Flipper::Api do
       env = {
         'flipper' => flipper,
       }
-      get 'api/v1/features', params, env
+      get '/features', params, env
 
       expect(last_response.status).to eq(200)
       feature_names = json_response.fetch('features').map { |feature| feature.fetch('key') }

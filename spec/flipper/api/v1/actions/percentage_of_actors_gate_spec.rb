@@ -58,7 +58,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
   describe 'disable with percentage' do
     before do
       flipper[:my_feature].enable_percentage_of_actors(10)
-      delete '/api/v1/features/my_feature/percentage_of_actors',
+      delete '/features/my_feature/percentage_of_actors',
              { percentage: '5' }.to_json,
              'CONTENT_TYPE' => 'application/json'
     end

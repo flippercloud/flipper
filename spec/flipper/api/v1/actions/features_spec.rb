@@ -60,7 +60,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
         flipper[:issues].enable
         flipper[:search].enable
         flipper[:stats].disable
-        get 'api/v1/features', 'keys' => 'search,stats'
+        get '/features', 'keys' => 'search,stats'
       end
 
       it 'responds with correct attributes' do
