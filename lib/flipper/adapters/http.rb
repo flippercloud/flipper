@@ -102,7 +102,7 @@ module Flipper
       end
 
       def get(feature)
-        response = @request.get(@uri + "/api/v1/features/#{feature.key}")
+        response = @request.get(@uri + "/features/#{feature.key}")
         raise Error, response unless response.is_a?(Net::HTTPOK)
 
         parsed_response = JSON.parse(response.body)
@@ -110,13 +110,13 @@ module Flipper
       end
 
       def add(feature)
-        response = @request.post(@uri + '/api/v1/features', name: feature.key)
+        response = @request.post(@uri + '/features', name: feature.key)
         response.is_a?(Net::HTTPOK)
       end
 
       def get_multi(features)
         csv_keys = features.map(&:key).join(',')
-        response = @request.get(@uri + "/api/v1/features?keys=#{csv_keys}")
+        response = @request.get(@uri + "/features?keys=#{csv_keys}")
         raise Error, response unless response.is_a?(Net::HTTPOK)
 
         parsed_response = JSON.parse(response.body)
@@ -134,7 +134,7 @@ module Flipper
       end
 
       def features
-        response = @request.get(@uri + '/api/v1/features')
+        response = @request.get(@uri + '/features')
         raise Error, response unless response.is_a?(Net::HTTPOK)
 
         parsed_response = JSON.parse(response.body)
@@ -142,24 +142,24 @@ module Flipper
       end
 
       def remove(feature)
-        response = @request.delete(@uri + "/api/v1/features/#{feature.key}")
+        response = @request.delete(@uri + "/features/#{feature.key}")
         response.is_a?(Net::HTTPNoContent)
       end
 
       def enable(feature, gate, thing)
         body = gate_request_body(gate.key, thing.value.to_s)
-        response = @request.post(@uri + "/api/v1/features/#{feature.key}/#{gate.key}", body)
+        response = @request.post(@uri + "/features/#{feature.key}/#{gate.key}", body)
         response.is_a?(Net::HTTPOK)
       end
 
       def disable(feature, gate, thing)
         body = gate_request_body(gate.key, thing.value)
-        response = @request.delete(@uri + "/api/v1/features/#{feature.key}/#{gate.key}", body)
+        response = @request.delete(@uri + "/features/#{feature.key}/#{gate.key}", body)
         response.is_a?(Net::HTTPOK)
       end
 
       def clear(feature)
-        response = @request.delete(@uri + "/api/v1/features/#{feature.key}/boolean")
+        response = @request.delete(@uri + "/features/#{feature.key}/boolean")
         response.is_a?(Net::HTTPOK)
       end
 

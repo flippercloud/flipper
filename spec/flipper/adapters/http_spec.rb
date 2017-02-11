@@ -47,7 +47,7 @@ RSpec.describe Flipper::Adapters::Http do
 
   describe "#get" do
     it "raises error when not successful response" do
-      stub_request(:get, "http://app.com/flipper/api/v1/features/feature_panel")
+      stub_request(:get, "http://app.com/flipper/features/feature_panel")
         .to_return(status: 503, body: "", headers: {})
 
       adapter = described_class.new('http://app.com/flipper')
@@ -59,7 +59,7 @@ RSpec.describe Flipper::Adapters::Http do
 
   describe "#get_multi" do
     it "raises error when not successful response" do
-      stub_request(:get, "http://app.com/flipper/api/v1/features?keys=feature_panel")
+      stub_request(:get, "http://app.com/flipper/features?keys=feature_panel")
         .to_return(status: 503, body: "", headers: {})
 
       adapter = described_class.new('http://app.com/flipper')
@@ -71,7 +71,7 @@ RSpec.describe Flipper::Adapters::Http do
 
   describe "#features" do
     it "raises error when not successful response" do
-      stub_request(:get, "http://app.com/flipper/api/v1/features")
+      stub_request(:get, "http://app.com/flipper/features")
         .to_return(status: 503, body: "", headers: {})
 
       adapter = described_class.new('http://app.com/flipper')
@@ -99,7 +99,7 @@ RSpec.describe Flipper::Adapters::Http do
     it 'allows client to set request headers' do
       subject.get(feature)
       expect(
-        a_request(:get, 'http://app.com/mount-point/api/v1/features/feature_panel')
+        a_request(:get, 'http://app.com/mount-point/features/feature_panel')
         .with(headers: { 'X-Custom-Header' => 'foo' })
       ).to have_been_made.once
     end
@@ -107,7 +107,7 @@ RSpec.describe Flipper::Adapters::Http do
     it 'allows client to set basic auth' do
       subject.get(feature)
       expect(
-        a_request(:get, 'http://app.com/mount-point/api/v1/features/feature_panel')
+        a_request(:get, 'http://app.com/mount-point/features/feature_panel')
         .with(basic_auth: %w(username password))
       ).to have_been_made.once
     end
