@@ -14,6 +14,7 @@ module Flipper
       builder = Rack::Builder.new
       yield builder if block_given?
       builder.use Flipper::Middleware::SetupEnv, flipper
+      builder.use Flipper::Middleware::Memoizer
       builder.use Flipper::Api::JsonParams
       builder.use Flipper::Api::Middleware
       builder.run app
