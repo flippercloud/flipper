@@ -34,6 +34,7 @@ module Flipper
         private
 
         def perform(http_method, path, headers = {}, options = {})
+          body = options[:body]
           uri = @uri.dup
           path_uri = URI(path)
           uri.path += path_uri.path
@@ -47,9 +48,8 @@ module Flipper
           end
 
           http = build_http(uri)
-          request = http_method.new(uri.request_uri, headers)
-
-          body = options[:body]
+          request = http_method.new(uri.request_uri)
+          request.initialize_http_header(headers) if headers
           request.body = body if body
 
           if @basic_auth_username && @basic_auth_password
