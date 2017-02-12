@@ -8,7 +8,9 @@ FLIPPER_SPEC_API_PORT = ENV.fetch('FLIPPER_SPEC_API_PORT', 9001).to_i
 
 RSpec.describe Flipper::Adapters::Http do
   context 'adapter' do
-    subject { described_class.new(URI("http://localhost:#{FLIPPER_SPEC_API_PORT}")) }
+    subject do
+      described_class.new(uri: URI("http://localhost:#{FLIPPER_SPEC_API_PORT}"))
+    end
 
     before :all do
       dir = FlipperRoot.join('tmp').tap(&:mkpath)
@@ -50,7 +52,7 @@ RSpec.describe Flipper::Adapters::Http do
       stub_request(:get, "http://app.com/flipper/features/feature_panel")
         .to_return(status: 503, body: "", headers: {})
 
-      adapter = described_class.new('http://app.com/flipper')
+      adapter = described_class.new(uri: URI('http://app.com/flipper'))
       expect do
         adapter.get(flipper[:feature_panel])
       end.to raise_error(Flipper::Adapters::Http::Error)
@@ -62,7 +64,7 @@ RSpec.describe Flipper::Adapters::Http do
       stub_request(:get, "http://app.com/flipper/features?keys=feature_panel")
         .to_return(status: 503, body: "", headers: {})
 
-      adapter = described_class.new('http://app.com/flipper')
+      adapter = described_class.new(uri: URI('http://app.com/flipper'))
       expect do
         adapter.get_multi([flipper[:feature_panel]])
       end.to raise_error(Flipper::Adapters::Http::Error)
@@ -74,7 +76,7 @@ RSpec.describe Flipper::Adapters::Http do
       stub_request(:get, "http://app.com/flipper/features")
         .to_return(status: 503, body: "", headers: {})
 
-      adapter = described_class.new('http://app.com/flipper')
+      adapter = described_class.new(uri: URI('http://app.com/flipper'))
       expect do
         adapter.features
       end.to raise_error(Flipper::Adapters::Http::Error)
@@ -82,18 +84,21 @@ RSpec.describe Flipper::Adapters::Http do
   end
 
   describe 'configuration' do
-    subject { described_class.new('http://app.com/mount-point') }
+    let(:options) {
+      {
+        uri: URI('http://app.com/mount-point'),
+        headers: { 'X-Custom-Header' => 'foo' },
+        basic_auth_username: 'username',
+        basic_auth_password: 'password',
+        read_timeout: 100,
+        open_timeout: 40,
+      }
+    }
+    subject { described_class.new(options) }
     let(:feature) { flipper[:feature_panel] }
 
     before do
       stub_request(:get, %r{\Ahttp://app.com*}).to_return(body: fixture_file('feature.json'))
-
-      described_class.configure do |c|
-        c.headers = { 'X-Custom-Header' => 'foo' }
-        c.basic_auth = { 'username' => 'password' }
-        c.read_timeout = 100
-        c.open_timeout = 40
-      end
     end
 
     it 'allows client to set request headers' do
