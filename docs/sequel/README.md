@@ -1,6 +1,6 @@
 # Flipper Sequel
 
-A Sequel adapter for [Flipper](https://github.com/jnunemaker/flipper).
+A [Sequel](https://github.com/jeremyevans/sequel) adapter for [Flipper](https://github.com/jnunemaker/flipper).
 
 ## Installation
 
