@@ -2,22 +2,15 @@ require 'net/http'
 require 'json'
 require 'set'
 require 'flipper'
+require 'flipper/adapters/http/error'
 require 'flipper/adapters/http/request'
 
 module Flipper
   module Adapters
     class Http
       include Flipper::Adapter
+
       attr_reader :name
-
-      class Error < StandardError
-        attr_reader :response
-
-        def initialize(response)
-          @response = response
-          super("Failed with status: #{response.code}")
-        end
-      end
 
       def initialize(options = {})
         @options = options

@@ -1,3 +1,5 @@
+require 'json'
+
 module Flipper
   module Adapters
     class Http
@@ -32,7 +34,7 @@ module Flipper
           uri = URI.parse(path)
           http = net_http(uri)
           request = Net::HTTP::Post.new(uri.request_uri, @headers)
-          request.body = data.to_json
+          request.body = JSON.generate(data)
           request.basic_auth(@basic_auth_username, @basic_auth_password) if basic_auth?
           http.request(request)
         end
@@ -42,7 +44,7 @@ module Flipper
           uri = URI.parse(path)
           http = net_http(uri)
           request = Net::HTTP::Delete.new(uri.request_uri, @headers)
-          request.body = data.to_h.to_json
+          request.body = JSON.generate(data.to_h)
           request.basic_auth(@basic_auth_username, @basic_auth_password) if basic_auth?
           http.request(request)
         end
