@@ -34,20 +34,29 @@ module Flipper
         private
 
         def perform(http_method, path, headers = {}, options = {})
-          body = options[:body]
+          uri = uri_for_path(path)
+          http = build_http(uri)
+          request = build_request(http_method, uri, headers, options)
+          http.request(request)
+        end
+
+        def uri_for_path(path)
           uri = @uri.dup
           path_uri = URI(path)
           uri.path += path_uri.path
+          uri.query = "#{uri.query}&#{path_uri.query}" if path_uri.query
+          uri
+        end
 
-          if path_uri.query
-            if uri.query
-              uri.query += "&#{path_uri.query}"
-            else
-              uri.query = path_uri.query
-            end
-          end
+        def build_http(uri)
+          http = Net::HTTP.new(uri.host, uri.port)
+          http.read_timeout = @read_timeout if @read_timeout
+          http.open_timeout = @open_timeout if @open_timeout
+          http
+        end
 
-          http = build_http(uri)
+        def build_request(http_method, uri, headers, options)
+          body = options[:body]
           request = http_method.new(uri.request_uri)
           request.initialize_http_header(headers) if headers
           request.body = body if body
@@ -56,14 +65,7 @@ module Flipper
             request.basic_auth(@basic_auth_username, @basic_auth_password)
           end
 
-          http.request(request)
-        end
-
-        def build_http(uri)
-          http = Net::HTTP.new(uri.host, uri.port)
-          http.read_timeout = @read_timeout if @read_timeout
-          http.open_timeout = @open_timeout if @open_timeout
-          http
+          request
         end
       end
     end
