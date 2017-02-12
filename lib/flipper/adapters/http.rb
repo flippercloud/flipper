@@ -31,7 +31,7 @@ module Flipper
       end
 
       def add(feature)
-        body = JSON.generate({ name: feature.key })
+        body = JSON.generate(name: feature.key)
         response = @client.post('/features', body)
         response.is_a?(Net::HTTPOK)
       end
