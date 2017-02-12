@@ -31,7 +31,8 @@ module Flipper
       end
 
       def add(feature)
-        response = @client.post('/features', name: feature.key)
+        body = JSON.generate({ name: feature.key })
+        response = @client.post('/features', body)
         response.is_a?(Net::HTTPOK)
       end
 
@@ -68,13 +69,13 @@ module Flipper
       end
 
       def enable(feature, gate, thing)
-        body = gate_request_body(gate.key, thing.value.to_s)
+        body = request_body_for_gate(gate, thing.value.to_s)
         response = @client.post("/features/#{feature.key}/#{gate.key}", body)
         response.is_a?(Net::HTTPOK)
       end
 
       def disable(feature, gate, thing)
-        body = gate_request_body(gate.key, thing.value)
+        body = request_body_for_gate(gate, thing.value.to_s)
         response = @client.delete("/features/#{feature.key}/#{gate.key}", body)
         response.is_a?(Net::HTTPOK)
       end
@@ -86,22 +87,20 @@ module Flipper
 
       private
 
-      # Returns request body for enabling/disabling gate
-      # gate_request_body(:percentage_of_actors, 10)
-      # => { 'percentage' => 10 }
-      def gate_request_body(key, value)
-        case key.to_sym
-        when :boolean
-          {}
-        when :groups
-          { name: value }
-        when :actors
-          { flipper_id: value }
-        when :percentage_of_actors, :percentage_of_time
-          { percentage: value }
-        else
-          raise "#{key} is not a valid flipper gate key"
-        end
+      def request_body_for_gate(gate, value)
+        data = case gate.key
+               when :boolean
+                 {}
+               when :groups
+                 { name: value }
+               when :actors
+                 { flipper_id: value }
+               when :percentage_of_actors, :percentage_of_time
+                 { percentage: value }
+               else
+                 raise "#{gate.key} is not a valid flipper gate key"
+               end
+        JSON.generate(data)
       end
 
       def result_for_feature(feature, api_gates)

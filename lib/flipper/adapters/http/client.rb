@@ -1,5 +1,4 @@
 require 'uri'
-require 'json'
 
 module Flipper
   module Adapters
@@ -23,12 +22,12 @@ module Flipper
           perform Net::HTTP::Get, path, @headers
         end
 
-        def post(path, data = {})
-          perform Net::HTTP::Post, path, @headers, body: JSON.generate(data)
+        def post(path, body = nil)
+          perform Net::HTTP::Post, path, @headers, body: body
         end
 
-        def delete(path, data = {})
-          perform Net::HTTP::Delete, path, @headers, body: JSON.generate(data)
+        def delete(path, body = nil)
+          perform Net::HTTP::Delete, path, @headers, body: body
         end
 
         private
