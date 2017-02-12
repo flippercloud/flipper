@@ -1,3 +1,4 @@
+require 'uri'
 require 'json'
 
 module Flipper
@@ -10,6 +11,7 @@ module Flipper
         }.freeze
 
         def initialize(options = {})
+          @uri = URI(options.fetch(:uri))
           @headers = DEFAULT_HEADERS.merge(options[:headers] || {})
           @basic_auth_username = options[:basic_auth_username]
           @basic_auth_password = options[:basic_auth_password]
@@ -17,22 +19,33 @@ module Flipper
           @open_timeout = options[:open_timeout]
         end
 
-        def get(url)
-          perform Net::HTTP::Get, url, @headers
+        def get(path)
+          perform Net::HTTP::Get, path, @headers
         end
 
-        def post(url, data = {})
-          perform Net::HTTP::Post, url, @headers, body: JSON.generate(data)
+        def post(path, data = {})
+          perform Net::HTTP::Post, path, @headers, body: JSON.generate(data)
         end
 
-        def delete(url, data = {})
-          perform Net::HTTP::Delete, url, @headers, body: JSON.generate(data)
+        def delete(path, data = {})
+          perform Net::HTTP::Delete, path, @headers, body: JSON.generate(data)
         end
 
         private
 
-        def perform(http_method, url, headers = {}, options = {})
-          uri = URI.parse(url)
+        def perform(http_method, path, headers = {}, options = {})
+          uri = @uri.dup
+          path_uri = URI(path)
+          uri.path += path_uri.path
+
+          if path_uri.query
+            if uri.query
+              uri.query += "&#{path_uri.query}"
+            else
+              uri.query = path_uri.query
+            end
+          end
+
           http = build_http(uri)
           request = http_method.new(uri.request_uri, headers)
 

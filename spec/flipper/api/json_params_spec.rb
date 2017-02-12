@@ -15,7 +15,7 @@ RSpec.describe Flipper::Api::JsonParams do
   describe 'json post request' do
     it 'adds request body to params' do
       response = post '/',
-                      JSON.generate({ flipper_id: 'user:2' }),
+                      JSON.generate(flipper_id: 'user:2'),
                       'CONTENT_TYPE' => 'application/json'
 
       params = JSON.parse(response.body)
@@ -24,7 +24,7 @@ RSpec.describe Flipper::Api::JsonParams do
 
     it 'handles request bodies with multiple params' do
       response = post '/',
-                      JSON.generate({ flipper_id: 'user:2', language: 'ruby' }),
+                      JSON.generate(flipper_id: 'user:2', language: 'ruby'),
                       'CONTENT_TYPE' => 'application/json'
 
       params = JSON.parse(response.body)
@@ -33,7 +33,7 @@ RSpec.describe Flipper::Api::JsonParams do
 
     it 'handles request bodies and single query string params' do
       response = post '/?language=ruby',
-                      JSON.generate({ flipper_id: 'user:2' }),
+                      JSON.generate(flipper_id: 'user:2'),
                       'CONTENT_TYPE' => 'application/json'
 
       params = JSON.parse(response.body)
@@ -42,7 +42,7 @@ RSpec.describe Flipper::Api::JsonParams do
 
     it 'handles request bodies and multiple query string params' do
       response = post '/?language=ruby&framework=rails',
-                      JSON.generate({ flipper_id: 'user:2' }),
+                      JSON.generate(flipper_id: 'user:2'),
                       'CONTENT_TYPE' => 'application/json'
 
       params = JSON.parse(response.body)
@@ -51,7 +51,7 @@ RSpec.describe Flipper::Api::JsonParams do
 
     it 'favors request body params' do
       response = post '/?language=javascript',
-                      JSON.generate({ flipper_id: 'user:2', language: 'ruby' }),
+                      JSON.generate(flipper_id: 'user:2', language: 'ruby'),
                       'CONTENT_TYPE' => 'application/json'
 
       params = JSON.parse(response.body)

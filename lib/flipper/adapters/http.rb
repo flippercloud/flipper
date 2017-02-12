@@ -13,14 +13,17 @@ module Flipper
       attr_reader :name
 
       def initialize(options = {})
-        @options = options
-        @client = Client.new(options)
-        @uri = options.fetch(:uri).to_s
+        @client = Client.new(uri: options.fetch(:uri),
+                             headers: options[:headers],
+                             basic_auth_username: options[:basic_auth_username],
+                             basic_auth_password: options[:basic_auth_password],
+                             read_timeout: options[:read_timeout],
+                             open_timeout: options[:open_timeout])
         @name = :http
       end
 
       def get(feature)
-        response = @client.get(@uri + "/features/#{feature.key}")
+        response = @client.get("/features/#{feature.key}")
         raise Error, response unless response.is_a?(Net::HTTPOK)
 
         parsed_response = JSON.parse(response.body)
@@ -28,13 +31,13 @@ module Flipper
       end
 
       def add(feature)
-        response = @client.post(@uri + '/features', name: feature.key)
+        response = @client.post('/features', name: feature.key)
         response.is_a?(Net::HTTPOK)
       end
 
       def get_multi(features)
         csv_keys = features.map(&:key).join(',')
-        response = @client.get(@uri + "/features?keys=#{csv_keys}")
+        response = @client.get("/features?keys=#{csv_keys}")
         raise Error, response unless response.is_a?(Net::HTTPOK)
 
         parsed_response = JSON.parse(response.body)
@@ -52,7 +55,7 @@ module Flipper
       end
 
       def features
-        response = @client.get(@uri + '/features')
+        response = @client.get('/features')
         raise Error, response unless response.is_a?(Net::HTTPOK)
 
         parsed_response = JSON.parse(response.body)
@@ -60,24 +63,24 @@ module Flipper
       end
 
       def remove(feature)
-        response = @client.delete(@uri + "/features/#{feature.key}")
+        response = @client.delete("/features/#{feature.key}")
         response.is_a?(Net::HTTPNoContent)
       end
 
       def enable(feature, gate, thing)
         body = gate_request_body(gate.key, thing.value.to_s)
-        response = @client.post(@uri + "/features/#{feature.key}/#{gate.key}", body)
+        response = @client.post("/features/#{feature.key}/#{gate.key}", body)
         response.is_a?(Net::HTTPOK)
       end
 
       def disable(feature, gate, thing)
         body = gate_request_body(gate.key, thing.value)
-        response = @client.delete(@uri + "/features/#{feature.key}/#{gate.key}", body)
+        response = @client.delete("/features/#{feature.key}/#{gate.key}", body)
         response.is_a?(Net::HTTPOK)
       end
 
       def clear(feature)
-        response = @client.delete(@uri + "/features/#{feature.key}/boolean")
+        response = @client.delete("/features/#{feature.key}/boolean")
         response.is_a?(Net::HTTPOK)
       end
 

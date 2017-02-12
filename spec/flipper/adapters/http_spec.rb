@@ -84,7 +84,7 @@ RSpec.describe Flipper::Adapters::Http do
   end
 
   describe 'configuration' do
-    let(:options) {
+    let(:options) do
       {
         uri: URI('http://app.com/mount-point'),
         headers: { 'X-Custom-Header' => 'foo' },
@@ -93,7 +93,7 @@ RSpec.describe Flipper::Adapters::Http do
         read_timeout: 100,
         open_timeout: 40,
       }
-    }
+    end
     subject { described_class.new(options) }
     let(:feature) { flipper[:feature_panel] }
 
