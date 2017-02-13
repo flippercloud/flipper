@@ -48,7 +48,7 @@ The Memoizer middleware also supports a few options. Use either `preload` or `pr
     config.middleware.use Flipper::Middleware::Memoizer,
       preload: [:stats, :search, :some_feature]
     ```
-* **`:preload_all`** - A Boolean value (default: false) of whether or not all features should be preloaded. Using this results in a `preload` call with the result of `Adapter#features`. Any subsequent feature checks will be memoized and perform no network calls. I wouldn't recommend using this unless you have few features (< 30?) and nearly all of them are used on every request.  
+* **`:preload_all`** - A Boolean value (default: false) of whether or not all features should be preloaded. Using this results in a `preload` call with the result of `Adapter#features`. Any subsequent feature checks will be memoized and perform no network calls. I wouldn't recommend using this unless you have few features (< 30?) and nearly all of them are used on every request.
     ```ruby
     config.middleware.use Flipper::Middleware::Memoizer,
       preload_all: true
@@ -71,4 +71,21 @@ dalli_client = Dalli::Client.new('localhost:11211')
 memory_adapter = Flipper::Adapters::Memory.new
 adapter = Flipper::Adapters::Dalli.new(memory_adapter, dalli_client, 600)
 flipper = Flipper.new(adapter)
+```
+### RedisCache
+
+Applications using [Redis](https://redis.io/) via the [redis-rb](https://github.com/redis/redis-rb) client can take advantage of the RedisCache adapter.
+
+Initialize `RedisCache`  with a flipper [adapter](https://github.com/jnunemaker/flipper/blob/master/docs/Adapters.md), a Redis client instance, and an optional TTL in seconds. TTL defaults to 3600 seconds.
+
+Example using the RedisCache adapter with the Memory adapter and a TTL of 4800 seconds:
+
+```ruby
+  require 'flipper/adapters/memory'
+  require 'flipper/adapters/redis_cache'
+
+  redis = Redis.new(url: ENV['REDIS_URL'])
+  memory_adapter = Flipper::Adapters::Memory.new
+  adapter = Flipper::Adapters::RedisCache.new(memory_adapter, redis, 4800)
+  flipper = Flipper.new(adapter)
 ```
