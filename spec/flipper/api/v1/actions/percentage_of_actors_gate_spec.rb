@@ -24,7 +24,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
       before do
         flipper[:my_feature].disable
         post '/features/my_feature/percentage_of_actors',
-             { percentage: '10' }.to_json,
+             JSON.generate(percentage: '10'),
              'CONTENT_TYPE' => 'application/json'
       end
 
@@ -59,7 +59,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
     before do
       flipper[:my_feature].enable_percentage_of_actors(10)
       delete '/features/my_feature/percentage_of_actors',
-             { percentage: '5' }.to_json,
+             JSON.generate(percentage: '5'),
              'CONTENT_TYPE' => 'application/json'
     end
 
