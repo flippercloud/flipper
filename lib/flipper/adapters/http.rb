@@ -76,7 +76,13 @@ module Flipper
 
       def disable(feature, gate, thing)
         body = request_body_for_gate(gate, thing.value.to_s)
-        response = @client.delete("/features/#{feature.key}/#{gate.key}", body)
+        response =
+          case gate.key
+          when :percentage_of_actors, :percentage_of_time
+            @client.post("/features/#{feature.key}/#{gate.key}", body)
+          else
+            @client.delete("/features/#{feature.key}/#{gate.key}", body)
+          end
         response.is_a?(Net::HTTPOK)
       end
 
