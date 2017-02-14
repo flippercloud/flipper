@@ -70,6 +70,20 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
       end
     end
 
+    context 'with keys that are not existing features' do
+      before do
+        flipper[:search].disable
+        flipper[:stats].disable
+        get '/features', 'keys' => 'search,stats,not_a_feature,another_feature_that_does_not_exist'
+      end
+
+      it 'only returns features that exist' do
+        expect(last_response.status).to eq(200)
+        keys = json_response.fetch('features').map { |feature| feature.fetch('key') }.sort
+        expect(keys).to eq(%w(search stats))
+      end
+    end
+
     context 'with no flipper features' do
       before do
         get '/features'
