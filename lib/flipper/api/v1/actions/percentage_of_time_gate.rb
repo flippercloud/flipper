@@ -21,12 +21,7 @@ module Flipper
 
           def delete
             feature = flipper[feature_name]
-
-            if percentage >= 0
-              feature.enable_percentage_of_time(percentage)
-            else
-              feature.disable_percentage_of_time
-            end
+            feature.disable_percentage_of_time
 
             decorated_feature = Decorators::Feature.new(feature)
             json_response(decorated_feature.as_json, 200)

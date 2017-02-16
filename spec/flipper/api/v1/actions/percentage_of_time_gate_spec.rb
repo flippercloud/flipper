@@ -43,10 +43,10 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfTimeGate do
              'CONTENT_TYPE' => 'application/json'
     end
 
-    it 'returns decorated feature with gate disabled' do
+    it 'returns decorated feature with gate value set to 0 regardless of percentage requested' do
       expect(last_response.status).to eq(200)
       gate = json_response['gates'].find { |gate| gate['name'] == 'percentage_of_time' }
-      expect(gate['value']).to eq('5')
+      expect(gate['value']).to eq('0')
     end
   end
 
