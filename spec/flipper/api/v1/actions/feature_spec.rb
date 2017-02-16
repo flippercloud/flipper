@@ -99,41 +99,14 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
         get '/features/not_a_feature'
       end
 
-      it 'responds with correct attributes' do
-        response_body = {
-          'key' => 'not_a_feature',
-          'state' => 'off',
-          'gates' => [
-            {
-              'key' => 'boolean',
-              'name' => 'boolean',
-              'value' => nil,
-            },
-            {
-              'key' => 'groups',
-              'name' => 'group',
-              'value' => [],
-            },
-            {
-              'key' => 'actors',
-              'name' => 'actor',
-              'value' => [],
-            },
-            {
-              'key' => 'percentage_of_actors',
-              'name' => 'percentage_of_actors',
-              'value' => nil,
-            },
-            {
-              'key' => 'percentage_of_time',
-              'name' => 'percentage_of_time',
-              'value' => nil,
-            },
-          ],
+      it '404s' do
+        expect(last_response.status).to eq(404)
+        expected = {
+          'code' => 1,
+          'message' => 'Feature not found.',
+          'more_info' => api_error_code_reference_url,
         }
-
-        expect(last_response.status).to eq(200)
-        expect(json_response).to eq(response_body)
+        expect(json_response).to eq(expected)
       end
     end
   end

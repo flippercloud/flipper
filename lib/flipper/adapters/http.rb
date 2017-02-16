@@ -24,10 +24,14 @@ module Flipper
 
       def get(feature)
         response = @client.get("/features/#{feature.key}")
-        raise Error, response unless response.is_a?(Net::HTTPOK)
-
-        parsed_response = JSON.parse(response.body)
-        result_for_feature(feature, parsed_response.fetch('gates'))
+        if response.is_a?(Net::HTTPOK)
+          parsed_response = JSON.parse(response.body)
+          result_for_feature(feature, parsed_response.fetch('gates'))
+        elsif response.is_a?(Net::HTTPNotFound)
+          default_config
+        else
+          raise Error, response
+        end
       end
 
       def add(feature)
