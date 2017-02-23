@@ -12,8 +12,7 @@ module Flipper
             feature_name = Rack::Utils.unescape(path_parts[-2])
             feature = flipper[feature_name]
             flipper.adapter.clear(feature)
-            decorated_feature = Decorators::Feature.new(feature)
-            json_response(decorated_feature.as_json, 200)
+            json_response({}, 204)
           end
         end
       end
