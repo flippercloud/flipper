@@ -16,7 +16,7 @@ RSpec.describe Flipper::Api::V1::Actions::ClearFeature do
       feature.enable flipper.actors(25)
       feature.enable flipper.time(45)
 
-      post '/features/my_feature/clear'
+      delete '/features/my_feature/clear'
     end
 
     it 'clears feature' do

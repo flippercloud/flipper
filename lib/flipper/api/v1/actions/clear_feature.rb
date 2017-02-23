@@ -8,7 +8,7 @@ module Flipper
         class ClearFeature < Api::Action
           route %r{features/[^/]*/clear/?\Z}
 
-          def post
+          def delete
             feature_name = Rack::Utils.unescape(path_parts[-2])
             feature = flipper[feature_name]
             flipper.adapter.clear(feature)
