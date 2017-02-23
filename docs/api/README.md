@@ -233,6 +233,26 @@ curl -X DELETE http://example.com/flipper/api/features/reports
 
 Successful deletion of a feature will return a 204 No Content response.
 
+### Clear a feature
+
+**URL**
+
+`DELETE /features/{feature_name}/clear`
+
+**Parameters**
+
+* `feature_name` - The name of the feature to clear
+
+**Request**
+
+```
+curl -X DELETE http://example.com/flipper/api/features/reports/clear
+```
+
+**Response**
+
+Successful clearing (removing of all gate values) of a feature will return a 204 No Content response.
+
 ## Gates
 
 The API supports enabling / disabling any of the Flipper [gates](https://github.com/jnunemaker/flipper/blob/master/docs/Gates.md). Gate endpoints follow the url convention:
