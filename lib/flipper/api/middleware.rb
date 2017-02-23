@@ -18,6 +18,7 @@ module Flipper
         @action_collection.add Api::V1::Actions::ActorsGate
         @action_collection.add Api::V1::Actions::GroupsGate
         @action_collection.add Api::V1::Actions::BooleanGate
+        @action_collection.add Api::V1::Actions::ClearFeature
         @action_collection.add Api::V1::Actions::Feature
         @action_collection.add Api::V1::Actions::Features
       end
