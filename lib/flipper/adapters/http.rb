@@ -91,7 +91,7 @@ module Flipper
       end
 
       def clear(feature)
-        response = @client.delete("/features/#{feature.key}/boolean")
+        response = @client.delete("/features/#{feature.key}/clear")
         response.is_a?(Net::HTTPOK)
       end
 
