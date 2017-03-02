@@ -24,8 +24,8 @@ end
 
 flipper = Flipper.new(adapter)
 
-flipper[:stats].enable flipper.group(:admins) # turn on for admins
-flipper[:stats].disable flipper.group(:admins) # turn off for admins
+flipper[:stats].enable flipper.group(:admins) # turn on the stats feature for admins
+flipper[:stats].disable flipper.group(:admins) # turn off the stats feature for admins
 
 person = Person.find(params[:id])
 flipper[:stats].enabled? person # check if enabled, returns true if person.admin? is true
@@ -37,7 +37,29 @@ flipper[:stats].enable_group :admins
 flipper[:stats].disable_group :admins
 ```
 
-There is no requirement that the thing yielded to the block be a user model or whatever. It can be anything you want, therefore it is a good idea to check that the thing passed into the group block actually responds to what you are trying.
+Here's a quick explanation:
+
+```
+Flipper.register(:admins) do |actor|
+  actor.respond_to?(:admin?) && actor.admin?
+end
+```
+- The above first registers a group called `admins` which essentially saves a [Proc](http://www.eriktrautman.com/posts/ruby-explained-blocks-procs-and-lambdas-aka-closures) to be called later.
+
+```
+flipper[:stats].enable flipper.group(:admins)
+```
+
+The above enables the stats feature to any object that passes the :admins proc.
+
+```
+person = Person.find(params[:id])
+flipper[:stats].enabled? person # check if person is enabled, returns true if person.admin? is true
+```
+
+When the `person` object is passed to the `enabled?` method, it is then passed into the proc. If the proc returns true, the entire statement returns true and so `flipper[:stats].enabled? person` returns true. Whatever logic follows this conditional check is then executed.
+
+There is no requirement that the thing yielded to the block be a user model or whatever. It can be anything you want, therefore it is a good idea to check that the thing passed into the group block actually responds to what you are trying to do in the `register` proc.
 
 ## 3. Individual Actor
 
