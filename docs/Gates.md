@@ -37,7 +37,7 @@ flipper[:stats].enable_group :admins
 flipper[:stats].disable_group :admins
 ```
 
-Here's a quick explanation:
+Here's a quick explanation of the above code block:
 
 ```
 Flipper.register(:admins) do |actor|
@@ -50,7 +50,7 @@ end
 flipper[:stats].enable flipper.group(:admins)
 ```
 
-The above enables the stats feature to any object that passes the :admins proc.
+- The above enables the stats feature to any object that returns true from the :admins proc.
 
 ```
 person = Person.find(params[:id])
