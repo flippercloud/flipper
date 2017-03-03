@@ -92,7 +92,7 @@ module Flipper
 
       def clear(feature)
         response = @client.delete("/features/#{feature.key}/clear")
-        response.is_a?(Net::HTTPOK)
+        response.is_a?(Net::HTTPNoContent)
       end
 
       private
