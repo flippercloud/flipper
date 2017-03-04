@@ -57,6 +57,20 @@ RSpec.describe Flipper::Adapters::Http do
         adapter.get(flipper[:feature_panel])
       end.to raise_error(Flipper::Adapters::Http::Error)
     end
+
+    it "sends default headers" do
+      headers = {
+        'Accept' => 'application/json',
+        'Content-Type' => 'application/json',
+        'User-Agent' => 'Flipper HTTP Adapter v0.10.2',
+      }
+      stub_request(:get, "http://app.com/flipper/features/feature_panel").
+         with(:headers => headers).
+         to_return(:status => 404, :body => "", :headers => {})
+
+      adapter = described_class.new(uri: URI('http://app.com/flipper'))
+      adapter.get(flipper[:feature_panel])
+    end
   end
 
   describe "#get_multi" do
