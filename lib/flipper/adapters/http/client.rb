@@ -1,4 +1,5 @@
 require 'uri'
+require 'flipper/version'
 
 module Flipper
   module Adapters
@@ -7,6 +8,7 @@ module Flipper
         DEFAULT_HEADERS = {
           'Content-Type' => 'application/json',
           'Accept' => 'application/json',
+          'User-Agent' => "Flipper HTTP Adapter v#{VERSION}",
         }.freeze
 
         def initialize(options = {})
