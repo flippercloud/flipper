@@ -11,6 +11,8 @@ module Flipper
           'User-Agent' => "Flipper HTTP Adapter v#{VERSION}",
         }.freeze
 
+        HTTPS_SCHEME = "https".freeze
+
         def initialize(options = {})
           @uri = URI(options.fetch(:uri))
           @headers = DEFAULT_HEADERS.merge(options[:headers] || {})
@@ -53,6 +55,12 @@ module Flipper
           http = Net::HTTP.new(uri.host, uri.port)
           http.read_timeout = @read_timeout if @read_timeout
           http.open_timeout = @open_timeout if @open_timeout
+
+          if uri.scheme == HTTPS_SCHEME
+            http.use_ssl = true
+            http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+          end
+
           http
         end
 
