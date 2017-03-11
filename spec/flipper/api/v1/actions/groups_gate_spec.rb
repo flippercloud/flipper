@@ -50,7 +50,7 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
     end
   end
 
-  describe 'non-existent feature' do
+  describe 'disable for non-existent feature' do
     before do
       Flipper.register(:admins) do |actor|
         actor.respond_to?(:admin?) && actor.admin?
@@ -72,7 +72,7 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
     end
   end
 
-  describe 'group not registered' do
+  describe 'disable for group not registered' do
     before do
       flipper[:my_feature].disable
       delete '/features/my_feature/groups', name: 'admins'
@@ -86,6 +86,49 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
         'more_info' => api_error_code_reference_url,
       }
       expect(json_response).to eq(expected)
+    end
+  end
+
+  describe 'enable for group not reigstered when allow_unregistered_groups is true' do
+    before do
+      Flipper.unregister_groups
+      flipper[:my_feature].disable
+      post '/features/my_feature/groups', name: 'admins', allow_unregistered_groups: 'true'
+    end
+
+    it 'responds successfully' do
+      expect(last_response.status).to eq(200)
+    end
+
+    it 'returns decorated feature with group in groups set' do
+      group_gate = json_response['gates'].find { |m| m['name'] == 'group' }
+      expect(group_gate['value']).to eq(['admins'])
+    end
+
+    it 'enables group' do
+      expect(flipper[:my_feature].groups_value).to eq(Set["admins"])
+    end
+  end
+
+  describe 'disable for group not registered when allow_unregistered_groups is true' do
+    before do
+      Flipper.unregister_groups
+      flipper[:my_feature].disable
+      flipper[:my_feature].enable_group(:admins)
+      delete '/features/my_feature/groups', name: 'admins', allow_unregistered_groups: 'true'
+    end
+
+    it 'responds successfully' do
+      expect(last_response.status).to eq(200)
+    end
+
+    it 'returns decorated feature with group not in groups set' do
+      group_gate = json_response['gates'].find { |m| m['name'] == 'group' }
+      expect(group_gate['value']).to eq([])
+    end
+
+    it 'disables group' do
+      expect(flipper[:my_feature].groups_value).to be_empty
     end
   end
 end
