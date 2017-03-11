@@ -26,6 +26,29 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
     end
   end
 
+  describe 'enable without name params' do
+    before do
+      flipper[:my_feature].disable
+      Flipper.register(:admins) do |actor|
+        actor.respond_to?(:admin?) && actor.admin?
+      end
+      post '/features/my_feature/groups'
+    end
+
+    it 'returns correct status code' do
+      expect(last_response.status).to eq(422)
+    end
+
+    it 'returns formatted error' do
+      expected = {
+        'code' => 5,
+        'message' => 'Required parameter name is missing.',
+        'more_info' => api_error_code_reference_url,
+      }
+      expect(json_response).to eq(expected)
+    end
+  end
+
   describe 'disable' do
     before do
       flipper[:my_feature].disable
