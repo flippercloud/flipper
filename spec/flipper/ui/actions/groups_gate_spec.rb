@@ -8,6 +8,7 @@ RSpec.describe Flipper::UI::Actions::GroupsGate do
       'a'
     end
   end
+
   let(:session) do
     if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
       { csrf: token }

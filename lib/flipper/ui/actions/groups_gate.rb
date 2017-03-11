@@ -25,17 +25,19 @@ module Flipper
           feature = flipper[feature_name.to_sym]
           value = params['value'].to_s.strip
 
-          case params['operation']
-          when 'enable'
-            feature.enable_group value
-          when 'disable'
-            feature.disable_group value
-          end
+          if Flipper.group_exists?(value)
+            case params['operation']
+            when 'enable'
+              feature.enable_group value
+            when 'disable'
+              feature.disable_group value
+            end
 
-          redirect_to("/features/#{feature.key}")
-        rescue Flipper::GroupNotRegistered => e
-          error = Rack::Utils.escape("The group named #{value.inspect} has not been registered.")
-          redirect_to("/features/#{feature.key}/groups?error=#{error}")
+            redirect_to("/features/#{feature.key}")
+          else
+            error = Rack::Utils.escape("The group named #{value.inspect} has not been registered.")
+            redirect_to("/features/#{feature.key}/groups?error=#{error}")
+          end
         end
       end
     end

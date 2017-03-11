@@ -107,10 +107,12 @@ RSpec.describe Flipper::DSL do
     end
 
     context 'for unregistered group' do
-      it 'raises error' do
-        expect do
-          subject.group(:admins)
-        end.to raise_error(Flipper::GroupNotRegistered)
+      it 'returns group with default block' do
+        expect(subject.group(:admins)).to be_instance_of(Flipper::Types::Group)
+      end
+
+      it 'always returns same instance for same name' do
+        expect(subject.group(:admins)).to equal(subject.group(:admins))
       end
     end
   end
