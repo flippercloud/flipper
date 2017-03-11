@@ -52,7 +52,7 @@ module Flipper
       end
     end
 
-    def fetch(key, &block)
+    def fetch(key)
       raise ArgumentError, "block is required" unless block_given?
       key = key.to_sym
       @mutex.synchronize do

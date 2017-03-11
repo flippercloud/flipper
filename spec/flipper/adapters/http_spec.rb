@@ -53,9 +53,9 @@ RSpec.describe Flipper::Adapters::Http do
       'Content-Type' => 'application/json',
       'User-Agent' => 'Flipper HTTP Adapter v0.10.2',
     }
-    stub_request(:get, "http://app.com/flipper/features/feature_panel").
-       with(:headers => headers).
-       to_return(:status => 404, :body => "", :headers => {})
+    stub_request(:get, "http://app.com/flipper/features/feature_panel")
+      .with(headers: headers)
+      .to_return(status: 404, body: "", headers: {})
 
     adapter = described_class.new(uri: URI('http://app.com/flipper'))
     adapter.get(flipper[:feature_panel])
