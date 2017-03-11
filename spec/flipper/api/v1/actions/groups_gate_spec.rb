@@ -89,7 +89,7 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
     end
   end
 
-  describe 'enable for group not reigstered when allow_unregistered_groups is true' do
+  describe 'enable for group not registered when allow_unregistered_groups is true' do
     before do
       Flipper.unregister_groups
       flipper[:my_feature].disable
