@@ -27,9 +27,10 @@ module Flipper
           private
 
           def ensure_valid_params
-            if disallow_unregistered_groups? && !Flipper.group_exists?(group_name)
-              json_error_response(:group_not_registered)
-            end
+            return if allow_unregistered_groups?
+            return unless Flipper.group_exists?(group_name)
+
+            json_error_response(:group_not_registered)
           end
 
           def allow_unregistered_groups?
