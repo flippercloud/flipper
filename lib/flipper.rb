@@ -64,12 +64,9 @@ module Flipper
   #
   #   Flipper.group(:admins)
   #
-  # Returns the Flipper::Group if group registered.
-  # Raises Flipper::GroupNotRegistered if group is not registered.
+  # Returns Flipper::Group.
   def self.group(name)
-    groups_registry.get(name)
-  rescue Registry::KeyNotFound => e
-    raise GroupNotRegistered, "Group #{e.key.inspect} has not been registered"
+    groups_registry.get(name) || Types::Group.new(name)
   end
 
   # Internal: Registry of all groups_registry.

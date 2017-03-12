@@ -46,9 +46,7 @@ module Flipper
     def get(key)
       key = key.to_sym
       @mutex.synchronize do
-        @source.fetch(key) do
-          raise KeyNotFound, key
-        end
+        @source[key]
       end
     end
 

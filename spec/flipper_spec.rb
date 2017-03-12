@@ -80,10 +80,17 @@ RSpec.describe Flipper do
     end
 
     context 'for unregistered group' do
-      it 'raises group not registered error' do
-        expect do
-          described_class.group(:cats)
-        end.to raise_error(Flipper::GroupNotRegistered, 'Group :cats has not been registered')
+      before do
+        @group = described_class.group(:cats)
+      end
+
+      it 'returns group' do
+        expect(@group).to be_instance_of(Flipper::Types::Group)
+        expect(@group.name).to eq(:cats)
+      end
+
+      it 'does not add group to registry' do
+        expect(described_class.group_exists?(@group.name)).to be(false)
       end
     end
   end

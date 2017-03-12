@@ -97,20 +97,9 @@ RSpec.describe Flipper::DSL do
         @group = Flipper.register(:admins) {}
       end
 
-      it 'returns group' do
-        expect(subject.group(:admins)).to eq(@group)
-      end
-
-      it 'always returns same instance for same name' do
-        expect(subject.group(:admins)).to equal(subject.group(:admins))
-      end
-    end
-
-    context 'for unregistered group' do
-      it 'raises error' do
-        expect do
-          subject.group(:admins)
-        end.to raise_error(Flipper::GroupNotRegistered)
+      it 'delegates to Flipper' do
+        expect(Flipper).to receive(:group).with(:admins).and_return(@group)
+        expect(subject.group(:admins)).to be(@group)
       end
     end
   end
