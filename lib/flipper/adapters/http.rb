@@ -74,7 +74,8 @@ module Flipper
 
       def enable(feature, gate, thing)
         body = request_body_for_gate(gate, thing.value.to_s)
-        response = @client.post("/features/#{feature.key}/#{gate.key}", body)
+        query_string = gate.key == :groups ? "?allow_unregistered_groups=true" : ""
+        response = @client.post("/features/#{feature.key}/#{gate.key}#{query_string}", body)
         response.is_a?(Net::HTTPOK)
       end
 

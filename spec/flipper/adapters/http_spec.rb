@@ -45,6 +45,12 @@ RSpec.describe Flipper::Adapters::Http do
     end
 
     it_should_behave_like 'a flipper adapter'
+
+    it "can enable unregistered group" do
+      flipper = Flipper.new(subject)
+      expect(flipper[:search].enable_group(:some_made_up_group)).to be(true)
+      expect(flipper[:search].groups_value).to eq(Set["some_made_up_group"])
+    end
   end
 
   it "sends default headers" do
