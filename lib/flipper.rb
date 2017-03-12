@@ -66,7 +66,7 @@ module Flipper
   #
   # Returns the Flipper::Group or registers new one with default block.
   def self.group(name)
-    groups_registry.fetch(name) { Types::Group.new(name) { false } }
+    groups_registry.fetch(name) { Types::Group.new(name) }
   end
 
   # Internal: Registry of all groups_registry.
