@@ -81,12 +81,13 @@ module Flipper
 
       def disable(feature, gate, thing)
         body = request_body_for_gate(gate, thing.value.to_s)
+        query_string = gate.key == :groups ? "?allow_unregistered_groups=true" : ""
         response =
           case gate.key
           when :percentage_of_actors, :percentage_of_time
-            @client.post("/features/#{feature.key}/#{gate.key}", body)
+            @client.post("/features/#{feature.key}/#{gate.key}#{query_string}", body)
           else
-            @client.delete("/features/#{feature.key}/#{gate.key}", body)
+            @client.delete("/features/#{feature.key}/#{gate.key}#{query_string}", body)
           end
         response.is_a?(Net::HTTPOK)
       end

@@ -46,10 +46,13 @@ RSpec.describe Flipper::Adapters::Http do
 
     it_should_behave_like 'a flipper adapter'
 
-    it "can enable unregistered group" do
+    it "can enable and disable unregistered group" do
       flipper = Flipper.new(subject)
       expect(flipper[:search].enable_group(:some_made_up_group)).to be(true)
       expect(flipper[:search].groups_value).to eq(Set["some_made_up_group"])
+
+      expect(flipper[:search].disable_group(:some_made_up_group)).to be(true)
+      expect(flipper[:search].groups_value).to eq(Set.new)
     end
   end
 
