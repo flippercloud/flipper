@@ -90,7 +90,7 @@ RSpec.describe Flipper do
       end
 
       it 'does not add group to registry' do
-        expect(Flipper.group_exists?(@group.name)).to be(false)
+        expect(described_class.group_exists?(@group.name)).to be(false)
       end
     end
   end
