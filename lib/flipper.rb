@@ -66,7 +66,7 @@ module Flipper
   #
   # Returns Flipper::Group.
   def self.group(name)
-    groups_registry.fetch(name) { Types::Group.new(name) }
+    groups_registry.get(name) || Types::Group.new(name)
   end
 
   # Internal: Registry of all groups_registry.

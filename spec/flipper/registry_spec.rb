@@ -44,10 +44,8 @@ RSpec.describe Flipper::Registry do
     end
 
     context 'key not registered' do
-      it 'raises key not found' do
-        expect do
-          subject.get(:admins)
-        end.to raise_error(Flipper::Registry::KeyNotFound)
+      it 'returns nil' do
+        expect(subject.get(:admins)).to be(nil)
       end
     end
   end
@@ -138,37 +136,6 @@ RSpec.describe Flipper::Registry do
     it 'clears the source' do
       subject.clear
       expect(source).to be_empty
-    end
-  end
-
-  describe '#fetch' do
-    context 'key registered' do
-      before do
-        source[:admins] = 'admins'
-      end
-
-      it 'returns value' do
-        expect(subject.fetch(:admins) {}).to eq('admins')
-      end
-
-      it 'returns value with string key' do
-        expect(subject.fetch('admins') {}).to eq('admins')
-      end
-    end
-
-    context 'key not registered' do
-      it 'sets value to result of block' do
-        subject.fetch(:admins) { 'admins' }
-        expect(source[:admins]).to eq('admins')
-      end
-    end
-
-    context 'key not registered and block not provided' do
-      it 'raises error' do
-        expect do
-          subject.fetch(:admins)
-        end.to raise_error(ArgumentError, "block is required")
-      end
     end
   end
 end

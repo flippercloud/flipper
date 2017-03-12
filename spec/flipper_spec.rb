@@ -80,10 +80,17 @@ RSpec.describe Flipper do
     end
 
     context 'for unregistered group' do
+      before do
+        @group = described_class.group(:cats)
+      end
+
       it 'returns group' do
-        group = described_class.group(:cats)
-        expect(group).to be_instance_of(Flipper::Types::Group)
-        expect(group.name).to eq(:cats)
+        expect(@group).to be_instance_of(Flipper::Types::Group)
+        expect(@group.name).to eq(:cats)
+      end
+
+      it 'does not add group to registry' do
+        expect(Flipper.group_exists?(@group.name)).to be(false)
       end
     end
   end
