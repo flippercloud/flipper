@@ -29,8 +29,8 @@ module Flipper
 
         if Types::Actor.wrappable?(context.thing)
           actor = Types::Actor.wrap(context.thing)
-          key = "#{context.feature_name}#{actor.value}"
-          Zlib.crc32(key) % 100 < percentage
+          id = "#{context.feature_name}#{actor.value}"
+          Zlib.crc32(id) % 100 < percentage
         else
           false
         end
