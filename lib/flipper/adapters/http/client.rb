@@ -1,4 +1,5 @@
 require 'uri'
+require 'openssl'
 require 'flipper/version'
 
 module Flipper
