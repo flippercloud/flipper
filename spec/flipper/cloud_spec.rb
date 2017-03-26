@@ -35,9 +35,7 @@ RSpec.describe Flipper::Cloud do
 
   context 'initialize with token and options' do
     before do
-      @instance = described_class.new('asdf', {
-        url: 'https://www.fakeflipper.com/sadpanda',
-      })
+      @instance = described_class.new('asdf', url: 'https://www.fakeflipper.com/sadpanda')
       memoized_adapter = @instance.adapter
       @http_adapter = memoized_adapter.adapter
       @http_client = @http_adapter.instance_variable_get('@client')
