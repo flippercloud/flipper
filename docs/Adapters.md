@@ -12,6 +12,7 @@ I plan on supporting the adapters in the flipper repo. Other adapters are welcom
 * [Sequel adapter](https://github.com/jnunemaker/flipper/blob/master/docs/sequel)
 * [Cassanity adapter](https://github.com/jnunemaker/flipper-cassanity)
 * [read-only adapter](https://github.com/jnunemaker/flipper/blob/master/docs/read-only)
+* [Http adapter](https://github.com/jnunemaker/flipper/blob/master/docs/http)
 
 ## Community Supported
 
