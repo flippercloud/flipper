@@ -12,15 +12,15 @@ flipper = Flipper::Cloud.new(ENV.fetch('TOKEN'))
 flipper[:stats].enable
 
 if flipper[:stats].enabled?
-  puts "Enabled!"
+  puts 'Enabled!'
 else
-  puts "Disabled!"
+  puts 'Disabled!'
 end
 
 flipper[:stats].disable
 
 if flipper[:stats].enabled?
-  puts "Enabled!"
+  puts 'Enabled!'
 else
-  puts "Disabled!"
+  puts 'Disabled!'
 end
