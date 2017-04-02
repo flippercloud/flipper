@@ -1,3 +1,13 @@
+## 0.11
+
+* Use primary keys with sequel adapter (https://github.com/jnunemaker/flipper/pull/210).
+* Add redis cache adapter (https://github.com/jnunemaker/flipper/pull/211).
+* Finish API and HTTP adapter that speaks to API.
+* Set flipper from env for API and UI (https://github.com/jnunemaker/flipper/pull/223 and https://github.com/jnunemaker/flipper/pull/229).
+* Add flipper cloud adapter (https://github.com/jnunemaker/flipper/pull/249).
+* Allow unregistered groups (https://github.com/jnunemaker/flipper/pull/244).
+* Drop support for Ruby 2.0 as it is end of lined (https://github.com/jnunemaker/flipper/commit/c2c81ed89938155ce91acb5173ac38580f630e3d).
+
 ## 0.10.2
 
 * Add Adapter#get_multi to allow for efficient loading of more than one feature at a time (https://github.com/jnunemaker/flipper/pull/198)
