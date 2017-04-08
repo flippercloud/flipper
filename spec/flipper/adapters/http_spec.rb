@@ -60,7 +60,7 @@ RSpec.describe Flipper::Adapters::Http do
     headers = {
       'Accept' => 'application/json',
       'Content-Type' => 'application/json',
-      'User-Agent' => 'Flipper HTTP Adapter v0.10.2',
+      'User-Agent' => "Flipper HTTP Adapter v#{Flipper::VERSION}",
     }
     stub_request(:get, "http://app.com/flipper/features/feature_panel")
       .with(headers: headers)
