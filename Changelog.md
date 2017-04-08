@@ -1,12 +1,17 @@
 ## 0.11
 
-* Use primary keys with sequel adapter (https://github.com/jnunemaker/flipper/pull/210).
+### Backwards Compatibility Break
+
+* * Set flipper from env for API and UI (https://github.com/jnunemaker/flipper/pull/223 and https://github.com/jnunemaker/flipper/pull/229). It is documented, but now the memoizing middleware requires that the SetupEnv middleware is used first.
+* Drop support for Ruby 2.0 as it is end of lined (https://github.com/jnunemaker/flipper/commit/c2c81ed89938155ce91acb5173ac38580f630e3d).
+* Allow unregistered groups (https://github.com/jnunemaker/flipper/pull/244). Only break in compatiblity is that previously unregistered groups could not be enabled and now they can be.
+
+### Additions/Changes
+
+* Use primary keys with sequel adapter (https://github.com/jnunemaker/flipper/pull/210). Should be backwards compatible, but if you want it to work this way you will need to migrate your database to the new schema.
 * Add redis cache adapter (https://github.com/jnunemaker/flipper/pull/211).
 * Finish API and HTTP adapter that speaks to API.
-* Set flipper from env for API and UI (https://github.com/jnunemaker/flipper/pull/223 and https://github.com/jnunemaker/flipper/pull/229).
-* Add flipper cloud adapter (https://github.com/jnunemaker/flipper/pull/249).
-* Allow unregistered groups (https://github.com/jnunemaker/flipper/pull/244).
-* Drop support for Ruby 2.0 as it is end of lined (https://github.com/jnunemaker/flipper/commit/c2c81ed89938155ce91acb5173ac38580f630e3d).
+* Add flipper cloud adapter (https://github.com/jnunemaker/flipper/pull/249). Nothing to see here yet, but good stuff soon. ;)
 
 ## 0.10.2
 
