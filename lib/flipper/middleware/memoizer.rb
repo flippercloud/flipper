@@ -8,6 +8,9 @@ module Flipper
       # using the Flipper::Middleware::SetupEnv middleware.
       #
       # app - The app this middleware is included in.
+      # opts - The Hash of options.
+      #        :preload_all - Boolean of whether or not to preload all features.
+      #        :preload - Array of Symbol feature names to preload.
       #
       # Examples
       #
