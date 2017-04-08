@@ -18,6 +18,19 @@ RSpec.describe Flipper::Middleware::Memoizer do
     flipper.adapter.memoize = nil
   end
 
+  it 'raises if initialized with app and flipper instance' do
+    expect do
+      described_class.new(app, flipper)
+    end.to raise_error(/no longer initializes with a flipper/)
+  end
+
+  it 'raises if initialized with app and block' do
+    block = -> { flipper }
+    expect do
+      described_class.new(app, block)
+    end.to raise_error(/no longer initializes with a flipper/)
+  end
+
   RSpec.shared_examples_for 'flipper middleware' do
     it 'delegates' do
       called = false
