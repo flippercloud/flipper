@@ -24,8 +24,7 @@ module Flipper
       #
       def initialize(app, opts = {})
         if opts.is_a?(Flipper::DSL) || opts.is_a?(Proc)
-          raise 'Flipper::Middleware::Memoizer no longer initializes with a \
-                flipper instance or block. Read more at: https://git.io/vSo31.'
+          raise 'Flipper::Middleware::Memoizer no longer initializes with a flipper instance or block. Read more at: https://git.io/vSo31.' # rubocop:disable LineLength
         end
 
         @app = app
