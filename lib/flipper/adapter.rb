@@ -17,6 +17,11 @@ module Flipper
     #
     # Returns nothing.
     def import(adapter)
+      features.each do |key|
+        feature = Flipper::Feature.new(key, self)
+        remove(feature)
+      end
+
       adapter.features.each do |key|
         feature = Flipper::Feature.new(key, adapter)
         destination_feature = Flipper::Feature.new(key, self)

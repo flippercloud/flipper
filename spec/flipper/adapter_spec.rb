@@ -77,5 +77,11 @@ RSpec.describe Flipper::Adapter do
       expect(feature.percentage_of_time_value).to be(0)
       expect(feature.percentage_of_actors_value).to be(25)
     end
+
+    it 'wipes existing features for adapter' do
+      destination_flipper.add(:stats)
+      destination_flipper.import(source_flipper)
+      expect(destination_flipper.features.map(&:key)).to eq([])
+    end
   end
 end
