@@ -8,6 +8,11 @@ RSpec.describe Flipper::Adapter do
   let(:destination_flipper) { build_flipper }
 
   describe '#migrate' do
+    it 'returns nothing' do
+      result = destination_flipper.migrate(source_flipper)
+      expect(result).to be(nil)
+    end
+
     it 'can migrate from one adapter to another' do
       source_flipper.enable(:search)
       destination_flipper.migrate(source_flipper)

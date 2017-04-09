@@ -42,6 +42,8 @@ module Flipper
           add(feature)
         end
       end
+
+      nil
     end
 
     def default_config
