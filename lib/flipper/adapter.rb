@@ -18,6 +18,7 @@ module Flipper
       adapter.features.each do |key|
         feature = Flipper::Feature.new(key, adapter)
         destination_feature = Flipper::Feature.new(key, self)
+        clear(destination_feature)
 
         case feature.state
         when :on
