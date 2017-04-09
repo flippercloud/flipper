@@ -12,6 +12,30 @@ module Flipper
       result
     end
 
+    def migrate(adapter)
+      actor_class = Struct.new(:flipper_id)
+      adapter.features.each do |feature|
+        to_feature = Flipper::Feature.new(feature.key, self)
+        case feature.state
+        when :on
+          to_feature.enable
+        when :conditional
+          feature.groups_value.each do |value|
+            to_feature.enable_group(value)
+          end
+
+          feature.actors_value.each do |value|
+            to_feature.enable_actor(actor_class.new(value))
+          end
+
+          to_feature.enable_percentage_of_actors(feature.percentage_of_actors_value)
+          to_feature.enable_percentage_of_time(feature.percentage_of_time_value)
+        when :off
+          add(feature)
+        end
+      end
+    end
+
     def default_config
       {
         boolean: nil,
