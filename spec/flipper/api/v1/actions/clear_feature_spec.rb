@@ -6,8 +6,7 @@ RSpec.describe Flipper::Api::V1::Actions::ClearFeature do
   describe 'clear' do
     before do
       Flipper.register(:admins) {}
-      actor_class = Flipper::Actor
-      actor22 = actor_class.new('22')
+      actor22 = Flipper::Actor.new('22')
 
       feature = flipper[:my_feature]
       feature.enable flipper.boolean

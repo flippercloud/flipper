@@ -16,7 +16,7 @@ module Flipper
     # values from provided adapter.
     #
     # Returns nothing.
-    def import(source_adapter)
+    def import(source_adapter) # rubocop:disable Metrics/MethodLength
       features.each do |key|
         feature = Flipper::Feature.new(key, self)
         remove(feature)
