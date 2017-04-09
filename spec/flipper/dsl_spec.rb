@@ -251,13 +251,20 @@ RSpec.describe Flipper::DSL do
     end
   end
 
+  describe '#add' do
+    it 'adds the feature' do
+      expect(subject.features).to eq(Set.new)
+      subject.add(:stats)
+      expect(subject.features).to eq(Set[subject[:stats]])
+    end
+  end
+
   describe '#remove' do
     it 'removes the feature' do
-      subject.enable(:stats)
-
-      expect { subject.remove(:stats) }.to change { subject.enabled?(:stats) }.to(false)
-
-      expect(subject.features).to be_empty
+      subject.adapter.add(subject[:stats])
+      expect(subject.features).to eq(Set[subject[:stats]])
+      subject.remove(:stats)
+      expect(subject.features).to eq(Set.new)
     end
   end
 
