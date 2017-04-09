@@ -12,11 +12,11 @@ module Flipper
       result
     end
 
-    # Public: Migrate current adapter features and gate values to be identical
-    # to provided adapter.
+    # Public: Wipe features and gate values and then import features and gate
+    # values from provided adapter.
     #
     # Returns nothing.
-    def migrate(adapter)
+    def import(adapter)
       actor_class = Struct.new(:flipper_id)
 
       adapter.features.each do |key|

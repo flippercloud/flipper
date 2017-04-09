@@ -7,27 +7,27 @@ RSpec.describe Flipper::Adapter do
   let(:source_flipper) { build_flipper }
   let(:destination_flipper) { build_flipper }
 
-  describe '#migrate' do
+  describe '#import' do
     it 'returns nothing' do
-      result = destination_flipper.migrate(source_flipper)
+      result = destination_flipper.import(source_flipper)
       expect(result).to be(nil)
     end
 
-    it 'can migrate from one adapter to another' do
+    it 'can import from one adapter to another' do
       source_flipper.enable(:search)
-      destination_flipper.migrate(source_flipper)
+      destination_flipper.import(source_flipper)
       expect(destination_flipper[:search].boolean_value).to eq(true)
       expect(destination_flipper.features.map(&:key).sort).to eq(%w[search])
     end
 
-    it 'can migrate features that have been added but their state is off' do
+    it 'can import features that have been added but their state is off' do
       feature = source_flipper[:search]
       source_flipper.add(:search)
-      destination_flipper.migrate(source_flipper)
+      destination_flipper.import(source_flipper)
       expect(destination_flipper.features.map(&:key)).to eq(["search"])
     end
 
-    it 'can migrate multiple features' do
+    it 'can import multiple features' do
       source_flipper.enable(:yep)
       source_flipper.enable_group(:preview_features, :developers)
       source_flipper.enable_group(:preview_features, :marketers)
@@ -39,7 +39,7 @@ RSpec.describe Flipper::Adapter do
       source_flipper.enable_percentage_of_actors(:issues_next, 25)
       source_flipper.enable_percentage_of_time(:verbose_logging, 5)
 
-      destination_flipper.migrate(source_flipper)
+      destination_flipper.import(source_flipper)
 
       feature = destination_flipper[:preview_features]
       expect(feature.boolean_value).to be(false)
@@ -70,7 +70,7 @@ RSpec.describe Flipper::Adapter do
       source_flipper.enable_percentage_of_time(:stats, 5)
       source_flipper.enable_percentage_of_actors(:verbose_logging, 25)
 
-      destination_flipper.migrate(source_flipper)
+      destination_flipper.import(source_flipper)
 
       feature = destination_flipper[:stats]
       expect(feature.boolean_value).to be(false)
