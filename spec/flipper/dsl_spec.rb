@@ -260,4 +260,12 @@ RSpec.describe Flipper::DSL do
       expect(subject.features).to be_empty
     end
   end
+
+  describe '#migrate' do
+    it 'delegates to adapter' do
+      destination_flipper = build_flipper
+      expect(subject.adapter).to receive(:migrate).with(destination_flipper.adapter)
+      subject.migrate(destination_flipper)
+    end
+  end
 end

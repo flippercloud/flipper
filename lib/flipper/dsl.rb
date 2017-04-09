@@ -241,5 +241,9 @@ module Flipper
     def features
       adapter.features.map { |name| feature(name) }.to_set
     end
+
+    def migrate(flipper)
+      adapter.migrate(flipper.adapter)
+    end
   end
 end
