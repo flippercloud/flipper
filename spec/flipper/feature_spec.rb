@@ -89,6 +89,23 @@ RSpec.describe Flipper::Feature do
     end
   end
 
+  describe '#add' do
+    it 'adds feature to adapter' do
+      expect(adapter.features).to eq(Set.new)
+      subject.add
+      expect(adapter.features).to eq(Set[subject.key])
+    end
+  end
+
+  describe '#remove' do
+    it 'removes feature from adapter' do
+      adapter.add(subject)
+      expect(adapter.features).to eq(Set[subject.key])
+      subject.remove
+      expect(adapter.features).to eq(Set.new)
+    end
+  end
+
   describe '#inspect' do
     it 'returns easy to read string representation' do
       string = subject.inspect
@@ -193,6 +210,17 @@ RSpec.describe Flipper::Feature do
       expect(event).not_to be_nil
       expect(event.payload[:operation]).to eq(:disable)
       expect(event.payload[:thing]).to eq(Flipper::Types::Actor.new(thing))
+    end
+
+    it 'is recorded for add' do
+      subject.add
+
+      event = instrumenter.events.last
+      expect(event).not_to be_nil
+      expect(event.name).to eq('feature_operation.flipper')
+      expect(event.payload[:feature_name]).to eq(:search)
+      expect(event.payload[:operation]).to eq(:add)
+      expect(event.payload[:result]).not_to be_nil
     end
 
     it 'is recorded for remove' do

@@ -69,6 +69,13 @@ module Flipper
       end
     end
 
+    # Public: Adds this feature.
+    #
+    # Returns the result of Adapter#add.
+    def add
+      instrument(:add) { adapter.add(self) }
+    end
+
     # Public: Removes this feature.
     #
     # Returns the result of Adapter#remove.
