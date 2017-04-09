@@ -3,7 +3,7 @@ require 'helper'
 RSpec.describe Flipper::FeatureCheckContext do
   let(:feature_name) { :new_profiles }
   let(:values) { Flipper::GateValues.new({}) }
-  let(:thing) { Struct.new(:flipper_id).new('5') }
+  let(:thing) { Flipper::Actor.new('5') }
   let(:options) do
     {
       feature_name: feature_name,

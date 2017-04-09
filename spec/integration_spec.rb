@@ -7,7 +7,7 @@ RSpec.describe Flipper do
   let(:flipper)     { described_class.new(adapter) }
   let(:feature)     { flipper[:search] }
 
-  let(:actor_class) { Struct.new(:flipper_id) }
+  let(:actor_class) { Flipper::Actor }
 
   let(:admin_group) { flipper.group(:admins) }
   let(:dev_group)   { flipper.group(:devs) }

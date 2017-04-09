@@ -11,7 +11,7 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
     Flipper::FeatureCheckContext.new(
       feature_name: feature,
       values: Flipper::GateValues.new(percentage_of_actors: integer),
-      thing: thing || Flipper::Types::Actor.new(Struct.new(:flipper_id).new(1))
+      thing: thing || Flipper::Types::Actor.new(Flipper::Actor.new(1))
     )
   end
 
@@ -22,7 +22,7 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
       let(:number_of_actors) { 100 }
 
       let(:actors) do
-        (1..number_of_actors).map { |n| Struct.new(:flipper_id).new(n) }
+        (1..number_of_actors).map { |n| Flipper::Actor.new(n) }
       end
 
       let(:feature_one_enabled_actors) do

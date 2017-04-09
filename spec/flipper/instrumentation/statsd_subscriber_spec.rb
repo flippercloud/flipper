@@ -15,7 +15,7 @@ RSpec.describe Flipper::Instrumentation::StatsdSubscriber do
     Flipper.new(adapter, instrumenter: ActiveSupport::Notifications)
   end
 
-  let(:user) { user = Struct.new(:flipper_id).new('1') }
+  let(:user) { user = Flipper::Actor.new('1') }
 
   before do
     described_class.client = statsd_client

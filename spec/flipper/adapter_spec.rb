@@ -2,8 +2,6 @@ require 'helper'
 require 'flipper/adapters/memory'
 
 RSpec.describe Flipper::Adapter do
-  let(:actor_class) { Struct.new(:flipper_id) }
-
   let(:source_flipper) { build_flipper }
   let(:destination_flipper) { build_flipper }
 
@@ -32,9 +30,9 @@ RSpec.describe Flipper::Adapter do
       source_flipper.enable_group(:preview_features, :marketers)
       source_flipper.enable_group(:preview_features, :company)
       source_flipper.enable_group(:preview_features, :early_access)
-      source_flipper.enable_actor(:preview_features, actor_class.new('1'))
-      source_flipper.enable_actor(:preview_features, actor_class.new('2'))
-      source_flipper.enable_actor(:preview_features, actor_class.new('3'))
+      source_flipper.enable_actor(:preview_features, Flipper::Actor.new('1'))
+      source_flipper.enable_actor(:preview_features, Flipper::Actor.new('2'))
+      source_flipper.enable_actor(:preview_features, Flipper::Actor.new('3'))
       source_flipper.enable_percentage_of_actors(:issues_next, 25)
       source_flipper.enable_percentage_of_time(:verbose_logging, 5)
 

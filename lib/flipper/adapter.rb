@@ -17,8 +17,6 @@ module Flipper
     #
     # Returns nothing.
     def import(adapter)
-      actor_class = Struct.new(:flipper_id)
-
       adapter.features.each do |key|
         feature = Flipper::Feature.new(key, adapter)
         destination_feature = Flipper::Feature.new(key, self)
@@ -33,7 +31,7 @@ module Flipper
           end
 
           feature.actors_value.each do |value|
-            destination_feature.enable_actor(actor_class.new(value))
+            destination_feature.enable_actor(Flipper::Actor.new(value))
           end
 
           destination_feature.enable_percentage_of_actors(feature.percentage_of_actors_value)

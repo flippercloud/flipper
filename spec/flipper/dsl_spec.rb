@@ -107,7 +107,7 @@ RSpec.describe Flipper::DSL do
   describe '#actor' do
     context 'for a thing' do
       it 'returns actor instance' do
-        thing = Struct.new(:flipper_id).new(33)
+        thing = Flipper::Actor.new(33)
         actor = subject.actor(thing)
         expect(actor).to be_instance_of(Flipper::Types::Actor)
         expect(actor.value).to eq('33')
@@ -204,7 +204,7 @@ RSpec.describe Flipper::DSL do
 
   describe '#enable_actor/disable_actor' do
     it 'enables and disables the feature for actor' do
-      actor = Struct.new(:flipper_id).new(5)
+      actor = Flipper::Actor.new(5)
 
       expect(subject[:stats].actors_value).to be_empty
       subject.enable_actor(:stats, actor)
@@ -217,7 +217,7 @@ RSpec.describe Flipper::DSL do
 
   describe '#enable_group/disable_group' do
     it 'enables and disables the feature for group' do
-      actor = Struct.new(:flipper_id).new(5)
+      actor = Flipper::Actor.new(5)
       group = Flipper.register(:fives) { |actor| actor.flipper_id == 5 }
 
       expect(subject[:stats].groups_value).to be_empty
