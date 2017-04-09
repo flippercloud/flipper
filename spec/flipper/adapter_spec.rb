@@ -21,7 +21,6 @@ RSpec.describe Flipper::Adapter do
     end
 
     it 'can import features that have been added but their state is off' do
-      feature = source_flipper[:search]
       source_flipper.add(:search)
       destination_flipper.import(source_flipper)
       expect(destination_flipper.features.map(&:key)).to eq(["search"])
