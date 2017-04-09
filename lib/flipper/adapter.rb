@@ -16,32 +16,32 @@ module Flipper
     # values from provided adapter.
     #
     # Returns nothing.
-    def import(adapter)
+    def import(source_adapter)
       features.each do |key|
         feature = Flipper::Feature.new(key, self)
         remove(feature)
       end
 
-      adapter.features.each do |key|
-        feature = Flipper::Feature.new(key, adapter)
+      source_adapter.features.each do |key|
+        source_feature = Flipper::Feature.new(key, source_adapter)
         destination_feature = Flipper::Feature.new(key, self)
 
-        case feature.state
+        case source_feature.state
         when :on
           destination_feature.enable
         when :conditional
-          feature.groups_value.each do |value|
+          source_feature.groups_value.each do |value|
             destination_feature.enable_group(value)
           end
 
-          feature.actors_value.each do |value|
+          source_feature.actors_value.each do |value|
             destination_feature.enable_actor(Flipper::Actor.new(value))
           end
 
-          destination_feature.enable_percentage_of_actors(feature.percentage_of_actors_value)
-          destination_feature.enable_percentage_of_time(feature.percentage_of_time_value)
+          destination_feature.enable_percentage_of_actors(source_feature.percentage_of_actors_value)
+          destination_feature.enable_percentage_of_time(source_feature.percentage_of_time_value)
         when :off
-          add(feature)
+          destination_feature.add
         end
       end
 
