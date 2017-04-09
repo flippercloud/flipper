@@ -27,4 +27,13 @@ RSpec.describe Flipper::Adapter do
     expected_feature_keys = %w[search admins debug issues logging nope].sort
     expect(destination_flipper.features.map(&:key).sort).to eq(expected_feature_keys)
   end
+
+  it 'can migrate features that exist but are off' do
+    feature = source_flipper[:search]
+    source_flipper.add(:search)
+
+    destination_flipper.migrate(source_flipper)
+
+    expect(destination_flipper.features.map(&:key)).to eq(["search"])
+  end
 end
