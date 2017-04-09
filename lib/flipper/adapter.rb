@@ -12,6 +12,10 @@ module Flipper
       result
     end
 
+    # Public: Migrate current adapter features and gate values to be identical
+    # to provided adapter.
+    #
+    # Returns nothing.
     def migrate(adapter)
       actor_class = Struct.new(:flipper_id)
 
