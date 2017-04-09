@@ -16,12 +16,26 @@ module Flipper
     # values from provided adapter.
     #
     # Returns nothing.
-    def import(source_adapter) # rubocop:disable Metrics/MethodLength
-      features.each do |key|
-        feature = Flipper::Feature.new(key, self)
-        remove(feature)
-      end
+    def import(source_adapter)
+      wipe
+      copy_features_and_gates(source_adapter)
+      nil
+    end
 
+    def default_config
+      {
+        boolean: nil,
+        groups: Set.new,
+        actors: Set.new,
+        percentage_of_actors: nil,
+        percentage_of_time: nil,
+      }
+    end
+
+    private
+
+    # Private: Copy source adapter features and gate values into self.
+    def copy_features_and_gates(source_adapter)
       source_adapter.features.each do |key|
         source_feature = Flipper::Feature.new(key, source_adapter)
         destination_feature = Flipper::Feature.new(key, self)
@@ -44,18 +58,14 @@ module Flipper
           destination_feature.add
         end
       end
-
-      nil
     end
 
-    def default_config
-      {
-        boolean: nil,
-        groups: Set.new,
-        actors: Set.new,
-        percentage_of_actors: nil,
-        percentage_of_time: nil,
-      }
+    # Private: Completely wipe adapter features and gate values.
+    def wipe
+      features.each do |key|
+        feature = Flipper::Feature.new(key, self)
+        remove(feature)
+      end
     end
   end
 end
