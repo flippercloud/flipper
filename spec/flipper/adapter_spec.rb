@@ -2,13 +2,12 @@ require 'helper'
 require 'flipper/adapters/memory'
 
 RSpec.describe Flipper::Adapter do
-  it 'can migrate from one adapter to another' do
-    actor = Struct.new(:flipper_id).new('22')
-    source_adapter = Flipper::Adapters::Memory.new
-    destination_adapter = Flipper::Adapters::Memory.new
-    source_flipper = Flipper.new(source_adapter)
-    destination_flipper = Flipper.new(destination_adapter)
+  let(:actor) { Struct.new(:flipper_id).new('22') }
 
+  let(:source_flipper) { build_flipper }
+  let(:destination_flipper) { build_flipper }
+
+  it 'can migrate from one adapter to another' do
     source_flipper.enable(:search)
     source_flipper.enable_group(:admins, :admins)
     source_flipper.enable_actor(:debug, actor)

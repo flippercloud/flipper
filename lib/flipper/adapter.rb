@@ -14,22 +14,25 @@ module Flipper
 
     def migrate(adapter)
       actor_class = Struct.new(:flipper_id)
-      adapter.features.each do |feature|
-        to_feature = Flipper::Feature.new(feature.key, self)
+
+      adapter.features.each do |key|
+        feature = Flipper::Feature.new(key, adapter)
+        destination_feature = Flipper::Feature.new(key, self)
+
         case feature.state
         when :on
-          to_feature.enable
+          destination_feature.enable
         when :conditional
           feature.groups_value.each do |value|
-            to_feature.enable_group(value)
+            destination_feature.enable_group(value)
           end
 
           feature.actors_value.each do |value|
-            to_feature.enable_actor(actor_class.new(value))
+            destination_feature.enable_actor(actor_class.new(value))
           end
 
-          to_feature.enable_percentage_of_actors(feature.percentage_of_actors_value)
-          to_feature.enable_percentage_of_time(feature.percentage_of_time_value)
+          destination_feature.enable_percentage_of_actors(feature.percentage_of_actors_value)
+          destination_feature.enable_percentage_of_time(feature.percentage_of_time_value)
         when :off
           add(feature)
         end
