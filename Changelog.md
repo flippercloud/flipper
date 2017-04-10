@@ -12,6 +12,7 @@
 * Add redis cache adapter (https://github.com/jnunemaker/flipper/pull/211).
 * Finish API and HTTP adapter that speaks to API.
 * Add flipper cloud adapter (https://github.com/jnunemaker/flipper/pull/249). Nothing to see here yet, but good stuff soon. ;)
+* Add importing (https://github.com/jnunemaker/flipper/pull/251).
 
 ## 0.10.2
 
