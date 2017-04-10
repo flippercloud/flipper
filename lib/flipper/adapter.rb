@@ -1,6 +1,23 @@
 module Flipper
   # Adding a module include so we have some hooks for stuff down the road
   module Adapter
+    def self.included(base)
+      base.extend(ClassMethods)
+    end
+
+    module ClassMethods
+      # Public: Default config for a feature's gate values.
+      def default_config
+        {
+          boolean: nil,
+          groups: Set.new,
+          actors: Set.new,
+          percentage_of_actors: nil,
+          percentage_of_time: nil,
+        }
+      end
+    end
+
     # Public: Get multiple features in one call. Defaults to one get per
     # feature. Feel free to override per adapter to make this more efficient and
     # reduce network calls.
@@ -22,14 +39,9 @@ module Flipper
       nil
     end
 
+    # Public: Default config for a feature's gate values.
     def default_config
-      {
-        boolean: nil,
-        groups: Set.new,
-        actors: Set.new,
-        percentage_of_actors: nil,
-        percentage_of_time: nil,
-      }
+      self.class.default_config
     end
 
     private

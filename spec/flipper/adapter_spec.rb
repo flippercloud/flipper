@@ -4,6 +4,33 @@ require 'flipper/adapters/memory'
 RSpec.describe Flipper::Adapter do
   let(:source_flipper) { build_flipper }
   let(:destination_flipper) { build_flipper }
+  let(:default_config) {
+    {
+      boolean: nil,
+      groups: Set.new,
+      actors: Set.new,
+      percentage_of_actors: nil,
+      percentage_of_time: nil,
+    }
+  }
+
+  describe '.default_config' do
+    it 'returns default config' do
+      adapter_class = Class.new do
+        include Flipper::Adapter
+      end
+      expect(adapter_class.default_config).to eq(default_config)
+    end
+  end
+
+  describe '#default_config' do
+    it 'returns default config' do
+      adapter_class = Class.new do
+        include Flipper::Adapter
+      end
+      expect(adapter_class.new.default_config).to eq(default_config)
+    end
+  end
 
   describe '#import' do
     it 'returns nothing' do
