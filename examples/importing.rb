@@ -12,7 +12,6 @@ ActiveRecord::Base.establish_connection({
 require 'generators/flipper/templates/migration'
 CreateFlipperTables.up
 
-
 # Say you are using redis...
 redis_adapter = Flipper::Adapters::Redis.new(Redis.new)
 redis_flipper = Flipper.new(redis_adapter)
@@ -25,14 +24,14 @@ redis_flipper.enable_actor(:issues, Flipper::Actor.new('1'))
 redis_flipper.enable_actor(:issues, Flipper::Actor.new('2'))
 redis_flipper.enable_group(:request_tracing, :staff)
 
-# And would like to switch to active record...
+# And you would like to switch to active record...
 ar_adapter = Flipper::Adapters::ActiveRecord.new
 ar_flipper = Flipper.new(ar_adapter)
 
-# Note: This wipes active record clean and copies features/gates from redis.
+# NOTE: This wipes active record clean and copies features/gates from redis into active record.
 ar_flipper.import(redis_flipper)
 
-# AR is now identical to Redis.
+# active record is now identical to redis.
 ar_flipper.features.each do |feature|
   pp feature: feature.key, values: feature.gate_values
 end
