@@ -17,7 +17,7 @@ RSpec.describe Flipper::Adapter do
   describe '.default_config' do
     it 'returns default config' do
       adapter_class = Class.new do
-        include described_class
+        include Flipper::Adapter # rubocop:disable RSpec/DescribedClass
       end
       expect(adapter_class.default_config).to eq(default_config)
     end
@@ -26,7 +26,7 @@ RSpec.describe Flipper::Adapter do
   describe '#default_config' do
     it 'returns default config' do
       adapter_class = Class.new do
-        include described_class
+        include Flipper::Adapter # rubocop:disable RSpec/DescribedClass
       end
       expect(adapter_class.new.default_config).to eq(default_config)
     end
