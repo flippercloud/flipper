@@ -89,6 +89,23 @@ RSpec.describe Flipper::Feature do
     end
   end
 
+  describe '#add' do
+    it 'adds feature to adapter' do
+      expect(adapter.features).to eq(Set.new)
+      subject.add
+      expect(adapter.features).to eq(Set[subject.key])
+    end
+  end
+
+  describe '#remove' do
+    it 'removes feature from adapter' do
+      adapter.add(subject)
+      expect(adapter.features).to eq(Set[subject.key])
+      subject.remove
+      expect(adapter.features).to eq(Set.new)
+    end
+  end
+
   describe '#inspect' do
     it 'returns easy to read string representation' do
       string = subject.inspect
@@ -113,7 +130,7 @@ RSpec.describe Flipper::Feature do
     end
 
     it 'is recorded for enable' do
-      thing = Flipper::Types::Actor.new(Struct.new(:flipper_id).new('1'))
+      thing = Flipper::Types::Actor.new(Flipper::Actor.new('1'))
       gate = subject.gate_for(thing)
 
       subject.enable(thing)
@@ -128,7 +145,7 @@ RSpec.describe Flipper::Feature do
     end
 
     it 'always instruments flipper type instance for enable' do
-      thing = Struct.new(:flipper_id).new('1')
+      thing = Flipper::Actor.new('1')
       gate = subject.gate_for(thing)
 
       subject.enable(thing)
@@ -153,7 +170,7 @@ RSpec.describe Flipper::Feature do
       expect(event.payload[:result]).not_to be_nil
     end
 
-    user = Struct.new(:flipper_id).new('1')
+    user = Flipper::Actor.new('1')
     actor = Flipper::Types::Actor.new(user)
     boolean_true = Flipper::Types::Boolean.new(true)
     boolean_false = Flipper::Types::Boolean.new(false)
@@ -184,7 +201,7 @@ RSpec.describe Flipper::Feature do
     end
 
     it 'always instruments flipper type instance for disable' do
-      thing = Struct.new(:flipper_id).new('1')
+      thing = Flipper::Actor.new('1')
       gate = subject.gate_for(thing)
 
       subject.disable(thing)
@@ -193,6 +210,17 @@ RSpec.describe Flipper::Feature do
       expect(event).not_to be_nil
       expect(event.payload[:operation]).to eq(:disable)
       expect(event.payload[:thing]).to eq(Flipper::Types::Actor.new(thing))
+    end
+
+    it 'is recorded for add' do
+      subject.add
+
+      event = instrumenter.events.last
+      expect(event).not_to be_nil
+      expect(event.name).to eq('feature_operation.flipper')
+      expect(event.payload[:feature_name]).to eq(:search)
+      expect(event.payload[:operation]).to eq(:add)
+      expect(event.payload[:result]).not_to be_nil
     end
 
     it 'is recorded for remove' do
@@ -207,7 +235,7 @@ RSpec.describe Flipper::Feature do
     end
 
     it 'is recorded for enabled?' do
-      thing = Flipper::Types::Actor.new(Struct.new(:flipper_id).new('1'))
+      thing = Flipper::Types::Actor.new(Flipper::Actor.new('1'))
       gate = subject.gate_for(thing)
 
       subject.enabled?(thing)
@@ -221,7 +249,7 @@ RSpec.describe Flipper::Feature do
       expect(event.payload[:result]).to eq(false)
     end
 
-    user = Struct.new(:flipper_id).new('1')
+    user = Flipper::Actor.new('1')
     actor = Flipper::Types::Actor.new(user)
     {
       nil => nil,
@@ -461,8 +489,8 @@ RSpec.describe Flipper::Feature do
 
     context 'when one or more actors are enabled' do
       before do
-        subject.enable Flipper::Types::Actor.new(Struct.new(:flipper_id).new('User:5'))
-        subject.enable Flipper::Types::Actor.new(Struct.new(:flipper_id).new('User:22'))
+        subject.enable Flipper::Types::Actor.new(Flipper::Actor.new('User:5'))
+        subject.enable Flipper::Types::Actor.new(Flipper::Actor.new('User:22'))
       end
 
       it 'returns set of actor ids' do
@@ -565,7 +593,7 @@ RSpec.describe Flipper::Feature do
     context 'with gate values set in adapter' do
       before do
         subject.enable Flipper::Types::Boolean.new(true)
-        subject.enable Flipper::Types::Actor.new(Struct.new(:flipper_id).new(5))
+        subject.enable Flipper::Types::Actor.new(Flipper::Actor.new(5))
         subject.enable Flipper::Types::Group.new(:admins)
         subject.enable Flipper::Types::PercentageOfTime.new(50)
         subject.enable Flipper::Types::PercentageOfActors.new(25)
@@ -584,7 +612,7 @@ RSpec.describe Flipper::Feature do
   describe '#enable_actor/disable_actor' do
     context 'with object that responds to flipper_id' do
       it 'updates the gate values to include the actor' do
-        actor = Struct.new(:flipper_id).new(5)
+        actor = Flipper::Actor.new(5)
         expect(subject.gate_values.actors).to be_empty
         subject.enable_actor(actor)
         expect(subject.gate_values.actors).to eq(Set['5'])
@@ -595,7 +623,7 @@ RSpec.describe Flipper::Feature do
 
     context 'with actor instance' do
       it 'updates the gate values to include the actor' do
-        actor = Struct.new(:flipper_id).new(5)
+        actor = Flipper::Actor.new(5)
         instance = Flipper::Types::Actor.new(actor)
         expect(subject.gate_values.actors).to be_empty
         subject.enable_actor(instance)
@@ -609,7 +637,7 @@ RSpec.describe Flipper::Feature do
   describe '#enable_group/disable_group' do
     context 'with symbol group name' do
       it 'updates the gate values to include the group' do
-        actor = Struct.new(:flipper_id).new(5)
+        actor = Flipper::Actor.new(5)
         group = Flipper.register(:five_only) { |actor| actor.flipper_id == 5 }
         expect(subject.gate_values.groups).to be_empty
         subject.enable_group(:five_only)
@@ -621,7 +649,7 @@ RSpec.describe Flipper::Feature do
 
     context 'with string group name' do
       it 'updates the gate values to include the group' do
-        actor = Struct.new(:flipper_id).new(5)
+        actor = Flipper::Actor.new(5)
         group = Flipper.register(:five_only) { |actor| actor.flipper_id == 5 }
         expect(subject.gate_values.groups).to be_empty
         subject.enable_group('five_only')
@@ -633,7 +661,7 @@ RSpec.describe Flipper::Feature do
 
     context 'with group instance' do
       it 'updates the gate values for the group' do
-        actor = Struct.new(:flipper_id).new(5)
+        actor = Flipper::Actor.new(5)
         group = Flipper.register(:five_only) { |actor| actor.flipper_id == 5 }
         expect(subject.gate_values.groups).to be_empty
         subject.enable_group(group)

@@ -80,6 +80,7 @@ module Flipper
   end
 end
 
+require 'flipper/actor'
 require 'flipper/adapter'
 require 'flipper/dsl'
 require 'flipper/errors'

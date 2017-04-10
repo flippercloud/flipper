@@ -91,3 +91,33 @@ end
 A good place to start when creating your own adapter is to copy one of the adapters mentioned above and replace the client specific code with whatever client you are attempting to adapt.
 
 I would also recommend setting `fail_fast = true` in your RSpec configuration as that will just give you one failure at a time to work through. It is also handy to have the shared adapter spec file open.
+
+## Swapping Adapters
+
+If you find yourself using one adapter and would like to swap to another, you can do that! Flipper adapters support importing another adapter's data. This will wipe the adapter you are wanting to swap to, if it isn't already clean, so please be careful.
+
+```ruby
+# Say you are using redis...
+redis_adapter = Flipper::Adapters::Redis.new(Redis.new)
+redis_flipper = Flipper.new(redis_adapter)
+
+# And redis has some stuff enabled...
+redis_flipper.enable(:search)
+redis_flipper.enable_percentage_of_time(:verbose_logging, 5)
+redis_flipper.enable_percentage_of_actors(:new_feature, 5)
+redis_flipper.enable_actor(:issues, Flipper::Actor.new('1'))
+redis_flipper.enable_actor(:issues, Flipper::Actor.new('2'))
+redis_flipper.enable_group(:request_tracing, :staff)
+
+# And you would like to switch to active record...
+ar_adapter = Flipper::Adapters::ActiveRecord.new
+ar_flipper = Flipper.new(ar_adapter)
+
+# NOTE: This wipes active record clean and copies features/gates from redis into active record.
+ar_flipper.import(redis_flipper)
+
+# active record is now identical to redis.
+ar_flipper.features.each do |feature|
+  pp feature: feature.key, values: feature.gate_values
+end
+```

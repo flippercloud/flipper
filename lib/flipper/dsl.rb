@@ -139,6 +139,15 @@ module Flipper
       feature(name).disable_percentage_of_actors
     end
 
+    # Public: Add a feature.
+    #
+    # name - The String or Symbol name of the feature.
+    #
+    # Returns result of add.
+    def add(name)
+      feature(name).add
+    end
+
     # Public: Remove a feature.
     #
     # name - The String or Symbol name of the feature.
@@ -240,6 +249,10 @@ module Flipper
     # Returns Set of Flipper::Feature instances.
     def features
       adapter.features.map { |name| feature(name) }.to_set
+    end
+
+    def import(flipper)
+      adapter.import(flipper.adapter)
     end
   end
 end

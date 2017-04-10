@@ -1,8 +1,6 @@
 # Requires the following methods:
 # * subject - The instance of the adapter
 RSpec.shared_examples_for 'a flipper adapter' do
-  let(:actor_class) { Struct.new(:flipper_id) }
-
   let(:flipper) { Flipper.new(subject) }
   let(:feature) { flipper[:stats] }
 
@@ -52,7 +50,7 @@ RSpec.shared_examples_for 'a flipper adapter' do
   end
 
   it 'fully disables all enabled things when boolean gate disabled' do
-    actor22 = actor_class.new('22')
+    actor22 = Flipper::Actor.new('22')
     expect(subject.enable(feature, boolean_gate, flipper.boolean)).to eq(true)
     expect(subject.enable(feature, group_gate, flipper.group(:admins))).to eq(true)
     expect(subject.enable(feature, actor_gate, flipper.actor(actor22))).to eq(true)
@@ -81,8 +79,8 @@ RSpec.shared_examples_for 'a flipper adapter' do
   end
 
   it 'can enable, disable and get value for actor gate' do
-    actor22 = actor_class.new('22')
-    actor_asdf = actor_class.new('asdf')
+    actor22 = Flipper::Actor.new('22')
+    actor_asdf = Flipper::Actor.new('asdf')
 
     expect(subject.enable(feature, actor_gate, flipper.actor(actor22))).to eq(true)
     expect(subject.enable(feature, actor_gate, flipper.actor(actor_asdf))).to eq(true)
@@ -158,7 +156,7 @@ RSpec.shared_examples_for 'a flipper adapter' do
   end
 
   it 'converts the actor value to a string' do
-    expect(subject.enable(feature, actor_gate, flipper.actor(actor_class.new(22)))).to eq(true)
+    expect(subject.enable(feature, actor_gate, flipper.actor(Flipper::Actor.new(22)))).to eq(true)
     result = subject.get(feature)
     expect(result[:actors]).to eq(Set['22'])
   end
@@ -198,7 +196,7 @@ RSpec.shared_examples_for 'a flipper adapter' do
   end
 
   it 'clears all the gate values for the feature on remove' do
-    actor22 = actor_class.new('22')
+    actor22 = Flipper::Actor.new('22')
     expect(subject.enable(feature, boolean_gate, flipper.boolean)).to eq(true)
     expect(subject.enable(feature, group_gate, flipper.group(:admins))).to eq(true)
     expect(subject.enable(feature, actor_gate, flipper.actor(actor22))).to eq(true)
@@ -211,7 +209,7 @@ RSpec.shared_examples_for 'a flipper adapter' do
   end
 
   it 'can clear all the gate values for a feature' do
-    actor22 = actor_class.new('22')
+    actor22 = Flipper::Actor.new('22')
     subject.add(feature)
     expect(subject.features).to include(feature.key)
 

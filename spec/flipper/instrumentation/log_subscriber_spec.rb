@@ -49,7 +49,7 @@ RSpec.describe Flipper::Instrumentation::LogSubscriber do
   end
 
   context 'feature enabled checks with a thing' do
-    let(:user) { Flipper::Types::Actor.new(Struct.new(:flipper_id).new('1')) }
+    let(:user) { Flipper::Types::Actor.new(Flipper::Actor.new('1')) }
 
     before do
       clear_logs
@@ -63,7 +63,7 @@ RSpec.describe Flipper::Instrumentation::LogSubscriber do
   end
 
   context 'changing feature enabled state' do
-    let(:user) { Flipper::Types::Actor.new(Struct.new(:flipper_id).new('1')) }
+    let(:user) { Flipper::Types::Actor.new(Flipper::Actor.new('1')) }
 
     before do
       clear_logs

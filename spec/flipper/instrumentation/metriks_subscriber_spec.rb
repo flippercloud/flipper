@@ -11,7 +11,7 @@ RSpec.describe Flipper::Instrumentation::MetriksSubscriber do
     Flipper.new(adapter, instrumenter: ActiveSupport::Notifications)
   end
 
-  let(:user) { user = Struct.new(:flipper_id).new('1') }
+  let(:user) { user = Flipper::Actor.new('1') }
 
   before do
     Metriks::Registry.default.clear

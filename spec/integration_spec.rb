@@ -6,9 +6,6 @@ RSpec.describe Flipper do
   let(:adapter)     { Flipper::Adapters::Memory.new }
   let(:flipper)     { described_class.new(adapter) }
   let(:feature)     { flipper[:search] }
-
-  let(:actor_class) { Struct.new(:flipper_id) }
-
   let(:admin_group) { flipper.group(:admins) }
   let(:dev_group)   { flipper.group(:devs) }
 
@@ -26,8 +23,8 @@ RSpec.describe Flipper do
     double 'Non Flipper Thing', flipper_id: 1,  admin?: nil, dev?: false
   end
 
-  let(:pitt)        { actor_class.new(1) }
-  let(:clooney)     { actor_class.new(10) }
+  let(:pitt)        { Flipper::Actor.new(1) }
+  let(:clooney)     { Flipper::Actor.new(10) }
 
   let(:five_percent_of_actors) { flipper.actors(5) }
   let(:five_percent_of_time) { flipper.time(5) }
@@ -123,7 +120,7 @@ RSpec.describe Flipper do
 
       it 'enables feature for actor within percentage' do
         enabled = (1..100).select do |i|
-          thing = actor_class.new(i)
+          thing = Flipper::Actor.new(i)
           feature.enabled?(thing)
         end.size
 
@@ -202,7 +199,7 @@ RSpec.describe Flipper do
 
       it 'disables actor in percentage of actors' do
         enabled = (1..100).select do |i|
-          thing = actor_class.new(i)
+          thing = Flipper::Actor.new(i)
           feature.enabled?(thing)
         end.size
 
@@ -285,7 +282,7 @@ RSpec.describe Flipper do
 
       it 'disables feature' do
         enabled = (1..100).select do |i|
-          thing = actor_class.new(i)
+          thing = Flipper::Actor.new(i)
           feature.enabled?(thing)
         end.size
 

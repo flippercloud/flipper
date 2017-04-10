@@ -107,7 +107,7 @@ RSpec.describe Flipper::DSL do
   describe '#actor' do
     context 'for a thing' do
       it 'returns actor instance' do
-        thing = Struct.new(:flipper_id).new(33)
+        thing = Flipper::Actor.new(33)
         actor = subject.actor(thing)
         expect(actor).to be_instance_of(Flipper::Types::Actor)
         expect(actor.value).to eq('33')
@@ -204,7 +204,7 @@ RSpec.describe Flipper::DSL do
 
   describe '#enable_actor/disable_actor' do
     it 'enables and disables the feature for actor' do
-      actor = Struct.new(:flipper_id).new(5)
+      actor = Flipper::Actor.new(5)
 
       expect(subject[:stats].actors_value).to be_empty
       subject.enable_actor(:stats, actor)
@@ -217,7 +217,7 @@ RSpec.describe Flipper::DSL do
 
   describe '#enable_group/disable_group' do
     it 'enables and disables the feature for group' do
-      actor = Struct.new(:flipper_id).new(5)
+      actor = Flipper::Actor.new(5)
       group = Flipper.register(:fives) { |actor| actor.flipper_id == 5 }
 
       expect(subject[:stats].groups_value).to be_empty
@@ -251,13 +251,28 @@ RSpec.describe Flipper::DSL do
     end
   end
 
+  describe '#add' do
+    it 'adds the feature' do
+      expect(subject.features).to eq(Set.new)
+      subject.add(:stats)
+      expect(subject.features).to eq(Set[subject[:stats]])
+    end
+  end
+
   describe '#remove' do
     it 'removes the feature' do
-      subject.enable(:stats)
+      subject.adapter.add(subject[:stats])
+      expect(subject.features).to eq(Set[subject[:stats]])
+      subject.remove(:stats)
+      expect(subject.features).to eq(Set.new)
+    end
+  end
 
-      expect { subject.remove(:stats) }.to change { subject.enabled?(:stats) }.to(false)
-
-      expect(subject.features).to be_empty
+  describe '#import' do
+    it 'delegates to adapter' do
+      destination_flipper = build_flipper
+      expect(subject.adapter).to receive(:import).with(destination_flipper.adapter)
+      subject.import(destination_flipper)
     end
   end
 end
