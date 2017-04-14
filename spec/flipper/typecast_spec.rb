@@ -46,7 +46,7 @@ RSpec.describe Flipper::Typecast do
     '1' => 1.0,
     '99' => 99.0,
   }.each do |value, expected|
-    context "#to_integer for #{value.inspect}" do
+    context "#to_float for #{value.inspect}" do
       it "returns #{expected}" do
         expect(described_class.to_float(value)).to be(expected)
       end
