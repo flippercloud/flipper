@@ -37,6 +37,23 @@ RSpec.describe Flipper::Typecast do
   end
 
   {
+    nil => 0.0,
+    '' => 0.0,
+    0 => 0.0,
+    1 => 1.0,
+    1.1 => 1.1,
+    '0.01' => 0.01,
+    '1' => 1.0,
+    '99' => 99.0,
+  }.each do |value, expected|
+    context "#to_integer for #{value.inspect}" do
+      it "returns #{expected}" do
+        expect(described_class.to_float(value)).to be(expected)
+      end
+    end
+  end
+
+  {
     nil => Set.new,
     '' => Set.new,
     Set.new([1, 2]) => Set.new([1, 2]),
