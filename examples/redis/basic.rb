@@ -7,8 +7,8 @@ $:.unshift(lib_path)
 
 require 'flipper/adapters/redis'
 options = {}
-if ENV['BOXEN_REDIS_URL']
-  options[:url] = ENV['BOXEN_REDIS_URL']
+if ENV['REDIS_URL']
+  options[:url] = ENV['REDIS_URL']
 end
 client = Redis.new(options)
 adapter = Flipper::Adapters::Redis.new(client)
