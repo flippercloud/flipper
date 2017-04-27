@@ -14,8 +14,8 @@ $:.unshift(lib_path)
 
 require 'flipper/adapters/redis'
 options = {url: 'redis://127.0.0.1:6379'}
-if ENV['BOXEN_REDIS_URL']
-  options[:url] = ENV['BOXEN_REDIS_URL']
+if ENV['REDIS_URL']
+  options[:url] = ENV['REDIS_URL']
 end
 client = Redis.new(options)
 namespaced_client = Redis::Namespace.new(:flipper_namespace, redis: client)

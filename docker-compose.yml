@@ -24,9 +24,9 @@ app:
     - mongo
     - memcached
   environment:
-    - BOXEN_REDIS_URL=redis://redis:6379
-    - BOXEN_MONGODB_HOST=mongo
-    - BOXEN_MEMCACHED_URL=memcached:11211
+    - REDIS_URL=redis://redis:6379
+    - MONGODB_HOST=mongo
+    - MEMCACHED_URL=memcached:11211
 bundle_cache:
   container_name: flipper_bundle_cache
   image: busybox

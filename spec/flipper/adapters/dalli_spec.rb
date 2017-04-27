@@ -5,7 +5,7 @@ require 'flipper/spec/shared_adapter_specs'
 
 RSpec.describe Flipper::Adapters::Dalli do
   let(:memory_adapter) { Flipper::Adapters::Memory.new }
-  let(:cache)   { Dalli::Client.new(ENV['BOXEN_MEMCACHED_URL'] || '127.0.0.1:11211') }
+  let(:cache)   { Dalli::Client.new(ENV['MEMCACHED_URL'] || '127.0.0.1:11211') }
   let(:adapter) { described_class.new(memory_adapter, cache) }
   let(:flipper) { Flipper.new(adapter) }
 
