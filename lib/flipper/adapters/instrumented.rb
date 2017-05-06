@@ -95,6 +95,18 @@ module Flipper
         end
       end
 
+      def get_multi(features)
+        payload = {
+          operation: :get_multi,
+          adapter_name: @adapter.name,
+          feature_names: features.map(&:name),
+        }
+
+        @instrumenter.instrument(InstrumentationName, payload) do |payload|
+          payload[:result] = @adapter.get_multi(features)
+        end
+      end
+
       # Public
       def enable(feature, gate, thing)
         payload = {
