@@ -4,7 +4,7 @@ require 'flipper/instrumenters/noop'
 module Flipper
   module Adapters
     # Internal: Adapter that wraps another adapter and instruments all adapter
-    # operations. Used by flipper dsl to provide instrumentatin for flipper.
+    # operations.
     class Instrumented < SimpleDelegator
       include ::Flipper::Adapter
 
