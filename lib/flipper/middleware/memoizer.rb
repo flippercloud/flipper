@@ -40,7 +40,9 @@ module Flipper
           flipper.preload_all
         end
 
-        flipper.preload(@opts[:preload]) if @opts[:preload]
+        if @opts[:preload]
+          flipper.preload(@opts[:preload])
+        end
 
         response = @app.call(env)
         response[2] = Rack::BodyProxy.new(response[2]) do
