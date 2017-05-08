@@ -37,8 +37,7 @@ module Flipper
         flipper.adapter.memoize = true
 
         if @opts[:preload_all]
-          names = flipper.features.map(&:name)
-          flipper.preload(names)
+          flipper.preload_all
         end
 
         flipper.preload(@opts[:preload]) if @opts[:preload]
