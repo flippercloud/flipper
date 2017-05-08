@@ -6,7 +6,7 @@ module Flipper
     # The default adapter wrapper which doesn't wrap at all.
     DEFAULT_ADAPTER_WRAPPER_BLOCK = ->(adapter) { adapter }
 
-    # The default url should be the one, the only, the website™.
+    # The default url should be the one, the only, the website.
     DEFAULT_URL = "https://www.featureflipper.com/adapter".freeze
 
     # Public: Returns a new Flipper instance with an http adapter correctly
