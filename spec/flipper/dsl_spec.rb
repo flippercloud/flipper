@@ -70,6 +70,42 @@ RSpec.describe Flipper::DSL do
     end
   end
 
+  describe '#preload_all' do
+    let(:instrumenter) { double('Instrumentor', instrument: nil) }
+    let(:dsl) do
+      names.each { |name| adapter.add subject[name] }
+      described_class.new(adapter, instrumenter: instrumenter)
+    end
+    let(:names) { %i(stats shiny) }
+    let(:features) { dsl.preload_all }
+
+    it 'returns array of features' do
+      expect(features).to all be_instance_of(Flipper::Feature)
+    end
+
+    it 'sets names' do
+      expect(features.map(&:key)).to eq(names.map(&:to_s))
+    end
+
+    it 'sets adapter' do
+      features.each do |feature|
+        expect(feature.adapter.name).to eq(dsl.adapter.name)
+      end
+    end
+
+    it 'sets instrumenter' do
+      features.each do |feature|
+        expect(feature.instrumenter).to eq(dsl.instrumenter)
+      end
+    end
+
+    it 'memoizes the feature' do
+      features.each do |feature|
+        expect(dsl.feature(feature.name)).to equal(feature)
+      end
+    end
+  end
+
   describe '#[]' do
     it_should_behave_like 'a DSL feature' do
       let(:method_name) { :[] }
