@@ -9,11 +9,7 @@ RSpec.describe Flipper::UI::Actions::Features do
     end
   end
   let(:session) do
-    if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
-      { csrf: token }
-    else
-      { '_csrf_token' => token }
-    end
+    { :csrf => token, 'csrf' => token, '_csrf_token' => token }
   end
 
   describe 'GET /features' do
