@@ -232,10 +232,26 @@ module Flipper
         result = @adapter.get_multi([@flipper[:stats], @flipper[:search], @flipper[:other]])
         assert_instance_of Hash, result
 
-        stats, search, other = result.values
+        stats = result["stats"]
+        search = result["search"]
+        other = result["other"]
         assert_equal @adapter.default_config.merge(boolean: 'true'), stats
         assert_equal @adapter.default_config, search
         assert_equal @adapter.default_config, other
+      end
+
+      def test_can_get_all_features
+        assert @adapter.add(@flipper[:stats])
+        assert @adapter.enable(@flipper[:stats], @boolean_gate, @flipper.boolean)
+        assert @adapter.add(@flipper[:search])
+
+        result = @adapter.get_all
+        assert_instance_of Hash, result
+
+        stats = result["stats"]
+        search = result["search"]
+        assert_equal @adapter.default_config.merge(boolean: 'true'), stats
+        assert_equal @adapter.default_config, search
       end
     end
   end

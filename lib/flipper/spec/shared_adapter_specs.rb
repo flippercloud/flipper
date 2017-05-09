@@ -231,15 +231,30 @@ RSpec.shared_examples_for 'a flipper adapter' do
   it 'can get multiple features' do
     expect(subject.add(flipper[:stats])).to eq(true)
     expect(subject.enable(flipper[:stats], boolean_gate, flipper.boolean)).to eq(true)
-
     expect(subject.add(flipper[:search])).to eq(true)
 
     result = subject.get_multi([flipper[:stats], flipper[:search], flipper[:other]])
     expect(result).to be_instance_of(Hash)
 
-    stats, search, other = result.values
+    stats = result["stats"]
+    search = result["search"]
+    other = result["other"]
     expect(stats).to eq(subject.default_config.merge(boolean: 'true'))
     expect(search).to eq(subject.default_config)
     expect(other).to eq(subject.default_config)
+  end
+
+  it 'can get all features' do
+    expect(subject.add(flipper[:stats])).to eq(true)
+    expect(subject.enable(flipper[:stats], boolean_gate, flipper.boolean)).to eq(true)
+    expect(subject.add(flipper[:search])).to eq(true)
+
+    result = subject.get_all
+    expect(result).to be_instance_of(Hash)
+
+    stats = result["stats"]
+    search = result["search"]
+    expect(stats).to eq(subject.default_config.merge(boolean: 'true'))
+    expect(search).to eq(subject.default_config)
   end
 end

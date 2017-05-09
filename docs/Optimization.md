@@ -48,7 +48,7 @@ The Memoizer middleware also supports a few options. Use either `preload` or `pr
     config.middleware.use Flipper::Middleware::Memoizer,
       preload: [:stats, :search, :some_feature]
     ```
-* **`:preload_all`** - A Boolean value (default: false) of whether or not all features should be preloaded. Using this results in a `preload` call with the result of `Adapter#features`. Any subsequent feature checks will be memoized and perform no network calls. I wouldn't recommend using this unless you have few features (< 30?) and nearly all of them are used on every request.
+* **`:preload_all`** - A Boolean value (default: false) of whether or not all features should be preloaded. Using this results in a `preload_all` call with the result of `Adapter#get_all`. Any subsequent feature checks will be memoized and perform no network calls. I wouldn't recommend using this unless you have few features (< 100?) and nearly all of them are used on every request.
     ```ruby
     config.middleware.use Flipper::Middleware::Memoizer,
       preload_all: true
