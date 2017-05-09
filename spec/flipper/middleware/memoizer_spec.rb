@@ -141,9 +141,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
       middleware = described_class.new(app, preload_all: true)
       middleware.call(env)
 
-      expect(adapter.count(:features)).to be(1)
-      expect(adapter.count(:get_multi)).to be(1)
-      expect(adapter.last(:get_multi).args).to eq([[flipper[:stats], flipper[:shiny]]])
+      expect(adapter.count(:get_all)).to be(1)
     end
 
     it 'caches unknown features for duration of request' do

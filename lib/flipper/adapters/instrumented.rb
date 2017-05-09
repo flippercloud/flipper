@@ -107,6 +107,17 @@ module Flipper
         end
       end
 
+      def get_all
+        payload = {
+          operation: :get_all,
+          adapter_name: @adapter.name,
+        }
+
+        @instrumenter.instrument(InstrumentationName, payload) do |payload|
+          payload[:result] = @adapter.get_all
+        end
+      end
+
       # Public
       def enable(feature, gate, thing)
         payload = {
