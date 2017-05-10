@@ -56,8 +56,8 @@ module Flipper
           flipper.preload_all
         end
 
-        if @opts[:preload]
-          flipper.preload(@opts[:preload])
+        if (preload = @opts[:preload])
+          flipper.preload(preload)
         end
 
         response = @app.call(env)
