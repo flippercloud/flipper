@@ -36,8 +36,8 @@ flipper = Flipper.new(adapter, instrumenter: ActiveSupport::Notifications)
 # flipper[:search_performance_another_long_thing].enable
 # flipper[:gauges_tracking].enable
 # flipper[:unused].disable
-# flipper[:suits].enable_actor Flipper::UI::Actor.new('1')
-# flipper[:suits].enable_actor Flipper::UI::Actor.new('6')
+# flipper[:suits].enable_actor Flipper::Actor.new('1')
+# flipper[:suits].enable_actor Flipper::Actor.new('6')
 # flipper[:secrets].enable_group :admins
 # flipper[:secrets].enable_group :early_access
 # flipper[:logging].enable_percentage_of_time 5

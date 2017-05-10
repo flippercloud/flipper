@@ -4,7 +4,6 @@ require 'flipper/middleware/setup_env'
 require 'flipper/middleware/memoizer'
 require 'flipper/api/middleware'
 require 'flipper/api/json_params'
-require 'flipper/api/actor'
 
 module Flipper
   module Api

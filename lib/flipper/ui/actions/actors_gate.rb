@@ -31,7 +31,7 @@ module Flipper
             redirect_to("/features/#{feature.key}/actors?error=#{error}")
           end
 
-          actor = Flipper::UI::Actor.new(value)
+          actor = Flipper::Actor.new(value)
 
           case params['operation']
           when 'enable'

@@ -2,7 +2,7 @@ require 'helper'
 
 RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
   let(:app) { build_api(flipper) }
-  let(:actor) { Flipper::Api::Actor.new('1') }
+  let(:actor) { Flipper::Actor.new('1') }
 
   describe 'enable' do
     before do
@@ -23,7 +23,7 @@ RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
   end
 
   describe 'disable' do
-    let(:actor) { Flipper::Api::Actor.new('1') }
+    let(:actor) { Flipper::Actor.new('1') }
 
     before do
       flipper[:my_feature].enable_actor(actor)

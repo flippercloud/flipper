@@ -82,7 +82,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
       let(:value) { 'User:6' }
 
       before do
-        flipper[:search].enable_actor Flipper::UI::Actor.new('User:6')
+        flipper[:search].enable_actor Flipper::Actor.new('User:6')
         post 'features/search/actors',
              { 'value' => value, 'operation' => 'disable', 'authenticity_token' => token },
              'rack.session' => session
