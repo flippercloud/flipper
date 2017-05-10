@@ -53,6 +53,12 @@ The Memoizer middleware also supports a few options. Use either `preload` or `pr
     config.middleware.use Flipper::Middleware::Memoizer,
       preload_all: true
     ```
+* **`:unless`** - A block that prevents preloading and memoization if it evaluates to true.
+    ```ruby
+    # skip preloading and memoizing if path starts with /assets
+    config.middleware.use Flipper::Middleware::Memoizer,
+      unless: ->(request) { request.path =~ /\A\/assets/ }
+    ```
 
 ## Cache Adapters
 
