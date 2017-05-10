@@ -502,7 +502,7 @@ Successful disabling of the group will return a 200 HTTP status and the feature 
 **Request**
 
 ```
-curl -X POST -d "flipper_id=User:1" http://example.com/flipper/api/features/reports/actors
+curl -X POST -d "flipper_id=User;1" http://example.com/flipper/api/features/reports/actors
 ```
 
 **Response**
@@ -557,7 +557,7 @@ Successful enabling of the actor will return a 200 HTTP status and the feature o
 **Request**
 
 ```
-curl -X DELETE -d "flipper_id=User:1" http://example.com/flipper/api/features/reports/actors
+curl -X DELETE -d "flipper_id=User;1" http://example.com/flipper/api/features/reports/actors
 ```
 
 **Response**

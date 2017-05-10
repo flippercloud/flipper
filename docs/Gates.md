@@ -92,13 +92,13 @@ The one exception to this rule is if you have globally unique `flipper_ids`, suc
 ```ruby
 class User
   def flipper_id
-    "User:#{id}"
+    "User;#{id}"
   end
 end
 
 class Group
   def flipper_id
-    "Group:#{id}"
+    "Group;#{id}"
   end
 end
 ```

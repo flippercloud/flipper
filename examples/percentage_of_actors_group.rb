@@ -21,7 +21,7 @@ class User
 
   # Must respond to flipper_id
   def flipper_id
-    "User:#{@id}"
+    "User;#{@id}"
   end
 end
 
