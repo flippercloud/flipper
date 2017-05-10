@@ -94,6 +94,18 @@ RSpec.describe Flipper::Adapters::Http do
     end
   end
 
+  describe "#get_all" do
+    it "raises error when not successful response" do
+      stub_request(:get, "http://app.com/flipper/features")
+        .to_return(status: 503, body: "", headers: {})
+
+      adapter = described_class.new(uri: URI('http://app.com/flipper'))
+      expect do
+        adapter.get_all
+      end.to raise_error(Flipper::Adapters::Http::Error)
+    end
+  end
+
   describe "#features" do
     it "raises error when not successful response" do
       stub_request(:get, "http://app.com/flipper/features")
