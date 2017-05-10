@@ -59,6 +59,25 @@ module Flipper
         result
       end
 
+      def get_all
+        response = @client.get("/features")
+        raise Error, response unless response.is_a?(Net::HTTPOK)
+
+        parsed_response = JSON.parse(response.body)
+        parsed_features = parsed_response.fetch('features')
+        gates_by_key = parsed_features.each_with_object({}) do |parsed_feature, hash|
+          hash[parsed_feature['key']] = parsed_feature['gates']
+          hash
+        end
+
+        result = {}
+        gates_by_key.keys.each do |key|
+          feature = Feature.new(key, self)
+          result[feature.key] = result_for_feature(feature, gates_by_key[feature.key])
+        end
+        result
+      end
+
       def features
         response = @client.get('/features')
         raise Error, response unless response.is_a?(Net::HTTPOK)

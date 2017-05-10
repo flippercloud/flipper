@@ -181,6 +181,14 @@ module Flipper
       features
     end
 
+    # Public: Preload all the adapters features.
+    #
+    # Returns an Array of Flipper::Feature.
+    def preload_all
+      keys = @adapter.get_all.keys
+      keys.map { |key| feature(key) }
+    end
+
     # Public: Shortcut access to a feature instance by name.
     #
     # name - The String or Symbol name of the feature.

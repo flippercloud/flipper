@@ -31,6 +31,7 @@ The basic API for an adapter is this:
 * `enable(feature, gate, thing)` - Enable a gate for a thing.
 * `disable(feature, gate, thing)` - Disable a gate for a thing.
 * `get_multi(features)` - Get all gate values for several features at once. Implementation is optional. If none provided, default implementation performs N+1 `get` calls where N is the number of elements in the features parameter.
+* `get_all` - Get all gate values for all features at once. Implementation is optional. If none provided, default implementation performs two calls, one to `features` to get the names of all features and one to `get_multi` with the feature names from the first call.
 
 If you would like to make your own adapter, there are shared adapter specs (RSpec) and tests (MiniTest) that you can use to verify that you have everything working correctly.
 

@@ -90,7 +90,7 @@ RSpec.describe Flipper::Adapters::Memoizable do
         subject.memoize = true
       end
 
-      it 'memoizes feature' do
+      it 'memoizes features' do
         names = %i(stats shiny)
         features = names.map { |name| flipper[name] }
         results = subject.get_multi(features)
@@ -111,6 +111,39 @@ RSpec.describe Flipper::Adapters::Memoizable do
         features = names.map { |name| flipper[name] }
         result = subject.get_multi(features)
         adapter_result = adapter.get_multi(features)
+        expect(result).to eq(adapter_result)
+      end
+    end
+  end
+
+  describe '#get_all' do
+    context "with memoization enabled" do
+      before do
+        subject.memoize = true
+      end
+
+      it 'memoizes features' do
+        names = %i(stats shiny)
+        features = names.map { |name| flipper[name].tap(&:enable) }
+        results = subject.get_all
+        features.each do |feature|
+          expect(cache[feature.key]).not_to be(nil)
+          expect(cache[feature.key]).to be(results[feature.key])
+        end
+        expect(cache[subject.class::FeaturesKey]).to eq(names.map(&:to_s).to_set)
+      end
+    end
+
+    context "with memoization disabled" do
+      before do
+        subject.memoize = false
+      end
+
+      it 'returns result' do
+        names = %i(stats shiny)
+        names.map { |name| flipper[name].tap(&:enable) }
+        result = subject.get_all
+        adapter_result = adapter.get_all
         expect(result).to eq(adapter_result)
       end
     end

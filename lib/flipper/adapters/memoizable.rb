@@ -26,6 +26,7 @@ module Flipper
         @name = :memoizable
         @cache = cache || {}
         @memoize = false
+        @all_fetched = false
       end
 
       # Public
@@ -90,6 +91,27 @@ module Flipper
         end
       end
 
+      def get_all
+        if memoizing?
+          unless @all_fetched
+            result = @adapter.get_all
+            result.each do |key, value|
+              cache[key] = value
+            end
+            cache[FeaturesKey] = result.keys.to_set
+            @all_fetched = true
+          end
+
+          result = {}
+          features.each do |key|
+            result[key] = cache[key]
+          end
+          result
+        else
+          @adapter.get_all
+        end
+      end
+
       # Public
       def enable(feature, gate, thing)
         result = @adapter.enable(feature, gate, thing)
@@ -108,6 +130,7 @@ module Flipper
       #
       # value - The Boolean that decides if local caching is on.
       def memoize=(value)
+        @all_fetched = false
         cache.clear
         @memoize = value
       end

@@ -18,6 +18,14 @@ module Flipper
       end
     end
 
+    # Public: Get all features and gate values in one call. Defaults to one call
+    # to features and another to get_multi. Feel free to override per adapter to
+    # make this more efficient.
+    def get_all
+      instances = features.map { |key| Flipper::Feature.new(key, self) }
+      get_multi(instances)
+    end
+
     # Public: Get multiple features in one call. Defaults to one get per
     # feature. Feel free to override per adapter to make this more efficient and
     # reduce network calls.

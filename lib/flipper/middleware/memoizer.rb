@@ -32,16 +32,31 @@ module Flipper
       end
 
       def call(env)
+        request = Rack::Request.new(env)
+
+        if skip_memoize?(request)
+          @app.call(env)
+        else
+          memoized_call(env)
+        end
+      end
+
+      private
+
+      def skip_memoize?(request)
+        @opts[:unless] && @opts[:unless].call(request)
+      end
+
+      def memoized_call(env)
         flipper = env.fetch('flipper')
         original = flipper.adapter.memoizing?
         flipper.adapter.memoize = true
 
-        if @opts[:preload_all]
-          names = flipper.features.map(&:name)
-          flipper.preload(names)
-        end
+        flipper.preload_all if @opts[:preload_all]
 
-        flipper.preload(@opts[:preload]) if @opts[:preload]
+        if (preload = @opts[:preload])
+          flipper.preload(preload)
+        end
 
         response = @app.call(env)
         response[2] = Rack::BodyProxy.new(response[2]) do

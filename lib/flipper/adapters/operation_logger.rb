@@ -17,6 +17,7 @@ module Flipper
         :clear,
         :get,
         :get_multi,
+        :get_all,
         :enable,
         :disable,
       ].freeze
@@ -70,6 +71,12 @@ module Flipper
       def get_multi(features)
         @operations << Operation.new(:get_multi, [features])
         @adapter.get_multi(features)
+      end
+
+      # Public
+      def get_all
+        @operations << Operation.new(:get_all, [])
+        @adapter.get_all
       end
 
       # Public
