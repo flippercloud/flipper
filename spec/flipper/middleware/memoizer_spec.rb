@@ -253,4 +253,36 @@ RSpec.describe Flipper::Middleware::Memoizer do
 
     include_examples 'flipper middleware'
   end
+
+  context 'with preload_all and unless option' do
+    let(:app) do
+      # ensure scoped for builder block, annoying...
+      middleware = described_class
+
+      Rack::Builder.new do
+        use middleware, {
+          preload_all: true,
+          unless: ->(request) { request.path =~ /\A\/assets\// },
+        }
+
+        map '/' do
+          run ->(_env) { [200, {}, []] }
+        end
+
+        map '/fail' do
+          run ->(_env) { raise 'FAIL!' }
+        end
+      end.to_app
+    end
+
+    it 'does NOT preload_all if request matches unless block' do
+      expect(flipper).to receive(:preload_all).never
+      get '/assets/foo.png', {}, 'flipper' => flipper
+    end
+
+    it 'does preload_all if request does NOT match unless block' do
+      expect(flipper).to receive(:preload_all).once
+      get '/some/other/path', {}, 'flipper' => flipper
+    end
+  end
 end

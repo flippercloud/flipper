@@ -32,6 +32,22 @@ module Flipper
       end
 
       def call(env)
+        request = Rack::Request.new(env)
+
+        if skip_memoize?(request)
+          @app.call(env)
+        else
+          memoized_call(env)
+        end
+      end
+
+      private
+
+      def skip_memoize?(request)
+        @opts[:unless] && @opts[:unless].call(request)
+      end
+
+      def memoized_call(env)
         flipper = env.fetch('flipper')
         original = flipper.adapter.memoizing?
         flipper.adapter.memoize = true
