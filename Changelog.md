@@ -13,6 +13,11 @@
 * Finish API and HTTP adapter that speaks to API.
 * Add flipper cloud adapter (https://github.com/jnunemaker/flipper/pull/249). Nothing to see here yet, but good stuff soon. ;)
 * Add importing (https://github.com/jnunemaker/flipper/pull/251).
+* Added Adapter#get_all to allow for more efficient preload_all (https://github.com/jnunemaker/flipper/pull/255).
+* Added :unless option to Flipper::Middleware::Memoizer to allow skipping memoization and preloading for certain requests.
+* Made it possible to instrument Flipper::Cloud (https://github.com/jnunemaker/flipper/commit/4b10e4d807772202f63881f5e2c00d11ac58481f).
+* Made it possible to wrap Http adapter when using Flipper::Cloud (https://github.com/jnunemaker/flipper/commit/4b10e4d807772202f63881f5e2c00d11ac58481f).
+* Instrument get_multi in instrumented adapter (https://github.com/jnunemaker/flipper/commit/951d25c5ce07d3b56b0b2337adf5f6bcbe4050e7).
 
 ## 0.10.2
 
