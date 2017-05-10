@@ -1,5 +1,6 @@
 # Requires the following methods:
 # * subject - The instance of the adapter
+# rubocop:disable Metrics/BlockLength
 RSpec.shared_examples_for 'a flipper adapter' do
   let(:flipper) { Flipper.new(subject) }
   let(:feature) { flipper[:stats] }

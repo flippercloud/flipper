@@ -141,7 +141,7 @@ RSpec.describe Flipper::Adapters::Memoizable do
 
       it 'returns result' do
         names = %i(stats shiny)
-        features = names.map { |name| flipper[name].tap(&:enable) }
+        names.map { |name| flipper[name].tap(&:enable) }
         result = subject.get_all
         adapter_result = adapter.get_all
         expect(result).to eq(adapter_result)

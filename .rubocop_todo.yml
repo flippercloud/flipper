@@ -186,3 +186,13 @@ Style/IfInsideElse:
 Style/MethodMissing:
   Exclude:
     - 'lib/flipper/types/actor.rb'
+
+Style/AccessorMethodName:
+  Exclude:
+    - 'lib/flipper/adapter.rb'
+    - 'lib/flipper/adapters/http.rb'
+    - 'lib/flipper/adapters/instrumented.rb'
+    - 'lib/flipper/adapters/memoizable.rb'
+    - 'lib/flipper/adapters/operation_logger.rb'
+    - 'lib/flipper/adapters/memory.rb'
+    - 'lib/flipper/adapters/pstore.rb'

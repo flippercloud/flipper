@@ -52,9 +52,7 @@ module Flipper
         original = flipper.adapter.memoizing?
         flipper.adapter.memoize = true
 
-        if @opts[:preload_all]
-          flipper.preload_all
-        end
+        flipper.preload_all if @opts[:preload_all]
 
         if (preload = @opts[:preload])
           flipper.preload(preload)

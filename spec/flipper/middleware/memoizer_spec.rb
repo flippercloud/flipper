@@ -260,10 +260,8 @@ RSpec.describe Flipper::Middleware::Memoizer do
       middleware = described_class
 
       Rack::Builder.new do
-        use middleware, {
-          preload_all: true,
-          unless: ->(request) { request.path =~ /\A\/assets\// },
-        }
+        use middleware, preload_all: true,
+                        unless: ->(request) { request.path.start_with?("/assets") }
 
         map '/' do
           run ->(_env) { [200, {}, []] }
