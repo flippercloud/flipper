@@ -21,6 +21,7 @@ module Flipper
           @basic_auth_password = options[:basic_auth_password]
           @read_timeout = options[:read_timeout]
           @open_timeout = options[:open_timeout]
+          @debug = options[:debug]
         end
 
         def get(path)
@@ -54,6 +55,7 @@ module Flipper
 
         def build_http(uri)
           http = Net::HTTP.new(uri.host, uri.port)
+          http.set_debug_output(STDOUT) if @debug
           http.read_timeout = @read_timeout if @read_timeout
           http.open_timeout = @open_timeout if @open_timeout
 
