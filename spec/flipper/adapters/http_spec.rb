@@ -119,6 +119,7 @@ RSpec.describe Flipper::Adapters::Http do
   end
 
   describe 'configuration' do
+    let(:debug_output) { object_double($stderr) }
     let(:options) do
       {
         uri: URI('http://app.com/mount-point'),
@@ -127,6 +128,7 @@ RSpec.describe Flipper::Adapters::Http do
         basic_auth_password: 'password',
         read_timeout: 100,
         open_timeout: 40,
+        debug_output: debug_output,
       }
     end
     subject { described_class.new(options) }
@@ -150,6 +152,14 @@ RSpec.describe Flipper::Adapters::Http do
         a_request(:get, 'http://app.com/mount-point/features/feature_panel')
         .with(basic_auth: %w(username password))
       ).to have_been_made.once
+    end
+
+    it 'allows client to set debug output' do
+      user_agent = Net::HTTP.new("app.com")
+      allow(Net::HTTP).to receive(:new).and_return(user_agent)
+
+      expect(user_agent).to receive(:set_debug_output).with(debug_output)
+      subject.get(feature)
     end
   end
 
