@@ -55,7 +55,6 @@ module Flipper
 
         def build_http(uri)
           http = Net::HTTP.new(uri.host, uri.port)
-          http.set_debug_output(STDOUT) if @debug
           http.read_timeout = @read_timeout if @read_timeout
           http.open_timeout = @open_timeout if @open_timeout
           http.set_debug_output(@debug_output) if @debug_output
