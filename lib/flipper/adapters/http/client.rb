@@ -21,7 +21,7 @@ module Flipper
           @basic_auth_password = options[:basic_auth_password]
           @read_timeout = options[:read_timeout]
           @open_timeout = options[:open_timeout]
-          @debug = options[:debug]
+          @debug_output = options[:debug_output]
         end
 
         def get(path)
@@ -58,6 +58,7 @@ module Flipper
           http.set_debug_output(STDOUT) if @debug
           http.read_timeout = @read_timeout if @read_timeout
           http.open_timeout = @open_timeout if @open_timeout
+          http.set_debug_output(@debug_output) if @debug_output
 
           if uri.scheme == HTTPS_SCHEME
             http.use_ssl = true

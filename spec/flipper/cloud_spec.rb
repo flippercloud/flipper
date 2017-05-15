@@ -68,4 +68,10 @@ RSpec.describe Flipper::Cloud do
     # instance.adapter is memoizable adapter instance
     expect(instance.adapter.adapter).to be_instance_of(Flipper::Adapters::Instrumented)
   end
+
+  it 'can set debug_output' do
+    expect(Flipper::Adapters::Http::Client).to receive(:new)
+      .with(hash_including(debug_output: STDOUT))
+    described_class.new('asdf', debug_output: STDOUT)
+  end
 end

@@ -19,7 +19,7 @@ module Flipper
                              basic_auth_password: options[:basic_auth_password],
                              read_timeout: options[:read_timeout],
                              open_timeout: options[:open_timeout],
-                             debug: options[:debug])
+                             debug_output: options[:debug_output])
         @name = :http
       end
 

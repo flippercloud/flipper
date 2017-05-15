@@ -31,7 +31,7 @@ module Flipper
         },
         read_timeout: options[:read_timeout],
         open_timeout: options[:open_timeout],
-        debug: options[:debug],
+        debug_output: options[:debug_output],
       }
       adapter = Flipper::Adapters::Http.new(http_options)
 
