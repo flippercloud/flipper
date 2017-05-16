@@ -8,14 +8,14 @@ module SpecHelpers
     base.let(:app) { build_app(flipper) }
   end
 
-  def build_app(flipper)
-    Flipper::UI.app(flipper) do |builder|
+  def build_app(flipper, options = {})
+    Flipper::UI.app(flipper, options) do |builder|
       builder.use Rack::Session::Cookie, secret: 'test'
     end
   end
 
-  def build_api(flipper)
-    Flipper::Api.app(flipper)
+  def build_api(flipper, options = {})
+    Flipper::Api.app(flipper, options)
   end
 
   def build_flipper(adapter = build_memory_adapter)

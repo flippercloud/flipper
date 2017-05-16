@@ -29,6 +29,9 @@ module Flipper
         headers: {
           "Feature-Flipper-Token" => token,
         },
+        read_timeout: options[:read_timeout],
+        open_timeout: options[:open_timeout],
+        debug_output: options[:debug_output],
       }
       adapter = Flipper::Adapters::Http.new(http_options)
 

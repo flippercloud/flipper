@@ -29,6 +29,7 @@ module Flipper
 
         @app = app
         @opts = opts
+        @env_key = opts.fetch(:env_key, 'flipper')
       end
 
       def call(env)
@@ -48,7 +49,7 @@ module Flipper
       end
 
       def memoized_call(env)
-        flipper = env.fetch('flipper')
+        flipper = env.fetch(@env_key)
         original = flipper.adapter.memoizing?
         flipper.adapter.memoize = true
 
