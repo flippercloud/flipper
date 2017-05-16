@@ -19,8 +19,9 @@ module Flipper
       #   # using with a block that yields a flipper instance
       #   use Flipper::Middleware::SetEnv, lambda { Flipper.new(...) }
       #
-      def initialize(app, flipper_or_block)
+      def initialize(app, flipper_or_block, options = {})
         @app = app
+        @env_key = options.fetch(:env_key, 'flipper')
 
         if flipper_or_block.respond_to?(:call)
           @flipper_block = flipper_or_block
@@ -30,7 +31,7 @@ module Flipper
       end
 
       def call(env)
-        env['flipper'.freeze] ||= flipper
+        env[@env_key] ||= flipper
         @app.call(env)
       end
 

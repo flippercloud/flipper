@@ -9,8 +9,9 @@ end
 module Flipper
   module Api
     class Middleware
-      def initialize(app)
+      def initialize(app, options = {})
         @app = app
+        @env_key = options.fetch(:env_key, 'flipper')
 
         @action_collection = ActionCollection.new
         @action_collection.add Api::V1::Actions::PercentageOfTimeGate
@@ -33,7 +34,7 @@ module Flipper
         if action_class.nil?
           @app.call(env)
         else
-          flipper = env.fetch('flipper')
+          flipper = env.fetch(@env_key)
           action_class.run(flipper, request)
         end
       end
