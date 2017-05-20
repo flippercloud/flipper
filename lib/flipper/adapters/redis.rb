@@ -16,7 +16,8 @@ module Flipper
       # Public: Initializes a Redis flipper adapter.
       #
       # client - The Redis client to use. Feel free to namespace it.
-      def initialize(client)
+      def initialize(client, options = {})
+        @namespace = options.fetch(:namespace)
         @client = client
         @name = :redis
       end
@@ -28,22 +29,22 @@ module Flipper
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
-        @client.sadd FeaturesKey, feature.key
+        @client.sadd FeaturesKey, namespaced_key(feature)
         true
       end
 
       # Public: Removes a feature from the set of known features.
       def remove(feature)
         @client.multi do
-          @client.srem FeaturesKey, feature.key
-          @client.del feature.key
+          @client.srem FeaturesKey, namespaced_key(feature)
+          @client.del namespaced_key(feature)
         end
         true
       end
 
       # Public: Clears the gate values for a feature.
       def clear(feature)
-        @client.del feature.key
+        @client.del namespaced_key(feature)
         true
       end
 
@@ -74,9 +75,9 @@ module Flipper
       def enable(feature, gate, thing)
         case gate.data_type
         when :boolean, :integer
-          @client.hset feature.key, gate.key, thing.value.to_s
+          @client.hset namespaced_key(feature), gate.key, thing.value.to_s
         when :set
-          @client.hset feature.key, to_field(gate, thing), 1
+          @client.hset namespaced_key(feature), to_field(gate, thing), 1
         else
           unsupported_data_type gate.data_type
         end
@@ -94,11 +95,11 @@ module Flipper
       def disable(feature, gate, thing)
         case gate.data_type
         when :boolean
-          @client.del feature.key
+          @client.del namespaced_key(feature)
         when :integer
-          @client.hset feature.key, gate.key, thing.value.to_s
+          @client.hset namespaced_key(feature), gate.key, thing.value.to_s
         when :set
-          @client.hdel feature.key, to_field(gate, thing)
+          @client.hdel namespaced_key(feature), to_field(gate, thing)
         else
           unsupported_data_type gate.data_type
         end
@@ -110,7 +111,7 @@ module Flipper
       #
       # Returns a Hash of fields => values.
       def doc_for(feature)
-        @client.hgetall(feature.key)
+        @client.hgetall(namespaced_key(feature))
       end
 
       def docs_for(features)
@@ -143,6 +144,14 @@ module Flipper
       # Private: Converts gate and thing to hash key.
       def to_field(gate, thing)
         "#{gate.key}/#{thing.value}"
+      end
+
+      def namespaced_key(feature)
+        if @namespace
+          @namespace + ':' + feature.key
+        else
+          feature.key
+        end
       end
 
       # Private: Returns a set of values given an array of fields and a gate.
