@@ -15,7 +15,7 @@
     <form action="<%= script_name %>/features/<%= @feature.key %>/actors" method="post">
       <%== csrf_input_tag %>
       <input type="hidden" name="operation" value="enable">
-      <input type="text" name="value" placeholder="ie: User:6">
+      <input type="text" name="value" placeholder="ie: user:6">
       <input type="submit" value="Add Actor" class="btn">
     </form>
   </div>
