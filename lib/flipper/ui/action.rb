@@ -179,18 +179,22 @@ module Flipper
 
       # Private
       def view_with_layout(&block)
-        view :layout, &block
+        path = if Flipper::UI.custom_layout
+                 Pathname.new(Flipper::UI.custom_layout)
+               else
+                 views_path.join("layout.erb")
+               end
+        view path, &block
       end
 
       # Private
       def view_without_layout(name)
-        view name
+        path = views_path.join("#{name}.erb")
+        view path
       end
 
       # Private
-      def view(name)
-        path = views_path.join("#{name}.erb")
-
+      def view(path)
         raise "Template does not exist: #{path}" unless path.exist?
 
         contents = path.read

@@ -25,6 +25,11 @@ module Flipper
       # set to false, users of the UI cannot create features. All feature
       # creation will need to be done through the conigured flipper instance.
       attr_accessor :feature_creation_enabled
+
+      # Public: If you set this, the UI will use your layout instead of the
+      # default. Must use the absolute path. See
+      # flipper/lib/flipper/ui/views/layout.erb for an example.
+      attr_accessor :custom_layout
     end
 
     self.feature_creation_enabled = true
