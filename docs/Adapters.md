@@ -4,15 +4,15 @@ I plan on supporting the adapters in the flipper repo. Other adapters are welcom
 
 ## Officially Supported
 
-* [memory adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb) – great for tests
-* [PStore adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/pstore.rb) – great for when a local file is enough
-* [Mongo adapter](https://github.com/jnunemaker/flipper/blob/master/docs/mongo)
-* [Redis adapter](https://github.com/jnunemaker/flipper/blob/master/docs/redis)
 * [ActiveRecord adapter](https://github.com/jnunemaker/flipper/blob/master/docs/active_record) - Rails 3, 4, and 5.
-* [Sequel adapter](https://github.com/jnunemaker/flipper/blob/master/docs/sequel)
 * [Cassanity adapter](https://github.com/jnunemaker/flipper-cassanity)
-* [read-only adapter](https://github.com/jnunemaker/flipper/blob/master/docs/read-only)
 * [Http adapter](https://github.com/jnunemaker/flipper/blob/master/docs/http)
+* [memory adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb) – great for tests
+* [Mongo adapter](https://github.com/jnunemaker/flipper/blob/master/docs/mongo)
+* [PStore adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/pstore.rb) – great for when a local file is enough
+* [read-only adapter](https://github.com/jnunemaker/flipper/blob/master/docs/read-only)
+* [Redis adapter](https://github.com/jnunemaker/flipper/blob/master/docs/redis)
+* [Sequel adapter](https://github.com/jnunemaker/flipper/blob/master/docs/sequel)
 
 ## Community Supported
 
