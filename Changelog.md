@@ -18,6 +18,11 @@
 * Made it possible to instrument Flipper::Cloud (https://github.com/jnunemaker/flipper/commit/4b10e4d807772202f63881f5e2c00d11ac58481f).
 * Made it possible to wrap Http adapter when using Flipper::Cloud (https://github.com/jnunemaker/flipper/commit/4b10e4d807772202f63881f5e2c00d11ac58481f).
 * Instrument get_multi in instrumented adapter (https://github.com/jnunemaker/flipper/commit/951d25c5ce07d3b56b0b2337adf5f6bcbe4050e7).
+* Allow instrumenting Flipper::Cloud http adapter (https://github.com/jnunemaker/flipper/pull/253).
+* Add DSL#preload_all and Adapter#get_all to allow for making even more efficient loading of features (https://github.com/jnunemaker/flipper/pull/255).
+* Allow setting debug output of http adapter (https://github.com/jnunemaker/flipper/pull/256 and https://github.com/jnunemaker/flipper/pull/258).
+* Allow setting env key for middleware (https://github.com/jnunemaker/flipper/pull/259).
+* Added ActiveSupport cache store adapter for use with Rails.cache (https://github.com/jnunemaker/flipper/pull/265).
 
 ## 0.10.2
 
