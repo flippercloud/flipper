@@ -6,7 +6,7 @@ A [CacheStore](http://api.rubyonrails.org/classes/ActiveSupport/Cache/Store.html
 
 Add this line to your application's Gemfile:
 
-  gem 'flipper-cache-store'
+    gem 'flipper-cache-store'
 
 And then execute:
 
@@ -28,12 +28,15 @@ cache = ActiveSupport::Cache::MemoryStore.new
 adapter = Flipper::Adapters::CacheStore.new(memory_adapter, cache, expires_in: 5.minutes)
 flipper = Flipper.new(adapter)
 ```
-Setting `:expires_in` is optional and will set an expiration time on Flipper cache keys.  If specified, all flipper keys will use this `expires_in` over the `expires_in` passed to your ActiveSupport cache constructor.
+Setting `expires_in` is optional and will set an expiration time on Flipper cache keys.  If specified, all flipper keys will use this `expires_in` over the `expires_in` passed to your ActiveSupport cache constructor.
 
 ## Internals
 
-Each feature is stored in the underlying cache store.  This is an example using `ActiveSupport::Cache::MemoryStore` with the [Flipper memory adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb).
-Each key is namespaced under `flipper/v1/feature/:feature_key`
+Each feature is stored in the underlying cache store.
+
+This is an example using `ActiveSupport::Cache::MemoryStore` with the [Flipper memory adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb).
+
+Each key is namespaced under `flipper/v1/feature/`
 
 ```ruby
 require 'active_support/cache'
