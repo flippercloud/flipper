@@ -217,7 +217,6 @@ module Flipper
     # name - The String or Symbol name of the feature.
     #
     # Returns an instance of Flipper::Group.
-    # Raises Flipper::GroupNotRegistered if group has not been registered.
     def group(name)
       Flipper.group(name)
     end

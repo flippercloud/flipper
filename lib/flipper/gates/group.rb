@@ -28,12 +28,8 @@ module Flipper
           false
         else
           value.any? do |name|
-            begin
-              group = Flipper.group(name)
-              group.match?(context.thing, context)
-            rescue GroupNotRegistered
-              false
-            end
+            group = Flipper.group(name)
+            group.match?(context.thing, context)
           end
         end
       end
