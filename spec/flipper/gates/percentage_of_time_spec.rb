@@ -7,10 +7,10 @@ RSpec.describe Flipper::Gates::PercentageOfTime do
     described_class.new
   end
 
-  def context(integer, feature = feature_name, thing = nil)
+  def context(percentage_of_time_value, feature = feature_name, thing = nil)
     Flipper::FeatureCheckContext.new(
       feature_name: feature,
-      values: Flipper::GateValues.new(percentage_of_actors: integer),
+      values: Flipper::GateValues.new(percentage_of_time: percentage_of_time_value),
       thing: thing || Flipper::Types::Actor.new(Flipper::Actor.new(1))
     )
   end
@@ -19,20 +19,16 @@ RSpec.describe Flipper::Gates::PercentageOfTime do
     context 'for fractional percentage' do
       let(:decimal) { 0.001}
       let(:percentage) { decimal * 100 }
-      let(:number_of_actors) { 10_000 }
-
-      let(:actors) do
-        (1..number_of_actors).map { |n| Flipper::Actor.new(n) }
-      end
+      let(:number_of_invocations) { 10_000 }
 
       subject { described_class.new }
 
       it 'enables feature for accurate percentage of time' do
-        margin_of_error = 0.02 * number_of_actors
-        expected_open_count = 100_000 * decimal
+        margin_of_error = 0.02 * number_of_invocations
+        expected_open_count = number_of_invocations * decimal
 
-        open_count = actors.select { |actor|
-          context = context(percentage, :feature, actor)
+        open_count = (1..number_of_invocations).select { |actor|
+          context = context(percentage, :feature, Flipper::Actor.new("1"))
           subject.open?(context)
         }.size
 

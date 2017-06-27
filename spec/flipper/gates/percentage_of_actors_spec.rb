@@ -7,10 +7,10 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
     described_class.new
   end
 
-  def context(integer, feature = feature_name, thing = nil)
+  def context(percentage_of_actors_value, feature = feature_name, thing = nil)
     Flipper::FeatureCheckContext.new(
       feature_name: feature,
-      values: Flipper::GateValues.new(percentage_of_actors: integer),
+      values: Flipper::GateValues.new(percentage_of_actors: percentage_of_actors_value),
       thing: thing || Flipper::Types::Actor.new(Flipper::Actor.new(1))
     )
   end
@@ -63,7 +63,7 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
 
       it 'enables feature for accurate number of actors' do
         margin_of_error = 0.02 * number_of_actors
-        expected_open_count = 100_000 * decimal
+        expected_open_count = number_of_actors * decimal
 
         open_count = actors.select { |actor|
           context = context(percentage, :feature, actor)
