@@ -19,20 +19,18 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
     context 'when compared against two features' do
       let(:percentage) { 0.05 }
       let(:percentage_as_integer) { percentage * 100 }
-      let(:number_of_actors) { 100 }
+      let(:number_of_actors) { 10_000 }
 
       let(:actors) do
         (1..number_of_actors).map { |n| Flipper::Actor.new(n) }
       end
 
       let(:feature_one_enabled_actors) do
-        gate = described_class.new
-        actors.select { |actor| gate.open? context(percentage_as_integer, :name_one, actor) }
+        actors.select { |actor| subject.open? context(percentage_as_integer, :name_one, actor) }
       end
 
       let(:feature_two_enabled_actors) do
-        gate = described_class.new
-        actors.select { |actor| gate.open? context(percentage_as_integer, :name_two, actor) }
+        actors.select { |actor| subject.open? context(percentage_as_integer, :name_two, actor) }
       end
 
       it 'does not enable both features for same set of actors' do
@@ -49,6 +47,30 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
         ].each do |actual_enabled_size|
           expect(actual_enabled_size).to be_within(margin_of_error).of(expected_enabled_size)
         end
+      end
+    end
+
+    context 'for fractional percentage' do
+      let(:decimal) { 0.001}
+      let(:percentage) { decimal * 100 }
+      let(:number_of_actors) { 10_000 }
+
+      let(:actors) do
+        (1..number_of_actors).map { |n| Flipper::Actor.new(n) }
+      end
+
+      subject { described_class.new }
+
+      it 'enables feature for accurate number of actors' do
+        margin_of_error = 0.02 * number_of_actors
+        expected_open_count = 100_000 * decimal
+
+        open_count = actors.select { |actor|
+          context = context(percentage, :feature, actor)
+          subject.open?(context)
+        }.size
+
+        expect(open_count).to be_within(margin_of_error).of(expected_open_count)
       end
     end
   end
