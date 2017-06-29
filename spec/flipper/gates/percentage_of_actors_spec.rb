@@ -51,7 +51,7 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
     end
 
     context 'for fractional percentage' do
-      let(:decimal) { 0.001}
+      let(:decimal) { 0.001 }
       let(:percentage) { decimal * 100 }
       let(:number_of_actors) { 10_000 }
 
@@ -65,10 +65,10 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
         margin_of_error = 0.02 * number_of_actors
         expected_open_count = number_of_actors * decimal
 
-        open_count = actors.select { |actor|
+        open_count = actors.select do |actor|
           context = context(percentage, :feature, actor)
           subject.open?(context)
-        }.size
+        end.size
 
         expect(open_count).to be_within(margin_of_error).of(expected_open_count)
       end
