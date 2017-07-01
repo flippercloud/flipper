@@ -436,7 +436,7 @@ RSpec.describe Flipper do
 
     context 'for enabled float percentage of time' do
       before do
-        # ensure percentage of time returns percentage that makes five percent
+        # ensure percentage of time returns percentage that makes 4.1 percent
         # of time true
         @gate = feature.gate(:percentage_of_time)
         allow(@gate).to receive_messages(rand: 0.04)
