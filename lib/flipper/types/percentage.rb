@@ -2,7 +2,7 @@ module Flipper
   module Types
     class Percentage < Type
       def initialize(value)
-        value = Typecast.to_integer(value)
+        value = Typecast.to_percentage(value)
 
         if value < 0 || value > 100
           raise ArgumentError,

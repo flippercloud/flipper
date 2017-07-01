@@ -100,7 +100,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
       context 'value contains whitespace' do
         let(:value) { '  User:6  ' }
 
-        it 'removes item whitout whitespace' do
+        it 'removes item without whitespace' do
           expect(flipper[:search].actors_value).not_to include('User:6')
         end
       end

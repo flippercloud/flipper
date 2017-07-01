@@ -26,6 +26,30 @@ module Flipper
       end
     end
 
+    # Internal: Convert value to a float.
+    #
+    # Returns a Float representation of the value.
+    # Raises ArgumentError if conversion is not possible.
+    def self.to_float(value)
+      if value.respond_to?(:to_f)
+        value.to_f
+      else
+        raise ArgumentError, "#{value.inspect} cannot be converted to a float"
+      end
+    end
+
+    # Internal: Convert value to a percentage.
+    #
+    # Returns a Integer or Float representation of the value.
+    # Raises ArgumentError if conversion is not possible.
+    def self.to_percentage(value)
+      if value.to_s.include?('.'.freeze)
+        to_float(value)
+      else
+        to_integer(value)
+      end
+    end
+
     # Internal: Convert value to a set.
     #
     # Returns a Set representation of the value.

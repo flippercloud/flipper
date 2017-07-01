@@ -132,6 +132,29 @@ RSpec.describe Flipper do
       end
     end
 
+    context 'with a float percentage of actors' do
+      before do
+        @result = feature.enable_percentage_of_actors 5.1
+      end
+
+      it 'returns true' do
+        expect(@result).to eq(true)
+      end
+
+      it 'enables feature for actor within percentage' do
+        enabled = (1..100).select do |i|
+          thing = Flipper::Actor.new(i)
+          feature.enabled?(thing)
+        end.size
+
+        expect(enabled).to be_within(2).of(5)
+      end
+
+      it 'adds feature to set of features' do
+        expect(flipper.features.map(&:name)).to include(:search)
+      end
+    end
+
     context 'with a percentage of time' do
       before do
         @gate = feature.gate(:percentage_of_time)
@@ -411,14 +434,56 @@ RSpec.describe Flipper do
       end
     end
 
-    context 'for not enabled percentage of time' do
+    context 'for enabled float percentage of time' do
       before do
-        # ensure percentage of time returns percentage that makes five percent
-        # of time false
+        # ensure percentage of time returns percentage that makes 4.1 percent
+        # of time true
+        @gate = feature.gate(:percentage_of_time)
+        allow(@gate).to receive_messages(rand: 0.04)
+
+        feature.enable_percentage_of_time 4.1
+      end
+
+      it 'returns true' do
+        expect(feature.enabled?).to eq(true)
+        expect(feature.enabled?(nil)).to eq(true)
+        expect(feature.enabled?(pitt)).to eq(true)
+        expect(feature.enabled?(admin_thing)).to eq(true)
+      end
+    end
+
+    context 'for NOT enabled integer percentage of time' do
+      before do
+        # ensure percentage of time returns percentage that makes enabled? false
         @gate = feature.gate(:percentage_of_time)
         allow(@gate).to receive_messages(rand: 0.10)
 
         feature.enable five_percent_of_time
+      end
+
+      it 'returns false' do
+        expect(feature.enabled?).to eq(false)
+        expect(feature.enabled?(nil)).to eq(false)
+        expect(feature.enabled?(pitt)).to eq(false)
+        expect(feature.enabled?(admin_thing)).to eq(false)
+      end
+
+      it 'returns true if boolean enabled' do
+        feature.enable
+        expect(feature.enabled?).to eq(true)
+        expect(feature.enabled?(nil)).to eq(true)
+        expect(feature.enabled?(pitt)).to eq(true)
+        expect(feature.enabled?(admin_thing)).to eq(true)
+      end
+    end
+
+    context 'for NOT enabled float percentage of time' do
+      before do
+        # ensure percentage of time returns percentage that makes enabled? false
+        @gate = feature.gate(:percentage_of_time)
+        allow(@gate).to receive_messages(rand: 0.10)
+
+        feature.enable_percentage_of_time 9.9
       end
 
       it 'returns false' do

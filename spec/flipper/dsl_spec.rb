@@ -274,6 +274,15 @@ RSpec.describe Flipper::DSL do
       subject.disable_percentage_of_time(:stats)
       expect(subject[:stats].percentage_of_time_value).to be(0)
     end
+
+    it 'can enable/disable float values' do
+      expect(subject[:stats].percentage_of_time_value).to be(0)
+      subject.enable_percentage_of_time(:stats, 0.01)
+      expect(subject[:stats].percentage_of_time_value).to be(0.01)
+
+      subject.disable_percentage_of_time(:stats)
+      expect(subject[:stats].percentage_of_time_value).to be(0)
+    end
   end
 
   describe '#enable_percentage_of_actors/disable_percentage_of_actors' do
@@ -281,6 +290,15 @@ RSpec.describe Flipper::DSL do
       expect(subject[:stats].percentage_of_actors_value).to be(0)
       subject.enable_percentage_of_actors(:stats, 6)
       expect(subject[:stats].percentage_of_actors_value).to be(6)
+
+      subject.disable_percentage_of_actors(:stats)
+      expect(subject[:stats].percentage_of_actors_value).to be(0)
+    end
+
+    it 'can enable/disable float values' do
+      expect(subject[:stats].percentage_of_actors_value).to be(0)
+      subject.enable_percentage_of_actors(:stats, 0.01)
+      expect(subject[:stats].percentage_of_actors_value).to be(0.01)
 
       subject.disable_percentage_of_actors(:stats)
       expect(subject[:stats].percentage_of_actors_value).to be(0)
