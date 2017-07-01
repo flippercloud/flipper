@@ -23,6 +23,8 @@
 * Allow setting debug output of http adapter (https://github.com/jnunemaker/flipper/pull/256 and https://github.com/jnunemaker/flipper/pull/258).
 * Allow setting env key for middleware (https://github.com/jnunemaker/flipper/pull/259).
 * Added ActiveSupport cache store adapter for use with Rails.cache (https://github.com/jnunemaker/flipper/pull/265).
+* Added support for up to 3 decimal places in percentage based rollouts (https://github.com/jnunemaker/flipper/pull/274).
+* Removed Flipper::GroupNotRegistered error as it is now unused (https://github.com/jnunemaker/flipper/pull/270).
 
 ## 0.10.2
 
