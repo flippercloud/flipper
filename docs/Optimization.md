@@ -95,3 +95,34 @@ Example using the RedisCache adapter with the Memory adapter and a TTL of 4800 s
   adapter = Flipper::Adapters::RedisCache.new(memory_adapter, redis, 4800)
   flipper = Flipper.new(adapter)
 ```
+
+### CacheStore
+
+Rails applications can cache Flipper calls in any [ActiveSupport::Cache::Store](http://api.rubyonrails.org/classes/ActiveSupport/Cache/Store.html) implementation.
+
+Add this line to your application's Gemfile:
+
+    gem 'flipper-cache-store'
+
+And then execute:
+
+    $ bundle
+
+Or install it yourself with:
+
+    $ gem install flipper-cache-store
+
+Example using the CacheStore adapter with ActiveSupport's [MemoryStore](http://api.rubyonrails.org/classes/ActiveSupport/Cache/MemoryStore.html), Flipper's [Memory adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb), and a TTL of 5 minutes.
+
+```ruby
+require 'active_support/cache'
+require 'flipper/adapters/memory'
+require 'flipper/adapters/cache_store'
+
+memory_adapter = Flipper::Adapters::Memory.new
+cache = ActiveSupport::Cache::MemoryStore.new
+adapter = Flipper::Adapters::CacheStore.new(memory_adapter, cache, expires_in: 5.minutes)
+flipper = Flipper.new(adapter)
+```
+
+Setting `expires_in` is optional and will set an expiration time on Flipper cache keys.  If specified, all flipper keys will use this `expires_in` over the `expires_in` passed to your ActiveSupport cache constructor.
