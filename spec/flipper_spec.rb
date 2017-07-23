@@ -116,4 +116,159 @@ RSpec.describe Flipper do
             ])
     end
   end
+
+  describe '.default_adapter' do
+    it 'raises when not set' do
+      expect { Flipper.default_adapter }.to raise_error(Flipper::DefaultAdapterNotSet)
+    end
+
+    it 'returns default adapter if set' do
+      adapter = Flipper::Adapters::Memory.new
+      Flipper.default_adapter = adapter
+      expect(Flipper.default_adapter).to eq(adapter)
+    end
+  end
+
+  describe '.instance' do
+    it 'returns new DSL instance using default_adapter' do
+      adapter = Flipper::Adapters::Memory.new
+      Flipper.default_adapter = adapter
+      expect(Flipper.instance).to be_instance_of(Flipper::DSL)
+      expect(Flipper.instance).to be(Flipper.instance)
+    end
+  end
+
+  describe "delegation to instance" do
+    let(:group) { Flipper::Types::Group.new(:admins) }
+    let(:actor) { Flipper::Actor.new("1") }
+
+    before do
+      adapter = Flipper::Adapters::Memory.new
+      Flipper.default_adapter = adapter
+    end
+
+    it 'delegates enabled? to instance' do
+      expect(Flipper.enabled?(:search)).to eq(Flipper.instance.enabled?(:search))
+      Flipper.instance.enable(:search)
+      expect(Flipper.enabled?(:search)).to eq(Flipper.instance.enabled?(:search))
+    end
+
+    it 'delegates enable to instance' do
+      Flipper.enable(:search)
+      expect(Flipper.instance.enabled?(:search)).to be(true)
+    end
+
+    it 'delegates disable to instance' do
+      Flipper.disable(:search)
+      expect(Flipper.instance.enabled?(:search)).to be(false)
+    end
+
+    it 'delegates bool to instance' do
+      expect(Flipper.bool).to eq(Flipper.instance.bool)
+    end
+
+    it 'delegates boolean to instance' do
+      expect(Flipper.boolean).to eq(Flipper.instance.boolean)
+    end
+
+    it 'delegates enable_actor to instance' do
+      Flipper.enable_actor(:search, actor)
+      expect(Flipper.instance.enabled?(:search, actor)).to be(true)
+    end
+
+    it 'delegates disable_actor to instance' do
+      Flipper.disable_actor(:search, actor)
+      expect(Flipper.instance.enabled?(:search, actor)).to be(false)
+    end
+
+    it 'delegates actor to instance' do
+      expect(Flipper.actor(actor)).to eq(Flipper.instance.actor(actor))
+    end
+
+    it 'delegates enable_group to instance' do
+      Flipper.enable_group(:search, group)
+      expect(Flipper.instance[:search].enabled_groups).to include(group)
+    end
+
+    it 'delegates disable_group to instance' do
+      Flipper.disable_group(:search, group)
+      expect(Flipper.instance[:search].enabled_groups).to_not include(group)
+    end
+
+    it 'delegates enable_percentage_of_actors to instance' do
+      Flipper.enable_percentage_of_actors(:search, 5)
+      expect(Flipper.instance[:search].percentage_of_actors_value).to be(5)
+    end
+
+    it 'delegates disable_percentage_of_actors to instance' do
+      Flipper.disable_percentage_of_actors(:search)
+      expect(Flipper.instance[:search].percentage_of_actors_value).to be(0)
+    end
+
+    it 'delegates actors to instance' do
+      expect(Flipper.actors(5)).to eq(Flipper.instance.actors(5))
+    end
+
+    it 'delegates percentage_of_actors to instance' do
+      expect(Flipper.percentage_of_actors(5)).to eq(Flipper.instance.percentage_of_actors(5))
+    end
+
+    it 'delegates enable_percentage_of_time to instance' do
+      Flipper.enable_percentage_of_time(:search, 5)
+      expect(Flipper.instance[:search].percentage_of_time_value).to be(5)
+    end
+
+    it 'delegates disable_percentage_of_time to instance' do
+      Flipper.disable_percentage_of_time(:search)
+      expect(Flipper.instance[:search].percentage_of_time_value).to be(0)
+    end
+
+    it 'delegates time to instance' do
+      expect(Flipper.time(56)).to eq(Flipper.instance.time(56))
+    end
+
+    it 'delegates percentage_of_time to instance' do
+      expect(Flipper.percentage_of_time(56)).to eq(Flipper.instance.percentage_of_time(56))
+    end
+
+    it 'delegates features to instance' do
+      Flipper.instance.add(:search)
+      expect(Flipper.features).to eq(Flipper.instance.features)
+      expect(Flipper.features).to include(Flipper.instance[:search])
+    end
+
+    it 'delegates feature to instance' do
+      expect(Flipper.feature(:search)).to eq(Flipper.instance.feature(:search))
+    end
+
+    it 'delegates [] to instance' do
+      expect(Flipper[:search]).to eq(Flipper.instance[:search])
+    end
+
+    it 'delegates preload to instance' do
+      Flipper.instance.enable(:search)
+      expect(Flipper.preload([:search])).to eq(Flipper.instance.preload([:search]))
+    end
+
+    it 'delegates preload_all to instance' do
+      Flipper.instance.enable(:search)
+      Flipper.instance.enable(:stats)
+      expect(Flipper.preload_all).to eq(Flipper.instance.preload_all)
+    end
+
+    it 'delegates add to instance' do
+      expect(Flipper.add(:search)).to eq(Flipper.instance.add(:search))
+    end
+
+    it 'delegates remove to instance' do
+      expect(Flipper.remove(:search)).to eq(Flipper.instance.remove(:search))
+    end
+
+    it 'delegates import to instance' do
+      other = Flipper.new(Flipper::Adapters::Memory.new)
+      other.enable(:search)
+      Flipper.import(other)
+      expect(Flipper.enabled?(:search)).to be(true)
+    end
+  end
 end

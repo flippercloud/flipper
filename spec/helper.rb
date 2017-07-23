@@ -22,6 +22,7 @@ Dir[FlipperRoot.join('spec/support/**/*.rb')].each { |f| require f }
 RSpec.configure do |config|
   config.before(:example) do
     Flipper.unregister_groups
+    Flipper.default_adapter = nil
   end
 
   config.disable_monkey_patching!
