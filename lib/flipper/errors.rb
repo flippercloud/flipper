@@ -11,4 +11,14 @@ module Flipper
 
   # Raised when attempting to declare a group name that has already been used.
   class DuplicateGroup < Error; end
+
+  # Raised when default instance not configured but there is an attempt to
+  # use it.
+  class DefaultNotSet < Flipper::Error
+    def initialize(message = nil)
+      default = "Default flipper instance not configured. See " \
+                "Flipper.configure for how to configure the default instance."
+      super(message || default)
+    end
+  end
 end
