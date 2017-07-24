@@ -13,22 +13,39 @@ module Flipper
     DSL.new(adapter, options)
   end
 
+  # Public: Configure flipper.
+  #
+  #   Flipper.configure do |config|
+  #     config.default { ... }
+  #   end
+  #
+  # Yields Flipper::Configuration instance.
   def configure(&block)
     yield configuration if block_given?
   end
 
+  # Public: Returns Flipper::Configuration instance.
   def configuration
     @configuration ||= Configuration.new
   end
 
+  # Public: Sets Flipper::Configuration instance.
   def configuration=(configuration)
     @configuration = configuration
   end
 
+  # Public: Default per thread flipper instance if configured. You should not
+  # need to use this directly as most of the Flipper::DSL methods are delegated
+  # from Flipper module itself. Instead of doing Flipper.instance.enabled?(:search),
+  # you can use Flipper.enabled?(:search) for the same result.
+  #
+  # Returns Flipper::DSL instance.
   def instance
     Thread.current[:flipper_instance] ||= configuration.default_instance
   end
 
+  # Public: All the methods delegated to instance. These should match the
+  # interface of Flipper::DSL.
   def_delegators :instance,
     :enabled?, :enable, :disable, :bool, :boolean,
     :enable_actor, :disable_actor, :actor,
