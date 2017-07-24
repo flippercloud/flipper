@@ -1,7 +1,7 @@
 module Flipper
   class Configuration
     def initialize
-      @default = lambda { raise DefaultNotSet }
+      @default = -> { raise DefaultNotSet }
     end
 
     # Controls the default instance for flipper. When used with a block it
