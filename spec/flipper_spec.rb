@@ -114,7 +114,8 @@ RSpec.describe Flipper do
     end
 
     it 'delegates percentage_of_actors to instance' do
-      expect(described_class.percentage_of_actors(5)).to eq(described_class.instance.percentage_of_actors(5))
+      expected = described_class.instance.percentage_of_actors(5)
+      expect(described_class.percentage_of_actors(5)).to eq(expected)
     end
 
     it 'delegates enable_percentage_of_time to instance' do
@@ -132,7 +133,8 @@ RSpec.describe Flipper do
     end
 
     it 'delegates percentage_of_time to instance' do
-      expect(described_class.percentage_of_time(56)).to eq(described_class.instance.percentage_of_time(56))
+      expected = described_class.instance.percentage_of_time(56)
+      expect(described_class.percentage_of_time(56)).to eq(expected)
     end
 
     it 'delegates features to instance' do
