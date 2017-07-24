@@ -3,25 +3,29 @@ require File.expand_path('../example_setup', __FILE__)
 require 'flipper'
 require 'flipper/adapters/memory'
 
-# pick an adapter
-adapter = Flipper::Adapters::Memory.new
+Flipper.configure do |config|
+  config.default do
+    # pick an adapter, this uses memory, any will do
+    adapter = Flipper::Adapters::Memory.new
 
-# get a handy dsl instance
-flipper = Flipper.new(adapter)
-
-# grab a feature
-search = flipper[:search]
-
-perform = lambda do
-  # check if that feature is enabled
-  if search.enabled?
-    puts 'Search away!'
-  else
-    puts 'No search for you!'
+    # pass adapter to handy DSL instance
+    Flipper.new(adapter)
   end
 end
 
-perform.call
+# check if search is enabled
+if Flipper.enabled?(:search)
+  puts 'Search away!'
+else
+  puts 'No search for you!'
+end
+
 puts 'Enabling Search...'
-search.enable
-perform.call
+Flipper.enable(:search)
+
+# check if search is enabled
+if Flipper.enabled?(:search)
+  puts 'Search away!'
+else
+  puts 'No search for you!'
+end

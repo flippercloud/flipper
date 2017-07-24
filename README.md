@@ -41,26 +41,34 @@ The goal of the API for flipper was to have everything revolve around features a
 
 ```ruby
 require 'flipper'
-
-# pick an adapter
 require 'flipper/adapters/memory'
-adapter = Flipper::Adapters::Memory.new
 
-# get a handy dsl instance
-flipper = Flipper.new(adapter)
+Flipper.configure do |config|
+  config.default do
+    # pick an adapter, this uses memory, any will do
+    adapter = Flipper::Adapters::Memory.new
 
-# grab a feature
-search = flipper[:search]
+    # pass adapter to handy DSL instance
+    Flipper.new(adapter)
+  end
+end
 
-# check if that feature is enabled
-if search.enabled?
+# check if search is enabled
+if Flipper.enabled?(:search)
   puts 'Search away!'
 else
   puts 'No search for you!'
 end
 
 puts 'Enabling Search...'
-search.enable
+Flipper.enable(:search)
+
+# check if search is enabled
+if Flipper.enabled?(:search)
+  puts 'Search away!'
+else
+  puts 'No search for you!'
+end
 ```
 
 Of course there are more [examples for you to peruse](examples/). You could also check out the [DSL](lib/flipper/dsl.rb) and [Feature](lib/flipper/feature.rb) classes for code/docs.
