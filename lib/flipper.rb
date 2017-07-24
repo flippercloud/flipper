@@ -41,7 +41,7 @@ module Flipper
   #
   # Returns Flipper::DSL instance.
   def instance
-    Thread.current[:flipper_instance] ||= configuration.default_instance
+    Thread.current[:flipper_instance] ||= configuration.default
   end
 
   # Public: All the methods delegated to instance. These should match the
