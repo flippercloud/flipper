@@ -7,26 +7,26 @@ module Flipper
   # Private: The namespace for all instrumented events.
   InstrumentationNamespace = :flipper
 
-  # Public: Raised when Flipper default instance is accessed without first
-  # setting the default_adapter.
-  class DefaultAdapterNotSet < StandardError; end
-
   # Public: Start here. Given an adapter returns a handy DSL to all the flipper
   # goodness. To see supported options, check out dsl.rb.
   def new(adapter, options = {})
     DSL.new(adapter, options)
   end
 
-  def default_adapter
-    @default_adapter || raise(DefaultAdapterNotSet, "Default adapter not set")
+  def configure(&block)
+    yield configuration if block_given?
   end
 
-  def default_adapter=(default_adapter)
-    @default_adapter = default_adapter
+  def configuration
+    @configuration ||= Configuration.new
+  end
+
+  def configuration=(configuration)
+    @configuration = configuration
   end
 
   def instance
-    @instance ||= new(default_adapter)
+    Thread.current[:flipper_instance] ||= configuration.default_instance
   end
 
   def_delegators :instance,
@@ -111,6 +111,7 @@ module Flipper
 end
 
 require 'flipper/actor'
+require 'flipper/configuration'
 require 'flipper/adapter'
 require 'flipper/dsl'
 require 'flipper/errors'
