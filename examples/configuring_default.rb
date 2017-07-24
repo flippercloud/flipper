@@ -3,6 +3,7 @@ require File.expand_path('../example_setup', __FILE__)
 require 'flipper'
 require 'flipper/adapters/memory'
 
+# sets up default adapter so Flipper works like Flipper::DSL
 Flipper.configure do |config|
   config.default do
     Flipper.new Flipper::Adapters::Memory.new
