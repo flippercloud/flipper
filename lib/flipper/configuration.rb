@@ -1,10 +1,10 @@
 module Flipper
   class Configuration
     def initialize
-      @default = -> {
+      @default = lambda do
         require "flipper/adapters/memory"
         Flipper.new Flipper::Adapters::Memory.new
-      }
+      end
     end
 
     def default(&block)

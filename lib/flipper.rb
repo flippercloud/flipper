@@ -20,7 +20,7 @@ module Flipper
   #   end
   #
   # Yields Flipper::Configuration instance.
-  def configure(&block)
+  def configure
     yield configuration if block_given?
   end
 
@@ -47,13 +47,15 @@ module Flipper
   # Public: All the methods delegated to instance. These should match the
   # interface of Flipper::DSL.
   def_delegators :instance,
-    :enabled?, :enable, :disable, :bool, :boolean,
-    :enable_actor, :disable_actor, :actor,
-    :enable_group, :disable_group,
-    :enable_percentage_of_actors, :disable_percentage_of_actors, :actors, :percentage_of_actors,
-    :enable_percentage_of_time, :disable_percentage_of_time, :time, :percentage_of_time,
-    :features, :feature, :[], :preload, :preload_all,
-    :add, :remove, :import
+                 :enabled?, :enable, :disable, :bool, :boolean,
+                 :enable_actor, :disable_actor, :actor,
+                 :enable_group, :disable_group,
+                 :enable_percentage_of_actors, :disable_percentage_of_actors,
+                 :actors, :percentage_of_actors,
+                 :enable_percentage_of_time, :disable_percentage_of_time,
+                 :time, :percentage_of_time,
+                 :features, :feature, :[], :preload, :preload_all,
+                 :add, :remove, :import
 
   # Public: Use this to register a group by name.
   #
