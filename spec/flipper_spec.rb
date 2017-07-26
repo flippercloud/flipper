@@ -8,28 +8,173 @@ RSpec.describe Flipper do
     end
   end
 
-  describe '.group_exists' do
-    it 'returns true if the group is already created' do
-      group = described_class.register('admins', &:admin?)
-      expect(described_class.group_exists?(:admins)).to eq(true)
-    end
-
-    it 'returns false when the group is not yet registered' do
-      expect(described_class.group_exists?(:non_existing)).to eq(false)
+  describe '.configure' do
+    it 'yield configuration instance' do
+      described_class.configure do |config|
+        expect(config).to be_instance_of(Flipper::Configuration)
+      end
     end
   end
 
-  describe '.groups_registry' do
-    it 'returns a registry instance' do
-      expect(described_class.groups_registry).to be_instance_of(Flipper::Registry)
+  describe '.configuration' do
+    it 'returns configuration instance' do
+      expect(described_class.configuration).to be_instance_of(Flipper::Configuration)
     end
   end
 
-  describe '.groups_registry=' do
-    it 'sets groups_registry registry' do
-      registry = Flipper::Registry.new
-      described_class.groups_registry = registry
-      expect(described_class.instance_variable_get('@groups_registry')).to eq(registry)
+  describe '.configuration=' do
+    it "sets configuration instance" do
+      configuration = Flipper::Configuration.new
+      described_class.configuration = configuration
+      expect(described_class.configuration).to be(configuration)
+    end
+  end
+
+  describe '.instance' do
+    it 'returns DSL instance using result of default invocation' do
+      instance = described_class.new(Flipper::Adapters::Memory.new)
+      described_class.configure do |config|
+        config.default { instance }
+      end
+      expect(described_class.instance).to be(instance)
+      expect(described_class.instance).to be(described_class.instance) # memoized
+    end
+  end
+
+  describe "delegation to instance" do
+    let(:group) { Flipper::Types::Group.new(:admins) }
+    let(:actor) { Flipper::Actor.new("1") }
+
+    before do
+      described_class.configure do |config|
+        config.default { described_class.new(Flipper::Adapters::Memory.new) }
+      end
+    end
+
+    it 'delegates enabled? to instance' do
+      expect(described_class.enabled?(:search)).to eq(described_class.instance.enabled?(:search))
+      described_class.instance.enable(:search)
+      expect(described_class.enabled?(:search)).to eq(described_class.instance.enabled?(:search))
+    end
+
+    it 'delegates enable to instance' do
+      described_class.enable(:search)
+      expect(described_class.instance.enabled?(:search)).to be(true)
+    end
+
+    it 'delegates disable to instance' do
+      described_class.disable(:search)
+      expect(described_class.instance.enabled?(:search)).to be(false)
+    end
+
+    it 'delegates bool to instance' do
+      expect(described_class.bool).to eq(described_class.instance.bool)
+    end
+
+    it 'delegates boolean to instance' do
+      expect(described_class.boolean).to eq(described_class.instance.boolean)
+    end
+
+    it 'delegates enable_actor to instance' do
+      described_class.enable_actor(:search, actor)
+      expect(described_class.instance.enabled?(:search, actor)).to be(true)
+    end
+
+    it 'delegates disable_actor to instance' do
+      described_class.disable_actor(:search, actor)
+      expect(described_class.instance.enabled?(:search, actor)).to be(false)
+    end
+
+    it 'delegates actor to instance' do
+      expect(described_class.actor(actor)).to eq(described_class.instance.actor(actor))
+    end
+
+    it 'delegates enable_group to instance' do
+      described_class.enable_group(:search, group)
+      expect(described_class.instance[:search].enabled_groups).to include(group)
+    end
+
+    it 'delegates disable_group to instance' do
+      described_class.disable_group(:search, group)
+      expect(described_class.instance[:search].enabled_groups).not_to include(group)
+    end
+
+    it 'delegates enable_percentage_of_actors to instance' do
+      described_class.enable_percentage_of_actors(:search, 5)
+      expect(described_class.instance[:search].percentage_of_actors_value).to be(5)
+    end
+
+    it 'delegates disable_percentage_of_actors to instance' do
+      described_class.disable_percentage_of_actors(:search)
+      expect(described_class.instance[:search].percentage_of_actors_value).to be(0)
+    end
+
+    it 'delegates actors to instance' do
+      expect(described_class.actors(5)).to eq(described_class.instance.actors(5))
+    end
+
+    it 'delegates percentage_of_actors to instance' do
+      expected = described_class.instance.percentage_of_actors(5)
+      expect(described_class.percentage_of_actors(5)).to eq(expected)
+    end
+
+    it 'delegates enable_percentage_of_time to instance' do
+      described_class.enable_percentage_of_time(:search, 5)
+      expect(described_class.instance[:search].percentage_of_time_value).to be(5)
+    end
+
+    it 'delegates disable_percentage_of_time to instance' do
+      described_class.disable_percentage_of_time(:search)
+      expect(described_class.instance[:search].percentage_of_time_value).to be(0)
+    end
+
+    it 'delegates time to instance' do
+      expect(described_class.time(56)).to eq(described_class.instance.time(56))
+    end
+
+    it 'delegates percentage_of_time to instance' do
+      expected = described_class.instance.percentage_of_time(56)
+      expect(described_class.percentage_of_time(56)).to eq(expected)
+    end
+
+    it 'delegates features to instance' do
+      described_class.instance.add(:search)
+      expect(described_class.features).to eq(described_class.instance.features)
+      expect(described_class.features).to include(described_class.instance[:search])
+    end
+
+    it 'delegates feature to instance' do
+      expect(described_class.feature(:search)).to eq(described_class.instance.feature(:search))
+    end
+
+    it 'delegates [] to instance' do
+      expect(described_class[:search]).to eq(described_class.instance[:search])
+    end
+
+    it 'delegates preload to instance' do
+      described_class.instance.enable(:search)
+      expect(described_class.preload([:search])).to eq(described_class.instance.preload([:search]))
+    end
+
+    it 'delegates preload_all to instance' do
+      described_class.instance.enable(:search)
+      described_class.instance.enable(:stats)
+      expect(described_class.preload_all).to eq(described_class.instance.preload_all)
+    end
+
+    it 'delegates add to instance' do
+      expect(described_class.add(:search)).to eq(described_class.instance.add(:search))
+    end
+
+    it 'delegates remove to instance' do
+      expect(described_class.remove(:search)).to eq(described_class.instance.remove(:search))
+    end
+
+    it 'delegates import to instance' do
+      other = described_class.new(Flipper::Adapters::Memory.new)
+      other.enable(:search)
+      described_class.import(other)
+      expect(described_class.enabled?(:search)).to be(true)
     end
   end
 
@@ -57,10 +202,43 @@ RSpec.describe Flipper do
     end
   end
 
+  describe '.groups' do
+    it 'returns array of group instances' do
+      admins = described_class.register(:admins, &:admin?)
+      preview_features = described_class.register(:preview_features, &:preview_features?)
+      expect(described_class.groups).to eq(Set[
+              admins,
+              preview_features,
+            ])
+    end
+  end
+
+  describe '.group_names' do
+    it 'returns array of group names' do
+      described_class.register(:admins, &:admin?)
+      described_class.register(:preview_features, &:preview_features?)
+      expect(described_class.group_names).to eq(Set[
+              :admins,
+              :preview_features,
+            ])
+    end
+  end
+
   describe '.unregister_groups' do
     it 'clear group registry' do
       expect(described_class.groups_registry).to receive(:clear)
       described_class.unregister_groups
+    end
+  end
+
+  describe '.group_exists' do
+    it 'returns true if the group is already created' do
+      group = described_class.register('admins', &:admin?)
+      expect(described_class.group_exists?(:admins)).to eq(true)
+    end
+
+    it 'returns false when the group is not yet registered' do
+      expect(described_class.group_exists?(:non_existing)).to eq(false)
     end
   end
 
@@ -95,25 +273,17 @@ RSpec.describe Flipper do
     end
   end
 
-  describe '.groups' do
-    it 'returns array of group instances' do
-      admins = described_class.register(:admins, &:admin?)
-      preview_features = described_class.register(:preview_features, &:preview_features?)
-      expect(described_class.groups).to eq(Set[
-              admins,
-              preview_features,
-            ])
+  describe '.groups_registry' do
+    it 'returns a registry instance' do
+      expect(described_class.groups_registry).to be_instance_of(Flipper::Registry)
     end
   end
 
-  describe '.group_names' do
-    it 'returns array of group names' do
-      described_class.register(:admins, &:admin?)
-      described_class.register(:preview_features, &:preview_features?)
-      expect(described_class.group_names).to eq(Set[
-              :admins,
-              :preview_features,
-            ])
+  describe '.groups_registry=' do
+    it 'sets groups_registry registry' do
+      registry = Flipper::Registry.new
+      described_class.groups_registry = registry
+      expect(described_class.instance_variable_get('@groups_registry')).to eq(registry)
     end
   end
 end
