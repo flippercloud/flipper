@@ -3,6 +3,8 @@ require 'zlib'
 module Flipper
   module Gates
     class PercentageOfActors < Gate
+      RAND_BASE = (2**32 - 1) / 100.0
+
       # Internal: The name of the gate. Used for instrumentation, etc.
       def name
         :percentage_of_actors
@@ -31,9 +33,8 @@ module Flipper
 
         actor = Types::Actor.wrap(context.thing)
         id = "#{context.feature_name}#{actor.value}"
-        # this is to support up to 3 decimal places in percentages
-        scaling_factor = 1_000
-        Zlib.crc32(id) % (100 * scaling_factor) < percentage * scaling_factor
+
+        Zlib.crc32(id) < RAND_BASE * percentage
       end
 
       def protects?(thing)
