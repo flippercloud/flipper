@@ -12,6 +12,7 @@ require 'flipper'
 require 'flipper/middleware/setup_env'
 require 'flipper/middleware/memoizer'
 require 'flipper/ui/middleware'
+require 'flipper/ui/configuration'
 
 module Flipper
   module UI
@@ -25,6 +26,9 @@ module Flipper
       # set to false, users of the UI cannot create features. All feature
       # creation will need to be done through the conigured flipper instance.
       attr_accessor :feature_creation_enabled
+
+      # Public: Set attributes on this instance to customize UI text
+      attr_reader :configuration
     end
 
     self.feature_creation_enabled = true
@@ -48,6 +52,15 @@ module Flipper
       klass = self
       builder.define_singleton_method(:inspect) { klass.inspect } # pretty rake routes output
       builder
+    end
+
+    # Public: yields configuration instance for customizing UI text
+    def self.configure
+      yield(configuration)
+    end
+
+    def self.configuration
+      @configuration ||= ::Flipper::UI::Configuration.new
     end
   end
 end

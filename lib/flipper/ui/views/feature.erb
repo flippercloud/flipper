@@ -37,7 +37,7 @@
     <div class="column one-half">
       <div class="panel panel-default">
         <div class="panel-heading">
-          <h3 class="panel-title">Percentage of Actors</h3>
+          <h3 class="panel-title"><%= Flipper::UI.configuration.percentage_of_actors.title %></h3>
         </div>
         <div class="panel-body">
           <form action="<%= script_name %>/features/<%= @feature.key %>/percentage_of_actors" method="post">
@@ -56,14 +56,14 @@
             <input type="text" name="value" <% if @feature.percentage_of_actors_value > 0 %>value="<%= @feature.percentage_of_actors_value %>"<% end %> placeholder="custom (ie: 26, 32, etc.)" class="input-mini">
             <input type="submit" name="action" value="Enable" class="btn btn-sm">
           </form>
-          <p class="help"><small>Percentage of actors functions independently of percentage of time. If you enable 50% of Actors and 25% of Time then the feature will always be enabled for 50% of users and occasionally enabled 25% of the time for everyone.</small></p>
+          <p class="help"><small><%= Flipper::UI.configuration.percentage_of_actors.description %></small></p>
         </div>
       </div>
     </div>
     <div class="column one-half">
       <div class="panel panel-default">
         <div class="panel-heading">
-          <h3 class="panel-title">Percentage of Time</h3>
+          <h3 class="panel-title"><%= Flipper::UI.configuration.percentage_of_time.title %></h3>
         </div>
         <div class="panel-body">
           <form action="<%= script_name %>/features/<%= @feature.key %>/percentage_of_time" method="post">
@@ -83,7 +83,7 @@
             <input type="submit" name="action" value="Enable" class="btn btn-sm">
           </form>
 
-          <p class="help"><small>Percentage of time functions independently of percentage of actors. If you enable 50% of Actors and 25% of Time then the feature will always be enabled for 50% of users and occasionally enabled 25% of the time for everyone.</small></p>
+          <p class="help"><small><%= Flipper::UI.configuration.actors.description %></small></p>
         </div>
       </div>
     </div>
@@ -110,7 +110,7 @@
               <input type="submit" value="Add Group" class="btn btn-sm">
             </form>
           <% end %>
-          <h3 class="panel-title">Groups</h3>
+          <h3 class="panel-title"><%= Flipper::UI.configuration.groups.title %></h3>
         </div>
         <% if @feature.groups_value.empty? %>
           <div class="blankslate">
@@ -118,7 +118,7 @@
             <span class="mega-octicon octicon-squirrel"></span>
             <span class="mega-octicon octicon-zap"></span>
             <h3>No Enabled Groups</h3>
-            <p>Enable groups using the form above.</p>
+            <p><%= Flipper::UI.configuration.groups.description %></p>
           </div>
         <% else %>
           <ul class="list-group">
@@ -154,7 +154,7 @@
             <input type="text" name="value" placeholder="ie: User:6" class="input-mini">
             <input type="submit" value="Add Actor" class="btn btn-sm">
           </form>
-          <h3 class="panel-title">Actors</h3>
+          <h3 class="panel-title"><%= Flipper::UI.configuration.actors.title %></h3>
         </div>
         <% if @feature.actors_value.empty? %>
           <div class="blankslate">
@@ -162,7 +162,7 @@
             <span class="mega-octicon octicon-squirrel"></span>
             <span class="mega-octicon octicon-zap"></span>
             <h3>No Enabled Actors</h3>
-            <p>Enable actors using the form above.</p>
+            <p><%= Flipper::UI.configuration.actors.description %></p>
           </div>
         <% else %>
           <ul class="list-group">
@@ -194,11 +194,11 @@
 
 <div class="panel panel-danger">
   <div class="panel-heading">
-    <h3 class="panel-title">Danger Zone</h3>
+    <h3 class="panel-title"><%= Flipper::UI.configuration.delete.title %></h3>
   </div>
   <div class="panel-body">
     <p>
-      Deleting a feature removes it from the list of features and disables it for everyone.
+      <%= Flipper::UI.configuration.delete.description %>
     </p>
 
     <form action="<%= script_name %>/features/<%= @feature.key %>" method="post" onsubmit="return confirm('Are you sure you want to remove <%= @feature.key %> from the list of features and disable it for everyone?')">

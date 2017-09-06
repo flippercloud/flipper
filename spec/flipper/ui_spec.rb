@@ -146,4 +146,12 @@ RSpec.describe Flipper::UI do
       described_class.feature_creation_enabled = @original_feature_creation_enabled
     end
   end
+
+  describe 'configure' do
+    it 'yields configuration instance' do
+      described_class.configure do |config|
+        expect(config).to be_instance_of(Flipper::UI::Configuration)
+      end
+    end
+  end
 end
