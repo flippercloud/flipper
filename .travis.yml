@@ -4,7 +4,7 @@ rvm:
   - 2.2
   - 2.3
 bundler_args: --without guard
-before_script: gem install bundler -v 1.10.6 && sudo service redis-server status && sudo service mongodb status
+before_script: gem install bundler -v 1.10.6 && sudo service redis-server status
 script: bundle exec rubocop && bundle exec rake
 services:
   - redis-server
