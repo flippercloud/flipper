@@ -68,10 +68,10 @@ There is no requirement that the thing yielded to the block be a user model or w
 In your application code, you can do something like this now:
 
 ```
-if $flipper[:stats].enabled?(some_admin)
-  (do thing)
+if flipper[:stats].enabled?(some_admin)
+  # do thing...
 else
-   raise "Your are not authorized to view this page"
+  raise "Your are not authorized to view this page"
 end 
 ```
 
