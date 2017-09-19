@@ -14,7 +14,9 @@ ActiveRecord::Base.establish_connection({
 require 'generators/flipper/templates/migration'
 CreateFlipperTables.up
 
+# Requires the flipper-active_record gem to be installed.
 require 'flipper/adapters/active_record'
+
 adapter = Flipper::Adapters::ActiveRecord.new
 flipper = Flipper.new(adapter)
 
