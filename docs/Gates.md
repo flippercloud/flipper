@@ -151,13 +151,14 @@ flipper = Flipper.new(adapter)
 # get percentage of time instance set to 5
 percentage = flipper.time(5)
 
-# turn on logging for 5 percent of the time
-# could be on during one request and off the next
+# Register a feature called logging and turn it on for 5 percent of the time.
+# This could be on during one request and off the next
 # could even be on first time in request and off second time
 flipper[:logging].enable percentage
+flipper[:logging].enabled? # this will return true 5% of the time.
 
 # you can also use shortcut methods
-flipper.enable_percentage_of_time :search, 5
+flipper.enable_percentage_of_time :search, 5 # registers a feature called "enable_percentage_of_time" and enables it 5% of the time
 flipper.disable_percentage_of_time :search # sets to 0
 flipper[:search].enable_percentage_of_time 5
 flipper[:search].disable_percentage_of_time # sets to 0
