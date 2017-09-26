@@ -154,4 +154,15 @@ RSpec.describe Flipper::UI do
       end
     end
   end
+
+  context 'with RACK_ENV set to production' do
+    before do
+      allow(ENV).to receive(:values_at).with("RACK_ENV", "RAILS_ENV").and_return(["production"])
+    end
+
+    it 'displays a production mode warning' do
+      get '/features'
+      expect(last_response.body).to include('Production mode!')
+    end
+  end
 end
