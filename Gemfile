@@ -8,7 +8,6 @@ end
 
 gem 'pry'
 gem 'rake', '~> 10.4.2'
-gem 'metriks', '~> 0.9.9'
 gem 'shotgun', '~> 0.9'
 gem 'statsd-ruby', '~> 1.2.1'
 gem 'rspec', '~> 3.0'

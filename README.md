@@ -77,7 +77,7 @@ Of course there are more [examples for you to peruse](examples/). You could also
 
 * [Gates](docs/Gates.md) - Boolean, Groups, Actors, % of Actors, and % of Time
 * [Adapters](docs/Adapters.md) - Mongo, Redis, Cassandra, Active Record...
-* [Instrumentation](docs/Instrumentation.md) - ActiveSupport::Notifications, Statsd and Metriks
+* [Instrumentation](docs/Instrumentation.md) - ActiveSupport::Notifications and Statsd
 * [Optimization](docs/Optimization.md) - Memoization middleware and Cache adapters
 * [Web Interface](docs/ui/README.md) - Point and click...
 * [API](docs/api/README.md) - HTTP API interface
