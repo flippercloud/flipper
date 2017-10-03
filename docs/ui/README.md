@@ -52,7 +52,24 @@ end
 
 #### Security
 
-You almost certainly want to limit access when using Flipper::UI in production. Using [routes constraints](http://guides.rubyonrails.org/routing.html#request-based-constraints) is one way to achieve this:
+You almost certainly want to limit access when using Flipper::UI in production. 
+
+##### Basic Authentication via Rack
+The `Flipper::UI.app` method yields a builder instance prior to any predefined middleware. You can insert the `Rack::Auth::Basic` middleware, that'll prompt for a username and password when visiting the defined (i.e., `/flipper`) route.
+
+```ruby
+# config/routes.rb
+
+flipper_app = Flipper::UI.app(Flipper.instance) do |builder|
+  builder.use Rack::Auth::Basic do |username, password|
+    # Verify credentials
+  end
+end
+mount flipper_app, at: '/flipper'
+```
+
+##### Route Constraints
+It is possible to use [routes constraints](http://guides.rubyonrails.org/routing.html#request-based-constraints) to limit access to routes:
 
 ```ruby
 # config/routes.rb
@@ -63,7 +80,7 @@ constraints flipper_constraint do
 end
 ```
 
-Another example of a route constrain using the current_user when using Devise or another warden based authentication system:
+Another example is to use the `current_user` when using a gem-based authentication system (i.e., [warden](https://github.com/hassox/warden) or [devise](https://github.com/plataformatec/devise)):
 
 ```ruby
 # initializers/admin_access.rb
@@ -81,7 +98,6 @@ constraints CanAccessFlipperUI do
   mount Flipper::UI.app(flipper) => '/flipper'
 end
 ```
-
 
 ### Standalone
 
