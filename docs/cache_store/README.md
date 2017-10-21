@@ -6,7 +6,7 @@ A [CacheStore](http://api.rubyonrails.org/classes/ActiveSupport/Cache/Store.html
 
 Add this line to your application's Gemfile:
 
-    gem 'flipper-cache-store'
+    gem 'flipper-cache_store'
 
 And then execute:
 
@@ -14,7 +14,7 @@ And then execute:
 
 Or install it yourself with:
 
-    $ gem install flipper-cache-store
+    $ gem install flipper-cache_store
 
 ## Usage
 
