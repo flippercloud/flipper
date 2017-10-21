@@ -102,7 +102,7 @@ Rails applications can cache Flipper calls in any [ActiveSupport::Cache::Store](
 
 Add this line to your application's Gemfile:
 
-    gem 'flipper-cache-store'
+    gem 'flipper-cache_store'
 
 And then execute:
 
@@ -110,7 +110,7 @@ And then execute:
 
 Or install it yourself with:
 
-    $ gem install flipper-cache-store
+    $ gem install flipper-cache_store
 
 Example using the CacheStore adapter with ActiveSupport's [MemoryStore](http://api.rubyonrails.org/classes/ActiveSupport/Cache/MemoryStore.html), Flipper's [Memory adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb), and a TTL of 5 minutes.
 
