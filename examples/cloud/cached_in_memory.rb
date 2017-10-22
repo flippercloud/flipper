@@ -21,7 +21,7 @@ Flipper.configure do |config|
 end
 
 loop do
-  # Should only print out http call every 10 seconds
+  # Should only print out http call every 5 seconds
   p Flipper.enabled?(feature_name)
   puts "\n\n"
 
