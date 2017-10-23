@@ -3,9 +3,10 @@ require 'rack/body_proxy'
 module Flipper
   module Middleware
     class Memoizer
-      # Public: Initializes an instance of the Memoizer middleware. The flipper
-      # instance must be setup in the env of the request. You can do this by
-      # using the Flipper::Middleware::SetupEnv middleware.
+      # Public: Initializes an instance of the Memoizer middleware. Flipper must
+      # be configured with a default instance or the flipper instance must be
+      # setup in the env of the request. You can do this by using the
+      # Flipper::Middleware::SetupEnv middleware.
       #
       # app - The app this middleware is included in.
       # opts - The Hash of options.
