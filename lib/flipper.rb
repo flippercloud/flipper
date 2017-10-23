@@ -55,7 +55,7 @@ module Flipper
                  :enable_percentage_of_time, :disable_percentage_of_time,
                  :time, :percentage_of_time,
                  :features, :feature, :[], :preload, :preload_all,
-                 :add, :remove, :import
+                 :adapter, :add, :remove, :import
 
   # Public: Use this to register a group by name.
   #

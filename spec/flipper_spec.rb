@@ -176,6 +176,10 @@ RSpec.describe Flipper do
       described_class.import(other)
       expect(described_class.enabled?(:search)).to be(true)
     end
+
+    it 'delegates adapter to instance' do
+      expect(described_class.adapter).to eq(described_class.instance.adapter)
+    end
   end
 
   describe '.register' do
