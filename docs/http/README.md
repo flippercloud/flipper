@@ -13,8 +13,8 @@ configuration = {
   headers: { 'X-Custom-Header' => 'foo' },
   basic_auth_username: 'user123',
   basic_auth_password: 'password123'
-  read_timeout: 75,
-  open_timeout: 70
+  read_timeout: 5,
+  open_timeout: 2,
 }
 
 adapter = Flipper::Adapters::Http.new(configuration)
