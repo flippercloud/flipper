@@ -49,7 +49,7 @@ module Flipper
       end
 
       def memoized_call(env)
-        flipper = env.fetch(@env_key)
+        flipper = env.fetch(@env_key) { Flipper }
         original = flipper.adapter.memoizing?
         flipper.adapter.memoize = true
 
