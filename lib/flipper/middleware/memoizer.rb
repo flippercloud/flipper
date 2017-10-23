@@ -65,7 +65,7 @@ module Flipper
         end
         response
       rescue
-        flipper.adapter.memoize = original
+        flipper.adapter.memoize = original if flipper
         raise
       end
     end
