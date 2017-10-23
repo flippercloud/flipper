@@ -31,6 +31,8 @@ module Flipper
 
   # Public: Sets Flipper::Configuration instance.
   def configuration=(configuration)
+    # need to reset flipper instance if configuration changes
+    Thread.current[:flipper_instance] = nil
     @configuration = configuration
   end
 
