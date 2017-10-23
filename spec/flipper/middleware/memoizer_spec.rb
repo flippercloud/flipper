@@ -254,6 +254,32 @@ RSpec.describe Flipper::Middleware::Memoizer do
     include_examples 'flipper middleware'
   end
 
+  context 'with Flipper setup in env' do
+    it 'caches getting a feature for duration of request' do
+      Flipper.configure do |config|
+        config.default do
+          memory = Flipper::Adapters::Memory.new
+          logged_adapter = Flipper::Adapters::OperationLogger.new(memory)
+          Flipper.new(logged_adapter)
+        end
+      end
+      Flipper.enable(:stats)
+      Flipper.adapter.reset # clear the log of operations
+
+      app = lambda do |_env|
+        Flipper.enabled?(:stats)
+        Flipper.enabled?(:stats)
+        Flipper.enabled?(:stats)
+        [200, {}, []]
+      end
+
+      middleware = described_class.new(app)
+      middleware.call('flipper' => Flipper)
+
+      expect(Flipper.adapter.count(:get)).to be(1)
+    end
+  end
+
   context 'with preload_all and unless option' do
     let(:app) do
       # ensure scoped for builder block, annoying...
