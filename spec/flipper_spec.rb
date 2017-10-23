@@ -39,6 +39,19 @@ RSpec.describe Flipper do
       expect(described_class.instance).to be(instance)
       expect(described_class.instance).to be(described_class.instance) # memoized
     end
+
+    it 'is reset when configuration is changed' do
+      Flipper.configure do |config|
+        config.default { Flipper.new(Flipper::Adapters::Memory.new) }
+      end
+      original_instance = Flipper.instance
+
+      new_config = Flipper::Configuration.new
+      new_config.default { Flipper.new(Flipper::Adapters::Memory.new) }
+      Flipper.configuration = new_config
+
+      expect(Flipper.instance).to_not be(original_instance)
+    end
   end
 
   describe "delegation to instance" do
