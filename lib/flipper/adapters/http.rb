@@ -13,7 +13,7 @@ module Flipper
       attr_reader :name
 
       def initialize(options = {})
-        @client = Client.new(uri: options.fetch(:uri),
+        @client = Client.new(url: options.fetch(:url),
                              headers: options[:headers],
                              basic_auth_username: options[:basic_auth_username],
                              basic_auth_password: options[:basic_auth_password],

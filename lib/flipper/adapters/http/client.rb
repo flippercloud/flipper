@@ -15,7 +15,7 @@ module Flipper
         HTTPS_SCHEME = "https".freeze
 
         def initialize(options = {})
-          @uri = URI(options.fetch(:uri))
+          @uri = URI(options.fetch(:url))
           @headers = DEFAULT_HEADERS.merge(options[:headers] || {})
           @basic_auth_username = options[:basic_auth_username]
           @basic_auth_password = options[:basic_auth_password]
