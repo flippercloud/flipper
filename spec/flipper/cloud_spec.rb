@@ -61,10 +61,11 @@ RSpec.describe Flipper::Cloud do
   end
 
   it 'allows wrapping adapter with another adapter like the instrumenter' do
-    adapter_wrapper = lambda do |adapter|
-      Flipper::Adapters::Instrumented.new(adapter)
+    instance = described_class.new('asdf') do |config|
+      config.adapter do |adapter|
+        Flipper::Adapters::Instrumented.new(adapter)
+      end
     end
-    instance = described_class.new('asdf', adapter_wrapper: adapter_wrapper)
     # instance.adapter is memoizable adapter instance
     expect(instance.adapter.adapter).to be_instance_of(Flipper::Adapters::Instrumented)
   end
