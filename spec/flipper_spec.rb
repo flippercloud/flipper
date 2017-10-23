@@ -41,16 +41,16 @@ RSpec.describe Flipper do
     end
 
     it 'is reset when configuration is changed' do
-      Flipper.configure do |config|
-        config.default { Flipper.new(Flipper::Adapters::Memory.new) }
+      described_class.configure do |config|
+        config.default { described_class.new(Flipper::Adapters::Memory.new) }
       end
-      original_instance = Flipper.instance
+      original_instance = described_class.instance
 
       new_config = Flipper::Configuration.new
-      new_config.default { Flipper.new(Flipper::Adapters::Memory.new) }
-      Flipper.configuration = new_config
+      new_config.default { described_class.new(Flipper::Adapters::Memory.new) }
+      described_class.configuration = new_config
 
-      expect(Flipper.instance).to_not be(original_instance)
+      expect(described_class.instance).not_to be(original_instance)
     end
   end
 
