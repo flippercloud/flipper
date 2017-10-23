@@ -3,9 +3,9 @@ require 'flipper/cloud/configuration'
 require 'flipper/adapters/instrumented'
 
 RSpec.describe Flipper::Cloud::Configuration do
-  let(:required_options) {
-    {token: "asdf"}
-  }
+  let(:required_options) do
+    { token: "asdf" }
+  end
 
   it "can set token" do
     instance = described_class.new(required_options)

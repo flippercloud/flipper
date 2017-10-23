@@ -67,9 +67,7 @@ module Flipper
       end
 
       # Public: Set url and uri for the http adapter.
-      def url=(url)
-        @url = url
-      end
+      attr_writer :url
 
       private
 
