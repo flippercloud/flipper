@@ -2,42 +2,33 @@
 
 ## Memoizing Middleware
 
-One optimization that flipper provides is a memoizing middleware. The memoizing middleware ensures that you only make one adapter call per feature per request.
+One optimization that flipper provides is a memoizing middleware. The memoizing middleware ensures that you only make one adapter call per feature per request. This means if you check the same feature over and over, it will only make one Mongo, Redis, or whatever call per feature for the length of the request.
 
-This means if you check the same feature over and over, it will only make one Mongo, Redis, or whatever call per feature for the length of the request.
-
-You can use the middleware from a Rails initializer like so:
+You can use the middleware like so for Rails:
 
 ```ruby
-# create flipper dsl instance, see above Usage for more details
-flipper = Flipper.new(...)
-
-require 'flipper/middleware/setup_env'
-require 'flipper/middleware/memoizer'
-config.middleware.use Flipper::Middleware::SetupEnv, flipper
-config.middleware.use Flipper::Middleware::Memoizer
-```
-
-If you set your flipper instance up in an initializer, you can pass a block to the middleware and it will lazily load the instance the first time the middleware is invoked.
-
-```ruby
-# config/initializers/flipper.rb
-module MyRailsApp
-  def self.flipper
-    @flipper ||= Flipper.new(...)
+# setup default instance (perhaps in config/initializer/flipper.rb)
+Flipper.configure do |config|
+  config.default do
+    Flipper.new(...)
   end
 end
 
-# config/application.rb
-require 'flipper/middleware/setup_env'
+# This assumes you setup a default flipper instance using configure.
 require 'flipper/middleware/memoizer'
-config.middleware.use Flipper::Middleware::SetupEnv, lambda {
-  MyRailsApp.flipper
-}
 config.middleware.use Flipper::Middleware::Memoizer
 ```
 
 **Note**: Be sure that the middleware is high enough up in your stack that all feature checks are wrapped.
+
+**Also Note**: If you haven't setup a default instance, you can pass the instance to `SetupEnv` as `Memoizer` uses whatever is setup in the `env`:
+
+```ruby
+require 'flipper/middleware/setup_env'
+require 'flipper/middleware/memoizer'
+config.middleware.use Flipper::Middleware::SetupEnv, -> { Flipper.new(...) }
+config.middleware.use Flipper::Middleware::Memoizer
+```
 
 ### Options
 
