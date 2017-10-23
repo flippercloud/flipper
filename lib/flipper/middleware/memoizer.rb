@@ -50,6 +50,7 @@ module Flipper
       end
 
       def memoized_call(env)
+        reset_on_body_close = false
         flipper = env.fetch(@env_key) { Flipper }
         original = flipper.adapter.memoizing?
         flipper.adapter.memoize = true
@@ -64,10 +65,10 @@ module Flipper
         response[2] = Rack::BodyProxy.new(response[2]) do
           flipper.adapter.memoize = original
         end
+        reset_on_body_close = true
         response
-      rescue
-        flipper.adapter.memoize = original if flipper
-        raise
+      ensure
+        flipper.adapter.memoize = original if flipper && !reset_on_body_close
       end
     end
   end
