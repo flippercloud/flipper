@@ -9,7 +9,7 @@ Initialize the HTTP adapter with a configuration Hash.
 require 'flipper/adapters/http'
 
 configuration = {
-  uri: URI('http://app.com/mount-point'), # required
+  url: 'http://app.com/mount-point', # required
   headers: { 'X-Custom-Header' => 'foo' },
   basic_auth_username: 'user123',
   basic_auth_password: 'password123'
@@ -22,7 +22,7 @@ flipper = Flipper.new(adapter)
 ```
 
 **Required keys**:
-* uri: [URI](https://docs.ruby-lang.org/en/2.3.0/URI.html) object referencing url where [Flipper Api](https://github.com/jnunemaker/flipper/blob/master/docs/api/README.md) is mounted.
+* url: String url where [Flipper Api](https://github.com/jnunemaker/flipper/blob/master/docs/api/README.md) is mounted.
 
 **Optional keys**:
 *These will affect every request the adapter makes.  For example, send basic auth credentials with every request.*
