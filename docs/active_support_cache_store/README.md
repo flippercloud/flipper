@@ -1,12 +1,12 @@
-# Flipper CacheStore
+# Flipper ActiveSupportCacheStore
 
-A [CacheStore](http://api.rubyonrails.org/classes/ActiveSupport/Cache/Store.html) adapter for [Flipper](https://github.com/jnunemaker/flipper).
+A [ActiveSupportCacheStore](http://api.rubyonrails.org/classes/ActiveSupport/Cache/Store.html) adapter for [Flipper](https://github.com/jnunemaker/flipper).
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
-    gem 'flipper-cache_store'
+    gem 'flipper-active_support_cache_store'
 
 And then execute:
 
@@ -14,18 +14,18 @@ And then execute:
 
 Or install it yourself with:
 
-    $ gem install flipper-cache_store
+    $ gem install flipper-active_support_cache_store
 
 ## Usage
 
 ```ruby
 require 'active_support/cache'
 require 'flipper/adapters/memory'
-require 'flipper/adapters/cache_store'
+require 'flipper/adapters/active_support_cache_store'
 
 memory_adapter = Flipper::Adapters::Memory.new
 cache = ActiveSupport::Cache::MemoryStore.new
-adapter = Flipper::Adapters::CacheStore.new(memory_adapter, cache, expires_in: 5.minutes)
+adapter = Flipper::Adapters::ActiveSupportCacheStore.new(memory_adapter, cache, expires_in: 5.minutes)
 flipper = Flipper.new(adapter)
 ```
 Setting `expires_in` is optional and will set an expiration time on Flipper cache keys.  If specified, all flipper keys will use this `expires_in` over the `expires_in` passed to your ActiveSupport cache constructor.
@@ -41,11 +41,11 @@ Each key is namespaced under `flipper/v1/feature/`
 ```ruby
 require 'active_support/cache'
 require 'flipper/adapters/memory'
-require 'flipper/adapters/cache_store'
+require 'flipper/adapters/active_support_cache_store'
 
 memory_adapter = Flipper::Adapters::Memory.new
 cache = ActiveSupport::Cache::MemoryStore.new
-adapter = Flipper::Adapters::CacheStore.new(memory_adapter, cache)
+adapter = Flipper::Adapters::ActiveSupportCacheStore.new(memory_adapter, cache)
 flipper = Flipper.new(adapter)
 
 # Register a few groups.

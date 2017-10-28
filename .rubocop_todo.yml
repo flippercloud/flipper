@@ -151,7 +151,7 @@ Style/FileName:
   Exclude:
     - 'lib/flipper-active_record.rb'
     - 'lib/flipper-api.rb'
-    - 'lib/flipper-cache_store.rb'
+    - 'lib/flipper-active_support_cache_store.rb'
     - 'lib/flipper-cloud.rb'
     - 'lib/flipper-dalli.rb'
     - 'lib/flipper-mongo.rb'

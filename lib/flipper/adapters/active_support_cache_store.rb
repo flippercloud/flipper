@@ -1,9 +1,9 @@
 module Flipper
   module Adapters
     # Public: Adapter that wraps another adapter with the ability to cache
-    # adapter calls in ActiveSupport::CacheStore caches.
+    # adapter calls in ActiveSupport::ActiveSupportCacheStore caches.
     #
-    class CacheStore
+    class ActiveSupportCacheStore
       include ::Flipper::Adapter
 
       Version = 'v1'.freeze
@@ -24,7 +24,7 @@ module Flipper
       # Public
       def initialize(adapter, cache, expires_in: nil)
         @adapter = adapter
-        @name = :cache_store
+        @name = :active_support_cache_store
         @cache = cache
         @write_options = {}
         @write_options.merge!(expires_in: expires_in) if expires_in
