@@ -15,7 +15,7 @@ Gem::Specification.new do |gem|
 
   gem.files         = `git ls-files`.split("\n").select(&flipper_active_support_cache_store_files) + ['lib/flipper/version.rb']
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n").select(&flipper_active_support_cache_store_files)
-  gem.name          = 'flipper-cache-store'
+  gem.name          = 'flipper-active_support_cache_store'
   gem.require_paths = ['lib']
   gem.version       = Flipper::VERSION
 
