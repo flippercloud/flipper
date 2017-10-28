@@ -10,13 +10,13 @@ feature_name = ENV.fetch("FEATURE") { "testing" }.to_sym
 
 Flipper.configure do |config|
   config.default do
-    Flipper::Cloud.new(token, {
-      debug_output: STDOUT,
-      adapter_wrapper: ->(adapter) {
-        cache = ActiveSupport::Cache::MemoryStore.new
-        Flipper::Adapters::CacheStore.new(adapter, cache, {expires_in: 5.seconds})
-      },
-    })
+    Flipper::Cloud.new(token) do |cloud|
+      cloud.debug_output = STDOUT
+      cloud.adapter do |adapter|
+        Flipper::Adapters::CacheStore.new(adapter,
+          ActiveSupport::Cache::MemoryStore.new, {expires_in: 5.seconds})
+      end
+    end
   end
 end
 
