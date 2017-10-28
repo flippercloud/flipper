@@ -1,8 +1,8 @@
 # -*- encoding: utf-8 -*-
 require File.expand_path('../lib/flipper/version', __FILE__)
 
-flipper_cache_store_files = lambda do |file|
-  file =~ /cache_store/
+flipper_active_support_cache_store_files = lambda do |file|
+  file =~ /active_support_cache_store/
 end
 
 Gem::Specification.new do |gem|
@@ -13,9 +13,9 @@ Gem::Specification.new do |gem|
   gem.license       = 'MIT'
   gem.homepage      = 'https://github.com/jnunemaker/flipper'
 
-  gem.files         = `git ls-files`.split("\n").select(&flipper_cache_store_files) + ['lib/flipper/version.rb']
-  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n").select(&flipper_cache_store_files)
-  gem.name          = 'flipper-cache_store'
+  gem.files         = `git ls-files`.split("\n").select(&flipper_active_support_cache_store_files) + ['lib/flipper/version.rb']
+  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n").select(&flipper_active_support_cache_store_files)
+  gem.name          = 'flipper-cache-store'
   gem.require_paths = ['lib']
   gem.version       = Flipper::VERSION
 

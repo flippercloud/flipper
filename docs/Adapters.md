@@ -5,7 +5,7 @@ I plan on supporting the adapters in the flipper repo. Other adapters are welcom
 ## Officially Supported
 
 * [ActiveRecord adapter](https://github.com/jnunemaker/flipper/blob/master/docs/active_record) - Rails 3, 4, and 5.
-* [CacheStore adapter](https://github.com/jnunemaker/flipper/blob/master/docs/cache_store) - ActiveSupport::Cache::Store
+* [ActiveSupportCacheStore adapter](https://github.com/jnunemaker/flipper/blob/master/docs/active_support_cache_store) - ActiveSupport::Cache::Store
 * [Cassanity adapter](https://github.com/jnunemaker/flipper-cassanity)
 * [Http adapter](https://github.com/jnunemaker/flipper/blob/master/docs/http)
 * [memory adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb) – great for tests

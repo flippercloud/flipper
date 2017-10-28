@@ -1,7 +1,7 @@
 require File.expand_path('../../example_setup', __FILE__)
 
 require 'flipper/cloud'
-require 'flipper/adapters/cache_store'
+require 'flipper/adapters/active_support_cache_store'
 require 'active_support/cache'
 require 'active_support/cache/memory_store'
 
@@ -13,7 +13,7 @@ Flipper.configure do |config|
     Flipper::Cloud.new(token) do |cloud|
       cloud.debug_output = STDOUT
       cloud.adapter do |adapter|
-        Flipper::Adapters::CacheStore.new(adapter,
+        Flipper::Adapters::ActiveSupportCacheStore.new(adapter,
           ActiveSupport::Cache::MemoryStore.new, {expires_in: 5.seconds})
       end
     end

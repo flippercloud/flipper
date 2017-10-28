@@ -1,10 +1,10 @@
 require 'helper'
 require 'active_support/cache'
 require 'flipper/adapters/memory'
-require 'flipper/adapters/cache_store'
+require 'flipper/adapters/active_support_cache_store'
 require 'flipper/spec/shared_adapter_specs'
 
-RSpec.describe Flipper::Adapters::CacheStore do
+RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
   let(:memory_adapter) { Flipper::Adapters::Memory.new }
   let(:cache) { ActiveSupport::Cache::MemoryStore.new }
   let(:adapter) { described_class.new(memory_adapter, cache) }
@@ -43,8 +43,8 @@ RSpec.describe Flipper::Adapters::CacheStore do
   end
 
   describe '#name' do
-    it 'is cache_store' do
-      expect(subject.name).to be(:cache_store)
+    it 'is active_support_cache_store' do
+      expect(subject.name).to be(:active_support_cache_store)
     end
   end
 end
