@@ -97,13 +97,20 @@ module Flipper
 
       def get_all
         if memoizing?
-          cache.fetch(:flipper_get_all) do
+          if cache[:all_memoized]
+            result = {}
+            cache[FeaturesKey].each do |key|
+              result[key] = cache[key_for(key)]
+            end
+            result
+          else
             response = @adapter.get_all
             response.each do |key, hash|
               cache[key_for(key)] = hash
             end
             cache[FeaturesKey] = response.keys.to_set
-            cache[:flipper_get_all] = response
+            cache[:all_memoized] = true
+            response
           end
         else
           @adapter.get_all
