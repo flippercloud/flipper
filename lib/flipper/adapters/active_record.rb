@@ -88,8 +88,8 @@ module Flipper
 
       def get_all
         joins = <<-EOJ
-          INNER JOIN #{@feature_class.table_name} ON
-          #{@feature_class.table_name}.key = #{@gate_class.table_name}.feature_key"
+          INNER JOIN #{@feature_class.table_name}
+          ON #{@feature_class.table_name}.key = #{@gate_class.table_name}.feature_key
         EOJ
         db_gates = @gate_class.joins(joins).all.to_a
         grouped_db_gates = db_gates.group_by(&:feature_key)
