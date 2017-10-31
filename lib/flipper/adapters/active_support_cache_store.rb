@@ -9,7 +9,7 @@ module Flipper
       Version = 'v1'.freeze
       Namespace = "flipper/#{Version}".freeze
       FeaturesKey = "#{Namespace}/features".freeze
-      GetAllKey = "#{Namespace}/get_all"
+      GetAllKey = "#{Namespace}/get_all".freeze
 
       # Private
       def self.key_for(key)

@@ -59,9 +59,9 @@ module Flipper
       end
 
       def get_all
-        features = set_members(FeaturesKey).map { |key|
+        features = set_members(FeaturesKey).map do |key|
           Flipper::Feature.new(key, self)
-        }
+        end
 
         result = {}
         features.each do |feature|
