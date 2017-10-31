@@ -28,7 +28,7 @@ module Flipper
         @name = :active_support_cache_store
         @cache = cache
         @write_options = {}
-        @write_options.merge!(expires_in: expires_in) if expires_in
+        @write_options[:expires_in] = expires_in if expires_in
       end
 
       # Public
@@ -70,7 +70,7 @@ module Flipper
       end
 
       def get_all
-        if @cache.write(GetAllKey, nil, unless_exist: true)
+        if @cache.write(GetAllKey, Time.now.to_i, @write_options.merge(unless_exist: true))
           response = @adapter.get_all
           response.each do |key, value|
             @cache.write(key_for(key), value, @write_options)
@@ -112,14 +112,20 @@ module Flipper
       # as few network calls as possible.
       def read_many_features(features)
         keys = features.map { |feature| key_for(feature.key) }
-        result = @cache.read_multi(keys)
-        uncached_features = features.reject { |feature| result[feature.key] }
+        cache_result = @cache.read_multi(*keys)
+        uncached_features = features.reject { |feature| cache_result[key_for(feature)] }
+
         if uncached_features.any?
           response = @adapter.get_multi(uncached_features)
           response.each do |key, value|
             @cache.write(key_for(key), value, @write_options)
-            result[key] = value
+            cache_result[key_for(key)] = value
           end
+        end
+
+        result = {}
+        features.each do |feature|
+          result[feature.key] = cache_result[key_for(feature.key)]
         end
         result
       end
