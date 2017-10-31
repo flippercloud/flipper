@@ -8,7 +8,8 @@ module Flipper
       include ::Flipper::Adapter
 
       begin
-        old, ::Sequel::Model.require_valid_table = ::Sequel::Model.require_valid_table, false
+        old = ::Sequel::Model.require_valid_table
+        ::Sequel::Model.require_valid_table = false
 
         # Private: Do not use outside of this adapter.
         class Feature < ::Sequel::Model(:flipper_features)

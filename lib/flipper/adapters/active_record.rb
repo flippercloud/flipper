@@ -87,7 +87,11 @@ module Flipper
       end
 
       def get_all
-        db_gates = @gate_class.joins("INNER JOIN #{@feature_class.table_name} on #{@feature_class.table_name}.key = #{@gate_class.table_name}.feature_key").all.to_a
+        joins = <<-EOJ
+          INNER JOIN #{@feature_class.table_name} ON
+          #{@feature_class.table_name}.key = #{@gate_class.table_name}.feature_key"
+        EOJ
+        db_gates = @gate_class.joins(joins).all.to_a
         grouped_db_gates = db_gates.group_by(&:feature_key)
         result = Hash.new { |hash, key| hash[key] = default_config }
         features = grouped_db_gates.keys.map { |key| Flipper::Feature.new(key, self) }

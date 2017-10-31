@@ -136,7 +136,6 @@ RSpec.describe Flipper::Adapters::Memoizable do
 
       it 'only calls get_all once for memoized adapter' do
         adapter = Flipper::Adapters::OperationLogger.new(Flipper::Adapters::Memory.new)
-        flipper = Flipper.new(adapter)
         cache = {}
         instance = described_class.new(adapter, cache)
         instance.memoize = true
@@ -172,7 +171,6 @@ RSpec.describe Flipper::Adapters::Memoizable do
 
       it 'calls get_all every time for memoized adapter' do
         adapter = Flipper::Adapters::OperationLogger.new(Flipper::Adapters::Memory.new)
-        flipper = Flipper.new(adapter)
         cache = {}
         instance = described_class.new(adapter, cache)
         instance.memoize = false

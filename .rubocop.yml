@@ -40,3 +40,6 @@ Style/TrailingCommaInLiteral:
 
 RSpec/InstanceVariable:
   Enabled: false
+
+Style/AccessorMethodName:
+  Enabled: false
