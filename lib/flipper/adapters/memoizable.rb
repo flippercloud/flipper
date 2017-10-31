@@ -19,6 +19,11 @@ module Flipper
       # Internal: The adapter this adapter is wrapping.
       attr_reader :adapter
 
+      # Private
+      def self.key_for(key)
+        "feature/#{key}"
+      end
+
       # Public
       def initialize(adapter, cache = nil)
         super(adapter)
@@ -26,7 +31,6 @@ module Flipper
         @name = :memoizable
         @cache = cache || {}
         @memoize = false
-        @all_fetched = false
       end
 
       # Public
@@ -63,7 +67,7 @@ module Flipper
       # Public
       def get(feature)
         if memoizing?
-          cache.fetch(feature.key) { cache[feature.key] = @adapter.get(feature) }
+          cache.fetch(key_for(feature.key)) { cache[key_for(feature.key)] = @adapter.get(feature) }
         else
           @adapter.get(feature)
         end
@@ -72,18 +76,18 @@ module Flipper
       # Public
       def get_multi(features)
         if memoizing?
-          uncached_features = features.reject { |feature| cache[feature.key] }
+          uncached_features = features.reject { |feature| cache[key_for(feature.key)] }
 
           if uncached_features.any?
             response = @adapter.get_multi(uncached_features)
             response.each do |key, hash|
-              cache[key] = hash
+              cache[key_for(key)] = hash
             end
           end
 
           result = {}
           features.each do |feature|
-            result[feature.key] = cache[feature.key]
+            result[feature.key] = cache[key_for(feature.key)]
           end
           result
         else
@@ -93,20 +97,14 @@ module Flipper
 
       def get_all
         if memoizing?
-          unless @all_fetched
-            result = @adapter.get_all
-            result.each do |key, value|
-              cache[key] = value
+          cache.fetch(:flipper_get_all) do
+            response = @adapter.get_all
+            response.each do |key, hash|
+              cache[key_for(key)] = hash
             end
-            cache[FeaturesKey] = result.keys.to_set
-            @all_fetched = true
+            cache[FeaturesKey] = response.keys.to_set
+            cache[:flipper_get_all] = response
           end
-
-          result = {}
-          features.each do |key|
-            result[key] = cache[key]
-          end
-          result
         else
           @adapter.get_all
         end
@@ -130,7 +128,6 @@ module Flipper
       #
       # value - The Boolean that decides if local caching is on.
       def memoize=(value)
-        @all_fetched = false
         cache.clear
         @memoize = value
       end
@@ -142,8 +139,12 @@ module Flipper
 
       private
 
+      def key_for(key)
+        self.class.key_for(key)
+      end
+
       def expire_feature(feature)
-        cache.delete(feature.key) if memoizing?
+        cache.delete(key_for(feature.key)) if memoizing?
       end
 
       def expire_features_set

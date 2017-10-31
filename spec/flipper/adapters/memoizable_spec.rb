@@ -66,7 +66,7 @@ RSpec.describe Flipper::Adapters::Memoizable do
       it 'memoizes feature' do
         feature = flipper[:stats]
         result = subject.get(feature)
-        expect(cache[feature.key]).to be(result)
+        expect(cache[described_class.key_for(feature.key)]).to be(result)
       end
     end
 
@@ -95,8 +95,8 @@ RSpec.describe Flipper::Adapters::Memoizable do
         features = names.map { |name| flipper[name] }
         results = subject.get_multi(features)
         features.each do |feature|
-          expect(cache[feature.key]).not_to be(nil)
-          expect(cache[feature.key]).to be(results[feature.key])
+          expect(cache[described_class.key_for(feature.key)]).not_to be(nil)
+          expect(cache[described_class.key_for(feature.key)]).to be(results[feature.key])
         end
       end
     end
@@ -127,8 +127,8 @@ RSpec.describe Flipper::Adapters::Memoizable do
         features = names.map { |name| flipper[name].tap(&:enable) }
         results = subject.get_all
         features.each do |feature|
-          expect(cache[feature.key]).not_to be(nil)
-          expect(cache[feature.key]).to be(results[feature.key])
+          expect(cache[described_class.key_for(feature.key)]).not_to be(nil)
+          expect(cache[described_class.key_for(feature.key)]).to be(results[feature.key])
         end
         expect(cache[subject.class::FeaturesKey]).to eq(names.map(&:to_s).to_set)
       end
@@ -158,9 +158,9 @@ RSpec.describe Flipper::Adapters::Memoizable do
       it 'unmemoizes feature' do
         feature = flipper[:stats]
         gate = feature.gate(:boolean)
-        cache[feature.key] = { some: 'thing' }
+        cache[described_class.key_for(feature.key)] = { some: 'thing' }
         subject.enable(feature, gate, flipper.bool)
-        expect(cache[feature.key]).to be_nil
+        expect(cache[described_class.key_for(feature.key)]).to be_nil
       end
     end
 
@@ -188,9 +188,9 @@ RSpec.describe Flipper::Adapters::Memoizable do
       it 'unmemoizes feature' do
         feature = flipper[:stats]
         gate = feature.gate(:boolean)
-        cache[feature.key] = { some: 'thing' }
+        cache[described_class.key_for(feature.key)] = { some: 'thing' }
         subject.disable(feature, gate, flipper.bool)
-        expect(cache[feature.key]).to be_nil
+        expect(cache[described_class.key_for(feature.key)]).to be_nil
       end
     end
 
@@ -272,9 +272,9 @@ RSpec.describe Flipper::Adapters::Memoizable do
 
       it 'unmemoizes the feature' do
         feature = flipper[:stats]
-        cache[feature.key] = { some: 'thing' }
+        cache[described_class.key_for(feature.key)] = { some: 'thing' }
         subject.remove(feature)
-        expect(cache[feature.key]).to be_nil
+        expect(cache[described_class.key_for(feature.key)]).to be_nil
       end
     end
 
@@ -297,9 +297,9 @@ RSpec.describe Flipper::Adapters::Memoizable do
 
       it 'unmemoizes feature' do
         feature = flipper[:stats]
-        cache[feature.key] = { some: 'thing' }
+        cache[described_class.key_for(feature.key)] = { some: 'thing' }
         subject.clear(feature)
-        expect(cache[feature.key]).to be_nil
+        expect(cache[described_class.key_for(feature.key)]).to be_nil
       end
     end
 
