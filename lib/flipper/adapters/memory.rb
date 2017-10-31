@@ -7,7 +7,7 @@ module Flipper
     class Memory
       include ::Flipper::Adapter
 
-      FeaturesKey = :flipper_features
+      FeaturesKey = :features
 
       # Public: The name of the adapter.
       attr_reader :name
@@ -20,7 +20,7 @@ module Flipper
 
       # Public: The set of known features.
       def features
-        set_members(FeaturesKey)
+        read_feature_keys
       end
 
       # Public: Adds a feature to the set of known features.
@@ -47,27 +47,19 @@ module Flipper
 
       # Public
       def get(feature)
-        result_for_feature(feature)
+        read_feature(feature)
       end
 
       def get_multi(features)
-        result = {}
-        features.each do |feature|
-          result[feature.key] = result_for_feature(feature)
-        end
-        result
+        read_many_features(features)
       end
 
       def get_all
-        features = set_members(FeaturesKey).map do |key|
+        features = read_feature_keys.map do |key|
           Flipper::Feature.new(key, self)
         end
 
-        result = {}
-        features.each do |feature|
-          result[feature.key] = result_for_feature(feature)
-        end
-        result
+        read_many_features(features)
       end
 
       # Public
@@ -109,12 +101,26 @@ module Flipper
         "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
       end
 
-      # Private
-      def key(feature, gate)
-        "#{feature.key}/#{gate.key}"
+      private
+
+      def read_feature_keys
+        set_members(FeaturesKey)
       end
 
-      def result_for_feature(feature)
+      # Private
+      def key(feature, gate)
+        "feature/#{feature.key}/#{gate.key}"
+      end
+
+      def read_many_features(features)
+        result = {}
+        features.each do |feature|
+          result[feature.key] = read_feature(feature)
+        end
+        result
+      end
+
+      def read_feature(feature)
         result = {}
 
         feature.gates.each do |gate|
