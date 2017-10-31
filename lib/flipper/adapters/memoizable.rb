@@ -9,6 +9,7 @@ module Flipper
       include ::Flipper::Adapter
 
       FeaturesKey = :flipper_features
+      GetAllKey = :all_memoized
 
       # Internal
       attr_reader :cache
@@ -96,25 +97,30 @@ module Flipper
       end
 
       def get_all
-        if memoizing?
-          if cache[:all_memoized]
-            result = {}
+        response = if memoizing?
+          if cache[GetAllKey]
+            hash = {}
             cache[FeaturesKey].each do |key|
-              result[key] = cache[key_for(key)]
+              hash[key] = cache[key_for(key)]
             end
-            result
+            hash
           else
-            response = @adapter.get_all
-            response.each do |key, hash|
+            adapter_response = @adapter.get_all
+            adapter_response.each do |key, hash|
               cache[key_for(key)] = hash
             end
-            cache[FeaturesKey] = response.keys.to_set
-            cache[:all_memoized] = true
-            response
+            cache[FeaturesKey] = adapter_response.keys.to_set
+            cache[GetAllKey] = true
+            adapter_response
           end
         else
           @adapter.get_all
         end
+
+        # Ensures that looking up other features that do not exist doesn't
+        # result in N+1 adapter calls.
+        response.default_proc = ->(hash, key) { hash[key] = default_config }
+        response
       end
 
       # Public

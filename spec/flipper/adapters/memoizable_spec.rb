@@ -147,6 +147,14 @@ RSpec.describe Flipper::Adapters::Memoizable do
         instance.get_all
         expect(adapter.count(:get_all)).to be(1)
       end
+
+      it 'returns default_config for unknown feature keys' do
+        first = subject.get_all
+        expect(first['doesntexist']).to eq(subject.default_config)
+
+        second = subject.get_all
+        expect(second['doesntexist']).to eq(subject.default_config)
+      end
     end
 
     context "with memoization disabled" do
@@ -174,6 +182,14 @@ RSpec.describe Flipper::Adapters::Memoizable do
 
         instance.get_all
         expect(adapter.count(:get_all)).to be(2)
+      end
+
+      it 'returns default_config for unknown feature keys' do
+        first = subject.get_all
+        expect(first['doesntexist']).to eq(subject.default_config)
+
+        second = subject.get_all
+        expect(second['doesntexist']).to eq(subject.default_config)
       end
     end
   end
