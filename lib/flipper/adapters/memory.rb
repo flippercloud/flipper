@@ -47,20 +47,26 @@ module Flipper
 
       # Public
       def get(feature)
+        result_for_feature(feature)
+      end
+
+      def get_multi(features)
         result = {}
-
-        feature.gates.each do |gate|
-          result[gate.key] =
-            case gate.data_type
-            when :boolean, :integer
-              read key(feature, gate)
-            when :set
-              set_members key(feature, gate)
-            else
-              raise "#{gate} is not supported by this adapter yet"
-            end
+        features.each do |feature|
+          result[feature.key] = result_for_feature(feature)
         end
+        result
+      end
 
+      def get_all
+        features = set_members(FeaturesKey).map { |key|
+          Flipper::Feature.new(key, self)
+        }
+
+        result = {}
+        features.each do |feature|
+          result[feature.key] = result_for_feature(feature)
+        end
         result
       end
 
@@ -106,6 +112,24 @@ module Flipper
       # Private
       def key(feature, gate)
         "#{feature.key}/#{gate.key}"
+      end
+
+      def result_for_feature(feature)
+        result = {}
+
+        feature.gates.each do |gate|
+          result[gate.key] =
+            case gate.data_type
+            when :boolean, :integer
+              read key(feature, gate)
+            when :set
+              set_members key(feature, gate)
+            else
+              raise "#{gate} is not supported by this adapter yet"
+            end
+        end
+
+        result
       end
 
       # Private
