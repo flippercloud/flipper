@@ -7,18 +7,24 @@ module Flipper
     class Sequel
       include ::Flipper::Adapter
 
-      # Private: Do not use outside of this adapter.
-      class Feature < ::Sequel::Model(:flipper_features)
-        unrestrict_primary_key
+      begin
+        old, ::Sequel::Model.require_valid_table = ::Sequel::Model.require_valid_table, false
 
-        plugin :timestamps, update_on_create: true
-      end
+        # Private: Do not use outside of this adapter.
+        class Feature < ::Sequel::Model(:flipper_features)
+          unrestrict_primary_key
 
-      # Private: Do not use outside of this adapter.
-      class Gate < ::Sequel::Model(:flipper_gates)
-        unrestrict_primary_key
+          plugin :timestamps, update_on_create: true
+        end
 
-        plugin :timestamps, update_on_create: true
+        # Private: Do not use outside of this adapter.
+        class Gate < ::Sequel::Model(:flipper_gates)
+          unrestrict_primary_key
+
+          plugin :timestamps, update_on_create: true
+        end
+      ensure
+        ::Sequel::Model.require_valid_table = old
       end
 
       # Public: The name of the adapter.
