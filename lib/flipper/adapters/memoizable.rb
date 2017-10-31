@@ -97,30 +97,31 @@ module Flipper
       end
 
       def get_all
-        response = if memoizing?
-                     if cache[GetAllKey]
-                       hash = {}
-                       cache[FeaturesKey].each do |key|
-                         hash[key] = cache[key_for(key)]
-                       end
-                       hash
-                     else
-                       adapter_response = @adapter.get_all
-                       adapter_response.each do |key, value|
-                         cache[key_for(key)] = value
-                       end
-                       cache[FeaturesKey] = adapter_response.keys.to_set
-                       cache[GetAllKey] = true
-                       adapter_response
-                     end
-                   else
-                     @adapter.get_all
-                   end
+        if memoizing?
+          response = nil
+          if cache[GetAllKey]
+            response = {}
+            cache[FeaturesKey].each do |key|
+              response[key] = cache[key_for(key)]
+            end
+            response
+          else
+            response = @adapter.get_all
+            response.each do |key, value|
+              cache[key_for(key)] = value
+            end
+            cache[FeaturesKey] = response.keys.to_set
+            cache[GetAllKey] = true
+            response
+          end
 
-        # Ensures that looking up other features that do not exist doesn't
-        # result in N+1 adapter calls.
-        response.default_proc = ->(memo, key) { memo[key] = default_config }
-        response
+          # Ensures that looking up other features that do not exist doesn't
+          # result in N+1 adapter calls.
+          response.default_proc = ->(memo, key) { memo[key] = default_config }
+          response
+       else
+         @adapter.get_all
+       end
       end
 
       # Public

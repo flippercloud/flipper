@@ -182,12 +182,12 @@ RSpec.describe Flipper::Adapters::Memoizable do
         expect(adapter.count(:get_all)).to be(2)
       end
 
-      it 'returns default_config for unknown feature keys' do
+      it 'returns nil for unknown feature keys' do
         first = subject.get_all
-        expect(first['doesntexist']).to eq(subject.default_config)
+        expect(first['doesntexist']).to be(nil)
 
         second = subject.get_all
-        expect(second['doesntexist']).to eq(subject.default_config)
+        expect(second['doesntexist']).to be(nil)
       end
     end
   end
