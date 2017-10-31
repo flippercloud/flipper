@@ -9,6 +9,7 @@ module Flipper
       Version = 'v1'.freeze
       Namespace = "flipper/#{Version}".freeze
       FeaturesKey = "#{Namespace}/features".freeze
+      GetAllKey = "#{Namespace}/get_all"
 
       # Private
       def self.key_for(key)
@@ -32,9 +33,7 @@ module Flipper
 
       # Public
       def features
-        @cache.fetch(FeaturesKey, @write_options) do
-          @adapter.features
-        end
+        read_feature_keys
       end
 
       # Public
@@ -67,17 +66,21 @@ module Flipper
       end
 
       def get_multi(features)
-        keys = features.map { |feature| key_for(feature.key) }
-        result = @cache.read_multi(keys)
-        uncached_features = features.reject { |feature| result[feature.key] }
-        if uncached_features.any?
-          response = @adapter.get_multi(uncached_features)
+        read_many_features(features)
+      end
+
+      def get_all
+        if @cache.write(GetAllKey, nil, unless_exist: true)
+          response = @adapter.get_all
           response.each do |key, value|
             @cache.write(key_for(key), value, @write_options)
-            result[key] = value
           end
+          @cache.write(FeaturesKey, response.keys.to_set, @write_options)
+          response
+        else
+          features = read_feature_keys.map { |key| Flipper::Feature.new(key, self) }
+          read_many_features(features)
         end
-        result
       end
 
       ## Public
@@ -98,6 +101,27 @@ module Flipper
 
       def key_for(key)
         self.class.key_for(key)
+      end
+
+      # Internal: Returns an array of the known feature keys.
+      def read_feature_keys
+        @cache.fetch(FeaturesKey, @write_options) { @adapter.features }
+      end
+
+      # Internal: Given an array of features, attempts to read through cache in
+      # as few network calls as possible.
+      def read_many_features(features)
+        keys = features.map { |feature| key_for(feature.key) }
+        result = @cache.read_multi(keys)
+        uncached_features = features.reject { |feature| result[feature.key] }
+        if uncached_features.any?
+          response = @adapter.get_multi(uncached_features)
+          response.each do |key, value|
+            @cache.write(key_for(key), value, @write_options)
+            result[key] = value
+          end
+        end
+        result
       end
     end
   end
