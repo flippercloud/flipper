@@ -1,6 +1,7 @@
 require 'helper'
 require 'flipper/adapters/memoizable'
 require 'flipper/adapters/memory'
+require 'flipper/adapters/operation_logger'
 require 'flipper/spec/shared_adapter_specs'
 
 RSpec.describe Flipper::Adapters::Memoizable do
@@ -132,6 +133,20 @@ RSpec.describe Flipper::Adapters::Memoizable do
         end
         expect(cache[subject.class::FeaturesKey]).to eq(names.map(&:to_s).to_set)
       end
+
+      it 'only calls get_all once for memoized adapter' do
+        adapter = Flipper::Adapters::OperationLogger.new(Flipper::Adapters::Memory.new)
+        flipper = Flipper.new(adapter)
+        cache = {}
+        instance = described_class.new(adapter, cache)
+        instance.memoize = true
+
+        instance.get_all
+        expect(adapter.count(:get_all)).to be(1)
+
+        instance.get_all
+        expect(adapter.count(:get_all)).to be(1)
+      end
     end
 
     context "with memoization disabled" do
@@ -145,6 +160,20 @@ RSpec.describe Flipper::Adapters::Memoizable do
         result = subject.get_all
         adapter_result = adapter.get_all
         expect(result).to eq(adapter_result)
+      end
+
+      it 'calls get_all every time for memoized adapter' do
+        adapter = Flipper::Adapters::OperationLogger.new(Flipper::Adapters::Memory.new)
+        flipper = Flipper.new(adapter)
+        cache = {}
+        instance = described_class.new(adapter, cache)
+        instance.memoize = false
+
+        instance.get_all
+        expect(adapter.count(:get_all)).to be(1)
+
+        instance.get_all
+        expect(adapter.count(:get_all)).to be(2)
       end
     end
   end
