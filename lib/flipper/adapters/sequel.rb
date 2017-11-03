@@ -96,6 +96,21 @@ module Flipper
         result
       end
 
+      def get_all
+        db_gates = @gate_class.fetch(<<-SQL).to_a
+          SELECT g.*
+          FROM #{@gate_class.table_name} g
+            INNER JOIN #{@feature_class.table_name} f ON f.key = g.feature_key
+        SQL
+        grouped_db_gates = db_gates.group_by(&:feature_key)
+        result = Hash.new { |hash, key| hash[key] = default_config }
+        features = grouped_db_gates.keys.map { |key| Flipper::Feature.new(key, self) }
+        features.each do |feature|
+          result[feature.key] = result_for_feature(feature, grouped_db_gates[feature.key])
+        end
+        result
+      end
+
       # Public: Enables a gate for a given thing.
       #
       # feature - The Flipper::Feature for the gate.
