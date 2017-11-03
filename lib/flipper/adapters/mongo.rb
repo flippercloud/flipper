@@ -20,7 +20,7 @@ module Flipper
 
       # Public: The set of known features.
       def features
-        find(FeaturesKey).fetch('features') { Set.new }.to_set
+        read_feature_keys
       end
 
       # Public: Adds a feature to the set of known features.
@@ -51,12 +51,12 @@ module Flipper
       end
 
       def get_multi(features)
-        docs = find_many(features.map(&:key))
-        result = {}
-        features.each do |feature|
-          result[feature.key] = result_for_feature(feature, docs[feature.key])
-        end
-        result
+        read_many_features(features)
+      end
+
+      def get_all
+        features = read_feature_keys.map { |key| Flipper::Feature.new(key, self) }
+        read_many_features(features)
       end
 
       # Public: Enables a gate for a given thing.
@@ -103,6 +103,21 @@ module Flipper
         end
 
         true
+      end
+
+      private
+
+      def read_feature_keys
+        find(FeaturesKey).fetch('features') { Set.new }.to_set
+      end
+
+      def read_many_features(features)
+        docs = find_many(features.map(&:key))
+        result = {}
+        features.each do |feature|
+          result[feature.key] = result_for_feature(feature, docs[feature.key])
+        end
+        result
       end
 
       # Private
