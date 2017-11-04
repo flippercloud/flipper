@@ -104,7 +104,6 @@ module Flipper
             cache[FeaturesKey].each do |key|
               response[key] = cache[key_for(key)]
             end
-            response
           else
             response = @adapter.get_all
             response.each do |key, value|
@@ -112,7 +111,6 @@ module Flipper
             end
             cache[FeaturesKey] = response.keys.to_set
             cache[GetAllKey] = true
-            response
           end
 
           # Ensures that looking up other features that do not exist doesn't
