@@ -14,7 +14,7 @@ Gem::Specification.new do |gem|
   gem.homepage      = 'https://github.com/jnunemaker/flipper'
 
   extra_files = [
-    'lib/generators/flipper/templates/migration.rb',
+    'lib/generators/flipper/templates/migration.erb',
     'lib/flipper/version.rb',
   ]
   gem.files         = `git ls-files`.split("\n").select(&flipper_active_record_files) + extra_files

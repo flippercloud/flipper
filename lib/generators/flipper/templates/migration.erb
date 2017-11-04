@@ -1,4 +1,4 @@
-class CreateFlipperTables < ActiveRecord::Migration
+class CreateFlipperTables < ActiveRecord::Migration<%= migration_version %>
   def self.up
     create_table :flipper_features do |t|
       t.string :key, null: false

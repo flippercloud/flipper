@@ -46,8 +46,10 @@ module Flipper
       # Public: Adds a feature to the set of known features.
       def add(feature)
         # race condition, but add is only used by enable/disable which happen
-        # super rarely, so it shouldn't matter in practice
-        unless @feature_class.where(key: feature.key).first
+        # super rarely, so it shouldn't matter in practice; additionally
+        # to_a.first is used instead of first because of a Ruby 2.4/Rails 3.2.21
+        # CI failure (https://travis-ci.org/jnunemaker/flipper/jobs/297274000).
+        unless @feature_class.where(key: feature.key).to_a.first
           @feature_class.create! { |f| f.key = feature.key }
         end
         true
