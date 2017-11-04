@@ -1,5 +1,6 @@
 require 'helper'
 require 'active_support/cache'
+require 'active_support/cache/dalli_store'
 require 'flipper/adapters/memory'
 require 'flipper/adapters/operation_logger'
 require 'flipper/adapters/active_support_cache_store'
@@ -9,11 +10,15 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
   let(:memory_adapter) do
     Flipper::Adapters::OperationLogger.new(Flipper::Adapters::Memory.new)
   end
-  let(:cache) { ActiveSupport::Cache::MemoryStore.new }
+  let(:cache) { ActiveSupport::Cache::DalliStore.new }
   let(:adapter) { described_class.new(memory_adapter, cache, expires_in: 10.seconds) }
   let(:flipper) { Flipper.new(adapter) }
 
   subject { adapter }
+
+  before do
+    cache.clear
+  end
 
   it_should_behave_like 'a flipper adapter'
 

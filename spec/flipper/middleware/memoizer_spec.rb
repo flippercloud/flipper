@@ -1,7 +1,7 @@
 require 'helper'
 require 'rack/test'
 require 'active_support/cache'
-require 'active_support/cache/memory_store'
+require 'active_support/cache/dalli_store'
 require 'flipper/middleware/memoizer'
 require 'flipper/adapters/active_support_cache_store'
 require 'flipper/adapters/operation_logger'
@@ -344,7 +344,8 @@ RSpec.describe Flipper::Middleware::Memoizer do
     it 'eagerly caches known features for duration of request' do
       memory = Flipper::Adapters::Memory.new
       logged_memory = Flipper::Adapters::OperationLogger.new(memory)
-      cache = ActiveSupport::Cache::MemoryStore.new
+      cache = ActiveSupport::Cache::DalliStore.new
+      cache.clear
       cached = Flipper::Adapters::ActiveSupportCacheStore.new(logged_memory, cache, expires_in: 10)
       logged_cached = Flipper::Adapters::OperationLogger.new(cached)
       memo = {}
