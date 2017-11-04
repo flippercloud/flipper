@@ -1,16 +1,8 @@
 require File.expand_path('../example_setup', __FILE__)
-
+require_relative 'active_record/ar_setup'
 require 'flipper'
 require 'flipper/adapters/redis'
 require 'flipper/adapters/active_record'
-
-# Active Record boiler plate, feel free to ignore.
-ActiveRecord::Base.establish_connection({
-  adapter: 'sqlite3',
-  database: ':memory:',
-})
-require 'generators/flipper/templates/migration'
-CreateFlipperTables.up
 
 # Say you are using redis...
 redis_adapter = Flipper::Adapters::Redis.new(Redis.new)
