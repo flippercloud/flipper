@@ -13,13 +13,18 @@ module Flipper
       end
 
       def self.migration_version
-        if Rails.version.start_with?('5')
-          "[#{Rails::VERSION::MAJOR}.#{Rails::VERSION::MINOR}]"
-        end
+        "[#{Rails::VERSION::MAJOR}.#{Rails::VERSION::MINOR}]" if rails5?
+      end
+
+      def self.rails5?
+        Rails.version.start_with?('5')
       end
 
       def create_migration_file
-        migration_template 'migration.rb', 'db/migrate/create_flipper_tables.rb', migration_version: migration_version
+        options = {
+          migration_version: migration_version,
+        }
+        migration_template 'migration.erb', 'db/migrate/create_flipper_tables.rb', options
       end
 
       def migration_version
