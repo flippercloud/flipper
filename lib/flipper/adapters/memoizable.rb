@@ -119,9 +119,9 @@ module Flipper
           # result in N+1 adapter calls.
           response.default_proc = ->(memo, key) { memo[key] = default_config }
           response
-       else
-         @adapter.get_all
-       end
+        else
+          @adapter.get_all
+        end
       end
 
       # Public

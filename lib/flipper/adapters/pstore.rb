@@ -94,7 +94,6 @@ module Flipper
 
       # Public
       def disable(feature, gate, thing)
-
         case gate.data_type
         when :boolean
           clear(feature)
