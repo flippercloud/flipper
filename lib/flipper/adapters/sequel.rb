@@ -7,18 +7,25 @@ module Flipper
     class Sequel
       include ::Flipper::Adapter
 
-      # Private: Do not use outside of this adapter.
-      class Feature < ::Sequel::Model(:flipper_features)
-        unrestrict_primary_key
+      begin
+        old = ::Sequel::Model.require_valid_table
+        ::Sequel::Model.require_valid_table = false
 
-        plugin :timestamps, update_on_create: true
-      end
+        # Private: Do not use outside of this adapter.
+        class Feature < ::Sequel::Model(:flipper_features)
+          unrestrict_primary_key
 
-      # Private: Do not use outside of this adapter.
-      class Gate < ::Sequel::Model(:flipper_gates)
-        unrestrict_primary_key
+          plugin :timestamps, update_on_create: true
+        end
 
-        plugin :timestamps, update_on_create: true
+        # Private: Do not use outside of this adapter.
+        class Gate < ::Sequel::Model(:flipper_gates)
+          unrestrict_primary_key
+
+          plugin :timestamps, update_on_create: true
+        end
+      ensure
+        ::Sequel::Model.require_valid_table = old
       end
 
       # Public: The name of the adapter.
@@ -83,6 +90,21 @@ module Flipper
         db_gates = @gate_class.where(feature_key: features.map(&:key)).to_a
         grouped_db_gates = db_gates.group_by(&:feature_key)
         result = {}
+        features.each do |feature|
+          result[feature.key] = result_for_feature(feature, grouped_db_gates[feature.key])
+        end
+        result
+      end
+
+      def get_all
+        db_gates = @gate_class.fetch(<<-SQL).to_a
+          SELECT g.*
+          FROM #{@gate_class.table_name} g
+            INNER JOIN #{@feature_class.table_name} f ON f.key = g.feature_key
+        SQL
+        grouped_db_gates = db_gates.group_by(&:feature_key)
+        result = Hash.new { |hash, key| hash[key] = default_config }
+        features = grouped_db_gates.keys.map { |key| Flipper::Feature.new(key, self) }
         features.each do |feature|
           result[feature.key] = result_for_feature(feature, grouped_db_gates[feature.key])
         end

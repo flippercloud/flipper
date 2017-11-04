@@ -25,59 +25,68 @@ module Flipper
 
       # Public: The set of known features.
       def features
-        set_members FeaturesKey
+        @store.transaction do
+          read_feature_keys
+        end
       end
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
-        set_add FeaturesKey, feature.key
+        @store.transaction do
+          set_add FeaturesKey, feature.key
+        end
         true
       end
 
       # Public: Removes a feature from the set of known features and clears
       # all the values for the feature.
       def remove(feature)
-        set_delete FeaturesKey, feature.key
-        clear(feature)
+        @store.transaction do
+          set_delete FeaturesKey, feature.key
+          clear_gates(feature)
+        end
         true
       end
 
       # Public: Clears all the gate values for a feature.
       def clear(feature)
-        feature.gates.each do |gate|
-          delete key(feature, gate)
+        @store.transaction do
+          clear_gates(feature)
         end
         true
       end
 
       # Public
       def get(feature)
-        result = {}
-
-        feature.gates.each do |gate|
-          result[gate.key] =
-            case gate.data_type
-            when :boolean, :integer
-              read key(feature, gate)
-            when :set
-              set_members key(feature, gate)
-            else
-              raise "#{gate} is not supported by this adapter yet"
-            end
+        @store.transaction do
+          result_for_feature(feature)
         end
+      end
 
-        result
+      def get_multi(features)
+        @store.transaction do
+          read_many_features(features)
+        end
+      end
+
+      def get_all
+        @store.transaction do
+          features = read_feature_keys.map { |key| Flipper::Feature.new(key, self) }
+          read_many_features(features)
+        end
       end
 
       # Public
       def enable(feature, gate, thing)
-        case gate.data_type
-        when :boolean, :integer
-          write key(feature, gate), thing.value.to_s
-        when :set
-          set_add key(feature, gate), thing.value.to_s
-        else
-          raise "#{gate} is not supported by this adapter yet"
+        @store.transaction do
+          case gate.data_type
+          when :boolean, :integer
+            write key(feature, gate), thing.value.to_s
+          when :set
+            set_add key(feature, gate), thing.value.to_s
+          else
+            raise "#{gate} is not supported by this adapter yet"
+          end
         end
 
         true
@@ -89,9 +98,13 @@ module Flipper
         when :boolean
           clear(feature)
         when :integer
-          write key(feature, gate), thing.value.to_s
+          @store.transaction do
+            write key(feature, gate), thing.value.to_s
+          end
         when :set
-          set_delete key(feature, gate), thing.value.to_s
+          @store.transaction do
+            set_delete key(feature, gate), thing.value.to_s
+          end
         else
           raise "#{gate} is not supported by this adapter yet"
         end
@@ -111,6 +124,42 @@ module Flipper
 
       private
 
+      def clear_gates(feature)
+        feature.gates.each do |gate|
+          delete key(feature, gate)
+        end
+      end
+
+      def read_feature_keys
+        set_members FeaturesKey
+      end
+
+      def read_many_features(features)
+        result = {}
+        features.each do |feature|
+          result[feature.key] = result_for_feature(feature)
+        end
+        result
+      end
+
+      def result_for_feature(feature)
+        result = {}
+
+        feature.gates.each do |gate|
+          result[gate.key] =
+            case gate.data_type
+            when :boolean, :integer
+              read key(feature, gate)
+            when :set
+              set_members key(feature, gate)
+            else
+              raise "#{gate} is not supported by this adapter yet"
+            end
+        end
+
+        result
+      end
+
       # Private
       def key(feature, gate)
         "#{feature.key}/#{gate.key}"
@@ -118,23 +167,17 @@ module Flipper
 
       # Private
       def read(key)
-        @store.transaction do
-          @store[key.to_s]
-        end
+        @store[key.to_s]
       end
 
       # Private
       def write(key, value)
-        @store.transaction do
-          @store[key.to_s] = value.to_s
-        end
+        @store[key.to_s] = value.to_s
       end
 
       # Private
       def delete(key)
-        @store.transaction do
-          @store.delete(key.to_s)
-        end
+        @store.delete(key.to_s)
       end
 
       # Private
@@ -154,14 +197,13 @@ module Flipper
       # Private
       def set_members(key)
         key = key.to_s
-        @store.transaction do
-          @store[key] ||= Set.new
 
-          if block_given?
-            yield @store[key]
-          else
-            @store[key]
-          end
+        @store[key] ||= Set.new
+
+        if block_given?
+          yield @store[key]
+        else
+          @store[key]
         end
       end
     end

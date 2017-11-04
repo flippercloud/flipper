@@ -1,6 +1,9 @@
 require 'helper'
 require 'rack/test'
+require 'active_support/cache'
+require 'active_support/cache/dalli_store'
 require 'flipper/middleware/memoizer'
+require 'flipper/adapters/active_support_cache_store'
 require 'flipper/adapters/operation_logger'
 require 'flipper/adapters/memory'
 
@@ -141,6 +144,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
       middleware = described_class.new(app, preload_all: true)
       middleware.call(env)
 
+      expect(adapter.operations.size).to be(1)
       expect(adapter.count(:get_all)).to be(1)
     end
 
@@ -333,6 +337,47 @@ RSpec.describe Flipper::Middleware::Memoizer do
     it 'does preload_all if request does NOT match unless block' do
       expect(flipper).to receive(:preload_all).once
       get '/some/other/path', {}, 'flipper' => flipper
+    end
+  end
+
+  context 'with preload_all and caching adapter' do
+    it 'eagerly caches known features for duration of request' do
+      memory = Flipper::Adapters::Memory.new
+      logged_memory = Flipper::Adapters::OperationLogger.new(memory)
+      cache = ActiveSupport::Cache::DalliStore.new
+      cache.clear
+      cached = Flipper::Adapters::ActiveSupportCacheStore.new(logged_memory, cache, expires_in: 10)
+      logged_cached = Flipper::Adapters::OperationLogger.new(cached)
+      memo = {}
+      flipper = Flipper.new(logged_cached)
+      flipper[:stats].enable
+      flipper[:shiny].enable
+
+      # clear the log of operations
+      logged_memory.reset
+      logged_cached.reset
+
+      app = lambda do |_env|
+        flipper[:stats].enabled?
+        flipper[:stats].enabled?
+        flipper[:shiny].enabled?
+        flipper[:shiny].enabled?
+        [200, {}, []]
+      end
+
+      middleware = described_class.new(app, preload_all: true)
+
+      middleware.call('flipper' => flipper)
+      expect(logged_cached.count(:get_all)).to be(1)
+      expect(logged_memory.count(:get_all)).to be(1)
+
+      middleware.call('flipper' => flipper)
+      expect(logged_cached.count(:get_all)).to be(2)
+      expect(logged_memory.count(:get_all)).to be(1)
+
+      middleware.call('flipper' => flipper)
+      expect(logged_cached.count(:get_all)).to be(3)
+      expect(logged_memory.count(:get_all)).to be(1)
     end
   end
 end

@@ -27,6 +27,14 @@ module Flipper
         @adapter.get(feature)
       end
 
+      def get_multi(features)
+        @adapter.get_multi(features)
+      end
+
+      def get_all
+        @adapter.get_all
+      end
+
       def add(_feature)
         raise WriteAttempted
       end
