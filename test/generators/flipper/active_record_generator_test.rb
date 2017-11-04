@@ -11,10 +11,10 @@ class FlipperActiveRecordGeneratorTest < Rails::Generators::TestCase
   def test_generates_migration
     run_generator
     migration_version = if Rails::VERSION::MAJOR.to_i < 5
-      ""
-    else
-      "[#{Rails::VERSION::MAJOR}.#{Rails::VERSION::MINOR}]"
-    end
+                          ""
+                        else
+                          "[#{Rails::VERSION::MAJOR}.#{Rails::VERSION::MINOR}]"
+                        end
     assert_migration 'db/migrate/create_flipper_tables.rb', <<-EOM
 class CreateFlipperTables < ActiveRecord::Migration#{migration_version}
   def self.up
