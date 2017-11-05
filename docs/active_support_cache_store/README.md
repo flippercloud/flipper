@@ -1,6 +1,6 @@
 # Flipper ActiveSupportCacheStore
 
-A [ActiveSupportCacheStore](http://api.rubyonrails.org/classes/ActiveSupport/Cache/Store.html) adapter for [Flipper](https://github.com/jnunemaker/flipper).
+An [ActiveSupportCacheStore](http://api.rubyonrails.org/classes/ActiveSupport/Cache/Store.html) adapter for [Flipper](https://github.com/jnunemaker/flipper).
 
 ## Installation
 
