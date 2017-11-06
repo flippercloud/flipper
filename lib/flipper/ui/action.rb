@@ -68,6 +68,7 @@ module Flipper
         else
           []
         end
+        @env = ENV['FLIPPER_ENVIRONMENT']
       end
 
       # Public: Runs the request method for the provided request.
