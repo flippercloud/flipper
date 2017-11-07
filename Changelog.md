@@ -2,9 +2,10 @@
 
 ### Backwards Compatibility Breaks
 
-* Set flipper from env for API and UI (https://github.com/jnunemaker/flipper/pull/223 and https://github.com/jnunemaker/flipper/pull/229). It is documented, but now the memoizing middleware requires that the SetupEnv middleware is used first.
+* Set flipper from env for API and UI (https://github.com/jnunemaker/flipper/pull/223 and https://github.com/jnunemaker/flipper/pull/229). It is documented, but now the memoizing middleware requires that the SetupEnv middleware is used first, unless you are configuring a Flipper default instance.
 * Drop support for Ruby 2.0 as it is end of lined (https://github.com/jnunemaker/flipper/commit/c2c81ed89938155ce91acb5173ac38580f630e3d).
 * Allow unregistered groups (https://github.com/jnunemaker/flipper/pull/244). Only break in compatibility is that previously unregistered groups could not be enabled and now they can be.
+* Removed support for metriks (https://github.com/jnunemaker/flipper/pull/291).
 
 ### Additions/Changes
 
@@ -22,9 +23,12 @@
 * Add DSL#preload_all and Adapter#get_all to allow for making even more efficient loading of features (https://github.com/jnunemaker/flipper/pull/255).
 * Allow setting debug output of http adapter (https://github.com/jnunemaker/flipper/pull/256 and https://github.com/jnunemaker/flipper/pull/258).
 * Allow setting env key for middleware (https://github.com/jnunemaker/flipper/pull/259).
-* Added ActiveSupport cache store adapter for use with Rails.cache (https://github.com/jnunemaker/flipper/pull/265).
+* Added ActiveSupport cache store adapter for use with Rails.cache (https://github.com/jnunemaker/flipper/pull/265 and https://github.com/jnunemaker/flipper/pull/297).
 * Added support for up to 3 decimal places in percentage based rollouts (https://github.com/jnunemaker/flipper/pull/274).
 * Removed Flipper::GroupNotRegistered error as it is now unused (https://github.com/jnunemaker/flipper/pull/270).
+* Added get_all to all adapters (https://github.com/jnunemaker/flipper/pull/298).
+* Added support for Rails 5.1 (https://github.com/jnunemaker/flipper/pull/299).
+* Added Flipper default instance generation (https://github.com/jnunemaker/flipper/pull/279).
 
 ## 0.10.2
 
