@@ -33,7 +33,7 @@ Given that you've already initialized `Flipper` as per the [flipper](https://git
 ```ruby
 # config/routes.rb
 YourRailsApp::Application.routes.draw do
-  mount Flipper::UI.app(flipper) => '/flipper'
+  mount Flipper::UI.app(Flipper) => '/flipper'
 end
 ```
 
