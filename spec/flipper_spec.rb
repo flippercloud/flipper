@@ -201,6 +201,16 @@ RSpec.describe Flipper do
     it 'delegates adapter to instance' do
       expect(described_class.adapter).to eq(described_class.instance.adapter)
     end
+
+    it 'delegates memoize= to instance' do
+      expect(described_class.adapter.memoizing?).to be(false)
+      described_class.memoize = true
+      expect(described_class.adapter.memoizing?).to be(true)
+    end
+
+    it 'delegates memoizing? to instance' do
+      expect(described_class.memoizing?).to eq(described_class.adapter.memoizing?)
+    end
   end
 
   describe '.register' do
