@@ -111,7 +111,7 @@ RSpec.describe Flipper::Feature do
       subject.enable
       expect(subject).to be_enabled
       subject.clear
-      expect(subject).to_not be_enabled
+      expect(subject).not_to be_enabled
     end
   end
 

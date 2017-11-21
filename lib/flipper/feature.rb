@@ -6,6 +6,7 @@ require 'flipper/gate_values'
 require 'flipper/instrumenters/noop'
 
 module Flipper
+  # rubocop:disable Metrics/ClassLength
   class Feature
     # Private: The name of feature instrumentation events.
     InstrumentationName = "feature_operation.#{InstrumentationNamespace}".freeze

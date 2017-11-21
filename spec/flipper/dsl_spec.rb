@@ -332,7 +332,7 @@ RSpec.describe Flipper::DSL do
 
   describe '#memoize=' do
     it 'delegates to adapter' do
-      expect(subject.adapter).to_not be_memoizing
+      expect(subject.adapter).not_to be_memoizing
       subject.memoize = true
       expect(subject.adapter).to be_memoizing
     end
