@@ -83,6 +83,13 @@ module Flipper
       instrument(:remove) { adapter.remove(self) }
     end
 
+    # Public: Clears all gate values for this feature.
+    #
+    # Returns the result of Adapter#clear.
+    def clear
+      instrument(:clear) { adapter.clear(self) }
+    end
+
     # Public: Check if a feature is enabled for a thing.
     #
     # Returns true if enabled, false if not.
