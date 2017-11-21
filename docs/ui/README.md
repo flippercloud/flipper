@@ -52,7 +52,7 @@ end
 
 #### Security
 
-You almost certainly want to limit access when using Flipper::UI in production. 
+You almost certainly want to limit access when using Flipper::UI in production.
 
 ##### Basic Authentication via Rack
 The `Flipper::UI.app` method yields a builder instance prior to any predefined middleware. You can insert the `Rack::Auth::Basic` middleware, that'll prompt for a username and password when visiting the defined (i.e., `/flipper`) route.
@@ -124,6 +124,33 @@ RuntimeError: you need to set up a session middleware *before* Rack::Protection:
 ```
 
 See [examples/ui/basic.ru](https://github.com/jnunemaker/flipper/blob/master/examples/ui/basic.ru) for a more full example
+
+### Configuration
+
+Flipper UI can be customized via `configure`, which yields a configuration instance for setting the text on the five main sections of the UI feature view.
+
+* `config.actors`
+* `config.groups`
+* `config.percentage_of_actors`
+* `config.percentage_of_time`
+* `config.delete`
+
+Each of these methods returns a [Flipper::UI::Option](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/ui/configuration/option.rb) that responds to `title=`, `description=` as seen below.
+
+*e.g. customzing the percentage_of_actors and delete sections' titles and descriptions*
+```ruby
+Flipper::UI.configure do |config|
+  config.percentage_of_actors.title = "My Custom Title"
+  config.percentage_of_actors.description = "My custom description"
+
+  config.delete.title = "BE VERY CAREFUL!"
+  config.delete.description = "YOU'VE BEEN WARNED!"
+end
+```
+
+results in:
+
+![configure](images/configured-ui.png)
 
 ## Contributing
 
