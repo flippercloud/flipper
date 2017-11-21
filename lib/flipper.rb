@@ -32,7 +32,7 @@ module Flipper
   # Public: Sets Flipper::Configuration instance.
   def configuration=(configuration)
     # need to reset flipper instance if configuration changes
-    Thread.current[:flipper_instance] = nil
+    self.instance = nil
     @configuration = configuration
   end
 
@@ -44,6 +44,13 @@ module Flipper
   # Returns Flipper::DSL instance.
   def instance
     Thread.current[:flipper_instance] ||= configuration.default
+  end
+
+  # Public: Set the flipper instance. It is most common to use the
+  # Configuration#default to set this instance, but for things like the test
+  # environment, this writer is actually useful.
+  def instance=(flipper)
+    Thread.current[:flipper_instance] = flipper
   end
 
   # Public: All the methods delegated to instance. These should match the
