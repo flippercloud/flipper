@@ -35,7 +35,7 @@ module Flipper
           def post
             feature_name = params.fetch('name') { json_error_response(:name_invalid) }
             feature = flipper[feature_name]
-            flipper.adapter.add(feature)
+            feature.add
             decorated_feature = Decorators::Feature.new(feature)
             json_response(decorated_feature.as_json, 200)
           end
