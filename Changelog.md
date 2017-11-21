@@ -1,3 +1,10 @@
+## master (to be 0.12)
+
+### Additions/Changes
+
+* Added Flipper.instance= writer method for explicitly setting the default instance (https://github.com/jnunemaker/flipper/pull/309).
+* Added Flipper::UI configuration instance for changing text and things (https://github.com/jnunemaker/flipper/pull/306).
+
 ## 0.11
 
 ### Backwards Compatibility Breaks
