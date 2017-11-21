@@ -1,13 +1,18 @@
+require 'forwardable'
 require 'flipper/adapters/memoizable'
 require 'flipper/instrumenters/noop'
 
 module Flipper
   class DSL
+    extend Forwardable
+
     # Private
     attr_reader :adapter
 
     # Private: What is being used to instrument all the things.
     attr_reader :instrumenter
+
+    def_delegators :@adapter, :memoize=, :memoizing?
 
     # Public: Returns a new instance of the DSL.
     #

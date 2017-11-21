@@ -6,6 +6,7 @@ require 'flipper/gate_values'
 require 'flipper/instrumenters/noop'
 
 module Flipper
+  # rubocop:disable Metrics/ClassLength
   class Feature
     # Private: The name of feature instrumentation events.
     InstrumentationName = "feature_operation.#{InstrumentationNamespace}".freeze
@@ -81,6 +82,13 @@ module Flipper
     # Returns the result of Adapter#remove.
     def remove
       instrument(:remove) { adapter.remove(self) }
+    end
+
+    # Public: Clears all gate values for this feature.
+    #
+    # Returns the result of Adapter#clear.
+    def clear
+      instrument(:clear) { adapter.clear(self) }
     end
 
     # Public: Check if a feature is enabled for a thing.

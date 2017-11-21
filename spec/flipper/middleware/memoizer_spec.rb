@@ -18,7 +18,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
   let(:env) { { 'flipper' => flipper } }
 
   after do
-    flipper.adapter.memoize = nil
+    flipper.memoize = nil
   end
 
   it 'raises if initialized with app and flipper instance' do
@@ -51,9 +51,9 @@ RSpec.describe Flipper::Middleware::Memoizer do
       middleware = described_class.new(app)
       body = middleware.call(env).last
 
-      expect(flipper.adapter.memoizing?).to eq(true)
+      expect(flipper.memoizing?).to eq(true)
       body.close
-      expect(flipper.adapter.memoizing?).to eq(false)
+      expect(flipper.memoizing?).to eq(false)
     end
 
     it 'clears local cache after body close' do
@@ -231,7 +231,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
         middleware = described_class.new(app)
         middleware.call(env)
       rescue RuntimeError
-        expect(flipper.adapter.memoizing?).to be(false)
+        expect(flipper.memoizing?).to be(false)
       end
     end
   end

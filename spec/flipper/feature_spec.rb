@@ -106,6 +106,15 @@ RSpec.describe Flipper::Feature do
     end
   end
 
+  describe '#clear' do
+    it 'clears feature using adapter' do
+      subject.enable
+      expect(subject).to be_enabled
+      subject.clear
+      expect(subject).not_to be_enabled
+    end
+  end
+
   describe '#inspect' do
     it 'returns easy to read string representation' do
       string = subject.inspect
@@ -231,6 +240,17 @@ RSpec.describe Flipper::Feature do
       expect(event.name).to eq('feature_operation.flipper')
       expect(event.payload[:feature_name]).to eq(:search)
       expect(event.payload[:operation]).to eq(:remove)
+      expect(event.payload[:result]).not_to be_nil
+    end
+
+    it 'is recorded for clear' do
+      subject.clear
+
+      event = instrumenter.events.last
+      expect(event).not_to be_nil
+      expect(event.name).to eq('feature_operation.flipper')
+      expect(event.payload[:feature_name]).to eq(:search)
+      expect(event.payload[:operation]).to eq(:clear)
       expect(event.payload[:result]).not_to be_nil
     end
 

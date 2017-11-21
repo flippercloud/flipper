@@ -23,7 +23,7 @@ module Flipper
         def delete
           feature_name = Rack::Utils.unescape(request.path.split('/').last)
           feature = flipper[feature_name]
-          flipper.adapter.remove(feature)
+          feature.remove
           redirect_to '/features'
         end
       end

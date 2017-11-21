@@ -11,7 +11,7 @@ module Flipper
           def delete
             feature_name = Rack::Utils.unescape(path_parts[-2])
             feature = flipper[feature_name]
-            flipper.adapter.clear(feature)
+            feature.clear
             json_response({}, 204)
           end
         end
