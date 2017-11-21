@@ -57,7 +57,7 @@ RSpec.describe Flipper do
   describe '.instance=' do
     it 'updates Flipper.instance' do
       instance = described_class.new(Flipper::Adapters::Memory.new)
-      Flipper.instance = instance
+      described_class.instance = instance
       expect(described_class.instance).to be(instance)
     end
   end
