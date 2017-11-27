@@ -113,30 +113,13 @@ module Flipper
       def enable(feature, gate, thing)
         case gate.data_type
         when :boolean, :integer
-          @gate_class.transaction do
-            @gate_class.where(
-              feature_key: feature.key,
-              key: gate.key
-            ).delete_all
-
-            @gate_class.create! do |g|
-              g.feature_key = feature.key
-              g.key = gate.key
-              g.value = thing.value.to_s
-            end
-          end
+          enable_single(feature, gate, thing)
         when :set
-          @gate_class.create! do |g|
-            g.feature_key = feature.key
-            g.key = gate.key
-            g.value = thing.value.to_s
-          end
+          enable_multi(feature, gate, thing)
         else
           unsupported_data_type gate.data_type
         end
 
-        true
-      rescue ::ActiveRecord::RecordNotUnique
         true
       end
 
@@ -179,6 +162,26 @@ module Flipper
       end
 
       private
+
+      def enable_single(feature, gate, thing)
+        @gate_class.transaction do
+          @gate_class.where(feature_key: feature.key, key: gate.key).delete_all
+          @gate_class.create! do |g|
+            g.feature_key = feature.key
+            g.key = gate.key
+            g.value = thing.value.to_s
+          end
+        end
+      end
+
+      def enable_multi(feature, gate, thing)
+        @gate_class.create! do |g|
+          g.feature_key = feature.key
+          g.key = gate.key
+          g.value = thing.value.to_s
+        end
+      rescue ::ActiveRecord::RecordNotUnique
+      end
 
       def result_for_feature(feature, db_gates)
         db_gates ||= []

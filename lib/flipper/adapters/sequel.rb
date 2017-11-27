@@ -127,17 +127,17 @@ module Flipper
               key: gate.key.to_s,
             }
             @gate_class.where(args).delete
-
             @gate_class.create(gate_attrs(feature, gate, thing))
           end
         when :set
-          @gate_class.create(gate_attrs(feature, gate, thing))
+          begin
+            @gate_class.create(gate_attrs(feature, gate, thing))
+          rescue ::Sequel::UniqueConstraintViolation
+          end
         else
           unsupported_data_type gate.data_type
         end
 
-        true
-      rescue ::Sequel::UniqueConstraintViolation
         true
       end
 
