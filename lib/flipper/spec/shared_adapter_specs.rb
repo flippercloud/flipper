@@ -258,4 +258,15 @@ RSpec.shared_examples_for 'a flipper adapter' do
     expect(stats).to eq(subject.default_config.merge(boolean: 'true'))
     expect(search).to eq(subject.default_config)
   end
+
+  it 'can double enable an actor without error' do
+    actor = Flipper::Actor.new('Flipper::Actor;22')
+    expect(subject.enable(feature, actor_gate, flipper.actor(actor))).to eq(true)
+    expect(subject.enable(feature, actor_gate, flipper.actor(actor))).to eq(true)
+  end
+
+  it 'can double enable a group without error' do
+    expect(subject.enable(feature, group_gate, flipper.group(:admins))).to eq(true)
+    expect(subject.enable(feature, group_gate, flipper.group(:admins))).to eq(true)
+  end
 end

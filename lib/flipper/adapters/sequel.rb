@@ -137,6 +137,8 @@ module Flipper
         end
 
         true
+      rescue ::Sequel::UniqueConstraintViolation
+        true
       end
 
       # Public: Disables a gate for a given thing.

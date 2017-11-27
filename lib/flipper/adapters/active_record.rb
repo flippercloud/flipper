@@ -136,6 +136,8 @@ module Flipper
         end
 
         true
+      rescue ::ActiveRecord::RecordNotUnique
+        true
       end
 
       # Public: Disables a gate for a given thing.
