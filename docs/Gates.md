@@ -15,7 +15,7 @@ flipper[:stats].enabled? # check
 
 ## 2. Group
 
-Turn on feature based on the return value of block. Super flexible way to turn on a feature for multiple things (users, people, accounts, etc.) as long as the thing returns true when passed to the block. 
+Turn on feature based on the return value of block. Super flexible way to turn on a feature for multiple things (users, people, accounts, etc.) as long as the thing returns true when passed to the block.
 
 ```ruby
 # this registers a group
@@ -71,8 +71,8 @@ In your application code, you can do something like this now:
 if flipper[:stats].enabled?(some_admin)
   # do thing...
 else
-  raise "Your are not authorized to view this page"
-end 
+  # do not do thing
+end
 ```
 
 ## 3. Individual Actor
