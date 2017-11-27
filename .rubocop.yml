@@ -43,3 +43,6 @@ RSpec/InstanceVariable:
 
 Style/AccessorMethodName:
   Enabled: false
+
+Lint/HandleExceptions:
+  Enabled: false

@@ -253,6 +253,17 @@ module Flipper
         assert_equal @adapter.default_config.merge(boolean: 'true'), stats
         assert_equal @adapter.default_config, search
       end
+
+      def test_can_double_enable_an_actor_without_error
+        actor = Flipper::Actor.new('Flipper::Actor;22')
+        assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor))
+        assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor))
+      end
+
+      def test_can_double_enable_a_group_without_error
+        assert_equal true, @adapter.enable(@feature, @group_gate, @flipper.group(:admins))
+        assert_equal true, @adapter.enable(@feature, @group_gate, @flipper.group(:admins))
+      end
     end
   end
 end
