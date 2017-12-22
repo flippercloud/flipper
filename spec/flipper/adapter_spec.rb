@@ -65,6 +65,13 @@ RSpec.describe Flipper::Adapter do
 
       destination_flipper.import(source_flipper)
 
+      feature = destination_flipper[:yep]
+      expect(feature.boolean_value).to be(true)
+      expect(feature.groups_value).to eq(Set[])
+      expect(feature.actors_value).to eq(Set[])
+      expect(feature.percentage_of_actors_value).to be(0)
+      expect(feature.percentage_of_time_value).to be(0)
+
       feature = destination_flipper[:preview_features]
       expect(feature.boolean_value).to be(false)
       expect(feature.actors_value).to eq(Set['1', '2', '3'])
