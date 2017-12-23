@@ -20,5 +20,5 @@ Gem::Specification.new do |gem|
   gem.version       = Flipper::VERSION
 
   gem.add_dependency 'flipper', "~> #{Flipper::VERSION}"
-  gem.add_dependency 'redis', '>= 2.2', '< 4.0.0'
+  gem.add_dependency 'redis', '>= 2.2', '< 4.1.0'
 end
