@@ -28,6 +28,23 @@ RSpec.describe Flipper::UI::Actions::Feature do
       expect(last_response.status).to be(302)
       expect(last_response.headers['Location']).to eq('/features')
     end
+
+    context 'when feature_removal_enabled is set to false' do
+      around do |example|
+        @original_feature_removal_enabled = Flipper::UI.feature_removal_enabled
+        Flipper::UI.feature_removal_enabled = false
+        example.run
+        Flipper::UI.feature_removal_enabled = @original_feature_removal_enabled
+      end
+
+      it 'returns with 403 status' do
+        expect(last_response.status).to be(403)
+      end
+
+      it 'renders feature removal disabled template' do
+        expect(last_response.body).to include('Feature removal from the UI is disabled')
+      end
+    end
   end
 
   describe 'POST /features/:feature with _method=DELETE' do
