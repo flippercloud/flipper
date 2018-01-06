@@ -9,6 +9,7 @@
 * Fixed redis cache adapter key (and thus cache misses) (https://github.com/jnunemaker/flipper/pull/325).
 * Added Rollout adapter to make it easy to import rollout data into Flipper (https://github.com/jnunemaker/flipper/pull/319).
 * Relaxed redis gem dependency constraint to allow redis-rb 4 (https://github.com/jnunemaker/flipper/pull/317).
+* Added configuration option for Flipper::UI to disable feature removal (https://github.com/jnunemaker/flipper/pull/322).
 
 ## 0.11
 
