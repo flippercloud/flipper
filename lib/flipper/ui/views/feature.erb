@@ -192,19 +192,21 @@
   </div>
 </div>
 
-<div class="panel panel-danger">
-  <div class="panel-heading">
-    <h3 class="panel-title"><%= Flipper::UI.configuration.delete.title %></h3>
-  </div>
-  <div class="panel-body">
-    <p>
-      <%= Flipper::UI.configuration.delete.description %>
-    </p>
+<% if Flipper::UI.feature_removal_enabled %>
+  <div class="panel panel-danger">
+    <div class="panel-heading">
+      <h3 class="panel-title"><%= Flipper::UI.configuration.delete.title %></h3>
+    </div>
+    <div class="panel-body">
+      <p>
+        <%= Flipper::UI.configuration.delete.description %>
+      </p>
 
-    <form action="<%= script_name %>/features/<%= @feature.key %>" method="post" onsubmit="return confirm('Are you sure you want to remove <%= @feature.key %> from the list of features and disable it for everyone?')">
-      <%== csrf_input_tag %>
-      <input type="hidden" name="_method" value="DELETE">
-      <button type="submit" name="action" value="Delete" class="btn btn-danger tooltipped tooltipped-ne" aria-label="Remove feature from list of features and disable it.">Delete</button>
-    </form>
+      <form action="<%= script_name %>/features/<%= @feature.key %>" method="post" onsubmit="return confirm('Are you sure you want to remove <%= @feature.key %> from the list of features and disable it for everyone?')">
+        <%== csrf_input_tag %>
+        <input type="hidden" name="_method" value="DELETE">
+        <button type="submit" name="action" value="Delete" class="btn btn-danger tooltipped tooltipped-ne" aria-label="Remove feature from list of features and disable it.">Delete</button>
+      </form>
+    </div>
   </div>
-</div>
+<% end %>
