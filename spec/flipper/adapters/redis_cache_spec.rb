@@ -34,6 +34,14 @@ RSpec.describe Flipper::Adapters::RedisCache do
     end
   end
 
+  describe '#get' do
+    it 'uses correct cache key' do
+      stats = flipper[:stats]
+      adapter.get(stats)
+      expect(client.get(described_class.key_for(stats))).not_to be_nil
+    end
+  end
+
   describe '#get_multi' do
     it 'warms uncached features' do
       stats = flipper[:stats]
