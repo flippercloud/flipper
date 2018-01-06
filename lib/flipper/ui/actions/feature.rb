@@ -21,6 +21,15 @@ module Flipper
         end
 
         def delete
+          unless Flipper::UI.feature_removal_enabled
+            status 403
+
+            breadcrumb 'Home', '/'
+            breadcrumb 'Features', '/features'
+
+            halt view_response(:feature_removal_disabled)
+          end
+
           feature_name = Rack::Utils.unescape(request.path.split('/').last)
           feature = flipper[feature_name]
           feature.remove

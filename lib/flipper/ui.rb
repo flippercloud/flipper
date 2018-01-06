@@ -24,14 +24,19 @@ module Flipper
 
       # Public: Is feature creation allowed from the UI? Defaults to true. If
       # set to false, users of the UI cannot create features. All feature
-      # creation will need to be done through the conigured flipper instance.
+      # creation will need to be done through the configured flipper instance.
       attr_accessor :feature_creation_enabled
+
+      # Public: Is feature deletion allowed from the UI? Defaults to true. If
+      # set to false, users won't be able to delete features from the UI.
+      attr_accessor :feature_removal_enabled
 
       # Public: Set attributes on this instance to customize UI text
       attr_reader :configuration
     end
 
     self.feature_creation_enabled = true
+    self.feature_removal_enabled = true
 
     def self.root
       @root ||= Pathname(__FILE__).dirname.expand_path.join('ui')
