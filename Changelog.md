@@ -5,7 +5,10 @@
 * Added Flipper.instance= writer method for explicitly setting the default instance (https://github.com/jnunemaker/flipper/pull/309).
 * Added Flipper::UI configuration instance for changing text and things (https://github.com/jnunemaker/flipper/pull/306).
 * Delegate memoize= and memoizing? for Flipper and Flipper::DSL (https://github.com/jnunemaker/flipper/pull/310).
+* Fixed error when enabling the same group or actor more than once (https://github.com/jnunemaker/flipper/pull/313).
 * Fixed redis cache adapter key (and thus cache misses) (https://github.com/jnunemaker/flipper/pull/325).
+* Added Rollout adapter to make it easy to import rollout data into Flipper (https://github.com/jnunemaker/flipper/pull/319).
+* Relaxed redis gem dependency constraint to allow redis-rb 4 (https://github.com/jnunemaker/flipper/pull/317).
 
 ## 0.11
 
