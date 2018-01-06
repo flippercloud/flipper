@@ -1,4 +1,4 @@
-## master (to be 0.12)
+## 0.12
 
 ### Additions/Changes
 
