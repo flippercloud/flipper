@@ -134,7 +134,7 @@ module Flipper
           Marshal.load(cached)
         else
           to_cache = yield
-          set_with_ttl(key_for(key), to_cache)
+          set_with_ttl(key, to_cache)
           to_cache
         end
       end
