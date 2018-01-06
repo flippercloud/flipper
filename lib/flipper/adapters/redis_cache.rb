@@ -128,13 +128,13 @@ module Flipper
         result
       end
 
-      def fetch(key)
-        cached = @cache.get(key)
+      def fetch(cache_key)
+        cached = @cache.get(cache_key)
         if cached
           Marshal.load(cached)
         else
           to_cache = yield
-          set_with_ttl(key_for(key), to_cache)
+          set_with_ttl(cache_key, to_cache)
           to_cache
         end
       end
