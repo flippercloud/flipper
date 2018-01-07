@@ -91,7 +91,8 @@ module Flipper
       def get_all
         rows = ::ActiveRecord::Base.connection.select_all <<-SQL
           SELECT ff.key AS feature_key, fg.key, fg.value
-          FROM flipper_features ff LEFT JOIN flipper_gates fg ON ff.key = fg.feature_key
+          FROM #{@feature_class.table_name} ff
+          LEFT JOIN #{@gate_class.table_name} fg ON ff.key = fg.feature_key
         SQL
         db_gates = rows.map { |row| Gate.new(row) }
         grouped_db_gates = db_gates.group_by(&:feature_key)
