@@ -259,6 +259,15 @@ RSpec.shared_examples_for 'a flipper adapter' do
     expect(search).to eq(subject.default_config)
   end
 
+  it 'includes explicitly disabled features when getting all features' do
+    flipper.enable(:stats)
+    flipper.enable(:search)
+    flipper.disable(:search)
+
+    result = subject.get_all
+    expect(result.keys.sort).to eq(%w(search stats))
+  end
+
   it 'can double enable an actor without error' do
     actor = Flipper::Actor.new('Flipper::Actor;22')
     expect(subject.enable(feature, actor_gate, flipper.actor(actor))).to eq(true)
