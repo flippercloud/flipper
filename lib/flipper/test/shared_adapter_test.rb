@@ -254,6 +254,15 @@ module Flipper
         assert_equal @adapter.default_config, search
       end
 
+      def test_includes_explicitly_disabled_features_when_getting_all_features
+        @flipper.enable(:stats)
+        @flipper.enable(:search)
+        @flipper.disable(:search)
+
+        result = @adapter.get_all
+        assert_equal %w(search stats), result.keys.sort
+      end
+
       def test_can_double_enable_an_actor_without_error
         actor = Flipper::Actor.new('Flipper::Actor;22')
         assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor))

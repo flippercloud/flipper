@@ -98,9 +98,9 @@ module Flipper
 
       def get_all
         db_gates = @gate_class.fetch(<<-SQL).to_a
-          SELECT g.*
-          FROM #{@gate_class.table_name} g
-            INNER JOIN #{@feature_class.table_name} f ON f.key = g.feature_key
+          SELECT ff.key AS feature_key, fg.key, fg.value
+          FROM #{@feature_class.table_name} ff
+          LEFT JOIN #{@gate_class.table_name} fg ON ff.key = fg.feature_key
         SQL
         grouped_db_gates = db_gates.group_by(&:feature_key)
         result = Hash.new { |hash, key| hash[key] = default_config }

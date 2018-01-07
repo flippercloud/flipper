@@ -45,16 +45,4 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
   end
 
   it_should_behave_like 'a flipper adapter'
-
-  describe '.get_all' do
-    it 'includes features in features table but not in gates table' do
-      flipper = Flipper.new(subject)
-      flipper.enable(:stats)
-      flipper.enable(:search)
-      flipper.disable(:search)
-
-      result = subject.get_all
-      expect(result.keys.sort).to eq(%w(search stats))
-    end
-  end
 end
