@@ -1,3 +1,9 @@
+## master
+
+### Additions/Changes
+
+* Fixed ActiveRecord and Sequel adapters to include disabled features for `get_all` (https://github.com/jnunemaker/flipper/pull/327).
+
 ## 0.12
 
 ### Additions/Changes
