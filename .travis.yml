@@ -4,6 +4,7 @@ rvm:
   - 2.2
   - 2.3
   - 2.4
+  - 2.5
 bundler_args: --without guard
 before_script: gem install bundler
 script: bundle exec rubocop -D && bundle exec rake
