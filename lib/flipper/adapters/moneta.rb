@@ -1,9 +1,12 @@
+require 'moneta'
+require 'pry'
+
 module Flipper
   module Adapters
     class Moneta
       include ::Flipper::Adapter
 
-      FeaturesKey = :features
+      FEATURES_KEY = :features
 
       # Public: The name of the adapter.
       attr_reader :name
@@ -15,163 +18,98 @@ module Flipper
       end
 
       def features
-        read_feature_keys
+        moneta[:features] || Set.new
       end
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
-        @moneta[FeaturesKey.to_s] ||= Set.new
-        @moneta[FeaturesKey.to_s] = @moneta[FeaturesKey.to_s].add(feature.key)
+        moneta[:features] = moneta[:features] || Set.new
+        moneta[:features] = moneta[:features] << feature.key.to_s
         true
       end
 
       # Public: Removes a feature from the set of known features and clears
       # all the values for the feature.
       def remove(feature)
-        @moneta[FeaturesKey.to_s] ||= Set.new
-        @moneta[FeaturesKey.to_s] = @moneta[FeaturesKey.to_s].delete(feature.key)
-        clear(feature)
+        moneta[:features] = moneta[:features] || Set.new
+        features = moneta[:features]
+        features.delete(feature.key.to_s)
+        moneta[:features] = features
+        moneta[feature.key] = default_config
         true
       end
 
       # Public: Clears all the gate values for a feature.
       def clear(feature)
-        feature.gates.each do |gate|
-          delete key(feature, gate)
-        end
+        moneta[feature.key] = default_config
         true
       end
 
       # Public
       def get(feature)
-        read_feature(feature)
+        moneta[feature.key] || default_config
       end
 
       def get_multi(features)
-        read_many_features(features)
+        h = {}
+        features.each do |feature|
+          h[feature.key] = default_config.merge(moneta[feature.key].to_h)
+        end
+        h
       end
 
       def get_all
-        features = read_feature_keys.map do |key|
-          Flipper::Feature.new(key, self)
+        h = {}
+        moneta[:features].each do |feature_key|
+          h[feature_key] = default_config.merge(moneta[feature_key].to_h)
         end
-
-        read_many_features(features)
+        h
       end
 
       # Public
       def enable(feature, gate, thing)
         case gate.data_type
         when :boolean, :integer
-          write key(feature, gate), thing.value.to_s
+          the_feature = moneta[feature.key] || {}
+          the_feature[gate.key] = thing.value.to_s
+          moneta[feature.key] = the_feature
         when :set
-          set_add key(feature, gate), thing.value.to_s
-        else
-          raise "#{gate} is not supported by this adapter yet"
+          the_feature = moneta[feature.key] || {}
+          if the_feature[gate.key]
+            the_feature[gate.key] << thing.value.to_s
+            moneta[feature.key] = the_feature
+          else
+            the_feature[gate.key] = Set.new
+            the_feature[gate.key] << thing.value.to_s
+            moneta[feature.key] = the_feature
+          end
         end
-
         true
       end
 
       # Public
       def disable(feature, gate, thing)
+        #binding.pry if thing.value.to_s == 0.to_s
         case gate.data_type
         when :boolean
-          clear(feature)
+          moneta[feature.key] = default_config
         when :integer
-          write key(feature, gate), thing.value.to_s
+          the_feature = moneta[feature.key] || default_config
+          the_feature[gate.key] = thing.value.to_s
+          moneta[feature.key] = the_feature
         when :set
-          set_delete key(feature, gate), thing.value.to_s
-        else
-          raise "#{gate} is not supported by this adapter yet"
+          the_feature = moneta[feature.key]
+          if the_feature[gate.key]
+            the_feature[gate.key] = the_feature[gate.key].delete(thing.value.to_s)
+          end
+          moneta[feature.key] = the_feature
         end
-
         true
-      end
-
-      # Public
-      def inspect
-        attributes = [
-          'name=:memory',
-          "source=#{@moneta.inspect}",
-        ]
-        "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
       end
 
       private
 
-      def read_feature_keys
-        set_members(FeaturesKey)
-      end
-
-      # Private
-      def key(feature, gate)
-        "feature/#{feature.key}/#{gate.key}"
-      end
-
-      def read_many_features(features)
-        result = {}
-        features.each do |feature|
-          result[feature.key] = read_feature(feature)
-        end
-        result
-      end
-
-      def read_feature(feature)
-        result = {}
-
-        feature.gates.each do |gate|
-          result[gate.key] =
-            case gate.data_type
-            when :boolean, :integer
-              read key(feature, gate)
-            when :set
-              set_members key(feature, gate)
-            else
-              raise "#{gate} is not supported by this adapter yet"
-            end
-        end
-
-        result
-      end
-
-      # Private
-      def read(key)
-        @moneta[key.to_s]
-      end
-
-      # Private
-      def write(key, value)
-        @moneta[key.to_s] = value.to_s
-      end
-
-      # Private
-      def delete(key)
-        @moneta.delete(key.to_s)
-      end
-
-      # Private
-      def set_add(key, value)
-        ensure_set_initialized(key)
-        @moneta[key.to_s] = @moneta[key.to_s].add(value.to_s)
-      end
-
-      # Private
-      def set_delete(key, value)
-        ensure_set_initialized(key)
-        @moneta[key.to_s] = @moneta[key.to_s].delete(value.to_s)
-      end
-
-      # Private
-      def set_members(key)
-        ensure_set_initialized(key)
-        @moneta[key.to_s]
-      end
-
-      # Private
-      def ensure_set_initialized(key)
-        @moneta[key.to_s] ||= Set.new
-      end
+      attr_reader :moneta
     end
   end
 end
