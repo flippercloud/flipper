@@ -1,9 +1,11 @@
+require 'moneta'
+
 module Flipper
   module Adapters
     class Moneta
       include ::Flipper::Adapter
 
-      FeaturesKey = :features
+      FEATURES_KEY = :features
 
       # Public: The name of the adapter.
       attr_reader :name
@@ -20,16 +22,14 @@ module Flipper
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
-        @moneta[FeaturesKey.to_s] ||= Set.new
-        @moneta[FeaturesKey.to_s] = @moneta[FeaturesKey.to_s].add(feature.key)
+        set_add(FEATURES_KEY, feature.key)
         true
       end
 
       # Public: Removes a feature from the set of known features and clears
       # all the values for the feature.
       def remove(feature)
-        @moneta[FeaturesKey.to_s] ||= Set.new
-        @moneta[FeaturesKey.to_s] = @moneta[FeaturesKey.to_s].delete(feature.key)
+        set_delete(FEATURES_KEY, feature.key)
         clear(feature)
         true
       end
@@ -55,7 +55,6 @@ module Flipper
         features = read_feature_keys.map do |key|
           Flipper::Feature.new(key, self)
         end
-
         read_many_features(features)
       end
 
@@ -85,23 +84,14 @@ module Flipper
         else
           raise "#{gate} is not supported by this adapter yet"
         end
-
         true
-      end
-
-      # Public
-      def inspect
-        attributes = [
-          'name=:memory',
-          "source=#{@moneta.inspect}",
-        ]
-        "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
       end
 
       private
 
+      # Private
       def read_feature_keys
-        set_members(FeaturesKey)
+        set_members(FEATURES_KEY)
       end
 
       # Private
@@ -109,6 +99,7 @@ module Flipper
         "feature/#{feature.key}/#{gate.key}"
       end
 
+      # Private
       def read_many_features(features)
         result = {}
         features.each do |feature|
@@ -117,6 +108,7 @@ module Flipper
         result
       end
 
+      # Private
       def read_feature(feature)
         result = {}
 
@@ -131,7 +123,6 @@ module Flipper
               raise "#{gate} is not supported by this adapter yet"
             end
         end
-
         result
       end
 
@@ -152,25 +143,17 @@ module Flipper
 
       # Private
       def set_add(key, value)
-        ensure_set_initialized(key)
-        @moneta[key.to_s] = @moneta[key.to_s].add(value.to_s)
+        @moneta[key.to_s] = @moneta.fetch(key.to_s) { Set.new }.add(value.to_s)
       end
 
       # Private
       def set_delete(key, value)
-        ensure_set_initialized(key)
-        @moneta[key.to_s] = @moneta[key.to_s].delete(value.to_s)
+        @moneta[key.to_s] = @moneta.fetch(key.to_s) { Set.new }.delete(value.to_s)
       end
 
       # Private
       def set_members(key)
-        ensure_set_initialized(key)
-        @moneta[key.to_s]
-      end
-
-      # Private
-      def ensure_set_initialized(key)
-        @moneta[key.to_s] ||= Set.new
+        @moneta.fetch(key.to_s) { Set.new }
       end
     end
   end
