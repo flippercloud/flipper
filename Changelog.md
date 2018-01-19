@@ -1,6 +1,10 @@
-## master
+## 0.12.1
 
 ### Additions/Changes
+
+* Added rollout adapter documentation (https://github.com/jnunemaker/flipper/pull/328).  
+
+### Bug Fixes
 
 * Fixed ActiveRecord and Sequel adapters to include disabled features for `get_all` (https://github.com/jnunemaker/flipper/pull/327).
 
