@@ -1,3 +1,5 @@
+require "flipper/errors"
+
 module Flipper
   module Adapters
     class Rollout
