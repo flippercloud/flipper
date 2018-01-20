@@ -40,14 +40,29 @@ RSpec.describe Flipper::Adapters::Rollout do
       expect(source_adapter.get(feature)).to eq(expected)
     end
 
-    it 'works for fully activated' do
+    it 'returns fully flipper enabled for fully rollout activated' do
       rollout.activate(:chat)
       feature = source_flipper[:chat]
       expected = {
-        boolean: nil,
+        boolean: true,
         groups: Set.new,
         actors: Set.new,
-        percentage_of_actors: 100.0,
+        percentage_of_actors: nil,
+        percentage_of_time: nil,
+      }
+      expect(source_adapter.get(feature)).to eq(expected)
+    end
+
+    it 'returns fully flipper enabled for fully rollout activated with user/group' do
+      rollout.activate_user(:chat, Struct.new(:id).new(1))
+      rollout.activate_group(:chat, :admins)
+      rollout.activate(:chat)
+      feature = source_flipper[:chat]
+      expected = {
+        boolean: true,
+        groups: Set.new,
+        actors: Set.new,
+        percentage_of_actors: nil,
         percentage_of_time: nil,
       }
       expect(source_adapter.get(feature)).to eq(expected)
