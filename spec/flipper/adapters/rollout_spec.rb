@@ -29,15 +29,48 @@ RSpec.describe Flipper::Adapters::Rollout do
       rollout.activate_user(:chat, Struct.new(:id).new(1))
       rollout.activate_percentage(:chat, 20)
       rollout.activate_group(:chat, :admins)
-      feature = Struct.new(:key).new(:chat)
+      feature = source_flipper[:chat]
       expected = {
-        actors: Set.new(["1"]),
         boolean: nil,
         groups: Set.new([:admins]),
+        actors: Set.new(["1"]),
         percentage_of_actors: 20.0,
         percentage_of_time: nil,
       }
       expect(source_adapter.get(feature)).to eq(expected)
+    end
+
+    it 'returns fully flipper enabled for fully rollout activated' do
+      rollout.activate(:chat)
+      feature = source_flipper[:chat]
+      expected = {
+        boolean: true,
+        groups: Set.new,
+        actors: Set.new,
+        percentage_of_actors: nil,
+        percentage_of_time: nil,
+      }
+      expect(source_adapter.get(feature)).to eq(expected)
+    end
+
+    it 'returns fully flipper enabled for fully rollout activated with user/group' do
+      rollout.activate_user(:chat, Struct.new(:id).new(1))
+      rollout.activate_group(:chat, :admins)
+      rollout.activate(:chat)
+      feature = source_flipper[:chat]
+      expected = {
+        boolean: true,
+        groups: Set.new,
+        actors: Set.new,
+        percentage_of_actors: nil,
+        percentage_of_time: nil,
+      }
+      expect(source_adapter.get(feature)).to eq(expected)
+    end
+
+    it 'returns default hash of gate data for feature not existing in rollout' do
+      feature = source_flipper[:chat]
+      expect(source_adapter.get(feature)).to eq(source_adapter.default_config)
     end
   end
 

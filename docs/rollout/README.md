@@ -23,18 +23,25 @@ Or install it yourself with:
 
 ## Usage
 
-Assuming you've configured a [default Flipper instance](https://github.com/jnunemaker/flipper#user-content-examples)
-
 ```ruby
 require 'redis'
+require 'rollout'
+require 'flipper'
+require 'flipper/adapters/redis'
 require 'flipper/adapters/rollout'
 
+# setup redis, rollout and rollout flipper
 redis = Redis.new
 rollout = Rollout.new(redis)
-
 rollout_adapter = Flipper::Adapters::Rollout.new(rollout)
 rollout_flipper = Flipper.new(rollout_adapter)
 
+# setup flipper default instance
+Flipper.configure do |config|
+  config.default { Flipper.new(Flipper::Adapters::Redis.new(redis)) }
+end
+
+# import rollout into redis flipper
 Flipper.import(rollout_flipper)
 ```
 

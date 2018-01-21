@@ -1,6 +1,10 @@
+require "flipper/errors"
+
 module Flipper
   module Adapters
     class Rollout
+      include Adapter
+
       class AdapterMethodNotSupportedError < Error
         def initialize(message = 'unsupported method called for import adapter')
           super(message)
@@ -24,13 +28,30 @@ module Flipper
       #
       # Returns a Hash of Flipper::Gate#key => value.
       def get(feature)
-        feature = @rollout.get(feature.key)
-        percentage = feature.percentage.zero? ? nil : feature.percentage
+        rollout_feature = @rollout.get(feature.key)
+        return default_config if rollout_feature.nil?
+
+        boolean = nil
+        groups = Set.new(rollout_feature.groups)
+        actors = Set.new(rollout_feature.users)
+
+        percentage_of_actors = case rollout_feature.percentage
+                               when 100
+                                 boolean = true
+                                 groups = Set.new
+                                 actors = Set.new
+                                 nil
+                               when 0
+                                 nil
+                               else
+                                 rollout_feature.percentage
+                               end
+
         {
-          boolean: nil,
-          groups: Set.new(feature.groups),
-          actors: Set.new(feature.users),
-          percentage_of_actors: percentage,
+          boolean: boolean,
+          groups: groups,
+          actors: actors,
+          percentage_of_actors: percentage_of_actors,
           percentage_of_time: nil,
         }
       end
