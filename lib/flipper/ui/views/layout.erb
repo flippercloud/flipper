@@ -17,6 +17,10 @@
   </head>
   <body>
     <div class="container header">
+      <%- if Rails.env.development? -%>
+        <div class="banner banner-warning">Careful! You are modifying Flipper features in production.</div>
+      <% end %>
+
       <%- if Flipper::UI.feature_creation_enabled -%>
         <a class="btn btn-sm right" href="<%= script_name %>/features/new">Add Feature</a>
       <%- end -%>

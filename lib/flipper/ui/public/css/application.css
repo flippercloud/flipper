@@ -2604,3 +2604,17 @@ a.list-group-item-danger {
 
 p.help {
   color: #999; }
+
+.banner {
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 20px;
+  color: #fff;
+  text-align: center;
+  border-radius: 3px;
+  background-color: #999; }
+
+.banner-warning {
+  background-color: #bd2c00; }
