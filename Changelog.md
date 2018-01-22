@@ -1,6 +1,6 @@
 ## 0.12.2
 
-## Additions/Changes
+### Additions/Changes
 
 * Improvements/fixes/examples for rollout adapter (https://github.com/jnunemaker/flipper/pull/332).
 
