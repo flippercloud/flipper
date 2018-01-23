@@ -15,11 +15,14 @@ module Flipper
 
       # Public: The path to where the file is stored.
       attr_reader :path
+      
+      # Public: PStore's thread_safe option (when enabled it will become thread-safe at the cost of a minor performance hit).
+      attr_reader :thread_safe
 
       # Public
-      def initialize(path = 'flipper.pstore')
+      def initialize(path = 'flipper.pstore', thread_safe = false)
         @path = path
-        @store = ::PStore.new(path)
+        @store = ::PStore.new(path, thread_safe)
         @name = :pstore
       end
 
