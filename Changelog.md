@@ -1,3 +1,9 @@
+## master 
+
+### Additions/Changes
+
+* Update PStore adapter to allow setting thread_safe option (https://github.com/jnunemaker/flipper/pull/334).
+
 ## 0.12.2
 
 ### Additions/Changes
