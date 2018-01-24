@@ -16,7 +16,7 @@ module Flipper
       # Public: The path to where the file is stored.
       attr_reader :path
       
-      # Public: PStore's thread_safe option (when enabled it will become thread-safe at the cost of a minor performance hit).
+      # Public: PStore's thread_safe option.
       attr_reader :thread_safe
 
       # Public
