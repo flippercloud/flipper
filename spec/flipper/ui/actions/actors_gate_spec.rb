@@ -22,7 +22,8 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
     end
 
     it 'renders add new actor form' do
-      expect(last_response.body).to include('<form action="/features/search/actors" method="post">')
+      form = '<form action="/features/search/actors" method="post" class="form-inline">'
+      expect(last_response.body).to include(form)
     end
   end
 

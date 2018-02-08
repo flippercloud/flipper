@@ -20,12 +20,15 @@ guard 'rspec', rspec_options do
   watch('spec/helper.rb') { 'spec' }
 end
 
-coffee_options = {
+coffeescript_options = {
   input: 'lib/flipper/ui/assets/javascripts',
   output: 'lib/flipper/ui/public/js',
-  all_on_start: false,
+  patterns: [%r{^lib/flipper/ui/assets/javascripts/(.+\.(?:coffee|coffee\.md|litcoffee))$}],
 }
-guard 'coffeescript', coffee_options
+
+guard 'coffeescript', coffeescript_options do
+  coffeescript_options[:patterns].each { |pattern| watch(pattern) }
+end
 
 sass_options = {
   input: 'lib/flipper/ui/assets/stylesheets',

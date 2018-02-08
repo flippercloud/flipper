@@ -1,20 +1,18 @@
 <% if params.key?("error") %>
-  <div class="flash flash-error">
+  <div class="alert alert-danger">
     <%= params["error"] %>
   </div>
 <% end %>
 
-<div class="panel panel-default">
-  <div class="panel-heading">
-    <h3 class="panel-title">Add Feature</h3>
-  </div>
-  <div class="panel-body">
-    <form action="<%= script_name %>/features" method="post">
+<div class="card">
+  <h4 class="card-header">Add Feature</h4>
+  <div class="card-body">
+    <form action="<%= script_name %>/features" method="post" class="form-inline mb-2">
       <%== csrf_input_tag %>
-      <input type="text" name="value" size="30" placeholder="ie: search, new_pricing, etc." autofocus>
-      <input type="submit" value="Add Feature" class="btn">
+      <input type="text" name="value" size="30" placeholder="ie: search, new_pricing, etc." autofocus class="form-control mr-2">
+      <input type="submit" value="Add Feature" class="btn btn-light">
     </form>
-    <p class="help">
+    <p class="text-muted">
       Recommended naming conventions: lower case, <a href="https://en.wikipedia.org/wiki/Snake_case">snake case</a>, underscores over dashes.
       <strong>Good</strong>: foo_bar, foo.
       <strong>Bad</strong>: FooBar, Foo Bar, foo bar, foo-bar.
