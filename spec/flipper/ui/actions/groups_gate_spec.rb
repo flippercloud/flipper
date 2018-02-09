@@ -28,7 +28,8 @@ RSpec.describe Flipper::UI::Actions::GroupsGate do
     end
 
     it 'renders add new group form' do
-      expect(last_response.body).to include('<form action="/features/search/groups" method="post">')
+      form = '<form action="/features/search/groups" method="post" class="form-inline">'
+      expect(last_response.body).to include(form)
     end
   end
 

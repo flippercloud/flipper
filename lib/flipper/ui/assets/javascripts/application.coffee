@@ -1,0 +1,3 @@
+$(() ->
+  $('[data-toggle="tooltip"]').tooltip();
+);
