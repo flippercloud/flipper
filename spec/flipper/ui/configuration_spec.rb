@@ -65,7 +65,8 @@ RSpec.describe Flipper::UI::Configuration do
     end
 
     it "raises if set to invalid value" do
-      expect { configuration.banner_class = :invalid_class }.to raise_error(Flipper::InvalidValueSet)
+      expect { configuration.banner_class = :invalid_class }
+        .to raise_error(Flipper::InvalidValueSet)
     end
   end
 end

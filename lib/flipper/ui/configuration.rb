@@ -12,7 +12,16 @@ module Flipper
       attr_accessor :banner_text,
                     :banner_class
 
-      VALID_BANNER_CLASS_VALUES = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark']
+      VALID_BANNER_CLASS_VALUES = %w(
+        danger
+        dark
+        info
+        light
+        primary
+        secondary
+        success
+        warning
+      ).freeze
 
       def initialize
         @actors = Option.new("Actors", "Enable actors using the form above.")
@@ -25,8 +34,10 @@ module Flipper
       end
 
       def banner_class=(value)
-        raise InvalidValueSet, "The banner_class provided '#{value}' is not one " \
-          "of: #{VALID_BANNER_CLASS_VALUES.join(', ')}" unless VALID_BANNER_CLASS_VALUES.include?(value)
+        unless VALID_BANNER_CLASS_VALUES.include?(value)
+          raise InvalidValueSet, "The banner_class provided '#{value}' is " \
+            "not one of: #{VALID_BANNER_CLASS_VALUES.join(', ')}"
+        end
         @banner_class = value
       end
     end
