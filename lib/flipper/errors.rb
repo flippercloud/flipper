@@ -21,4 +21,12 @@ module Flipper
       super(message || default)
     end
   end
+
+  # Raised when an invalid value is set to a configuration property
+  class InvalidValueSet < Flipper::Error
+    def initialize(message = nil)
+      default = "Configuration value is not valid."
+      super(message || default)
+    end
+  end
 end

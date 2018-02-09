@@ -152,6 +152,23 @@ results in:
 
 ![configure](images/configured-ui.png)
 
+### Banner
+
+Flipper UI can display a banner across the top of the page. The `banner_text` and `banner_class` can be configured by using the `Flipper::UI.configure` block as seen below.
+
+```ruby
+Flipper::UI.configure do |config|
+  config.banner_text = 'Production Environment'
+  config.banner_class = 'danger'
+end
+```
+
+By default the `environment` is set to an empty string so no banner will show. If you wish to customize the look of the banner, you can set `banner_class` to one of the bootstrap color classes: `primary`, `secondary`, `success`, `danger`, `warning`, `info`, `light`, or `dark`. The default `banner_class` is `danger`.
+
+The above configuration results in:
+
+![configure](images/environment-banner.png)
+
 ## Contributing
 
 1. Fork it
