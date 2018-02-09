@@ -35,7 +35,7 @@ module Flipper
 
       def banner_class=(value)
         unless VALID_BANNER_CLASS_VALUES.include?(value)
-          raise InvalidValueSet, "The banner_class provided '#{value}' is " \
+          raise InvalidConfigurationValue, "The banner_class provided '#{value}' is " \
             "not one of: #{VALID_BANNER_CLASS_VALUES.join(', ')}"
         end
         @banner_class = value
