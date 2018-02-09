@@ -153,5 +153,29 @@ RSpec.describe Flipper::UI do
         expect(config).to be_instance_of(Flipper::UI::Configuration)
       end
     end
+
+    describe 'banner' do
+      it 'does not include the banner if banner_text is not set' do
+        get '/features'
+        expect(last_response.body).not_to include('Production Environment')
+      end
+
+      describe 'when set' do
+        around do |example|
+          begin
+            @original_banner_text = described_class.configuration.banner_text
+            described_class.configuration.banner_text = 'Production Environment'
+            example.run
+          ensure
+            described_class.configuration.banner_text = @original_banner_text
+          end
+        end
+
+        it 'includes banner' do
+          get '/features'
+          expect(last_response.body).to include('Production Environment')
+        end
+      end
+    end
   end
 end
