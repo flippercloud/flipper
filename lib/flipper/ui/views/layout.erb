@@ -16,7 +16,13 @@
     <![endif]-->
   </head>
   <body>
-    <div class="container header">
+    <div class="container">
+      <%- unless Flipper::UI.configuration.banner_text.nil? -%>
+        <div class="alert alert-<%= Flipper::UI.configuration.banner_class %> text-center font-weight-bold">
+          <%= Flipper::UI.configuration.banner_text %>
+        </div>
+      <%- end -%>
+
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb bg-white border border-light align-items-center">
           <% @breadcrumbs.each do |breadcrumb| %>

@@ -42,4 +42,31 @@ RSpec.describe Flipper::UI::Configuration do
       expect(configuration.delete.description).to eq("Deleting a feature removes it from the list of features and disables it for everyone.") # rubocop:disable Metrics/LineLength
     end
   end
+
+  describe "#banner_text" do
+    it "has no default" do
+      expect(configuration.banner_text).to eq(nil)
+    end
+
+    it "can be updated" do
+      configuration.banner_text = 'Production Environment'
+      expect(configuration.banner_text).to eq('Production Environment')
+    end
+  end
+
+  describe "#banner_class" do
+    it "has default color" do
+      expect(configuration.banner_class).to eq('danger')
+    end
+
+    it "can be updated" do
+      configuration.banner_class = 'info'
+      expect(configuration.banner_class).to eq('info')
+    end
+
+    it "raises if set to invalid value" do
+      expect { configuration.banner_class = :invalid_class }
+        .to raise_error(Flipper::InvalidConfigurationValue)
+    end
+  end
 end
