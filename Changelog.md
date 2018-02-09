@@ -3,6 +3,7 @@
 ### Additions/Changes
 
 * Update PStore adapter to allow setting thread_safe option (https://github.com/jnunemaker/flipper/pull/334).
+* Update Flipper::UI to Bootstrap 4 (https://github.com/jnunemaker/flipper/pull/336).
 
 ## 0.12.2
 
