@@ -6,6 +6,11 @@ module Flipper
       # Public: The name of the adapter.
       attr_reader :name
 
+      # Public: Build a new sync instance.
+      #
+      # local - The local flipper adapter that should serve reads.
+      # remote - The remote flipper adpater that should serve writes and update
+      #          the local on an interval.
       def initialize(local, remote)
         @local = local
         @remote = remote
