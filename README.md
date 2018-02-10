@@ -1,5 +1,3 @@
-![flipper logo](https://raw.githubusercontent.com/jnunemaker/flipper/master/lib/flipper/ui/public/images/logo.png)
-
 <pre>
                                    __
                                _.-~  )
@@ -105,4 +103,6 @@ Of course there are more [examples for you to peruse](examples/). You could also
 |---|---|---|
 | ![@jnunemaker](https://avatars3.githubusercontent.com/u/235?s=64) | [@jnunemaker](https://github.com/jnunemaker) | most things |
 | ![@alexwheeler](https://avatars3.githubusercontent.com/u/3260042?s=64) | [@alexwheeler](https://github.com/alexwheeler) | api |
+| ![@thetimbanks](https://avatars1.githubusercontent.com/u/471801?s=64) | [@thetimbanks](https://github.com/thetimbanks) | ui |
 | ![@lazebny](https://avatars1.githubusercontent.com/u/6276766?s=64) | [@lazebny](https://github.com/lazebny) | docker |
+
