@@ -24,6 +24,7 @@ gem 'test-unit', '~> 3.0'
 
 group(:guard) do
   gem 'guard', '~> 2.12.5'
+  gem 'guard-rubocop', '~> 1.3.0'
   gem 'guard-rspec', '~> 4.5.0'
   gem 'guard-bundler', '~> 2.1.0'
   gem 'guard-coffeescript', '~> 2.0.1'
