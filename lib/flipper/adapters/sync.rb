@@ -81,8 +81,8 @@ module Flipper
       end
 
       class IntervalSynchronizer
-        # Private: Default to syncing every second.
-        DEFAULT_INTERVAL_MS = 1_000
+        # Private: Default to syncing every 10 seconds.
+        DEFAULT_INTERVAL_MS = 10_000
 
         def initialize(synchronizer, interval: nil)
           @synchronizer = synchronizer
