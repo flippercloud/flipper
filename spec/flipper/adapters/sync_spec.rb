@@ -15,7 +15,9 @@ RSpec.describe Flipper::Adapters::Sync do
   let(:remote) { Flipper.new(remote_adapter) }
   let(:sync) { Flipper.new(subject) }
 
-  subject { described_class.new(local_adapter, remote_adapter) }
+  subject do
+    described_class.new(local_adapter, remote_adapter, interval: 1)
+  end
 
   it_should_behave_like 'a flipper adapter'
 
@@ -170,5 +172,25 @@ RSpec.describe Flipper::Adapters::Sync do
       expect(local_adapter.count(:enable)).to be(0)
       expect(local_adapter.count(:disable)).to be(0)
     end
+  end
+
+  it 'synchronizes for #features' do
+    expect(subject).to receive(:sync)
+    subject.features
+  end
+
+  it 'synchronizes for #get' do
+    expect(subject).to receive(:sync)
+    subject.get sync[:search]
+  end
+
+  it 'synchronizes for #get_multi' do
+    expect(subject).to receive(:sync)
+    subject.get_multi [sync[:search]]
+  end
+
+  it 'synchronizes for #get_all' do
+    expect(subject).to receive(:sync)
+    subject.get_all
   end
 end

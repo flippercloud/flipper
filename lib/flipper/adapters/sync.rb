@@ -21,11 +21,27 @@ module Flipper
           synchronizer = Synchronizer.new(@local, @remote)
           IntervalSynchronizer.new(synchronizer, interval: options[:interval])
         }
-        @synchronizer.call
+        sync
       end
 
       def features
+        sync
         @local.features
+      end
+
+      def get(feature)
+        sync
+        @local.get(feature)
+      end
+
+      def get_multi(features)
+        sync
+        @local.get_multi(features)
+      end
+
+      def get_all
+        sync
+        @local.get_all
       end
 
       def add(feature)
@@ -46,18 +62,6 @@ module Flipper
         result
       end
 
-      def get(feature)
-        @local.get(feature)
-      end
-
-      def get_multi(features)
-        @local.get_multi(features)
-      end
-
-      def get_all
-        @local.get_all
-      end
-
       def enable(feature, gate, thing)
         result = @remote.enable(feature, gate, thing)
         @local.enable(feature, gate, thing)
@@ -71,6 +75,10 @@ module Flipper
       end
 
       private
+
+      def sync
+        @synchronizer.call
+      end
 
       class IntervalSynchronizer
         DEFAULT_INTERVAL_MS = 1_000 # Default to syncing every second.
@@ -107,15 +115,10 @@ module Flipper
           @remote = remote
         end
 
-        def remote_get_all
-          @remote_get_all ||= @remote.get_all
-        end
-
-        def local_get_all
-          local_get_all ||= @local.get_all
-        end
-
         def call
+          local_get_all = @local.get_all
+          remote_get_all = @remote.get_all
+
           remote_get_all.each do |feature_key, remote_gates_hash|
             feature = Feature.new(feature_key, @local)
             local_gates_hash = local_get_all[feature_key] || @local.default_config
