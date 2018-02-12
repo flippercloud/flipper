@@ -17,10 +17,10 @@ module Flipper
         @name = :sync
         @local = local
         @remote = remote
-        @synchronizer = options.fetch(:synchronizer) {
+        @synchronizer = options.fetch(:synchronizer) do
           synchronizer = Synchronizer.new(@local, @remote)
           IntervalSynchronizer.new(synchronizer, interval: options[:interval])
-        }
+        end
         sync
       end
 
@@ -144,17 +144,17 @@ module Flipper
         def_delegator :@local_gate_values, :actors, :local_actors
         def_delegator :@local_gate_values, :groups, :local_groups
         def_delegator :@local_gate_values, :percentage_of_actors,
-          :local_percentage_of_actors
+                      :local_percentage_of_actors
         def_delegator :@local_gate_values, :percentage_of_time,
-          :local_percentage_of_time
+                      :local_percentage_of_time
 
         def_delegator :@remote_gate_values, :boolean, :remote_boolean
         def_delegator :@remote_gate_values, :actors, :remote_actors
         def_delegator :@remote_gate_values, :groups, :remote_groups
         def_delegator :@remote_gate_values, :percentage_of_actors,
-          :remote_percentage_of_actors
+                      :remote_percentage_of_actors
         def_delegator :@remote_gate_values, :percentage_of_time,
-          :remote_percentage_of_time
+                      :remote_percentage_of_time
 
         def initialize(feature, local_gate_values, remote_gate_values)
           @feature = feature
