@@ -1,3 +1,5 @@
+require "flipper/instrumenters/noop"
+
 module Flipper
   module Adapters
     # TODO: Syncing should happen in a background thread on a regular interval
@@ -20,7 +22,10 @@ module Flipper
         @local = local
         @remote = remote
         @synchronizer = options.fetch(:synchronizer) do
-          synchronizer = Synchronizer.new(@local, @remote)
+          instrumenter = options[:instrumenter]
+          sync_options = {}
+          sync_options[:instrumenter] = instrumenter if instrumenter
+          synchronizer = Synchronizer.new(@local, @remote, sync_options)
           IntervalSynchronizer.new(synchronizer, interval: options[:interval])
         end
         sync
@@ -113,15 +118,17 @@ module Flipper
       end
 
       class Synchronizer
-        def initialize(local, remote)
+        def initialize(local, remote, options = {})
           @local = local
           @remote = remote
+          @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
         end
 
         def call
           local_get_all = @local.get_all
           remote_get_all = @remote.get_all
 
+          # Sync all the gate values.
           remote_get_all.each do |feature_key, remote_gates_hash|
             feature = Feature.new(feature_key, @local)
             local_gates_hash = local_get_all[feature_key] || @local.default_config
@@ -133,9 +140,13 @@ module Flipper
           # Add features that are missing
           features_to_add = remote_get_all.keys - local_get_all.keys
           features_to_add.each do |feature_key|
-            feature = Feature.new(feature_key, @local)
-            @local.add(feature)
+            Feature.new(feature_key, @local).add
           end
+        rescue => exception
+          payload = {
+            exception: exception,
+          }
+          @instrumenter.instrument("synchronizer_exception.flipper", payload)
         end
       end
 

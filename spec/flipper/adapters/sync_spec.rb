@@ -3,6 +3,7 @@ require 'flipper/adapters/sync'
 require 'flipper/adapters/memory'
 require 'flipper/adapters/operation_logger'
 require 'flipper/spec/shared_adapter_specs'
+require 'active_support/notifications'
 
 RSpec.describe Flipper::Adapters::Sync do
   let(:local_adapter) do
@@ -16,7 +17,11 @@ RSpec.describe Flipper::Adapters::Sync do
   let(:sync) { Flipper.new(subject) }
 
   subject do
-    described_class.new(local_adapter, remote_adapter, interval: 1)
+    options = {
+      interval: 1,
+      instrumenter: ActiveSupport::Notifications,
+    }
+    described_class.new(local_adapter, remote_adapter, options)
   end
 
   it_should_behave_like 'a flipper adapter'
@@ -192,5 +197,18 @@ RSpec.describe Flipper::Adapters::Sync do
   it 'synchronizes for #get_all' do
     expect(subject).to receive(:sync)
     subject.get_all
+  end
+
+  it 'instruments synchronization errors' do
+    events = []
+    ActiveSupport::Notifications.subscribe("synchronizer_exception.flipper") do |*args|
+      events << ActiveSupport::Notifications::Event.new(*args)
+    end
+    exception = StandardError.new
+    expect(remote_adapter).to receive(:get_all).and_raise(exception)
+    subject # initialize forces sync
+    expect(events.size).to be(1)
+    event = events[0]
+    expect(event.payload[:exception]).to eq(exception)
   end
 end
