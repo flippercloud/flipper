@@ -17,11 +17,7 @@ RSpec.describe Flipper::Adapters::Sync do
   let(:sync) { Flipper.new(subject) }
 
   subject do
-    options = {
-      interval: 1,
-      instrumenter: ActiveSupport::Notifications,
-    }
-    described_class.new(local_adapter, remote_adapter, options)
+    described_class.new(local_adapter, remote_adapter, interval: 1)
   end
 
   it_should_behave_like 'a flipper adapter'
@@ -197,18 +193,5 @@ RSpec.describe Flipper::Adapters::Sync do
   it 'synchronizes for #get_all' do
     expect(subject).to receive(:sync)
     subject.get_all
-  end
-
-  it 'instruments synchronization errors' do
-    events = []
-    ActiveSupport::Notifications.subscribe("synchronizer_exception.flipper") do |*args|
-      events << ActiveSupport::Notifications::Event.new(*args)
-    end
-    exception = StandardError.new
-    expect(remote_adapter).to receive(:get_all).and_raise(exception)
-    subject # initialize forces sync
-    expect(events.size).to be(1)
-    event = events[0]
-    expect(event.payload[:exception]).to eq(exception)
   end
 end

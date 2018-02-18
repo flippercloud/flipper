@@ -11,6 +11,12 @@ module Flipper
         end
 
         def call
+          @instrumenter.instrument("synchronizer_call.flipper") { sync }
+        end
+
+        private
+
+        def sync
           local_get_all = @local.get_all
           remote_get_all = @remote.get_all
 
