@@ -1,3 +1,6 @@
+require "flipper/actor"
+require "flipper/gate_values"
+
 module Flipper
   module Adapters
     class Sync
