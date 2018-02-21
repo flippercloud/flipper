@@ -1,6 +1,8 @@
 module Flipper
   module Adapters
     class Sync
+      # Internal: Given a feature, local gate values and remote gate values,
+      # makes the local equal to the remote.
       class FeatureSynchronizer
         extend Forwardable
 

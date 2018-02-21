@@ -3,6 +3,8 @@ require "flipper/adapters/sync/feature_synchronizer"
 module Flipper
   module Adapters
     class Sync
+      # Internal: Given a local and remote adapter, it can update the local to
+      # match the remote doing only the necessary enable/disable operations.
       class Synchronizer
         def initialize(local, remote, options = {})
           @local = local

@@ -1,7 +1,8 @@
 module Flipper
   module Adapters
     class Sync
-      # TODO: Make this instrument when it actually calls the wrapped synchronizer.
+      # Internal: Wraps a Synchronizer instance and only invokes it every
+      # N milliseconds.
       class IntervalSynchronizer
         # Private: Default to syncing every 10 seconds.
         DEFAULT_INTERVAL_MS = 10_000
