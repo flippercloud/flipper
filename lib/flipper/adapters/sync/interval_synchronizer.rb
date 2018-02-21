@@ -4,9 +4,19 @@ module Flipper
       # Internal: Wraps a Synchronizer instance and only invokes it every
       # N milliseconds.
       class IntervalSynchronizer
-        # Private: Default to syncing every 10 seconds.
+        # Private: Number of milliseconds between syncs (default: 10 seconds).
         DEFAULT_INTERVAL_MS = 10_000
 
+        # Private
+        def self.now_ms
+          Process.clock_gettime(Process::CLOCK_MONOTONIC, :millisecond)
+        end
+
+        # Public: Initializes a new interval synchronizer.
+        #
+        # synchronizer - The Synchronizer to call when the interval has passed.
+        # interval - The Integer number of milliseconds between invocations of
+        #            the wrapped synchronizer.
         def initialize(synchronizer, interval: nil)
           @synchronizer = synchronizer
           @interval = interval || DEFAULT_INTERVAL_MS
@@ -29,7 +39,7 @@ module Flipper
         end
 
         def now_ms
-          Process.clock_gettime(Process::CLOCK_MONOTONIC, :millisecond)
+          self.class.now_ms
         end
       end
     end
