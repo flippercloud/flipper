@@ -272,10 +272,12 @@ RSpec.shared_examples_for 'a flipper adapter' do
     actor = Flipper::Actor.new('Flipper::Actor;22')
     expect(subject.enable(feature, actor_gate, flipper.actor(actor))).to eq(true)
     expect(subject.enable(feature, actor_gate, flipper.actor(actor))).to eq(true)
+    expect(subject.get(feature).fetch(:actors)).to eq(Set['Flipper::Actor;22'])
   end
 
   it 'can double enable a group without error' do
     expect(subject.enable(feature, group_gate, flipper.group(:admins))).to eq(true)
     expect(subject.enable(feature, group_gate, flipper.group(:admins))).to eq(true)
+    expect(subject.get(feature).fetch(:groups)).to eq(Set['admins'])
   end
 end
