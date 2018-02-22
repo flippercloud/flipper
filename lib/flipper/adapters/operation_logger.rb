@@ -8,7 +8,14 @@ module Flipper
     class OperationLogger < SimpleDelegator
       include ::Flipper::Adapter
 
-      Operation = Struct.new(:type, :args)
+      class Operation
+        attr_reader :type, :args
+
+        def initialize(type, args)
+          @type = type
+          @args = args
+        end
+      end
 
       OperationTypes = [
         :features,
@@ -93,7 +100,12 @@ module Flipper
 
       # Public: Count the number of times a certain operation happened.
       def count(type)
-        @operations.select { |operation| operation.type == type }.size
+        type(type).size
+      end
+
+      # Public: Get all operations of a certain type.
+      def type(type)
+        @operations.select { |operation| operation.type == type }
       end
 
       # Public: Get the last operation of a certain type.

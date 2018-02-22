@@ -267,11 +267,13 @@ module Flipper
         actor = Flipper::Actor.new('Flipper::Actor;22')
         assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor))
         assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor))
+        assert_equal Set['Flipper::Actor;22'], @adapter.get(@feature).fetch(:actors)
       end
 
       def test_can_double_enable_a_group_without_error
         assert_equal true, @adapter.enable(@feature, @group_gate, @flipper.group(:admins))
         assert_equal true, @adapter.enable(@feature, @group_gate, @flipper.group(:admins))
+        assert_equal Set['admins'], @adapter.get(@feature).fetch(:groups)
       end
     end
   end

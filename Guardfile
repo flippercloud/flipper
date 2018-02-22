@@ -36,7 +36,10 @@ sass_options = {
 }
 guard 'sass', sass_options
 
-guard :rubocop do
+rubo_options = {
+  all_on_start: false,
+}
+guard :rubocop, rubo_options do
   watch(/.+\.rb$/)
   watch(%r{(?:.+/)?\.rubocop(?:_todo)?\.yml$}) { |m| File.dirname(m[0]) }
 end
