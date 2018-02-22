@@ -5,6 +5,7 @@
 * Update PStore adapter to allow setting thread_safe option (https://github.com/jnunemaker/flipper/pull/334).
 * Update Flipper::UI to Bootstrap 4 (https://github.com/jnunemaker/flipper/pull/336).
 * Add Flipper::UI configuration to add a banner with customizeable text and background color (https://github.com/jnunemaker/flipper/pull/337).
+* Add sync adapter (https://github.com/jnunemaker/flipper/pull/341).
 
 ## 0.12.2
 
