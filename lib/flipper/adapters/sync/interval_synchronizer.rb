@@ -20,6 +20,8 @@ module Flipper
         def initialize(synchronizer, interval: nil)
           @synchronizer = synchronizer
           @interval = interval || DEFAULT_INTERVAL_MS
+          # TODO: add jitter to this so all processes booting at the same time
+          # don't phone home at the same time.
           @last_sync_at = 0
         end
 
