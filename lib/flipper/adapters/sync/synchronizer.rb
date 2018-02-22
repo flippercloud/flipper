@@ -23,6 +23,8 @@ module Flipper
 
         def sync
           local_get_all = @local.get_all
+          # TODO: Move remote get all to background thread to minimize impact to
+          # whatever is happening in main thread.
           remote_get_all = @remote.get_all
 
           # Sync all the gate values.
