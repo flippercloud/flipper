@@ -1,6 +1,7 @@
 require 'helper'
 require 'flipper/cloud'
 require 'flipper/adapters/instrumented'
+require 'flipper/instrumenters/memory'
 
 RSpec.describe Flipper::Cloud do
   context "initialize with token" do
@@ -55,7 +56,7 @@ RSpec.describe Flipper::Cloud do
   end
 
   it 'can set instrumenter' do
-    instrumenter = Object.new
+    instrumenter = Flipper::Instrumenters::Memory.new
     instance = described_class.new('asdf', instrumenter: instrumenter)
     expect(instance.instrumenter).to be(instrumenter)
   end
