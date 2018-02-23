@@ -4,13 +4,18 @@ require 'flipper/adapters/instrumented'
 require 'flipper/instrumenters/memory'
 
 RSpec.describe Flipper::Cloud do
+  before do
+    stub_request(:get, /featureflipper\.com/).to_return(status: 200, body: "{}")
+  end
+
   context "initialize with token" do
     let(:token) { 'asdf' }
 
     before do
       @instance = described_class.new(token)
       memoized_adapter = @instance.adapter
-      @http_adapter = memoized_adapter.adapter
+      sync_adapter = memoized_adapter.adapter
+      @http_adapter = sync_adapter.instance_variable_get('@remote')
       @http_client = @http_adapter.instance_variable_get('@client')
     end
 
@@ -41,9 +46,12 @@ RSpec.describe Flipper::Cloud do
 
   context 'initialize with token and options' do
     before do
+      stub_request(:get, /fakeflipper\.com/).to_return(status: 200, body: "{}")
+
       @instance = described_class.new('asdf', url: 'https://www.fakeflipper.com/sadpanda')
       memoized_adapter = @instance.adapter
-      @http_adapter = memoized_adapter.adapter
+      sync_adapter = memoized_adapter.adapter
+      @http_adapter = sync_adapter.instance_variable_get('@remote')
       @http_client = @http_adapter.instance_variable_get('@client')
     end
 

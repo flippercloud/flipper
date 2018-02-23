@@ -34,11 +34,17 @@ RSpec.describe Flipper::Cloud::Configuration do
   end
 
   it "defaults adapter block" do
+    # The initial sync of http to local invokes this web request.
+    stub_request(:get, /featureflipper\.com/).to_return(status: 200, body: "{}")
+
     instance = described_class.new(required_options)
-    expect(instance.adapter).to be_instance_of(Flipper::Adapters::Http)
+    expect(instance.adapter).to be_instance_of(Flipper::Adapters::Sync)
   end
 
   it "can override adapter block" do
+    # The initial sync of http to local invokes this web request.
+    stub_request(:get, /featureflipper\.com/).to_return(status: 200, body: "{}")
+
     instance = described_class.new(required_options)
     instance.adapter do |adapter|
       Flipper::Adapters::Instrumented.new(adapter)

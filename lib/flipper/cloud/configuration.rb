@@ -1,4 +1,6 @@
 require "flipper/adapters/http"
+require "flipper/adapters/memory"
+require "flipper/adapters/sync"
 require "flipper/instrumenters/noop"
 
 module Flipper
@@ -36,11 +38,21 @@ module Flipper
       #  configuration.instrumenter = ActiveSupport::Notifications
       attr_accessor :instrumenter
 
+      # Public: Local adapter that all reads should go to in order to ensure
+      # latency is low and resiliency is high. This adapter is automatically
+      # kept in sync with cloud.
+      #
+      #  # for example, to use active record you could do:
+      #  configuration = Flipper::Cloud::Configuration.new
+      #  configuration.local_adapter = Flipper::Adapters::ActiveRecord.new
+      attr_accessor :local_adapter
+
       def initialize(options = {})
         @token = options.fetch(:token)
         @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
         @read_timeout = options.fetch(:read_timeout, 5)
         @open_timeout = options.fetch(:open_timeout, 5)
+        @local_adapter = options.fetch(:local_adapter) { Adapters::Memory.new }
         @debug_output = options[:debug_output]
         @adapter_block = ->(adapter) { adapter }
 
@@ -48,7 +60,7 @@ module Flipper
       end
 
       # Public: Read or customize the http adapter. Calling without a block will
-      # perform a read. Calling with a block yields the http_adapter
+      # perform a read. Calling with a block yields the cloud adapter
       # for customization.
       #
       #   # for example, to instrument the http calls, you can wrap the http
@@ -62,23 +74,30 @@ module Flipper
         if block_given?
           @adapter_block = block
         else
-          @adapter_block.call(http_adapter)
+          @adapter_block.call sync_adapter
         end
       end
 
-      # Public: Set url and uri for the http adapter.
+      # Public: Set url for the http adapter.
       attr_writer :url
 
       private
 
+      def sync_adapter
+        Flipper::Adapters::Sync.new(local_adapter, http_adapter, instrumenter: instrumenter)
+      end
+
       def http_adapter
-        Flipper::Adapters::Http.new(url: @url,
-                                    read_timeout: @read_timeout,
-                                    open_timeout: @open_timeout,
-                                    debug_output: @debug_output,
-                                    headers: {
-                                      "Feature-Flipper-Token" => @token,
-                                    })
+        http_options = {
+          url: @url,
+          read_timeout: @read_timeout,
+          open_timeout: @open_timeout,
+          debug_output: @debug_output,
+          headers: {
+            "Feature-Flipper-Token" => @token,
+          },
+        }
+        Flipper::Adapters::Http.new(http_options)
       end
     end
   end
