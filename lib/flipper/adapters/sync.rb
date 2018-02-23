@@ -12,6 +12,9 @@ module Flipper
       # Public: The name of the adapter.
       attr_reader :name
 
+      # Public: The synchronizer that will keep the local and remote in sync.
+      attr_reader :synchronizer
+
       # Public: Build a new sync instance.
       #
       # local - The local flipper adapter that should serve reads.
