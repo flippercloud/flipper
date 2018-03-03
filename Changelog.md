@@ -1,4 +1,4 @@
-## master 
+## master
 
 ### Additions/Changes
 
@@ -6,6 +6,7 @@
 * Update Flipper::UI to Bootstrap 4 (https://github.com/jnunemaker/flipper/pull/336).
 * Add Flipper::UI configuration to add a banner with customizeable text and background color (https://github.com/jnunemaker/flipper/pull/337).
 * Add sync adapter (https://github.com/jnunemaker/flipper/pull/341).
+* Make cloud use sync adapter (https://github.com/jnunemaker/flipper/pull/342). This makes local flipper operations resilient to cloud failures.
 
 ## 0.12.2
 
