@@ -1,3 +1,7 @@
+## master
+
+* Changed sync_interval to be seconds instead of milliseconds.
+
 ## 0.13.0
 
 ### Additions/Changes

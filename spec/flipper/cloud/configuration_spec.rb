@@ -29,16 +29,16 @@ RSpec.describe Flipper::Cloud::Configuration do
   end
 
   it "can set sync_interval" do
-    instance = described_class.new(required_options.merge(sync_interval: 1_000))
-    expect(instance.sync_interval).to eq(1_000)
+    instance = described_class.new(required_options.merge(sync_interval: 1))
+    expect(instance.sync_interval).to eq(1)
   end
 
   it "passes sync_interval into sync adapter" do
     # The initial sync of http to local invokes this web request.
     stub_request(:get, /featureflipper\.com/).to_return(status: 200, body: "{}")
 
-    instance = described_class.new(required_options.merge(sync_interval: 1_000))
-    expect(instance.adapter.synchronizer.interval).to be(1_000)
+    instance = described_class.new(required_options.merge(sync_interval: 1))
+    expect(instance.adapter.synchronizer.interval).to be(1)
   end
 
   it "can set debug_output" do
