@@ -12,8 +12,8 @@ module Flipper
           Process.clock_gettime(Process::CLOCK_MONOTONIC, :millisecond)
         end
 
-        # Public: The number of milliseconds between invocations of the
-        # wrapped synchronizer.
+        # Public: The Float or Integer number of seconds between invocations of
+        # the wrapped synchronizer.
         attr_reader :interval
 
         # Public: Initializes a new interval synchronizer.
