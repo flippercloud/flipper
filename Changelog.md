@@ -1,4 +1,4 @@
-## master
+## 0.14.0
 
 * Changed sync_interval to be seconds instead of milliseconds.
 
