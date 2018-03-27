@@ -22,7 +22,7 @@ Flipper.configure do |config|
     Flipper::Cloud.new(token) do |cloud|
       cloud.debug_output = STDOUT
       cloud.local_adapter = Flipper::Adapters::Redis.new(redis)
-      cloud.sync_interval = 10_000
+      cloud.sync_interval = 10
     end
   end
 end

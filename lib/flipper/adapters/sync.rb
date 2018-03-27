@@ -20,8 +20,8 @@ module Flipper
       # local - The local flipper adapter that should serve reads.
       # remote - The remote flipper adpater that should serve writes and update
       #          the local on an interval.
-      # interval - The number of milliseconds between syncs from remote to
-      #            local. Default value is set in IntervalSynchronizer.
+      # interval - The Float or Integer number of seconds between syncs from
+      # remote to local. Default value is set in IntervalSynchronizer.
       def initialize(local, remote, options = {})
         @name = :sync
         @local = local
