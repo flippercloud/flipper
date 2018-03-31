@@ -17,26 +17,25 @@ require 'flipper/ui/configuration'
 module Flipper
   module UI
     class << self
-      # Public: If you set this, the UI will always have a first breadcrumb that
-      # says "App" which points to this href. The href can be a path (ie: "/")
-      # or full url ("https://app.example.com/").
-      attr_accessor :application_breadcrumb_href
+      # These three configuration options have been moved to Flipper::UI::Configuration
+      deprecated_configuration_options = %w(application_breadcrumb_href
+                                            feature_creation_enabled
+                                            feature_removal_enabled)
+      deprecated_configuration_options.each do |attribute_name|
+        send(:define_method, "#{attribute_name}=".to_sym) do
+          raise ConfigurationDeprecated, "The UI configuration for #{attribute_name} has " \
+            "deprecated. This configuration option has moved to Flipper::UI::Configuration"
+        end
 
-      # Public: Is feature creation allowed from the UI? Defaults to true. If
-      # set to false, users of the UI cannot create features. All feature
-      # creation will need to be done through the configured flipper instance.
-      attr_accessor :feature_creation_enabled
-
-      # Public: Is feature deletion allowed from the UI? Defaults to true. If
-      # set to false, users won't be able to delete features from the UI.
-      attr_accessor :feature_removal_enabled
+        send(:define_method, attribute_name.to_sym) do
+          raise ConfigurationDeprecated, "The UI configuration for #{attribute_name} has " \
+            "deprecated. This configuration option has moved to Flipper::UI::Configuration"
+        end
+      end
 
       # Public: Set attributes on this instance to customize UI text
       attr_reader :configuration
     end
-
-    self.feature_creation_enabled = true
-    self.feature_removal_enabled = true
 
     def self.root
       @root ||= Pathname(__FILE__).dirname.expand_path.join('ui')

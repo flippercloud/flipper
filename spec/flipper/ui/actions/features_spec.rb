@@ -33,15 +33,15 @@ RSpec.describe Flipper::UI::Actions::Features do
     let(:feature_name) { 'notifications_next' }
 
     before do
-      @original_feature_creation_enabled = Flipper::UI.feature_creation_enabled
-      Flipper::UI.feature_creation_enabled = feature_creation_enabled
+      @original_feature_creation_enabled = Flipper::UI.configuration.feature_creation_enabled
+      Flipper::UI.configuration.feature_creation_enabled = feature_creation_enabled
       post '/features',
            { 'value' => feature_name, 'authenticity_token' => token },
            'rack.session' => session
     end
 
     after do
-      Flipper::UI.feature_creation_enabled = @original_feature_creation_enabled
+      Flipper::UI.configuration.feature_creation_enabled = @original_feature_creation_enabled
     end
 
     context 'feature_creation_enabled set to true' do

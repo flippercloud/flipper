@@ -29,4 +29,12 @@ module Flipper
       super(message || default)
     end
   end
+
+  # Raised when accessing a configuration property that has been deprecated
+  class ConfigurationDeprecated < Flipper::Error
+    def initialize(message = nil)
+      default = "The configuration property has been deprecated"
+      super(message || default)
+    end
+  end
 end
