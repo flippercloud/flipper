@@ -1,3 +1,7 @@
+## master (to be 0.15.0)
+
+* Move Flipper::UI configuration options to Flipper::UI::Configuration (https://github.com/jnunemaker/flipper/pull/345).
+
 ## 0.14.0
 
 * Changed sync_interval to be seconds instead of milliseconds.
