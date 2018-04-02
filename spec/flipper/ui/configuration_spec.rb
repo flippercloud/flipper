@@ -69,4 +69,37 @@ RSpec.describe Flipper::UI::Configuration do
         .to raise_error(Flipper::InvalidConfigurationValue)
     end
   end
+
+  describe "#application_breadcrumb_href" do
+    it "has default value" do
+      expect(configuration.application_breadcrumb_href).to eq(nil)
+    end
+
+    it "can be updated" do
+      configuration.application_breadcrumb_href = 'http://www.myapp.com'
+      expect(configuration.application_breadcrumb_href).to eq('http://www.myapp.com')
+    end
+  end
+
+  describe "#feature_creation_enabled" do
+    it "has default value" do
+      expect(configuration.feature_creation_enabled).to eq(true)
+    end
+
+    it "can be updated" do
+      configuration.feature_creation_enabled = false
+      expect(configuration.feature_creation_enabled).to eq(false)
+    end
+  end
+
+  describe "#feature_removal_enabled" do
+    it "has default value" do
+      expect(configuration.feature_removal_enabled).to eq(true)
+    end
+
+    it "can be updated" do
+      configuration.feature_removal_enabled = false
+      expect(configuration.feature_removal_enabled).to eq(false)
+    end
+  end
 end

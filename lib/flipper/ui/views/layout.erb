@@ -35,7 +35,7 @@
             </li>
           <% end %>
           <li class="ml-auto">
-            <%- if Flipper::UI.feature_creation_enabled -%>
+            <%- if Flipper::UI.configuration.feature_creation_enabled -%>
               <a class="btn btn-sm btn-light" href="<%= script_name %>/features/new">Add Feature</a>
             <%- end -%>
           </li>

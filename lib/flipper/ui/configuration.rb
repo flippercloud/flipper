@@ -12,6 +12,20 @@ module Flipper
       attr_accessor :banner_text,
                     :banner_class
 
+      # Public: If you set this, the UI will always have a first breadcrumb that
+      # says "App" which points to this href. The href can be a path (ie: "/")
+      # or full url ("https://app.example.com/").
+      attr_accessor :application_breadcrumb_href
+
+      # Public: Is feature creation allowed from the UI? Defaults to true. If
+      # set to false, users of the UI cannot create features. All feature
+      # creation will need to be done through the configured flipper instance.
+      attr_accessor :feature_creation_enabled
+
+      # Public: Is feature deletion allowed from the UI? Defaults to true. If
+      # set to false, users won't be able to delete features from the UI.
+      attr_accessor :feature_removal_enabled
+
       VALID_BANNER_CLASS_VALUES = %w(
         danger
         dark
@@ -31,6 +45,8 @@ module Flipper
         @delete = Option.new("Danger Zone", "Deleting a feature removes it from the list of features and disables it for everyone.") # rubocop:disable Metrics/LineLength
         @banner_text = nil
         @banner_class = 'danger'
+        @feature_creation_enabled = true
+        @feature_removal_enabled = true
       end
 
       def banner_class=(value)

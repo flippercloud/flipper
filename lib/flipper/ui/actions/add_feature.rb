@@ -8,7 +8,7 @@ module Flipper
         route %r{features/new/?\Z}
 
         def get
-          unless Flipper::UI.feature_creation_enabled
+          unless Flipper::UI.configuration.feature_creation_enabled
             status 403
 
             breadcrumb 'Home', '/'

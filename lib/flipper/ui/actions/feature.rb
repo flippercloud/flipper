@@ -21,7 +21,7 @@ module Flipper
         end
 
         def delete
-          unless Flipper::UI.feature_removal_enabled
+          unless Flipper::UI.configuration.feature_removal_enabled
             status 403
 
             breadcrumb 'Home', '/'
