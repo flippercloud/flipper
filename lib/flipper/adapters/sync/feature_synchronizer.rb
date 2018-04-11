@@ -39,6 +39,7 @@ module Flipper
             return if local_boolean_enabled?
             @feature.enable
           else
+            @feature.disable if local_boolean_enabled?
             sync_actors
             sync_groups
             sync_percentage_of_actors

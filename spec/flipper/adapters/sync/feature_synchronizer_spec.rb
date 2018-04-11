@@ -56,7 +56,29 @@ RSpec.describe Flipper::Adapters::Sync::FeatureSynchronizer do
     end
   end
 
-  context "when conditionally enabled" do
+  context "when remote conditionally enabled" do
+    it "disables feature locally and syncs conditional enablements" do
+      feature.enable
+      adapter.reset
+      remote_gate_values_hash = {
+        boolean: nil,
+        actors: Set["1"],
+        groups: Set["staff"],
+        percentage_of_time: 10,
+        percentage_of_actors: 15,
+      }
+      remote = Flipper::GateValues.new(remote_gate_values_hash)
+
+      described_class.new(feature, feature.gate_values, remote).call
+
+      local_gate_values_hash = adapter.get(feature)
+      expect(local_gate_values_hash.fetch(:boolean)).to be(nil)
+      expect(local_gate_values_hash.fetch(:actors)).to eq(Set["1"])
+      expect(local_gate_values_hash.fetch(:groups)).to eq(Set["staff"])
+      expect(local_gate_values_hash.fetch(:percentage_of_time)).to eq("10")
+      expect(local_gate_values_hash.fetch(:percentage_of_actors)).to eq("15")
+    end
+
     it "adds remotely added actors" do
       remote = Flipper::GateValues.new(actors: Set["1", "2"])
       feature.enable_actor(Flipper::Actor.new("1"))
