@@ -21,6 +21,18 @@ module Flipper
         @events << Event.new(name, payload, result)
         result
       end
+
+      def events_by_name(name)
+        @events.select { |event| event.name == name }
+      end
+
+      def event_by_name(name)
+        events_by_name(name).first
+      end
+
+      def reset
+        @events = []
+      end
     end
   end
 end
