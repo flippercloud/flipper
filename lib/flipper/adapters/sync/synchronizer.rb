@@ -36,9 +36,15 @@ module Flipper
             FeatureSynchronizer.new(feature, local_gate_values, remote_gate_values).call
           end
 
-          # Add features that are missing
+          # Add features that are missing in local and present in remote.
           features_to_add = remote_get_all.keys - local_get_all.keys
           features_to_add.each { |key| Feature.new(key, @local).add }
+
+          # Remove features that are present in local and missing in remote.
+          features_to_remove = local_get_all.keys - remote_get_all.keys
+          features_to_remove.each { |key| Feature.new(key, @local).remove }
+
+          nil
         rescue => exception
           @instrumenter.instrument("synchronizer_exception.flipper", exception: exception)
         end
