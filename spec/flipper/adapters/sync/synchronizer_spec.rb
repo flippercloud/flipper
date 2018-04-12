@@ -20,17 +20,34 @@ RSpec.describe Flipper::Adapters::Sync::Synchronizer do
     expect(events.size).to be(1)
   end
 
-  it "does not raise, but instruments exceptions for visibility" do
+  it "raises errors by default" do
     exception = StandardError.new
     expect(remote).to receive(:get_all).and_raise(exception)
 
-    expect { subject.call }.not_to raise_error
+    expect { subject.call }.to raise_error(exception)
+  end
 
-    events = instrumenter.events_by_name("synchronizer_exception.flipper")
-    expect(events.size).to be(1)
+  context "when raise disabled" do
+    subject do
+      options = {
+        instrumenter: instrumenter,
+        raise: false,
+      }
+      described_class.new(local, remote, options)
+    end
 
-    event = events[0]
-    expect(event.payload[:exception]).to eq(exception)
+    it "does not raise, but instruments exceptions for visibility" do
+      exception = StandardError.new
+      expect(remote).to receive(:get_all).and_raise(exception)
+
+      expect { subject.call }.not_to raise_error
+
+      events = instrumenter.events_by_name("synchronizer_exception.flipper")
+      expect(events.size).to be(1)
+
+      event = events[0]
+      expect(event.payload[:exception]).to eq(exception)
+    end
   end
 
   describe '#call' do

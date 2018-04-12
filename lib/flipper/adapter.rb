@@ -43,7 +43,7 @@ module Flipper
     #
     # Returns result of Synchronizer#call.
     def import(source_adapter)
-      Adapters::Sync::Synchronizer.new(self, source_adapter).call
+      Adapters::Sync::Synchronizer.new(self, source_adapter, raise: true).call
     end
 
     # Public: Default config for a feature's gate values.

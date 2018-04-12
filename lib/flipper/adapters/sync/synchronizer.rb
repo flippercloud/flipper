@@ -20,6 +20,7 @@ module Flipper
           @local = local
           @remote = remote
           @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
+          @raise = options.fetch(:raise, true)
         end
 
         # Public: Forces a sync.
@@ -53,6 +54,7 @@ module Flipper
           nil
         rescue => exception
           @instrumenter.instrument("synchronizer_exception.flipper", exception: exception)
+          raise if @raise
         end
       end
     end
