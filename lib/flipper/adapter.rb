@@ -1,3 +1,5 @@
+require "flipper/adapters/sync/synchronizer"
+
 module Flipper
   # Adding a module include so we have some hooks for stuff down the road
   module Adapter
@@ -37,55 +39,16 @@ module Flipper
       result
     end
 
-    # Public: Wipe features and gate values and then import features and gate
-    # values from provided adapter.
+    # Public: Ensure that adapter is in sync with source adapter provided.
     #
-    # Returns nothing.
+    # Returns result of Synchronizer#call.
     def import(source_adapter)
-      wipe
-      copy_features_and_gates(source_adapter)
-      nil
+      Adapters::Sync::Synchronizer.new(self, source_adapter, raise: true).call
     end
 
     # Public: Default config for a feature's gate values.
     def default_config
       self.class.default_config
-    end
-
-    private
-
-    # Private: Copy source adapter features and gate values into self.
-    def copy_features_and_gates(source_adapter)
-      source_adapter.features.each do |key|
-        source_feature = Flipper::Feature.new(key, source_adapter)
-        destination_feature = Flipper::Feature.new(key, self)
-
-        case source_feature.state
-        when :on
-          destination_feature.enable
-        when :conditional
-          source_feature.groups_value.each do |value|
-            destination_feature.enable_group(value)
-          end
-
-          source_feature.actors_value.each do |value|
-            destination_feature.enable_actor(Flipper::Actor.new(value))
-          end
-
-          destination_feature.enable_percentage_of_actors(source_feature.percentage_of_actors_value)
-          destination_feature.enable_percentage_of_time(source_feature.percentage_of_time_value)
-        when :off
-          destination_feature.add
-        end
-      end
-    end
-
-    # Private: Completely wipe adapter features and gate values.
-    def wipe
-      features.each do |key|
-        feature = Flipper::Feature.new(key, self)
-        remove(feature)
-      end
     end
   end
 end

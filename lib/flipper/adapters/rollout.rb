@@ -56,14 +56,6 @@ module Flipper
         }
       end
 
-      def get_multi(_features)
-        raise AdapterMethodNotSupportedError
-      end
-
-      def get_all
-        raise AdapterMethodNotSupportedError
-      end
-
       def add(_feature)
         raise AdapterMethodNotSupportedError
       end

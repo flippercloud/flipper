@@ -126,16 +126,6 @@ RSpec.describe Flipper::Adapters::Rollout do
   end
 
   describe 'unsupported methods' do
-    it 'raises on get_multi' do
-      expect { source_adapter.get_multi([]) }
-        .to raise_error(Flipper::Adapters::Rollout::AdapterMethodNotSupportedError)
-    end
-
-    it 'raises on get_all' do
-      expect { source_adapter.get_all }
-        .to raise_error(Flipper::Adapters::Rollout::AdapterMethodNotSupportedError)
-    end
-
     it 'raises on add' do
       expect { source_adapter.add(:feature) }
         .to raise_error(Flipper::Adapters::Rollout::AdapterMethodNotSupportedError)

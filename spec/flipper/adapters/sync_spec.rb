@@ -194,4 +194,10 @@ RSpec.describe Flipper::Adapters::Sync do
     expect(subject).to receive(:sync)
     subject.get_all
   end
+
+  it 'does not raise sync exceptions' do
+    exception = StandardError.new
+    expect(remote_adapter).to receive(:get_all).and_raise(exception)
+    expect { subject.get_all }.not_to raise_error
+  end
 end
