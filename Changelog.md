@@ -2,6 +2,7 @@
 
 * Move Flipper::UI configuration options to Flipper::UI::Configuration (https://github.com/jnunemaker/flipper/pull/345).
 * Bug fix in adapter synchronizing and switched DSL#import to use Synchronizer (https://github.com/jnunemaker/flipper/pull/347).
+* Fix AR adapter table name prefix/suffix bug (https://github.com/jnunemaker/flipper/pull/350).
 
 ## 0.14.0
 
