@@ -7,9 +7,9 @@ module Flipper
   module Cloud
     class Configuration
       # The default url should be the one, the only, the website.
-      DEFAULT_URL = "https://www.featureflipper.com/adapter".freeze
+      DEFAULT_URL = "https://www.flippercloud.io/adapter".freeze
 
-      # Public: The token corresponding to an environment on featureflipper.com.
+      # Public: The token corresponding to an environment on flippercloud.io.
       attr_accessor :token
 
       # Public: The url for http adapter (default: Flipper::Cloud::DEFAULT_URL).

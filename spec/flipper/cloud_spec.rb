@@ -5,7 +5,7 @@ require 'flipper/instrumenters/memory'
 
 RSpec.describe Flipper::Cloud do
   before do
-    stub_request(:get, /featureflipper\.com/).to_return(status: 200, body: "{}")
+    stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
   end
 
   context "initialize with token" do
@@ -30,7 +30,7 @@ RSpec.describe Flipper::Cloud do
     it 'sets up correct url' do
       uri = @http_client.instance_variable_get('@uri')
       expect(uri.scheme).to eq('https')
-      expect(uri.host).to eq('www.featureflipper.com')
+      expect(uri.host).to eq('www.flippercloud.io')
       expect(uri.path).to eq('/adapter')
     end
 
