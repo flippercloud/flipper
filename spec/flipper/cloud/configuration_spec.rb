@@ -35,7 +35,7 @@ RSpec.describe Flipper::Cloud::Configuration do
 
   it "passes sync_interval into sync adapter" do
     # The initial sync of http to local invokes this web request.
-    stub_request(:get, /featureflipper\.com/).to_return(status: 200, body: "{}")
+    stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
 
     instance = described_class.new(required_options.merge(sync_interval: 1))
     expect(instance.adapter.synchronizer.interval).to be(1)
@@ -48,7 +48,7 @@ RSpec.describe Flipper::Cloud::Configuration do
 
   it "defaults adapter block" do
     # The initial sync of http to local invokes this web request.
-    stub_request(:get, /featureflipper\.com/).to_return(status: 200, body: "{}")
+    stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
 
     instance = described_class.new(required_options)
     expect(instance.adapter).to be_instance_of(Flipper::Adapters::Sync)
@@ -56,7 +56,7 @@ RSpec.describe Flipper::Cloud::Configuration do
 
   it "can override adapter block" do
     # The initial sync of http to local invokes this web request.
-    stub_request(:get, /featureflipper\.com/).to_return(status: 200, body: "{}")
+    stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
 
     instance = described_class.new(required_options)
     instance.adapter do |adapter|
