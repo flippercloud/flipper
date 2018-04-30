@@ -16,7 +16,6 @@ module Flipper
         @action_collection = ActionCollection.new
 
         # UI
-        @action_collection.add UI::Actions::Features
         @action_collection.add UI::Actions::AddFeature
         @action_collection.add UI::Actions::Feature
         @action_collection.add UI::Actions::ActorsGate
@@ -25,6 +24,7 @@ module Flipper
         @action_collection.add UI::Actions::PercentageOfTimeGate
         @action_collection.add UI::Actions::PercentageOfActorsGate
         @action_collection.add UI::Actions::Gate
+        @action_collection.add UI::Actions::Features
 
         # Static Assets/Files
         @action_collection.add UI::Actions::File
