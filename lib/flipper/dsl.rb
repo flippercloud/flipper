@@ -210,7 +210,7 @@ module Flipper
       Types::Boolean.new(value)
     end
 
-    # Public: Event shorter shortcut for getting a boolean type instance.
+    # Public: Even shorter shortcut for getting a boolean type instance.
     #
     # value - The true or false value for the boolean.
     #
