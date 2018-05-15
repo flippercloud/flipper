@@ -1,3 +1,5 @@
+require "set"
+require "flipper/feature"
 require "flipper/adapters/sync/synchronizer"
 
 module Flipper
@@ -53,5 +55,6 @@ module Flipper
   end
 end
 
+# Default always included adapters.
 require "flipper/adapters/memory"
 require "flipper/adapters/instrumented"
