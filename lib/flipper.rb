@@ -142,6 +142,7 @@ end
 require 'flipper/actor'
 require 'flipper/configuration'
 require 'flipper/adapter'
+require 'flipper/adapters/memory'
 require 'flipper/dsl'
 require 'flipper/errors'
 require 'flipper/feature'
