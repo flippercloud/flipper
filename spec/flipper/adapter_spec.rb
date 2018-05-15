@@ -1,5 +1,4 @@
 require 'helper'
-require 'flipper/adapters/memory'
 
 RSpec.describe Flipper::Adapter do
   let(:source_flipper) { build_flipper }

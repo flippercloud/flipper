@@ -7,7 +7,6 @@ lib_path  = root_path.join('lib')
 $:.unshift(lib_path)
 
 require 'flipper'
-require 'flipper/adapters/memory'
 require 'flipper/cloud'
 
 memory_adapter = Flipper::Adapters::Memory.new

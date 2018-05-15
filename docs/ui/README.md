@@ -107,7 +107,6 @@ Minimal example for Rack:
 # config.ru
 
 require 'flipper-ui'
-require 'flipper/adapters/memory'
 
 adapter = Flipper::Adapters::Memory.new
 flipper = Flipper.new(adapter)

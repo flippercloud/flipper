@@ -43,7 +43,6 @@ For example, here is what the in-memory adapter spec looks like:
 
 ```ruby
 require 'helper'
-require 'flipper/adapters/memory'
 
 # The shared specs are included with the flipper gem so you can use them in
 # separate adapter specific gems.
@@ -67,7 +66,6 @@ Here is what an in-memory adapter MiniTest looks like:
 
 ```ruby
 require 'test_helper'
-require 'flipper/adapters/memory'
 
 class MemoryTest < MiniTest::Test
   prepend SharedAdapterTests

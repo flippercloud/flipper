@@ -2,7 +2,6 @@ require 'helper'
 require 'redis'
 require 'rollout'
 require 'flipper/adapters/rollout'
-require 'flipper/adapters/memory'
 require 'flipper/spec/shared_adapter_specs'
 
 RSpec.describe Flipper::Adapters::Rollout do

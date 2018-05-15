@@ -20,7 +20,6 @@ Or install it yourself with:
 
 ```ruby
 require 'active_support/cache'
-require 'flipper/adapters/memory'
 require 'flipper/adapters/active_support_cache_store'
 
 memory_adapter = Flipper::Adapters::Memory.new
@@ -40,7 +39,6 @@ Each key is namespaced under `flipper/v1/feature/`
 
 ```ruby
 require 'active_support/cache'
-require 'flipper/adapters/memory'
 require 'flipper/adapters/active_support_cache_store'
 
 memory_adapter = Flipper::Adapters::Memory.new

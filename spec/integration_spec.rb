@@ -1,6 +1,5 @@
 require 'helper'
 require 'flipper/feature'
-require 'flipper/adapters/memory'
 
 RSpec.describe Flipper do
   let(:adapter)     { Flipper::Adapters::Memory.new }

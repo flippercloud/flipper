@@ -1,5 +1,4 @@
 require 'helper'
-require 'flipper/adapters/memory'
 require 'flipper/adapters/operation_logger'
 require 'flipper/adapters/dalli'
 require 'flipper/spec/shared_adapter_specs'

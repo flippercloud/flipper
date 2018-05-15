@@ -78,7 +78,6 @@ Initialize `RedisCache`  with a flipper [adapter](https://github.com/jnunemaker/
 Example using the RedisCache adapter with the Memory adapter and a TTL of 4800 seconds:
 
 ```ruby
-  require 'flipper/adapters/memory'
   require 'flipper/adapters/redis_cache'
 
   redis = Redis.new(url: ENV['REDIS_URL'])
@@ -107,7 +106,6 @@ Example using the ActiveSupportCacheStore adapter with ActiveSupport's [MemorySt
 
 ```ruby
 require 'active_support/cache'
-require 'flipper/adapters/memory'
 require 'flipper/adapters/active_support_cache_store'
 
 memory_adapter = Flipper::Adapters::Memory.new

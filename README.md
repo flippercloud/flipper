@@ -39,7 +39,6 @@ The goal of the API for flipper was to have everything revolve around features a
 
 ```ruby
 require 'flipper'
-require 'flipper/adapters/memory'
 
 Flipper.configure do |config|
   config.default do
@@ -105,4 +104,3 @@ Of course there are more [examples for you to peruse](examples/). You could also
 | ![@alexwheeler](https://avatars3.githubusercontent.com/u/3260042?s=64) | [@alexwheeler](https://github.com/alexwheeler) | api |
 | ![@thetimbanks](https://avatars1.githubusercontent.com/u/471801?s=64) | [@thetimbanks](https://github.com/thetimbanks) | ui |
 | ![@lazebny](https://avatars1.githubusercontent.com/u/6276766?s=64) | [@lazebny](https://github.com/lazebny) | docker |
-

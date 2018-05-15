@@ -52,3 +52,6 @@ module Flipper
     end
   end
 end
+
+require "flipper/adapters/memory"
+require "flipper/adapters/instrumented"

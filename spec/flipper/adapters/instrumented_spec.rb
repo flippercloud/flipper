@@ -1,5 +1,4 @@
 require 'helper'
-require 'flipper/adapters/memory'
 require 'flipper/adapters/instrumented'
 require 'flipper/instrumenters/memory'
 require 'flipper/spec/shared_adapter_specs'

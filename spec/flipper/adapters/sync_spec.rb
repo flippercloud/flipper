@@ -1,6 +1,5 @@
 require 'helper'
 require 'flipper/adapters/sync'
-require 'flipper/adapters/memory'
 require 'flipper/adapters/operation_logger'
 require 'flipper/spec/shared_adapter_specs'
 require 'active_support/notifications'

@@ -5,7 +5,6 @@ require 'active_support/cache/dalli_store'
 require 'flipper/middleware/memoizer'
 require 'flipper/adapters/active_support_cache_store'
 require 'flipper/adapters/operation_logger'
-require 'flipper/adapters/memory'
 
 RSpec.describe Flipper::Middleware::Memoizer do
   include Rack::Test::Methods

@@ -1,5 +1,4 @@
 require 'test_helper'
-require 'flipper/adapters/memory'
 
 class MemoryTest < MiniTest::Test
   prepend Flipper::Test::SharedAdapterTests

@@ -13,7 +13,6 @@ class FlipperSubscriber
 end
 
 require 'flipper'
-require 'flipper/adapters/memory'
 require 'flipper/adapters/instrumented'
 
 # pick an adapter

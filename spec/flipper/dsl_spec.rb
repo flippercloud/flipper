@@ -1,6 +1,5 @@
 require 'helper'
 require 'flipper/dsl'
-require 'flipper/adapters/memory'
 
 RSpec.describe Flipper::DSL do
   subject { described_class.new(adapter) }

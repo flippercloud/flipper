@@ -1,5 +1,4 @@
 require 'helper'
-require 'flipper/adapters/memory'
 require 'flipper/ui/decorators/gate'
 
 RSpec.describe Flipper::UI::Decorators::Gate do

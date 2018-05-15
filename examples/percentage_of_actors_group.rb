@@ -5,7 +5,6 @@
 # plucked from memcached, redis, mysql or whatever.
 require File.expand_path('../example_setup', __FILE__)
 require 'flipper'
-require 'flipper/adapters/memory'
 
 adapter = Flipper::Adapters::Memory.new
 flipper = Flipper.new(adapter)

@@ -1,7 +1,6 @@
 require File.expand_path('../example_setup', __FILE__)
 
 require 'flipper'
-require 'flipper/adapters/memory'
 
 Flipper.configure do |config|
   config.default do

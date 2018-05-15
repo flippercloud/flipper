@@ -1,7 +1,6 @@
 require File.expand_path('../example_setup', __FILE__)
 
 require 'flipper'
-require 'flipper/adapters/memory'
 
 # Some class that represents what will be trying to do something
 class User

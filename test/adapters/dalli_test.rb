@@ -1,5 +1,4 @@
 require 'test_helper'
-require 'flipper/adapters/memory'
 require 'flipper/adapters/dalli'
 
 class DalliTest < MiniTest::Test

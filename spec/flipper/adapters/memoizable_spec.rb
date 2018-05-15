@@ -1,6 +1,5 @@
 require 'helper'
 require 'flipper/adapters/memoizable'
-require 'flipper/adapters/memory'
 require 'flipper/adapters/operation_logger'
 require 'flipper/spec/shared_adapter_specs'
 

@@ -1,5 +1,4 @@
 require 'json'
-require 'flipper/adapters/memory'
 require 'rack/test'
 
 module SpecHelpers

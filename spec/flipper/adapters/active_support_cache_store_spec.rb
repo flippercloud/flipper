@@ -1,7 +1,6 @@
 require 'helper'
 require 'active_support/cache'
 require 'active_support/cache/dalli_store'
-require 'flipper/adapters/memory'
 require 'flipper/adapters/operation_logger'
 require 'flipper/adapters/active_support_cache_store'
 require 'flipper/spec/shared_adapter_specs'

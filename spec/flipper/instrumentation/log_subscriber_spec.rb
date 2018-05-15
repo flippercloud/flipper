@@ -1,7 +1,6 @@
 require 'logger'
 require 'helper'
 require 'flipper/adapters/instrumented'
-require 'flipper/adapters/memory'
 require 'flipper/instrumentation/log_subscriber'
 
 RSpec.describe Flipper::Instrumentation::LogSubscriber do
