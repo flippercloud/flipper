@@ -1,7 +1,6 @@
 require "flipper/adapters/http"
 require "flipper/adapters/memory"
 require "flipper/adapters/sync"
-require "flipper/instrumenters/noop"
 
 module Flipper
   module Cloud

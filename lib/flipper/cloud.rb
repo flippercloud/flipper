@@ -1,3 +1,4 @@
+require "flipper"
 require "flipper/cloud/configuration"
 
 module Flipper

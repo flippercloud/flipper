@@ -1,4 +1,3 @@
-require "flipper/instrumenters/noop"
 require "flipper/adapters/sync/synchronizer"
 require "flipper/adapters/sync/interval_synchronizer"
 

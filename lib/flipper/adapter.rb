@@ -54,7 +54,3 @@ module Flipper
     end
   end
 end
-
-# Default always included adapters.
-require "flipper/adapters/memory"
-require "flipper/adapters/instrumented"

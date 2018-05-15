@@ -1,3 +1,5 @@
+require 'flipper/typecast'
+
 module Flipper
   module Types
     class Percentage < Type

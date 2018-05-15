@@ -15,7 +15,6 @@ Flipper.configure do |config|
 end
 
 # This assumes you setup a default flipper instance using configure.
-require 'flipper/middleware/memoizer'
 config.middleware.use Flipper::Middleware::Memoizer
 ```
 
@@ -24,8 +23,6 @@ config.middleware.use Flipper::Middleware::Memoizer
 **Also Note**: If you haven't setup a default instance, you can pass the instance to `SetupEnv` as `Memoizer` uses whatever is setup in the `env`:
 
 ```ruby
-require 'flipper/middleware/setup_env'
-require 'flipper/middleware/memoizer'
 config.middleware.use Flipper::Middleware::SetupEnv, -> { Flipper.new(...) }
 config.middleware.use Flipper::Middleware::Memoizer
 ```

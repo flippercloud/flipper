@@ -9,8 +9,6 @@ end
 require 'rack/protection'
 
 require 'flipper'
-require 'flipper/middleware/setup_env'
-require 'flipper/middleware/memoizer'
 require 'flipper/ui/middleware'
 require 'flipper/ui/configuration'
 

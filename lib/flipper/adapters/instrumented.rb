@@ -1,5 +1,4 @@
 require 'delegate'
-require 'flipper/instrumenters/noop'
 
 module Flipper
   module Adapters

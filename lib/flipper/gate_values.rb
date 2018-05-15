@@ -1,4 +1,5 @@
 require 'set'
+require 'flipper/typecast'
 
 module Flipper
   class GateValues

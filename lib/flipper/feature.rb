@@ -3,7 +3,6 @@ require 'flipper/type'
 require 'flipper/gate'
 require 'flipper/feature_check_context'
 require 'flipper/gate_values'
-require 'flipper/instrumenters/noop'
 
 module Flipper
   # rubocop:disable Metrics/ClassLength

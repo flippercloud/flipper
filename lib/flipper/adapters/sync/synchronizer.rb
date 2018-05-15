@@ -1,6 +1,5 @@
 require "flipper/feature"
 require "flipper/gate_values"
-require "flipper/instrumenters/noop"
 require "flipper/adapters/sync/feature_synchronizer"
 
 module Flipper

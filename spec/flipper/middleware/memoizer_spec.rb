@@ -2,7 +2,6 @@ require 'helper'
 require 'rack/test'
 require 'active_support/cache'
 require 'active_support/cache/dalli_store'
-require 'flipper/middleware/memoizer'
 require 'flipper/adapters/active_support_cache_store'
 require 'flipper/adapters/operation_logger'
 

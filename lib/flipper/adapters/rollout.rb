@@ -1,4 +1,4 @@
-require "flipper/errors"
+require 'flipper'
 
 module Flipper
   module Adapters

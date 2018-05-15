@@ -1,3 +1,5 @@
+require 'flipper'
+
 module Flipper
   module Adapters
     # Public: Adapter that wraps another adapter with the ability to cache

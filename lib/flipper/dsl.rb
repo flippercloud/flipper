@@ -1,6 +1,4 @@
 require 'forwardable'
-require 'flipper/adapters/memoizable'
-require 'flipper/instrumenters/noop'
 
 module Flipper
   class DSL

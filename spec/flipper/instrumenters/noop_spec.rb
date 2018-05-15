@@ -1,5 +1,4 @@
 require 'helper'
-require 'flipper/instrumenters/noop'
 
 RSpec.describe Flipper::Instrumenters::Noop do
   describe '.instrument' do
