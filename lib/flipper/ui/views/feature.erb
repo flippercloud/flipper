@@ -14,7 +14,7 @@
         </h4>
         <div class="card-body">
           <p>
-            <% if @feature.on? %>
+            <% if @feature.boolean_value %>
               The feature is enabled for <strong>everyone</strong>. Disable this feature with one click.
             <% else %>
               Enable or disable this feature for <strong>everyone</strong> with one click.
@@ -24,7 +24,7 @@
           <form action="<%= script_name %>/features/<%= @feature.key %>/boolean" method="post">
             <%== csrf_input_tag %>
 
-            <% unless @feature.on? %>
+            <% unless @feature.boolean_value %>
               <button type="submit" name="action" value="Enable" class="btn btn-danger" data-toggle="tooltip" title="Enable for everyone">Enable</button>
             <% end %>
 
