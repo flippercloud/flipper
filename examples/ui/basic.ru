@@ -44,6 +44,7 @@ flipper = Flipper.new(adapter, instrumenter: ActiveSupport::Notifications)
 # flipper[:secrets].enable_group :early_access
 # flipper[:logging].enable_percentage_of_time 5
 # flipper[:new_cache].enable_percentage_of_actors 15
+# flipper["a/b"].add
 
 run Flipper::UI.app(flipper) { |builder|
   builder.use Rack::Session::Cookie, secret: "_super_secret"
