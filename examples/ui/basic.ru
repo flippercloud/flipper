@@ -14,6 +14,7 @@ $:.unshift(lib_path)
 
 require "flipper-ui"
 require "flipper/adapters/pstore"
+require "active_support/notifications"
 
 Flipper.register(:admins) { |actor|
   actor.respond_to?(:admin?) && actor.admin?
@@ -24,10 +25,11 @@ Flipper.register(:early_access) { |actor|
 }
 
 # Setup logging of flipper calls.
-$logger = Logger.new(STDOUT)
-require "active_support/notifications"
-require "flipper/instrumentation/log_subscriber"
-Flipper::Instrumentation::LogSubscriber.logger = $logger
+if ENV["LOG"] == "1"
+  $logger = Logger.new(STDOUT)
+  require "flipper/instrumentation/log_subscriber"
+  Flipper::Instrumentation::LogSubscriber.logger = $logger
+end
 
 adapter = Flipper::Adapters::PStore.new
 flipper = Flipper.new(adapter, instrumenter: ActiveSupport::Notifications)
