@@ -5,7 +5,9 @@ module Flipper
   module UI
     module Actions
       class AddFeature < UI::Action
-        route %r{features/new/?\Z}
+        match do |request|
+          request.path_info =~ %r{\A/features/new/?\Z}
+        end
 
         def get
           unless Flipper::UI.configuration.feature_creation_enabled

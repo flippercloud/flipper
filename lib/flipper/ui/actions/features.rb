@@ -6,7 +6,9 @@ module Flipper
   module UI
     module Actions
       class Features < UI::Action
-        route %r{features/?\Z}
+        match do |request|
+          request.path_info =~ %r{\A/features/?\Z}
+        end
 
         def get
           @page_title = 'Features'

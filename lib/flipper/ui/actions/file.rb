@@ -5,7 +5,9 @@ module Flipper
   module UI
     module Actions
       class File < UI::Action
-        route %r{(images|css|js|octicons|fonts)/.*\Z}
+        match do |request|
+          request.path_info =~ %r{(images|css|js|octicons|fonts)/.*\Z}
+        end
 
         def get
           Rack::File.new(public_path).call(request.env)

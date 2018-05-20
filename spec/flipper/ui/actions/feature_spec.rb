@@ -107,4 +107,24 @@ RSpec.describe Flipper::UI::Actions::Feature do
       expect(last_response.body).to include('Percentage of Actors')
     end
   end
+
+  describe 'GET /features/:feature with slash in feature name' do
+    before do
+      get '/features/a/b'
+    end
+
+    it 'responds with success' do
+      expect(last_response.status).to be(200)
+    end
+
+    it 'renders template' do
+      expect(last_response.body).to include('a/b')
+      expect(last_response.body).to include('Enable')
+      expect(last_response.body).to include('Disable')
+      expect(last_response.body).to include('Actors')
+      expect(last_response.body).to include('Groups')
+      expect(last_response.body).to include('Percentage of Time')
+      expect(last_response.body).to include('Percentage of Actors')
+    end
+  end
 end

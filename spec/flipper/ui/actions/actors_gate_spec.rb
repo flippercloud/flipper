@@ -27,6 +27,21 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
     end
   end
 
+  describe 'GET /features/:feature/actors with slash in feature name' do
+    before do
+      get 'features/a/b/actors'
+    end
+
+    it 'responds with success' do
+      expect(last_response.status).to be(200)
+    end
+
+    it 'renders add new actor form' do
+      form = '<form action="/features/a/b/actors" method="post" class="form-inline">'
+      expect(last_response.body).to include(form)
+    end
+  end
+
   describe 'POST /features/:feature/actors' do
     context 'enabling an actor' do
       let(:value) { 'User:6' }

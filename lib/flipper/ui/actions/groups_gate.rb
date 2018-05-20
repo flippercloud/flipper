@@ -5,11 +5,11 @@ module Flipper
   module UI
     module Actions
       class GroupsGate < UI::Action
-        route %r{features/[^/]*/groups/?\Z}
+        REGEX = %r{\A/features/(.*)/groups/?\Z}
+        match { |request| request.path_info =~ REGEX }
 
         def get
-          feature_name = Rack::Utils.unescape(request.path.split('/')[-2])
-          feature = flipper[feature_name.to_sym]
+          feature = flipper[feature_name]
           @feature = Decorators::Feature.new(feature)
 
           breadcrumb 'Home', '/'
@@ -21,8 +21,7 @@ module Flipper
         end
 
         def post
-          feature_name = Rack::Utils.unescape(request.path.split('/')[-2])
-          feature = flipper[feature_name.to_sym]
+          feature = flipper[feature_name]
           value = params['value'].to_s.strip
 
           if Flipper.group_exists?(value)
@@ -37,6 +36,15 @@ module Flipper
           else
             error = Rack::Utils.escape("The group named #{value.inspect} has not been registered.")
             redirect_to("/features/#{feature.key}/groups?error=#{error}")
+          end
+        end
+
+        private
+
+        def feature_name
+          @feature_name ||= begin
+            match = request.path_info.match(REGEX)
+            match ? match[1] : nil
           end
         end
       end
