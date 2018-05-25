@@ -1,4 +1,8 @@
-## master (to be 0.15.0)
+## master
+
+* Introduce `Flipper.disabled?(:feature)` to use instead of `!Flipper.enabled?(:feature)` (https://github.com/jnunemaker/flipper/pull/359)
+
+## 0.15.0
 
 * Move Flipper::UI configuration options to Flipper::UI::Configuration (https://github.com/jnunemaker/flipper/pull/345).
 * Bug fix in adapter synchronizing and switched DSL#import to use Synchronizer (https://github.com/jnunemaker/flipper/pull/347).
