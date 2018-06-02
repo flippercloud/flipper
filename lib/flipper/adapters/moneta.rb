@@ -23,16 +23,14 @@ module Flipper
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
-        moneta[FEATURES_KEY] = (moneta[FEATURES_KEY] || Set.new) << feature.key.to_s
+        moneta[FEATURES_KEY] = features << feature.key.to_s
         true
       end
 
       # Public: Removes a feature from the set of known features and clears
       # all the values for the feature.
       def remove(feature)
-        features = moneta[FEATURES_KEY] || Set.new
-        features.delete(feature.key.to_s)
-        moneta[FEATURES_KEY] = features
+        moneta[FEATURES_KEY] = features.delete(feature.key.to_s)
         moneta[key(feature.key)] = default_config
         true
       end
@@ -47,14 +45,14 @@ module Flipper
       #
       # Returns a Hash of Flipper::Gate#key => value.
       def get(feature)
-        moneta[key(feature.key)] || default_config
+        default_config.merge(moneta[key(feature.key)].to_h)
       end
 
       # Public
       def get_multi(features)
         result = {}
         features.each do |feature|
-          result[feature.key] = default_config.merge(moneta[key(feature.key)].to_h)
+          result[feature.key] = get(feature)
         end
         result
       end
@@ -63,7 +61,7 @@ module Flipper
       def get_all
         result = {}
         moneta[FEATURES_KEY].each do |feature_key|
-          result[feature_key] = default_config.merge(moneta[key(feature_key)].to_h)
+          result[feature_key] = get(Feature.new(feature_key, self))
         end
         result
       end
@@ -78,12 +76,11 @@ module Flipper
       def enable(feature, gate, thing)
         case gate.data_type
         when :boolean, :integer
-          result = moneta[key(feature.key)] || {}
+          result = get(feature)
           result[gate.key] = thing.value.to_s
           moneta[key(feature.key)] = result
         when :set
-          result = moneta[key(feature.key)] || {}
-          result[gate.key] ||= Set.new
+          result = get(feature)
           result[gate.key] << thing.value.to_s
           moneta[key(feature.key)] = result
         end
@@ -102,12 +99,12 @@ module Flipper
         when :boolean
           moneta[key(feature.key)] = default_config
         when :integer
-          result = moneta[key(feature.key)] || {}
+          result = get(feature)
           result[gate.key] = thing.value.to_s
           moneta[key(feature.key)] = result
         when :set
-          result = moneta[key(feature.key)]
-          result[gate.key] = result[gate.key].delete(thing.value.to_s) if result[gate.key]
+          result = get(feature)
+          result[gate.key] = result[gate.key].delete(thing.value.to_s)
           moneta[key(feature.key)] = result
         end
         true
