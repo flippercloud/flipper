@@ -20,5 +20,5 @@ Gem::Specification.new do |gem|
   gem.version       = Flipper::VERSION
 
   gem.add_dependency 'flipper', "~> #{Flipper::VERSION}"
-  gem.add_dependency 'moneta', '>= 0.7.19'
+  gem.add_dependency 'moneta', '>= 0.7.0', '<= 1.0.0'
 end
