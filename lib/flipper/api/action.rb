@@ -17,11 +17,19 @@ module Flipper
 
       # Public: Call this in subclasses so the action knows its route.
       #
-      # regex - The Regexp that this action should run for.
+      # block - The Block that determines if this can handle a given request.
       #
       # Returns nothing.
-      def self.route(regex)
-        @regex = regex
+      def self.match(&block)
+        if block_given?
+          @match = block
+        else
+          @match || raise("No match block set for #{name}")
+        end
+      end
+
+      def self.match?(request)
+        !!match.call(request)
       end
 
       # Internal: Initializes and runs an action for a given request.

@@ -6,7 +6,7 @@ module Flipper
     module V1
       module Actions
         class Features < Api::Action
-          route(/features\Z/)
+          match { |request| request.path_info =~ %r{\A/features/?\Z} }
 
           def get
             keys = params['keys']

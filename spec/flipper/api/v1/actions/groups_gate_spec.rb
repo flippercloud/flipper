@@ -26,6 +26,29 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
     end
   end
 
+  describe 'enable feature with slash in name' do
+    before do
+      flipper["my/feature"].disable
+      Flipper.register(:admins) do |actor|
+        actor.respond_to?(:admin?) && actor.admin?
+      end
+      post '/features/my/feature/groups', name: 'admins'
+    end
+
+    it 'enables feature for group' do
+      person = double
+      allow(person).to receive(:flipper_id).and_return(1)
+      allow(person).to receive(:admin?).and_return(true)
+      expect(last_response.status).to eq(200)
+      expect(flipper["my/feature"].enabled?(person)).to be_truthy
+    end
+
+    it 'returns decorated feature with group enabled' do
+      group_gate = json_response['gates'].find { |m| m['name'] == 'group' }
+      expect(group_gate['value']).to eq(['admins'])
+    end
+  end
+
   describe 'enable without name params' do
     before do
       flipper[:my_feature].disable

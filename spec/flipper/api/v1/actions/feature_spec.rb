@@ -153,6 +153,50 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
         expect(json_response).to eq(response_body)
       end
     end
+
+    context 'feature with name that has slash' do
+      before do
+        flipper["my/feature"].enable
+        get '/features/my/feature'
+      end
+
+      it 'responds with correct attributes' do
+        response_body = {
+          'key' => 'my/feature',
+          'state' => 'on',
+          'gates' => [
+            {
+              'key' => 'boolean',
+              'name' => 'boolean',
+              'value' => 'true',
+            },
+            {
+              'key' => 'groups',
+              'name' => 'group',
+              'value' => [],
+            },
+            {
+              'key' => 'actors',
+              'name' => 'actor',
+              'value' => [],
+            },
+            {
+              'key' => 'percentage_of_actors',
+              'name' => 'percentage_of_actors',
+              'value' => nil,
+            },
+            {
+              'key' => 'percentage_of_time',
+              'name' => 'percentage_of_time',
+              'value' => nil,
+            },
+          ],
+        }
+
+        expect(last_response.status).to eq(200)
+        expect(json_response).to eq(response_body)
+      end
+    end
   end
 
   describe 'delete' do

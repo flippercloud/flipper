@@ -6,7 +6,8 @@ module Flipper
     module V1
       module Actions
         class PercentageOfActorsGate < Api::Action
-          route %r{features/[^/]*/percentage_of_actors/?\Z}
+          REGEX = %r{\A/features/(.*)/percentage_of_actors/?\Z}
+          match { |request| request.path_info =~ REGEX }
 
           def post
             if percentage < 0 || percentage > 100
@@ -29,7 +30,10 @@ module Flipper
           private
 
           def feature_name
-            @feature_name ||= Rack::Utils.unescape(path_parts[-2])
+            @feature_name ||= begin
+              match = request.path_info.match(REGEX)
+              match ? match[1] : nil
+            end
           end
 
           def percentage

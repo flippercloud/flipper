@@ -19,6 +19,22 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfTimeGate do
     end
   end
 
+  describe 'enable for feature with slash in name' do
+    before do
+      flipper["my/feature"].disable
+      post '/features/my/feature/percentage_of_time', percentage: '10'
+    end
+
+    it 'enables gate for feature' do
+      expect(flipper["my/feature"].enabled_gate_names).to include(:percentage_of_time)
+    end
+
+    it 'returns decorated feature with gate enabled for 5% of time' do
+      gate = json_response['gates'].find { |gate| gate['name'] == 'percentage_of_time' }
+      expect(gate['value']).to eq('10')
+    end
+  end
+
   describe 'disable without percentage' do
     before do
       flipper[:my_feature].enable_percentage_of_time(10)

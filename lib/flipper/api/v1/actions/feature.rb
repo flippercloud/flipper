@@ -6,7 +6,8 @@ module Flipper
     module V1
       module Actions
         class Feature < Api::Action
-          route %r{features/[^/]*/?\Z}
+          REGEX = %r{\A/features/(.*)/?\Z}
+          match { |request| request.path_info =~ REGEX }
 
           def get
             return json_error_response(:feature_not_found) unless feature_exists?(feature_name)
@@ -22,7 +23,10 @@ module Flipper
           private
 
           def feature_name
-            @feature_name ||= Rack::Utils.unescape(path_parts.last)
+            @feature_name ||= begin
+              match = request.path_info.match(REGEX)
+              match ? match[1] : nil
+            end
           end
 
           def feature_exists?(feature_name)

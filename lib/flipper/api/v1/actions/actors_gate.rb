@@ -6,7 +6,8 @@ module Flipper
     module V1
       module Actions
         class ActorsGate < Api::Action
-          route %r{features/[^/]*/actors/?\Z}
+          REGEX = %r{\A/features/(.*)/actors/?\Z}
+          match { |request| request.path_info =~ REGEX }
 
           def post
             ensure_valid_params
@@ -33,7 +34,10 @@ module Flipper
           end
 
           def feature_name
-            @feature_name ||= Rack::Utils.unescape(path_parts[-2])
+            @feature_name ||= begin
+              match = request.path_info.match(REGEX)
+              match ? match[1] : nil
+            end
           end
 
           def flipper_id

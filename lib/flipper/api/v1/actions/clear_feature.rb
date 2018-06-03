@@ -6,13 +6,22 @@ module Flipper
     module V1
       module Actions
         class ClearFeature < Api::Action
-          route %r{features/[^/]*/clear/?\Z}
+          REGEX = %r{\A/features/(.*)/clear/?\Z}
+          match { |request| request.path_info =~ REGEX }
 
           def delete
-            feature_name = Rack::Utils.unescape(path_parts[-2])
             feature = flipper[feature_name]
             feature.clear
             json_response({}, 204)
+          end
+
+          private
+
+          def feature_name
+            @feature_name ||= begin
+              match = request.path_info.match(REGEX)
+              match ? match[1] : nil
+            end
           end
         end
       end
