@@ -8,8 +8,8 @@ module Flipper
         DEFAULT_INTERVAL = 10
 
         # Private
-        def self.now_ms
-          Process.clock_gettime(Process::CLOCK_MONOTONIC, :millisecond)
+        def self.now
+          Process.clock_gettime(Process::CLOCK_MONOTONIC, :second)
         end
 
         # Public: The Float or Integer number of seconds between invocations of
@@ -32,7 +32,7 @@ module Flipper
         def call
           return unless time_to_sync?
 
-          @last_sync_at = now_ms
+          @last_sync_at = now
           @synchronizer.call
 
           nil
@@ -41,11 +41,12 @@ module Flipper
         private
 
         def time_to_sync?
-          ((now_ms - @last_sync_at) / 1_000.0) >= @interval
+          seconds_since_last_sync = now - @last_sync_at
+          seconds_since_last_sync >= @interval
         end
 
-        def now_ms
-          self.class.now_ms
+        def now
+          self.class.now
         end
       end
     end
