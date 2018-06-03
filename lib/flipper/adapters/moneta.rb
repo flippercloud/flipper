@@ -31,7 +31,7 @@ module Flipper
       # all the values for the feature.
       def remove(feature)
         moneta[FEATURES_KEY] = features.delete(feature.key.to_s)
-        moneta[key(feature.key)] = default_config
+        moneta.delete(key(feature.key))
         true
       end
 
@@ -46,24 +46,6 @@ module Flipper
       # Returns a Hash of Flipper::Gate#key => value.
       def get(feature)
         default_config.merge(moneta[key(feature.key)].to_h)
-      end
-
-      # Public
-      def get_multi(features)
-        result = {}
-        features.each do |feature|
-          result[feature.key] = get(feature)
-        end
-        result
-      end
-
-      # Public
-      def get_all
-        result = {}
-        moneta[FEATURES_KEY].each do |feature_key|
-          result[feature_key] = get(Feature.new(feature_key, self))
-        end
-        result
       end
 
       # Public: Enables a gate for a given thing.
@@ -97,7 +79,7 @@ module Flipper
       def disable(feature, gate, thing)
         case gate.data_type
         when :boolean
-          moneta[key(feature.key)] = default_config
+          clear(feature)
         when :integer
           result = get(feature)
           result[gate.key] = thing.value.to_s
