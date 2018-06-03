@@ -29,7 +29,7 @@ module Flipper
       end
 
       def self.match?(request)
-        !!match.call(request)
+        match.call(request)
       end
 
       # Internal: Initializes and runs an action for a given request.
