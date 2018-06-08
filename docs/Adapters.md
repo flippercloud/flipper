@@ -9,6 +9,7 @@ I plan on supporting the adapters in the flipper repo. Other adapters are welcom
 * [Cassanity adapter](https://github.com/jnunemaker/flipper-cassanity)
 * [Http adapter](https://github.com/jnunemaker/flipper/blob/master/docs/http)
 * [memory adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb) – great for tests
+* [Moneta adapter](https://github.com/jnunemaker/flipper/blob/master/docs/moneta)
 * [Mongo adapter](https://github.com/jnunemaker/flipper/blob/master/docs/mongo)
 * [PStore adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/pstore.rb) – great for when a local file is enough
 * [read-only adapter](https://github.com/jnunemaker/flipper/blob/master/docs/read-only)
