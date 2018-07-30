@@ -6,7 +6,7 @@ module Flipper
     module V1
       module Actions
         class ActorsGate < Api::Action
-          REGEX = %r{\A/features/(.*)/actors/?\Z}
+          REGEX = %r{\A/features/(?<feature_name>.*)/actors/?\Z}
           match { |request| request.path_info =~ REGEX }
 
           def post
@@ -36,7 +36,7 @@ module Flipper
           def feature_name
             @feature_name ||= begin
               match = request.path_info.match(REGEX)
-              match ? match[1] : nil
+              match ? match[:feature_name] : nil
             end
           end
 

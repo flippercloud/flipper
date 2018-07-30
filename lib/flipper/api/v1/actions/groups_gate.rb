@@ -6,7 +6,7 @@ module Flipper
     module V1
       module Actions
         class GroupsGate < Api::Action
-          REGEX = %r{\A/features/(.*)/groups/?\Z}
+          REGEX = %r{\A/features/(?<feature_name>.*)/groups/?\Z}
           match { |request| request.path_info =~ REGEX }
 
           def post
@@ -50,7 +50,7 @@ module Flipper
           def feature_name
             @feature_name ||= begin
               match = request.path_info.match(REGEX)
-              match ? match[1] : nil
+              match ? match[:feature_name] : nil
             end
           end
 
