@@ -7,7 +7,7 @@ module Flipper
       module Actions
         class ActorsGate < Api::Action
           REGEX = %r{\A/features/(?<feature_name>.*)/actors/?\Z}
-          match { |request| request.path_info =~ REGEX }
+          route REGEX
 
           def post
             ensure_valid_params

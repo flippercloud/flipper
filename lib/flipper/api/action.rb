@@ -17,19 +17,21 @@ module Flipper
 
       # Public: Call this in subclasses so the action knows its route.
       #
-      # block - The Block that determines if this can handle a given request.
+      # regex - The Regexp that this action should run for.
       #
       # Returns nothing.
-      def self.match(&block)
-        if block_given?
-          @match = block
-        else
-          @match || raise("No match block set for #{name}")
-        end
+      def self.route(regex)
+        @route_regex = regex
       end
 
-      def self.match?(request)
-        match.call(request)
+      # Internal: Does this action's route match the path.
+      def self.route_match?(path)
+        path.match(route_regex)
+      end
+
+      # Internal: The regex that matches which routes this action will work for.
+      def self.route_regex
+        @route_regex || raise("#{name}.route is not set")
       end
 
       # Internal: Initializes and runs an action for a given request.
@@ -40,11 +42,6 @@ module Flipper
       # Returns result of Action#run.
       def self.run(flipper, request)
         new(flipper, request).run
-      end
-
-      # Internal: The regex that matches which routes this action will work for.
-      def self.regex
-        @regex || raise("#{name}.route is not set")
       end
 
       # Public: The instance of the Flipper::DSL the middleware was

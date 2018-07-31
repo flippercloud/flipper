@@ -6,9 +6,8 @@ module Flipper
   module UI
     module Actions
       class Features < UI::Action
-        match do |request|
-          request.path_info =~ %r{\A/features/?\Z}
-        end
+        REGEX = %r{\A/features/?\Z}
+        route REGEX
 
         def get
           @page_title = 'Features'

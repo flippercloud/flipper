@@ -7,7 +7,7 @@ module Flipper
       module Actions
         class ClearFeature < Api::Action
           REGEX = %r{\A/features/(?<feature_name>.*)/clear/?\Z}
-          match { |request| request.path_info =~ REGEX }
+          route REGEX
 
           def delete
             feature = flipper[feature_name]

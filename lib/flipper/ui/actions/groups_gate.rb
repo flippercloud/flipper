@@ -6,7 +6,7 @@ module Flipper
     module Actions
       class GroupsGate < UI::Action
         REGEX = %r{\A/features/(?<feature_name>.*)/groups/?\Z}
-        match { |request| request.path_info =~ REGEX }
+        route REGEX
 
         def get
           feature = flipper[feature_name]

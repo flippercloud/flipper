@@ -7,7 +7,7 @@ module Flipper
       module Actions
         class Feature < Api::Action
           REGEX = %r{\A/features/(?<feature_name>.*)/?\Z}
-          match { |request| request.path_info =~ REGEX }
+          route REGEX
 
           def get
             return json_error_response(:feature_not_found) unless feature_exists?(feature_name)

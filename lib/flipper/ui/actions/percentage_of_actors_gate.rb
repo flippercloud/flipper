@@ -6,7 +6,7 @@ module Flipper
     module Actions
       class PercentageOfActorsGate < UI::Action
         REGEX = %r{\A/features/(?<feature_name>.*)/percentage_of_actors/?\Z}
-        match { |request| request.path_info =~ REGEX }
+        route REGEX
 
         def post
           feature = flipper[feature_name]

@@ -5,9 +5,7 @@ module Flipper
   module UI
     module Actions
       class Home < UI::Action
-        match do |request|
-          request.path_info =~ %r{\A/?\Z}
-        end
+        route %r{\A/?\Z}
 
         def get
           redirect_to '/features'

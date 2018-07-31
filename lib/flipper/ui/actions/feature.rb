@@ -6,7 +6,7 @@ module Flipper
     module Actions
       class Feature < UI::Action
         REGEX = %r{\A/features/(?<feature_name>.*)\Z}
-        match { |request| request.path_info =~ REGEX }
+        route REGEX
 
         def get
           @feature = Decorators::Feature.new(flipper[feature_name])
