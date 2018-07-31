@@ -6,8 +6,9 @@ module Flipper
     module V1
       module Actions
         class BooleanGate < Api::Action
-          REGEX = %r{\A/features/(?<feature_name>.*)/boolean/?\Z}
-          route REGEX
+          include FeatureNameFromRoute
+
+          route %r{\A/features/(?<feature_name>.*)/boolean/?\Z}
 
           def post
             feature = flipper[feature_name]
@@ -21,15 +22,6 @@ module Flipper
             feature.disable
             decorated_feature = Decorators::Feature.new(feature)
             json_response(decorated_feature.as_json, 200)
-          end
-
-          private
-
-          def feature_name
-            @feature_name ||= begin
-              match = request.path_info.match(REGEX)
-              match ? match[:feature_name] : nil
-            end
           end
         end
       end

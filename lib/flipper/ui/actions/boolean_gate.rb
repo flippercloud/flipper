@@ -5,8 +5,9 @@ module Flipper
   module UI
     module Actions
       class BooleanGate < UI::Action
-        REGEX = %r{\A/features/(?<feature_name>.*)/boolean/?\Z}
-        route REGEX
+        include FeatureNameFromRoute
+
+        route %r{\A/features/(?<feature_name>.*)/boolean/?\Z}
 
         def post
           feature = flipper[feature_name]
@@ -19,15 +20,6 @@ module Flipper
           end
 
           redirect_to "/features/#{@feature.key}"
-        end
-
-        private
-
-        def feature_name
-          @feature_name ||= begin
-            match = request.path_info.match(REGEX)
-            match ? match[:feature_name] : nil
-          end
         end
       end
     end

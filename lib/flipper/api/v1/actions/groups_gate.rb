@@ -6,8 +6,9 @@ module Flipper
     module V1
       module Actions
         class GroupsGate < Api::Action
-          REGEX = %r{\A/features/(?<feature_name>.*)/groups/?\Z}
-          route REGEX
+          include FeatureNameFromRoute
+
+          route %r{\A/features/(?<feature_name>.*)/groups/?\Z}
 
           def post
             ensure_valid_params
@@ -45,13 +46,6 @@ module Flipper
 
           def disallow_unregistered_groups?
             !allow_unregistered_groups?
-          end
-
-          def feature_name
-            @feature_name ||= begin
-              match = request.path_info.match(REGEX)
-              match ? match[:feature_name] : nil
-            end
           end
 
           def group_name

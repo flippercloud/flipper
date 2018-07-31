@@ -6,8 +6,7 @@ module Flipper
     module V1
       module Actions
         class Features < Api::Action
-          REGEX = %r{\A/features/?\Z}
-          route REGEX
+          route %r{\A/features/?\Z}
 
           def get
             keys = params['keys']

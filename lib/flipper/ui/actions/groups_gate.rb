@@ -5,8 +5,9 @@ module Flipper
   module UI
     module Actions
       class GroupsGate < UI::Action
-        REGEX = %r{\A/features/(?<feature_name>.*)/groups/?\Z}
-        route REGEX
+        include FeatureNameFromRoute
+
+        route %r{\A/features/(?<feature_name>.*)/groups/?\Z}
 
         def get
           feature = flipper[feature_name]
@@ -36,15 +37,6 @@ module Flipper
           else
             error = Rack::Utils.escape("The group named #{value.inspect} has not been registered.")
             redirect_to("/features/#{feature.key}/groups?error=#{error}")
-          end
-        end
-
-        private
-
-        def feature_name
-          @feature_name ||= begin
-            match = request.path_info.match(REGEX)
-            match ? match[:feature_name] : nil
           end
         end
       end

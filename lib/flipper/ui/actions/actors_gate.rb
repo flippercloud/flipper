@@ -6,8 +6,9 @@ module Flipper
   module UI
     module Actions
       class ActorsGate < UI::Action
-        REGEX = %r{\A/features/(?<feature_name>.*)/actors/?\Z}
-        route REGEX
+        include FeatureNameFromRoute
+
+        route %r{\A/features/(?<feature_name>.*)/actors/?\Z}
 
         def get
           feature = flipper[feature_name]
@@ -40,15 +41,6 @@ module Flipper
           end
 
           redirect_to("/features/#{feature.key}")
-        end
-
-        private
-
-        def feature_name
-          @feature_name ||= begin
-            match = request.path_info.match(REGEX)
-            match ? match[:feature_name] : nil
-          end
         end
       end
     end

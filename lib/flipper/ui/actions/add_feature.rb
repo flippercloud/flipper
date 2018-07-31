@@ -5,8 +5,7 @@ module Flipper
   module UI
     module Actions
       class AddFeature < UI::Action
-        REGEX = %r{\A/features/new/?\Z}
-        route REGEX
+        route %r{\A/features/new/?\Z}
 
         def get
           unless Flipper::UI.configuration.feature_creation_enabled

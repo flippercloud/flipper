@@ -6,6 +6,16 @@ require 'json'
 module Flipper
   module Api
     class Action
+      module FeatureNameFromRoute
+        def feature_name
+          @feature_name ||= begin
+            match = request.path_info.match(self.class.route_regex)
+            match ? match[:feature_name] : nil
+          end
+        end
+        private :feature_name
+      end
+
       extend Forwardable
 
       VALID_REQUEST_METHOD_NAMES = Set.new([
