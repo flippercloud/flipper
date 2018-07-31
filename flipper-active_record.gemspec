@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 require File.expand_path('../lib/flipper/version', __FILE__)
+require File.expand_path('../lib/flipper/metadata', __FILE__)
 
 flipper_active_record_files = lambda do |file|
   file =~ /active_record/
@@ -22,6 +23,7 @@ Gem::Specification.new do |gem|
   gem.name          = 'flipper-active_record'
   gem.require_paths = ['lib']
   gem.version       = Flipper::VERSION
+  gem.metadata      = Flipper::METADATA
 
   gem.add_dependency 'flipper', "~> #{Flipper::VERSION}"
   gem.add_dependency 'activerecord', '>= 3.2', '< 6'

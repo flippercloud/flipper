@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 require File.expand_path('../lib/flipper/version', __FILE__)
+require File.expand_path('../lib/flipper/metadata', __FILE__)
 
 plugin_files = []
 plugin_test_files = []
@@ -34,4 +35,5 @@ Gem::Specification.new do |gem|
   gem.name          = 'flipper'
   gem.require_paths = ['lib']
   gem.version       = Flipper::VERSION
+  gem.metadata      = Flipper::METADATA
 end

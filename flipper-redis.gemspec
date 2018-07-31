@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 require File.expand_path('../lib/flipper/version', __FILE__)
+require File.expand_path('../lib/flipper/metadata', __FILE__)
 
 flipper_redis_files = lambda do |file|
   file =~ /redis/
@@ -18,6 +19,7 @@ Gem::Specification.new do |gem|
   gem.name          = 'flipper-redis'
   gem.require_paths = ['lib']
   gem.version       = Flipper::VERSION
+  gem.metadata      = Flipper::METADATA
 
   gem.add_dependency 'flipper', "~> #{Flipper::VERSION}"
   gem.add_dependency 'redis', '>= 2.2', '< 4.1.0'
