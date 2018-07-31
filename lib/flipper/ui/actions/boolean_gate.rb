@@ -5,11 +5,12 @@ module Flipper
   module UI
     module Actions
       class BooleanGate < UI::Action
-        route %r{features/[^/]*/boolean/?\Z}
+        include FeatureNameFromRoute
+
+        route %r{\A/features/(?<feature_name>.*)/boolean/?\Z}
 
         def post
-          feature_name = Rack::Utils.unescape(request.path.split('/')[-2])
-          feature = flipper[feature_name.to_sym]
+          feature = flipper[feature_name]
           @feature = Decorators::Feature.new(feature)
 
           if params['action'] == 'Enable'

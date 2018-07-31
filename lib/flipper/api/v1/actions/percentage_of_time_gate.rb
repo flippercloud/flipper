@@ -6,7 +6,9 @@ module Flipper
     module V1
       module Actions
         class PercentageOfTimeGate < Api::Action
-          route %r{features/[^/]*/percentage_of_time/?\Z}
+          include FeatureNameFromRoute
+
+          route %r{\A/features/(?<feature_name>.*)/percentage_of_time/?\Z}
 
           def post
             if percentage < 0 || percentage > 100
@@ -28,10 +30,6 @@ module Flipper
           end
 
           private
-
-          def feature_name
-            @feature_name ||= Rack::Utils.unescape(path_parts[-2])
-          end
 
           def percentage
             @percentage ||= begin

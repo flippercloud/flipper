@@ -6,7 +6,9 @@ module Flipper
     module V1
       module Actions
         class ActorsGate < Api::Action
-          route %r{features/[^/]*/actors/?\Z}
+          include FeatureNameFromRoute
+
+          route %r{\A/features/(?<feature_name>.*)/actors/?\Z}
 
           def post
             ensure_valid_params
@@ -30,10 +32,6 @@ module Flipper
 
           def ensure_valid_params
             json_error_response(:flipper_id_invalid) if flipper_id.nil?
-          end
-
-          def feature_name
-            @feature_name ||= Rack::Utils.unescape(path_parts[-2])
           end
 
           def flipper_id

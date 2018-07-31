@@ -6,7 +6,9 @@ module Flipper
     module V1
       module Actions
         class GroupsGate < Api::Action
-          route %r{features/[^/]*/groups/?\Z}
+          include FeatureNameFromRoute
+
+          route %r{\A/features/(?<feature_name>.*)/groups/?\Z}
 
           def post
             ensure_valid_params
@@ -44,10 +46,6 @@ module Flipper
 
           def disallow_unregistered_groups?
             !allow_unregistered_groups?
-          end
-
-          def feature_name
-            @feature_name ||= Rack::Utils.unescape(path_parts[-2])
           end
 
           def group_name

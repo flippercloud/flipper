@@ -5,11 +5,12 @@ module Flipper
   module UI
     module Actions
       class GroupsGate < UI::Action
-        route %r{features/[^/]*/groups/?\Z}
+        include FeatureNameFromRoute
+
+        route %r{\A/features/(?<feature_name>.*)/groups/?\Z}
 
         def get
-          feature_name = Rack::Utils.unescape(request.path.split('/')[-2])
-          feature = flipper[feature_name.to_sym]
+          feature = flipper[feature_name]
           @feature = Decorators::Feature.new(feature)
 
           breadcrumb 'Home', '/'
@@ -21,8 +22,7 @@ module Flipper
         end
 
         def post
-          feature_name = Rack::Utils.unescape(request.path.split('/')[-2])
-          feature = flipper[feature_name.to_sym]
+          feature = flipper[feature_name]
           value = params['value'].to_s.strip
 
           if Flipper.group_exists?(value)

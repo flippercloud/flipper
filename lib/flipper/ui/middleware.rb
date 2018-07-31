@@ -17,13 +17,12 @@ module Flipper
 
         # UI
         @action_collection.add UI::Actions::AddFeature
-        @action_collection.add UI::Actions::Feature
         @action_collection.add UI::Actions::ActorsGate
         @action_collection.add UI::Actions::GroupsGate
         @action_collection.add UI::Actions::BooleanGate
         @action_collection.add UI::Actions::PercentageOfTimeGate
         @action_collection.add UI::Actions::PercentageOfActorsGate
-        @action_collection.add UI::Actions::Gate
+        @action_collection.add UI::Actions::Feature
         @action_collection.add UI::Actions::Features
 
         # Static Assets/Files

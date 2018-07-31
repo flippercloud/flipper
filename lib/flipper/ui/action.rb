@@ -6,6 +6,16 @@ require 'json'
 module Flipper
   module UI
     class Action
+      module FeatureNameFromRoute
+        def feature_name
+          @feature_name ||= begin
+            match = request.path_info.match(self.class.route_regex)
+            match ? match[:feature_name] : nil
+          end
+        end
+        private :feature_name
+      end
+
       extend Forwardable
 
       VALID_REQUEST_METHOD_NAMES = Set.new([
@@ -21,7 +31,17 @@ module Flipper
       #
       # Returns nothing.
       def self.route(regex)
-        @regex = regex
+        @route_regex = regex
+      end
+
+      # Internal: Does this action's route match the path.
+      def self.route_match?(path)
+        path.match(route_regex)
+      end
+
+      # Internal: The regex that matches which routes this action will work for.
+      def self.route_regex
+        @route_regex || raise("#{name}.route is not set")
       end
 
       # Internal: Initializes and runs an action for a given request.
@@ -32,11 +52,6 @@ module Flipper
       # Returns result of Action#run.
       def self.run(flipper, request)
         new(flipper, request).run
-      end
-
-      # Internal: The regex that matches which routes this action will work for.
-      def self.regex
-        @regex || raise("#{name}.route is not set")
       end
 
       # Private: The path to the views folder.

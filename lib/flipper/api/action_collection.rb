@@ -1,5 +1,6 @@
 module Flipper
   module Api
+    # Internal: Used to detect the action that should be used in the middleware.
     class ActionCollection
       def initialize
         @action_classes = []
@@ -11,7 +12,7 @@ module Flipper
 
       def action_for_request(request)
         @action_classes.detect do |action_class|
-          request.path_info =~ action_class.regex
+          action_class.route_match?(request.path_info)
         end
       end
     end

@@ -4,6 +4,22 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
   let(:app) { build_api(flipper) }
 
   describe 'enable' do
+    context 'for feature with slash in name' do
+      before do
+        flipper["my/feature"].disable
+        post '/features/my/feature/percentage_of_actors', percentage: '10'
+      end
+
+      it 'enables gate for feature' do
+        expect(flipper["my/feature"].enabled_gate_names).to include(:percentage_of_actors)
+      end
+
+      it 'returns decorated feature with gate enabled for 10 percent of actors' do
+        gate = json_response['gates'].find { |gate| gate['name'] == 'percentage_of_actors' }
+        expect(gate['value']).to eq('10')
+      end
+    end
+
     context 'url-encoded request' do
       before do
         flipper[:my_feature].disable

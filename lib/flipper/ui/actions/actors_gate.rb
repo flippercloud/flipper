@@ -6,11 +6,12 @@ module Flipper
   module UI
     module Actions
       class ActorsGate < UI::Action
-        route %r{features/[^/]*/actors/?\Z}
+        include FeatureNameFromRoute
+
+        route %r{\A/features/(?<feature_name>.*)/actors/?\Z}
 
         def get
-          feature_name = Rack::Utils.unescape(request.path.split('/')[-2])
-          feature = flipper[feature_name.to_sym]
+          feature = flipper[feature_name]
           @feature = Decorators::Feature.new(feature)
 
           breadcrumb 'Home', '/'
@@ -22,8 +23,7 @@ module Flipper
         end
 
         def post
-          feature_name = Rack::Utils.unescape(request.path.split('/')[-2])
-          feature = flipper[feature_name.to_sym]
+          feature = flipper[feature_name]
           value = params['value'].to_s.strip
 
           if Util.blank?(value)

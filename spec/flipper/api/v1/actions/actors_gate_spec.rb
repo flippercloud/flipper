@@ -42,6 +42,24 @@ RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
     end
   end
 
+  describe 'enable feature with slash in name' do
+    before do
+      flipper[:my_feature].disable_actor(actor)
+      post '/features/my/feature/actors', flipper_id: actor.flipper_id
+    end
+
+    it 'enables feature for actor' do
+      expect(last_response.status).to eq(200)
+      expect(flipper["my/feature"].enabled?(actor)).to be_truthy
+      expect(flipper["my/feature"].enabled_gate_names).to eq([:actor])
+    end
+
+    it 'returns decorated feature with actor enabled' do
+      gate = json_response['gates'].find { |gate| gate['key'] == 'actors' }
+      expect(gate['value']).to eq(['1'])
+    end
+  end
+
   describe 'enable missing flipper_id parameter' do
     before do
       flipper[:my_feature].enable
