@@ -76,6 +76,13 @@ module Flipper
       instrument(:add) { adapter.add(self) }
     end
 
+    # Public: Does this feature exist in the adapter.
+    #
+    # Returns true if exists in adapter else false.
+    def exist?
+      instrument(:exist?) { adapter.features.include?(key) }
+    end
+
     # Public: Removes this feature.
     #
     # Returns the result of Adapter#remove.

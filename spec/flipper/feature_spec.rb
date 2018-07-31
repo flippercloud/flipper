@@ -96,6 +96,17 @@ RSpec.describe Flipper::Feature do
     end
   end
 
+  describe '#exist?' do
+    it 'returns true if feature is added in adapter' do
+      subject.add
+      expect(subject.exist?).to be(true)
+    end
+
+    it 'returns false if feature is NOT added in adapter' do
+      expect(subject.exist?).to be(false)
+    end
+  end
+
   describe '#remove' do
     it 'removes feature from adapter' do
       adapter.add(subject)
@@ -228,6 +239,17 @@ RSpec.describe Flipper::Feature do
       expect(event.name).to eq('feature_operation.flipper')
       expect(event.payload[:feature_name]).to eq(:search)
       expect(event.payload[:operation]).to eq(:add)
+      expect(event.payload[:result]).not_to be_nil
+    end
+
+    it 'is recorded for exist?' do
+      subject.exist?
+
+      event = instrumenter.events.last
+      expect(event).not_to be_nil
+      expect(event.name).to eq('feature_operation.flipper')
+      expect(event.payload[:feature_name]).to eq(:search)
+      expect(event.payload[:operation]).to eq(:exist?)
       expect(event.payload[:result]).not_to be_nil
     end
 

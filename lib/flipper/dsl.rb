@@ -151,6 +151,15 @@ module Flipper
       feature(name).add
     end
 
+    # Public: Has a feature been added in the adapter.
+    #
+    # name - The String or Symbol name of the feature.
+    #
+    # Returns true if added else false.
+    def exist?(name)
+      feature(name).exist?
+    end
+
     # Public: Remove a feature.
     #
     # name - The String or Symbol name of the feature.

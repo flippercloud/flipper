@@ -312,6 +312,17 @@ RSpec.describe Flipper::DSL do
     end
   end
 
+  describe '#exist?' do
+    it 'returns true if the feature is added in adapter' do
+      subject.add(:stats)
+      expect(subject.exist?(:stats)).to be(true)
+    end
+
+    it 'returns false if the feature is NOT added in adapter' do
+      expect(subject.exist?(:stats)).to be(false)
+    end
+  end
+
   describe '#remove' do
     it 'removes the feature' do
       subject.adapter.add(subject[:stats])
