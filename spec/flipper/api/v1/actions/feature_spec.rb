@@ -171,11 +171,6 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
               'value' => 'true',
             },
             {
-              'key' => 'groups',
-              'name' => 'group',
-              'value' => [],
-            },
-            {
               'key' => 'actors',
               'name' => 'actor',
               'value' => [],
@@ -189,6 +184,11 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
               'key' => 'percentage_of_time',
               'name' => 'percentage_of_time',
               'value' => nil,
+            },
+            {
+              'key' => 'groups',
+              'name' => 'group',
+              'value' => [],
             },
           ],
         }
