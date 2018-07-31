@@ -1,4 +1,15 @@
-## master (to be 0.15.0)
+## 0.16.0
+
+### Bug Fixes
+
+* Support slashes in feature names (https://github.com/jnunemaker/flipper/pull/362).
+
+### Additions/Changes
+
+* Re-order gates for improved performance in some cases (https://github.com/jnunemaker/flipper/pull/370).
+* Add Feature#exist?, DSL#exist? and Flipper#exist? (https://github.com/jnunemaker/flipper/pull/371).
+
+## 0.15.0
 
 * Move Flipper::UI configuration options to Flipper::UI::Configuration (https://github.com/jnunemaker/flipper/pull/345).
 * Bug fix in adapter synchronizing and switched DSL#import to use Synchronizer (https://github.com/jnunemaker/flipper/pull/347).
