@@ -335,10 +335,10 @@ module Flipper
     def gates
       @gates ||= [
         Gates::Boolean.new,
-        Gates::Group.new,
         Gates::Actor.new,
         Gates::PercentageOfActors.new,
         Gates::PercentageOfTime.new,
+        Gates::Group.new,
       ]
     end
 
