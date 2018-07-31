@@ -187,6 +187,10 @@ RSpec.describe Flipper do
       expect(described_class.add(:search)).to eq(described_class.instance.add(:search))
     end
 
+    it 'delegates exist? to instance' do
+      expect(described_class.exist?(:search)).to eq(described_class.instance.exist?(:search))
+    end
+
     it 'delegates remove to instance' do
       expect(described_class.remove(:search)).to eq(described_class.instance.remove(:search))
     end
