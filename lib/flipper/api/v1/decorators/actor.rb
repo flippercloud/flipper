@@ -4,24 +4,32 @@ module Flipper
       module Decorators
         class Actor < SimpleDelegator
           # Public: the actor and feature.
-          attr_reader :actor, :feature
+          attr_reader :actor, :features
 
-          def initialize(actor, feature)
+          def initialize(actor, features)
             @actor = actor
-            @feature = feature
+            @features = features
           end
 
           def as_json
             {
               'flipper_id' => actor.flipper_id,
-              'feature' => feature,
-              'enabled' => enabled?,
+              'features' => features_data,
             }
           end
 
           private
 
-          def enabled?
+          def features_data
+            features.map do |feature|
+              {
+                'feature' => feature,
+                'enabled' => enabled?(feature),
+              }
+            end
+          end
+
+          def enabled?(feature)
             feature.enabled?(actor)
           end
         end
