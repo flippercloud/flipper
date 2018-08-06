@@ -23,7 +23,7 @@ module Flipper
           def features_data
             features.map do |feature|
               {
-                'feature' => feature,
+                'feature' => feature.name,
                 'enabled' => enabled?(feature),
               }
             end
