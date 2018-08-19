@@ -24,13 +24,9 @@ module Flipper
             features.map do |feature|
               {
                 'feature' => feature.name,
-                'enabled' => enabled?(feature),
+                'enabled' => feature.enabled?(actor),
               }
             end
-          end
-
-          def enabled?(feature)
-            feature.enabled?(actor)
           end
         end
       end
