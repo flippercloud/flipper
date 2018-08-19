@@ -15,11 +15,7 @@ module Flipper
                          if names.empty?
                            []
                          else
-                           existing_feature_names = names.keep_if do |feature_name|
-                             feature_exists?(feature_name)
-                           end
-
-                           flipper.preload(existing_feature_names)
+                           flipper.preload(names)
                          end
                        else
                          flipper.features
@@ -31,10 +27,6 @@ module Flipper
           end
 
           private
-
-          def feature_exists?(feature_name)
-            flipper.features.map(&:key).include?(feature_name)
-          end
 
           def flipper_id
             match = request.path_info.match(self.class.route_regex)

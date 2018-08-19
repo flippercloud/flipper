@@ -82,6 +82,9 @@ RSpec.describe Flipper::Api::V1::Actions::Actors do
             'my_feature_3' => {
               'enabled' => true,
             },
+            'not_a_feature' => {
+              'enabled' => false,
+            },
           },
         }
 
