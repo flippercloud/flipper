@@ -3,7 +3,7 @@ module Flipper
     module V1
       module Decorators
         class Actor < SimpleDelegator
-          # Public: the actor and feature.
+          # Public: the actor and features.
           attr_reader :actor, :features
 
           def initialize(actor, features)
@@ -21,11 +21,11 @@ module Flipper
           private
 
           def features_data
-            features.map do |feature|
-              {
-                'feature' => feature.name,
+            features.each_with_object({}) do |feature, features_hash|
+              features_hash[feature.name] = {
                 'enabled' => feature.enabled?(actor),
               }
+              features_hash
             end
           end
         end

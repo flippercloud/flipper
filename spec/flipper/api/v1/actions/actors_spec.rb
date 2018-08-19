@@ -23,20 +23,17 @@ RSpec.describe Flipper::Api::V1::Actions::Actors do
       it 'returns all features' do
         expected_response = {
           'flipper_id' => 'User123',
-          'features' => [
-            {
-              'feature' => 'my_feature_1',
+          'features' => {
+            'my_feature_1' => {
               'enabled' => true,
             },
-            {
-              'feature' => 'my_feature_2',
+            'my_feature_2' => {
               'enabled' => false,
             },
-            {
-              'feature' => 'my_feature_3',
+            'my_feature_3' => {
               'enabled' => true,
             },
-          ],
+          },
         }
 
         expect(json_response).to eq(expected_response)
@@ -55,16 +52,14 @@ RSpec.describe Flipper::Api::V1::Actions::Actors do
       it 'returns all specified features' do
         expected_response = {
           'flipper_id' => 'User123',
-          'features' => [
-            {
-              'feature' => 'my_feature_2',
+          'features' => {
+            'my_feature_2' => {
               'enabled' => false,
             },
-            {
-              'feature' => 'my_feature_3',
+            'my_feature_3' => {
               'enabled' => true,
             },
-          ],
+          },
         }
 
         expect(json_response).to eq(expected_response)
@@ -73,22 +68,21 @@ RSpec.describe Flipper::Api::V1::Actions::Actors do
 
     context 'when non-existent features are specified' do
       before do
-        get "/actors/#{actor.flipper_id}", keys: "my_feature_2,not_a_feature"
+        get "/actors/#{actor.flipper_id}", keys: "my_feature_3,not_a_feature"
       end
 
       it 'responds with success' do
         expect(last_response.status).to eq(200)
       end
 
-      it 'ignores the non-existent features' do
+      it 'returns false for a non-existent feature' do
         expected_response = {
           'flipper_id' => 'User123',
-          'features' => [
-            {
-              'feature' => 'my_feature_2',
-              'enabled' => false,
+          'features' => {
+            'my_feature_3' => {
+              'enabled' => true,
             },
-          ],
+          },
         }
 
         expect(json_response).to eq(expected_response)
