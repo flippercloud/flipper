@@ -1,3 +1,9 @@
+## master
+
+### Additions/Changes
+
+* Add actors API endpoint (https://github.com/jnunemaker/flipper/pull/372).
+
 ## 0.16.0
 
 ### Bug Fixes
