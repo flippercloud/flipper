@@ -3,6 +3,7 @@
 ### Additions/Changes
 
 * Add actors API endpoint (https://github.com/jnunemaker/flipper/pull/372).
+* Fix rack body proxy require for those using flipper without rack  (https://github.com/jnunemaker/flipper/pull/376).
 
 ## 0.16.0
 
