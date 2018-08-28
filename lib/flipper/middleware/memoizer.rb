@@ -1,5 +1,3 @@
-require 'rack/body_proxy'
-
 module Flipper
   module Middleware
     class Memoizer
