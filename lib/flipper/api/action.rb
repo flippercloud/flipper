@@ -10,7 +10,7 @@ module Flipper
         def feature_name
           @feature_name ||= begin
             match = request.path_info.match(self.class.route_regex)
-            match ? match[:feature_name] : nil
+            match ? Rack::Utils.unescape(match[:feature_name]) : nil
           end
         end
         private :feature_name
