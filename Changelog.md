@@ -4,6 +4,7 @@
 
 * Add actors API endpoint (https://github.com/jnunemaker/flipper/pull/372).
 * Fix rack body proxy require for those using flipper without rack  (https://github.com/jnunemaker/flipper/pull/376).
+* Unescapes feature_name in FeatureNameFromRoute (https://github.com/jnunemaker/flipper/pull/377).
 
 ## 0.16.0
 
