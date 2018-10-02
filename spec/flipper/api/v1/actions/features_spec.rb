@@ -10,7 +10,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
       before do
         flipper[:my_feature].enable
         flipper[:my_feature].enable(admin)
-        get 'api/v1/features'
+        get '/features'
       end
 
       it 'responds with correct attributes' do
@@ -24,11 +24,6 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
                   'key' => 'boolean',
                   'name' => 'boolean',
                   'value' => 'true',
-                },
-                {
-                  'key' => 'groups',
-                  'name' => 'group',
-                  'value' => [],
                 },
                 {
                   'key' => 'actors',
@@ -45,6 +40,11 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
                   'name' => 'percentage_of_time',
                   'value' => nil,
                 },
+                {
+                  'key' => 'groups',
+                  'name' => 'group',
+                  'value' => [],
+                },
               ],
             },
           ],
@@ -60,7 +60,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
         flipper[:issues].enable
         flipper[:search].enable
         flipper[:stats].disable
-        get 'api/v1/features', 'keys' => 'search,stats'
+        get '/features', 'keys' => 'search,stats'
       end
 
       it 'responds with correct attributes' do
@@ -70,9 +70,23 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
       end
     end
 
+    context 'with keys that are not existing features' do
+      before do
+        flipper[:search].disable
+        flipper[:stats].disable
+        get '/features', 'keys' => 'search,stats,not_a_feature,another_feature_that_does_not_exist'
+      end
+
+      it 'only returns features that exist' do
+        expect(last_response.status).to eq(200)
+        keys = json_response.fetch('features').map { |feature| feature.fetch('key') }.sort
+        expect(keys).to eq(%w(search stats))
+      end
+    end
+
     context 'with no flipper features' do
       before do
-        get 'api/v1/features'
+        get '/features'
       end
 
       it 'returns empty array for features key' do
@@ -88,7 +102,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
   describe 'post' do
     context 'succesful request' do
       before do
-        post 'api/v1/features', name: 'my_feature'
+        post '/features', name: 'my_feature'
       end
 
       it 'responds 200 ' do
@@ -107,11 +121,6 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
               'value' => nil,
             },
             {
-              'key' => 'groups',
-              'name' => 'group',
-              'value' => [],
-            },
-            {
               'key' => 'actors',
               'name' => 'actor',
               'value' => [],
@@ -125,6 +134,11 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
               'key' => 'percentage_of_time',
               'name' => 'percentage_of_time',
               'value' => nil,
+            },
+            {
+              'key' => 'groups',
+              'name' => 'group',
+              'value' => [],
             },
           ],
         }
@@ -142,7 +156,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
 
     context 'bad request' do
       before do
-        post 'api/v1/features'
+        post '/features'
       end
 
       it 'returns correct status code' do

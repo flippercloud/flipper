@@ -9,11 +9,7 @@ RSpec.describe Flipper::UI::Actions::Features do
     end
   end
   let(:session) do
-    if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
-      { csrf: token }
-    else
-      { '_csrf_token' => token }
-    end
+    { :csrf => token, 'csrf' => token, '_csrf_token' => token }
   end
 
   describe 'GET /features' do
@@ -37,15 +33,15 @@ RSpec.describe Flipper::UI::Actions::Features do
     let(:feature_name) { 'notifications_next' }
 
     before do
-      @original_feature_creation_enabled = Flipper::UI.feature_creation_enabled
-      Flipper::UI.feature_creation_enabled = feature_creation_enabled
+      @original_feature_creation_enabled = Flipper::UI.configuration.feature_creation_enabled
+      Flipper::UI.configuration.feature_creation_enabled = feature_creation_enabled
       post '/features',
            { 'value' => feature_name, 'authenticity_token' => token },
            'rack.session' => session
     end
 
     after do
-      Flipper::UI.feature_creation_enabled = @original_feature_creation_enabled
+      Flipper::UI.configuration.feature_creation_enabled = @original_feature_creation_enabled
     end
 
     context 'feature_creation_enabled set to true' do

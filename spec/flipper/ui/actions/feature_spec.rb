@@ -9,11 +9,7 @@ RSpec.describe Flipper::UI::Actions::Feature do
     end
   end
   let(:session) do
-    if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
-      { csrf: token }
-    else
-      { '_csrf_token' => token }
-    end
+    { :csrf => token, 'csrf' => token, '_csrf_token' => token }
   end
 
   describe 'DELETE /features/:feature' do
@@ -31,6 +27,26 @@ RSpec.describe Flipper::UI::Actions::Feature do
     it 'redirects to features' do
       expect(last_response.status).to be(302)
       expect(last_response.headers['Location']).to eq('/features')
+    end
+
+    context 'when feature_removal_enabled is set to false' do
+      around do |example|
+        begin
+          @original_feature_removal_enabled = Flipper::UI.configuration.feature_removal_enabled
+          Flipper::UI.configuration.feature_removal_enabled = false
+          example.run
+        ensure
+          Flipper::UI.configuration.feature_removal_enabled = @original_feature_removal_enabled
+        end
+      end
+
+      it 'returns with 403 status' do
+        expect(last_response.status).to be(403)
+      end
+
+      it 'renders feature removal disabled template' do
+        expect(last_response.body).to include('Feature removal from the UI is disabled')
+      end
     end
   end
 
@@ -63,6 +79,46 @@ RSpec.describe Flipper::UI::Actions::Feature do
 
     it 'renders template' do
       expect(last_response.body).to include('search')
+      expect(last_response.body).to include('Enable')
+      expect(last_response.body).to include('Disable')
+      expect(last_response.body).to include('Actors')
+      expect(last_response.body).to include('Groups')
+      expect(last_response.body).to include('Percentage of Time')
+      expect(last_response.body).to include('Percentage of Actors')
+    end
+  end
+
+  describe 'GET /features/:feature with _features in feature name' do
+    before do
+      get '/features/search_features'
+    end
+
+    it 'responds with success' do
+      expect(last_response.status).to be(200)
+    end
+
+    it 'renders template' do
+      expect(last_response.body).to include('search_features')
+      expect(last_response.body).to include('Enable')
+      expect(last_response.body).to include('Disable')
+      expect(last_response.body).to include('Actors')
+      expect(last_response.body).to include('Groups')
+      expect(last_response.body).to include('Percentage of Time')
+      expect(last_response.body).to include('Percentage of Actors')
+    end
+  end
+
+  describe 'GET /features/:feature with slash in feature name' do
+    before do
+      get '/features/a/b'
+    end
+
+    it 'responds with success' do
+      expect(last_response.status).to be(200)
+    end
+
+    it 'renders template' do
+      expect(last_response.body).to include('a/b')
       expect(last_response.body).to include('Enable')
       expect(last_response.body).to include('Disable')
       expect(last_response.body).to include('Actors')

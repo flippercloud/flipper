@@ -1,5 +1,4 @@
 require 'helper'
-require 'flipper/adapters/memory'
 require 'flipper/adapters/instrumented'
 require 'flipper/instrumenters/memory'
 require 'flipper/spec/shared_adapter_specs'
@@ -45,6 +44,20 @@ RSpec.describe Flipper::Adapters::Instrumented do
       expect(event.payload[:operation]).to eq(:get)
       expect(event.payload[:adapter_name]).to eq(:memory)
       expect(event.payload[:feature_name]).to eq(:stats)
+      expect(event.payload[:result]).to be(result)
+    end
+  end
+
+  describe '#get_multi' do
+    it 'records instrumentation' do
+      result = subject.get_multi([feature])
+
+      event = instrumenter.events.last
+      expect(event).not_to be_nil
+      expect(event.name).to eq('adapter_operation.flipper')
+      expect(event.payload[:operation]).to eq(:get_multi)
+      expect(event.payload[:adapter_name]).to eq(:memory)
+      expect(event.payload[:feature_names]).to eq([:stats])
       expect(event.payload[:result]).to be(result)
     end
   end

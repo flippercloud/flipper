@@ -5,7 +5,6 @@ module Flipper
       def setup
         super
         @flipper = Flipper.new(@adapter)
-        @actor_class = Struct.new(:flipper_id)
         @feature = @flipper[:stats]
         @boolean_gate = @feature.gate(:boolean)
         @group_gate = @feature.gate(:group)
@@ -50,7 +49,7 @@ module Flipper
       end
 
       def test_fully_disables_all_enabled_things_when_boolean_gate_disabled
-        actor22 = @actor_class.new('22')
+        actor22 = Flipper::Actor.new('22')
         assert_equal true, @adapter.enable(@feature, @boolean_gate, @flipper.boolean)
         assert_equal true, @adapter.enable(@feature, @group_gate, @flipper.group(:admins))
         assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor22))
@@ -77,8 +76,8 @@ module Flipper
       end
 
       def test_can_enable_disable_and_get_value_for_an_actor_gate
-        actor22 = @actor_class.new('22')
-        actor_asdf = @actor_class.new('asdf')
+        actor22 = Flipper::Actor.new('22')
+        actor_asdf = Flipper::Actor.new('asdf')
 
         assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor22))
         assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor_asdf))
@@ -155,7 +154,7 @@ module Flipper
 
       def test_converts_the_actor_value_to_a_string
         assert_equal true,
-                     @adapter.enable(@feature, @actor_gate, @flipper.actor(@actor_class.new(22)))
+                     @adapter.enable(@feature, @actor_gate, @flipper.actor(Flipper::Actor.new(22)))
         result = @adapter.get(@feature)
         assert_equal Set['22'], result[:actors]
       end
@@ -195,7 +194,7 @@ module Flipper
       end
 
       def test_clears_all_the_gate_values_for_the_feature_on_remove
-        actor22 = @actor_class.new('22')
+        actor22 = Flipper::Actor.new('22')
         assert_equal true, @adapter.enable(@feature, @boolean_gate, @flipper.boolean)
         assert_equal true, @adapter.enable(@feature, @group_gate, @flipper.group(:admins))
         assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor22))
@@ -208,7 +207,7 @@ module Flipper
       end
 
       def test_can_clear_all_the_gate_values_for_a_feature
-        actor22 = @actor_class.new('22')
+        actor22 = Flipper::Actor.new('22')
         @adapter.add(@feature)
         assert_includes @adapter.features, @feature.key
 
@@ -235,10 +234,48 @@ module Flipper
         result = @adapter.get_multi([@flipper[:stats], @flipper[:search], @flipper[:other]])
         assert_instance_of Hash, result
 
-        stats, search, other = result.values
+        stats = result["stats"]
+        search = result["search"]
+        other = result["other"]
         assert_equal @adapter.default_config.merge(boolean: 'true'), stats
         assert_equal @adapter.default_config, search
         assert_equal @adapter.default_config, other
+      end
+
+      def test_can_get_all_features
+        assert @adapter.add(@flipper[:stats])
+        assert @adapter.enable(@flipper[:stats], @boolean_gate, @flipper.boolean)
+        assert @adapter.add(@flipper[:search])
+
+        result = @adapter.get_all
+        assert_instance_of Hash, result
+
+        stats = result["stats"]
+        search = result["search"]
+        assert_equal @adapter.default_config.merge(boolean: 'true'), stats
+        assert_equal @adapter.default_config, search
+      end
+
+      def test_includes_explicitly_disabled_features_when_getting_all_features
+        @flipper.enable(:stats)
+        @flipper.enable(:search)
+        @flipper.disable(:search)
+
+        result = @adapter.get_all
+        assert_equal %w(search stats), result.keys.sort
+      end
+
+      def test_can_double_enable_an_actor_without_error
+        actor = Flipper::Actor.new('Flipper::Actor;22')
+        assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor))
+        assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor))
+        assert_equal Set['Flipper::Actor;22'], @adapter.get(@feature).fetch(:actors)
+      end
+
+      def test_can_double_enable_a_group_without_error
+        assert_equal true, @adapter.enable(@feature, @group_gate, @flipper.group(:admins))
+        assert_equal true, @adapter.enable(@feature, @group_gate, @flipper.group(:admins))
+        assert_equal Set['admins'], @adapter.get(@feature).fetch(:groups)
       end
     end
   end

@@ -1,3 +1,104 @@
+## master
+
+### Additions/Changes
+
+* Add actors API endpoint (https://github.com/jnunemaker/flipper/pull/372).
+* Fix rack body proxy require for those using flipper without rack  (https://github.com/jnunemaker/flipper/pull/376).
+* Unescapes feature_name in FeatureNameFromRoute (https://github.com/jnunemaker/flipper/pull/377).
+
+## 0.16.0
+
+### Bug Fixes
+
+* Support slashes in feature names (https://github.com/jnunemaker/flipper/pull/362).
+
+### Additions/Changes
+
+* Re-order gates for improved performance in some cases (https://github.com/jnunemaker/flipper/pull/370).
+* Add Feature#exist?, DSL#exist? and Flipper#exist? (https://github.com/jnunemaker/flipper/pull/371).
+
+## 0.15.0
+
+* Move Flipper::UI configuration options to Flipper::UI::Configuration (https://github.com/jnunemaker/flipper/pull/345).
+* Bug fix in adapter synchronizing and switched DSL#import to use Synchronizer (https://github.com/jnunemaker/flipper/pull/347).
+* Fix AR adapter table name prefix/suffix bug (https://github.com/jnunemaker/flipper/pull/350).
+* Allow feature names to end with "features" in UI (https://github.com/jnunemaker/flipper/pull/353).
+
+## 0.14.0
+
+* Changed sync_interval to be seconds instead of milliseconds.
+
+## 0.13.0
+
+### Additions/Changes
+
+* Update PStore adapter to allow setting thread_safe option (https://github.com/jnunemaker/flipper/pull/334).
+* Update Flipper::UI to Bootstrap 4 (https://github.com/jnunemaker/flipper/pull/336).
+* Add Flipper::UI configuration to add a banner with customizeable text and background color (https://github.com/jnunemaker/flipper/pull/337).
+* Add sync adapter (https://github.com/jnunemaker/flipper/pull/341).
+* Make cloud use sync adapter (https://github.com/jnunemaker/flipper/pull/342). This makes local flipper operations resilient to cloud failures.
+
+## 0.12.2
+
+### Additions/Changes
+
+* Improvements/fixes/examples for rollout adapter (https://github.com/jnunemaker/flipper/pull/332).
+
+## 0.12.1
+
+### Additions/Changes
+
+* Added rollout adapter documentation (https://github.com/jnunemaker/flipper/pull/328).  
+
+### Bug Fixes
+
+* Fixed ActiveRecord and Sequel adapters to include disabled features for `get_all` (https://github.com/jnunemaker/flipper/pull/327).
+
+## 0.12
+
+### Additions/Changes
+
+* Added Flipper.instance= writer method for explicitly setting the default instance (https://github.com/jnunemaker/flipper/pull/309).
+* Added Flipper::UI configuration instance for changing text and things (https://github.com/jnunemaker/flipper/pull/306).
+* Delegate memoize= and memoizing? for Flipper and Flipper::DSL (https://github.com/jnunemaker/flipper/pull/310).
+* Fixed error when enabling the same group or actor more than once (https://github.com/jnunemaker/flipper/pull/313).
+* Fixed redis cache adapter key (and thus cache misses) (https://github.com/jnunemaker/flipper/pull/325).
+* Added Rollout adapter to make it easy to import rollout data into Flipper (https://github.com/jnunemaker/flipper/pull/319).
+* Relaxed redis gem dependency constraint to allow redis-rb 4 (https://github.com/jnunemaker/flipper/pull/317).
+* Added configuration option for Flipper::UI to disable feature removal (https://github.com/jnunemaker/flipper/pull/322).
+
+## 0.11
+
+### Backwards Compatibility Breaks
+
+* Set flipper from env for API and UI (https://github.com/jnunemaker/flipper/pull/223 and https://github.com/jnunemaker/flipper/pull/229). It is documented, but now the memoizing middleware requires that the SetupEnv middleware is used first, unless you are configuring a Flipper default instance.
+* Drop support for Ruby 2.0 as it is end of lined (https://github.com/jnunemaker/flipper/commit/c2c81ed89938155ce91acb5173ac38580f630e3d).
+* Allow unregistered groups (https://github.com/jnunemaker/flipper/pull/244). Only break in compatibility is that previously unregistered groups could not be enabled and now they can be.
+* Removed support for metriks (https://github.com/jnunemaker/flipper/pull/291).
+
+### Additions/Changes
+
+* Use primary keys with sequel adapter (https://github.com/jnunemaker/flipper/pull/210). Should be backwards compatible, but if you want it to work this way you will need to migrate your database to the new schema.
+* Add redis cache adapter (https://github.com/jnunemaker/flipper/pull/211).
+* Finish API and HTTP adapter that speaks to API.
+* Add flipper cloud adapter (https://github.com/jnunemaker/flipper/pull/249). Nothing to see here yet, but good stuff soon. ;)
+* Add importing (https://github.com/jnunemaker/flipper/pull/251).
+* Added Adapter#get_all to allow for more efficient preload_all (https://github.com/jnunemaker/flipper/pull/255).
+* Added :unless option to Flipper::Middleware::Memoizer to allow skipping memoization and preloading for certain requests.
+* Made it possible to instrument Flipper::Cloud (https://github.com/jnunemaker/flipper/commit/4b10e4d807772202f63881f5e2c00d11ac58481f).
+* Made it possible to wrap Http adapter when using Flipper::Cloud (https://github.com/jnunemaker/flipper/commit/4b10e4d807772202f63881f5e2c00d11ac58481f).
+* Instrument get_multi in instrumented adapter (https://github.com/jnunemaker/flipper/commit/951d25c5ce07d3b56b0b2337adf5f6bcbe4050e7).
+* Allow instrumenting Flipper::Cloud http adapter (https://github.com/jnunemaker/flipper/pull/253).
+* Add DSL#preload_all and Adapter#get_all to allow for making even more efficient loading of features (https://github.com/jnunemaker/flipper/pull/255).
+* Allow setting debug output of http adapter (https://github.com/jnunemaker/flipper/pull/256 and https://github.com/jnunemaker/flipper/pull/258).
+* Allow setting env key for middleware (https://github.com/jnunemaker/flipper/pull/259).
+* Added ActiveSupport cache store adapter for use with Rails.cache (https://github.com/jnunemaker/flipper/pull/265 and https://github.com/jnunemaker/flipper/pull/297).
+* Added support for up to 3 decimal places in percentage based rollouts (https://github.com/jnunemaker/flipper/pull/274).
+* Removed Flipper::GroupNotRegistered error as it is now unused (https://github.com/jnunemaker/flipper/pull/270).
+* Added get_all to all adapters (https://github.com/jnunemaker/flipper/pull/298).
+* Added support for Rails 5.1 (https://github.com/jnunemaker/flipper/pull/299).
+* Added Flipper default instance generation (https://github.com/jnunemaker/flipper/pull/279).
+
 ## 0.10.2
 
 * Add Adapter#get_multi to allow for efficient loading of more than one feature at a time (https://github.com/jnunemaker/flipper/pull/198)

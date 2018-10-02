@@ -6,7 +6,7 @@ module Flipper
   module UI
     module Actions
       class Features < UI::Action
-        route %r{features/?\Z}
+        route %r{\A/features/?\Z}
 
         def get
           @page_title = 'Features'
@@ -23,7 +23,7 @@ module Flipper
         end
 
         def post
-          unless Flipper::UI.feature_creation_enabled
+          unless Flipper::UI.configuration.feature_creation_enabled
             status 403
 
             breadcrumb 'Home', '/'
@@ -40,7 +40,8 @@ module Flipper
             redirect_to("/features/new?error=#{error}")
           end
 
-          flipper.storage.add(flipper[value])
+          feature = flipper[value]
+          feature.add
 
           redirect_to "/features/#{Rack::Utils.escape_path(value)}"
         end

@@ -8,12 +8,9 @@ RSpec.describe Flipper::UI::Actions::GroupsGate do
       'a'
     end
   end
+
   let(:session) do
-    if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
-      { csrf: token }
-    else
-      { '_csrf_token' => token }
-    end
+    { :csrf => token, 'csrf' => token, '_csrf_token' => token }
   end
 
   describe 'GET /features/:feature/groups' do
@@ -31,7 +28,8 @@ RSpec.describe Flipper::UI::Actions::GroupsGate do
     end
 
     it 'renders add new group form' do
-      expect(last_response.body).to include('<form action="/features/search/groups" method="post">')
+      form = '<form action="/features/search/groups" method="post" class="form-inline">'
+      expect(last_response.body).to include(form)
     end
   end
 

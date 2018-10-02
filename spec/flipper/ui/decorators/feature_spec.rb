@@ -1,5 +1,4 @@
 require 'helper'
-require 'flipper/adapters/memory'
 
 RSpec.describe Flipper::UI::Decorators::Feature do
   let(:source)  { {} }

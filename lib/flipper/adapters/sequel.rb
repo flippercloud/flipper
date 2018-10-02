@@ -7,18 +7,25 @@ module Flipper
     class Sequel
       include ::Flipper::Adapter
 
-      # Private: Do not use outside of this adapter.
-      class Feature < ::Sequel::Model(:flipper_features)
-        unrestrict_primary_key
+      begin
+        old = ::Sequel::Model.require_valid_table
+        ::Sequel::Model.require_valid_table = false
 
-        plugin :timestamps, update_on_create: true
-      end
+        # Private: Do not use outside of this adapter.
+        class Feature < ::Sequel::Model(:flipper_features)
+          unrestrict_primary_key
 
-      # Private: Do not use outside of this adapter.
-      class Gate < ::Sequel::Model(:flipper_gates)
-        unrestrict_primary_key
+          plugin :timestamps, update_on_create: true
+        end
 
-        plugin :timestamps, update_on_create: true
+        # Private: Do not use outside of this adapter.
+        class Gate < ::Sequel::Model(:flipper_gates)
+          unrestrict_primary_key
+
+          plugin :timestamps, update_on_create: true
+        end
+      ensure
+        ::Sequel::Model.require_valid_table = old
       end
 
       # Public: The name of the adapter.
@@ -89,6 +96,21 @@ module Flipper
         result
       end
 
+      def get_all
+        db_gates = @gate_class.fetch(<<-SQL).to_a
+          SELECT ff.key AS feature_key, fg.key, fg.value
+          FROM #{@feature_class.table_name} ff
+          LEFT JOIN #{@gate_class.table_name} fg ON ff.key = fg.feature_key
+        SQL
+        grouped_db_gates = db_gates.group_by(&:feature_key)
+        result = Hash.new { |hash, key| hash[key] = default_config }
+        features = grouped_db_gates.keys.map { |key| Flipper::Feature.new(key, self) }
+        features.each do |feature|
+          result[feature.key] = result_for_feature(feature, grouped_db_gates[feature.key])
+        end
+        result
+      end
+
       # Public: Enables a gate for a given thing.
       #
       # feature - The Flipper::Feature for the gate.
@@ -105,11 +127,13 @@ module Flipper
               key: gate.key.to_s,
             }
             @gate_class.where(args).delete
-
             @gate_class.create(gate_attrs(feature, gate, thing))
           end
         when :set
-          @gate_class.create(gate_attrs(feature, gate, thing))
+          begin
+            @gate_class.create(gate_attrs(feature, gate, thing))
+          rescue ::Sequel::UniqueConstraintViolation
+          end
         else
           unsupported_data_type gate.data_type
         end

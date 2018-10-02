@@ -19,7 +19,7 @@ module Flipper
       end
 
       def features
-        find(FeaturesKey).fetch('features') { Set.new }.to_set
+        read_feature_keys
       end
 
       def add(feature)
@@ -44,12 +44,12 @@ module Flipper
       end
 
       def get_multi(features)
-        docs = find_many(features.map(&:key))
-        result = {}
-        features.each do |feature|
-          result[feature.key] = result_for_feature(feature, docs[feature.key])
-        end
-        result
+        read_many_features(features)
+      end
+
+      def get_all
+        features = read_feature_keys.map { |key| Flipper::Feature.new(key, self) }
+        read_many_features(features)
       end
 
       def enable(feature, gate, thing)
@@ -86,6 +86,20 @@ module Flipper
 
       private
 
+      def read_feature_keys
+        find(FeaturesKey).fetch('features') { Set.new }.to_set
+      end
+
+      def read_many_features(features)
+        docs = find_many(features.map(&:key))
+        result = {}
+        features.each do |feature|
+          result[feature.key] = result_for_feature(feature, docs[feature.key])
+        end
+        result
+      end
+
+      # Private
       def unsupported_data_type(data_type)
         raise "#{data_type} is not supported by this adapter"
       end

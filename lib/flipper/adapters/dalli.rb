@@ -1,5 +1,6 @@
 require 'flipper'
 require 'dalli'
+require 'flipper'
 
 module Flipper
   module Adapters
@@ -11,6 +12,7 @@ module Flipper
       Version = 'v1'.freeze
       Namespace = "flipper/#{Version}".freeze
       FeaturesKey = "#{Namespace}/features".freeze
+      GetAllKey = "#{Namespace}/get_all".freeze
 
       # Private
       def self.key_for(key)
@@ -26,6 +28,10 @@ module Flipper
       # Internal: The adapter this adapter is wrapping.
       attr_reader :adapter
 
+      # Public: The ttl for all cached data.
+      attr_reader :ttl
+
+      # Public
       def initialize(adapter, cache, ttl = 0)
         @adapter = adapter
         @name = :dalli
@@ -34,9 +40,7 @@ module Flipper
       end
 
       def features
-        @cache.fetch(FeaturesKey, @ttl) do
-          @adapter.features
-        end
+        read_feature_keys
       end
 
       def add(feature)
@@ -66,19 +70,21 @@ module Flipper
       end
 
       def get_multi(features)
-        keys = features.map { |feature| key_for(feature.key) }
-        result = @cache.get_multi(keys)
-        uncached_features = features.reject { |feature| result[key_for(feature.key)] }
+        read_many_features(features)
+      end
 
-        if uncached_features.any?
-          response = @adapter.get_multi(uncached_features)
+      def get_all
+        if @cache.add(GetAllKey, Time.now.to_i, @ttl)
+          response = @adapter.get_all
           response.each do |key, value|
             @cache.set(key_for(key), value, @ttl)
-            result[key] = value
           end
+          @cache.set(FeaturesKey, response.keys.to_set, @ttl)
+          response
+        else
+          features = read_feature_keys.map { |key| Flipper::Feature.new(key, self) }
+          read_many_features(features)
         end
-
-        result
       end
 
       # Public
@@ -98,6 +104,32 @@ module Flipper
 
       def key_for(key)
         self.class.key_for(key)
+      end
+
+      def read_feature_keys
+        @cache.fetch(FeaturesKey, @ttl) { @adapter.features }
+      end
+
+      # Internal: Given an array of features, attempts to read through cache in
+      # as few network calls as possible.
+      def read_many_features(features)
+        keys = features.map { |feature| key_for(feature.key) }
+        cache_result = @cache.get_multi(keys)
+        uncached_features = features.reject { |feature| cache_result[key_for(feature.key)] }
+
+        if uncached_features.any?
+          response = @adapter.get_multi(uncached_features)
+          response.each do |key, value|
+            @cache.set(key_for(key), value, @ttl)
+            cache_result[key_for(key)] = value
+          end
+        end
+
+        result = {}
+        features.each do |feature|
+          result[feature.key] = cache_result[key_for(feature.key)]
+        end
+        result
       end
     end
   end

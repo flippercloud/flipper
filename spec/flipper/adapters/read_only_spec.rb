@@ -2,8 +2,6 @@ require 'helper'
 require 'flipper/adapters/read_only'
 
 RSpec.describe Flipper::Adapters::ReadOnly do
-  let(:actor_class) { Struct.new(:flipper_id) }
-
   let(:adapter) { Flipper::Adapters::Memory.new }
   let(:flipper) { Flipper.new(subject) }
   let(:feature) { flipper[:stats] }
@@ -48,7 +46,7 @@ RSpec.describe Flipper::Adapters::ReadOnly do
   end
 
   it 'can get feature' do
-    actor22 = actor_class.new('22')
+    actor22 = Flipper::Actor.new('22')
     adapter.enable(feature, boolean_gate, flipper.boolean)
     adapter.enable(feature, group_gate, flipper.group(:admins))
     adapter.enable(feature, actor_gate, flipper.actor(actor22))

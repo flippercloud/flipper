@@ -22,7 +22,7 @@ module Flipper
       end
 
       def features
-        @client.smembers(FeaturesKey).to_set
+        read_feature_keys
       end
 
       def add(feature)
@@ -49,12 +49,12 @@ module Flipper
       end
 
       def get_multi(features)
-        docs = docs_for(features)
-        result = {}
-        features.zip(docs) do |feature, doc|
-          result[feature.key] = result_for_feature(feature, doc)
-        end
-        result
+        read_many_features(features)
+      end
+
+      def get_all
+        features = read_feature_keys.map { |key| Flipper::Feature.new(key, self) }
+        read_many_features(features)
       end
 
       def enable(feature, gate, thing)
@@ -86,6 +86,19 @@ module Flipper
       end
 
       private
+
+      def read_many_features(features)
+        docs = docs_for(features)
+        result = {}
+        features.zip(docs) do |feature, doc|
+          result[feature.key] = result_for_feature(feature, doc)
+        end
+        result
+      end
+
+      def read_feature_keys
+        @client.smembers(FeaturesKey).to_set
+      end
 
       # Private: Gets a hash of fields => values for the given feature.
       #

@@ -10,6 +10,7 @@ module Flipper
       include ::Flipper::Adapter
 
       FeaturesKey = :flipper_features
+      GetAllKey = :all_memoized
 
       # Public: The name of the adapter.
       attr_reader :name
@@ -20,6 +21,12 @@ module Flipper
       # Internal: The adapter this adapter is wrapping.
       attr_reader :adapter
 
+      # Private
+      def self.key_for(key)
+        "feature/#{key}"
+      end
+
+      # Public
       def initialize(adapter, cache = nil)
         super(adapter)
         @adapter = adapter
@@ -57,7 +64,7 @@ module Flipper
 
       def get(feature)
         if memoizing?
-          cache.fetch(feature.key) { cache[feature.key] = @adapter.get(feature) }
+          cache.fetch(key_for(feature.key)) { cache[key_for(feature.key)] = @adapter.get(feature) }
         else
           @adapter.get(feature)
         end
@@ -66,22 +73,48 @@ module Flipper
       # Public
       def get_multi(features)
         if memoizing?
-          uncached_features = features.reject { |feature| cache[feature.key] }
+          uncached_features = features.reject { |feature| cache[key_for(feature.key)] }
 
           if uncached_features.any?
             response = @adapter.get_multi(uncached_features)
             response.each do |key, hash|
-              cache[key] = hash
+              cache[key_for(key)] = hash
             end
           end
 
           result = {}
           features.each do |feature|
-            result[feature.key] = cache[feature.key]
+            result[feature.key] = cache[key_for(feature.key)]
           end
           result
         else
           @adapter.get_multi(features)
+        end
+      end
+
+      def get_all
+        if memoizing?
+          response = nil
+          if cache[GetAllKey]
+            response = {}
+            cache[FeaturesKey].each do |key|
+              response[key] = cache[key_for(key)]
+            end
+          else
+            response = @adapter.get_all
+            response.each do |key, value|
+              cache[key_for(key)] = value
+            end
+            cache[FeaturesKey] = response.keys.to_set
+            cache[GetAllKey] = true
+          end
+
+          # Ensures that looking up other features that do not exist doesn't
+          # result in N+1 adapter calls.
+          response.default_proc = ->(memo, key) { memo[key] = default_config }
+          response
+        else
+          @adapter.get_all
         end
       end
 
@@ -113,8 +146,12 @@ module Flipper
 
       private
 
+      def key_for(key)
+        self.class.key_for(key)
+      end
+
       def expire_feature(feature)
-        cache.delete(feature.key) if memoizing?
+        cache.delete(key_for(feature.key)) if memoizing?
       end
 
       def expire_features_set

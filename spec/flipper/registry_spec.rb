@@ -44,10 +44,8 @@ RSpec.describe Flipper::Registry do
     end
 
     context 'key not registered' do
-      it 'raises key not found' do
-        expect do
-          subject.get(:admins)
-        end.to raise_error(Flipper::Registry::KeyNotFound)
+      it 'returns nil' do
+        expect(subject.get(:admins)).to be(nil)
       end
     end
   end

@@ -1,4 +1,5 @@
 require 'redis'
+require 'flipper'
 
 module Flipper
   module Adapters
@@ -10,6 +11,7 @@ module Flipper
       Version = 'v1'.freeze
       Namespace = "flipper/#{Version}".freeze
       FeaturesKey = "#{Namespace}/features".freeze
+      GetAllKey = "#{Namespace}/get_all".freeze
 
       # Private
       def self.key_for(key)
@@ -32,9 +34,7 @@ module Flipper
 
       # Public
       def features
-        fetch(FeaturesKey) do
-          @adapter.features
-        end
+        read_feature_keys
       end
 
       # Public
@@ -67,20 +67,22 @@ module Flipper
       end
 
       def get_multi(features)
-        keys = features.map(&:key)
-        result = Hash[keys.zip(multi_cache_get(keys))]
-        uncached_features = features.reject do |feature|
-          result[feature.key]
-        end
+        read_many_features(features)
+      end
 
-        if uncached_features.any?
-          response = @adapter.get_multi(uncached_features)
+      def get_all
+        if @cache.setnx(GetAllKey, Time.now.to_i)
+          @cache.expire(GetAllKey, @ttl)
+          response = @adapter.get_all
           response.each do |key, value|
-            set_with_ttl(key_for(key), value)
-            result[key] = value
+            set_with_ttl key_for(key), value
           end
+          set_with_ttl FeaturesKey, response.keys.to_set
+          response
+        else
+          features = read_feature_keys.map { |key| Flipper::Feature.new(key, self) }
+          read_many_features(features)
         end
-        result
       end
 
       # Public
@@ -103,13 +105,37 @@ module Flipper
         self.class.key_for(key)
       end
 
-      def fetch(key)
-        cached = @cache.get(key)
+      def read_feature_keys
+        fetch(FeaturesKey) { @adapter.features }
+      end
+
+      def read_many_features(features)
+        keys = features.map(&:key)
+        cache_result = Hash[keys.zip(multi_cache_get(keys))]
+        uncached_features = features.reject { |feature| cache_result[feature.key] }
+
+        if uncached_features.any?
+          response = @adapter.get_multi(uncached_features)
+          response.each do |key, value|
+            set_with_ttl(key_for(key), value)
+            cache_result[key] = value
+          end
+        end
+
+        result = {}
+        features.each do |feature|
+          result[feature.key] = cache_result[feature.key]
+        end
+        result
+      end
+
+      def fetch(cache_key)
+        cached = @cache.get(cache_key)
         if cached
           Marshal.load(cached)
         else
           to_cache = yield
-          set_with_ttl(key, to_cache)
+          set_with_ttl(cache_key, to_cache)
           to_cache
         end
       end

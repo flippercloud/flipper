@@ -6,14 +6,14 @@ Dir['flipper-*.gemspec'].each do |gemspec|
   gemspec(name: "flipper-#{plugin}", development_group: plugin)
 end
 
+gem 'pry'
 gem 'rake', '~> 10.4.2'
-gem 'metriks', '~> 0.9.9'
 gem 'shotgun', '~> 0.9'
 gem 'statsd-ruby', '~> 1.2.1'
 gem 'rspec', '~> 3.0'
 gem 'rack-test', '~> 0.6.3'
 gem 'sqlite3', '~> 1.3.11'
-gem 'rails', "~> #{ENV['RAILS_VERSION'] || '4.2.5'}"
+gem 'rails', "~> #{ENV['RAILS_VERSION'] || '5.1.4'}"
 gem 'minitest', '~> 5.8.0'
 gem 'redis-namespace', '~> 1.5.2'
 gem 'rubocop', '~> 0.45.0'
@@ -25,6 +25,7 @@ gem 'test-unit', '~> 3.0'
 
 group(:guard) do
   gem 'guard', '~> 2.12.5'
+  gem 'guard-rubocop', '~> 1.3.0'
   gem 'guard-rspec', '~> 4.5.0'
   gem 'guard-bundler', '~> 2.1.0'
   gem 'guard-minitest', '~> 2.4.5'

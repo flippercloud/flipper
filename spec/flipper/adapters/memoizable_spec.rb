@@ -1,6 +1,6 @@
 require 'helper'
 require 'flipper/adapters/memoizable'
-require 'flipper/adapters/memory'
+require 'flipper/adapters/operation_logger'
 require 'flipper/spec/shared_adapter_specs'
 
 RSpec.describe Flipper::Adapters::Memoizable do
@@ -66,7 +66,7 @@ RSpec.describe Flipper::Adapters::Memoizable do
       it 'memoizes feature' do
         feature = flipper[:stats]
         result = subject.get(feature)
-        expect(cache[feature.key]).to be(result)
+        expect(cache[described_class.key_for(feature.key)]).to be(result)
       end
     end
 
@@ -90,13 +90,13 @@ RSpec.describe Flipper::Adapters::Memoizable do
         subject.memoize = true
       end
 
-      it 'memoizes feature' do
+      it 'memoizes features' do
         names = %i(stats shiny)
         features = names.map { |name| flipper[name] }
         results = subject.get_multi(features)
         features.each do |feature|
-          expect(cache[feature.key]).not_to be(nil)
-          expect(cache[feature.key]).to be(results[feature.key])
+          expect(cache[described_class.key_for(feature.key)]).not_to be(nil)
+          expect(cache[described_class.key_for(feature.key)]).to be(results[feature.key])
         end
       end
     end
@@ -116,6 +116,81 @@ RSpec.describe Flipper::Adapters::Memoizable do
     end
   end
 
+  describe '#get_all' do
+    context "with memoization enabled" do
+      before do
+        subject.memoize = true
+      end
+
+      it 'memoizes features' do
+        names = %i(stats shiny)
+        features = names.map { |name| flipper[name].tap(&:enable) }
+        results = subject.get_all
+        features.each do |feature|
+          expect(cache[described_class.key_for(feature.key)]).not_to be(nil)
+          expect(cache[described_class.key_for(feature.key)]).to be(results[feature.key])
+        end
+        expect(cache[subject.class::FeaturesKey]).to eq(names.map(&:to_s).to_set)
+      end
+
+      it 'only calls get_all once for memoized adapter' do
+        adapter = Flipper::Adapters::OperationLogger.new(Flipper::Adapters::Memory.new)
+        cache = {}
+        instance = described_class.new(adapter, cache)
+        instance.memoize = true
+
+        instance.get_all
+        expect(adapter.count(:get_all)).to be(1)
+
+        instance.get_all
+        expect(adapter.count(:get_all)).to be(1)
+      end
+
+      it 'returns default_config for unknown feature keys' do
+        first = subject.get_all
+        expect(first['doesntexist']).to eq(subject.default_config)
+
+        second = subject.get_all
+        expect(second['doesntexist']).to eq(subject.default_config)
+      end
+    end
+
+    context "with memoization disabled" do
+      before do
+        subject.memoize = false
+      end
+
+      it 'returns result' do
+        names = %i(stats shiny)
+        names.map { |name| flipper[name].tap(&:enable) }
+        result = subject.get_all
+        adapter_result = adapter.get_all
+        expect(result).to eq(adapter_result)
+      end
+
+      it 'calls get_all every time for memoized adapter' do
+        adapter = Flipper::Adapters::OperationLogger.new(Flipper::Adapters::Memory.new)
+        cache = {}
+        instance = described_class.new(adapter, cache)
+        instance.memoize = false
+
+        instance.get_all
+        expect(adapter.count(:get_all)).to be(1)
+
+        instance.get_all
+        expect(adapter.count(:get_all)).to be(2)
+      end
+
+      it 'returns nil for unknown feature keys' do
+        first = subject.get_all
+        expect(first['doesntexist']).to be(nil)
+
+        second = subject.get_all
+        expect(second['doesntexist']).to be(nil)
+      end
+    end
+  end
+
   describe '#enable' do
     context 'with memoization enabled' do
       before do
@@ -125,9 +200,9 @@ RSpec.describe Flipper::Adapters::Memoizable do
       it 'unmemoizes feature' do
         feature = flipper[:stats]
         gate = feature.gate(:boolean)
-        cache[feature.key] = { some: 'thing' }
+        cache[described_class.key_for(feature.key)] = { some: 'thing' }
         subject.enable(feature, gate, flipper.bool)
-        expect(cache[feature.key]).to be_nil
+        expect(cache[described_class.key_for(feature.key)]).to be_nil
       end
     end
 
@@ -155,9 +230,9 @@ RSpec.describe Flipper::Adapters::Memoizable do
       it 'unmemoizes feature' do
         feature = flipper[:stats]
         gate = feature.gate(:boolean)
-        cache[feature.key] = { some: 'thing' }
+        cache[described_class.key_for(feature.key)] = { some: 'thing' }
         subject.disable(feature, gate, flipper.bool)
-        expect(cache[feature.key]).to be_nil
+        expect(cache[described_class.key_for(feature.key)]).to be_nil
       end
     end
 
@@ -239,9 +314,9 @@ RSpec.describe Flipper::Adapters::Memoizable do
 
       it 'unmemoizes the feature' do
         feature = flipper[:stats]
-        cache[feature.key] = { some: 'thing' }
+        cache[described_class.key_for(feature.key)] = { some: 'thing' }
         subject.remove(feature)
-        expect(cache[feature.key]).to be_nil
+        expect(cache[described_class.key_for(feature.key)]).to be_nil
       end
     end
 
@@ -264,9 +339,9 @@ RSpec.describe Flipper::Adapters::Memoizable do
 
       it 'unmemoizes feature' do
         feature = flipper[:stats]
-        cache[feature.key] = { some: 'thing' }
+        cache[described_class.key_for(feature.key)] = { some: 'thing' }
         subject.clear(feature)
-        expect(cache[feature.key]).to be_nil
+        expect(cache[described_class.key_for(feature.key)]).to be_nil
       end
     end
 

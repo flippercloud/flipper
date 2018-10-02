@@ -1,7 +1,6 @@
 require File.expand_path('../example_setup', __FILE__)
 
 require 'flipper'
-require 'flipper/adapters/v2/memory'
 
 adapter = Flipper::Adapters::V2::Memory.new
 flipper = Flipper.new(adapter)

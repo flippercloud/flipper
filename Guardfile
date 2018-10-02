@@ -14,12 +14,12 @@ rspec_options = {
 }
 guard 'rspec', rspec_options do
   watch(%r{^spec/.+_spec\.rb$})
-  watch(%r{^lib/(.*/)?([^/]+)\.rb$}) { |m| "spec/#{m[1]}#{m[2]}_spec.rb" }
+  watch(%r{^lib/(.+)\.rb$}) { |m| "spec/#{m[1]}_spec.rb" }
   watch(/shared_adapter_specs/) do
     Dir.glob("spec/flipper/adapters/*_spec.rb") +
       Dir.glob("spec/flipper/adapters/v2/*_spec.rb")
   end
-  watch('spec/helper.rb') { "spec" }
+  watch('spec/helper.rb') { 'spec' }
 end
 
 minitest_options = {
@@ -40,15 +40,26 @@ guard :minitest, minitest_options do
   end
 end
 
-coffee_options = {
+coffeescript_options = {
   input: 'lib/flipper/ui/assets/javascripts',
   output: 'lib/flipper/ui/public/js',
-  all_on_start: false,
+  patterns: [%r{^lib/flipper/ui/assets/javascripts/(.+\.(?:coffee|coffee\.md|litcoffee))$}],
 }
-guard 'coffeescript', coffee_options
+
+guard 'coffeescript', coffeescript_options do
+  coffeescript_options[:patterns].each { |pattern| watch(pattern) }
+end
 
 sass_options = {
   input: 'lib/flipper/ui/assets/stylesheets',
   output: 'lib/flipper/ui/public/css',
 }
 guard 'sass', sass_options
+
+rubo_options = {
+  all_on_start: false,
+}
+guard :rubocop, rubo_options do
+  watch(/.+\.rb$/)
+  watch(%r{(?:.+/)?\.rubocop(?:_todo)?\.yml$}) { |m| File.dirname(m[0]) }
+end

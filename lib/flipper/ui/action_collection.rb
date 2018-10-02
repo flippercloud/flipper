@@ -12,7 +12,7 @@ module Flipper
 
       def action_for_request(request)
         @action_classes.detect do |action_class|
-          request.path_info =~ action_class.regex
+          action_class.route_match?(request.path_info)
         end
       end
     end

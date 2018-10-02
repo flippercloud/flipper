@@ -6,10 +6,11 @@ module Flipper
     module V1
       module Actions
         class BooleanGate < Api::Action
-          route %r{api/v1/features/[^/]*/boolean/?\Z}
+          include FeatureNameFromRoute
+
+          route %r{\A/features/(?<feature_name>.*)/boolean/?\Z}
 
           def post
-            feature_name = Rack::Utils.unescape(path_parts[-2])
             feature = flipper[feature_name]
             feature.enable
             decorated_feature = Decorators::Feature.new(feature)
@@ -17,7 +18,6 @@ module Flipper
           end
 
           def delete
-            feature_name = Rack::Utils.unescape(path_parts[-2])
             feature = flipper[feature_name.to_sym]
             feature.disable
             decorated_feature = Decorators::Feature.new(feature)

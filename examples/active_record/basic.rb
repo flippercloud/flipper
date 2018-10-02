@@ -1,19 +1,6 @@
-require 'pathname'
-require 'logger'
+require_relative "./ar_setup"
 
-root_path = Pathname(__FILE__).dirname.join('..').expand_path
-lib_path  = root_path.join('lib')
-$:.unshift(lib_path)
-
-require 'active_record'
-ActiveRecord::Base.establish_connection({
-  adapter: 'sqlite3',
-  database: ':memory:',
-})
-
-require 'generators/flipper/templates/v2_migration'
-CreateFlipperV2Tables.up
-
+# Requires the flipper-active_record gem to be installed.
 require 'flipper/adapters/v2/active_record'
 adapter = Flipper::Adapters::V2::ActiveRecord.new
 flipper = Flipper.new(adapter)

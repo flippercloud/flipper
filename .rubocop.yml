@@ -27,6 +27,12 @@ Style/NumericLiterals:
 Style/StringLiterals:
   Enabled: false
 
+Style/GuardClause:
+  Enabled: false
+
+Style/IfUnlessModifier:
+  Enabled: false
+
 Metrics/LineLength:
   Max: 100
   Exclude:
@@ -39,4 +45,10 @@ Style/TrailingCommaInLiteral:
   EnforcedStyleForMultiline: consistent_comma
 
 RSpec/InstanceVariable:
+  Enabled: false
+
+Style/AccessorMethodName:
+  Enabled: false
+
+Lint/HandleExceptions:
   Enabled: false

@@ -4,9 +4,9 @@ require 'flipper/gate'
 require 'flipper/storage'
 require 'flipper/feature_check_context'
 require 'flipper/gate_values'
-require 'flipper/instrumenters/noop'
 
 module Flipper
+  # rubocop:disable Metrics/ClassLength
   class Feature
     # Private: The name of feature instrumentation events.
     InstrumentationName = "feature_operation.#{InstrumentationNamespace}".freeze
@@ -66,11 +66,32 @@ module Flipper
       end
     end
 
+    # Public: Adds this feature.
+    #
+    # Returns the result of Adapter#add.
+    def add
+      instrument(:add) { adapter.add(self) }
+    end
+
+    # Public: Does this feature exist in the adapter.
+    #
+    # Returns true if exists in adapter else false.
+    def exist?
+      instrument(:exist?) { adapter.features.include?(key) }
+    end
+
     # Public: Removes this feature.
     #
     # Returns the result of Adapter#remove.
     def remove
       instrument(:remove) { @storage.remove(self) }
+    end
+
+    # Public: Clears all gate values for this feature.
+    #
+    # Returns the result of Adapter#clear.
+    def clear
+      instrument(:clear) { adapter.clear(self) }
     end
 
     # Public: Check if a feature is enabled for a thing.
@@ -317,10 +338,10 @@ module Flipper
     def gates
       @gates ||= [
         Gates::Boolean.new,
-        Gates::Group.new,
         Gates::Actor.new,
         Gates::PercentageOfActors.new,
         Gates::PercentageOfTime.new,
+        Gates::Group.new,
       ]
     end
 

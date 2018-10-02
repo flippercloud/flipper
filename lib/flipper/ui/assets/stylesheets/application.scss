@@ -1,58 +1,19 @@
+html {
+  font-size: 0.8rem;
+}
 body {
-  padding-top: 20px;
+  padding-top: 1.5em;
+  padding-bottom: 1.5em;
 }
 
-@import "primer/primer";
-
-@import "bootstrap/variables";
-@import "bootstrap/mixins";
-@import "bootstrap/tables";
-@import "bootstrap/panels";
-@import "bootstrap/list-group";
-@import "bootstrap/breadcrumbs";
+$light: #ddd;
+@import "bootstrap/bootstrap";
 
 .flash {
   margin-bottom:15px;
 }
 
-.panel-heading .btn.btn-sm.right,
-.panel-heading form.right {
-  margin-top:-5px;
-}
-.panel-heading p.right {
-  margin-top:0;
-}
-.panel-heading form.right input[type=text],
-.panel-heading form.right select {
-  width:150px;
+.row + .row {
+  margin-top: 1.5em;
 }
 
-.panel-body :first-child {
-  margin-top:0;
-}
-
-.button-inv {
-  background:none;
-  border:0;
-}
-
-.breadcrumb {
-  background-color: #fff;
-  border: 1px solid #ddd;
-}
-
-.header .btn.right {
-  margin-top:5px;
-  margin-right:15px;
-}
-
-.feature-state {
-  width:40px;
-}
-.feature-enabled-gates {
-  width:380px;
-}
-
-p.help {
-  color: #999;
-}

@@ -8,7 +8,6 @@ Any attempted write raises `Flipper::Adapters::ReadOnly::WriteAttempted`  with m
 ## Usage
 ```ruby
 # example wrapping memory adapter
-require 'flipper/adapters/memory'
 require 'flipper/adapters/read_only'
 
 memory_adapter = Flipper::Adapters::Memory.new

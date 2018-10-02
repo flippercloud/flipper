@@ -1,8 +1,7 @@
 # Requires the following methods:
 # * subject - The instance of the adapter
+# rubocop:disable Metrics/BlockLength
 RSpec.shared_examples_for 'a flipper adapter' do
-  let(:actor_class) { Struct.new(:flipper_id) }
-
   let(:flipper) { Flipper.new(subject) }
   let(:feature) { flipper[:stats] }
 
@@ -56,7 +55,7 @@ RSpec.shared_examples_for 'a flipper adapter' do
   end
 
   it 'fully disables all enabled things when boolean gate disabled' do
-    actor22 = actor_class.new('22')
+    actor22 = Flipper::Actor.new('22')
     expect(subject.enable(feature, boolean_gate, flipper.boolean)).to eq(true)
     expect(subject.enable(feature, group_gate, flipper.group(:admins))).to eq(true)
     expect(subject.enable(feature, actor_gate, flipper.actor(actor22))).to eq(true)
@@ -85,8 +84,8 @@ RSpec.shared_examples_for 'a flipper adapter' do
   end
 
   it 'can enable, disable and get value for actor gate' do
-    actor22 = actor_class.new('22')
-    actor_asdf = actor_class.new('asdf')
+    actor22 = Flipper::Actor.new('22')
+    actor_asdf = Flipper::Actor.new('asdf')
 
     expect(subject.enable(feature, actor_gate, flipper.actor(actor22))).to eq(true)
     expect(subject.enable(feature, actor_gate, flipper.actor(actor_asdf))).to eq(true)
@@ -162,7 +161,7 @@ RSpec.shared_examples_for 'a flipper adapter' do
   end
 
   it 'converts the actor value to a string' do
-    expect(subject.enable(feature, actor_gate, flipper.actor(actor_class.new(22)))).to eq(true)
+    expect(subject.enable(feature, actor_gate, flipper.actor(Flipper::Actor.new(22)))).to eq(true)
     result = subject.get(feature)
     expect(result[:actors]).to eq(Set['22'])
   end
@@ -202,7 +201,7 @@ RSpec.shared_examples_for 'a flipper adapter' do
   end
 
   it 'clears all the gate values for the feature on remove' do
-    actor22 = actor_class.new('22')
+    actor22 = Flipper::Actor.new('22')
     expect(subject.enable(feature, boolean_gate, flipper.boolean)).to eq(true)
     expect(subject.enable(feature, group_gate, flipper.group(:admins))).to eq(true)
     expect(subject.enable(feature, actor_gate, flipper.actor(actor22))).to eq(true)
@@ -215,7 +214,7 @@ RSpec.shared_examples_for 'a flipper adapter' do
   end
 
   it 'can clear all the gate values for a feature' do
-    actor22 = actor_class.new('22')
+    actor22 = Flipper::Actor.new('22')
     subject.add(feature)
     expect(subject.features).to include(feature.key)
 
@@ -237,16 +236,53 @@ RSpec.shared_examples_for 'a flipper adapter' do
   it 'can get multiple features' do
     expect(subject.add(flipper[:stats])).to eq(true)
     expect(subject.enable(flipper[:stats], boolean_gate, flipper.boolean)).to eq(true)
-
     expect(subject.add(flipper[:search])).to eq(true)
 
     result = subject.get_multi([flipper[:stats], flipper[:search], flipper[:other]])
     expect(result).to be_instance_of(Hash)
 
-    stats, search, other = result.values
+    stats = result["stats"]
+    search = result["search"]
+    other = result["other"]
     expect(stats).to eq(subject.default_config.merge(boolean: 'true'))
     expect(search).to eq(subject.default_config)
     expect(other).to eq(subject.default_config)
+  end
+
+  it 'can get all features' do
+    expect(subject.add(flipper[:stats])).to eq(true)
+    expect(subject.enable(flipper[:stats], boolean_gate, flipper.boolean)).to eq(true)
+    expect(subject.add(flipper[:search])).to eq(true)
+
+    result = subject.get_all
+    expect(result).to be_instance_of(Hash)
+
+    stats = result["stats"]
+    search = result["search"]
+    expect(stats).to eq(subject.default_config.merge(boolean: 'true'))
+    expect(search).to eq(subject.default_config)
+  end
+
+  it 'includes explicitly disabled features when getting all features' do
+    flipper.enable(:stats)
+    flipper.enable(:search)
+    flipper.disable(:search)
+
+    result = subject.get_all
+    expect(result.keys.sort).to eq(%w(search stats))
+  end
+
+  it 'can double enable an actor without error' do
+    actor = Flipper::Actor.new('Flipper::Actor;22')
+    expect(subject.enable(feature, actor_gate, flipper.actor(actor))).to eq(true)
+    expect(subject.enable(feature, actor_gate, flipper.actor(actor))).to eq(true)
+    expect(subject.get(feature).fetch(:actors)).to eq(Set['Flipper::Actor;22'])
+  end
+
+  it 'can double enable a group without error' do
+    expect(subject.enable(feature, group_gate, flipper.group(:admins))).to eq(true)
+    expect(subject.enable(feature, group_gate, flipper.group(:admins))).to eq(true)
+    expect(subject.get(feature).fetch(:groups)).to eq(Set['admins'])
   end
 end
 

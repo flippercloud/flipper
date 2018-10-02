@@ -1,6 +1,5 @@
 require 'helper'
 require 'flipper/dsl'
-require 'flipper/adapters/memory'
 
 RSpec.describe Flipper::DSL do
   subject { described_class.new(adapter) }
@@ -70,6 +69,42 @@ RSpec.describe Flipper::DSL do
     end
   end
 
+  describe '#preload_all' do
+    let(:instrumenter) { double('Instrumentor', instrument: nil) }
+    let(:dsl) do
+      names.each { |name| adapter.add subject[name] }
+      described_class.new(adapter, instrumenter: instrumenter)
+    end
+    let(:names) { %i(stats shiny) }
+    let(:features) { dsl.preload_all }
+
+    it 'returns array of features' do
+      expect(features).to all be_instance_of(Flipper::Feature)
+    end
+
+    it 'sets names' do
+      expect(features.map(&:key)).to eq(names.map(&:to_s))
+    end
+
+    it 'sets adapter' do
+      features.each do |feature|
+        expect(feature.adapter.name).to eq(dsl.adapter.name)
+      end
+    end
+
+    it 'sets instrumenter' do
+      features.each do |feature|
+        expect(feature.instrumenter).to eq(dsl.instrumenter)
+      end
+    end
+
+    it 'memoizes the feature' do
+      features.each do |feature|
+        expect(dsl.feature(feature.name)).to equal(feature)
+      end
+    end
+  end
+
   describe '#[]' do
     it_should_behave_like 'a DSL feature' do
       let(:method_name) { :[] }
@@ -97,20 +132,9 @@ RSpec.describe Flipper::DSL do
         @group = Flipper.register(:admins) {}
       end
 
-      it 'returns group' do
-        expect(subject.group(:admins)).to eq(@group)
-      end
-
-      it 'always returns same instance for same name' do
-        expect(subject.group(:admins)).to equal(subject.group(:admins))
-      end
-    end
-
-    context 'for unregistered group' do
-      it 'raises error' do
-        expect do
-          subject.group(:admins)
-        end.to raise_error(Flipper::GroupNotRegistered)
+      it 'delegates to Flipper' do
+        expect(Flipper).to receive(:group).with(:admins).and_return(@group)
+        expect(subject.group(:admins)).to be(@group)
       end
     end
   end
@@ -118,7 +142,7 @@ RSpec.describe Flipper::DSL do
   describe '#actor' do
     context 'for a thing' do
       it 'returns actor instance' do
-        thing = Struct.new(:flipper_id).new(33)
+        thing = Flipper::Actor.new(33)
         actor = subject.actor(thing)
         expect(actor).to be_instance_of(Flipper::Types::Actor)
         expect(actor.value).to eq('33')
@@ -215,7 +239,7 @@ RSpec.describe Flipper::DSL do
 
   describe '#enable_actor/disable_actor' do
     it 'enables and disables the feature for actor' do
-      actor = Struct.new(:flipper_id).new(5)
+      actor = Flipper::Actor.new(5)
 
       expect(subject[:stats].actors_value).to be_empty
       subject.enable_actor(:stats, actor)
@@ -228,7 +252,7 @@ RSpec.describe Flipper::DSL do
 
   describe '#enable_group/disable_group' do
     it 'enables and disables the feature for group' do
-      actor = Struct.new(:flipper_id).new(5)
+      actor = Flipper::Actor.new(5)
       group = Flipper.register(:fives) { |actor| actor.flipper_id == 5 }
 
       expect(subject[:stats].groups_value).to be_empty
@@ -249,6 +273,15 @@ RSpec.describe Flipper::DSL do
       subject.disable_percentage_of_time(:stats)
       expect(subject[:stats].percentage_of_time_value).to be(0)
     end
+
+    it 'can enable/disable float values' do
+      expect(subject[:stats].percentage_of_time_value).to be(0)
+      subject.enable_percentage_of_time(:stats, 0.01)
+      expect(subject[:stats].percentage_of_time_value).to be(0.01)
+
+      subject.disable_percentage_of_time(:stats)
+      expect(subject[:stats].percentage_of_time_value).to be(0)
+    end
   end
 
   describe '#enable_percentage_of_actors/disable_percentage_of_actors' do
@@ -260,6 +293,34 @@ RSpec.describe Flipper::DSL do
       subject.disable_percentage_of_actors(:stats)
       expect(subject[:stats].percentage_of_actors_value).to be(0)
     end
+
+    it 'can enable/disable float values' do
+      expect(subject[:stats].percentage_of_actors_value).to be(0)
+      subject.enable_percentage_of_actors(:stats, 0.01)
+      expect(subject[:stats].percentage_of_actors_value).to be(0.01)
+
+      subject.disable_percentage_of_actors(:stats)
+      expect(subject[:stats].percentage_of_actors_value).to be(0)
+    end
+  end
+
+  describe '#add' do
+    it 'adds the feature' do
+      expect(subject.features).to eq(Set.new)
+      subject.add(:stats)
+      expect(subject.features).to eq(Set[subject[:stats]])
+    end
+  end
+
+  describe '#exist?' do
+    it 'returns true if the feature is added in adapter' do
+      subject.add(:stats)
+      expect(subject.exist?(:stats)).to be(true)
+    end
+
+    it 'returns false if the feature is NOT added in adapter' do
+      expect(subject.exist?(:stats)).to be(false)
+    end
   end
 
   describe '#remove' do
@@ -267,6 +328,31 @@ RSpec.describe Flipper::DSL do
       subject.enable(:stats)
       expect { subject.remove(:stats) }.to change { subject.enabled?(:stats) }.to(false)
       expect(subject.features).to be_empty
+    end
+  end
+
+  describe '#import' do
+    it 'delegates to adapter' do
+      destination_flipper = build_flipper
+      expect(subject.adapter).to receive(:import).with(destination_flipper.adapter)
+      subject.import(destination_flipper)
+    end
+  end
+
+  describe '#memoize=' do
+    it 'delegates to adapter' do
+      expect(subject.adapter).not_to be_memoizing
+      subject.memoize = true
+      expect(subject.adapter).to be_memoizing
+    end
+  end
+
+  describe '#memoizing?' do
+    it 'delegates to adapter' do
+      subject.memoize = false
+      expect(subject.adapter.memoizing?).to eq(subject.memoizing?)
+      subject.memoize = true
+      expect(subject.adapter.memoizing?).to eq(subject.memoizing?)
     end
   end
 end

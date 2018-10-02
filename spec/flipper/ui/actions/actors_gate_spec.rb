@@ -9,11 +9,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
     end
   end
   let(:session) do
-    if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
-      { csrf: token }
-    else
-      { '_csrf_token' => token }
-    end
+    { :csrf => token, 'csrf' => token, '_csrf_token' => token }
   end
 
   describe 'GET /features/:feature/actors' do
@@ -26,7 +22,23 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
     end
 
     it 'renders add new actor form' do
-      expect(last_response.body).to include('<form action="/features/search/actors" method="post">')
+      form = '<form action="/features/search/actors" method="post" class="form-inline">'
+      expect(last_response.body).to include(form)
+    end
+  end
+
+  describe 'GET /features/:feature/actors with slash in feature name' do
+    before do
+      get 'features/a/b/actors'
+    end
+
+    it 'responds with success' do
+      expect(last_response.status).to be(200)
+    end
+
+    it 'renders add new actor form' do
+      form = '<form action="/features/a/b/actors" method="post" class="form-inline">'
+      expect(last_response.body).to include(form)
     end
   end
 
@@ -86,7 +98,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
       let(:value) { 'User:6' }
 
       before do
-        flipper[:search].enable_actor Flipper::UI::Actor.new('User:6')
+        flipper[:search].enable_actor Flipper::Actor.new('User:6')
         post 'features/search/actors',
              { 'value' => value, 'operation' => 'disable', 'authenticity_token' => token },
              'rack.session' => session
@@ -104,7 +116,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
       context 'value contains whitespace' do
         let(:value) { '  User:6  ' }
 
-        it 'removes item whitout whitespace' do
+        it 'removes item without whitespace' do
           expect(flipper[:search].actors_value).not_to include('User:6')
         end
       end

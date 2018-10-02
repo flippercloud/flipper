@@ -11,7 +11,7 @@ RSpec.describe Flipper::Gates::Group do
     Flipper::FeatureCheckContext.new(
       feature_name: feature_name,
       values: Flipper::GateValues.new(groups: set),
-      thing: Flipper::Types::Actor.new(Struct.new(:flipper_id).new('5'))
+      thing: Flipper::Types::Actor.new(Flipper::Actor.new('5'))
     )
   end
 
@@ -22,7 +22,7 @@ RSpec.describe Flipper::Gates::Group do
       end
 
       it 'ignores group' do
-        thing = Struct.new(:flipper_id).new('5')
+        thing = Flipper::Actor.new('5')
         expect(subject.open?(context(Set[:newbs, :staff]))).to be(true)
       end
     end

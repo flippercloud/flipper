@@ -1,14 +1,19 @@
+require 'forwardable'
 require 'flipper/storage'
 require 'flipper/adapters/memoizable'
 require 'flipper/instrumenters/noop'
 
 module Flipper
   class DSL
+    extend Forwardable
+
     # Private
     attr_reader :storage
 
     # Private: What is being used to instrument all the things.
     attr_reader :instrumenter
+
+    def_delegators :@adapter, :memoize=, :memoizing?
 
     # Public: Returns a new instance of the DSL.
     #
@@ -139,6 +144,24 @@ module Flipper
       feature(name).disable_percentage_of_actors
     end
 
+    # Public: Add a feature.
+    #
+    # name - The String or Symbol name of the feature.
+    #
+    # Returns result of add.
+    def add(name)
+      feature(name).add
+    end
+
+    # Public: Has a feature been added in the adapter.
+    #
+    # name - The String or Symbol name of the feature.
+    #
+    # Returns true if added else false.
+    def exist?(name)
+      feature(name).exist?
+    end
+
     # Public: Remove a feature.
     #
     # name - The String or Symbol name of the feature.
@@ -172,6 +195,14 @@ module Flipper
       features
     end
 
+    # Public: Preload all the adapters features.
+    #
+    # Returns an Array of Flipper::Feature.
+    def preload_all
+      keys = @adapter.get_all.keys
+      keys.map { |key| feature(key) }
+    end
+
     # Public: Shortcut access to a feature instance by name.
     #
     # name - The String or Symbol name of the feature.
@@ -188,7 +219,7 @@ module Flipper
       Types::Boolean.new(value)
     end
 
-    # Public: Event shorter shortcut for getting a boolean type instance.
+    # Public: Even shorter shortcut for getting a boolean type instance.
     #
     # value - The true or false value for the boolean.
     #
@@ -200,7 +231,6 @@ module Flipper
     # name - The String or Symbol name of the feature.
     #
     # Returns an instance of Flipper::Group.
-    # Raises Flipper::GroupNotRegistered if group has not been registered.
     def group(name)
       Flipper.group(name)
     end
@@ -240,6 +270,10 @@ module Flipper
     # Returns Set of Flipper::Feature instances.
     def features
       @storage.features.map { |name| feature(name) }.to_set
+    end
+
+    def import(flipper)
+      adapter.import(flipper.adapter)
     end
   end
 end

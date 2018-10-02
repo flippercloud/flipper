@@ -32,11 +32,11 @@ module Flipper
         def color_class
           case feature.state
           when :on
-            'text-open'
+            'text-success'
           when :off
-            'text-closed'
+            'text-danger'
           when :conditional
-            'text-pending'
+            'text-warning'
           end
         end
 

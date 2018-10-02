@@ -6,7 +6,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfTimeGate do
   describe 'enable' do
     before do
       flipper[:my_feature].disable
-      post '/api/v1/features/my_feature/percentage_of_time', percentage: '10'
+      post '/features/my_feature/percentage_of_time', percentage: '10'
     end
 
     it 'enables gate for feature' do
@@ -19,10 +19,26 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfTimeGate do
     end
   end
 
+  describe 'enable for feature with slash in name' do
+    before do
+      flipper["my/feature"].disable
+      post '/features/my/feature/percentage_of_time', percentage: '10'
+    end
+
+    it 'enables gate for feature' do
+      expect(flipper["my/feature"].enabled_gate_names).to include(:percentage_of_time)
+    end
+
+    it 'returns decorated feature with gate enabled for 5% of time' do
+      gate = json_response['gates'].find { |gate| gate['name'] == 'percentage_of_time' }
+      expect(gate['value']).to eq('10')
+    end
+  end
+
   describe 'disable without percentage' do
     before do
       flipper[:my_feature].enable_percentage_of_time(10)
-      delete '/api/v1/features/my_feature/percentage_of_time'
+      delete '/features/my_feature/percentage_of_time'
     end
 
     it 'disables gate for feature' do
@@ -38,21 +54,21 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfTimeGate do
   describe 'disable with percentage' do
     before do
       flipper[:my_feature].enable_percentage_of_time(10)
-      delete '/api/v1/features/my_feature/percentage_of_time',
-             { percentage: '5' }.to_json,
+      delete '/features/my_feature/percentage_of_time',
+             JSON.generate(percentage: '5'),
              'CONTENT_TYPE' => 'application/json'
     end
 
-    it 'returns decorated feature with gate disabled' do
+    it 'returns decorated feature with gate value set to 0 regardless of percentage requested' do
       expect(last_response.status).to eq(200)
       gate = json_response['gates'].find { |gate| gate['name'] == 'percentage_of_time' }
-      expect(gate['value']).to eq('5')
+      expect(gate['value']).to eq('0')
     end
   end
 
   describe 'non-existent feature' do
     before do
-      delete '/api/v1/features/my_feature/percentage_of_time'
+      delete '/features/my_feature/percentage_of_time'
     end
 
     it 'disables gate for feature' do
@@ -68,7 +84,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfTimeGate do
   describe 'out of range parameter percentage parameter' do
     before do
       flipper[:my_feature].disable
-      post '/api/v1/features/my_feature/percentage_of_time', percentage: '300'
+      post '/features/my_feature/percentage_of_time', percentage: '300'
     end
 
     it '422s with correct error response when percentage parameter is invalid' do
@@ -80,7 +96,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfTimeGate do
   describe 'percentage parameter not an integer' do
     before do
       flipper[:my_feature].disable
-      post '/api/v1/features/my_feature/percentage_of_time', percentage: 'foo'
+      post '/features/my_feature/percentage_of_time', percentage: 'foo'
     end
 
     it '422s with correct error response when percentage parameter is invalid' do
@@ -92,7 +108,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfTimeGate do
   describe 'missing percentage parameter' do
     before do
       flipper[:my_feature].disable
-      post '/api/v1/features/my_feature/percentage_of_time'
+      post '/features/my_feature/percentage_of_time'
     end
 
     it '422s with correct error response when percentage parameter is missing' do

@@ -1,5 +1,3 @@
-![flipper logo](https://raw.githubusercontent.com/jnunemaker/flipper/master/lib/flipper/ui/public/images/logo.png)
-
 <pre>
                                    __
                                _.-~  )
@@ -42,25 +40,32 @@ The goal of the API for flipper was to have everything revolve around features a
 ```ruby
 require 'flipper'
 
-# pick an adapter
-require 'flipper/adapters/memory'
-adapter = Flipper::Adapters::Memory.new
+Flipper.configure do |config|
+  config.default do
+    # pick an adapter, this uses memory, any will do
+    adapter = Flipper::Adapters::Memory.new
 
-# get a handy dsl instance
-flipper = Flipper.new(adapter)
+    # pass adapter to handy DSL instance
+    Flipper.new(adapter)
+  end
+end
 
-# grab a feature
-search = flipper[:search]
-
-# check if that feature is enabled
-if search.enabled?
+# check if search is enabled
+if Flipper.enabled?(:search)
   puts 'Search away!'
 else
   puts 'No search for you!'
 end
 
 puts 'Enabling Search...'
-search.enable
+Flipper.enable(:search)
+
+# check if search is enabled
+if Flipper.enabled?(:search)
+  puts 'Search away!'
+else
+  puts 'No search for you!'
+end
 ```
 
 Of course there are more [examples for you to peruse](examples/). You could also check out the [DSL](lib/flipper/dsl.rb) and [Feature](lib/flipper/feature.rb) classes for code/docs.
@@ -69,7 +74,7 @@ Of course there are more [examples for you to peruse](examples/). You could also
 
 * [Gates](docs/Gates.md) - Boolean, Groups, Actors, % of Actors, and % of Time
 * [Adapters](docs/Adapters.md) - Mongo, Redis, Cassandra, Active Record...
-* [Instrumentation](docs/Instrumentation.md) - ActiveSupport::Notifications, Statsd and Metriks
+* [Instrumentation](docs/Instrumentation.md) - ActiveSupport::Notifications and Statsd
 * [Optimization](docs/Optimization.md) - Memoization middleware and Cache adapters
 * [Web Interface](docs/ui/README.md) - Point and click...
 * [API](docs/api/README.md) - HTTP API interface
@@ -97,4 +102,5 @@ Of course there are more [examples for you to peruse](examples/). You could also
 |---|---|---|
 | ![@jnunemaker](https://avatars3.githubusercontent.com/u/235?s=64) | [@jnunemaker](https://github.com/jnunemaker) | most things |
 | ![@alexwheeler](https://avatars3.githubusercontent.com/u/3260042?s=64) | [@alexwheeler](https://github.com/alexwheeler) | api |
+| ![@thetimbanks](https://avatars1.githubusercontent.com/u/471801?s=64) | [@thetimbanks](https://github.com/thetimbanks) | ui |
 | ![@lazebny](https://avatars1.githubusercontent.com/u/6276766?s=64) | [@lazebny](https://github.com/lazebny) | docker |

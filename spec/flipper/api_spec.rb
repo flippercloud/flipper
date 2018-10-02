@@ -16,7 +16,7 @@ RSpec.describe Flipper::Api do
       env = {
         'flipper' => env_flipper,
       }
-      get 'api/v1/features', params, env
+      get '/features', params, env
 
       expect(last_response.status).to eq(200)
       feature_names = json_response.fetch('features').map { |feature| feature.fetch('key') }
@@ -35,11 +35,45 @@ RSpec.describe Flipper::Api do
       env = {
         'flipper' => flipper,
       }
-      get 'api/v1/features', params, env
+      get '/features', params, env
 
       expect(last_response.status).to eq(200)
       feature_names = json_response.fetch('features').map { |feature| feature.fetch('key') }
       expect(feature_names).to eq(%w(a b))
+    end
+  end
+
+  context 'when initialized with env_key' do
+    let(:app) { build_api(flipper, env_key: 'flipper_api') }
+
+    it 'uses provided env key instead of default' do
+      flipper[:a].enable
+      flipper[:b].disable
+
+      default_env_flipper = build_flipper
+      default_env_flipper[:env_a].enable
+      default_env_flipper[:env_b].disable
+
+      params = {}
+      env = {
+        'flipper' => default_env_flipper,
+        'flipper_api' => flipper,
+      }
+      get '/features', params, env
+
+      expect(last_response.status).to eq(200)
+      feature_names = json_response.fetch('features').map { |feature| feature.fetch('key') }
+      expect(feature_names).to eq(%w(a b))
+    end
+  end
+
+  context "when request does not match any api routes" do
+    let(:app) { build_api(flipper) }
+
+    it "returns 404" do
+      get '/gibberish'
+      expect(last_response.status).to eq(404)
+      expect(json_response).to eq({})
     end
   end
 end

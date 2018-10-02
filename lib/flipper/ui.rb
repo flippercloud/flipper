@@ -9,44 +9,60 @@ end
 require 'rack/protection'
 
 require 'flipper'
-require 'flipper/middleware/memoizer'
-
-require 'flipper/ui/actor'
 require 'flipper/ui/middleware'
+require 'flipper/ui/configuration'
 
 module Flipper
   module UI
     class << self
-      # Public: If you set this, the UI will always have a first breadcrumb that
-      # says "App" which points to this href. The href can be a path (ie: "/")
-      # or full url ("https://app.example.com/").
-      attr_accessor :application_breadcrumb_href
+      # These three configuration options have been moved to Flipper::UI::Configuration
+      deprecated_configuration_options = %w(application_breadcrumb_href
+                                            feature_creation_enabled
+                                            feature_removal_enabled)
+      deprecated_configuration_options.each do |attribute_name|
+        send(:define_method, "#{attribute_name}=".to_sym) do
+          raise ConfigurationDeprecated, "The UI configuration for #{attribute_name} has " \
+            "deprecated. This configuration option has moved to Flipper::UI::Configuration"
+        end
 
-      # Public: Is feature creation allowed from the UI? Defaults to true. If
-      # set to false, users of the UI cannot create features. All feature
-      # creation will need to be done through the conigured flipper instance.
-      attr_accessor :feature_creation_enabled
+        send(:define_method, attribute_name.to_sym) do
+          raise ConfigurationDeprecated, "The UI configuration for #{attribute_name} has " \
+            "deprecated. This configuration option has moved to Flipper::UI::Configuration"
+        end
+      end
+
+      # Public: Set attributes on this instance to customize UI text
+      attr_reader :configuration
     end
-
-    self.feature_creation_enabled = true
 
     def self.root
       @root ||= Pathname(__FILE__).dirname.expand_path.join('ui')
     end
 
-    def self.app(flipper, _options = {})
-      app = ->(_env) { [200, { 'Content-Type' => 'text/html' }, ['']] }
+    def self.app(flipper = nil, options = {})
+      env_key = options.fetch(:env_key, 'flipper')
+      app = ->() { [200, { 'Content-Type' => 'text/html' }, ['']] }
       builder = Rack::Builder.new
       yield builder if block_given?
       builder.use Rack::Protection
       builder.use Rack::Protection::AuthenticityToken
       builder.use Rack::MethodOverride
-      builder.use Flipper::Middleware::Memoizer, flipper
-      builder.use Middleware, flipper
+      builder.use Flipper::Middleware::SetupEnv, flipper, env_key: env_key
+      builder.use Flipper::Middleware::Memoizer, env_key: env_key
+      builder.use Middleware, env_key: env_key
       builder.run app
       klass = self
       builder.define_singleton_method(:inspect) { klass.inspect } # pretty rake routes output
       builder
+    end
+
+    # Public: yields configuration instance for customizing UI text
+    def self.configure
+      yield(configuration)
+    end
+
+    def self.configuration
+      @configuration ||= ::Flipper::UI::Configuration.new
     end
   end
 end

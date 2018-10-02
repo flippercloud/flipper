@@ -9,12 +9,9 @@ RSpec.describe Flipper::UI do
     end
   end
   let(:session) do
-    if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
-      { csrf: token }
-    else
-      { '_csrf_token' => token }
-    end
+    { :csrf => token, 'csrf' => token, '_csrf_token' => token }
   end
+  let(:configuration) { described_class.configuration }
 
   describe 'Initializing middleware with flipper instance' do
     let(:app) { build_app(flipper) }
@@ -63,91 +60,186 @@ RSpec.describe Flipper::UI do
     expect(last_response.headers['Location']).to eq('/features/refactor-images')
   end
 
-  it 'does not have an application_breadcrumb_href by default' do
-    expect(described_class.application_breadcrumb_href).to be(nil)
-  end
-
-  context 'with application_breadcrumb_href not set' do
-    before do
-      @original_application_breadcrumb_href = described_class.application_breadcrumb_href
-      described_class.application_breadcrumb_href = nil
-    end
-
-    after do
-      described_class.application_breadcrumb_href = @original_application_breadcrumb_href
-    end
-
-    it 'does not add App breadcrumb' do
-      get '/features'
-      expect(last_response.body).not_to include('<a href="/myapp">App</a>')
+  describe "application_breadcrumb_href" do
+    it "raises an exception since it is deprecated" do
+      expect { described_class.application_breadcrumb_href }
+        .to raise_error(Flipper::ConfigurationDeprecated)
     end
   end
 
-  context 'with application_breadcrumb_href set' do
-    before do
-      @original_application_breadcrumb_href = described_class.application_breadcrumb_href
-      described_class.application_breadcrumb_href = '/myapp'
-    end
-
-    after do
-      described_class.application_breadcrumb_href = @original_application_breadcrumb_href
-    end
-
-    it 'does add App breadcrumb' do
-      get '/features'
-      expect(last_response.body).to include('<a href="/myapp">App</a>')
+  describe "feature_creation_enabled" do
+    it "raises an exception since it is deprecated" do
+      expect { described_class.feature_creation_enabled }
+        .to raise_error(Flipper::ConfigurationDeprecated)
     end
   end
 
-  context 'with application_breadcrumb_href set to full url' do
-    before do
-      @original_application_breadcrumb_href = described_class.application_breadcrumb_href
-      described_class.application_breadcrumb_href = 'https://myapp.com/'
-    end
-
-    after do
-      described_class.application_breadcrumb_href = @original_application_breadcrumb_href
-    end
-
-    it 'does add App breadcrumb' do
-      get '/features'
-      expect(last_response.body).to include('<a href="https://myapp.com/">App</a>')
+  describe "feature_removal_enabled" do
+    it "raises an exception since it is deprecated" do
+      expect { described_class.feature_removal_enabled }
+        .to raise_error(Flipper::ConfigurationDeprecated)
     end
   end
 
-  it 'sets feature_creation_enabled to true by default' do
-    expect(described_class.feature_creation_enabled).to be(true)
-  end
-
-  context 'with feature_creation_enabled set to true' do
-    before do
-      @original_feature_creation_enabled = described_class.feature_creation_enabled
-      described_class.feature_creation_enabled = true
+  describe 'configure' do
+    it 'yields configuration instance' do
+      described_class.configure do |config|
+        expect(config).to be_instance_of(Flipper::UI::Configuration)
+      end
     end
 
-    it 'has the add_feature button' do
-      get '/features'
-      expect(last_response.body).to include('Add Feature')
+    describe 'banner' do
+      it 'does not include the banner if banner_text is not set' do
+        get '/features'
+        expect(last_response.body).not_to include('Production Environment')
+      end
+
+      describe 'when set' do
+        around do |example|
+          begin
+            @original_banner_text = described_class.configuration.banner_text
+            described_class.configuration.banner_text = 'Production Environment'
+            example.run
+          ensure
+            described_class.configuration.banner_text = @original_banner_text
+          end
+        end
+
+        it 'includes banner' do
+          get '/features'
+          expect(last_response.body).to include('Production Environment')
+        end
+      end
     end
 
-    after do
-      described_class.feature_creation_enabled = @original_feature_creation_enabled
-    end
-  end
+    describe "application_breadcrumb_href" do
+      it 'does not have an application_breadcrumb_href by default' do
+        expect(configuration.application_breadcrumb_href).to be(nil)
+      end
 
-  context 'with feature_creation_enabled set to false' do
-    before do
-      @original_feature_creation_enabled = described_class.feature_creation_enabled
-      described_class.feature_creation_enabled = false
+      context 'with application_breadcrumb_href not set' do
+        before do
+          @original_application_breadcrumb_href = configuration.application_breadcrumb_href
+          configuration.application_breadcrumb_href = nil
+        end
+
+        after do
+          configuration.application_breadcrumb_href = @original_application_breadcrumb_href
+        end
+
+        it 'does not add App breadcrumb' do
+          get '/features'
+          expect(last_response.body).not_to include('<a href="/myapp">App</a>')
+        end
+      end
+
+      context 'with application_breadcrumb_href set' do
+        before do
+          @original_application_breadcrumb_href = configuration.application_breadcrumb_href
+          configuration.application_breadcrumb_href = '/myapp'
+        end
+
+        after do
+          configuration.application_breadcrumb_href = @original_application_breadcrumb_href
+        end
+
+        it 'does add App breadcrumb' do
+          get '/features'
+          expect(last_response.body).to include('<a href="/myapp">App</a>')
+        end
+      end
+
+      context 'with application_breadcrumb_href set to full url' do
+        before do
+          @original_application_breadcrumb_href = configuration.application_breadcrumb_href
+          configuration.application_breadcrumb_href = 'https://myapp.com/'
+        end
+
+        after do
+          configuration.application_breadcrumb_href = @original_application_breadcrumb_href
+        end
+
+        it 'does add App breadcrumb' do
+          get '/features'
+          expect(last_response.body).to include('<a href="https://myapp.com/">App</a>')
+        end
+      end
     end
 
-    it 'does not have the add_feature button' do
-      get '/features'
-      expect(last_response.body).not_to include('Add Feature')
+    describe "feature_creation_enabled" do
+      it 'sets feature_creation_enabled to true by default' do
+        expect(configuration.feature_creation_enabled).to be(true)
+      end
+
+      context 'with feature_creation_enabled set to true' do
+        before do
+          @original_feature_creation_enabled = configuration.feature_creation_enabled
+          configuration.feature_creation_enabled = true
+        end
+
+        it 'has the add_feature button' do
+          get '/features'
+          expect(last_response.body).to include('Add Feature')
+        end
+
+        after do
+          configuration.feature_creation_enabled = @original_feature_creation_enabled
+        end
+      end
+
+      context 'with feature_creation_enabled set to false' do
+        before do
+          @original_feature_creation_enabled = configuration.feature_creation_enabled
+          configuration.feature_creation_enabled = false
+        end
+
+        it 'does not have the add_feature button' do
+          get '/features'
+          expect(last_response.body).not_to include('Add Feature')
+        end
+
+        after do
+          configuration.feature_creation_enabled = @original_feature_creation_enabled
+        end
+      end
     end
 
-    after do
-      described_class.feature_creation_enabled = @original_feature_creation_enabled
+    describe "feature_removal_enabled" do
+      it 'sets feature_removal_enabled to true by default' do
+        expect(configuration.feature_removal_enabled).to be(true)
+      end
+
+      context 'with feature_removal_enabled set to true' do
+        before do
+          @original_feature_removal_enabled = configuration.feature_removal_enabled
+          configuration.feature_removal_enabled = true
+        end
+
+        it 'has the add_feature button' do
+          get '/features/test'
+          expect(last_response.body).to include('Delete')
+        end
+
+        after do
+          configuration.feature_removal_enabled = @original_feature_removal_enabled
+        end
+      end
+
+      context 'with feature_removal_enabled set to false' do
+        before do
+          @original_feature_removal_enabled = configuration.feature_removal_enabled
+          configuration.feature_removal_enabled = false
+        end
+
+        it 'does not have the add_feature button' do
+          get '/features/test'
+          expect(last_response.body).not_to include('Delete')
+        end
+
+        after do
+          configuration.feature_removal_enabled = @original_feature_removal_enabled
+        end
+      end
     end
   end
 end

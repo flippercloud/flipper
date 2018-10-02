@@ -6,7 +6,9 @@ module Flipper
     module V1
       module Actions
         class PercentageOfTimeGate < Api::Action
-          route %r{api/v1/features/[^/]*/percentage_of_time/?\Z}
+          include FeatureNameFromRoute
+
+          route %r{\A/features/(?<feature_name>.*)/percentage_of_time/?\Z}
 
           def post
             if percentage < 0 || percentage > 100
@@ -21,22 +23,13 @@ module Flipper
 
           def delete
             feature = flipper[feature_name]
-
-            if percentage >= 0
-              feature.enable_percentage_of_time(percentage)
-            else
-              feature.disable_percentage_of_time
-            end
+            feature.disable_percentage_of_time
 
             decorated_feature = Decorators::Feature.new(feature)
             json_response(decorated_feature.as_json, 200)
           end
 
           private
-
-          def feature_name
-            @feature_name ||= Rack::Utils.unescape(path_parts[-2])
-          end
 
           def percentage
             @percentage ||= begin

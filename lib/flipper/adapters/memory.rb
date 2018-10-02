@@ -8,7 +8,7 @@ module Flipper
     class Memory
       include ::Flipper::Adapter
 
-      FeaturesKey = :flipper_features
+      FeaturesKey = :features
 
       # Public: The name of the adapter.
       attr_reader :name
@@ -19,7 +19,7 @@ module Flipper
       end
 
       def features
-        set_members(FeaturesKey)
+        read_feature_keys
       end
 
       def add(feature)
@@ -41,21 +41,19 @@ module Flipper
       end
 
       def get(feature)
-        result = {}
+        read_feature(feature)
+      end
 
-        feature.gates.each do |gate|
-          result[gate.key] =
-            case gate.data_type
-            when :boolean, :integer
-              read key(feature, gate)
-            when :set
-              set_members key(feature, gate)
-            else
-              raise "#{gate} is not supported by this adapter yet"
-            end
+      def get_multi(features)
+        read_many_features(features)
+      end
+
+      def get_all
+        features = read_feature_keys.map do |key|
+          Flipper::Feature.new(key, self)
         end
 
-        result
+        read_many_features(features)
       end
 
       def enable(feature, gate, thing)
@@ -96,8 +94,39 @@ module Flipper
 
       private
 
+      def read_feature_keys
+        set_members(FeaturesKey)
+      end
+
+      # Private
       def key(feature, gate)
-        "#{feature.key}/#{gate.key}"
+        "feature/#{feature.key}/#{gate.key}"
+      end
+
+      def read_many_features(features)
+        result = {}
+        features.each do |feature|
+          result[feature.key] = read_feature(feature)
+        end
+        result
+      end
+
+      def read_feature(feature)
+        result = {}
+
+        feature.gates.each do |gate|
+          result[gate.key] =
+            case gate.data_type
+            when :boolean, :integer
+              read key(feature, gate)
+            when :set
+              set_members key(feature, gate)
+            else
+              raise "#{gate} is not supported by this adapter yet"
+            end
+        end
+
+        result
       end
 
       def read(key)

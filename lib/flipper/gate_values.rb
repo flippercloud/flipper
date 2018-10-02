@@ -1,4 +1,5 @@
 require 'set'
+require 'flipper/typecast'
 
 module Flipper
   class GateValues
@@ -22,8 +23,8 @@ module Flipper
       @boolean = Typecast.to_boolean(adapter_values[:boolean])
       @actors = Typecast.to_set(adapter_values[:actors])
       @groups = Typecast.to_set(adapter_values[:groups])
-      @percentage_of_actors = Typecast.to_integer(adapter_values[:percentage_of_actors])
-      @percentage_of_time = Typecast.to_integer(adapter_values[:percentage_of_time])
+      @percentage_of_actors = Typecast.to_percentage(adapter_values[:percentage_of_actors])
+      @percentage_of_time = Typecast.to_percentage(adapter_values[:percentage_of_time])
     end
 
     def [](key)

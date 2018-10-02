@@ -12,7 +12,7 @@ new contributor could start working on code with a minumum efforts.
 1. Run specs `docker-compose run --rm app bundle exec rspec`
 1. Run tests `docker-compose run --rm app bundle exec rake test`
 1. Clear and check files with Rubocop `docker-compose run --rm  app bundle exec rubocop -D`
-1. Optional: log in to container an using a bash for running specs
+1. Optional: log in to container an using a `bash` shell for running specs
 ```sh
 docker-compose run --rm app bash
 bundle exec rspec

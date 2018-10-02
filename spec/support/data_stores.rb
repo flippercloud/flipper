@@ -11,7 +11,7 @@ ActiveRecord::Migration.verbose = false
 
 module DataStores
   def self.redis
-    @redis ||= Redis.new
+    @redis ||= Redis.new(url: ENV.fetch('REDIS_URL', 'redis://localhost:6379'))
   end
 
   def self.reset_redis
@@ -34,7 +34,7 @@ module DataStores
   end
 
   def self.dalli
-    @dalli ||= Dalli::Client.new('localhost:11211')
+    @dalli ||= Dalli::Client.new(ENV.fetch('MEMCACHED_URL', 'localhost:11211'))
   end
 
   def self.reset_dalli

@@ -4,10 +4,26 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
   let(:app) { build_api(flipper) }
 
   describe 'enable' do
+    context 'for feature with slash in name' do
+      before do
+        flipper["my/feature"].disable
+        post '/features/my/feature/percentage_of_actors', percentage: '10'
+      end
+
+      it 'enables gate for feature' do
+        expect(flipper["my/feature"].enabled_gate_names).to include(:percentage_of_actors)
+      end
+
+      it 'returns decorated feature with gate enabled for 10 percent of actors' do
+        gate = json_response['gates'].find { |gate| gate['name'] == 'percentage_of_actors' }
+        expect(gate['value']).to eq('10')
+      end
+    end
+
     context 'url-encoded request' do
       before do
         flipper[:my_feature].disable
-        post '/api/v1/features/my_feature/percentage_of_actors', percentage: '10'
+        post '/features/my_feature/percentage_of_actors', percentage: '10'
       end
 
       it 'enables gate for feature' do
@@ -23,8 +39,8 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
     context 'json request' do
       before do
         flipper[:my_feature].disable
-        post '/api/v1/features/my_feature/percentage_of_actors',
-             { percentage: '10' }.to_json,
+        post '/features/my_feature/percentage_of_actors',
+             JSON.generate(percentage: '10'),
              'CONTENT_TYPE' => 'application/json'
       end
 
@@ -42,7 +58,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
   describe 'disable without percentage' do
     before do
       flipper[:my_feature].enable_percentage_of_actors(10)
-      delete '/api/v1/features/my_feature/percentage_of_actors'
+      delete '/features/my_feature/percentage_of_actors'
     end
 
     it 'disables gate for feature' do
@@ -58,20 +74,20 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
   describe 'disable with percentage' do
     before do
       flipper[:my_feature].enable_percentage_of_actors(10)
-      delete '/api/v1/features/my_feature/percentage_of_actors',
-             { percentage: '5' }.to_json,
+      delete '/features/my_feature/percentage_of_actors',
+             JSON.generate(percentage: '5'),
              'CONTENT_TYPE' => 'application/json'
     end
 
-    it 'returns decorated feature with gate disabled' do
+    it 'returns decorated feature with gate value set to 0 regardless of percentage requested' do
       gate = json_response['gates'].find { |gate| gate['name'] == 'percentage_of_actors' }
-      expect(gate['value']).to eq('5')
+      expect(gate['value']).to eq('0')
     end
   end
 
   describe 'non-existent feature' do
     before do
-      delete '/api/v1/features/my_feature/percentage_of_actors'
+      delete '/features/my_feature/percentage_of_actors'
     end
 
     it 'disables gate for feature' do
@@ -88,7 +104,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
   describe 'out of range parameter percentage parameter' do
     before do
       flipper[:my_feature].disable
-      post '/api/v1/features/my_feature/percentage_of_actors', percentage: '300'
+      post '/features/my_feature/percentage_of_actors', percentage: '300'
     end
 
     it '422s with correct error response when percentage parameter is invalid' do
@@ -100,7 +116,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
   describe 'percentage parameter not an integer' do
     before do
       flipper[:my_feature].disable
-      post '/api/v1/features/my_feature/percentage_of_actors', percentage: 'foo'
+      post '/features/my_feature/percentage_of_actors', percentage: 'foo'
     end
 
     it '422s with correct error response when percentage parameter is invalid' do
@@ -112,7 +128,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
   describe 'missing percentage parameter' do
     before do
       flipper[:my_feature].disable
-      post '/api/v1/features/my_feature/percentage_of_actors'
+      post '/features/my_feature/percentage_of_actors'
     end
 
     it '422s with correct error response when percentage parameter is missing' do

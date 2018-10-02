@@ -6,9 +6,11 @@ lib_path  = root_path.join('lib')
 $:.unshift(lib_path)
 
 require 'flipper/adapters/v2/redis'
-
-client = Redis.new
-client.flushdb
+options = {}
+if ENV['REDIS_URL']
+  options[:url] = ENV['REDIS_URL']
+end
+client = Redis.new(options)
 adapter = Flipper::Adapters::V2::Redis.new(client)
 flipper = Flipper.new(adapter)
 

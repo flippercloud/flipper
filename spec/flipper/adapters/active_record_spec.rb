@@ -2,6 +2,9 @@ require 'helper'
 require 'flipper/adapters/active_record'
 require 'flipper/spec/shared_adapter_specs'
 
+# Turn off migration logging for specs
+ActiveRecord::Migration.verbose = false
+
 RSpec.describe Flipper::Adapters::ActiveRecord do
   subject { described_class.new }
 

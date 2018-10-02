@@ -9,7 +9,26 @@ module Flipper
     class OperationLogger < SimpleDelegator
       include ::Flipper::Adapter
 
-      Operation = Struct.new(:type, :args)
+      class Operation
+        attr_reader :type, :args
+
+        def initialize(type, args)
+          @type = type
+          @args = args
+        end
+      end
+
+      OperationTypes = [
+        :features,
+        :add,
+        :remove,
+        :clear,
+        :get,
+        :get_multi,
+        :get_all,
+        :enable,
+        :disable,
+      ].freeze
 
       # Internal: An array of the operations that have happened.
       attr_reader :operations
@@ -56,6 +75,12 @@ module Flipper
       end
 
       # Public
+      def get_all
+        @operations << Operation.new(:get_all, [])
+        @adapter.get_all
+      end
+
+      # Public
       def enable(feature, gate, thing)
         @operations << Operation.new(:enable, [feature, gate, thing])
         @adapter.enable(feature, gate, thing)
@@ -68,7 +93,12 @@ module Flipper
 
       # Public: Count the number of times a certain operation happened.
       def count(type)
-        @operations.select { |operation| operation.type == type }.size
+        type(type).size
+      end
+
+      # Public: Get all operations of a certain type.
+      def type(type)
+        @operations.select { |operation| operation.type == type }
       end
 
       # Public: Get the last operation of a certain type.
