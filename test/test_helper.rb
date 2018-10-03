@@ -14,7 +14,6 @@ require 'rails/test_help'
 
 begin
   ActiveSupport::TestCase.test_order = :random
-# rubocop:disable Lint/HandleExceptions
 rescue NoMethodError
   # no biggie, means we are on older version of AS that doesn't have this option
 end
