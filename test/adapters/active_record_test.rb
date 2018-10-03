@@ -2,9 +2,6 @@ require 'test_helper'
 require 'flipper/test/shared_adapter_test'
 require 'flipper/adapters/active_record'
 
-# Turn off migration logging for specs
-ActiveRecord::Migration.verbose = false
-
 class ActiveRecordTest < MiniTest::Test
   prepend Flipper::Test::SharedAdapterTests
 

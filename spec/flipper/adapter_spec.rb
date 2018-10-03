@@ -1,8 +1,6 @@
 require 'helper'
 
 RSpec.describe Flipper::Adapter do
-  let(:source_flipper) { build_flipper }
-  let(:destination_flipper) { build_flipper }
   let(:default_config) do
     {
       boolean: nil,
@@ -32,89 +30,113 @@ RSpec.describe Flipper::Adapter do
   end
 
   describe '#import' do
-    it 'returns nothing' do
-      result = destination_flipper.import(source_flipper)
-      expect(result).to be(nil)
-    end
+    [
+      [
+        -> { Flipper.new(Flipper::Adapters::Memory.new) },
+        -> { Flipper.new(Flipper::Adapters::Memory.new) },
+      ],
+      [
+        -> { Flipper.new(Flipper::Adapters::V2::Memory.new) },
+        -> { Flipper.new(Flipper::Adapters::V2::Memory.new) },
+      ],
+      [
+        -> { Flipper.new(Flipper::Adapters::Memory.new) },
+        -> { Flipper.new(Flipper::Adapters::V2::Memory.new) },
+      ],
+      [
+        -> { Flipper.new(Flipper::Adapters::V2::Memory.new) },
+        -> { Flipper.new(Flipper::Adapters::Memory.new) },
+      ],
+    ].each do |(source_builder, destination_builder)|
+      context "from source V#{destination_builder.call.adapter.version} to destination V#{source_builder.call.adapter.version}" do
+        let(:source_flipper) { source_builder.call }
+        let(:destination_flipper) { destination_builder.call }
 
-    it 'can import from one adapter to another' do
-      source_flipper.enable(:search)
-      destination_flipper.import(source_flipper)
-      expect(destination_flipper[:search].boolean_value).to eq(true)
-      expect(destination_flipper.features.map(&:key).sort).to eq(%w(search))
-    end
+        it 'returns nothing' do
+          result = destination_flipper.import(source_flipper)
+          expect(result).to be(nil)
+        end
 
-    it 'can import features that have been added but their state is off' do
-      source_flipper.add(:search)
-      destination_flipper.import(source_flipper)
-      expect(destination_flipper.features.map(&:key)).to eq(["search"])
-    end
+        it 'can import from one adapter to another' do
+          source_flipper.enable(:search)
+          destination_flipper.import(source_flipper)
+          expect(destination_flipper[:search].boolean_value).to eq(true)
+          expect(destination_flipper.features.map(&:key).sort).to eq(%w(search))
+        end
 
-    it 'can import multiple features' do
-      source_flipper.enable(:yep)
-      source_flipper.enable_group(:preview_features, :developers)
-      source_flipper.enable_group(:preview_features, :marketers)
-      source_flipper.enable_group(:preview_features, :company)
-      source_flipper.enable_group(:preview_features, :early_access)
-      source_flipper.enable_actor(:preview_features, Flipper::Actor.new('1'))
-      source_flipper.enable_actor(:preview_features, Flipper::Actor.new('2'))
-      source_flipper.enable_actor(:preview_features, Flipper::Actor.new('3'))
-      source_flipper.enable_percentage_of_actors(:issues_next, 25)
-      source_flipper.enable_percentage_of_time(:verbose_logging, 5)
+        it 'can import features that have been added but their state is off' do
+          source_flipper.add(:search)
+          destination_flipper.import(source_flipper)
+          expect(destination_flipper.features.map(&:key)).to eq(["search"])
+        end
 
-      destination_flipper.import(source_flipper)
+        it 'can import multiple features' do
+          source_flipper.enable(:yep)
+          source_flipper.enable_group(:preview_features, :developers)
+          source_flipper.enable_group(:preview_features, :marketers)
+          source_flipper.enable_group(:preview_features, :company)
+          source_flipper.enable_group(:preview_features, :early_access)
+          source_flipper.enable_actor(:preview_features, Flipper::Actor.new('1'))
+          source_flipper.enable_actor(:preview_features, Flipper::Actor.new('2'))
+          source_flipper.enable_actor(:preview_features, Flipper::Actor.new('3'))
+          source_flipper.enable_percentage_of_actors(:issues_next, 25)
+          source_flipper.enable_percentage_of_time(:verbose_logging, 5)
 
-      feature = destination_flipper[:yep]
-      expect(feature.boolean_value).to be(true)
-      expect(feature.groups_value).to eq(Set[])
-      expect(feature.actors_value).to eq(Set[])
-      expect(feature.percentage_of_actors_value).to be(0)
-      expect(feature.percentage_of_time_value).to be(0)
+          destination_flipper.import(source_flipper)
 
-      feature = destination_flipper[:preview_features]
-      expect(feature.boolean_value).to be(false)
-      expect(feature.actors_value).to eq(Set['1', '2', '3'])
-      expected_groups = Set['developers', 'marketers', 'company', 'early_access']
-      expect(feature.groups_value).to eq(expected_groups)
-      expect(feature.percentage_of_actors_value).to be(0)
-      expect(feature.percentage_of_time_value).to be(0)
+          feature = destination_flipper[:yep]
+          expect(feature.boolean_value).to be(true)
+          expect(feature.groups_value).to eq(Set[])
+          expect(feature.actors_value).to eq(Set[])
+          expect(feature.percentage_of_actors_value).to be(0)
+          expect(feature.percentage_of_time_value).to be(0)
 
-      feature = destination_flipper[:issues_next]
-      expect(feature.boolean_value).to eq(false)
-      expect(feature.actors_value).to eq(Set.new)
-      expect(feature.groups_value).to eq(Set.new)
-      expect(feature.percentage_of_actors_value).to be(25)
-      expect(feature.percentage_of_time_value).to be(0)
+          feature = destination_flipper[:preview_features]
+          expect(feature.boolean_value).to be(false)
+          expect(feature.actors_value).to eq(Set['1', '2', '3'])
+          expected_groups = Set['developers', 'marketers', 'company', 'early_access']
+          expect(feature.groups_value).to eq(expected_groups)
+          expect(feature.percentage_of_actors_value).to be(0)
+          expect(feature.percentage_of_time_value).to be(0)
 
-      feature = destination_flipper[:verbose_logging]
-      expect(feature.boolean_value).to eq(false)
-      expect(feature.actors_value).to eq(Set.new)
-      expect(feature.groups_value).to eq(Set.new)
-      expect(feature.percentage_of_actors_value).to be(0)
-      expect(feature.percentage_of_time_value).to be(5)
-    end
+          feature = destination_flipper[:issues_next]
+          expect(feature.boolean_value).to eq(false)
+          expect(feature.actors_value).to eq(Set.new)
+          expect(feature.groups_value).to eq(Set.new)
+          expect(feature.percentage_of_actors_value).to be(25)
+          expect(feature.percentage_of_time_value).to be(0)
 
-    it 'wipes existing enablements for adapter' do
-      destination_flipper.enable(:stats)
-      destination_flipper.enable_percentage_of_time(:verbose_logging, 5)
-      source_flipper.enable_percentage_of_time(:stats, 5)
-      source_flipper.enable_percentage_of_actors(:verbose_logging, 25)
+          feature = destination_flipper[:verbose_logging]
+          expect(feature.boolean_value).to eq(false)
+          expect(feature.actors_value).to eq(Set.new)
+          expect(feature.groups_value).to eq(Set.new)
+          expect(feature.percentage_of_actors_value).to be(0)
+          expect(feature.percentage_of_time_value).to be(5)
+        end
 
-      destination_flipper.import(source_flipper)
+        it 'wipes existing enablements for adapter' do
+          destination_flipper.enable(:stats)
+          destination_flipper.enable_percentage_of_time(:verbose_logging, 5)
+          source_flipper.enable_percentage_of_time(:stats, 5)
+          source_flipper.enable_percentage_of_actors(:verbose_logging, 25)
 
-      feature = destination_flipper[:stats]
-      expect(feature.boolean_value).to be(false)
-      expect(feature.percentage_of_time_value).to be(5)
+          destination_flipper.import(source_flipper)
 
-      feature = destination_flipper[:verbose_logging]
-      expect(feature.percentage_of_time_value).to be(0)
-      expect(feature.percentage_of_actors_value).to be(25)
-    end
+          feature = destination_flipper[:stats]
+          expect(feature.boolean_value).to be(false)
+          expect(feature.percentage_of_time_value).to be(5)
 
-    it 'wipes existing features for adapter' do
-      destination_flipper.add(:stats)
-      destination_flipper.import(source_flipper)
-      expect(destination_flipper.features.map(&:key)).to eq([])
+          feature = destination_flipper[:verbose_logging]
+          expect(feature.percentage_of_time_value).to be(0)
+          expect(feature.percentage_of_actors_value).to be(25)
+        end
+
+        it 'wipes existing features for adapter' do
+          destination_flipper.add(:stats)
+          destination_flipper.import(source_flipper)
+          expect(destination_flipper.features.map(&:key)).to eq([])
+        end
+      end
     end
   end
 end

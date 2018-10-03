@@ -35,7 +35,7 @@ RSpec.describe Flipper::Adapters::Sync::FeatureSynchronizer do
           described_class.new(feature, feature.gate_values, remote).call
 
           expect(gate_values_for_feature(feature).fetch(:boolean)).to be(nil)
-          expect_only_disable
+          expect_only_clear
         end
       end
 
@@ -228,6 +228,19 @@ RSpec.describe Flipper::Adapters::Sync::FeatureSynchronizer do
     when Flipper::Adapter::V1
       expect(adapter.count(:enable)).to be(0)
       expect(adapter.count(:disable)).to be(1)
+    when Flipper::Adapter::V2
+      expect(adapter.count(:set)).to be(1)
+    else
+      raise 'unsupported adapter version'
+    end
+  end
+
+  def expect_only_clear
+    case adapter.version
+    when Flipper::Adapter::V1
+      expect(adapter.count(:enable)).to be(0)
+      expect(adapter.count(:disable)).to be(0)
+      expect(adapter.count(:clear)).to be(1)
     when Flipper::Adapter::V2
       expect(adapter.count(:set)).to be(1)
     else

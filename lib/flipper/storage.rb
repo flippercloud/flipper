@@ -97,7 +97,8 @@ module Flipper
         @adapter.get_all
       when Adapter::V2
         set = v2_features
-        get_multi(set)
+        instances = set.map { |key| build_feature(key) }
+        get_multi(instances)
       end
     end
 
@@ -147,15 +148,23 @@ module Flipper
       @adapter.import(source_storage.adapter)
     end
 
+    def build_feature(key)
+      @adapter.build_feature(key)
+    end
+
+    def default_config
+      @adapter.default_config
+    end
+
     private
 
     def disable_v1(feature, gate, thing)
       add(feature)
-      @adapter.disable feature, gate, thing
-      # if gate.is_a?(Gates::Boolean)
-      #   @adapter.clear feature
-      # else
-      # end
+      if gate.is_a?(Gates::Boolean)
+        @adapter.clear feature
+      else
+        @adapter.disable feature, gate, thing
+      end
     end
 
     def disable_v2(feature, gate, thing)

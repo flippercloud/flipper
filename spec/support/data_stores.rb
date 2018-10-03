@@ -4,9 +4,6 @@ require 'redis'
 require 'mongo'
 require 'pstore'
 
-Mongo::Logger.logger.level = Logger::INFO
-ActiveRecord::Migration.verbose = false
-
 module DataStores
   def self.redis
     @redis ||= Redis.new(url: ENV.fetch('REDIS_URL', 'redis://localhost:6379'))
@@ -18,6 +15,8 @@ module DataStores
 
   def self.mongo
     @mongo ||= begin
+      Mongo::Logger.logger.level = Logger::INFO
+
       options = {
         server_selection_timeout: 1,
         database: 'testing',
@@ -64,6 +63,8 @@ module DataStores
     db_path.join("migrate").children.each do |migration_path|
       require migration_path.to_s
     end
+
+    # Turn off migration logging for specs
     ActiveRecord::Migration.verbose = false
 
     reset_active_record_connection

@@ -16,8 +16,8 @@ module Flipper
         # options - The Hash of options.
         #           :instrumenter - The instrumenter used to instrument.
         def initialize(local, remote, options = {})
-          @local = local
-          @remote = remote
+          @local = Storage.new(local)
+          @remote = Storage.new(remote)
           @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
           @raise = options.fetch(:raise, true)
         end

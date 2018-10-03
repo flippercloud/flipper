@@ -56,6 +56,25 @@ module Flipper
         }
       end
 
+      # Public: Get all features and gate values in one call. Defaults to one call
+      # to features and another to get_multi. Feel free to override per adapter to
+      # make this more efficient.
+      def get_all
+        instances = features.map { |key| build_feature(key) }
+        get_multi(instances)
+      end
+
+      # Public: Get multiple features in one call. Defaults to one get per
+      # feature. Feel free to override per adapter to make this more efficient and
+      # reduce network calls.
+      def get_multi(features)
+        result = {}
+        features.each do |feature|
+          result[feature.key] = get(feature)
+        end
+        result
+      end
+
       def add(_feature)
         raise AdapterMethodNotSupportedError
       end
