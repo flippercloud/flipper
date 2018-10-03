@@ -7,8 +7,14 @@ module Flipper
       class OperationLogger < SimpleDelegator
         include ::Flipper::Adapter
 
+        # Internal: An array of the operations that have happened.
+        attr_reader :operations
+
         # Public: The name of the adapter.
         attr_reader :name
+
+        # Public: The adapter being wrapped.
+        attr_reader :adapter
 
         def initialize(adapter, operations = nil)
           super(adapter)

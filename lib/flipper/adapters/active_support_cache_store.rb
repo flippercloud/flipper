@@ -80,7 +80,8 @@ module Flipper
           @cache.write(FeaturesKey, response.keys.to_set, @write_options)
           response
         else
-          features = read_feature_keys.map { |key| Flipper::Feature.new(key, self) }
+          storage = Flipper::Storage.new(self)
+          features = read_feature_keys.map { |key| Flipper::Feature.new(key, storage) }
           read_many_features(features)
         end
       end

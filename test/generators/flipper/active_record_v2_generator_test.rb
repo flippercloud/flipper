@@ -3,8 +3,6 @@ require 'active_record'
 require 'rails/generators/test_case'
 require 'generators/flipper/active_record_v2_generator'
 
-DataStores.reset_active_record
-
 class FlipperActiveRecordV2GeneratorTest < Rails::Generators::TestCase
   tests Flipper::Generators::ActiveRecordV2Generator
   destination File.expand_path("../../../../tmp", __FILE__)
@@ -12,8 +10,13 @@ class FlipperActiveRecordV2GeneratorTest < Rails::Generators::TestCase
 
   def test_generates_migration
     run_generator
-    assert_migration "db/migrate/create_flipper_tables.rb", <<-EOM
-class CreateFlipperV2Tables < ActiveRecord::Migration
+    migration_version = if Rails::VERSION::MAJOR.to_i < 5
+                          ""
+                        else
+                          "[#{Rails::VERSION::MAJOR}.#{Rails::VERSION::MINOR}]"
+                        end
+    assert_migration "db/migrate/create_flipper_keys_table.rb", <<-EOM
+class CreateFlipperV2Tables < ActiveRecord::Migration#{migration_version}
   def self.up
     create_table :flipper_keys do |t|
       t.string :key, null: false

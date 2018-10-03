@@ -64,14 +64,14 @@ module Flipper
       when Adapter::V2
         raw = @adapter.get("feature/#{feature.key}")
         if raw
-          hash = JSON.parse(raw)
-          symbolized_hash = {}
-          hash.each_key do |key|
-            symbolized_hash[key.to_sym] = hash[key]
+          data = JSON.parse(raw)
+          hash = {}
+          data.each_key do |key|
+            hash[key.to_sym] = data[key]
           end
-          symbolized_hash[:groups] = Set.new(symbolized_hash[:groups].map(&:to_sym))
-          symbolized_hash[:actors] = Set.new(symbolized_hash[:actors])
-          symbolized_hash
+          hash[:groups] = Set.new(hash[:groups])
+          hash[:actors] = Set.new(hash[:actors])
+          hash
         else
           @adapter.default_config
         end
@@ -91,6 +91,16 @@ module Flipper
       end
     end
 
+    def get_all
+      case @adapter.version
+      when Adapter::V1
+        @adapter.get_all
+      when Adapter::V2
+        set = v2_features
+        get_multi(set)
+      end
+    end
+
     def enable(feature, gate, thing)
       case @adapter.version
       when Adapter::V1
@@ -101,12 +111,12 @@ module Flipper
         hash = get(feature)
         case gate.data_type
         when :boolean, :integer
-          hash[gate.key] = thing.value
+          hash[gate.key] = thing.value.to_s
         when :set
-          hash[gate.key].add(thing.value)
+          hash[gate.key].add(thing.value.to_s)
         end
-        hash[:groups] = hash[:groups].to_a
-        hash[:actors] = hash[:actors].to_a
+        hash[:groups] = hash[:groups].to_a.map(&:to_s)
+        hash[:actors] = hash[:actors].to_a.map(&:to_s)
         @adapter.set("feature/#{feature.key}", JSON.generate(hash))
         true
       end
@@ -121,15 +131,31 @@ module Flipper
       end
     end
 
+    def clear(feature)
+      case @adapter.version
+      when Adapter::V1
+        @adapter.clear(feature)
+      when Adapter::V2
+        hash = get(feature)
+        @adapter.default_config.each { |key, value| hash[key] = value }
+        @adapter.set("feature/#{feature.key}", JSON.generate(hash))
+        true
+      end
+    end
+
+    def import(source_storage)
+      @adapter.import(source_storage.adapter)
+    end
+
     private
 
     def disable_v1(feature, gate, thing)
       add(feature)
-      if gate.is_a?(Gates::Boolean)
-        @adapter.clear feature
-      else
-        @adapter.disable feature, gate, thing
-      end
+      @adapter.disable feature, gate, thing
+      # if gate.is_a?(Gates::Boolean)
+      #   @adapter.clear feature
+      # else
+      # end
     end
 
     def disable_v2(feature, gate, thing)
@@ -139,12 +165,12 @@ module Flipper
       when :boolean
         hash = @adapter.default_config
       when :integer
-        hash[gate.key] = thing.value
+        hash[gate.key] = thing.value.to_s
       when :set
-        hash[gate.key].delete(thing.value)
+        hash[gate.key].delete(thing.value.to_s)
       end
-      hash[:groups] = hash[:groups].to_a
-      hash[:actors] = hash[:actors].to_a
+      hash[:groups] = hash[:groups].to_a.map(&:to_s)
+      hash[:actors] = hash[:actors].to_a.map(&:to_s)
       @adapter.set("feature/#{feature.key}", JSON.generate(hash))
       true
     end

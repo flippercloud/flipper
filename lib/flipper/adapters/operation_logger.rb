@@ -36,6 +36,9 @@ module Flipper
       # Public: The name of the adapter.
       attr_reader :name
 
+      # Public: The adapter being wrapped.
+      attr_reader :adapter
+
       def initialize(adapter, operations = nil)
         super(adapter)
         @adapter = adapter

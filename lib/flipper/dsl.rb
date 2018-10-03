@@ -13,7 +13,7 @@ module Flipper
     # Private: What is being used to instrument all the things.
     attr_reader :instrumenter
 
-    def_delegators :@adapter, :memoize=, :memoizing?
+    def_delegators :@storage, :memoize=, :memoizing?, :adapter
 
     # Public: Returns a new instance of the DSL.
     #
@@ -153,7 +153,7 @@ module Flipper
       feature(name).add
     end
 
-    # Public: Has a feature been added in the adapter.
+    # Public: Has a feature been added to storage.
     #
     # name - The String or Symbol name of the feature.
     #
@@ -195,11 +195,11 @@ module Flipper
       features
     end
 
-    # Public: Preload all the adapters features.
+    # Public: Preload all the features from storage.
     #
     # Returns an Array of Flipper::Feature.
     def preload_all
-      keys = @adapter.get_all.keys
+      keys = @storage.get_all.keys
       keys.map { |key| feature(key) }
     end
 
@@ -265,7 +265,7 @@ module Flipper
     end
     alias_method :percentage_of_actors, :actors
 
-    # Public: Returns a Set of the known features for this adapter.
+    # Public: Returns a Set of the known features from storage.
     #
     # Returns Set of Flipper::Feature instances.
     def features
@@ -273,7 +273,7 @@ module Flipper
     end
 
     def import(flipper)
-      adapter.import(flipper.adapter)
+      @storage.import(flipper.storage)
     end
   end
 end

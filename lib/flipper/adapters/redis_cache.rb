@@ -80,7 +80,7 @@ module Flipper
           set_with_ttl FeaturesKey, response.keys.to_set
           response
         else
-          features = read_feature_keys.map { |key| Flipper::Feature.new(key, self) }
+          features = read_feature_keys.map { |key| build_feature(key) }
           read_many_features(features)
         end
       end

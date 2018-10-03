@@ -73,7 +73,7 @@ module Flipper
 
         result = {}
         gates_by_key.keys.each do |key|
-          feature = Feature.new(key, self)
+          feature = build_feature(key)
           result[feature.key] = result_for_feature(feature, gates_by_key[feature.key])
         end
         result

@@ -266,7 +266,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
         end
       end
       Flipper.enable(:stats)
-      Flipper.adapter.reset # clear the log of operations
+      Flipper.storage.adapter.reset # clear the log of operations
 
       app = lambda do |_env|
         Flipper.enabled?(:stats)
@@ -278,7 +278,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
       middleware = described_class.new(app)
       middleware.call('flipper' => Flipper)
 
-      expect(Flipper.adapter.count(:get)).to be(1)
+      expect(Flipper.storage.adapter.count(:get)).to be(1)
     end
   end
 
@@ -292,7 +292,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
         end
       end
       Flipper.enable(:stats)
-      Flipper.adapter.reset # clear the log of operations
+      Flipper.storage.adapter.reset # clear the log of operations
 
       app = lambda do |_env|
         Flipper.enabled?(:stats)
@@ -304,7 +304,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
       middleware = described_class.new(app)
       middleware.call({})
 
-      expect(Flipper.adapter.count(:get)).to be(1)
+      expect(Flipper.storage.adapter.count(:get)).to be(1)
     end
   end
 

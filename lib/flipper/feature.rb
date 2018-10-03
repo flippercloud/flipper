@@ -1,3 +1,4 @@
+require 'forwardable'
 require 'flipper/errors'
 require 'flipper/type'
 require 'flipper/gate'
@@ -8,13 +9,15 @@ require 'flipper/gate_values'
 module Flipper
   # rubocop:disable Metrics/ClassLength
   class Feature
+    extend Forwardable
+
     # Private: The name of feature instrumentation events.
     InstrumentationName = "feature_operation.#{InstrumentationNamespace}".freeze
 
     # Public: The name of the feature.
     attr_reader :name
 
-    # Public: Name converted to value safe for adapter.
+    # Public: Name converted to value safe for storage.
     attr_reader :key
 
     # Private: The storage that should be used to talk to the adapter.
@@ -22,6 +25,8 @@ module Flipper
 
     # Private: What is being used to instrument all the things.
     attr_reader :instrumenter
+
+    def_delegator :storage, :adapter
 
     # Internal: Initializes a new feature instance.
     #
@@ -40,7 +45,7 @@ module Flipper
 
     # Public: Enable this feature for something.
     #
-    # Returns the result of Adapter#enable.
+    # Returns the result of Storage#enable.
     def enable(thing = true)
       instrument(:enable) do |payload|
         gate = gate_for(thing)
@@ -54,7 +59,7 @@ module Flipper
 
     # Public: Disable this feature for something.
     #
-    # Returns the result of Adapter#disable.
+    # Returns the result of Storage#disable.
     def disable(thing = false)
       instrument(:disable) do |payload|
         gate = gate_for(thing)
@@ -68,30 +73,30 @@ module Flipper
 
     # Public: Adds this feature.
     #
-    # Returns the result of Adapter#add.
+    # Returns the result of Storage#add.
     def add
-      instrument(:add) { adapter.add(self) }
+      instrument(:add) { @storage.add(self) }
     end
 
-    # Public: Does this feature exist in the adapter.
+    # Public: Does this feature exist in storage.
     #
-    # Returns true if exists in adapter else false.
+    # Returns true if exists in storage else false.
     def exist?
-      instrument(:exist?) { adapter.features.include?(key) }
+      instrument(:exist?) { @storage.features.include?(key) }
     end
 
     # Public: Removes this feature.
     #
-    # Returns the result of Adapter#remove.
+    # Returns the result of Storage#remove.
     def remove
       instrument(:remove) { @storage.remove(self) }
     end
 
     # Public: Clears all gate values for this feature.
     #
-    # Returns the result of Adapter#clear.
+    # Returns the result of Storage#clear.
     def clear
-      instrument(:clear) { adapter.clear(self) }
+      instrument(:clear) { @storage.clear(self) }
     end
 
     # Public: Check if a feature is enabled for a thing.

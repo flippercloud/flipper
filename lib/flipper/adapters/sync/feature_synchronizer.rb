@@ -86,7 +86,7 @@ module Flipper
         end
 
         def default_config
-          @default_config ||= @feature.adapter.default_config
+          @default_config ||= @feature.storage.adapter.default_config
         end
 
         def default_gate_values

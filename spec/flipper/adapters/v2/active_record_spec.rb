@@ -5,8 +5,6 @@ require 'flipper/spec/shared_adapter_specs'
 # Turn off migration logging for specs
 ActiveRecord::Migration.verbose = false
 
-require 'generators/flipper/templates/v2_migration'
-
 RSpec.describe Flipper::Adapters::V2::ActiveRecord do
   subject { described_class.new }
 

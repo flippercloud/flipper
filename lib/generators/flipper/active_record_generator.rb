@@ -1,4 +1,5 @@
 require 'rails/generators/active_record'
+require 'rails/version'
 
 module Flipper
   module Generators

@@ -53,7 +53,7 @@ module Flipper
       end
 
       def get_all
-        features = read_feature_keys.map { |key| Flipper::Feature.new(key, self) }
+        features = read_feature_keys.map { |key| build_feature(key) }
         read_many_features(features)
       end
 

@@ -104,7 +104,7 @@ module Flipper
         SQL
         grouped_db_gates = db_gates.group_by(&:feature_key)
         result = Hash.new { |hash, key| hash[key] = default_config }
-        features = grouped_db_gates.keys.map { |key| Flipper::Feature.new(key, self) }
+        features = grouped_db_gates.keys.map { |key| build_feature(key) }
         features.each do |feature|
           result[feature.key] = result_for_feature(feature, grouped_db_gates[feature.key])
         end

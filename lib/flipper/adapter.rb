@@ -1,6 +1,4 @@
 require "set"
-require "flipper/feature"
-require "flipper/adapters/sync/synchronizer"
 
 module Flipper
   # Adding a module include so we have some hooks for stuff down the road
@@ -33,7 +31,7 @@ module Flipper
     # to features and another to get_multi. Feel free to override per adapter to
     # make this more efficient.
     def get_all
-      instances = features.map { |key| Flipper::Feature.new(key, self) }
+      instances = features.map { |key| build_feature(key) }
       get_multi(instances)
     end
 
@@ -59,5 +57,12 @@ module Flipper
     def default_config
       self.class.default_config
     end
+
+    def build_feature(feature_key)
+      Flipper::Feature.new(feature_key, Flipper::Storage.new(self))
+    end
   end
 end
+
+require "flipper/feature"
+require "flipper/adapters/sync/synchronizer"

@@ -1,4 +1,5 @@
-require "rails/generators/active_record"
+require 'rails/generators/active_record'
+require 'rails/version'
 
 module Flipper
   module Generators
@@ -8,12 +9,27 @@ module Flipper
 
       source_paths << File.join(File.dirname(__FILE__), "templates")
 
-      def create_migration_file
-        migration_template "v2_migration.rb", "db/migrate/create_flipper_tables.rb"
-      end
-
       def self.next_migration_number(dirname)
         ::ActiveRecord::Generators::Base.next_migration_number(dirname)
+      end
+
+      def self.migration_version
+        "[#{Rails::VERSION::MAJOR}.#{Rails::VERSION::MINOR}]" if rails5?
+      end
+
+      def self.rails5?
+        Rails.respond_to?(:version) && Rails.version.start_with?('5')
+      end
+
+      def create_migration_file
+        options = {
+          migration_version: migration_version,
+        }
+        migration_template 'v2_migration.erb', 'db/migrate/create_flipper_keys_table.rb', options
+      end
+
+      def migration_version
+        self.class.migration_version
       end
     end
   end
