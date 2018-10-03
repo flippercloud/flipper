@@ -156,8 +156,6 @@ module Flipper
         raise "#{data_type} is not supported by this adapter"
       end
 
-      private
-
       def enable_single(feature, gate, thing)
         @gate_class.transaction do
           @gate_class.where(feature_key: feature.key, key: gate.key).delete_all

@@ -48,6 +48,7 @@ RSpec.describe Flipper::Adapter do
         -> { Flipper.new(Flipper::Adapters::Memory.new) },
       ],
     ].each do |(source_builder, destination_builder)|
+      # rubocop:disable Metrics/LineLength
       context "from source V#{destination_builder.call.adapter.version} to destination V#{source_builder.call.adapter.version}" do
         let(:source_flipper) { source_builder.call }
         let(:destination_flipper) { destination_builder.call }
