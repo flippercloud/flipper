@@ -18,7 +18,7 @@ module Flipper
       end
 
       def self.rails5?
-        Rails.version.start_with?('5')
+        Rails.respond_to?(:version) && Rails.version.start_with?('5')
       end
 
       def create_migration_file
