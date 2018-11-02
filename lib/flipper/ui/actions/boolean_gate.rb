@@ -10,13 +10,13 @@ module Flipper
         route %r{\A/features/(?<feature_name>.*)/boolean/?\Z}
 
         def post
-          feature = flipper[feature_name]
-          @feature = Decorators::Feature.new(feature)
+          feature = feature_name.to_sym
+          @feature = Decorators::Feature.new(flipper[feature])
 
           if params['action'] == 'Enable'
-            feature.enable
+            flipper.enable(feature)
           else
-            feature.disable
+            flipper.disable(feature)
           end
 
           redirect_to "/features/#{@feature.key}"
