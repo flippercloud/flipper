@@ -66,7 +66,7 @@ module Flipper
       # Public: Removes a feature from the set of known features.
       def remove(feature)
         @feature_class.transaction do
-          @feature_class.where(key: feature.key).delete_all
+          @feature_class.where(key: feature.key).destroy_all
           clear(feature)
         end
         true
