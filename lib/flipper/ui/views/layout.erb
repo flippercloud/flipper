@@ -17,11 +17,11 @@
   </head>
   <body>
     <div class="container">
-      <%- unless Flipper::UI.configuration.banner_text.nil? -%>
+      <% unless Flipper::UI.configuration.banner_text.nil? %>
         <div class="alert alert-<%= Flipper::UI.configuration.banner_class %> text-center font-weight-bold">
           <%= Flipper::UI.configuration.banner_text %>
         </div>
-      <%- end -%>
+      <% end %>
 
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb bg-white border border-light align-items-center">
@@ -35,15 +35,15 @@
             </li>
           <% end %>
           <li class="ml-auto">
-            <%- if Flipper::UI.configuration.feature_creation_enabled -%>
+            <% if Flipper::UI.configuration.feature_creation_enabled %>
               <a class="btn btn-sm btn-light" href="<%= script_name %>/features/new">Add Feature</a>
-            <%- end -%>
+            <% end %>
           </li>
         </ol>
       </nav>
 
       <div>
-        <%== yield %>
+        <%= yield %>
       </div>
     </div>
 
