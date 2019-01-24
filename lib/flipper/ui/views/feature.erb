@@ -35,7 +35,7 @@
     </div>
   </div>
   <div class="row">
-    <div class="col-md mb-4 mb-md-0">
+    <div class="col-md mb-4 mb-lg-0">
       <div class="card">
         <h4 class="card-header"><%= Flipper::UI.configuration.percentage_of_actors.title %></h4>
         <div class="card-body">
@@ -128,7 +128,7 @@
                 <form action="<%= script_name %>/features/<%= @feature.key %>/groups" method="post" class="form-inline">
                   <%== csrf_input_tag %>
                   <input type="hidden" name="operation" value="enable">
-                  <select name="value" class="form-control form-control-sm mr-sm-2 mb-2 mb-md-0">
+                  <select name="value" class="form-control form-control-sm mr-sm-2 mb-2 mb-sm-0">
                     <option value="">Select a group...</option>
                     <% @feature.disabled_groups.each do |group| %>
                       <option value="<%= group.name %>"><%= group.name %></option>
@@ -186,7 +186,7 @@
               <form action="<%= script_name %>/features/<%= @feature.key %>/actors" method="post" class="form-inline">
                 <%== csrf_input_tag %>
                 <input type="hidden" name="operation" value="enable">
-                <input type="text" name="value" placeholder="ie: User:6" class="form-control form-control-sm mr-sm-2 mb-2 mb-md-0">
+                <input type="text" name="value" placeholder="ie: User:6" class="form-control form-control-sm mr-sm-2 mb-2 mb-sm-0">
                 <input type="submit" value="Add Actor" class="btn btn-light btn-sm">
               </form>
             </div>
