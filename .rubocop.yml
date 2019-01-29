@@ -10,6 +10,7 @@ AllCops:
     - 'examples/**/*'
     - 'tmp/**/*'
     - 'bin/**/*'
+    - 'vendor/bundle/**/*'
   TargetRubyVersion: 2.0
   # DefaultFormatter: fuubar
 Style/Alias:
