@@ -1,4 +1,4 @@
-## master
+## 0.16.1
 
 ### Additions/Changes
 
@@ -6,6 +6,7 @@
 * Fix rack body proxy require for those using flipper without rack  (https://github.com/jnunemaker/flipper/pull/376).
 * Unescapes feature_name in FeatureNameFromRoute (https://github.com/jnunemaker/flipper/pull/377).
 * Replace delete_all with destroy_all in ActiveRecord adapter (https://github.com/jnunemaker/flipper/pull/395)
+* Target correct bootstrap breakpoints in flipper UI (https://github.com/jnunemaker/flipper/pull/396)
 
 ## 0.16.0
 
