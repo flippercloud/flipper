@@ -5,8 +5,9 @@ rvm:
   - 2.3
   - 2.4
   - 2.5
-bundler_args: --without guard
-before_script: gem install bundler
+before_install:
+  - gem install bundler -v 1.17.3 --no-rdoc --no-ri --without guard
+  - bundle _1.17.3_ install
 script: bundle exec rubocop -D && bundle exec rake
 services:
   - redis-server
