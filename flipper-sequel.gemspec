@@ -23,5 +23,5 @@ Gem::Specification.new do |gem|
   gem.metadata      = Flipper::METADATA
 
   gem.add_dependency 'flipper', "~> #{Flipper::VERSION}"
-  gem.add_dependency 'sequel', '>= 4.0.0'
+  gem.add_dependency 'sequel', '>= 4.0.0', '< 6'
 end
