@@ -1,3 +1,11 @@
+## 0.16.2
+
+### Additions/Changes
+
+* Bump rollout redis dependency to < 5 (https://github.com/jnunemaker/flipper/pull/403)
+* Bump redis dependency to < 5 (https://github.com/jnunemaker/flipper/pull/401)
+* Bump sequel dependency to < 6 (https://github.com/jnunemaker/flipper/pull/399 and https://github.com/jnunemaker/flipper/commit/edc767e69b4ce8daead9801f38e0e8bf6b238765)
+
 ## 0.16.1
 
 ### Additions/Changes
