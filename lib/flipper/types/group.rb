@@ -14,7 +14,7 @@ module Flipper
 
         if block_given?
           @block = block
-          @single_argument = @block.arity == 1
+          @single_argument = @block.arity.abs == 1
         else
           @block = ->(_thing, _context) { false }
           @single_argument = false
