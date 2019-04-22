@@ -65,6 +65,28 @@ RSpec.describe Flipper::Types::Group do
       expect(group.match?(double('Actor'), fake_context)).to be_falsey
     end
 
+    it 'returns true for truthy shortand block results' do
+      actor = Class.new do
+        def admin?
+          true
+        end
+      end.new
+
+      group = described_class.new(:admin, &:admin?)
+      expect(group.match?(actor, fake_context)).to be_truthy
+    end
+
+    it 'returns false for falsy shortand block results' do
+      actor = Class.new do
+        def admin?
+          false
+        end
+      end.new
+
+      group = described_class.new(:admin, &:admin?)
+      expect(group.match?(actor, fake_context)).to be_falsey
+    end
+
     it 'can yield without context as block argument' do
       context = Flipper::FeatureCheckContext.new(
         feature_name: :my_feature,
