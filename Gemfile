@@ -12,7 +12,7 @@ gem 'shotgun', '~> 0.9'
 gem 'statsd-ruby', '~> 1.2.1'
 gem 'rspec', '~> 3.0'
 gem 'rack-test', '~> 0.6.3'
-gem 'sqlite3', '~> 1.3.11'
+gem 'sqlite3', "~> #{ENV['SQLITE3_VERSION'] || '1.3.11'}"
 gem 'rails', "~> #{ENV['RAILS_VERSION'] || '5.1.4'}"
 gem 'minitest', '~> 5.8.0'
 gem 'rubocop', '~> 0.45.0'

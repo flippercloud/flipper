@@ -13,11 +13,11 @@ module Flipper
       end
 
       def self.migration_version
-        "[#{Rails::VERSION::MAJOR}.#{Rails::VERSION::MINOR}]" if rails5?
+        "[#{Rails::VERSION::MAJOR}.#{Rails::VERSION::MINOR}]" if requires_migration_number?
       end
 
-      def self.rails5?
-        Rails.version.start_with?('5')
+      def self.requires_migration_number?
+        Rails::VERSION::MAJOR.to_i >= 5
       end
 
       def create_migration_file
