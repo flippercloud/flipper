@@ -27,3 +27,12 @@ bundle exec rake
 export RAILS_VERSION=5.1.4
 script/bootstrap || bundle update
 bundle exec rake
+
+export RAILS_VERSION=5.2.3
+script/bootstrap || bundle update
+bundle exec rake
+
+export RAILS_VERSION=6.0.0.rc1
+export SQLITE3_VERSION=1.4.1
+script/bootstrap || bundle update
+bundle exec rake
