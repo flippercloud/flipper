@@ -16,7 +16,7 @@
       <thead>
         <tr class="d-flex">
           <th class="col-1">
-            <span class="octicon octicon-squirrel"></span>
+            <span class="octicon octicon-<%= Flipper::UI.configuration.feature_icon %>"></span>
           </th>
           <th class="col">Feature</th>
           <th class="col">Enabled Gates</th>
@@ -26,7 +26,7 @@
         <% @features.each do |feature| %>
           <tr class="d-flex">
             <td class="col-1">
-              <span class="octicon octicon-squirrel <%= feature.color_class %>"></span>
+              <span class="octicon octicon-<%= Flipper::UI.configuration.feature_icon %> <%= feature.color_class %>"></span>
             </td>
             <td class="col">
               <a href="<%= "#{script_name}/features/#{feature.key}" %>">

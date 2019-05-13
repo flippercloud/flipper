@@ -9,7 +9,7 @@
     <div class="col">
       <div class="card">
         <h4 class="card-header">
-          <span class="octicon octicon-squirrel <%= @feature.color_class %>"></span>
+          <span class="octicon octicon-<%= Flipper::UI.configuration.feature_icon %> <%= @feature.color_class %>"></span>
           <%= @feature.key %>
         </h4>
         <div class="card-body">
@@ -144,7 +144,7 @@
           <div class="card-body bg-light">
             <div class="text-center">
               <span class="mega-octicon octicon-organization text-muted"></span>
-              <span class="mega-octicon octicon-squirrel text-muted"></span>
+              <span class="mega-octicon octicon-<%= Flipper::UI.configuration.feature_icon %> text-muted"></span>
               <span class="mega-octicon octicon-zap text-muted"></span>
               <h4>No Enabled Groups</h4>
               <p><%= Flipper::UI.configuration.groups.description %></p>
@@ -196,7 +196,7 @@
           <div class="card-body bg-light">
             <div class="text-center">
               <span class="mega-octicon octicon-person text-muted"></span>
-              <span class="mega-octicon octicon-squirrel text-muted"></span>
+              <span class="mega-octicon octicon-<%= Flipper::UI.configuration.feature_icon %> text-muted"></span>
               <span class="mega-octicon octicon-zap text-muted"></span>
               <h4>No Enabled Actors</h4>
               <p><%= Flipper::UI.configuration.actors.description %></p>
