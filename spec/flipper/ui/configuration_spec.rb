@@ -102,4 +102,15 @@ RSpec.describe Flipper::UI::Configuration do
       expect(configuration.feature_removal_enabled).to eq(false)
     end
   end
+
+  describe "#fun" do
+    it "has default value" do
+      expect(configuration.fun).to eq(true)
+    end
+
+    it "can be updated" do
+      configuration.fun = false
+      expect(configuration.fun).to eq(false)
+    end
+  end
 end
