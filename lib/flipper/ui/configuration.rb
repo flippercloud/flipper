@@ -26,6 +26,10 @@ module Flipper
       # set to false, users won't be able to delete features from the UI.
       attr_accessor :feature_removal_enabled
 
+      # Public: Are you feeling lucky? Defaults to true. If set to false, users
+      # won't see a videoclip of Taylor Swift when there aren't any features
+      attr_accessor :fun
+
       VALID_BANNER_CLASS_VALUES = %w(
         danger
         dark
@@ -47,6 +51,7 @@ module Flipper
         @banner_class = 'danger'
         @feature_creation_enabled = true
         @feature_removal_enabled = true
+        @fun = true
       end
 
       def banner_class=(value)
