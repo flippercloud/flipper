@@ -37,14 +37,15 @@ YourRailsApp::Application.routes.draw do
 end
 ```
 
-If you'd like to lazy load flipper, you can pass a block instead:
+If you'd like to lazy load flipper, you can instead pass a block to initialize it:
 
 ```ruby
 # config/routes.rb
 YourRailsApp::Application.routes.draw do
   flipper_block = lambda {
     # some flipper initialization here, for example:
-    # YourRailsApp.flipper
+    adapter = Flipper::Adapters::Memory.new
+    Flipper.new(adapter)
   }
   mount Flipper::UI.app(flipper_block) => '/flipper'
 end
