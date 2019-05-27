@@ -73,6 +73,7 @@ RSpec.describe Flipper::Adapters::Instrumented do
       expect(event.payload[:adapter_name]).to eq(:memory)
       expect(event.payload[:feature_name]).to eq(:stats)
       expect(event.payload[:gate_name]).to eq(:percentage_of_actors)
+      expect(event.payload[:thing_value]).to eq(22)
       expect(event.payload[:result]).to be(result)
     end
   end
@@ -88,6 +89,7 @@ RSpec.describe Flipper::Adapters::Instrumented do
       expect(event.payload[:adapter_name]).to eq(:memory)
       expect(event.payload[:feature_name]).to eq(:stats)
       expect(event.payload[:gate_name]).to eq(:percentage_of_actors)
+      expect(event.payload[:thing_value]).to eq(22)
       expect(event.payload[:result]).to be(result)
     end
   end

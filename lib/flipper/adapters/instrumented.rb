@@ -124,6 +124,7 @@ module Flipper
           adapter_name: @adapter.name,
           feature_name: feature.name,
           gate_name: gate.name,
+          thing_value: thing.value,
         }
 
         @instrumenter.instrument(InstrumentationName, payload) do |payload|
@@ -138,6 +139,7 @@ module Flipper
           adapter_name: @adapter.name,
           feature_name: feature.name,
           gate_name: gate.name,
+          thing_value: thing.value,
         }
 
         @instrumenter.instrument(InstrumentationName, payload) do |payload|
