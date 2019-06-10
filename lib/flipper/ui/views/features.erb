@@ -31,19 +31,36 @@
         </tr>
       </thead>
       <tbody>
-        <% @features.each do |feature| %>
-          <tr class="d-flex">
-            <td class="col-1">
-              <span class="octicon octicon-squirrel <%= feature.color_class %>"></span>
-            </td>
-            <td class="col">
-              <a href="<%= "#{script_name}/features/#{feature.key}" %>">
-                <%= feature.key %></a>
-            </td>
-            <td class="col">
-              <%= feature.pretty_enabled_gate_names %>
-            </td>
-          </tr>
+        <% if true %>
+          <% @features.sort { |a,b| a.timestamp && b.timestamp ? a.timestamp <=> b.timestamp : a ? 1 : -1 }.each do |feature| %>
+            <tr class="d-flex">
+              <td class="col-1">
+                <span class="octicon octicon-squirrel <%= feature.color_class %>"></span>
+              </td>
+              <td class="col">
+                <a href="<%= "#{script_name}/features/#{feature.key}" %>">
+                  <%= feature.key %></a>
+              </td>
+              <td class="col">
+                <%= feature.pretty_enabled_gate_names %>
+              </td>
+            </tr>
+            <% end %>
+        <% else %>
+          <% @features.each do |feature| %>
+            <tr class="d-flex">
+              <td class="col-1">
+                <span class="octicon octicon-squirrel <%= feature.color_class %>"></span>
+              </td>
+              <td class="col">
+                <a href="<%= "#{script_name}/features/#{feature.key}" %>">
+                  <%= feature.key %></a>
+              </td>
+              <td class="col">
+                <%= feature.pretty_enabled_gate_names %>
+              </td>
+            </tr>
+          <% end %>
         <% end %>
       </tbody>
     </table>

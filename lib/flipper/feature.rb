@@ -5,7 +5,6 @@ require 'flipper/feature_check_context'
 require 'flipper/gate_values'
 
 module Flipper
-  # rubocop:disable Metrics/ClassLength
   class Feature
     # Private: The name of feature instrumentation events.
     InstrumentationName = "feature_operation.#{InstrumentationNamespace}".freeze
@@ -15,6 +14,9 @@ module Flipper
 
     # Public: Name converted to value safe for adapter.
     attr_reader :key
+
+    # Public: Time of last update to a feature's gates
+    attr_reader :timestamp
 
     # Private: The adapter this feature should use.
     attr_reader :adapter
@@ -35,12 +37,14 @@ module Flipper
       @key = name.to_s
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
       @adapter = adapter
+      @timestamp = Time.now
     end
 
     # Public: Enable this feature for something.
     #
     # Returns the result of Adapter#enable.
     def enable(thing = true)
+      update_timestamp
       instrument(:enable) do |payload|
         adapter.add self
 
@@ -57,6 +61,7 @@ module Flipper
     #
     # Returns the result of Adapter#disable.
     def disable(thing = false)
+      update_timestamp
       instrument(:disable) do |payload|
         adapter.add self
 
@@ -127,6 +132,7 @@ module Flipper
     #
     # Returns result of enable.
     def enable_actor(actor)
+      update_timestamp
       enable Types::Actor.wrap(actor)
     end
 
@@ -137,6 +143,7 @@ module Flipper
     #
     # Returns result of enable.
     def enable_group(group)
+      update_timestamp
       enable Types::Group.wrap(group)
     end
 
@@ -147,6 +154,7 @@ module Flipper
     #
     # Returns result of enable.
     def enable_percentage_of_time(percentage)
+      update_timestamp
       enable Types::PercentageOfTime.wrap(percentage)
     end
 
@@ -157,6 +165,7 @@ module Flipper
     #
     # Returns result of enable.
     def enable_percentage_of_actors(percentage)
+      update_timestamp
       enable Types::PercentageOfActors.wrap(percentage)
     end
 
@@ -167,6 +176,7 @@ module Flipper
     #
     # Returns result of disable.
     def disable_actor(actor)
+      update_timestamp
       disable Types::Actor.wrap(actor)
     end
 
@@ -177,6 +187,7 @@ module Flipper
     #
     # Returns result of disable.
     def disable_group(group)
+      update_timestamp
       disable Types::Group.wrap(group)
     end
 
@@ -187,6 +198,7 @@ module Flipper
     #
     # Returns result of disable.
     def disable_percentage_of_time
+      update_timestamp
       disable Types::PercentageOfTime.new(0)
     end
 
@@ -197,6 +209,7 @@ module Flipper
     #
     # Returns result of disable.
     def disable_percentage_of_actors
+      update_timestamp
       disable Types::PercentageOfActors.new(0)
     end
 
@@ -325,11 +338,17 @@ module Flipper
       to_s
     end
 
+    # Public: update timestamp attribute to be current time
+    def update_timestamp
+      @timestamp = Time.now
+    end
+
     # Public: Pretty string version for debugging.
     def inspect
       attributes = [
         "name=#{name.inspect}",
         "state=#{state.inspect}",
+        "timestamp=#{timestamp.inspect}",
         "enabled_gate_names=#{enabled_gate_names.inspect}",
         "adapter=#{adapter.name.inspect}",
       ]
