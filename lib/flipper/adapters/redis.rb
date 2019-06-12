@@ -74,9 +74,9 @@ module Flipper
       def enable(feature, gate, thing)
         case gate.data_type
         when :boolean, :integer
-          @client.hset feature.key, gate.key, thing.value.to_s
+          @client.hmset feature.key, 'time', feature.timestamp, gate.key, thing.value.to_s
         when :set
-          @client.hset feature.key, to_field(gate, thing), 1
+          @client.hmset feature.key, 'time', feature.timestamp, to_field(gate, thing), 1
         else
           unsupported_data_type gate.data_type
         end
@@ -139,6 +139,8 @@ module Flipper
       def result_for_feature(feature, doc)
         result = {}
         fields = doc.keys
+        result[:time] = doc['time']
+        feature.set_timestamp(result[:time])
 
         feature.gates.each do |gate|
           result[gate.key] =

@@ -32,7 +32,7 @@
       </thead>
       <tbody>
         <% if true %>
-          <% @features.sort { |a,b| a.timestamp && b.timestamp ? a.timestamp <=> b.timestamp : a ? 1 : -1 }.each do |feature| %>
+          <% @features.sort { |a,b| a.time_compare(b) }.each do |feature| %>
             <tr class="d-flex">
               <td class="col-1">
                 <span class="octicon octicon-squirrel <%= feature.color_class %>"></span>

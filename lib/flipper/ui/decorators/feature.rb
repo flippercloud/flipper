@@ -57,6 +57,11 @@ module Flipper
             StateSortMap[state] <=> StateSortMap[other.state]
           end
         end
+
+        # Public: method used to sort by timestamp (nil timestamps are first)
+        def time_compare(other)
+          timestamp && other.timestamp ? timestamp <=> other.timestamp : timestamp ? 1 : -1
+        end
       end
     end
   end

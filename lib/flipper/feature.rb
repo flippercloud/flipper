@@ -37,7 +37,6 @@ module Flipper
       @key = name.to_s
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
       @adapter = adapter
-      @timestamp = Time.now
     end
 
     # Public: Enable this feature for something.
@@ -336,6 +335,11 @@ module Flipper
     # Public: Identifier to be used in the url (a rails-ism).
     def to_param
       to_s
+    end
+
+    # Public: set the timestamp
+    def set_timestamp(time)
+      @timestamp = time
     end
 
     # Public: update timestamp attribute to be current time
