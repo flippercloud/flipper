@@ -60,7 +60,11 @@ module Flipper
 
         # Public: method used to sort by timestamp (nil timestamps are first)
         def time_compare(other)
-          timestamp && other.timestamp ? timestamp <=> other.timestamp : timestamp ? 1 : -1
+          if timestamp && other.timestamp
+            timestamp <=> other.timestamp
+          else
+            timestamp ? 1 : -1
+          end
         end
       end
     end

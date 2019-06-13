@@ -44,6 +44,7 @@ module Flipper
       # Public: Clears the gate values for a feature.
       def clear(feature)
         @client.del feature.key
+        @client.hset feature.key, 'time', feature.timestamp
         true
       end
 
@@ -94,9 +95,11 @@ module Flipper
       def disable(feature, gate, thing)
         case gate.data_type
         when :boolean
-          @client.del feature.key
+          @client.hset feature.key, 'time', feature.timestamp
+          @client.hdel feature.key, gate.key
+          @client.hdel feature.key, thing.value.to_s
         when :integer
-          @client.hset feature.key, gate.key, thing.value.to_s
+          @client.hmset feature.key, 'time', feature.timestamp, gate.key, thing.value.to_s
         when :set
           @client.hdel feature.key, to_field(gate, thing)
         else
