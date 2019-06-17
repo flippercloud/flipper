@@ -44,6 +44,11 @@ module Flipper
           enabled_gates.map { |gate| Util.titleize(gate.key) }.sort.join(', ')
         end
 
+        def pretty_timestamp
+          return "" if timestamp.nil?
+          timestamp[0..15]
+        end
+
         StateSortMap = {
           on: 1,
           conditional: 2,
@@ -62,6 +67,8 @@ module Flipper
         def time_compare(other)
           if timestamp && other.timestamp
             timestamp <=> other.timestamp
+          elsif !(timestamp || other.timestamp)
+            self <=> other
           else
             timestamp ? 1 : -1
           end

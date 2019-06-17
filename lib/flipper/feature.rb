@@ -343,6 +343,10 @@ module Flipper
       @timestamp = time
     end
 
+    def get_timestamp
+      @timestamp
+    end
+
     # Public: update timestamp attribute to be current time
     def update_timestamp
       @timestamp = Time.now

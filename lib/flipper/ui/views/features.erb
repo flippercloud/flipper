@@ -28,10 +28,13 @@
           </th>
           <th class="col">Feature</th>
           <th class="col">Enabled Gates</th>
+          <% if flipper.adapter.adapter.name.eql? :redis %>
+            <th class="col">Gate Timestamp</th>
+          <% end %>
         </tr>
       </thead>
       <tbody>
-        <% if true %>
+        <% if false %>
           <% @features.sort { |a,b| a.time_compare(b) }.each do |feature| %>
             <tr class="d-flex">
               <td class="col-1">
@@ -43,6 +46,9 @@
               </td>
               <td class="col">
                 <%= feature.pretty_enabled_gate_names %>
+              </td>
+              <td class="col">
+                <%= feature.pretty_timestamp %>
               </td>
             </tr>
             <% end %>
@@ -59,6 +65,11 @@
               <td class="col">
                 <%= feature.pretty_enabled_gate_names %>
               </td>
+              <% if flipper.adapter.adapter.name.eql? :redis %>
+                <td class="col">
+                  <%= feature.pretty_timestamp %>
+                </td>
+              <% end %>
             </tr>
           <% end %>
         <% end %>
