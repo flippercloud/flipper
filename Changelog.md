@@ -1,3 +1,13 @@
+## master
+
+### Additions/Changes
+
+* Allow shorthand block notation on group types (https://github.com/jnunemaker/flipper/pull/406)
+* Relax active record/support constraints to support Rails 6 (https://github.com/jnunemaker/flipper/pull/409)
+* Allow disabling fun (https://github.com/jnunemaker/flipper/pull/413)
+* Include thing_value in payload of Instrumented#enable and #disable (https://github.com/jnunemaker/flipper/pull/417)
+* Replace Erubis with Erubi (https://github.com/jnunemaker/flipper/pull/407)
+
 ## 0.16.2
 
 ### Additions/Changes
