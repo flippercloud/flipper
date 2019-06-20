@@ -41,15 +41,15 @@ module Flipper
 
     def self.app(flipper = nil, options = {})
       env_key = options.fetch(:env_key, 'flipper')
+      rack_protection_options = options.fetch(:rack_protection, use: :authenticity_token)
       app = ->() { [200, { 'Content-Type' => 'text/html' }, ['']] }
       builder = Rack::Builder.new
       yield builder if block_given?
-      builder.use Rack::Protection
-      builder.use Rack::Protection::AuthenticityToken
+      builder.use Rack::Protection, rack_protection_options
       builder.use Rack::MethodOverride
       builder.use Flipper::Middleware::SetupEnv, flipper, env_key: env_key
       builder.use Flipper::Middleware::Memoizer, env_key: env_key
-      builder.use Middleware, env_key: env_key
+      builder.use Flipper::UI::Middleware, env_key: env_key
       builder.run app
       klass = self
       builder.define_singleton_method(:inspect) { klass.inspect } # pretty rake routes output
