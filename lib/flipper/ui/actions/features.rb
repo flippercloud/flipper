@@ -10,9 +10,15 @@ module Flipper
 
         def get
           @page_title = 'Features'
+          @search = params['search']
+
           @features = flipper.features.map do |feature|
             Decorators::Feature.new(feature)
           end.sort
+
+          if @search
+            @features = @features.select { |feature| feature.name.match(@search) }
+          end
 
           @show_blank_slate = @features.empty?
 
