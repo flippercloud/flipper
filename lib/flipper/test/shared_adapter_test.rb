@@ -275,6 +275,16 @@ module Flipper
         assert_equal true, @adapter.enable(@feature, @group_gate, @flipper.group(:admins))
         assert_equal Set['admins'], @adapter.get(@feature).fetch(:groups)
       end
+
+      def test_can_double_enable_percentage_without_error
+        assert_equal true, @adapter.enable(@feature, @actors_gate, @flipper.actors(25))
+        assert_equal true, @adapter.enable(@feature, @actors_gate, @flipper.actors(25))
+      end
+
+      def test_can_double_enable_without_error
+        assert_equal true, @adapter.enable(@feature, @boolean_gate, @flipper.boolean)
+        assert_equal true, @adapter.enable(@feature, @boolean_gate, @flipper.boolean)
+      end
     end
   end
 end

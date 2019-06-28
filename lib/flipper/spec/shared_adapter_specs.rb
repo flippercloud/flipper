@@ -280,4 +280,14 @@ RSpec.shared_examples_for 'a flipper adapter' do
     expect(subject.enable(feature, group_gate, flipper.group(:admins))).to eq(true)
     expect(subject.get(feature).fetch(:groups)).to eq(Set['admins'])
   end
+
+  it 'can double enable percentage without error' do
+    expect(subject.enable(feature, actors_gate, flipper.actors(25))).to eq(true)
+    expect(subject.enable(feature, actors_gate, flipper.actors(25))).to eq(true)
+  end
+
+  it 'can double enable without error' do
+    expect(subject.enable(feature, boolean_gate, flipper.boolean)).to eq(true)
+    expect(subject.enable(feature, boolean_gate, flipper.boolean)).to eq(true)
+  end
 end
