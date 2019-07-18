@@ -107,10 +107,10 @@ module Flipper
         if thing.nil?
           values = gate_values
         else
-          if adapter.respond_to?(:get_by_value)
-            values = gate_values_by_id(thing.is_a?(Integer) ? thing : thing.id)
+          values = if adapter.respond_to?(:get_by_value)
+            gate_values_by_id(thing.is_a?(Integer) ? thing : thing.id)
           else
-            values = gate_values
+            gate_values
           end
 
           thing = gate(:actor).wrap(thing)
@@ -118,9 +118,9 @@ module Flipper
         end
 
         context = FeatureCheckContext.new(
-            feature_name: @name,
-            values: values,
-            thing: thing
+          feature_name: @name,
+          values: values,
+          thing: thing
         )
 
         if open_gate = gates.detect { |gate| gate.open?(context) }
@@ -346,10 +346,10 @@ module Flipper
     # Public: Pretty string version for debugging.
     def inspect
       attributes = [
-          "name=#{name.inspect}",
-          "state=#{state.inspect}",
-          "enabled_gate_names=#{enabled_gate_names.inspect}",
-          "adapter=#{adapter.name.inspect}",
+        "name=#{name.inspect}",
+        "state=#{state.inspect}",
+        "enabled_gate_names=#{enabled_gate_names.inspect}",
+        "adapter=#{adapter.name.inspect}",
       ]
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
     end
@@ -359,11 +359,11 @@ module Flipper
     # Returns an array of gates
     def gates
       @gates ||= [
-          Gates::Boolean.new,
-          Gates::Actor.new,
-          Gates::PercentageOfActors.new,
-          Gates::PercentageOfTime.new,
-          Gates::Group.new,
+        Gates::Boolean.new,
+        Gates::Actor.new,
+        Gates::PercentageOfActors.new,
+        Gates::PercentageOfTime.new,
+        Gates::Group.new,
       ]
     end
 
