@@ -86,6 +86,11 @@ module Flipper
         result_for_feature(feature, db_gates)
       end
 
+      def get_by_value(feature, value)
+        db_gates = @gate_class.where(feature_key: feature.key, value: value)
+        result_for_feature(feature, db_gates)
+      end
+
       def get_multi(features)
         db_gates = @gate_class.where(feature_key: features.map(&:key))
         grouped_db_gates = db_gates.group_by(&:feature_key)

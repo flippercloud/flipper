@@ -102,13 +102,25 @@ module Flipper
     # Returns true if enabled, false if not.
     def enabled?(thing = nil)
       instrument(:enabled?) do |payload|
-        values = gate_values
-        thing = gate(:actor).wrap(thing) unless thing.nil?
-        payload[:thing] = thing
+        values = []
+
+        if thing.nil?
+          values = gate_values
+        else
+          if adapter.respond_to?(:get_by_value)
+            values = gate_values_by_id(thing.is_a?(Integer) ? thing : thing.id)
+          else
+            values = gate_values
+          end
+
+          thing = gate(:actor).wrap(thing)
+          payload[:thing] = thing
+        end
+
         context = FeatureCheckContext.new(
-          feature_name: @name,
-          values: values,
-          thing: thing
+            feature_name: @name,
+            values: values,
+            thing: thing
         )
 
         if open_gate = gates.detect { |gate| gate.open?(context) }
@@ -236,12 +248,18 @@ module Flipper
       GateValues.new(adapter.get(self))
     end
 
+    # Public: Returns the raw gate values stored by the adapter.
+    def gate_values_by_id(thing_id)
+      GateValues.new(adapter.get_by_value(self, thing_id))
+    end
+
     # Public: Get groups enabled for this feature.
     #
     # Returns Set of Flipper::Types::Group instances.
     def enabled_groups
       groups_value.map { |name| Flipper.group(name) }.to_set
     end
+
     alias_method :groups, :enabled_groups
 
     # Public: Get groups not enabled for this feature.
@@ -328,10 +346,10 @@ module Flipper
     # Public: Pretty string version for debugging.
     def inspect
       attributes = [
-        "name=#{name.inspect}",
-        "state=#{state.inspect}",
-        "enabled_gate_names=#{enabled_gate_names.inspect}",
-        "adapter=#{adapter.name.inspect}",
+          "name=#{name.inspect}",
+          "state=#{state.inspect}",
+          "enabled_gate_names=#{enabled_gate_names.inspect}",
+          "adapter=#{adapter.name.inspect}",
       ]
       "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
     end
@@ -341,11 +359,11 @@ module Flipper
     # Returns an array of gates
     def gates
       @gates ||= [
-        Gates::Boolean.new,
-        Gates::Actor.new,
-        Gates::PercentageOfActors.new,
-        Gates::PercentageOfTime.new,
-        Gates::Group.new,
+          Gates::Boolean.new,
+          Gates::Actor.new,
+          Gates::PercentageOfActors.new,
+          Gates::PercentageOfTime.new,
+          Gates::Group.new,
       ]
     end
 

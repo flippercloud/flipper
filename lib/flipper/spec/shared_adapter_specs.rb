@@ -98,6 +98,19 @@ RSpec.shared_examples_for 'a flipper adapter' do
     expect(result[:actors]).to eq(Set.new)
   end
 
+  it 'can get by value for actor gate' do
+    skip unless subject.respond_to?(:get_by_value)
+
+    actor22 = Flipper::Actor.new('22')
+    actor_asdf = Flipper::Actor.new('asdf')
+
+    expect(subject.enable(feature, actor_gate, flipper.actor(actor22))).to eq(true)
+    expect(subject.enable(feature, actor_gate, flipper.actor(actor_asdf))).to eq(true)
+
+    result = subject.get_by_value(feature, 22)
+    expect(result[:actors]).to eq(Set['22'])
+  end
+
   it 'can enable, disable and get value for percentage of actors gate' do
     expect(subject.enable(feature, actors_gate, flipper.actors(15))).to eq(true)
     result = subject.get(feature)
