@@ -97,7 +97,7 @@ module Flipper
       end
 
       def get_all
-        rows = ::ActiveRecord::Base.connection.select_all <<-SQL
+        rows = ::ActiveRecord::Base.connection.select_all <<-SQL.tr("\n", ' ')
           SELECT ff.key AS feature_key, fg.key, fg.value
           FROM #{@feature_class.table_name} ff
           LEFT JOIN #{@gate_class.table_name} fg ON ff.key = fg.feature_key
