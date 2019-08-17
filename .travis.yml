@@ -14,7 +14,7 @@ services:
   - mongodb
   - memcached
 env:
-  - RAILS_VERSION=6.0.0.rc1 SQLITE3_VERSION=1.4.1
+  - RAILS_VERSION=6.0.0 SQLITE3_VERSION=1.4.1
   - RAILS_VERSION=5.2.3
   - RAILS_VERSION=5.1.4
   - RAILS_VERSION=5.0.0
@@ -30,10 +30,10 @@ matrix:
     - rvm: 2.1
       env: RAILS_VERSION=5.2.3
     - rvm: 2.1
-      env: RAILS_VERSION=6.0.0.rc1 SQLITE3_VERSION=1.4.1
+      env: RAILS_VERSION=6.0.0 SQLITE3_VERSION=1.4.1
     - rvm: 2.2
-      env: RAILS_VERSION=6.0.0.rc1 SQLITE3_VERSION=1.4.1
+      env: RAILS_VERSION=6.0.0 SQLITE3_VERSION=1.4.1
     - rvm: 2.3
-      env: RAILS_VERSION=6.0.0.rc1 SQLITE3_VERSION=1.4.1
+      env: RAILS_VERSION=6.0.0 SQLITE3_VERSION=1.4.1
     - rvm: 2.4
-      env: RAILS_VERSION=6.0.0.rc1 SQLITE3_VERSION=1.4.1
+      env: RAILS_VERSION=6.0.0 SQLITE3_VERSION=1.4.1
