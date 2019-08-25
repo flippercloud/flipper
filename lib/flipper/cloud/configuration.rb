@@ -22,6 +22,9 @@ module Flipper
       # Public: net/http open timeout for all http requests (default: 5).
       attr_accessor :open_timeout
 
+      # Public: net/http write timeout for all http requests (default: 5).
+      attr_accessor :write_timeout
+
       # Public: IO stream to send debug output too. Off by default.
       #
       #  # for example, this would send all http request information to STDOUT
@@ -55,6 +58,7 @@ module Flipper
         @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
         @read_timeout = options.fetch(:read_timeout, 5)
         @open_timeout = options.fetch(:open_timeout, 5)
+        @write_timeout = options.fetch(:write_timeout, 5)
         @sync_interval = options.fetch(:sync_interval, 10)
         @local_adapter = options.fetch(:local_adapter) { Adapters::Memory.new }
         @debug_output = options[:debug_output]

@@ -128,6 +128,7 @@ RSpec.describe Flipper::Adapters::Http do
         basic_auth_password: 'password',
         read_timeout: 100,
         open_timeout: 40,
+        write_timeout: 40,
         debug_output: debug_output,
       }
     end
