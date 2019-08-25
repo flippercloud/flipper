@@ -7,7 +7,7 @@ Dir['flipper-*.gemspec'].each do |gemspec|
 end
 
 gem 'pry'
-gem 'rake', '~> 10.4.2'
+gem 'rake', '~> 12.3.3'
 gem 'shotgun', '~> 0.9'
 gem 'statsd-ruby', '~> 1.2.1'
 gem 'rspec', '~> 3.0'
@@ -17,7 +17,7 @@ gem 'rails', "~> #{ENV['RAILS_VERSION'] || '6.0.0'}"
 gem 'minitest', '~> 5.8.0'
 gem 'rubocop', '~> 0.45.0'
 gem 'rubocop-rspec', '= 1.5.1'
-gem 'webmock', '~> 2.0'
+gem 'webmock', '~> 3.0'
 
 # for active support tests in test/ and only needed for ruby 2.2.x
 gem 'test-unit', '~> 3.0'
