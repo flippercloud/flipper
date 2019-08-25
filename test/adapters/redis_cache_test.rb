@@ -1,7 +1,7 @@
 require 'test_helper'
 require 'flipper/adapters/redis_cache'
 
-class DalliTest < MiniTest::Test
+class RedisCacheTest < MiniTest::Test
   prepend Flipper::Test::SharedAdapterTests
 
   def setup
