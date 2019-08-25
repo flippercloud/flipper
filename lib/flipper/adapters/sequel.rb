@@ -192,12 +192,12 @@ module Flipper
           result[gate.key] =
             case gate.data_type
             when :boolean
-              if db_gate = db_gates.detect { |db_gate| db_gate.key == gate.key.to_s }
-                db_gate.value
+              if detected_db_gate = db_gates.detect { |db_gate| db_gate.key == gate.key.to_s }
+                detected_db_gate.value
               end
             when :integer
-              if db_gate = db_gates.detect { |db_gate| db_gate.key == gate.key.to_s }
-                db_gate.value
+              if detected_db_gate = db_gates.detect { |db_gate| db_gate.key == gate.key.to_s }
+                detected_db_gate.value
               end
             when :set
               db_gates.select { |db_gate| db_gate.key == gate.key.to_s }.map(&:value).to_set
