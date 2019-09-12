@@ -2,6 +2,7 @@ language: ruby
 rvm:
   - 2.4
   - 2.5
+  - 2.6
 before_install:
   - gem install bundler -v 1.17.3 --without guard
   - bundle _1.17.3_ install
