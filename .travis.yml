@@ -1,8 +1,5 @@
 language: ruby
 rvm:
-  - 2.1
-  - 2.2
-  - 2.3
   - 2.4
   - 2.5
 before_install:
@@ -23,17 +20,5 @@ env:
 matrix:
   # don't run rails 5 on ruby versions that can't install rack 2
   exclude:
-    - rvm: 2.1
-      env: RAILS_VERSION=5.0.0 SQLITE3_VERSION=1.3.11
-    - rvm: 2.1
-      env: RAILS_VERSION=5.1.4 SQLITE3_VERSION=1.3.11
-    - rvm: 2.1
-      env: RAILS_VERSION=5.2.3 SQLITE3_VERSION=1.3.11
-    - rvm: 2.1
-      env: RAILS_VERSION=6.0.0 SQLITE3_VERSION=1.4.1
-    - rvm: 2.2
-      env: RAILS_VERSION=6.0.0 SQLITE3_VERSION=1.4.1
-    - rvm: 2.3
-      env: RAILS_VERSION=6.0.0 SQLITE3_VERSION=1.4.1
     - rvm: 2.4
       env: RAILS_VERSION=6.0.0 SQLITE3_VERSION=1.4.1
