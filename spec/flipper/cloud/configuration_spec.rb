@@ -28,6 +28,11 @@ RSpec.describe Flipper::Cloud::Configuration do
     expect(instance.open_timeout).to eq(5)
   end
 
+  it "can set write_timeout" do
+    instance = described_class.new(required_options.merge(write_timeout: 5))
+    expect(instance.write_timeout).to eq(5)
+  end
+
   it "can set sync_interval" do
     instance = described_class.new(required_options.merge(sync_interval: 1))
     expect(instance.sync_interval).to eq(1)

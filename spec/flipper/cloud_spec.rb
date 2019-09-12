@@ -96,4 +96,12 @@ RSpec.describe Flipper::Cloud do
       .with(hash_including(open_timeout: 1))
     described_class.new('asdf', open_timeout: 1)
   end
+
+  if RUBY_VERSION >= '2.6.0'
+    it 'can set write_timeout' do
+      expect(Flipper::Adapters::Http::Client).to receive(:new)
+        .with(hash_including(open_timeout: 1))
+      described_class.new('asdf', open_timeout: 1)
+    end
+  end
 end
