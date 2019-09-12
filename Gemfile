@@ -23,11 +23,11 @@ gem 'webmock', '~> 3.0'
 gem 'test-unit', '~> 3.0'
 
 group(:guard) do
-  gem 'guard', '~> 2.12.5'
-  gem 'guard-rubocop', '~> 1.3.0'
-  gem 'guard-rspec', '~> 4.5.0'
-  gem 'guard-bundler', '~> 2.1.0'
-  gem 'guard-coffeescript', '~> 2.0.1'
-  gem 'guard-sass', '~> 1.6.0'
-  gem 'rb-fsevent', '~> 0.9.4'
+  gem 'guard', '~> 2.15'
+  gem 'guard-rubocop', '~> 1.3'
+  gem 'guard-rspec', '~> 4.5'
+  gem 'guard-bundler', '~> 2.2'
+  gem 'guard-coffeescript', '~> 2.0'
+  gem 'guard-sass', '~> 1.6'
+  gem 'rb-fsevent', '~> 0.9'
 end
