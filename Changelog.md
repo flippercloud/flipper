@@ -7,7 +7,8 @@
 * Allow disabling fun (https://github.com/jnunemaker/flipper/pull/413)
 * Include thing_value in payload of Instrumented#enable and #disable (https://github.com/jnunemaker/flipper/pull/417)
 * Replace Erubis with Erubi (https://github.com/jnunemaker/flipper/pull/407)
-* Allow to customize Rack::Protection middleware list (https://github.com/jnunemaker/flipper/pull/385)
+* Allow customizing Rack::Protection middleware list (https://github.com/jnunemaker/flipper/pull/385)
+* Allow setting write_timeout for ruby 2.6+ (https://github.com/jnunemaker/flipper/pull/433)
 
 ## 0.16.2
 
