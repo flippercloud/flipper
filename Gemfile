@@ -19,9 +19,6 @@ gem 'rubocop', '~> 0.45.0'
 gem 'rubocop-rspec', '= 1.5.1'
 gem 'webmock', '~> 3.0'
 
-# for active support tests in test/ and only needed for ruby 2.2.x
-gem 'test-unit', '~> 3.0'
-
 group(:guard) do
   gem 'guard', '~> 2.15'
   gem 'guard-rubocop', '~> 1.3'
