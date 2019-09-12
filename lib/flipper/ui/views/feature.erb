@@ -239,7 +239,7 @@
             <%= Flipper::UI.configuration.delete.description %>
           </p>
 
-          <form action="<%= script_name %>/features/<%= @feature.key %>" method="post" onsubmit="return confirm('Are you sure you want to remove <%= @feature.key %> from the list of features and disable it for everyone?')">
+          <form action="<%= script_name %>/features/<%= @feature.key %>" method="post" onsubmit="return confirm('Are you sure you want to remove this feature from the list of features and disable it for everyone?')">
             <%== csrf_input_tag %>
             <input type="hidden" name="_method" value="DELETE">
             <button type="submit" name="action" value="Delete" class="btn btn-danger" data-toggle="tooltip" title="Remove feature from list of features and disable it." data-placement="right">Delete</button>
