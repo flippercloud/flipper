@@ -55,9 +55,15 @@ module Flipper
       def add(feature)
         # race condition, but add is only used by enable/disable which happen
         # super rarely, so it shouldn't matter in practice
-        unless @feature_class.where(key: feature.key).first
-          @feature_class.create! { |f| f.key = feature.key }
+        @feature_class.transaction do
+          unless @feature_class.where(key: feature.key).first
+            begin
+              @feature_class.create! { |f| f.key = feature.key }
+            rescue ActiveRecord::RecordNotUnique
+            end
+          end
         end
+
         true
       end
 
@@ -120,7 +126,7 @@ module Flipper
       def enable(feature, gate, thing)
         case gate.data_type
         when :boolean, :integer
-          enable_single(feature, gate, thing)
+          set(feature, gate, thing)
         when :set
           enable_multi(feature, gate, thing)
         else
@@ -142,18 +148,7 @@ module Flipper
         when :boolean
           clear(feature)
         when :integer
-          @gate_class.transaction do
-            @gate_class.where(
-              feature_key: feature.key,
-              key: gate.key
-            ).destroy_all
-
-            @gate_class.create! do |g|
-              g.feature_key = feature.key
-              g.key = gate.key
-              g.value = thing.value.to_s
-            end
-          end
+          set(feature, gate, thing)
         when :set
           @gate_class.where(feature_key: feature.key, key: gate.key, value: thing.value).destroy_all
         else
@@ -170,7 +165,7 @@ module Flipper
 
       private
 
-      def enable_single(feature, gate, thing)
+      def set(feature, gate, thing)
         @gate_class.transaction do
           @gate_class.where(feature_key: feature.key, key: gate.key).destroy_all
           @gate_class.create! do |g|
@@ -179,6 +174,8 @@ module Flipper
             g.value = thing.value.to_s
           end
         end
+
+        nil
       end
 
       def enable_multi(feature, gate, thing)
@@ -187,9 +184,10 @@ module Flipper
           g.key = gate.key
           g.value = thing.value.to_s
         end
+
+        nil
       rescue ::ActiveRecord::RecordNotUnique
-      rescue ::ActiveRecord::StatementInvalid => error
-        raise unless error.message =~ /unique/i
+        # already added so no need move on with life
       end
 
       def result_for_feature(feature, db_gates)
