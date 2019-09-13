@@ -527,7 +527,7 @@ Successful enabling of the actor will return a 200 HTTP status and the feature o
     {
       "key": "actors",
       "name": "actor",
-      "value": ["User:1"]
+      "value": ["User;1"]
     },
     {
       "key": "percentage_of_actors",
@@ -828,7 +828,7 @@ Successful disabling of a percentage of time will set the percentage to 0 and re
 **Request**
 
 ```
-curl -X GET http://example.com/flipper/api/actors/user:1?keys=my_feature_1,my_feature_2
+curl -X GET http://example.com/flipper/api/actors/User;1?keys=my_feature_1,my_feature_2
 ```
 
 **Response**
@@ -838,7 +838,7 @@ If no keys are specified all features are returned.
 
 ```json
 {
-  "flipper_id": "user:1",
+  "flipper_id": "User;1",
     "features": {
       "my_feature_1": {
         "enabled": true,

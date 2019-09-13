@@ -530,12 +530,12 @@ RSpec.describe Flipper::Feature do
 
     context 'when one or more actors are enabled' do
       before do
-        subject.enable Flipper::Types::Actor.new(Flipper::Actor.new('User:5'))
-        subject.enable Flipper::Types::Actor.new(Flipper::Actor.new('User:22'))
+        subject.enable Flipper::Types::Actor.new(Flipper::Actor.new('User;5'))
+        subject.enable Flipper::Types::Actor.new(Flipper::Actor.new('User;22'))
       end
 
       it 'returns set of actor ids' do
-        expect(subject.actors_value).to eq(Set.new(['User:5', 'User:22']))
+        expect(subject.actors_value).to eq(Set.new(['User;5', 'User;22']))
       end
     end
   end

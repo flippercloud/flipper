@@ -41,8 +41,8 @@ RSpec.describe Flipper::FeatureCheckContext do
   end
 
   it 'knows actors_value' do
-    args = options.merge(values: Flipper::GateValues.new(actors: Set['User:1']))
-    expect(described_class.new(args).actors_value).to eq(Set['User:1'])
+    args = options.merge(values: Flipper::GateValues.new(actors: Set['User;1']))
+    expect(described_class.new(args).actors_value).to eq(Set['User;1'])
   end
 
   it 'knows groups_value' do
