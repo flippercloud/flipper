@@ -30,6 +30,11 @@ module Flipper
       # won't see a videoclip of Taylor Swift when there aren't any features
       attr_accessor :fun
 
+      # Public: What should show up in the form to add actors. This can be
+      # different per application since flipper_id's can be whatever an
+      # application needs. Defaults to "a flipper id".
+      attr_accessor :add_actor_placeholder
+
       VALID_BANNER_CLASS_VALUES = %w(
         danger
         dark
@@ -52,6 +57,7 @@ module Flipper
         @feature_creation_enabled = true
         @feature_removal_enabled = true
         @fun = true
+        @add_actor_placeholder = "a flipper id"
       end
 
       def banner_class=(value)
