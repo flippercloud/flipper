@@ -171,6 +171,8 @@ module Flipper
             g.value = thing.value.to_s
           end
         end
+
+        nil
       end
 
       def enable_multi(feature, gate, thing)
@@ -179,6 +181,8 @@ module Flipper
           g.key = gate.key
           g.value = thing.value.to_s
         end
+
+        nil
       rescue ::ActiveRecord::RecordNotUnique
       rescue ::ActiveRecord::StatementInvalid => error
         raise unless error.message =~ /unique/i
