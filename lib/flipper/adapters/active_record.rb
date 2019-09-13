@@ -57,7 +57,10 @@ module Flipper
         # super rarely, so it shouldn't matter in practice
         @feature_class.transaction do
           unless @feature_class.where(key: feature.key).first
-            @feature_class.create! { |f| f.key = feature.key }
+            begin
+              @feature_class.create! { |f| f.key = feature.key }
+            rescue ActiveRecord::RecordNotUnique
+            end
           end
         end
 
