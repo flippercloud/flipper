@@ -55,9 +55,12 @@ module Flipper
       def add(feature)
         # race condition, but add is only used by enable/disable which happen
         # super rarely, so it shouldn't matter in practice
-        unless @feature_class.where(key: feature.key).first
-          @feature_class.create! { |f| f.key = feature.key }
+        @feature_class.transaction do
+          unless @feature_class.where(key: feature.key).first
+            @feature_class.create! { |f| f.key = feature.key }
+          end
         end
+
         true
       end
 
