@@ -187,6 +187,7 @@ module Flipper
 
         nil
       rescue ::ActiveRecord::RecordNotUnique
+        # already added so no need move on with life
       end
 
       def result_for_feature(feature, db_gates)
