@@ -145,18 +145,7 @@ module Flipper
         when :boolean
           clear(feature)
         when :integer
-          @gate_class.transaction do
-            @gate_class.where(
-              feature_key: feature.key,
-              key: gate.key
-            ).destroy_all
-
-            @gate_class.create! do |g|
-              g.feature_key = feature.key
-              g.key = gate.key
-              g.value = thing.value.to_s
-            end
-          end
+          enable_single(feature, gate, thing)
         when :set
           @gate_class.where(feature_key: feature.key, key: gate.key, value: thing.value).destroy_all
         else
