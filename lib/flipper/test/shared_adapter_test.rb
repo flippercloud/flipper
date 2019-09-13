@@ -42,7 +42,7 @@ module Flipper # rubocop:disable Metrics/ModuleLength
         assert_equal true, @adapter.enable(@feature, @boolean_gate, @flipper.boolean)
         assert_equal 'true', @adapter.get(@feature)[:boolean]
         assert_equal true, @adapter.disable(@feature, @boolean_gate, @flipper.boolean(false))
-        assert_equal nil, @adapter.get(@feature)[:boolean]
+        assert_nil @adapter.get(@feature)[:boolean]
       end
 
       def test_fully_disables_all_enabled_things_when_boolean_gate_disabled
