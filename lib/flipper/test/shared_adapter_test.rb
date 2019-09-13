@@ -1,4 +1,5 @@
-module Flipper # rubocop:disable Metrics/ModuleLength
+# rubocop:disable Metrics/ModuleLength
+module Flipper
   module Test
     module SharedAdapterTests
       def setup
