@@ -1,7 +1,5 @@
 # -*- encoding: utf-8 -*-
-# frozen_string_literal: true
-
-require File.expand_path('lib/flipper/version', __dir__)
+require File.expand_path('../lib/flipper/version', __FILE__)
 
 flipper_moneta_files = lambda do |file|
   file =~ /moneta/

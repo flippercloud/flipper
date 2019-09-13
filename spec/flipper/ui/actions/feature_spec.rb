@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'helper'
 
 RSpec.describe Flipper::UI::Actions::Feature do
@@ -33,11 +31,13 @@ RSpec.describe Flipper::UI::Actions::Feature do
 
     context 'when feature_removal_enabled is set to false' do
       around do |example|
-        @original_feature_removal_enabled = Flipper::UI.configuration.feature_removal_enabled
-        Flipper::UI.configuration.feature_removal_enabled = false
-        example.run
-      ensure
-        Flipper::UI.configuration.feature_removal_enabled = @original_feature_removal_enabled
+        begin
+          @original_feature_removal_enabled = Flipper::UI.configuration.feature_removal_enabled
+          Flipper::UI.configuration.feature_removal_enabled = false
+          example.run
+        ensure
+          Flipper::UI.configuration.feature_removal_enabled = @original_feature_removal_enabled
+        end
       end
 
       it 'returns with 403 status' do

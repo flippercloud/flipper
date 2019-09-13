@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'flipper/errors'
 require 'flipper/type'
 require 'flipper/gate'
@@ -10,7 +8,7 @@ module Flipper
   # rubocop:disable Metrics/ClassLength
   class Feature
     # Private: The name of feature instrumentation events.
-    InstrumentationName = "feature_operation.#{InstrumentationNamespace}"
+    InstrumentationName = "feature_operation.#{InstrumentationNamespace}".freeze
 
     # Public: The name of the feature.
     attr_reader :name
@@ -379,5 +377,4 @@ module Flipper
       end
     end
   end
-  # rubocop:enable Metrics/ClassLength
 end

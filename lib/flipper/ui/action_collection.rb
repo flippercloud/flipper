@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module Flipper
   module UI
     # Internal: Used to detect the action that should be used in the middleware.

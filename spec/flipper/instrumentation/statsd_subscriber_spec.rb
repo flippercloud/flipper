@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'helper'
 require 'flipper/adapters/instrumented'
 require 'flipper/instrumentation/statsd'
@@ -39,7 +37,7 @@ RSpec.describe Flipper::Instrumentation::StatsdSubscriber do
     expect(result).not_to be_nil
   end
 
-  context 'with enabled feature' do
+  context 'for enabled feature' do
     it 'updates feature metrics when calls happen' do
       flipper[:stats].enable(user)
       assert_timer 'flipper.feature_operation.enable'
@@ -50,7 +48,7 @@ RSpec.describe Flipper::Instrumentation::StatsdSubscriber do
     end
   end
 
-  context 'with disabled feature' do
+  context 'for disabled feature' do
     it 'updates feature metrics when calls happen' do
       flipper[:stats].disable(user)
       assert_timer 'flipper.feature_operation.disable'

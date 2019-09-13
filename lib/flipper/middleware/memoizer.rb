@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module Flipper
   module Middleware
     class Memoizer
@@ -46,7 +44,7 @@ module Flipper
       private
 
       def skip_memoize?(request)
-        @opts[:unless]&.call(request)
+        @opts[:unless] && @opts[:unless].call(request)
       end
 
       def memoized_call(env)

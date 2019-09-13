@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module Flipper
   # Top level error that all other errors inherit from.
   class Error < StandardError; end

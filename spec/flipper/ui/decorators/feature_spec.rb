@@ -1,16 +1,14 @@
-# frozen_string_literal: true
-
 require 'helper'
 
 RSpec.describe Flipper::UI::Decorators::Feature do
-  subject do
-    described_class.new(feature)
-  end
-
   let(:source)  { {} }
   let(:adapter) { Flipper::Adapters::Memory.new(source) }
   let(:flipper) { build_flipper }
   let(:feature) { flipper[:some_awesome_feature] }
+
+  subject do
+    described_class.new(feature)
+  end
 
   describe '#initialize' do
     it 'sets the feature' do

@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'pathname'
 require 'rack'
 begin
@@ -18,9 +16,9 @@ module Flipper
   module UI
     class << self
       # These three configuration options have been moved to Flipper::UI::Configuration
-      deprecated_configuration_options = %w[application_breadcrumb_href
+      deprecated_configuration_options = %w(application_breadcrumb_href
                                             feature_creation_enabled
-                                            feature_removal_enabled]
+                                            feature_removal_enabled)
       deprecated_configuration_options.each do |attribute_name|
         send(:define_method, "#{attribute_name}=".to_sym) do
           raise ConfigurationDeprecated, "The UI configuration for #{attribute_name} has " \
@@ -44,7 +42,7 @@ module Flipper
     def self.app(flipper = nil, options = {})
       env_key = options.fetch(:env_key, 'flipper')
       rack_protection_options = options.fetch(:rack_protection, use: :authenticity_token)
-      app = -> { [200, { 'Content-Type' => 'text/html' }, ['']] }
+      app = ->() { [200, { 'Content-Type' => 'text/html' }, ['']] }
       builder = Rack::Builder.new
       yield builder if block_given?
       builder.use Rack::Protection, rack_protection_options

@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'helper'
 
 RSpec.describe Flipper::UI do
@@ -98,11 +96,13 @@ RSpec.describe Flipper::UI do
 
       describe 'when set' do
         around do |example|
-          @original_banner_text = described_class.configuration.banner_text
-          described_class.configuration.banner_text = 'Production Environment'
-          example.run
-        ensure
-          described_class.configuration.banner_text = @original_banner_text
+          begin
+            @original_banner_text = described_class.configuration.banner_text
+            described_class.configuration.banner_text = 'Production Environment'
+            example.run
+          ensure
+            described_class.configuration.banner_text = @original_banner_text
+          end
         end
 
         it 'includes banner' do
@@ -177,13 +177,13 @@ RSpec.describe Flipper::UI do
           configuration.feature_creation_enabled = true
         end
 
-        after do
-          configuration.feature_creation_enabled = @original_feature_creation_enabled
-        end
-
         it 'has the add_feature button' do
           get '/features'
           expect(last_response.body).to include('Add Feature')
+        end
+
+        after do
+          configuration.feature_creation_enabled = @original_feature_creation_enabled
         end
       end
 
@@ -193,13 +193,13 @@ RSpec.describe Flipper::UI do
           configuration.feature_creation_enabled = false
         end
 
-        after do
-          configuration.feature_creation_enabled = @original_feature_creation_enabled
-        end
-
         it 'does not have the add_feature button' do
           get '/features'
           expect(last_response.body).not_to include('Add Feature')
+        end
+
+        after do
+          configuration.feature_creation_enabled = @original_feature_creation_enabled
         end
       end
     end
@@ -215,13 +215,13 @@ RSpec.describe Flipper::UI do
           configuration.feature_removal_enabled = true
         end
 
-        after do
-          configuration.feature_removal_enabled = @original_feature_removal_enabled
-        end
-
         it 'has the add_feature button' do
           get '/features/test'
           expect(last_response.body).to include('Delete')
+        end
+
+        after do
+          configuration.feature_removal_enabled = @original_feature_removal_enabled
         end
       end
 
@@ -231,13 +231,13 @@ RSpec.describe Flipper::UI do
           configuration.feature_removal_enabled = false
         end
 
-        after do
-          configuration.feature_removal_enabled = @original_feature_removal_enabled
-        end
-
         it 'does not have the add_feature button' do
           get '/features/test'
           expect(last_response.body).not_to include('Delete')
+        end
+
+        after do
+          configuration.feature_removal_enabled = @original_feature_removal_enabled
         end
       end
     end

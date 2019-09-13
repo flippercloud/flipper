@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require "set"
 require "flipper/feature"
 require "flipper/adapters/sync/synchronizer"

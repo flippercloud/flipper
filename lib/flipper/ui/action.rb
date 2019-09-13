@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'forwardable'
 require 'flipper/ui/error'
 require 'erubi'
@@ -20,11 +18,11 @@ module Flipper
 
       extend Forwardable
 
-      VALID_REQUEST_METHOD_NAMES = Set.new(%w[
-                                             get
-                                             post
-                                             put
-                                             delete
+      VALID_REQUEST_METHOD_NAMES = Set.new([
+                                             'get'.freeze,
+                                             'post'.freeze,
+                                             'put'.freeze,
+                                             'delete'.freeze,
                                            ]).freeze
 
       # Public: Call this in subclasses so the action knows its route.
@@ -210,9 +208,9 @@ module Flipper
 
         raise "Template does not exist: #{path}" unless path.exist?
 
-        # rubocop:disable Security/Eval
+        # rubocop:disable Lint/Eval
         eval(Erubi::Engine.new(path.read, escape: true).src)
-        # rubocop:enable Security/Eval
+        # rubocop:enable Lint/Eval
       end
 
       # Internal: The path the app is mounted at.

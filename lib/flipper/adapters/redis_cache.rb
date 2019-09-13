@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'redis'
 require 'flipper'
 
@@ -10,10 +8,10 @@ module Flipper
     class RedisCache
       include ::Flipper::Adapter
 
-      Version = 'v1'
-      Namespace = "flipper/#{Version}"
-      FeaturesKey = "#{Namespace}/features"
-      GetAllKey = "#{Namespace}/get_all"
+      Version = 'v1'.freeze
+      Namespace = "flipper/#{Version}".freeze
+      FeaturesKey = "#{Namespace}/features".freeze
+      GetAllKey = "#{Namespace}/get_all".freeze
 
       # Private
       def self.key_for(key)

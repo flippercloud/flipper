@@ -1,4 +1,4 @@
-# frozen_string_literal: true
+require 'thread'
 
 module Flipper
   # Internal: Used to store registry of groups by name.

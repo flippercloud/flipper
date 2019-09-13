@@ -1,13 +1,11 @@
-# frozen_string_literal: true
-
 require 'helper'
 
 RSpec.describe Flipper::Gates::PercentageOfActors do
+  let(:feature_name) { :search }
+
   subject do
     described_class.new
   end
-
-  let(:feature_name) { :search }
 
   def context(percentage_of_actors_value, feature = feature_name, thing = nil)
     Flipper::FeatureCheckContext.new(
@@ -52,9 +50,7 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
       end
     end
 
-    context 'with fractional percentage' do
-      subject { described_class.new }
-
+    context 'for fractional percentage' do
       let(:decimal) { 0.001 }
       let(:percentage) { decimal * 100 }
       let(:number_of_actors) { 10_000 }
@@ -62,6 +58,8 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
       let(:actors) do
         (1..number_of_actors).map { |n| Flipper::Actor.new(n) }
       end
+
+      subject { described_class.new }
 
       it 'enables feature for accurate number of actors' do
         margin_of_error = 0.02 * number_of_actors

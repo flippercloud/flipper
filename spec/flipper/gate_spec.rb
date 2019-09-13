@@ -1,20 +1,14 @@
-# frozen_string_literal: true
-
 require 'helper'
 
 RSpec.describe Flipper::Gate do
+  let(:feature_name) { :stats }
+
   subject do
     described_class.new
   end
 
-  let(:feature_name) { :stats }
-
   describe '#inspect' do
-    context 'with subclass' do
-      subject do
-        subclass.new
-      end
-
+    context 'for subclass' do
       let(:subclass) do
         Class.new(described_class) do
           def name
@@ -29,6 +23,10 @@ RSpec.describe Flipper::Gate do
             :set
           end
         end
+      end
+
+      subject do
+        subclass.new
       end
 
       it 'includes attributes' do

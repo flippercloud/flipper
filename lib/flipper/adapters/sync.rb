@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require "flipper/adapters/sync/synchronizer"
 require "flipper/adapters/sync/interval_synchronizer"
 

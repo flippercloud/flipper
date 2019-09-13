@@ -1,14 +1,12 @@
-# frozen_string_literal: true
-
 require "helper"
 require "flipper/adapters/sync/interval_synchronizer"
 
 RSpec.describe Flipper::Adapters::Sync::IntervalSynchronizer do
-  subject { described_class.new(synchronizer, interval: interval) }
-
   let(:events) { [] }
   let(:synchronizer) { -> { events << described_class.now } }
   let(:interval) { 10 }
+
+  subject { described_class.new(synchronizer, interval: interval) }
 
   it 'synchronizes on first call' do
     expect(events.size).to be(0)

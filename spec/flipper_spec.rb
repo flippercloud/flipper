@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'helper'
 
 RSpec.describe Flipper do
@@ -267,7 +265,7 @@ RSpec.describe Flipper do
 
   describe '.unregister_groups' do
     it 'clear group registry' do
-      expect(described_class.groups_registry).to have_receive(:clear)
+      expect(described_class.groups_registry).to receive(:clear)
       described_class.unregister_groups
     end
   end
@@ -284,7 +282,7 @@ RSpec.describe Flipper do
   end
 
   describe '.group' do
-    context 'with registered group' do
+    context 'for registered group' do
       before do
         @group = described_class.register(:admins) {}
       end
@@ -298,7 +296,7 @@ RSpec.describe Flipper do
       end
     end
 
-    context 'with unregistered group' do
+    context 'for unregistered group' do
       before do
         @group = described_class.group(:cats)
       end

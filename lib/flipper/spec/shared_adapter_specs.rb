@@ -1,7 +1,6 @@
-# frozen_string_literal: true
-
 # Requires the following methods:
 # * subject - The instance of the adapter
+# rubocop:disable Metrics/BlockLength
 RSpec.shared_examples_for 'a flipper adapter' do
   let(:flipper) { Flipper.new(subject) }
   let(:feature) { flipper[:stats] }
@@ -266,7 +265,7 @@ RSpec.shared_examples_for 'a flipper adapter' do
     flipper.disable(:search)
 
     result = subject.get_all
-    expect(result.keys.sort).to eq(%w[search stats])
+    expect(result.keys.sort).to eq(%w(search stats))
   end
 
   it 'can double enable an actor without error' do

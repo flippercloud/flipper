@@ -1,13 +1,11 @@
-# frozen_string_literal: true
-
 require 'helper'
 
 RSpec.describe Flipper::Gates::PercentageOfTime do
+  let(:feature_name) { :search }
+
   subject do
     described_class.new
   end
-
-  let(:feature_name) { :search }
 
   def context(percentage_of_time_value, feature = feature_name, thing = nil)
     Flipper::FeatureCheckContext.new(
@@ -18,12 +16,12 @@ RSpec.describe Flipper::Gates::PercentageOfTime do
   end
 
   describe '#open?' do
-    context 'with fractional percentage' do
-      subject { described_class.new }
-
+    context 'for fractional percentage' do
       let(:decimal) { 0.001 }
       let(:percentage) { decimal * 100 }
       let(:number_of_invocations) { 10_000 }
+
+      subject { described_class.new }
 
       it 'enables feature for accurate percentage of time' do
         margin_of_error = 0.02 * number_of_invocations

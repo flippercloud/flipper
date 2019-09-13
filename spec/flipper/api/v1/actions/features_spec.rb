@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'helper'
 
 RSpec.describe Flipper::Api::V1::Actions::Features do
@@ -68,7 +66,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
       it 'responds with correct attributes' do
         expect(last_response.status).to eq(200)
         keys = json_response.fetch('features').map { |feature| feature.fetch('key') }.sort
-        expect(keys).to eq(%w[search stats])
+        expect(keys).to eq(%w(search stats))
       end
     end
 
@@ -82,7 +80,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
       it 'only returns features that exist' do
         expect(last_response.status).to eq(200)
         keys = json_response.fetch('features').map { |feature| feature.fetch('key') }.sort
-        expect(keys).to eq(%w[search stats])
+        expect(keys).to eq(%w(search stats))
       end
     end
 
@@ -152,7 +150,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
       end
 
       it 'does not enable feature' do
-        expect(flipper['my_feature']).not_to be_enabled
+        expect(flipper['my_feature'].enabled?).to be_falsy
       end
     end
 

@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'helper'
 require 'flipper/dsl'
 
@@ -30,7 +28,7 @@ RSpec.describe Flipper::DSL do
   end
 
   describe '#feature' do
-    it_behaves_like 'a DSL feature' do
+    it_should_behave_like 'a DSL feature' do
       let(:method_name) { :feature }
       let(:instrumenter) { double('Instrumentor', instrument: nil) }
       let(:feature) { dsl.send(method_name, :stats) }
@@ -41,7 +39,7 @@ RSpec.describe Flipper::DSL do
   describe '#preload' do
     let(:instrumenter) { double('Instrumentor', instrument: nil) }
     let(:dsl) { described_class.new(adapter, instrumenter: instrumenter) }
-    let(:names) { [:stats, :shiny] }
+    let(:names) { %i(stats shiny) }
     let(:features) { dsl.preload(names) }
 
     it 'returns array of features' do
@@ -77,7 +75,7 @@ RSpec.describe Flipper::DSL do
       names.each { |name| adapter.add subject[name] }
       described_class.new(adapter, instrumenter: instrumenter)
     end
-    let(:names) { [:stats, :shiny] }
+    let(:names) { %i(stats shiny) }
     let(:features) { dsl.preload_all }
 
     it 'returns array of features' do
@@ -108,7 +106,7 @@ RSpec.describe Flipper::DSL do
   end
 
   describe '#[]' do
-    it_behaves_like 'a DSL feature' do
+    it_should_behave_like 'a DSL feature' do
       let(:method_name) { :[] }
       let(:instrumenter) { double('Instrumentor', instrument: nil) }
       let(:feature) { dsl.send(method_name, :stats) }
@@ -117,19 +115,19 @@ RSpec.describe Flipper::DSL do
   end
 
   describe '#boolean' do
-    it_behaves_like 'a DSL boolean method' do
+    it_should_behave_like 'a DSL boolean method' do
       let(:method_name) { :boolean }
     end
   end
 
   describe '#bool' do
-    it_behaves_like 'a DSL boolean method' do
+    it_should_behave_like 'a DSL boolean method' do
       let(:method_name) { :bool }
     end
   end
 
   describe '#group' do
-    context 'with registered group' do
+    context 'for registered group' do
       before do
         @group = Flipper.register(:admins) {}
       end
@@ -142,7 +140,7 @@ RSpec.describe Flipper::DSL do
   end
 
   describe '#actor' do
-    context 'with a thing' do
+    context 'for a thing' do
       it 'returns actor instance' do
         thing = Flipper::Actor.new(33)
         actor = subject.actor(thing)
@@ -151,7 +149,7 @@ RSpec.describe Flipper::DSL do
       end
     end
 
-    context 'with nil' do
+    context 'for nil' do
       it 'raises argument error' do
         expect do
           subject.actor(nil)
@@ -159,7 +157,7 @@ RSpec.describe Flipper::DSL do
       end
     end
 
-    context 'with something that is not actor wrappable' do
+    context 'for something that is not actor wrappable' do
       it 'raises argument error' do
         expect do
           subject.actor(Object.new)
@@ -223,7 +221,7 @@ RSpec.describe Flipper::DSL do
         subject.features.each do |feature|
           expect(feature).to be_instance_of(Flipper::Feature)
         end
-        expect(subject.features.map(&:name).map(&:to_s).sort).to eq(%w[cache search stats])
+        expect(subject.features.map(&:name).map(&:to_s).sort).to eq(%w(cache search stats))
       end
     end
   end

@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'rack'
 require 'flipper'
 require 'flipper/api/middleware'
@@ -7,11 +5,11 @@ require 'flipper/api/json_params'
 
 module Flipper
   module Api
-    CONTENT_TYPE = 'application/json'
+    CONTENT_TYPE = 'application/json'.freeze
 
     def self.app(flipper = nil, options = {})
       env_key = options.fetch(:env_key, 'flipper')
-      app = ->(_) { [404, { 'Content-Type' => CONTENT_TYPE }, ['{}']] }
+      app = ->(_) { [404, { 'Content-Type'.freeze => CONTENT_TYPE }, ['{}'.freeze]] }
       builder = Rack::Builder.new
       yield builder if block_given?
       builder.use Flipper::Api::JsonParams

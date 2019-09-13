@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'helper'
 require 'active_support/cache'
 require 'active_support/cache/dalli_store'
@@ -8,8 +6,6 @@ require 'flipper/adapters/active_support_cache_store'
 require 'flipper/spec/shared_adapter_specs'
 
 RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
-  subject { adapter }
-
   let(:memory_adapter) do
     Flipper::Adapters::OperationLogger.new(Flipper::Adapters::Memory.new)
   end
@@ -17,11 +13,13 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
   let(:adapter) { described_class.new(memory_adapter, cache, expires_in: 10.seconds) }
   let(:flipper) { Flipper.new(adapter) }
 
+  subject { adapter }
+
   before do
     cache.clear
   end
 
-  it_behaves_like 'a flipper adapter'
+  it_should_behave_like 'a flipper adapter'
 
   describe '#remove' do
     it 'expires feature' do

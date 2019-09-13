@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'delegate'
 require 'flipper/api/v1/decorators/gate'
 

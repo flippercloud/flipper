@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'flipper/ui/action'
 require 'flipper/ui/decorators/feature'
 require 'flipper/ui/util'

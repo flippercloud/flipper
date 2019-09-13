@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'helper'
 require 'rack/test'
 require 'active_support/cache'
@@ -76,7 +74,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
       flipper.adapter.cache['hello'] = 'world'
       begin
         get '/fail', {}, 'flipper' => flipper
-      rescue StandardError
+      rescue
         nil
       end
       expect(flipper.adapter.cache).to be_empty
@@ -173,7 +171,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
       middleware = described_class
 
       Rack::Builder.new do
-        use middleware, preload: [:stats]
+        use middleware, preload: %i(stats)
 
         map '/' do
           run ->(_env) { [200, {}, []] }
@@ -199,7 +197,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
         [200, {}, []]
       end
 
-      middleware = described_class.new app, preload: [:stats]
+      middleware = described_class.new app, preload: %i(stats)
       middleware.call(env)
 
       expect(adapter.count(:get_multi)).to be(1)
@@ -216,7 +214,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
         [200, {}, []]
       end
 
-      middleware = described_class.new app, preload: [:stats]
+      middleware = described_class.new app, preload: %i(stats)
       middleware.call(env)
 
       expect(adapter.count(:get)).to be(1)
@@ -226,11 +224,13 @@ RSpec.describe Flipper::Middleware::Memoizer do
 
   context 'when an app raises an exception' do
     it 'resets memoize' do
-      app = ->(_env) { raise }
-      middleware = described_class.new(app)
-      middleware.call(env)
-    rescue RuntimeError
-      expect(flipper.memoizing?).to be(false)
+      begin
+        app = ->(_env) { raise }
+        middleware = described_class.new(app)
+        middleware.call(env)
+      rescue RuntimeError
+        expect(flipper.memoizing?).to be(false)
+      end
     end
   end
 
@@ -328,7 +328,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
     end
 
     it 'does NOT preload_all if request matches unless block' do
-      expect(flipper).not_to receive(:preload_all)
+      expect(flipper).to receive(:preload_all).never
       get '/assets/foo.png', {}, 'flipper' => flipper
     end
 

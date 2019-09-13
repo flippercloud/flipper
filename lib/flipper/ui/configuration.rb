@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'flipper/ui/configuration/option'
 
 module Flipper
@@ -32,7 +30,7 @@ module Flipper
       # won't see a videoclip of Taylor Swift when there aren't any features
       attr_accessor :fun
 
-      VALID_BANNER_CLASS_VALUES = %w[
+      VALID_BANNER_CLASS_VALUES = %w(
         danger
         dark
         info
@@ -41,7 +39,7 @@ module Flipper
         secondary
         success
         warning
-      ].freeze
+      ).freeze
 
       def initialize
         @actors = Option.new("Actors", "Enable actors using the form above.")

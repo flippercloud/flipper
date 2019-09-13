@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'helper'
 require 'flipper/feature'
 
@@ -213,7 +211,7 @@ RSpec.describe Flipper do
         expect(feature.enabled?).to eq(false)
       end
 
-      it 'disables for individual actor and percentage of time' do
+      it 'disables for individual actor' do
         expect(feature.enabled?(pitt)).to eq(false)
       end
 
@@ -228,6 +226,10 @@ RSpec.describe Flipper do
         end.size
 
         expect(enabled).to be(0)
+      end
+
+      it 'disables percentage of time' do
+        expect(feature.enabled?(pitt)).to eq(false)
       end
 
       it 'adds feature to set of features' do
@@ -366,7 +368,7 @@ RSpec.describe Flipper do
       end
     end
 
-    context 'with actor in enabled group' do
+    context 'for actor in enabled group' do
       before do
         feature.enable admin_group
       end
@@ -381,7 +383,7 @@ RSpec.describe Flipper do
       end
     end
 
-    context 'with actor in disabled group' do
+    context 'for actor in disabled group' do
       it 'returns false' do
         expect(feature.enabled?(flipper.actor(dev_thing))).to eq(false)
         expect(feature.enabled?(dev_thing)).to eq(false)
@@ -392,7 +394,7 @@ RSpec.describe Flipper do
       end
     end
 
-    context 'with enabled actor' do
+    context 'for enabled actor' do
       before do
         feature.enable pitt
       end
@@ -402,7 +404,7 @@ RSpec.describe Flipper do
       end
     end
 
-    context 'with not enabled actor' do
+    context 'for not enabled actor' do
       it 'returns false' do
         expect(feature.enabled?(clooney)).to eq(false)
       end
@@ -413,7 +415,7 @@ RSpec.describe Flipper do
       end
     end
 
-    context 'with enabled percentage of time' do
+    context 'for enabled percentage of time' do
       before do
         # ensure percentage of time returns percentage that makes five percent
         # of time true
@@ -431,7 +433,7 @@ RSpec.describe Flipper do
       end
     end
 
-    context 'with enabled float percentage of time' do
+    context 'for enabled float percentage of time' do
       before do
         # ensure percentage of time returns percentage that makes 4.1 percent
         # of time true
@@ -449,7 +451,7 @@ RSpec.describe Flipper do
       end
     end
 
-    context 'with NOT enabled integer percentage of time' do
+    context 'for NOT enabled integer percentage of time' do
       before do
         # ensure percentage of time returns percentage that makes enabled? false
         @gate = feature.gate(:percentage_of_time)
@@ -474,7 +476,7 @@ RSpec.describe Flipper do
       end
     end
 
-    context 'with NOT enabled float percentage of time' do
+    context 'for NOT enabled float percentage of time' do
       before do
         # ensure percentage of time returns percentage that makes enabled? false
         @gate = feature.gate(:percentage_of_time)
@@ -499,7 +501,7 @@ RSpec.describe Flipper do
       end
     end
 
-    context 'with a non flipper thing' do
+    context 'for a non flipper thing' do
       before do
         feature.enable admin_group
       end
@@ -520,7 +522,7 @@ RSpec.describe Flipper do
     end
   end
 
-  context 'with enabling multiple groups, disabling everything, then enabling one group' do
+  context 'enabling multiple groups, disabling everything, then enabling one group' do
     before do
       feature.enable(admin_group)
       feature.enable(dev_group)

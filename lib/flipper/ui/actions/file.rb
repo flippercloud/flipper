@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'rack/file'
 require 'flipper/ui/action'
 

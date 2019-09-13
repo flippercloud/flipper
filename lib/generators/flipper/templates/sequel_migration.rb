@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 class CreateFlipperTablesSequel < Sequel::Migration
   def up
     create_table :flipper_features do |_t|

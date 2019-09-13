@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'helper'
 require 'flipper/registry'
 
@@ -89,7 +87,7 @@ RSpec.describe Flipper::Registry do
     end
 
     it 'returns the keys' do
-      expect(subject.keys.map(&:to_s).sort).to eq(%w[admins devs])
+      expect(subject.keys.map(&:to_s).sort).to eq(%w(admins devs))
     end
 
     it 'returns the keys as symbols' do
@@ -106,7 +104,7 @@ RSpec.describe Flipper::Registry do
     end
 
     it 'returns the values' do
-      expect(subject.values.map(&:to_s).sort).to eq(%w[admins devs])
+      expect(subject.values.map(&:to_s).sort).to eq(%w(admins devs))
     end
   end
 
@@ -125,8 +123,8 @@ RSpec.describe Flipper::Registry do
         values << value
       end
 
-      expect(keys.map(&:to_s).sort).to eq(%w[admins devs])
-      expect(values.sort).to eq(%w[admins devs])
+      expect(keys.map(&:to_s).sort).to eq(%w(admins devs))
+      expect(values.sort).to eq(%w(admins devs))
     end
   end
 

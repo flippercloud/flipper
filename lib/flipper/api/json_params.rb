@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'rack/utils'
 
 module Flipper
@@ -11,9 +9,9 @@ module Flipper
         @app = app
       end
 
-      CONTENT_TYPE = 'CONTENT_TYPE'
-      QUERY_STRING = 'QUERY_STRING'
-      REQUEST_BODY = 'rack.input'
+      CONTENT_TYPE = 'CONTENT_TYPE'.freeze
+      QUERY_STRING = 'QUERY_STRING'.freeze
+      REQUEST_BODY = 'rack.input'.freeze
 
       # Public: Merge request body params with query string params
       # This way can access all params with Rack::Request#params
@@ -36,7 +34,6 @@ module Flipper
       # This method accomplishes similar functionality
       def update_params(env, data)
         return if data.empty?
-
         parsed_request_body = JSON.parse(data)
         parsed_query_string = parse_query(env[QUERY_STRING])
         parsed_query_string.merge!(parsed_request_body)

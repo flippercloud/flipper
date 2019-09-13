@@ -1,8 +1,6 @@
 # -*- encoding: utf-8 -*-
-# frozen_string_literal: true
-
-require File.expand_path('lib/flipper/version', __dir__)
-require File.expand_path('lib/flipper/metadata', __dir__)
+require File.expand_path('../lib/flipper/version', __FILE__)
+require File.expand_path('../lib/flipper/metadata', __FILE__)
 
 flipper_ui_files = lambda do |file|
   file =~ %r{(docs|examples|flipper)[\/-]ui}
@@ -23,8 +21,8 @@ Gem::Specification.new do |gem|
   gem.version       = Flipper::VERSION
   gem.metadata      = Flipper::METADATA
 
-  gem.add_dependency 'erubi', '>= 1.0.0', '< 2.0.0'
-  gem.add_dependency 'flipper', "~> #{Flipper::VERSION}"
   gem.add_dependency 'rack', '>= 1.4', '< 3'
   gem.add_dependency 'rack-protection', '>= 1.5.3', '< 2.1.0'
+  gem.add_dependency 'flipper', "~> #{Flipper::VERSION}"
+  gem.add_dependency 'erubi', '>= 1.0.0', '< 2.0.0'
 end

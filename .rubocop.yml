@@ -11,13 +11,10 @@ AllCops:
     - 'tmp/**/*'
     - 'bin/**/*'
     - 'vendor/bundle/**/*'
-  TargetRubyVersion: 2.6
+  TargetRubyVersion: 2.0
   # DefaultFormatter: fuubar
 Style/Alias:
   Enabled: false
-
-Style/SymbolArray:
-  EnforcedStyle: brackets
 
 Style/Documentation:
   Enabled: false
@@ -45,20 +42,14 @@ Metrics/LineLength:
 Style/RegexpLiteral:
   EnforcedStyle: mixed
 
-Style/TrailingCommaInArrayLiteral:
-  EnforcedStyleForMultiline: consistent_comma
-
-Style/TrailingCommaInHashLiteral:
+Style/TrailingCommaInLiteral:
   EnforcedStyleForMultiline: consistent_comma
 
 RSpec/InstanceVariable:
   Enabled: false
 
-RSpec/MultipleExpectations:
-  Max: 20
-
-RSpec/NestedGroups:
-  Max: 5
+Style/AccessorMethodName:
+  Enabled: false
 
 Lint/HandleExceptions:
   Enabled: false

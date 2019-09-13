@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'helper'
 require 'flipper/adapters/active_record'
 require 'flipper/spec/shared_adapter_specs'
@@ -15,7 +13,7 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
                                             database: ':memory:')
   end
 
-  before do
+  before(:each) do
     ActiveRecord::Base.connection.execute <<-SQL
       CREATE TABLE flipper_features (
         id integer PRIMARY KEY,
@@ -41,10 +39,10 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
     SQL
   end
 
-  after do
+  after(:each) do
     ActiveRecord::Base.connection.execute("DROP table IF EXISTS `flipper_features`")
     ActiveRecord::Base.connection.execute("DROP table IF EXISTS `flipper_gates`")
   end
 
-  it_behaves_like 'a flipper adapter'
+  it_should_behave_like 'a flipper adapter'
 end

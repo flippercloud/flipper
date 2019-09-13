@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require "helper"
 require "flipper/adapters/memory"
 require "flipper/adapters/operation_logger"

@@ -1,11 +1,7 @@
-# frozen_string_literal: true
-
 require 'helper'
 require 'flipper/adapters/read_only'
 
 RSpec.describe Flipper::Adapters::ReadOnly do
-  subject { described_class.new(adapter) }
-
   let(:adapter) { Flipper::Adapters::Memory.new }
   let(:flipper) { Flipper.new(subject) }
   let(:feature) { flipper[:stats] }
@@ -15,6 +11,8 @@ RSpec.describe Flipper::Adapters::ReadOnly do
   let(:actor_gate)   { feature.gate(:actor) }
   let(:actors_gate)  { feature.gate(:percentage_of_actors) }
   let(:time_gate)    { feature.gate(:percentage_of_time) }
+
+  subject { described_class.new(adapter) }
 
   before do
     Flipper.register(:admins) do |actor|

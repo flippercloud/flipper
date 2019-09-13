@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'flipper/ui/action'
 require 'flipper/ui/decorators/feature'
 
@@ -17,8 +15,8 @@ module Flipper
 
           begin
             feature.enable_percentage_of_actors params['value']
-          rescue ArgumentError => e
-            error = Rack::Utils.escape("Invalid percentage of actors value: #{e.message}")
+          rescue ArgumentError => exception
+            error = Rack::Utils.escape("Invalid percentage of actors value: #{exception.message}")
             redirect_to("/features/#{@feature.key}?error=#{error}")
           end
 

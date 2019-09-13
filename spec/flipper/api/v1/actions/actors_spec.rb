@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'helper'
 
 RSpec.describe Flipper::Api::V1::Actions::Actors do

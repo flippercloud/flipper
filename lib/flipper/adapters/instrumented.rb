@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'delegate'
 
 module Flipper
@@ -10,7 +8,7 @@ module Flipper
       include ::Flipper::Adapter
 
       # Private: The name of instrumentation events.
-      InstrumentationName = "adapter_operation.#{InstrumentationNamespace}"
+      InstrumentationName = "adapter_operation.#{InstrumentationNamespace}".freeze
 
       # Private: What is used to instrument all the things.
       attr_reader :instrumenter

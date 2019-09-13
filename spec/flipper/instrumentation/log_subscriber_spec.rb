@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'logger'
 require 'helper'
 require 'flipper/adapters/instrumented'

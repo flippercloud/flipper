@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'helper'
 
 RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
@@ -14,7 +12,7 @@ RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
 
     it 'enables feature for actor' do
       expect(last_response.status).to eq(200)
-      expect(flipper[:my_feature]).to be_enabled(actor)
+      expect(flipper[:my_feature].enabled?(actor)).to be_truthy
       expect(flipper[:my_feature].enabled_gate_names).to eq([:actor])
     end
 
@@ -34,7 +32,7 @@ RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
 
     it 'disables feature' do
       expect(last_response.status).to eq(200)
-      expect(flipper[:my_feature]).not_to be_enabled(actor)
+      expect(flipper[:my_feature].enabled?(actor)).to be_falsy
       expect(flipper[:my_feature].enabled_gate_names).to be_empty
     end
 
@@ -52,7 +50,7 @@ RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
 
     it 'enables feature for actor' do
       expect(last_response.status).to eq(200)
-      expect(flipper["my/feature"]).to be_enabled(actor)
+      expect(flipper["my/feature"].enabled?(actor)).to be_truthy
       expect(flipper["my/feature"].enabled_gate_names).to eq([:actor])
     end
 
@@ -117,7 +115,7 @@ RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
 
     it 'enables feature for actor' do
       expect(last_response.status).to eq(200)
-      expect(flipper[:my_feature]).to be_enabled(actor)
+      expect(flipper[:my_feature].enabled?(actor)).to be_truthy
       expect(flipper[:my_feature].enabled_gate_names).to eq([:actor])
     end
 
@@ -134,7 +132,7 @@ RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
 
     it 'disables feature' do
       expect(last_response.status).to eq(200)
-      expect(flipper[:my_feature]).not_to be_enabled(actor)
+      expect(flipper[:my_feature].enabled?(actor)).to be_falsy
       expect(flipper[:my_feature].enabled_gate_names).to be_empty
     end
 

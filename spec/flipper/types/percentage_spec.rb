@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'helper'
 require 'flipper/types/percentage_of_actors'
 
@@ -7,8 +5,7 @@ RSpec.describe Flipper::Types::Percentage do
   subject do
     described_class.new(5)
   end
-
-  it_behaves_like 'a percentage'
+  it_should_behave_like 'a percentage'
 
   describe '.wrap' do
     context 'with percentage instance' do

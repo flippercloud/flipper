@@ -1,13 +1,11 @@
-# frozen_string_literal: true
-
 require 'helper'
 
 RSpec.describe Flipper::Gates::Boolean do
+  let(:feature_name) { :search }
+
   subject do
     described_class.new
   end
-
-  let(:feature_name) { :search }
 
   def context(bool)
     Flipper::FeatureCheckContext.new(
@@ -18,13 +16,13 @@ RSpec.describe Flipper::Gates::Boolean do
   end
 
   describe '#enabled?' do
-    context 'with true value' do
+    context 'for true value' do
       it 'returns true' do
         expect(subject.enabled?(true)).to eq(true)
       end
     end
 
-    context 'with false value' do
+    context 'for false value' do
       it 'returns false' do
         expect(subject.enabled?(false)).to eq(false)
       end
@@ -32,13 +30,13 @@ RSpec.describe Flipper::Gates::Boolean do
   end
 
   describe '#open?' do
-    context 'with true value' do
+    context 'for true value' do
       it 'returns true' do
         expect(subject.open?(context(true))).to be(true)
       end
     end
 
-    context 'with false value' do
+    context 'for false value' do
       it 'returns false' do
         expect(subject.open?(context(false))).to be(false)
       end

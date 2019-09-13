@@ -1,18 +1,16 @@
-# frozen_string_literal: true
-
 require 'helper'
 require 'flipper/ui/decorators/gate'
 
 RSpec.describe Flipper::UI::Decorators::Gate do
-  subject do
-    described_class.new(gate, false)
-  end
-
   let(:source)  { {} }
   let(:adapter) { Flipper::Adapters::Memory.new(source) }
   let(:flipper) { build_flipper }
   let(:feature) { flipper[:some_awesome_feature] }
   let(:gate) { feature.gate(:boolean) }
+
+  subject do
+    described_class.new(gate, false)
+  end
 
   describe '#initialize' do
     it 'sets gate' do

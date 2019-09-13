@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'helper'
 
 RSpec.describe Flipper::Api::V1::Actions::BooleanGate do
@@ -13,7 +11,7 @@ RSpec.describe Flipper::Api::V1::Actions::BooleanGate do
 
     it 'enables feature' do
       expect(last_response.status).to eq(200)
-      expect(flipper[:my_feature]).to be_on
+      expect(flipper[:my_feature].on?).to be_truthy
     end
 
     it 'returns decorated feature with boolean gate enabled' do
@@ -30,7 +28,7 @@ RSpec.describe Flipper::Api::V1::Actions::BooleanGate do
 
     it 'enables feature' do
       expect(last_response.status).to eq(200)
-      expect(flipper["my/feature"]).to be_on
+      expect(flipper["my/feature"].on?).to be_truthy
     end
 
     it 'returns decorated feature with boolean gate enabled' do
@@ -47,7 +45,7 @@ RSpec.describe Flipper::Api::V1::Actions::BooleanGate do
 
     it 'disables feature' do
       expect(last_response.status).to eq(200)
-      expect(flipper[:my_feature]).to be_off
+      expect(flipper[:my_feature].off?).to be_truthy
     end
 
     it 'returns decorated feature with boolean gate disabled' do

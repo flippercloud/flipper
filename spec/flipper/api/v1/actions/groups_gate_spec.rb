@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'helper'
 
 RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
@@ -19,7 +17,7 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
       allow(person).to receive(:flipper_id).and_return(1)
       allow(person).to receive(:admin?).and_return(true)
       expect(last_response.status).to eq(200)
-      expect(flipper[:my_feature]).to be_enabled(person)
+      expect(flipper[:my_feature].enabled?(person)).to be_truthy
     end
 
     it 'returns decorated feature with group enabled' do
@@ -42,7 +40,7 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
       allow(person).to receive(:flipper_id).and_return(1)
       allow(person).to receive(:admin?).and_return(true)
       expect(last_response.status).to eq(200)
-      expect(flipper["my/feature"]).to be_enabled(person)
+      expect(flipper["my/feature"].enabled?(person)).to be_truthy
     end
 
     it 'returns decorated feature with group enabled' do
@@ -89,7 +87,7 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
       allow(person).to receive(:flipper_id).and_return(1)
       allow(person).to receive(:admin?).and_return(true)
       expect(last_response.status).to eq(200)
-      expect(flipper[:my_feature]).not_to be_enabled(person)
+      expect(flipper[:my_feature].enabled?(person)).to be_falsey
     end
 
     it 'returns decorated feature with group disabled' do
@@ -111,7 +109,7 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
       allow(person).to receive(:flipper_id).and_return(1)
       allow(person).to receive(:admin?).and_return(true)
       expect(last_response.status).to eq(200)
-      expect(flipper[:my_feature]).not_to be_enabled(person)
+      expect(flipper[:my_feature].enabled?(person)).to be_falsey
     end
 
     it 'returns decorated feature with group disabled' do

@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'rails/generators/active_record'
 
 module Flipper

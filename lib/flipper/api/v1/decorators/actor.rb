@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module Flipper
   module Api
     module V1

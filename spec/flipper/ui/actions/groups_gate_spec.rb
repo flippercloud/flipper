@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require 'helper'
 
 RSpec.describe Flipper::UI::Actions::GroupsGate do
@@ -70,7 +68,7 @@ RSpec.describe Flipper::UI::Actions::GroupsGate do
         end
       end
 
-      context 'with an unregistered group' do
+      context 'for an unregistered group' do
         context 'unknown group name' do
           let(:group_name) { 'not_here' }
 
