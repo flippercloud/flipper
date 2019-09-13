@@ -1,9 +1,15 @@
+# frozen_string_literal: true
+
 require 'helper'
 require 'flipper/adapters/instrumented'
 require 'flipper/instrumenters/memory'
 require 'flipper/spec/shared_adapter_specs'
 
 RSpec.describe Flipper::Adapters::Instrumented do
+  subject do
+    described_class.new(adapter, instrumenter: instrumenter)
+  end
+
   let(:instrumenter) { Flipper::Instrumenters::Memory.new }
   let(:adapter) { Flipper::Adapters::Memory.new }
   let(:flipper) { Flipper.new(adapter) }
@@ -12,11 +18,7 @@ RSpec.describe Flipper::Adapters::Instrumented do
   let(:gate) { feature.gate(:percentage_of_actors) }
   let(:thing) { flipper.actors(22) }
 
-  subject do
-    described_class.new(adapter, instrumenter: instrumenter)
-  end
-
-  it_should_behave_like 'a flipper adapter'
+  it_behaves_like 'a flipper adapter'
 
   it 'forwards missing methods to underlying adapter' do
     adapter = Class.new do

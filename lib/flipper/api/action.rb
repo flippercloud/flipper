@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'forwardable'
 require 'flipper/api/error'
 require 'flipper/api/error_response'
@@ -18,11 +20,11 @@ module Flipper
 
       extend Forwardable
 
-      VALID_REQUEST_METHOD_NAMES = Set.new([
-                                             'get'.freeze,
-                                             'post'.freeze,
-                                             'put'.freeze,
-                                             'delete'.freeze,
+      VALID_REQUEST_METHOD_NAMES = Set.new(%w[
+                                             get
+                                             post
+                                             put
+                                             delete
                                            ]).freeze
 
       # Public: Call this in subclasses so the action knows its route.

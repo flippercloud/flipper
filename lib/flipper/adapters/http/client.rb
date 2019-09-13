@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'uri'
 require 'openssl'
 require 'flipper/version'
@@ -12,7 +14,7 @@ module Flipper
           'User-Agent' => "Flipper HTTP Adapter v#{VERSION}",
         }.freeze
 
-        HTTPS_SCHEME = "https".freeze
+        HTTPS_SCHEME = "https"
 
         def initialize(options = {})
           @uri = URI(options.fetch(:url))

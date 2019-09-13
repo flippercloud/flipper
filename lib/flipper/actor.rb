@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Simple class for turning a flipper_id into an actor that can be based
 # to Flipper::Feature#enabled?.
 module Flipper

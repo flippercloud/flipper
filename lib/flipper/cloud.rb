@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "flipper"
 require "flipper/cloud/configuration"
 

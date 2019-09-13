@@ -1,11 +1,13 @@
+# frozen_string_literal: true
+
 require 'helper'
 
 RSpec.describe Flipper::Gates::Group do
-  let(:feature_name) { :search }
-
   subject do
     described_class.new
   end
+
+  let(:feature_name) { :search }
 
   def context(set)
     Flipper::FeatureCheckContext.new(

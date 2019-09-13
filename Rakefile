@@ -1,5 +1,7 @@
 #!/usr/bin/env rake
-$LOAD_PATH.push File.expand_path('../lib', __FILE__)
+# frozen_string_literal: true
+
+$LOAD_PATH.push File.expand_path('lib', __dir__)
 require 'rake/testtask'
 require 'flipper/version'
 
@@ -25,19 +27,19 @@ end
 
 require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new(:spec) do |t|
-  t.rspec_opts = %w(--color)
+  t.rspec_opts = %w[--color]
 end
 
 namespace :spec do
   desc 'Run specs for UI queue'
   RSpec::Core::RakeTask.new(:ui) do |t|
-    t.rspec_opts = %w(--color)
+    t.rspec_opts = %w[--color]
     t.pattern = ['spec/flipper/ui/**/*_spec.rb', 'spec/flipper/ui_spec.rb']
   end
 end
 
 Rake::TestTask.new do |t|
-  t.libs = %w(lib test)
+  t.libs = %w[lib test]
   t.pattern = 'test/**/*_test.rb'
 end
 

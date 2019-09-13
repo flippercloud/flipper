@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'helper'
 require 'flipper/adapters/sync'
 require 'flipper/adapters/operation_logger'
@@ -5,6 +7,10 @@ require 'flipper/spec/shared_adapter_specs'
 require 'active_support/notifications'
 
 RSpec.describe Flipper::Adapters::Sync do
+  subject do
+    described_class.new(local_adapter, remote_adapter, interval: 1)
+  end
+
   let(:local_adapter) do
     Flipper::Adapters::OperationLogger.new Flipper::Adapters::Memory.new
   end
@@ -15,42 +21,38 @@ RSpec.describe Flipper::Adapters::Sync do
   let(:remote) { Flipper.new(remote_adapter) }
   let(:sync) { Flipper.new(subject) }
 
-  subject do
-    described_class.new(local_adapter, remote_adapter, interval: 1)
-  end
-
-  it_should_behave_like 'a flipper adapter'
+  it_behaves_like 'a flipper adapter'
 
   context 'when local has never been synced' do
     it 'syncs boolean' do
       remote.enable(:search)
       expect(sync[:search].boolean_value).to be(true)
-      expect(subject.features.sort).to eq(%w(search))
+      expect(subject.features.sort).to eq(%w[search])
     end
 
     it 'syncs actor' do
       actor = Flipper::Actor.new("User;1000")
       remote.enable_actor(:search, actor)
       expect(sync[:search].actors_value).to eq(Set[actor.flipper_id])
-      expect(subject.features.sort).to eq(%w(search))
+      expect(subject.features.sort).to eq(%w[search])
     end
 
     it 'syncs group' do
       remote.enable_group(:search, :staff)
       expect(sync[:search].groups_value).to eq(Set["staff"])
-      expect(subject.features.sort).to eq(%w(search))
+      expect(subject.features.sort).to eq(%w[search])
     end
 
     it 'syncs percentage of actors' do
       remote.enable_percentage_of_actors(:search, 25)
       expect(sync[:search].percentage_of_actors_value).to eq(25)
-      expect(subject.features.sort).to eq(%w(search))
+      expect(subject.features.sort).to eq(%w[search])
     end
 
     it 'syncs percentage of time' do
       remote.enable_percentage_of_time(:search, 15)
       expect(sync[:search].percentage_of_time_value).to eq(15)
-      expect(subject.features.sort).to eq(%w(search))
+      expect(subject.features.sort).to eq(%w[search])
     end
   end
 

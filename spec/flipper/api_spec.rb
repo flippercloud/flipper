@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'helper'
 
 RSpec.describe Flipper::Api do
@@ -20,7 +22,7 @@ RSpec.describe Flipper::Api do
 
       expect(last_response.status).to eq(200)
       feature_names = json_response.fetch('features').map { |feature| feature.fetch('key') }
-      expect(feature_names).to eq(%w(env_a env_b))
+      expect(feature_names).to eq(%w[env_a env_b])
     end
   end
 
@@ -39,7 +41,7 @@ RSpec.describe Flipper::Api do
 
       expect(last_response.status).to eq(200)
       feature_names = json_response.fetch('features').map { |feature| feature.fetch('key') }
-      expect(feature_names).to eq(%w(a b))
+      expect(feature_names).to eq(%w[a b])
     end
   end
 
@@ -63,7 +65,7 @@ RSpec.describe Flipper::Api do
 
       expect(last_response.status).to eq(200)
       feature_names = json_response.fetch('features').map { |feature| feature.fetch('key') }
-      expect(feature_names).to eq(%w(a b))
+      expect(feature_names).to eq(%w[a b])
     end
   end
 

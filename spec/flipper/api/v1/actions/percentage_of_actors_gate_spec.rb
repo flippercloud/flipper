@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 require 'helper'
 
 RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
   let(:app) { build_api(flipper) }
 
   describe 'enable' do
-    context 'for feature with slash in name' do
+    context 'with feature with slash in name' do
       before do
         flipper["my/feature"].disable
         post '/features/my/feature/percentage_of_actors', percentage: '10'

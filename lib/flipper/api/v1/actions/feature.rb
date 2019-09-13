@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'flipper/api/action'
 require 'flipper/api/v1/decorators/feature'
 
@@ -12,6 +14,7 @@ module Flipper
 
           def get
             return json_error_response(:feature_not_found) unless feature_exists?(feature_name)
+
             feature = Decorators::Feature.new(flipper[feature_name])
             json_response(feature.as_json)
           end

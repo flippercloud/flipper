@@ -1,12 +1,14 @@
+# frozen_string_literal: true
+
 require 'set'
 
 module Flipper
   module Typecast
     TruthMap = {
-      true    => true,
-      1       => true,
-      'true'  => true,
-      '1'     => true,
+      true => true,
+      1 => true,
+      'true' => true,
+      '1' => true,
     }.freeze
 
     # Internal: Convert value to a boolean.
@@ -45,7 +47,7 @@ module Flipper
     # Returns a Integer or Float representation of the value.
     # Raises ArgumentError if conversion is not possible.
     def self.to_percentage(value)
-      if value.to_s.include?('.'.freeze)
+      if value.to_s.include?('.')
         to_float(value)
       else
         to_integer(value)

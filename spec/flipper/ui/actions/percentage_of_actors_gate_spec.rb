@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'helper'
 
 RSpec.describe Flipper::UI::Actions::PercentageOfActorsGate do

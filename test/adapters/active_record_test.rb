@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'test_helper'
 require 'flipper/adapters/active_record'
 
@@ -53,7 +55,6 @@ class ActiveRecordTest < MiniTest::Test
 
     assert_equal "foo_flipper_features_bar", Flipper::Adapters::ActiveRecord::Feature.table_name
     assert_equal "foo_flipper_gates_bar", Flipper::Adapters::ActiveRecord::Gate.table_name
-
   ensure
     ActiveRecord::Base.table_name_prefix = ""
     ActiveRecord::Base.table_name_suffix = ""

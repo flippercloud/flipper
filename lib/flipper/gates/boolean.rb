@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Flipper
   module Gates
     class Boolean < Gate

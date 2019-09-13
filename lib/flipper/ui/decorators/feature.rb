@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'delegate'
 require 'flipper/ui/decorators/gate'
 require 'flipper/ui/util'

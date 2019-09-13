@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "flipper/actor"
 require "flipper/gate_values"
 
@@ -34,9 +36,11 @@ module Flipper
         def call
           if remote_disabled?
             return if local_disabled?
+
             @feature.disable
           elsif remote_boolean_enabled?
             return if local_boolean_enabled?
+
             @feature.enable
           else
             @feature.disable if local_boolean_enabled?

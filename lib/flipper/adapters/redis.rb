@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'set'
 require 'redis'
 require 'flipper'

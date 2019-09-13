@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'helper'
 require 'flipper/adapters/pstore'
 require 'flipper/spec/shared_adapter_specs'
@@ -10,7 +12,7 @@ RSpec.describe Flipper::Adapters::PStore do
     described_class.new(pstore_file)
   end
 
-  it_should_behave_like 'a flipper adapter'
+  it_behaves_like 'a flipper adapter'
 
   it 'defaults path to flipper.pstore' do
     expect(described_class.new.path).to eq('flipper.pstore')

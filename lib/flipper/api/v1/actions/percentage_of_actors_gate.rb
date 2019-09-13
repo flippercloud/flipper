@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'flipper/api/action'
 require 'flipper/api/v1/decorators/feature'
 
@@ -33,8 +35,8 @@ module Flipper
           def percentage
             @percentage ||= begin
               Integer(params['percentage'])
-            rescue ArgumentError, TypeError
-              -1
+                            rescue ArgumentError, TypeError
+                              -1
             end
           end
         end

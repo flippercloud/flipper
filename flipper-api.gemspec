@@ -1,6 +1,8 @@
 # -*- encoding: utf-8 -*-
-require File.expand_path('../lib/flipper/version', __FILE__)
-require File.expand_path('../lib/flipper/metadata', __FILE__)
+# frozen_string_literal: true
+
+require File.expand_path('lib/flipper/version', __dir__)
+require File.expand_path('lib/flipper/metadata', __dir__)
 
 flipper_api_files = lambda do |file|
   file =~ %r{(flipper)[\/-]api}
@@ -20,6 +22,6 @@ Gem::Specification.new do |gem|
   gem.version       = Flipper::VERSION
   gem.metadata      = Flipper::METADATA
 
-  gem.add_dependency 'rack', '>= 1.4', '< 3'
   gem.add_dependency 'flipper', "~> #{Flipper::VERSION}"
+  gem.add_dependency 'rack', '>= 1.4', '< 3'
 end

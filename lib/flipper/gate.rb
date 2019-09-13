@@ -1,8 +1,9 @@
+# frozen_string_literal: true
+
 module Flipper
   class Gate
     # Public
-    def initialize(options = {})
-    end
+    def initialize(options = {}); end
 
     # Public: The name of the gate. Implemented in subclass.
     def name

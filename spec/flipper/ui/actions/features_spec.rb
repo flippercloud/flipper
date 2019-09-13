@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'helper'
 
 RSpec.describe Flipper::UI::Actions::Features do
@@ -42,6 +44,7 @@ RSpec.describe Flipper::UI::Actions::Features do
 
       context "when fun mode is enabled" do
         let(:fun_mode) { true }
+
         before { get '/features' }
 
         it 'responds with success' do
@@ -55,6 +58,7 @@ RSpec.describe Flipper::UI::Actions::Features do
 
       context "when fun mode is disabled" do
         let(:fun_mode) { false }
+
         before { get '/features' }
 
         it 'responds with success' do
@@ -103,7 +107,7 @@ RSpec.describe Flipper::UI::Actions::Features do
         end
       end
 
-      context 'for an invalid feature name' do
+      context 'with an invalid feature name' do
         context 'empty feature name' do
           let(:feature_name) { '' }
 

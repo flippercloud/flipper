@@ -1,17 +1,19 @@
+# frozen_string_literal: true
+
 require 'helper'
 require 'flipper/adapters/memoizable'
 require 'flipper/adapters/operation_logger'
 require 'flipper/spec/shared_adapter_specs'
 
 RSpec.describe Flipper::Adapters::Memoizable do
+  subject { described_class.new(adapter, cache) }
+
   let(:features_key) { described_class::FeaturesKey }
   let(:adapter) { Flipper::Adapters::Memory.new }
   let(:flipper) { Flipper.new(adapter) }
   let(:cache)   { {} }
 
-  subject { described_class.new(adapter, cache) }
-
-  it_should_behave_like 'a flipper adapter'
+  it_behaves_like 'a flipper adapter'
 
   it 'forwards missing methods to underlying adapter' do
     adapter = Class.new do
@@ -91,7 +93,7 @@ RSpec.describe Flipper::Adapters::Memoizable do
       end
 
       it 'memoizes features' do
-        names = %i(stats shiny)
+        names = [:stats, :shiny]
         features = names.map { |name| flipper[name] }
         results = subject.get_multi(features)
         features.each do |feature|
@@ -107,7 +109,7 @@ RSpec.describe Flipper::Adapters::Memoizable do
       end
 
       it 'returns result' do
-        names = %i(stats shiny)
+        names = [:stats, :shiny]
         features = names.map { |name| flipper[name] }
         result = subject.get_multi(features)
         adapter_result = adapter.get_multi(features)
@@ -123,7 +125,7 @@ RSpec.describe Flipper::Adapters::Memoizable do
       end
 
       it 'memoizes features' do
-        names = %i(stats shiny)
+        names = [:stats, :shiny]
         features = names.map { |name| flipper[name].tap(&:enable) }
         results = subject.get_all
         features.each do |feature|
@@ -161,7 +163,7 @@ RSpec.describe Flipper::Adapters::Memoizable do
       end
 
       it 'returns result' do
-        names = %i(stats shiny)
+        names = [:stats, :shiny]
         names.map { |name| flipper[name].tap(&:enable) }
         result = subject.get_all
         adapter_result = adapter.get_all

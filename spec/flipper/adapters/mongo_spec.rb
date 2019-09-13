@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'helper'
 require 'flipper/adapters/mongo'
 require 'flipper/spec/shared_adapter_specs'
@@ -23,5 +25,5 @@ RSpec.describe Flipper::Adapters::Mongo do
     collection.create
   end
 
-  it_should_behave_like 'a flipper adapter'
+  it_behaves_like 'a flipper adapter'
 end

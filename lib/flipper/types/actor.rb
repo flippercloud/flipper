@@ -1,8 +1,11 @@
+# frozen_string_literal: true
+
 module Flipper
   module Types
     class Actor < Type
       def self.wrappable?(thing)
         return false if thing.nil?
+
         thing.respond_to?(:flipper_id)
       end
 

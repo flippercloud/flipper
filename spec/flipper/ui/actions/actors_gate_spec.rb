@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'helper'
 
 RSpec.describe Flipper::UI::Actions::ActorsGate do
@@ -69,7 +71,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
         end
       end
 
-      context 'for an invalid actor value' do
+      context 'with an invalid actor value' do
         context 'empty value' do
           let(:value) { '' }
 

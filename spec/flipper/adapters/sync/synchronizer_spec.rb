@@ -1,16 +1,18 @@
+# frozen_string_literal: true
+
 require "helper"
 require "flipper/adapters/memory"
 require "flipper/instrumenters/memory"
 require "flipper/adapters/sync/synchronizer"
 
 RSpec.describe Flipper::Adapters::Sync::Synchronizer do
+  subject { described_class.new(local, remote, instrumenter: instrumenter) }
+
   let(:local) { Flipper::Adapters::Memory.new }
   let(:remote) { Flipper::Adapters::Memory.new }
   let(:local_flipper) { Flipper.new(local) }
   let(:remote_flipper) { Flipper.new(remote) }
   let(:instrumenter) { Flipper::Instrumenters::Memory.new }
-
-  subject { described_class.new(local, remote, instrumenter: instrumenter) }
 
   it "instruments call" do
     subject.call
@@ -65,7 +67,7 @@ RSpec.describe Flipper::Adapters::Sync::Synchronizer do
 
       expect(local_flipper[:search].boolean_value).to eq(true)
       expect(local_flipper[:logging].percentage_of_time_value).to eq(10)
-      expect(local_flipper.features.map(&:key).sort).to eq(%w(logging search))
+      expect(local_flipper.features.map(&:key).sort).to eq(%w[logging search])
     end
 
     it 'adds features in remote that are not in local' do

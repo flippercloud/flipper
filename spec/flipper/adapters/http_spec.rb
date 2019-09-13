@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'helper'
 require 'flipper/adapters/http'
 require 'flipper/adapters/pstore'
@@ -37,14 +39,14 @@ RSpec.describe Flipper::Adapters::Http do
     end
 
     after :all do
-      @server.shutdown if @server
+      @server&.shutdown
     end
 
-    before(:each) do
+    before do
       @pstore_file.unlink if @pstore_file.exist?
     end
 
-    it_should_behave_like 'a flipper adapter'
+    it_behaves_like 'a flipper adapter'
 
     it "can enable and disable unregistered group" do
       flipper = Flipper.new(subject)
@@ -119,6 +121,8 @@ RSpec.describe Flipper::Adapters::Http do
   end
 
   describe 'configuration' do
+    subject { described_class.new(options) }
+
     let(:debug_output) { object_double($stderr) }
     let(:options) do
       {
@@ -132,7 +136,7 @@ RSpec.describe Flipper::Adapters::Http do
         debug_output: debug_output,
       }
     end
-    subject { described_class.new(options) }
+
     let(:feature) { flipper[:feature_panel] }
 
     before do
@@ -151,7 +155,7 @@ RSpec.describe Flipper::Adapters::Http do
       subject.get(feature)
       expect(
         a_request(:get, 'http://app.com/mount-point/features/feature_panel')
-        .with(basic_auth: %w(username password))
+        .with(basic_auth: %w[username password])
       ).to have_been_made.once
     end
 
@@ -165,7 +169,7 @@ RSpec.describe Flipper::Adapters::Http do
   end
 
   def fixture_file(name)
-    fixtures_path = File.expand_path('../../../fixtures', __FILE__)
+    fixtures_path = File.expand_path('../../fixtures', __dir__)
     File.new(fixtures_path + '/' + name)
   end
 end

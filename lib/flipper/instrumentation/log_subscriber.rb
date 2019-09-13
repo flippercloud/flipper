@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'securerandom'
 require 'active_support/notifications'
 require 'active_support/log_subscriber'

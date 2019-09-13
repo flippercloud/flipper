@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Flipper
   class FeatureCheckContext
     # Public: The name of the feature.

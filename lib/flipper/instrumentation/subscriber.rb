@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Flipper
   module Instrumentation
     class Subscriber
@@ -72,7 +74,7 @@ module Flipper
         update_timer "flipper.adapter.#{adapter_name}.#{operation}"
       end
 
-      QUESTION_MARK = '?'.freeze
+      QUESTION_MARK = '?'
 
       # Private
       def strip_trailing_question_mark(operation)

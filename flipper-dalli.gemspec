@@ -1,6 +1,8 @@
 # -*- encoding: utf-8 -*-
-require File.expand_path('../lib/flipper/version', __FILE__)
-require File.expand_path('../lib/flipper/metadata', __FILE__)
+# frozen_string_literal: true
+
+require File.expand_path('lib/flipper/version', __dir__)
+require File.expand_path('lib/flipper/metadata', __dir__)
 
 flipper_dalli_files = lambda do |file|
   file =~ /dalli/
@@ -21,6 +23,6 @@ Gem::Specification.new do |gem|
   gem.version       = Flipper::VERSION
   gem.metadata      = Flipper::METADATA
 
-  gem.add_dependency 'flipper', "~> #{Flipper::VERSION}"
   gem.add_dependency 'dalli', '>= 2.0', '< 3'
+  gem.add_dependency 'flipper', "~> #{Flipper::VERSION}"
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'helper'
 require 'flipper/cloud'
 require 'flipper/adapters/instrumented'

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'helper'
 require 'flipper/types/actor'
 
@@ -39,7 +41,7 @@ RSpec.describe Flipper::Types::Actor do
   end
 
   describe '.wrap' do
-    context 'for actor' do
+    context 'with actor' do
       it 'returns actor' do
         actor = described_class.wrap(subject)
         expect(actor).to be_instance_of(described_class)
@@ -47,7 +49,7 @@ RSpec.describe Flipper::Types::Actor do
       end
     end
 
-    context 'for other thing' do
+    context 'with other thing' do
       it 'returns actor' do
         thing = thing_class.new('1')
         actor = described_class.wrap(thing)

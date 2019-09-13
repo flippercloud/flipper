@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # rubocop:disable Metrics/ModuleLength
 module Flipper
   module Test
@@ -260,7 +262,7 @@ module Flipper
         @flipper.disable(:search)
 
         result = @adapter.get_all
-        assert_equal %w(search stats), result.keys.sort
+        assert_equal %w[search stats], result.keys.sort
       end
 
       def test_can_double_enable_an_actor_without_error

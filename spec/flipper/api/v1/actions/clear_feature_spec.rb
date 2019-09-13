@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'helper'
 
 RSpec.describe Flipper::Api::V1::Actions::ClearFeature do
@@ -20,7 +22,7 @@ RSpec.describe Flipper::Api::V1::Actions::ClearFeature do
 
     it 'clears feature' do
       expect(last_response.status).to eq(204)
-      expect(flipper[:my_feature].off?).to be_truthy
+      expect(flipper[:my_feature]).to be_off
     end
   end
 
@@ -41,7 +43,7 @@ RSpec.describe Flipper::Api::V1::Actions::ClearFeature do
 
     it 'clears feature' do
       expect(last_response.status).to eq(204)
-      expect(flipper["my/feature"].off?).to be_truthy
+      expect(flipper["my/feature"]).to be_off
     end
   end
 end

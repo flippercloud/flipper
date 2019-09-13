@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "flipper/adapters/http"
 require "flipper/adapters/memory"
 require "flipper/adapters/sync"
@@ -6,7 +8,7 @@ module Flipper
   module Cloud
     class Configuration
       # The default url should be the one, the only, the website.
-      DEFAULT_URL = "https://www.flippercloud.io/adapter".freeze
+      DEFAULT_URL = "https://www.flippercloud.io/adapter"
 
       # Public: The token corresponding to an environment on flippercloud.io.
       attr_accessor :token

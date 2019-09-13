@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'helper'
 require 'flipper/feature'
 require 'flipper/instrumenters/memory'
@@ -142,11 +144,11 @@ RSpec.describe Flipper::Feature do
   end
 
   describe 'instrumentation' do
-    let(:instrumenter) { Flipper::Instrumenters::Memory.new }
-
     subject do
       described_class.new(:search, adapter, instrumenter: instrumenter)
     end
+
+    let(:instrumenter) { Flipper::Instrumenters::Memory.new }
 
     it 'is recorded for enable' do
       thing = Flipper::Types::Actor.new(Flipper::Actor.new('1'))

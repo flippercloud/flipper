@@ -1,15 +1,17 @@
+# frozen_string_literal: true
+
 require 'helper'
 require 'flipper/adapters/operation_logger'
 require 'flipper/spec/shared_adapter_specs'
 
 RSpec.describe Flipper::Adapters::OperationLogger do
+  subject { described_class.new(adapter, operations) }
+
   let(:operations) { [] }
   let(:adapter)    { Flipper::Adapters::Memory.new }
   let(:flipper)    { Flipper.new(adapter) }
 
-  subject { described_class.new(adapter, operations) }
-
-  it_should_behave_like 'a flipper adapter'
+  it_behaves_like 'a flipper adapter'
 
   it 'forwards missing methods to underlying adapter' do
     adapter = Class.new do

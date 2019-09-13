@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Note: You should never need to require this file directly if you are using
 # ActiveSupport::Notifications. Instead, you should require the statsd file
 # that lives in the same directory as this file. The benefit is that it
@@ -12,13 +14,11 @@ module Flipper
       end
 
       def update_timer(metric)
-        if self.class.client
-          self.class.client.timing metric, (@duration * 1_000).round
-        end
+        self.class.client&.timing metric, (@duration * 1_000).round
       end
 
       def update_counter(metric)
-        self.class.client.increment metric if self.class.client
+        self.class.client&.increment metric
       end
     end
   end

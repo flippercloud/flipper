@@ -1,8 +1,11 @@
+# frozen_string_literal: true
+
 module Flipper
   module Types
     class Group < Type
       def self.wrap(group_or_name)
         return group_or_name if group_or_name.is_a?(self)
+
         Flipper.group(group_or_name)
       end
 

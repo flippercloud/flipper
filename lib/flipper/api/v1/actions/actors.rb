@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'flipper/api/action'
 require 'flipper/api/v1/decorators/actor'
 

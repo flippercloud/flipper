@@ -1,12 +1,14 @@
+# frozen_string_literal: true
+
 require 'helper'
 require 'flipper/types/group'
 
 RSpec.describe Flipper::Types::Group do
-  let(:fake_context) { double('FeatureCheckContext') }
-
   subject do
     Flipper.register(:admins, &:admin?)
   end
+
+  let(:fake_context) { double('FeatureCheckContext') }
 
   describe '.wrap' do
     context 'with group instance' do
@@ -55,14 +57,14 @@ RSpec.describe Flipper::Types::Group do
       group = described_class.new(:examples) do |actor|
         actor.email =~ /@example\.com/
       end
-      expect(group.match?(double('Actor', email: 'foo@example.com'), fake_context)).to be_truthy
+      expect(group).to be_match(double('Actor', email: 'foo@example.com'), fake_context)
     end
 
     it 'returns false for falsey block results' do
       group = described_class.new(:examples) do |_actor|
         nil
       end
-      expect(group.match?(double('Actor'), fake_context)).to be_falsey
+      expect(group).not_to be_match(double('Actor'), fake_context)
     end
 
     it 'returns true for truthy shortand block results' do
@@ -73,7 +75,7 @@ RSpec.describe Flipper::Types::Group do
       end.new
 
       group = described_class.new(:admin, &:admin?)
-      expect(group.match?(actor, fake_context)).to be_truthy
+      expect(group).to be_match(actor, fake_context)
     end
 
     it 'returns false for falsy shortand block results' do
@@ -84,7 +86,7 @@ RSpec.describe Flipper::Types::Group do
       end.new
 
       group = described_class.new(:admin, &:admin?)
-      expect(group.match?(actor, fake_context)).to be_falsey
+      expect(group).not_to be_match(actor, fake_context)
     end
 
     it 'can yield without context as block argument' do

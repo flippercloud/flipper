@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'helper'
 require 'sequel'
 
@@ -17,15 +19,15 @@ RSpec.describe Flipper::Adapters::Sequel do
   let(:feature_class) { Flipper::Adapters::Sequel::Feature }
   let(:gate_class) { Flipper::Adapters::Sequel::Gate }
 
-  before(:each) do
+  before do
     CreateFlipperTablesSequel.new(Sequel::Model.db).up
     feature_class.dataset = feature_class.dataset
     gate_class.dataset = gate_class.dataset
   end
 
-  after(:each) do
+  after do
     CreateFlipperTablesSequel.new(Sequel::Model.db).down
   end
 
-  it_should_behave_like 'a flipper adapter'
+  it_behaves_like 'a flipper adapter'
 end

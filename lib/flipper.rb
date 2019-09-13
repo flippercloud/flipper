@@ -1,7 +1,11 @@
+# frozen_string_literal: true
+
 require "forwardable"
 
 module Flipper
-  extend self # rubocop:disable Style/ModuleFunction
+  # rubocop:disable Style/ModuleFunction
+  extend self
+  # rubocop:enable Style/ModuleFunction
   extend Forwardable
 
   # Private: The namespace for all instrumented events.

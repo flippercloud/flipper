@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Flipper
   module UI
     # All flipper ui errors inherit from this.

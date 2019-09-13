@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'set'
 require 'flipper'
 require 'active_record'
@@ -188,8 +190,8 @@ module Flipper
           g.value = thing.value.to_s
         end
       rescue ::ActiveRecord::RecordNotUnique
-      rescue ::ActiveRecord::StatementInvalid => error
-        raise unless error.message =~ /unique/i
+      rescue ::ActiveRecord::StatementInvalid => e
+        raise unless e.message =~ /unique/i
       end
 
       def result_for_feature(feature, db_gates)

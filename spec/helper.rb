@@ -1,4 +1,6 @@
-$LOAD_PATH.unshift(File.expand_path('../../lib', __FILE__))
+# frozen_string_literal: true
+
+$LOAD_PATH.unshift(File.expand_path('../lib', __dir__))
 
 require 'pp'
 require 'pathname'
@@ -20,7 +22,7 @@ require 'flipper-api'
 Dir[FlipperRoot.join('spec/support/**/*.rb')].each { |f| require f }
 
 RSpec.configure do |config|
-  config.before(:example) do
+  config.before do
     Flipper.unregister_groups
     Flipper.configuration = nil
   end

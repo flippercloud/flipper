@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'helper'
 
 RSpec.describe Flipper::Adapter do
@@ -16,7 +18,7 @@ RSpec.describe Flipper::Adapter do
   describe '.default_config' do
     it 'returns default config' do
       adapter_class = Class.new do
-        include Flipper::Adapter # rubocop:disable RSpec/DescribedClass
+        include Flipper::Adapter
       end
       expect(adapter_class.default_config).to eq(default_config)
     end
@@ -25,7 +27,7 @@ RSpec.describe Flipper::Adapter do
   describe '#default_config' do
     it 'returns default config' do
       adapter_class = Class.new do
-        include Flipper::Adapter # rubocop:disable RSpec/DescribedClass
+        include Flipper::Adapter
       end
       expect(adapter_class.new.default_config).to eq(default_config)
     end
@@ -41,7 +43,7 @@ RSpec.describe Flipper::Adapter do
       source_flipper.enable(:search)
       destination_flipper.import(source_flipper)
       expect(destination_flipper[:search].boolean_value).to eq(true)
-      expect(destination_flipper.features.map(&:key).sort).to eq(%w(search))
+      expect(destination_flipper.features.map(&:key).sort).to eq(%w[search])
     end
 
     it 'can import features that have been added but their state is off' do

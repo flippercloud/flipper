@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "flipper/feature"
 require "flipper/gate_values"
 require "flipper/adapters/sync/feature_synchronizer"
@@ -51,8 +53,8 @@ module Flipper
           features_to_remove.each { |key| Feature.new(key, @local).remove }
 
           nil
-        rescue => exception
-          @instrumenter.instrument("synchronizer_exception.flipper", exception: exception)
+        rescue StandardError => e
+          @instrumenter.instrument("synchronizer_exception.flipper", exception: e)
           raise if @raise
         end
       end
