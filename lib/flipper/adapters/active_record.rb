@@ -126,7 +126,7 @@ module Flipper
       def enable(feature, gate, thing)
         case gate.data_type
         when :boolean, :integer
-          enable_single(feature, gate, thing)
+          set(feature, gate, thing)
         when :set
           enable_multi(feature, gate, thing)
         else
@@ -148,7 +148,7 @@ module Flipper
         when :boolean
           clear(feature)
         when :integer
-          enable_single(feature, gate, thing)
+          set(feature, gate, thing)
         when :set
           @gate_class.where(feature_key: feature.key, key: gate.key, value: thing.value).destroy_all
         else
@@ -165,7 +165,7 @@ module Flipper
 
       private
 
-      def enable_single(feature, gate, thing)
+      def set(feature, gate, thing)
         @gate_class.transaction do
           @gate_class.where(feature_key: feature.key, key: gate.key).destroy_all
           @gate_class.create! do |g|
