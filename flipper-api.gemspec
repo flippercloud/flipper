@@ -13,8 +13,8 @@ Gem::Specification.new do |gem|
   gem.description   = 'Rack middleware that provides an API for the flipper gem.'
   gem.license       = 'MIT'
   gem.homepage      = 'https://github.com/jnunemaker/flipper'
-  gem.files         = `git ls-files`.split("\n").select(&flipper_api_files) + ['lib/flipper/version.rb']
-  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n").select(&flipper_api_files)
+  gem.files         = `git ls-files`.split("\n").select(&flipper_api_files) + ['lib/flipper/version.rb'] # rubocop:disable Metrics/LineLength
+  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n").select(&flipper_api_files) # rubocop:disable Metrics/LineLength
   gem.name          = 'flipper-api'
   gem.require_paths = ['lib']
   gem.version       = Flipper::VERSION

@@ -77,11 +77,11 @@ RSpec.describe Flipper::UI::Decorators::Feature do
     end
 
     it 'sorts :on before :off' do
-      expect((on <=> conditional)).to be(-1)
+      expect((on <=> off)).to be(-1)
     end
 
     it 'sorts :conditional before :off' do
-      expect((on <=> conditional)).to be(-1)
+      expect((conditional <=> off)).to be(-1)
     end
 
     it 'sorts on key for identical states' do

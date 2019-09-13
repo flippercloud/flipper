@@ -1,6 +1,7 @@
 #!/usr/bin/env rake
 $LOAD_PATH.push File.expand_path('../lib', __FILE__)
 require 'rake/testtask'
+require 'rubocop/rake_task'
 require 'flipper/version'
 
 # gem install pkg/*.gem
@@ -25,7 +26,7 @@ end
 
 require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new(:spec) do |t|
-  t.rspec_opts = %w(--color)
+  t.rspec_opts = %w(--color --format documentation)
 end
 
 namespace :spec do
@@ -39,6 +40,16 @@ end
 Rake::TestTask.new do |t|
   t.libs = %w(lib test)
   t.pattern = 'test/**/*_test.rb'
+  t.options = '--documentation'
+  t.warning = false
 end
 
-task default: [:spec, :test]
+Rake::TestTask.new(:test_rails) do |t|
+  t.libs = %w(lib test_rails)
+  t.pattern = 'test_rails/**/*_test.rb'
+  t.warning = false
+end
+
+RuboCop::RakeTask.new
+
+task default: [:spec, :test, :test_rails, :rubocop]

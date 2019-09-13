@@ -25,13 +25,13 @@ Gem::Specification.new do |gem|
   gem.authors       = ['John Nunemaker']
   gem.email         = ['nunemaker@gmail.com']
   gem.summary       = 'Feature flipper for ANYTHING'
-  gem.description   = 'Feature flipper is the act of enabling/disabling features in your application, ideally without re-deploying or changing anything in your code base. Flipper makes this extremely easy to do with any backend you would like to use.'
+  gem.description   = 'Feature flipper is the act of enabling/disabling features in your application, ideally without re-deploying or changing anything in your code base. Flipper makes this extremely easy to do with any backend you would like to use.' # rubocop:disable Metrics/LineLength
   gem.homepage      = 'https://github.com/jnunemaker/flipper'
   gem.license       = 'MIT'
 
-  gem.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
-  gem.files         = `git ls-files`.split("\n") - ignored_files + ['lib/flipper/version.rb']
-  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n") - ignored_test_files
+  gem.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) } # rubocop:disable Metrics/LineLength
+  gem.files         = `git ls-files`.split("\n") - ignored_files + ['lib/flipper/version.rb'] # rubocop:disable Metrics/LineLength
+  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n") - ignored_test_files # rubocop:disable Metrics/LineLength
   gem.name          = 'flipper'
   gem.require_paths = ['lib']
   gem.version       = Flipper::VERSION

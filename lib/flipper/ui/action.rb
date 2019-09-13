@@ -205,12 +205,8 @@ module Flipper
       # Private
       def view(name)
         path = views_path.join("#{name}.erb")
-
         raise "Template does not exist: #{path}" unless path.exist?
-
-        # rubocop:disable Lint/Eval
-        eval(Erubi::Engine.new(path.read, escape: true).src)
-        # rubocop:enable Lint/Eval
+        eval(Erubi::Engine.new(path.read, escape: true).src) # rubocop:disable Security/Eval
       end
 
       # Internal: The path the app is mounted at.
