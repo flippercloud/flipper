@@ -9,6 +9,13 @@
 * Replace Erubis with Erubi (https://github.com/jnunemaker/flipper/pull/407)
 * Allow customizing Rack::Protection middleware list (https://github.com/jnunemaker/flipper/pull/385)
 * Allow setting write_timeout for ruby 2.6+ (https://github.com/jnunemaker/flipper/pull/433)
+* Drop support for Ruby 2.1, 2.2, and 2.3 (https://github.com/jnunemaker/flipper/commit/cf58982e70de5e6963b018ceced4f36a275f5b5d)
+* Add support for Ruby 2.6 (https://github.com/jnunemaker/flipper/commit/57888311449ec81184d3d47ba9ae5cb1ad4a2f45)
+* Remove support for Rails 3.2 (https://github.com/jnunemaker/flipper/commit/177c48c4edf51d4e411e7c673e30e06d1c66fb40)
+* Add write_timeout for flipper http adapter for ruby 2.6+ (https://github.com/jnunemaker/flipper/pull/433)
+* Relax moneta version to allow for < 1.2 (https://github.com/jnunemaker/flipper/pull/434).
+* Improve active record idempotency (https://github.com/jnunemaker/flipper/pull/436).
+* Allow customizing add actor placeholder text (https://github.com/jnunemaker/flipper/commit/5faa1e9cf66b68f8227d2f8408fb448a14676c45)
 
 ## 0.16.2
 
