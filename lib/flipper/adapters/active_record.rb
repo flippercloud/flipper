@@ -184,8 +184,6 @@ module Flipper
 
         nil
       rescue ::ActiveRecord::RecordNotUnique
-      rescue ::ActiveRecord::StatementInvalid => error
-        raise unless error.message =~ /unique/i
       end
 
       def result_for_feature(feature, db_gates)
