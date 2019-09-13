@@ -42,4 +42,10 @@ Rake::TestTask.new do |t|
   t.warning = false
 end
 
-task default: [:spec, :test]
+Rake::TestTask.new(:test_rails) do |t|
+  t.libs = %w(lib test_rails)
+  t.pattern = 'test_rails/**/*_test.rb'
+  t.warning = false
+end
+
+task default: [:spec, :test, :test_rails]
