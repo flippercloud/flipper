@@ -26,7 +26,7 @@ end
 
 require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new(:spec) do |t|
-  t.rspec_opts = %w(--color)
+  t.rspec_opts = %w(--color --format documentation)
 end
 
 namespace :spec do
@@ -40,6 +40,7 @@ end
 Rake::TestTask.new do |t|
   t.libs = %w(lib test)
   t.pattern = 'test/**/*_test.rb'
+  t.options = '--documentation'
   t.warning = false
 end
 
