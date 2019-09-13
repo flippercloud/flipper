@@ -39,6 +39,7 @@ end
 Rake::TestTask.new do |t|
   t.libs = %w(lib test)
   t.pattern = 'test/**/*_test.rb'
+  t.warning = false
 end
 
 task default: [:spec, :test]
