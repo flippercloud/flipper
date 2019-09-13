@@ -9,7 +9,7 @@
   <div class="card-body">
     <form action="<%= script_name %>/features" method="post" class="form-inline mb-2">
       <%== csrf_input_tag %>
-      <input type="text" name="value" size="30" placeholder="ie: search, new_pricing, etc." autofocus class="form-control mr-2 mb-2 mb-md-0">
+      <input type="text" name="value" size="30" placeholder="search, new_pricing, etc." autofocus class="form-control mr-2 mb-2 mb-md-0">
       <input type="submit" value="Add Feature" class="btn btn-light">
     </form>
     <p class="text-muted">

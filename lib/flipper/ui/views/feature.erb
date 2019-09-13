@@ -60,7 +60,7 @@
             <div class="col">
               <form action="<%= script_name %>/features/<%= @feature.key %>/percentage_of_actors" method="post" class="form-inline">
                 <%== csrf_input_tag %>
-                <input type="text" name="value" <% if @feature.percentage_of_actors_value > 0 %>value="<%= @feature.percentage_of_actors_value %>"<% end %> placeholder="custom (ie: 26, 32, etc.)" class="form-control form-control-sm mr-sm-2 mb-2 mb-md-0">
+                <input type="text" name="value" <% if @feature.percentage_of_actors_value > 0 %>value="<%= @feature.percentage_of_actors_value %>"<% end %> placeholder="custom (26, 32, etc.)" class="form-control form-control-sm mr-sm-2 mb-2 mb-md-0">
                 <input type="submit" name="action" value="Enable" class="btn btn-light btn-sm">
               </form>
             </div>
@@ -98,7 +98,7 @@
             <div class="col">
               <form action="<%= script_name %>/features/<%= @feature.key %>/percentage_of_time" method="post" class="form-inline">
                 <%== csrf_input_tag %>
-                <input type="text" name="value" <% if @feature.percentage_of_time_value > 0 %>value="<%= @feature.percentage_of_time_value %>"<% end %> placeholder="custom (ie: 26, 32, etc.)" class="form-control form-control-sm mr-sm-2 mb-2 mb-md-0">
+                <input type="text" name="value" <% if @feature.percentage_of_time_value > 0 %>value="<%= @feature.percentage_of_time_value %>"<% end %> placeholder="custom (26, 32, etc.)" class="form-control form-control-sm mr-sm-2 mb-2 mb-md-0">
                 <input type="submit" name="action" value="Enable" class="btn btn-light btn-sm">
               </form>
             </div>

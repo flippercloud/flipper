@@ -204,8 +204,8 @@
 
 * Added Flipper.groups and Flipper.group_names
 * Changed percentage_of_random to percentage_of_time
-* Added enable/disable convenience methods for all gates (ie: enable_group, enable_actor, enable_percentage_of_actors, enable_percentage_of_time)
-* Added value convenience methods (ie: boolean_value, groups_value, actors_value, etc.)
+* Added enable/disable convenience methods for all gates (enable_group, enable_actor, enable_percentage_of_actors, enable_percentage_of_time)
+* Added value convenience methods (boolean_value, groups_value, actors_value, etc.)
 * Added Feature#gate_values for getting typecast adapter gate values
 * Added Feature#enabled_gates and #disabled_gates for getting the gates that are enabled/disabled for the feature
 * Remove Feature#description
