@@ -1,4 +1,8 @@
-## master
+## 0.17.1
+
+* Fix require in flipper-active_record (https://github.com/jnunemaker/flipper/pull/437)
+
+## 0.17.0
 
 ### Additions/Changes
 
