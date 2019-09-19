@@ -169,6 +169,16 @@ The above configuration results in:
 
 ![configure](images/environment-banner.png)
 
+### Fun mode
+
+By default, Flipper UI displays a videoclip when there are no flags. The `fun` mode can be configured by using the `Flipper::UI.configure` block as seen below.
+
+```ruby
+Flipper::UI.configure do |config|
+  config.fun = false
+end
+```
+
 ## Contributing
 
 1. Fork it
