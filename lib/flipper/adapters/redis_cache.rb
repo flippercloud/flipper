@@ -146,6 +146,9 @@ module Flipper
 
       def multi_cache_get(keys)
         cache_keys = keys.map { |key| key_for(key) }
+
+        return [] if cache_keys.none?
+
         @cache.mget(cache_keys).map do |value|
           value ? Marshal.load(value) : nil
         end
