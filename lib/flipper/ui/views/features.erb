@@ -34,7 +34,7 @@
         <% @features.each do |feature| %>
           <tr class="d-flex">
             <td class="col-1">
-              <span class="octicon octicon-squirrel <%= feature.color_class %>"></span>
+              <span class="octicon octicon-squirrel <%= feature.color_class %>" data-toggle="tooltip" title=<%= feature.state.to_s.capitalize %>></span>
             </td>
             <td class="col">
               <a href="<%= "#{script_name}/features/#{feature.key}" %>">
