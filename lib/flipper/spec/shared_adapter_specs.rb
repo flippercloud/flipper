@@ -289,4 +289,9 @@ RSpec.shared_examples_for 'a flipper adapter' do
     expect(subject.enable(feature, boolean_gate, flipper.boolean)).to eq(true)
     expect(subject.enable(feature, boolean_gate, flipper.boolean)).to eq(true)
   end
+
+  it 'can get_all features when there are none' do
+    expect(subject.features).to eq(Set.new)
+    expect(subject.get_all).to eq({})
+  end
 end
