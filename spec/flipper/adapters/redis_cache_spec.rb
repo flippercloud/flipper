@@ -94,18 +94,6 @@ RSpec.describe Flipper::Adapters::RedisCache do
       5.times { adapter.get_all }
       expect(memory_adapter.count(:get_all)).to eq(1)
     end
-
-    context 'when there are no features' do
-      before do
-        stats.remove
-        search.remove
-      end
-
-      it 'does not raise an error' do
-        adapter.get_all
-        expect { adapter.get_all }.not_to raise_error
-      end
-    end
   end
 
   describe '#name' do

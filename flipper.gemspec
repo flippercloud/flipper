@@ -29,9 +29,9 @@ Gem::Specification.new do |gem|
   gem.homepage      = 'https://github.com/jnunemaker/flipper'
   gem.license       = 'MIT'
 
-  gem.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) } # rubocop:disable Metrics/LineLength
-  gem.files         = `git ls-files`.split("\n") - ignored_files + ['lib/flipper/version.rb'] # rubocop:disable Metrics/LineLength
-  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n") - ignored_test_files # rubocop:disable Metrics/LineLength
+  gem.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
+  gem.files         = `git ls-files`.split("\n") - ignored_files + ['lib/flipper/version.rb']
+  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n") - ignored_test_files
   gem.name          = 'flipper'
   gem.require_paths = ['lib']
   gem.version       = Flipper::VERSION

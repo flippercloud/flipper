@@ -285,6 +285,12 @@ module Flipper
         assert_equal true, @adapter.enable(@feature, @boolean_gate, @flipper.boolean)
         assert_equal true, @adapter.enable(@feature, @boolean_gate, @flipper.boolean)
       end
+
+      def test_can_get_all_features_when_there_are_none
+        expected = {}
+        assert_equal Set.new, @adapter.features
+        assert_equal expected, @adapter.get_all
+      end
     end
   end
 end
