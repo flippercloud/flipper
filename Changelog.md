@@ -1,3 +1,9 @@
+## master
+
+### Additions/Changes
+
+* Shared Specs/Tests for Get All With No Features (https://github.com/jnunemaker/flipper/pull/441 and https://github.com/jnunemaker/flipper/pull/442)
+
 ## 0.17.1
 
 * Fix require in flipper-active_record (https://github.com/jnunemaker/flipper/pull/437)
