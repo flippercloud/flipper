@@ -59,7 +59,7 @@ module Flipper
           unless @feature_class.where(key: feature.key).first
             begin
               @feature_class.create! { |f| f.key = feature.key }
-            rescue ActiveRecord::RecordNotUnique
+            rescue ::ActiveRecord::RecordNotUnique
             end
           end
         end
