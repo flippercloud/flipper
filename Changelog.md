@@ -3,6 +3,7 @@
 ### Additions/Changes
 
 * Shared Specs/Tests for Get All With No Features (https://github.com/jnunemaker/flipper/pull/441 and https://github.com/jnunemaker/flipper/pull/442)
+* ::ActiveRecord::RecordNotUnique > ActiveRecord::RecordNotUnique (https://github.com/jnunemaker/flipper/pull/444)
 
 ## 0.17.1
 
