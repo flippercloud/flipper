@@ -1,5 +1,6 @@
 require 'test_helper'
-require 'flipper/adapters/active_record'
+require 'active_record'
+require 'flipper-active_record'
 
 # Turn off migration logging for specs
 ActiveRecord::Migration.verbose = false
