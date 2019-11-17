@@ -1,6 +1,5 @@
 require 'set'
 require 'flipper'
-require 'active_record'
 
 module Flipper
   module Adapters
