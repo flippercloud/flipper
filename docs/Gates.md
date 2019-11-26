@@ -139,7 +139,7 @@ Flipper.register(:admins) do |actor|
   actor.respond_to?(:admin?) && actor.admin?
 end
 ```
-- The above first registers a group called `admins` which essentially saves a [Proc](http://www.eriktrautman.com/posts/ruby-explained-blocks-procs-and-lambdas-aka-closures) to be called later.
+- The above first registers a group called `admins` which essentially saves a [Proc](http://www.eriktrautman.com/posts/ruby-explained-blocks-procs-and-lambdas-aka-closures) to be called later. The `actor` is an instance of the `Flipper::Types::Actor` that wraps the thing being checked against and `actor.thing` is the original object being checked. 
 
 ```
 flipper[:stats].enable flipper.group(:admins)
