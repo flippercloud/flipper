@@ -34,10 +34,8 @@ module Flipper
 
       # Public: Removes a feature from the set of known features.
       def remove(feature)
-        @client.multi do
-          @client.srem FeaturesKey, feature.key
-          @client.del feature.key
-        end
+        @client.srem FeaturesKey, feature.key
+        @client.del feature.key
         true
       end
 
