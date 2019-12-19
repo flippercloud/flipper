@@ -96,7 +96,7 @@ end
 # config/routes.rb
 
 constraints CanAccessFlipperUI do
-  mount Flipper::UI.app(flipper) => '/flipper'
+  mount Flipper::UI.app(Flipper) => '/flipper'
 end
 ```
 
