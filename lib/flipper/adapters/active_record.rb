@@ -125,7 +125,9 @@ module Flipper
       # Returns true.
       def enable(feature, gate, thing)
         case gate.data_type
-        when :boolean, :integer
+        when :boolean
+          set(feature, gate, thing, clear: true)
+        when :integer
           set(feature, gate, thing)
         when :set
           enable_multi(feature, gate, thing)
@@ -165,8 +167,10 @@ module Flipper
 
       private
 
-      def set(feature, gate, thing)
+      def set(feature, gate, thing, options = {})
+        clear_feature = options.fetch(:clear, false)
         @gate_class.transaction do
+          clear(feature) if clear_feature
           @gate_class.where(feature_key: feature.key, key: gate.key).destroy_all
           @gate_class.create! do |g|
             g.feature_key = feature.key

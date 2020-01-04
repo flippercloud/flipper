@@ -84,7 +84,10 @@ module Flipper
       def enable(feature, gate, thing)
         @store.transaction do
           case gate.data_type
-          when :boolean, :integer
+          when :boolean
+            clear_gates(feature)
+            write key(feature, gate), thing.value.to_s
+          when :integer
             write key(feature, gate), thing.value.to_s
           when :set
             set_add key(feature, gate), thing.value.to_s

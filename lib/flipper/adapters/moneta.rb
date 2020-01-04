@@ -57,7 +57,12 @@ module Flipper
       # Returns true.
       def enable(feature, gate, thing)
         case gate.data_type
-        when :boolean, :integer
+        when :boolean
+          clear(feature)
+          result = get(feature)
+          result[gate.key] = thing.value.to_s
+          moneta[key(feature.key)] = result
+        when :integer
           result = get(feature)
           result[gate.key] = thing.value.to_s
           moneta[key(feature.key)] = result

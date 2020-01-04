@@ -120,7 +120,17 @@ module Flipper
       # Returns true.
       def enable(feature, gate, thing)
         case gate.data_type
-        when :boolean, :integer
+        when :boolean
+          @gate_class.db.transaction do
+            clear(feature)
+            args = {
+              feature_key: feature.key,
+              key: gate.key.to_s,
+            }
+            @gate_class.where(args).delete
+            @gate_class.create(gate_attrs(feature, gate, thing))
+          end
+        when :integer
           @gate_class.db.transaction do
             args = {
               feature_key: feature.key,

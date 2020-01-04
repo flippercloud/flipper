@@ -294,4 +294,14 @@ RSpec.shared_examples_for 'a flipper adapter' do
     expect(subject.features).to eq(Set.new)
     expect(subject.get_all).to eq({})
   end
+
+  it 'clears other gate values on enable' do
+    actor = Flipper::Actor.new('Flipper::Actor;22')
+    subject.enable(feature, actors_gate, flipper.actors(25))
+    subject.enable(feature, time_gate, flipper.time(25))
+    subject.enable(feature, group_gate, flipper.group(:admins))
+    subject.enable(feature, actor_gate, flipper.actor(actor))
+    subject.enable(feature, boolean_gate, flipper.boolean(true))
+    expect(subject.get(feature)).to eq(subject.default_config.merge(boolean: "true"))
+  end
 end
