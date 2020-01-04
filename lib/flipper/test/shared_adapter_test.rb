@@ -291,6 +291,16 @@ module Flipper
         assert_equal Set.new, @adapter.features
         assert_equal expected, @adapter.get_all
       end
+
+      def test_clears_other_gate_values_on_enable
+        actor = Flipper::Actor.new('Flipper::Actor;22')
+        assert_equal true, @adapter.enable(@feature, @actors_gate, @flipper.actors(25))
+        assert_equal true, @adapter.enable(@feature, @time_gate, @flipper.time(25))
+        assert_equal true, @adapter.enable(@feature, @group_gate, @flipper.group(:admins))
+        assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor))
+        assert_equal true, @adapter.enable(@feature, @boolean_gate, @flipper.boolean(true))
+        assert_equal @adapter.default_config.merge(boolean: "true"), @adapter.get(@feature)
+      end
     end
   end
 end

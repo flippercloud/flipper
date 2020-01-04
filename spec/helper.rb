@@ -17,7 +17,7 @@ require 'flipper'
 require 'flipper-ui'
 require 'flipper-api'
 
-Dir[FlipperRoot.join('spec/support/**/*.rb')].each { |f| require f }
+Dir[FlipperRoot.join('spec/support/**/*.rb')].sort.each { |f| require f }
 
 RSpec.configure do |config|
   config.before(:example) do

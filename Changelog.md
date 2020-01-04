@@ -4,6 +4,7 @@
 
 * Avoid errors on import when there are no features and shared specs/tests for get all with no features (https://github.com/jnunemaker/flipper/pull/441 and https://github.com/jnunemaker/flipper/pull/442)
 * ::ActiveRecord::RecordNotUnique > ActiveRecord::RecordNotUnique (https://github.com/jnunemaker/flipper/pull/444)
+* Clear gate values on enable (https://github.com/jnunemaker/flipper/pull/454)
 
 ## 0.17.1
 

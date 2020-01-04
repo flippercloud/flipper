@@ -65,7 +65,10 @@ module Flipper
       # Public
       def enable(feature, gate, thing)
         case gate.data_type
-        when :boolean, :integer
+        when :boolean
+          clear(feature)
+          write key(feature, gate), thing.value.to_s
+        when :integer
           write key(feature, gate), thing.value.to_s
         when :set
           set_add key(feature, gate), thing.value.to_s

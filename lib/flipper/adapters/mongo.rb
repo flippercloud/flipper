@@ -68,7 +68,12 @@ module Flipper
       # Returns true.
       def enable(feature, gate, thing)
         case gate.data_type
-        when :boolean, :integer
+        when :boolean
+          clear(feature)
+          update feature.key, '$set' => {
+            gate.key.to_s => thing.value.to_s,
+          }
+        when :integer
           update feature.key, '$set' => {
             gate.key.to_s => thing.value.to_s,
           }

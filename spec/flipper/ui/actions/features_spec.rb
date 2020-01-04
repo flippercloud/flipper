@@ -111,12 +111,12 @@ RSpec.describe Flipper::UI::Actions::Features do
             expect(flipper.features.map(&:key)).to eq([])
           end
 
-          # rubocop:disable Metrics/LineLength
+          # rubocop:disable Layout/LineLength
           it 'redirects back to feature' do
             expect(last_response.status).to be(302)
             expect(last_response.headers['Location']).to eq('/features/new?error=%22%22+is+not+a+valid+feature+name.')
           end
-          # rubocop:enable Metrics/LineLength
+          # rubocop:enable Layout/LineLength
         end
 
         context 'nil feature name' do
@@ -126,12 +126,12 @@ RSpec.describe Flipper::UI::Actions::Features do
             expect(flipper.features.map(&:key)).to eq([])
           end
 
-          # rubocop:disable Metrics/LineLength
+          # rubocop:disable Layout/LineLength
           it 'redirects back to feature' do
             expect(last_response.status).to be(302)
             expect(last_response.headers['Location']).to eq('/features/new?error=%22%22+is+not+a+valid+feature+name.')
           end
-          # rubocop:enable Metrics/LineLength
+          # rubocop:enable Layout/LineLength
         end
       end
     end
