@@ -121,24 +121,9 @@ module Flipper
       def enable(feature, gate, thing)
         case gate.data_type
         when :boolean
-          @gate_class.db.transaction do
-            clear(feature)
-            args = {
-              feature_key: feature.key,
-              key: gate.key.to_s,
-            }
-            @gate_class.where(args).delete
-            @gate_class.create(gate_attrs(feature, gate, thing))
-          end
+          set(feature, gate, thing, clear: true)
         when :integer
-          @gate_class.db.transaction do
-            args = {
-              feature_key: feature.key,
-              key: gate.key.to_s,
-            }
-            @gate_class.where(args).delete
-            @gate_class.create(gate_attrs(feature, gate, thing))
-          end
+          set(feature, gate, thing)
         when :set
           begin
             @gate_class.create(gate_attrs(feature, gate, thing))
@@ -163,15 +148,7 @@ module Flipper
         when :boolean
           clear(feature)
         when :integer
-          @gate_class.db.transaction do
-            args = {
-              feature_key: feature.key.to_s,
-              key: gate.key.to_s,
-            }
-            @gate_class.where(args).delete
-
-            @gate_class.create(gate_attrs(feature, gate, thing))
-          end
+          set(feature, gate, thing)
         when :set
           @gate_class.where(gate_attrs(feature, gate, thing))
                      .delete
@@ -186,6 +163,20 @@ module Flipper
 
       def unsupported_data_type(data_type)
         raise "#{data_type} is not supported by this adapter"
+      end
+
+      def set(feature, gate, thing, options = {})
+        clear_feature = options.fetch(:clear, false)
+        args = {
+          feature_key: feature.key,
+          key: gate.key.to_s,
+        }
+
+        @gate_class.db.transaction do
+          clear(feature) if clear_feature
+          @gate_class.where(args).delete
+          @gate_class.create(gate_attrs(feature, gate, thing))
+        end
       end
 
       def gate_attrs(feature, gate, thing)

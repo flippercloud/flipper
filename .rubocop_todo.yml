@@ -32,7 +32,7 @@ Gemspec/OrderedDependencies:
 # SupportedHashRocketStyles: key, separator, table
 # SupportedColonStyles: key, separator, table
 # SupportedLastArgumentHashStyles: always_inspect, always_ignore, ignore_implicit, ignore_explicit
-Layout/AlignHash:
+Layout/HashAlignment:
   Exclude:
     - 'lib/flipper/typecast.rb'
 
@@ -81,7 +81,7 @@ Layout/EmptyLinesAroundExceptionHandlingKeywords:
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle.
 # SupportedStyles: squiggly, active_support, powerpack, unindent
-Layout/IndentHeredoc:
+Layout/HeredocIndentation:
   Exclude:
     - 'test/generators/flipper/active_record_generator_test.rb'
 
@@ -138,13 +138,13 @@ Lint/ShadowingOuterLocalVariable:
 
 # Offense count: 2
 # Cop supports --auto-correct.
-Lint/UnneededCopDisableDirective:
+Lint/RedundantCopDisableDirective:
   Exclude:
     - 'spec/flipper/adapter_spec.rb'
 
 # Offense count: 1
 # Cop supports --auto-correct.
-Lint/UnneededRequireStatement:
+Lint/RedundantRequireStatement:
   Exclude:
     - 'lib/flipper/registry.rb'
 
@@ -174,13 +174,13 @@ Metrics/BlockLength:
 # Offense count: 11
 # Configuration parameters: CountComments.
 Metrics/ClassLength:
-  Max: 150
+  Max: 160
 
 # Offense count: 20
 # Cop supports --auto-correct.
 # Configuration parameters: AutoCorrect, AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
 # URISchemes: http, https
-Metrics/LineLength:
+Layout/LineLength:
   Max: 251
 
 # Offense count: 59

@@ -33,7 +33,7 @@ Style/GuardClause:
 Style/IfUnlessModifier:
   Enabled: false
 
-Metrics/LineLength:
+Layout/LineLength:
   Max: 100
 
 Style/RegexpLiteral:
@@ -48,5 +48,5 @@ Style/TrailingCommaInHashLiteral:
 RSpec/InstanceVariable:
   Enabled: false
 
-Lint/HandleExceptions:
+Lint/SuppressedException:
   Enabled: false

@@ -10,11 +10,11 @@ Gem::Specification.new do |gem|
   gem.authors       = ['John Nunemaker']
   gem.email         = ['nunemaker@gmail.com']
   gem.summary       = 'UI for the Flipper gem'
-  gem.description   = 'Rack middleware that provides a fully featured web interface for the flipper gem.' # rubocop:disable Metrics/LineLength
+  gem.description   = 'Rack middleware that provides a fully featured web interface for the flipper gem.' # rubocop:disable Layout/LineLength
   gem.license       = 'MIT'
   gem.homepage      = 'https://github.com/jnunemaker/flipper'
 
-  gem.files         = `git ls-files`.split("\n").select(&flipper_ui_files) + ['lib/flipper/version.rb'] # rubocop:disable Metrics/LineLength
+  gem.files         = `git ls-files`.split("\n").select(&flipper_ui_files) + ['lib/flipper/version.rb'] # rubocop:disable Layout/LineLength
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n").select(&flipper_ui_files)
   gem.name          = 'flipper-ui'
   gem.require_paths = ['lib']
