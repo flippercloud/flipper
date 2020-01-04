@@ -25,7 +25,6 @@ Gem::Specification.new do |gem|
   gem.authors       = ['John Nunemaker']
   gem.email         = ['nunemaker@gmail.com']
   gem.summary       = 'Feature flipper for ANYTHING'
-  gem.description   = 'Feature flipper is the act of enabling/disabling features in your application, ideally without re-deploying or changing anything in your code base. Flipper makes this extremely easy to do with any backend you would like to use.' # rubocop:disable Layout/LineLength
   gem.homepage      = 'https://github.com/jnunemaker/flipper'
   gem.license       = 'MIT'
 

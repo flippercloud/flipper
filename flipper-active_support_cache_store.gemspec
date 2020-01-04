@@ -10,7 +10,6 @@ Gem::Specification.new do |gem|
   gem.authors       = ['John Nunemaker']
   gem.email         = ['nunemaker@gmail.com']
   gem.summary       = 'ActiveSupport::Cache store adapter for Flipper'
-  gem.description   = 'ActiveSupport::Cache store adapter for Flipper'
   gem.license       = 'MIT'
   gem.homepage      = 'https://github.com/jnunemaker/flipper'
 

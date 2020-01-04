@@ -10,7 +10,6 @@ Gem::Specification.new do |gem|
   gem.authors       = ['John Nunemaker']
   gem.email         = ['nunemaker@gmail.com']
   gem.summary       = 'UI for the Flipper gem'
-  gem.description   = 'Rack middleware that provides a fully featured web interface for the flipper gem.' # rubocop:disable Layout/LineLength
   gem.license       = 'MIT'
   gem.homepage      = 'https://github.com/jnunemaker/flipper'
 
