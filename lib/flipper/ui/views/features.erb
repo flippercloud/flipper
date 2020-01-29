@@ -21,6 +21,23 @@
   <div class="card">
     <h4 class="card-header">Features</h4>
     <table class="table">
+      <tbody>
+        <tr class="d-flex">
+          <ul class="nav nav-tabs">
+            <% @tabs.each do |tab| %>
+              <li class="nav-item">
+                <% if tab.active %>
+                  <a class="nav-link active" href="<%= tab.href %>"><%= tab.name %></a>
+                <% else %>
+                  <a class="nav-link" href="<%= tab.href %>"><%= tab.name %></a>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        </tr>
+      </tbody>
+    </table>
+    <table class="table">
       <thead>
         <tr class="d-flex">
           <th class="col-1">

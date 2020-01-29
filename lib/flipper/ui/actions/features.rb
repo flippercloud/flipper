@@ -16,6 +16,8 @@ module Flipper
 
           @show_blank_slate = @features.empty?
 
+          init_tabs
+
           breadcrumb 'Home', '/'
           breadcrumb 'Features'
 
@@ -33,17 +35,38 @@ module Flipper
             halt view_response(:feature_creation_disabled)
           end
 
-          value = params['value'].to_s.strip
+          feature_name = params['value'].to_s.strip
 
-          if Util.blank?(value)
-            error = Rack::Utils.escape("#{value.inspect} is not a valid feature name.")
+          if Util.blank?(feature_name)
+            error = Rack::Utils.escape("#{feature_name.inspect} is not a valid feature name.")
             redirect_to("/features/new?error=#{error}")
           end
 
-          feature = flipper[value]
+          namespace = params['namespace'].to_s.strip
+          feature_name = "#{namespace}:#{feature_name}" unless namespace.empty?
+          feature = flipper[feature_name]
+
           feature.add
 
-          redirect_to "/features/#{Rack::Utils.escape_path(value)}"
+          redirect_to "/features/#{Rack::Utils.escape_path(feature_name)}"
+        end
+
+        private
+
+        def init_tabs
+          tab_names = flipper.features.map do |feature|
+            feature.key.split(':').first if feature.key.include?(':')
+          end.compact.uniq
+
+          @tabs = tab_names.map do |tab_name|
+            OpenStruct.new(
+              name: tab_name,
+              href: "#{script_name}/namespaces/#{tab_name}",
+              active: false
+            )
+          end
+
+          @tabs.unshift OpenStruct.new(name: 'all', href: "#{script_name}/features", active: true)
         end
       end
     end
