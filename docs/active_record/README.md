@@ -37,43 +37,7 @@ flipper = Flipper.new(adapter)
 # profit...
 ```
 
-## Rails Initialization
-
-The current convention in the Ruby-on-Rails community is to instantiate a Flipper object in a Rails initializer, like so:
-
-```ruby
-# config/initializers/flipper.rb
-
-require 'flipper/adapters/active_record'
-
-Flipper.configure do |config|
-    config.default do
-        adapter = Flipper::Adapters::ActiveRecord.new
-        Flipper.new(adapter)
-    end
-    # Setting of flags, etc...
-end
-```
-
-This is fine, but will cause an issue in places where your new Flipper-related migration has not already run, such as continuous integration pipelines; the initializer will try to instantiate a Flipper object, which will look for the necessary database tables but fail to find them.
-
-One way to avoid this situation is to *only* instantiate our Flipper object after confirming that the necessary database tables have been created:
-
-```ruby
-# config/initializers/flipper.rb
-
-require 'flipper/adapters/active_record'
-
-if ActiveRecord::Base.connection.table_exists? :flipper_features
-    Flipper.configure do |config|
-        config.default do
-            adapter = Flipper::Adapters::ActiveRecord.new
-            Flipper.new(adapter)
-        end
-        # Setting of flags, etc...
-    end
-end
-```
+Note that the active record adapter requires the database tables to be created in order to work; failure to run the migration first will cause an exception to be raised when attempting to initialize the active record adapter.
 
 ## Internals
 
