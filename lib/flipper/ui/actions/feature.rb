@@ -11,6 +11,8 @@ module Flipper
 
         def get
           @feature = Decorators::Feature.new(flipper[feature_name])
+          descriptions = Flipper::UI.configuration.descriptions_source
+          @feature.description = descriptions[@feature.key]
           @page_title = "#{@feature.key} // Features"
           @percentages = [0, 1, 5, 10, 15, 25, 50, 75, 100]
 

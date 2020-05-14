@@ -39,6 +39,26 @@ RSpec.describe Flipper::UI::Decorators::Feature do
       expect(@result['name']).to eq('Some Awesome Feature')
     end
 
+    describe 'description' do
+      context 'when a value is present' do
+        subject do
+          instance = described_class.new(feature)
+          instance.description = 'Awesome feature description'
+          instance
+        end
+
+        it 'includes it' do
+          expect(@result['description']).to eq('Awesome feature description')
+        end
+      end
+
+      context 'when a value is not present' do
+        it 'includes it' do
+          expect(@result['description']).to eq(nil)
+        end
+      end
+    end
+
     it 'includes state' do
       expect(@result['state']).to eq('off')
     end

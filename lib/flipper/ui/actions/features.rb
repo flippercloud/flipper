@@ -10,8 +10,11 @@ module Flipper
 
         def get
           @page_title = 'Features'
+          descriptions = Flipper::UI.configuration.descriptions_source
           @features = flipper.features.map do |feature|
-            Decorators::Feature.new(feature)
+            decorator = Decorators::Feature.new(feature)
+            decorator.description = descriptions[feature.key]
+            decorator
           end.sort
 
           @show_blank_slate = @features.empty?
