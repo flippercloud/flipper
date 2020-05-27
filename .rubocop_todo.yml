@@ -374,7 +374,7 @@ RSpec/RepeatedDescription:
 RSpec/RepeatedExample:
   Exclude:
     - 'spec/flipper/cloud_spec.rb'
-    - 'spec/integration_spec.rb'
+    - 'spec/flipper_integration_spec.rb'
 
 # Offense count: 2
 RSpec/ScatteredLet:
@@ -396,7 +396,7 @@ RSpec/VerifiedDoubles:
     - 'spec/flipper/feature_spec.rb'
     - 'spec/flipper/types/group_spec.rb'
     - 'spec/flipper_spec.rb'
-    - 'spec/integration_spec.rb'
+    - 'spec/flipper_integration_spec.rb'
 
 # Offense count: 1
 Security/Eval:

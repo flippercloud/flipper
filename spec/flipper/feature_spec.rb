@@ -208,7 +208,7 @@ RSpec.describe Flipper::Feature do
       percentage_of_time => percentage_of_time,
       percentage_of_actors => percentage_of_actors,
     }.each do |thing, wrapped_thing|
-      it "always instruments #{thing.inspect} as #{wrapped_thing.class} for enable" do # rubocop:disable RSpec/RepeatedDescription
+      it "always instruments #{thing.inspect} as #{wrapped_thing.class} for enable" do
         Flipper.register(:admins) {}
         subject.enable(thing)
 
@@ -297,7 +297,7 @@ RSpec.describe Flipper::Feature do
       user => actor,
       actor => actor,
     }.each do |thing, wrapped_thing|
-      it "always instruments #{thing.inspect} as #{wrapped_thing.class} for enabled?" do # rubocop:disable RSpec/RepeatedDescription
+      it "always instruments #{thing.inspect} as #{wrapped_thing.class} for enabled?" do
         subject.enabled?(thing)
 
         event = instrumenter.events.last
