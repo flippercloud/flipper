@@ -11,6 +11,8 @@ module Flipper
         # Public: The feature being decorated.
         alias_method :feature, :__getobj__
 
+        attr_accessor :description
+
         # Public: Returns name titleized.
         def pretty_name
           @pretty_name ||= Util.titleize(name)
@@ -22,6 +24,7 @@ module Flipper
           {
             'id' => name.to_s,
             'name' => pretty_name,
+            'description' => description,
             'state' => state.to_s,
             'gates' => gates.map do |gate|
               Decorators::Gate.new(gate, gate_values[gate.key]).as_json

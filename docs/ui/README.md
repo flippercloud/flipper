@@ -148,6 +148,17 @@ Flipper::UI.configure do |config|
 end
 ```
 
+We can also associate a `description` for each `feature` by providing a descriptions source:
+
+```ruby
+Flipper::UI.configure do |config|
+  config.descriptions_source = ->(keys) do
+    # descriptions loaded from YAML file or database (postgres, mysql, etc)
+    # return has to be hash of {String key => String description}
+  end
+end
+```
+
 results in:
 
 ![configure](images/configured-ui.png)

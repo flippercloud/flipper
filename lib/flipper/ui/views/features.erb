@@ -27,6 +27,7 @@
             <span class="octicon octicon-squirrel"></span>
           </th>
           <th class="col">Feature</th>
+          <th class="col-6">Description</th>
           <th class="col">Enabled Gates</th>
         </tr>
       </thead>
@@ -39,6 +40,9 @@
             <td class="col">
               <a href="<%= "#{script_name}/features/#{feature.key}" %>">
                 <%= feature.key %></a>
+            </td>
+            <td class="col-6">
+              <%= feature.description %>
             </td>
             <td class="col">
               <%= feature.pretty_enabled_gate_names %>
