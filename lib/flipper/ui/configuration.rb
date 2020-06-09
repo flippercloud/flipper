@@ -37,7 +37,7 @@ module Flipper
 
       # Public: If you set this, Flipper::UI will fetch descriptions
       # from your external source. Descriptions for `features` will be shown on `feature`
-      # and `features` pages. Defaults to empty hash.
+      # and `features` pages. Defaults to empty block.
       attr_accessor :descriptions_source
 
       VALID_BANNER_CLASS_VALUES = %w(
@@ -63,7 +63,7 @@ module Flipper
         @feature_removal_enabled = true
         @fun = true
         @add_actor_placeholder = "a flipper id"
-        @descriptions_source = ->(args) {}
+        @descriptions_source = ->(keys) {}
       end
 
       def banner_class=(value)
