@@ -96,7 +96,7 @@ flipper[:logging].enable percentage
 flipper[:logging].enabled? # this will return true 5% of the time.
 
 # you can also use shortcut methods
-flipper.enable_percentage_of_time :search, 5 # registers a feature called "enable_percentage_of_time" and enables it 5% of the time
+flipper.enable_percentage_of_time :search, 5 # registers a feature called "search" and enables it 5% of the time
 flipper.disable_percentage_of_time :search # sets to 0
 flipper[:search].enable_percentage_of_time 5
 flipper[:search].disable_percentage_of_time # sets to 0
