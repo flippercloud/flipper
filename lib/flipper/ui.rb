@@ -30,9 +30,6 @@ module Flipper
             "deprecated. This configuration option has moved to Flipper::UI::Configuration"
         end
       end
-
-      # Public: Set attributes on this instance to customize UI text
-      attr_reader :configuration
     end
 
     def self.root
