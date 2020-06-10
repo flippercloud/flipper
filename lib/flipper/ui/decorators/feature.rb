@@ -18,20 +18,6 @@ module Flipper
           @pretty_name ||= Util.titleize(name)
         end
 
-        # Public: Returns instance as hash that is ready to be json dumped.
-        def as_json
-          gate_values = feature.gate_values
-          {
-            'id' => name.to_s,
-            'name' => pretty_name,
-            'description' => description,
-            'state' => state.to_s,
-            'gates' => gates.map do |gate|
-              Decorators::Gate.new(gate, gate_values[gate.key]).as_json
-            end,
-          }
-        end
-
         def color_class
           case feature.state
           when :on

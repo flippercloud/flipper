@@ -12,12 +12,14 @@ module Flipper
           # Public: Returns instance as hash that is ready to be json dumped.
           def as_json
             gate_values = feature.adapter.get(self)
+            gates_json = gates.map do |gate|
+              Decorators::Gate.new(gate, gate_values[gate.key]).as_json
+            end
+
             {
               'key' => key,
               'state' => state.to_s,
-              'gates' => gates.map do |gate|
-                Decorators::Gate.new(gate, gate_values[gate.key]).as_json
-              end,
+              'gates' => gates_json,
             }
           end
         end
