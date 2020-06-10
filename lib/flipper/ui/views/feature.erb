@@ -48,7 +48,7 @@
                 <%== csrf_input_tag %>
                 <div class="btn-group">
                   <% @percentages.each do |number| %>
-                    <input type="submit" name="value" value="<%= number %>%" class="btn btn-light btn-sm" <% if number == @feature.percentage_of_actors_value %>disabled<% end %>>
+                    <input type="submit" name="value" value="<%= number %>%" class="btn btn-light btn-sm <%= "d-none d-md-block" if [15, 75].include?(number) %>" <% if number == @feature.percentage_of_actors_value %>disabled<% end %>>
                   <% end %>
                 </div>
               </form>
@@ -86,7 +86,7 @@
                 <%== csrf_input_tag %>
                 <div class="btn-group">
                   <% @percentages.each do |number| %>
-                    <input type="submit" name="value" value="<%= number %>%" class="btn btn-light btn-sm" <% if number == @feature.percentage_of_time_value %>disabled<% end %>>
+                    <input type="submit" name="value" value="<%= number %>%" class="btn btn-light btn-sm <%= "d-none d-md-block" if [15, 75].include?(number) %>" <% if number == @feature.percentage_of_time_value %>disabled<% end %>>
                   <% end %>
                 </div>
               </form>
