@@ -11,6 +11,8 @@ module Flipper
         # Public: The feature being decorated.
         alias_method :feature, :__getobj__
 
+        # Internal: Used to preload description if descriptions_source is
+        # configured for Flipper::UI.
         attr_accessor :description
 
         # Public: Returns name titleized.
