@@ -65,14 +65,6 @@ module Flipper
         @public_path ||= Flipper::UI.root.join('public')
       end
 
-      ##### RFC: What if we place the `descriptions` call here instead ?
-      #####      so we avoid calling it from both `feature` and `features` actions
-
-      # Private: The path to descriptions source
-      # def self.descriptions
-      #   Flipper::UI.configuration.descriptions_source
-      # end
-
       # Public: The instance of the Flipper::DSL the middleware was
       # initialized with.
       attr_reader :flipper
