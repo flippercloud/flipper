@@ -48,7 +48,7 @@
                 <%== csrf_input_tag %>
                 <div class="btn-group">
                   <% @percentages.each do |number| %>
-                    <input type="submit" name="value" value="<%= number %>%" class="btn btn-light btn-sm" <% if number == @feature.percentage_of_actors_value %>disabled<% end %>>
+                    <input type="submit" name="value" value="<%= number %>%" class="btn btn-light btn-sm <%= "d-none d-md-block" if [15, 75].include?(number) %>" <% if number == @feature.percentage_of_actors_value %>disabled<% end %>>
                   <% end %>
                 </div>
               </form>
@@ -86,7 +86,7 @@
                 <%== csrf_input_tag %>
                 <div class="btn-group">
                   <% @percentages.each do |number| %>
-                    <input type="submit" name="value" value="<%= number %>%" class="btn btn-light btn-sm" <% if number == @feature.percentage_of_time_value %>disabled<% end %>>
+                    <input type="submit" name="value" value="<%= number %>%" class="btn btn-light btn-sm <%= "d-none d-md-block" if [15, 75].include?(number) %>" <% if number == @feature.percentage_of_time_value %>disabled<% end %>>
                   <% end %>
                 </div>
               </form>
@@ -120,26 +120,28 @@
     <div class="col-md mb-4 mb-md-0">
       <div class="card">
         <div class="card-header">
-          <div class="d-flex w-100 justify-content-between align-items-center">
-            <div>
-              <h4><%= Flipper::UI.configuration.groups.title %></h4>
+          <div class="row">
+            <div class="col-12 col-md-3">
+              <h4 class="mb-2 mb-md-0"><%= Flipper::UI.configuration.groups.title %></h4>
             </div>
-            <div>
-              <% if @feature.disabled_groups.empty? %>
-                All groups enabled.
-              <% else %>
-                <form action="<%= script_name %>/features/<%= @feature.key %>/groups" method="post" class="form-inline">
-                  <%== csrf_input_tag %>
-                  <input type="hidden" name="operation" value="enable">
-                  <select name="value" class="form-control form-control-sm mr-sm-2 mb-2 mb-sm-0">
-                    <option value="">Select a group...</option>
-                    <% @feature.disabled_groups.each do |group| %>
-                      <option value="<%= group.name %>"><%= group.name %></option>
-                    <% end %>
-                  </select>
-                  <input type="submit" value="Add Group" class="btn btn-light btn-sm">
-                </form>
-              <% end %>
+            <div class="col-12 col-md-9">
+              <div class="float-md-right">
+                <% if @feature.disabled_groups.empty? %>
+                  All groups enabled.
+                <% else %>
+                  <form action="<%= script_name %>/features/<%= @feature.key %>/groups" method="post" class="form-inline">
+                    <%== csrf_input_tag %>
+                    <input type="hidden" name="operation" value="enable">
+                    <select name="value" class="form-control form-control-sm mr-sm-2 mb-2 mb-sm-0">
+                      <option value="">Select a group...</option>
+                      <% @feature.disabled_groups.each do |group| %>
+                        <option value="<%= group.name %>"><%= group.name %></option>
+                      <% end %>
+                    </select>
+                    <input type="submit" value="Add Group" class="btn btn-light btn-sm">
+                  </form>
+                  <% end %>
+              </div>
             </div>
           </div>
         </div>
@@ -181,17 +183,19 @@
     <div class="col-md">
       <div class="card">
         <div class="card-header">
-          <div class="d-flex w-100 justify-content-between align-items-center">
-            <div>
-              <h4><%= Flipper::UI.configuration.actors.title %></h4>
+          <div class="row">
+            <div class="col-12 col-md-3">
+              <h4 class="mb-2 mb-md-0"><%= Flipper::UI.configuration.actors.title %></h4>
             </div>
-            <div>
-              <form action="<%= script_name %>/features/<%= @feature.key %>/actors" method="post" class="form-inline">
-                <%== csrf_input_tag %>
-                <input type="hidden" name="operation" value="enable">
-                <input type="text" name="value" placeholder="<%= Flipper::UI.configuration.add_actor_placeholder %>" class="form-control form-control-sm mr-sm-2 mb-2 mb-sm-0">
-                <input type="submit" value="Add Actor" class="btn btn-light btn-sm">
-              </form>
+            <div class="col-12 col-md-9">
+              <div class="float-md-right">
+                <form action="<%= script_name %>/features/<%= @feature.key %>/actors" method="post" class="form-inline">
+                  <%== csrf_input_tag %>
+                  <input type="hidden" name="operation" value="enable">
+                  <input type="text" name="value" placeholder="<%= Flipper::UI.configuration.add_actor_placeholder %>" class="form-control form-control-sm mr-sm-2 mb-2 mb-sm-0">
+                  <input type="submit" value="Add Actor" class="btn btn-light btn-sm">
+                </form>
+              </div>
             </div>
           </div>
         </div>

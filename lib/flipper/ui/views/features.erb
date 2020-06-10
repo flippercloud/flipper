@@ -1,3 +1,9 @@
+<%- if Flipper::UI.configuration.feature_creation_enabled -%>
+  <div class="mb-3">
+    <a class="btn btn-light" href="<%= script_name %>/features/new">Add Feature</a>
+  </div>
+<%- end -%>
+
 <% if @show_blank_slate %>
   <div class="jumbotron text-center">
     <span class="mega-octicon octicon-plus"></span>
