@@ -63,7 +63,7 @@ module Flipper
         @feature_removal_enabled = true
         @fun = true
         @add_actor_placeholder = "a flipper id"
-        @descriptions_source = ->(keys) {}
+        @descriptions_source = ->(_keys) { {} }
       end
 
       def banner_class=(value)

@@ -116,18 +116,20 @@ RSpec.describe Flipper::UI::Configuration do
 
   describe "#descriptions_source" do
     it "has default value" do
-      expect(configuration.descriptions_source.call(["foo", "bar"])).to be(nil)
+      expect(configuration.descriptions_source.call(%w[foo bar])).to eq({})
     end
 
     context "descriptions source is provided" do
       it "can be updated" do
-        file = YAML.load_file(FlipperRoot.join('spec/support/descriptions.yml'))
-        configuration.descriptions_source = ->(keys) { file }
-        keys = ["some_awesome_feature", "foo"]
+        configuration.descriptions_source = lambda do |_keys|
+          YAML.load_file(FlipperRoot.join('spec/support/descriptions.yml'))
+        end
+        keys = %w[some_awesome_feature foo]
         result = configuration.descriptions_source.call(keys)
-        expect(result).to eq({
+        expected = {
           "some_awesome_feature" => "Awesome feature description",
-        })
+        }
+        expect(result).to eq(expected)
       end
     end
   end

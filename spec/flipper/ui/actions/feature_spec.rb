@@ -70,6 +70,15 @@ RSpec.describe Flipper::UI::Actions::Feature do
 
   describe 'GET /features/:feature' do
     before do
+      Flipper::UI.configure do |config|
+        config.descriptions_source = lambda { |_keys|
+          {
+            "stats" => "Most awesome stats",
+            "search" => "Most in-depth search",
+          }
+        }
+      end
+
       get '/features/search'
     end
 
@@ -85,6 +94,7 @@ RSpec.describe Flipper::UI::Actions::Feature do
       expect(last_response.body).to include('Groups')
       expect(last_response.body).to include('Percentage of Time')
       expect(last_response.body).to include('Percentage of Actors')
+      expect(last_response.body).to include('Most in-depth search')
     end
   end
 
