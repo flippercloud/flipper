@@ -34,6 +34,21 @@ end
 adapter = Flipper::Adapters::PStore.new
 flipper = Flipper.new(adapter, instrumenter: ActiveSupport::Notifications)
 
+Flipper::UI.configure do |config|
+  config.descriptions_source = lambda do |_keys|
+    {
+      "search_performance_another_long_thing" => "Just to test feature name length.",
+      "gauges_tracking" => "Should we track page views with gaug.es.",
+      "unused" => "Not used.",
+      "suits" => "Are suits necessary in business?",
+      "secrets" => "Secrets are lies.",
+      "logging" => "Log all the things.",
+      "new_cache" => "Like the old cache but newer.",
+      "a/b" => "Why would someone use a slash? I don't know but someone did. Let's make this really long so they regret using slashes. Please don't use slashes.",
+    }
+  end
+end
+
 # You can uncomment these to get some default data:
 # flipper[:search_performance_another_long_thing].enable
 # flipper[:gauges_tracking].enable

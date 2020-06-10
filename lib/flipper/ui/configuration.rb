@@ -51,6 +51,8 @@ module Flipper
         warning
       ).freeze
 
+      DEFAULT_DESCRIPTIONS_SOURCE = ->(_keys) { {} }
+
       def initialize
         @actors = Option.new("Actors", "Enable actors using the form above.")
         @groups = Option.new("Groups", "Enable groups using the form above.")
@@ -63,7 +65,11 @@ module Flipper
         @feature_removal_enabled = true
         @fun = true
         @add_actor_placeholder = "a flipper id"
-        @descriptions_source = ->(_keys) { {} }
+        @descriptions_source = DEFAULT_DESCRIPTIONS_SOURCE
+      end
+
+      def using_descriptions?
+        @descriptions_source != DEFAULT_DESCRIPTIONS_SOURCE
       end
 
       def banner_class=(value)

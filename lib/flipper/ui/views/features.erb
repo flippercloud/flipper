@@ -27,8 +27,10 @@
             <span class="octicon octicon-squirrel"></span>
           </th>
           <th class="col">Feature</th>
-          <th class="col-6">Description</th>
-          <th class="col">Enabled Gates</th>
+          <% if Flipper::UI.configuration.using_descriptions? %>
+            <th class="col-6 d-none d-md-table-cell">Description</th>
+          <% end %>
+          <th class="col d-none d-md-table-cell">Enabled Gates</th>
         </tr>
       </thead>
       <tbody>
@@ -37,14 +39,20 @@
             <td class="col-1">
               <span class="octicon octicon-squirrel <%= feature.color_class %>" data-toggle="tooltip" title=<%= feature.state.to_s.capitalize %>></span>
             </td>
-            <td class="col">
+            <td class="col text-truncate">
               <a href="<%= "#{script_name}/features/#{feature.key}" %>">
                 <%= feature.key %></a>
             </td>
-            <td class="col-6">
-              <%= feature.description %>
-            </td>
-            <td class="col">
+            <% if Flipper::UI.configuration.using_descriptions? %>
+              <td class="col-6 d-none d-md-table-cell">
+                <% if feature.description.nil? || feature.description.empty? %>
+                  <span class="text-muted font-italic">None</span>
+                <% else %>
+                  <%= feature.description %>
+                <% end %>
+              </td>
+            <% end %>
+            <td class="col d-none d-md-table-cell">
               <%= feature.pretty_enabled_gate_names %>
             </td>
           </tr>

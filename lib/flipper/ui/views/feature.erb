@@ -12,10 +12,10 @@
           <span class="octicon octicon-squirrel <%= @feature.color_class %>"></span>
           <%= @feature.key %>
         </h4>
-        <% if @feature.description %>
-          <p><%= @feature.description %></p>
-        <% end %>
         <div class="card-body">
+          <% if @feature.description %>
+            <p><%= @feature.description %></p>
+          <% end %>
           <p>
             <% if @feature.boolean_value %>
               The feature is enabled for <strong>everyone</strong>. Disable this feature with one click.
