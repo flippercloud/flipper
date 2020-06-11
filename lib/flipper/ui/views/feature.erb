@@ -43,7 +43,7 @@
     </div>
   </div>
   <div class="row">
-    <div class="col-md mb-4 mb-lg-0">
+    <div class="col-md mb-4 mb-lg-0 pr-3">
       <div class="card">
         <h4 class="card-header"><%= Flipper::UI.configuration.percentage_of_actors.title %></h4>
         <div class="card-body">
@@ -81,7 +81,7 @@
         </div>
       </div>
     </div>
-    <div class="col-md">
+    <div class="col-md pl-2">
       <div class="card">
         <h4 class="card-header"><%= Flipper::UI.configuration.percentage_of_time.title %></h4>
         <div class="card-body">
@@ -122,7 +122,7 @@
   </div>
 
   <div class="row">
-    <div class="col-md mb-4 mb-md-0">
+    <div class="col-md mb-4 mb-md-0 pr-3">
       <div class="card">
         <div class="card-header">
           <div class="row">
@@ -185,7 +185,7 @@
         <% end %>
       </div>
     </div>
-    <div class="col-md">
+    <div class="col-md pl-2">
       <div class="card">
         <div class="card-header">
           <div class="row">
@@ -242,23 +242,23 @@
   </div>
 
   <% if Flipper::UI.configuration.feature_removal_enabled %>
-  <div class="row">
-    <div class="col">
-      <div class="card border-danger">
-        <h4 class="card-header bg-danger text-white"><%= Flipper::UI.configuration.delete.title %></h4>
-        <div class="card-body">
-          <p>
-            <%= Flipper::UI.configuration.delete.description %>
-          </p>
+    <div class="row">
+      <div class="col">
+        <div class="card border-danger">
+          <h4 class="card-header bg-danger text-white"><%= Flipper::UI.configuration.delete.title %></h4>
+          <div class="card-body">
+            <p>
+              <%= Flipper::UI.configuration.delete.description %>
+            </p>
 
-          <form action="<%= script_name %>/features/<%= @feature.key %>" method="post" onsubmit="return confirm('Are you sure you want to remove this feature from the list of features and disable it for everyone?')">
-            <%== csrf_input_tag %>
-            <input type="hidden" name="_method" value="DELETE">
-            <button type="submit" name="action" value="Delete" class="btn btn-danger" data-toggle="tooltip" title="Remove feature from list of features and disable it." data-placement="right">Delete</button>
-          </form>
+            <form action="<%= script_name %>/features/<%= @feature.key %>" method="post" onsubmit="return confirm('Are you sure you want to remove this feature from the list of features and disable it for everyone?')">
+              <%== csrf_input_tag %>
+              <input type="hidden" name="_method" value="DELETE">
+              <button type="submit" name="action" value="Delete" class="btn btn-danger" data-toggle="tooltip" title="Remove feature from list of features and disable it." data-placement="right">Delete</button>
+            </form>
+          </div>
         </div>
       </div>
     </div>
-  </div>
   <% end %>
 </div>
