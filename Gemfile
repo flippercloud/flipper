@@ -16,8 +16,8 @@ gem 'sqlite3', "~> #{ENV['SQLITE3_VERSION'] || '1.3.11'}"
 gem 'rails', "~> #{ENV['RAILS_VERSION'] || '6.0.0'}"
 gem 'minitest', '~> 5.8'
 gem 'minitest-documentation'
-gem 'rubocop'
-gem 'rubocop-rspec'
+gem 'rubocop', '~> 0.79.0'
+gem 'rubocop-rspec', '~> 1.38.0'
 gem 'webmock', '~> 3.0'
 
 group(:guard) do
