@@ -6,6 +6,11 @@
     <% if Flipper::UI.configuration.fun %>
       <h4>But I've got a blank space baby...</h4>
       <p>And I'll flip your features.</p>
+      <%- if Flipper::UI.configuration.feature_creation_enabled -%>
+        <p>
+          <a class="btn btn-primary btn-sm" href="<%= script_name %>/features/new">Add Feature</a>
+        </p>
+      <%- end -%>
       <div class="embed-responsive embed-responsive-16by9">
         <iframe class="embed-responsive-item" width="560" height="315" src="https://www.youtube.com/embed/e-ORhEE9VVg" frameborder="0" allowfullscreen></iframe>
       </div>
