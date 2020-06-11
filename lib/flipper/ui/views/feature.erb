@@ -27,11 +27,16 @@
           <form action="<%= script_name %>/features/<%= @feature.key %>/boolean" method="post">
             <%== csrf_input_tag %>
 
-            <% unless @feature.boolean_value %>
-              <button type="submit" name="action" value="Enable" class="btn btn-danger" data-toggle="tooltip" title="Enable for everyone">Enable</button>
-            <% end %>
-
-            <button type="submit" name="action" value="Disable" class="btn btn-light" data-toggle="tooltip" <% if @feature.off? %>disabled title="Already disabled for everyone"<% else %>title="Disable for everyone by clearing all percentages, groups and actors."<% end %>>Disable</button>
+            <button type="submit" name="action" value="Enable" class="btn btn-primary" <%= "disabled" if @feature.boolean_value %>>
+              <span class="d-inline-block" data-toggle="tooltip" title="<%= @feature.boolean_value ? "Already enabled for everyone" : "Enable for everyone" %>">
+                Enable
+              </span>
+            </button>
+            <button type="submit" name="action" value="Disable" class="btn btn-secondary" <%= "disabled" if @feature.off? %>>
+              <span class="d-inline-block" data-toggle="tooltip" title="<%= @feature.off? ? "Already disabled for everyone" : "Disable for everyone by clearing all percentages, groups and actors." %>">
+                Disable
+              </span>
+            </button>
           </form>
         </div>
       </div>
