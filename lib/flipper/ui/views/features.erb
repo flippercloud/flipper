@@ -1,9 +1,3 @@
-<%- if Flipper::UI.configuration.feature_creation_enabled -%>
-  <div class="mb-3">
-    <a class="btn btn-primary" href="<%= script_name %>/features/new">Add Feature</a>
-  </div>
-<%- end -%>
-
 <% if @show_blank_slate %>
   <div class="jumbotron text-center">
     <span class="mega-octicon octicon-plus"></span>
@@ -25,7 +19,14 @@
   </div>
 <% else %>
   <div class="card">
-    <h4 class="card-header">Features</h4>
+    <div class="card-header">
+      <%- if Flipper::UI.configuration.feature_creation_enabled -%>
+        <div class="float-right">
+          <a class="btn btn-primary btn-sm" href="<%= script_name %>/features/new">Add Feature</a>
+        </div>
+      <%- end -%>
+      <h4 class="m-0">Features</h4>
+    </div>
     <table class="table">
       <thead>
         <tr class="d-flex">
