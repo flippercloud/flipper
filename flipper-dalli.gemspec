@@ -13,8 +13,8 @@ Gem::Specification.new do |gem|
   gem.license       = 'MIT'
   gem.homepage      = 'https://github.com/jnunemaker/flipper'
 
-  gem.files         = `git ls-files`.split("\n").select(&flipper_dalli_files) + ['lib/flipper/version.rb'] # rubocop:disable Layout/LineLength
-  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n").select(&flipper_dalli_files) # rubocop:disable Layout/LineLength
+  gem.files         = `git ls-files`.split("\n").select(&flipper_dalli_files) + ['lib/flipper/version.rb']
+  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n").select(&flipper_dalli_files)
   gem.name          = 'flipper-dalli'
   gem.require_paths = ['lib']
   gem.version       = Flipper::VERSION

@@ -5,7 +5,7 @@ require 'flipper/feature_check_context'
 require 'flipper/gate_values'
 
 module Flipper
-  class Feature # rubocop:disable Metrics/ClassLength
+  class Feature
     # Private: The name of feature instrumentation events.
     InstrumentationName = "feature_operation.#{InstrumentationNamespace}".freeze
 

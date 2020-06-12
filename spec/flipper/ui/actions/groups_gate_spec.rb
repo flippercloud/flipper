@@ -72,34 +72,28 @@ RSpec.describe Flipper::UI::Actions::GroupsGate do
         context 'unknown group name' do
           let(:group_name) { 'not_here' }
 
-          # rubocop:disable Layout/LineLength
           it 'redirects back to feature' do
             expect(last_response.status).to be(302)
             expect(last_response.headers['Location']).to eq('/features/search/groups?error=The+group+named+%22not_here%22+has+not+been+registered.')
           end
-          # rubocop:enable Layout/LineLength
         end
 
         context 'empty group name' do
           let(:group_name) { '' }
 
-          # rubocop:disable Layout/LineLength
           it 'redirects back to feature' do
             expect(last_response.status).to be(302)
             expect(last_response.headers['Location']).to eq('/features/search/groups?error=The+group+named+%22%22+has+not+been+registered.')
           end
-          # rubocop:enable Layout/LineLength
         end
 
         context 'nil group name' do
           let(:group_name) { nil }
 
-          # rubocop:disable Layout/LineLength
           it 'redirects back to feature' do
             expect(last_response.status).to be(302)
             expect(last_response.headers['Location']).to eq('/features/search/groups?error=The+group+named+%22%22+has+not+been+registered.')
           end
-          # rubocop:enable Layout/LineLength
         end
       end
     end
