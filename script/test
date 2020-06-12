@@ -12,11 +12,6 @@ cd $(dirname "$0")/..
     exit 0
 }
 
-export RAILS_VERSION=4.2.5
-export SQLITE3_VERSION=1.3.11
-script/bootstrap || bundle update
-bundle exec rake
-
 export RAILS_VERSION=5.0.0
 export SQLITE3_VERSION=1.3.11
 script/bootstrap || bundle update
