@@ -4,7 +4,6 @@ An ActiveRecord adapter for [Flipper](https://github.com/jnunemaker/flipper).
 
 Supported Active Record versions:
 
-* 4.2.x
 * 5.0.x
 * 6.0.x
 

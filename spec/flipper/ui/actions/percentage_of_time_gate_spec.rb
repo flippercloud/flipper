@@ -41,12 +41,10 @@ RSpec.describe Flipper::UI::Actions::PercentageOfTimeGate do
         expect(flipper[:search].percentage_of_time_value).to be(0)
       end
 
-      # rubocop:disable Layout/LineLength
       it 'redirects back to feature' do
         expect(last_response.status).to be(302)
         expect(last_response.headers['Location']).to eq('/features/search?error=Invalid+percentage+of+time+value%3A+value+must+be+a+positive+number+less+than+or+equal+to+100%2C+but+was+555')
       end
-      # rubocop:enable Layout/LineLength
     end
   end
 end

@@ -13,13 +13,13 @@ Gem::Specification.new do |gem|
   gem.license       = 'MIT'
   gem.homepage      = 'https://github.com/jnunemaker/flipper'
 
-  gem.files         = `git ls-files`.split("\n").select(&flipper_active_support_cache_store_files) + ['lib/flipper/version.rb'] # rubocop:disable Layout/LineLength
-  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n").select(&flipper_active_support_cache_store_files) # rubocop:disable Layout/LineLength
+  gem.files         = `git ls-files`.split("\n").select(&flipper_active_support_cache_store_files) + ['lib/flipper/version.rb']
+  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n").select(&flipper_active_support_cache_store_files)
   gem.name          = 'flipper-active_support_cache_store'
   gem.require_paths = ['lib']
   gem.version       = Flipper::VERSION
   gem.metadata      = Flipper::METADATA
 
   gem.add_dependency 'flipper', "~> #{Flipper::VERSION}"
-  gem.add_dependency 'activesupport', '>= 4.2', '< 7'
+  gem.add_dependency 'activesupport', '>= 5.0', '< 7'
 end

@@ -1,7 +1,6 @@
 #!/usr/bin/env rake
 $LOAD_PATH.push File.expand_path('../lib', __FILE__)
 require 'rake/testtask'
-require 'rubocop/rake_task'
 require 'flipper/version'
 
 # gem install pkg/*.gem
@@ -50,6 +49,4 @@ Rake::TestTask.new(:test_rails) do |t|
   t.warning = false
 end
 
-RuboCop::RakeTask.new
-
-task default: [:spec, :test, :test_rails, :rubocop]
+task default: [:spec, :test, :test_rails]

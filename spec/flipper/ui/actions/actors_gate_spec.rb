@@ -73,23 +73,19 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
         context 'empty value' do
           let(:value) { '' }
 
-          # rubocop:disable Layout/LineLength
           it 'redirects back to feature' do
             expect(last_response.status).to be(302)
             expect(last_response.headers['Location']).to eq('/features/search/actors?error=%22%22+is+not+a+valid+actor+value.')
           end
-          # rubocop:enable Layout/LineLength
         end
 
         context 'nil value' do
           let(:value) { nil }
 
-          # rubocop:disable Layout/LineLength
           it 'redirects back to feature' do
             expect(last_response.status).to be(302)
             expect(last_response.headers['Location']).to eq('/features/search/actors?error=%22%22+is+not+a+valid+actor+value.')
           end
-          # rubocop:enable Layout/LineLength
         end
       end
     end

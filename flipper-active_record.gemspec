@@ -18,12 +18,12 @@ Gem::Specification.new do |gem|
     'lib/flipper/version.rb',
   ]
   gem.files         = `git ls-files`.split("\n").select(&flipper_active_record_files) + extra_files
-  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n").select(&flipper_active_record_files) # rubocop:disable Layout/LineLength
+  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n").select(&flipper_active_record_files)
   gem.name          = 'flipper-active_record'
   gem.require_paths = ['lib']
   gem.version       = Flipper::VERSION
   gem.metadata      = Flipper::METADATA
 
   gem.add_dependency 'flipper', "~> #{Flipper::VERSION}"
-  gem.add_dependency 'activerecord', '>= 4.2', '< 7'
+  gem.add_dependency 'activerecord', '>= 5.0', '< 7'
 end

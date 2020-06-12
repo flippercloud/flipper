@@ -1,7 +1,7 @@
 require "forwardable"
 
 module Flipper
-  extend self # rubocop:disable Style/ModuleFunction
+  extend self
   extend Forwardable
 
   # Private: The namespace for all instrumented events.
