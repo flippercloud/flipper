@@ -15,16 +15,6 @@ RSpec.describe Flipper::UI::Actions::Features do
   describe 'GET /features' do
     context "when there are some features" do
       before do
-        @original_descriptions_source = Flipper::UI.configuration.descriptions_source
-        Flipper::UI.configure do |config|
-          config.descriptions_source = lambda { |_keys|
-            {
-              "stats" => "Most awesome stats",
-              "search" => "Most in-depth search",
-            }
-          }
-        end
-
         flipper[:stats].enable
         flipper[:search].enable
         get '/features'
@@ -37,8 +27,6 @@ RSpec.describe Flipper::UI::Actions::Features do
       it 'renders template' do
         expect(last_response.body).to include('stats')
         expect(last_response.body).to include('search')
-        expect(last_response.body).to include("Most awesome stats")
-        expect(last_response.body).to include("Most in-depth search")
       end
     end
 
