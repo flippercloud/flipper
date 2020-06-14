@@ -32,44 +32,22 @@
       <%- end -%>
       <h4 class="m-0">Features</h4>
     </div>
-    <table class="table">
-      <thead>
-        <tr class="d-flex">
-          <th class="col-1 border-0">
-            <span class="octicon octicon-squirrel"></span>
-          </th>
-          <th class="col border-0">Feature</th>
-          <% if Flipper::UI.configuration.using_descriptions? %>
-            <th class="col-6 d-none d-md-table-cell border-0">Description</th>
-          <% end %>
-          <th class="col d-none d-md-table-cell border-0">Enabled Gates</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @features.each do |feature| %>
-          <tr class="d-flex">
-            <td class="col-1">
-              <span class="octicon octicon-squirrel <%= feature.color_class %>" data-toggle="tooltip" title=<%= feature.state.to_s.capitalize %>></span>
-            </td>
-            <td class="col text-truncate">
-              <a href="<%= "#{script_name}/features/#{feature.key}" %>">
-                <%= feature.key %></a>
-            </td>
-            <% if Flipper::UI.configuration.using_descriptions? %>
-              <td class="col-6 d-none d-md-table-cell">
-                <% if feature.description.nil? || feature.description.empty? %>
-                  <span class="text-muted font-italic">None</span>
-                <% else %>
-                  <%= feature.description %>
-                <% end %>
-              </td>
-            <% end %>
-            <td class="col d-none d-md-table-cell">
-              <%= feature.pretty_enabled_gate_names %>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
+    <div class="card-body py-0">
+      <% @features.each do |feature| %>
+        <div class="feature row align-items-center mt-0 px-3 border-bottom">
+          <div class="col-1 col-md-auto">
+            <span class="octicon octicon-squirrel <%= feature.color_class %>" data-toggle="tooltip" title=<%= feature.state.to_s.capitalize %>></span>
+          </div>
+          <div class="col-10">
+            <a href="<%= "#{script_name}/features/#{feature.key}" %>" class="d-block px-0 py-3 btn text-left text-dark">
+              <div class="text-truncate"><%= feature.key %></div>
+              <div class="text-muted text-truncate">
+                <%== feature.gates_in_words %>
+              </div>
+            </a>
+          </div>
+        </div>
+      <% end %>
+    </div>
   </div>
 <% end %>

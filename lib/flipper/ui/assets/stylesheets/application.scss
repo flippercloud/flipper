@@ -17,3 +17,42 @@ $light: #ddd;
   margin-top: 1.5em;
 }
 
+.bg-lightest {
+  background: rgba(0, 0, 0, 0.01);
+}
+
+.toggle-block-when-on,
+.toggle-inline-block-when-on,
+.toggle-inline-when-on {
+  display: none;
+}
+
+.toggle-block-when-off {
+  display: block;
+}
+
+.toggle-inline-block-when-off {
+  display: inline-block;
+}
+
+.toggle-inline-when-off {
+  display: inline;
+}
+
+.toggle-on .toggle-block-when-on {
+  display: block;
+}
+
+.toggle-on .toggle-inline-block-when-on {
+  display: inline-block;
+}
+
+.toggle-on .toggle-inline-when-on {
+  display: inline;
+}
+
+.toggle-on .toggle-block-when-off,
+.toggle-on .toggle-inline-block-when-off,
+.toggle-on .toggle-inline-when-off {
+  display: none;
+}

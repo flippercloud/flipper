@@ -1,3 +1,9 @@
-$(() ->
-  $('[data-toggle="tooltip"]').tooltip();
+$(
+  () ->
+    $(document).on('click', '.js-toggle-trigger', () ->
+      $container = $(this).closest('.js-toggle-container')
+      $container.toggleClass('toggle-on');
+
+      if $container.hasClass('toggle-on')
+        $container.find('.js-toggle-focus-when-on').focus()
 );
