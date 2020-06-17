@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="<%= script_name %>/css/application.css">
   </head>
   <body class="py-4">
-    <div class="container" style="max-width:600px;">
+    <div class="container mw-600">
       <%- unless Flipper::UI.configuration.banner_text.nil? -%>
         <div class="alert alert-<%= Flipper::UI.configuration.banner_class %> text-center font-weight-bold">
           <%= Flipper::UI.configuration.banner_text %>

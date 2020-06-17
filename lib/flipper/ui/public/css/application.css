@@ -6,6 +6,10 @@ html {
   margin-bottom: 15px;
 }
 
+.mw-600 {
+  max-width: 600px;
+}
+
 .bg-lightest {
   background: rgba(0, 0, 0, 0.01);
 }
