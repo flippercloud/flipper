@@ -62,7 +62,7 @@ RSpec.describe Flipper::UI::Actions::Features do
         end
 
         it 'renders template' do
-          expect(last_response.body).to include('There aren\'t any features to configure.')
+          expect(last_response.body).to include('You have not added any features to configure yet.')
         end
       end
     end

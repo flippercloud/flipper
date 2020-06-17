@@ -22,7 +22,5 @@ group(:guard) do
   gem 'guard', '~> 2.15'
   gem 'guard-rspec', '~> 4.5'
   gem 'guard-bundler', '~> 2.2'
-  gem 'guard-coffeescript', '~> 2.0'
-  gem 'guard-sass', '~> 1.6'
   gem 'rb-fsevent', '~> 0.9'
 end

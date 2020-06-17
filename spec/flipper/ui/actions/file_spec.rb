@@ -21,16 +21,6 @@ RSpec.describe Flipper::UI::Actions::File do
     end
   end
 
-  describe 'GET /fonts/bootstrap/glyphicons-halflings-regular.eot' do
-    before do
-      get '/fonts/bootstrap/glyphicons-halflings-regular.eot'
-    end
-
-    it 'responds with 200' do
-      expect(last_response.status).to be(200)
-    end
-  end
-
   describe 'GET /octicons/octicons.eot' do
     before do
       get '/octicons/octicons.eot'

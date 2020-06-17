@@ -195,8 +195,7 @@ end
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. **Fire up the app** (`script/server`)
-4. **Start up guard** (`bundle exec guard` for automatic coffeescript/sass compilation and such).
-5. Run the tests `bundle exec rake`
-6. Commit your changes (`git commit -am 'Added some feature'`)
-7. Push to the branch (`git push origin my-new-feature`)
-8. Create new Pull Request
+4. Run the tests `bundle exec rake`
+5. Commit your changes (`git commit -am 'Added some feature'`)
+6. Push to the branch (`git push origin my-new-feature`)
+7. Create new Pull Request

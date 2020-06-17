@@ -1,8 +1,5 @@
 <% if @show_blank_slate %>
   <div class="jumbotron text-center">
-    <span class="mega-octicon octicon-plus"></span>
-    <span class="mega-octicon octicon-list-unordered"></span>
-    <span class="mega-octicon octicon-zap"></span>
     <% if Flipper::UI.configuration.fun %>
       <h4>But I've got a blank space baby...</h4>
       <p>And I'll flip your features.</p>
@@ -15,11 +12,18 @@
         <iframe class="embed-responsive-item" width="560" height="315" src="https://www.youtube.com/embed/e-ORhEE9VVg" frameborder="0" allowfullscreen></iframe>
       </div>
     <% else %>
-      <h4>There aren't any features to configure.</h4>
-      <p>
-        Check the <a href="https://github.com/jnunemaker/flipper#examples">examples</a> to
-        learn how to add one.
-      </p>
+      <h4>Getting Started</h4>
+      <p class="mb-1">You have not added any features to configure yet.</p>
+      <%- if Flipper::UI.configuration.feature_creation_enabled -%>
+        <p class="mt-2">
+          <a class="btn btn-primary btn-sm" href="<%= script_name %>/features/new">Add Feature</a>
+        </p>
+      <% else %>
+        <p>
+          Check the <a href="https://github.com/jnunemaker/flipper#examples">examples</a> to
+          learn how to add one.
+        </p>
+      <%- end -%>
     <% end %>
   </div>
 <% else %>
