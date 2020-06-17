@@ -35,6 +35,10 @@ adapter = Flipper::Adapters::PStore.new
 flipper = Flipper.new(adapter, instrumenter: ActiveSupport::Notifications)
 
 Flipper::UI.configure do |config|
+  # config.banner_text = 'Production Environment'
+  # config.banner_class = 'danger'
+  config.feature_creation_enabled = true
+  config.feature_removal_enabled = true
   config.descriptions_source = lambda do |_keys|
     {
       "search_performance_another_long_thing" => "Just to test feature name length.",
