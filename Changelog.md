@@ -1,3 +1,15 @@
+## 0.18.0
+
+## Additions/Changes
+
+* Add support for feature descriptions to flipper-ui (https://github.com/jnunemaker/flipper/pull/461).
+* Remove rubocop (https://github.com/jnunemaker/flipper/pull/469).
+* flipper-ui redesign (https://github.com/jnunemaker/flipper/pull/470).
+* Removed support for ruby 2.4.
+* Added support for ruby 2.7.
+* Removed support for Rails 4.x.x.
+* Removed support for customizing actors, groups, % of actors and % of time text in flipper-ui in favor of automatic and more descriptive text.
+
 ## 0.17.2
 
 ### Additions/Changes
@@ -90,7 +102,7 @@
 
 ### Additions/Changes
 
-* Added rollout adapter documentation (https://github.com/jnunemaker/flipper/pull/328).  
+* Added rollout adapter documentation (https://github.com/jnunemaker/flipper/pull/328).
 
 ### Bug Fixes
 
