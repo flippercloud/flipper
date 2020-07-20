@@ -5,9 +5,11 @@ UI for the [Flipper](https://github.com/jnunemaker/flipper) gem.
 ## Screenshots
 
 Viewing list of features:
+
 ![features](images/features.png)
 
 Viewing an individual feature:
+
 ![feature](images/feature.png)
 
 ## Installation
@@ -127,28 +129,11 @@ See [examples/ui/basic.ru](https://github.com/jnunemaker/flipper/blob/master/exa
 
 ### Configuration
 
-Flipper UI can be customized via `configure`, which yields a configuration instance for setting the text on the five main sections of the UI feature view.
+Flipper UI can be customized via `configure`, which yields a configuration instance.
 
-* `config.actors`
-* `config.groups`
-* `config.percentage_of_actors`
-* `config.percentage_of_time`
-* `config.delete`
+#### Description 
 
-Each of these methods returns a [Flipper::UI::Option](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/ui/configuration/option.rb) that responds to `title=`, `description=` as seen below.
-
-*e.g. customzing the percentage_of_actors and delete sections' titles and descriptions*
-```ruby
-Flipper::UI.configure do |config|
-  config.percentage_of_actors.title = "My Custom Title"
-  config.percentage_of_actors.description = "My custom description"
-
-  config.delete.title = "BE VERY CAREFUL!"
-  config.delete.description = "YOU'VE BEEN WARNED!"
-end
-```
-
-We can also associate a `description` for each `feature` by providing a descriptions source:
+We can associate a `description` for each `feature` by providing a descriptions source:
 
 ```ruby
 Flipper::UI.configure do |config|
@@ -159,11 +144,11 @@ Flipper::UI.configure do |config|
 end
 ```
 
-results in:
+Descriptions show up in the UI like so:
 
-![configure](images/configured-ui.png)
+![description](images/description.png)
 
-### Banner
+#### Banner
 
 Flipper UI can display a banner across the top of the page. The `banner_text` and `banner_class` can be configured by using the `Flipper::UI.configure` block as seen below.
 
@@ -178,9 +163,9 @@ By default the `environment` is set to an empty string so no banner will show. I
 
 The above configuration results in:
 
-![configure](images/environment-banner.png)
+![banner](images/banner.png)
 
-### Fun mode
+#### Fun mode
 
 By default, Flipper UI displays a videoclip when there are no flags. The `fun` mode can be configured by using the `Flipper::UI.configure` block as seen below.
 
