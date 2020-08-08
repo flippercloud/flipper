@@ -359,19 +359,19 @@ RSpec.describe Flipper::Feature do
       end
 
       it 'returns :on' do
-        expect(subject.state).to be(:on)
+        expect(subject.state).to be(:conditional)
       end
 
-      it 'returns true for on?' do
-        expect(subject.on?).to be(true)
+      it 'returns false for on?' do
+        expect(subject.on?).to be(false)
       end
 
       it 'returns false for off?' do
         expect(subject.off?).to be(false)
       end
 
-      it 'returns false for conditional?' do
-        expect(subject.conditional?).to be(false)
+      it 'returns true for conditional?' do
+        expect(subject.conditional?).to be(true)
       end
     end
 
