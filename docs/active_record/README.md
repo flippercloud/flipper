@@ -36,6 +36,8 @@ flipper = Flipper.new(adapter)
 # profit...
 ```
 
+Note that the active record adapter requires the database tables to be created in order to work; failure to run the migration first will cause an exception to be raised when attempting to initialize the active record adapter.
+
 ## Internals
 
 Each feature is stored as a row in a features table. Each gate is stored as a row in a gates table, related to the feature by the feature's key.
