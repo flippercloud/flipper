@@ -33,8 +33,11 @@ module Flipper
 
       # Public: If you set this, Flipper::UI will fetch descriptions
       # from your external source. Descriptions for `features` will be shown on `feature`
-      # and `features` pages. Defaults to empty block.
+      # page, and optionally the `features` pages. Defaults to empty block.
       attr_accessor :descriptions_source
+
+      # Public: when using descriptions, show them on the `features` page. Default false. 
+      attr_accessor :display_descriptions_on_features_page
 
       VALID_BANNER_CLASS_VALUES = %w(
         danger
@@ -58,10 +61,15 @@ module Flipper
         @fun = true
         @add_actor_placeholder = "a flipper id"
         @descriptions_source = DEFAULT_DESCRIPTIONS_SOURCE
+        @display_descriptions_on_features_page = false
       end
 
       def using_descriptions?
         @descriptions_source != DEFAULT_DESCRIPTIONS_SOURCE
+      end
+
+      def display_descriptions_on_features_page?
+        using_descriptions? && @display_descriptions_on_features_page
       end
 
       def banner_class=(value)

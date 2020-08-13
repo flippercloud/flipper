@@ -100,4 +100,41 @@ RSpec.describe Flipper::UI::Configuration do
       end
     end
   end
+
+  describe "#display_descriptions_on_features_page" do
+    it "has default value" do
+      expect(configuration.display_descriptions_on_features_page).to eq(false)
+    end
+
+    it "can be updated" do
+      configuration.display_descriptions_on_features_page = true
+      expect(configuration.display_descriptions_on_features_page).to eq(true)
+    end
+  end
+
+  describe "#display_descriptions_on_features_page?" do
+    subject { configuration.display_descriptions_on_features_page? }
+
+    context 'when using_descriptions? is false and display_descriptions_on_features_page is false' do
+      it { is_expected.to eq(false) }
+    end
+
+    context 'when using_descriptions? is false and display_descriptions_on_features_page is true' do
+      before { configuration.display_descriptions_on_features_page = true }
+      it { is_expected.to eq(false) }
+    end
+
+    context 'when using_descriptions? is true and display_descriptions_on_features_page is false' do
+      before { allow(configuration).to receive(:using_descriptions?).and_return(true) }
+      it { is_expected.to eq(false) }
+    end
+
+    context 'when using_descriptions? is true and display_descriptions_on_features_page is true' do
+      before do
+        allow(configuration).to receive(:using_descriptions?).and_return(true)
+        configuration.display_descriptions_on_features_page = true
+      end
+      it { is_expected.to eq(true) }
+    end
+  end
 end
