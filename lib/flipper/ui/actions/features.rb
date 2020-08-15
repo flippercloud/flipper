@@ -10,11 +10,21 @@ module Flipper
 
         def get
           @page_title = 'Features'
-          @keys = flipper.features.map(&:key)
+          keys = flipper.features.map(&:key)
+          descriptions = if Flipper::UI.configuration.display_descriptions_on_features_page?
+            Flipper::UI.configuration.descriptions_source.call(keys)
+          else
+            {}
+          end
+
           @features = flipper.features.map do |feature|
-            Decorators::Feature.new(feature).tap do |decorator|
-              decorator.description = descriptions[feature.key]
+            decorated_feature = Decorators::Feature.new(feature)
+
+            if Flipper::UI.configuration.display_descriptions_on_features_page?
+              decorated_feature.description = descriptions[feature.key]
             end
+
+            decorated_feature
           end.sort
 
           @show_blank_slate = @features.empty?
@@ -47,14 +57,6 @@ module Flipper
           feature.add
 
           redirect_to "/features/#{Rack::Utils.escape_path(value)}"
-        end
-
-        private
-
-        def descriptions
-          return {} unless Flipper::UI.configuration.display_descriptions_on_features_page?
-
-          @descriptions ||= Flipper::UI.configuration.descriptions_source.call(@keys)
         end
       end
     end
