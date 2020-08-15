@@ -101,38 +101,38 @@ RSpec.describe Flipper::UI::Configuration do
     end
   end
 
-  describe "#display_descriptions_on_features_page" do
+  describe "#show_feature_description_in_list" do
     it "has default value" do
-      expect(configuration.display_descriptions_on_features_page).to eq(false)
+      expect(configuration.show_feature_description_in_list).to eq(false)
     end
 
     it "can be updated" do
-      configuration.display_descriptions_on_features_page = true
-      expect(configuration.display_descriptions_on_features_page).to eq(true)
+      configuration.show_feature_description_in_list = true
+      expect(configuration.show_feature_description_in_list).to eq(true)
     end
   end
 
-  describe "#display_descriptions_on_features_page?" do
-    subject { configuration.display_descriptions_on_features_page? }
+  describe "#show_feature_description_in_list?" do
+    subject { configuration.show_feature_description_in_list? }
 
-    context 'when using_descriptions? is false and display_descriptions_on_features_page is false' do
+    context 'when using_descriptions? is false and show_feature_description_in_list is false' do
       it { is_expected.to eq(false) }
     end
 
-    context 'when using_descriptions? is false and display_descriptions_on_features_page is true' do
-      before { configuration.display_descriptions_on_features_page = true }
+    context 'when using_descriptions? is false and show_feature_description_in_list is true' do
+      before { configuration.show_feature_description_in_list = true }
       it { is_expected.to eq(false) }
     end
 
-    context 'when using_descriptions? is true and display_descriptions_on_features_page is false' do
+    context 'when using_descriptions? is true and show_feature_description_in_list is false' do
       before { allow(configuration).to receive(:using_descriptions?).and_return(true) }
       it { is_expected.to eq(false) }
     end
 
-    context 'when using_descriptions? is true and display_descriptions_on_features_page is true' do
+    context 'when using_descriptions? is true and show_feature_description_in_list is true' do
       before do
         allow(configuration).to receive(:using_descriptions?).and_return(true)
-        configuration.display_descriptions_on_features_page = true
+        configuration.show_feature_description_in_list = true
       end
       it { is_expected.to eq(true) }
     end

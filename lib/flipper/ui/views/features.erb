@@ -45,7 +45,7 @@
           <div class="col-10">
             <a href="<%= "#{script_name}/features/#{feature.key}" %>" class="d-block px-0 py-3 btn text-left text-dark">
               <div class="text-truncate" style="font-weight: 500"><%= feature.key %></div>
-              <% if Flipper::UI.configuration.display_descriptions_on_features_page? && Flipper::UI::Util.present?(feature.description) %>
+              <% if Flipper::UI.configuration.show_feature_description_in_list? && Flipper::UI::Util.present?(feature.description) %>
                 <div class="text-muted font-weight-light" style="line-height: 1.4; white-space: initial; padding: 8px 0">
                   <%= feature.description %>
                 </div>

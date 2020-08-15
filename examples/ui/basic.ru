@@ -39,6 +39,7 @@ Flipper::UI.configure do |config|
   # config.banner_class = 'danger'
   config.feature_creation_enabled = true
   config.feature_removal_enabled = true
+  # config.show_feature_description_in_list = true
   config.descriptions_source = lambda do |_keys|
     {
       "search_performance_another_long_thing" => "Just to test feature name length.",

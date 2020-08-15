@@ -36,8 +36,8 @@ module Flipper
       # page, and optionally the `features` pages. Defaults to empty block.
       attr_accessor :descriptions_source
 
-      # Public: when using descriptions, show them on the `features` page. Default false. 
-      attr_accessor :display_descriptions_on_features_page
+      # Public: when using descriptions, show them on the `features` page. Default false.
+      attr_accessor :show_feature_description_in_list
 
       VALID_BANNER_CLASS_VALUES = %w(
         danger
@@ -61,15 +61,15 @@ module Flipper
         @fun = true
         @add_actor_placeholder = "a flipper id"
         @descriptions_source = DEFAULT_DESCRIPTIONS_SOURCE
-        @display_descriptions_on_features_page = false
+        @show_feature_description_in_list = false
       end
 
       def using_descriptions?
         @descriptions_source != DEFAULT_DESCRIPTIONS_SOURCE
       end
 
-      def display_descriptions_on_features_page?
-        using_descriptions? && @display_descriptions_on_features_page
+      def show_feature_description_in_list?
+        using_descriptions? && @show_feature_description_in_list
       end
 
       def banner_class=(value)
