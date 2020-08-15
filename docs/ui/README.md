@@ -131,7 +131,7 @@ See [examples/ui/basic.ru](https://github.com/jnunemaker/flipper/blob/master/exa
 
 Flipper UI can be customized via `configure`, which yields a configuration instance.
 
-#### Description 
+#### Description
 
 We can associate a `description` for each `feature` by providing a descriptions source:
 
@@ -141,6 +141,10 @@ Flipper::UI.configure do |config|
     # descriptions loaded from YAML file or database (postgres, mysql, etc)
     # return has to be hash of {String key => String description}
   end
+
+  # Defaults to false. Set to true to show feature descriptions on the list
+  # page as well as the view page.
+  # config.show_feature_description_in_list = true
 end
 ```
 

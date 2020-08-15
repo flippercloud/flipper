@@ -36,7 +36,8 @@ module Flipper
       # page, and optionally the `features` pages. Defaults to empty block.
       attr_accessor :descriptions_source
 
-      # Public: when using descriptions, show them on the `features` page. Default false.
+      # Public: Should feature descriptions be show on the `features` list page.
+      # Default false. Only works when using descriptions.
       attr_accessor :show_feature_description_in_list
 
       VALID_BANNER_CLASS_VALUES = %w(
