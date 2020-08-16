@@ -9,7 +9,7 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
   let(:memory_adapter) do
     Flipper::Adapters::OperationLogger.new(Flipper::Adapters::Memory.new)
   end
-  let(:cache) { ActiveSupport::Cache::DalliStore.new }
+  let(:cache) { ActiveSupport::Cache::DalliStore.new(ENV['MEMCACHED_URL']) }
   let(:adapter) { described_class.new(memory_adapter, cache, expires_in: 10.seconds) }
   let(:flipper) { Flipper.new(adapter) }
 

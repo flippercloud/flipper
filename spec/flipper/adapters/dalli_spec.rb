@@ -7,7 +7,7 @@ RSpec.describe Flipper::Adapters::Dalli do
   let(:memory_adapter) do
     Flipper::Adapters::OperationLogger.new(Flipper::Adapters::Memory.new)
   end
-  let(:cache)   { Dalli::Client.new(ENV['MEMCACHED_URL'] || '127.0.0.1:11211') }
+  let(:cache)   { Dalli::Client.new(ENV['MEMCACHED_URL']) }
   let(:adapter) { described_class.new(memory_adapter, cache) }
   let(:flipper) { Flipper.new(adapter) }
 
