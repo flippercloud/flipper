@@ -34,12 +34,12 @@ module Flipper
       feature(name).enabled?(*args)
     end
 
-    def enabled_for_some?(name, *args)
+    def enabled_for_some?(name, actor)
       if enabled?(name)
         raise Flipper::Error, "The feature #{name.inspect} is enabled for all!"
       end
 
-      enabled?(name, *args)
+      enabled?(name, actor)
     end
 
     # Public: Enable a feature.
