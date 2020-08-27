@@ -36,7 +36,8 @@ module Flipper
 
     def enabled_for_some?(name, actor)
       if enabled?(name)
-        raise Flipper::Error, "The feature #{name.inspect} is enabled for all!"
+        yield if block_given?
+        return false
       end
 
       enabled?(name, actor)

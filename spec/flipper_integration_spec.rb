@@ -532,10 +532,14 @@ RSpec.describe Flipper do
       expect(flipper.enabled_for_some?(:search, pitt)).to eq(true)
     end
 
-    it "errors when enabled for all" do
+    it "is false when enabled for all" do
       feature.enable
-      expect { flipper.enabled_for_some?(:search, pitt) }
-        .to raise_error(/enabled for all/)
+      expect(flipper.enabled_for_some?(:search, pitt)).to be(false)
+    end
+
+    it "provides optional argument for responding to global case" do
+      feature.enable
+      expect { |b| flipper.enabled_for_some?(:search, pitt, &b) }.to yield_control
     end
   end
 
