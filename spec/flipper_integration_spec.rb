@@ -522,24 +522,24 @@ RSpec.describe Flipper do
     end
   end
 
-  describe "#enabled_for_some?" do
+  describe "#strict_enabled?" do
     it "is false when not enabled for actor" do
-      expect(flipper.enabled_for_some?(:search, pitt)).to be(false)
+      expect(flipper.strict_enabled?(:search, pitt)).to be(false)
     end
 
     it "is true when enabled for actor" do
       feature.enable pitt
-      expect(flipper.enabled_for_some?(:search, pitt)).to eq(true)
+      expect(flipper.strict_enabled?(:search, pitt)).to eq(true)
     end
 
     it "is false when enabled for all" do
       feature.enable
-      expect(flipper.enabled_for_some?(:search, pitt)).to be(false)
+      expect(flipper.strict_enabled?(:search, pitt)).to be(false)
     end
 
     it "provides optional argument for responding to global case" do
       feature.enable
-      expect { |b| flipper.enabled_for_some?(:search, pitt, &b) }.to yield_control
+      expect { |b| flipper.strict_enabled?(:search, pitt, &b) }.to yield_control
     end
   end
 

@@ -34,7 +34,7 @@ module Flipper
       feature(name).enabled?(*args)
     end
 
-    def enabled_for_some?(name, actor)
+    def strict_enabled?(name, actor)
       if enabled?(name)
         yield if block_given?
         return false

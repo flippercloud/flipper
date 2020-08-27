@@ -78,10 +78,10 @@ RSpec.describe Flipper do
       expect(described_class.enabled?(:search)).to eq(described_class.instance.enabled?(:search))
     end
 
-    it 'delegates enabled_for_some? to instance' do
-      expect(described_class.enabled_for_some?(:search, actor)).to be(false)
+    it 'delegates strict_enabled? to instance' do
+      expect(described_class.strict_enabled?(:search, actor)).to be(false)
       described_class.instance.enable(:search, actor)
-      expect(described_class.enabled_for_some?(:search, actor)).to be(true)
+      expect(described_class.strict_enabled?(:search, actor)).to be(true)
     end
 
     it 'delegates enable to instance' do

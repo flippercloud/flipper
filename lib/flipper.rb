@@ -56,7 +56,7 @@ module Flipper
   # Public: All the methods delegated to instance. These should match the
   # interface of Flipper::DSL.
   def_delegators :instance,
-                 :enabled?, :enabled_for_some?, :enable, :disable, :bool, :boolean,
+                 :enabled?, :strict_enabled?, :enable, :disable, :bool, :boolean,
                  :enable_actor, :disable_actor, :actor,
                  :enable_group, :disable_group,
                  :enable_percentage_of_actors, :disable_percentage_of_actors,
