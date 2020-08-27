@@ -522,6 +522,23 @@ RSpec.describe Flipper do
     end
   end
 
+  describe "#enabled_for_some?" do
+    it "is false when not enabled for actor" do
+      expect(flipper.enabled_for_some?(:search, pitt)).to be(false)
+    end
+
+    it "is true when enabled for actor" do
+      feature.enable pitt
+      expect(flipper.enabled_for_some?(:search, pitt)).to eq(true)
+    end
+
+    it "errors when enabled for all" do
+      feature.enable
+      expect { flipper.enabled_for_some?(:search, pitt) }
+        .to raise_error(/enabled for all/)
+    end
+  end
+
   context 'enabling multiple groups, disabling everything, then enabling one group' do
     before do
       feature.enable(admin_group)
