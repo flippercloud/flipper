@@ -3,6 +3,7 @@
 ## Additions/Changes
 
 * 100% of actors is now considered conditional. Feature#on?, Feature#conditional?, Feature#state would all be affected. See https://github.com/jnunemaker/flipper/issues/463 for more.
+* Several doc updates.
 
 ## 0.18.0
 
