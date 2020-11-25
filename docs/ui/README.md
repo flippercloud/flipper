@@ -86,20 +86,28 @@ end
 Another example is to use the `current_user` when using a gem-based authentication system (i.e., [warden](https://github.com/hassox/warden) or [devise](https://github.com/plataformatec/devise)):
 
 ```ruby
-# initializers/admin_access.rb
+# initializers/flipper_admin_access.rb
 
-class CanAccessFlipperUI
-  def self.matches?(request)
-    current_user = request.env['warden'].user
-    current_user.present? && current_user.respond_to?(:admin?) && current_user.admin?
+class FlipperAdminAccess
+  ACCESS_DENIED_MESSAGE = "Flipper access denied"
+
+  def initialize
+    @app = Flipper::UI.app(Flipper)
+  end
+
+  def call(env)
+    if env["warden"].user&.can_access_flipper?
+      @app.call(env)
+    else
+      [403, {}, [ACCESS_DENIED_MESSAGE]]
+    end
   end
 end
 
+
 # config/routes.rb
 
-constraints CanAccessFlipperUI do
-  mount Flipper::UI.app(Flipper) => '/flipper'
-end
+mount FlipperAdminAccess.new => "/flipper"
 ```
 
 ### Standalone
