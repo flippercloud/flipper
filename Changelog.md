@@ -1,3 +1,9 @@
+## Unreleased
+
+## Additions/Changes
+
+* Bump rack-protection version to < 2.2 (https://github.com/jnunemaker/flipper/pull/487)
+
 ## 0.19.0
 
 ## Additions/Changes
