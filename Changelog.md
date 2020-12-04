@@ -1,8 +1,9 @@
-## Unreleased
+## 0.19.1
 
 ### Additions/Changes
 
 * Bump rack-protection version to < 2.2 (https://github.com/jnunemaker/flipper/pull/487)
+* Add memoizer_options to Flipper::Api.app (https://github.com/jnunemaker/flipper/commit/174ad4bb94046a25c432d3c53fe1ff9f5a76d838)
 
 ## 0.19.0
 
