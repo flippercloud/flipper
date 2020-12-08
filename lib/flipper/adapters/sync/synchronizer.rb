@@ -15,6 +15,7 @@ module Flipper
         #          adapter should be brought in line with.
         # options - The Hash of options.
         #           :instrumenter - The instrumenter used to instrument.
+        #           :raise - Should errors be raised (default: true).
         def initialize(local, remote, options = {})
           @local = local
           @remote = remote

@@ -103,4 +103,91 @@ RSpec.describe Flipper::Cloud::Configuration do
     expect(instance.sync_method).to eq(:webhook)
     expect(instance.adapter).to be_instance_of(Flipper::Adapters::Memory)
   end
+
+  it "can sync with cloud" do
+    body = JSON.generate({
+      "features": [
+        {
+          "key": "search",
+          "state": "on",
+          "gates": [
+            {
+              "key": "boolean",
+              "name": "boolean",
+              "value": true
+            },
+            {
+              "key": "groups",
+              "name": "group",
+              "value": []
+            },
+            {
+              "key": "actors",
+              "name": "actor",
+              "value": []
+            },
+            {
+              "key": "percentage_of_actors",
+              "name": "percentage_of_actors",
+              "value": 0
+            },
+            {
+              "key": "percentage_of_time",
+              "name": "percentage_of_time",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "key": "history",
+          "state": "off",
+          "gates": [
+            {
+              "key": "boolean",
+              "name": "boolean",
+              "value": false
+            },
+            {
+              "key": "groups",
+              "name": "group",
+              "value": []
+            },
+            {
+              "key": "actors",
+              "name": "actor",
+              "value": []
+            },
+            {
+              "key": "percentage_of_actors",
+              "name": "percentage_of_actors",
+              "value": 0
+            },
+            {
+              "key": "percentage_of_time",
+              "name": "percentage_of_time",
+              "value": 0
+            }
+          ]
+        }
+      ]
+    })
+    stub = stub_request(:get, "https://www.flippercloud.io/adapter/features").
+      with({
+        headers: {
+          'Flipper-Cloud-Token'=>'asdf',
+        },
+      }).to_return(status: 200, body: body, headers: {})
+    instance = described_class.new(required_options)
+    instance.sync
+
+    # Check that remote was fetched.
+    expect(stub).to have_been_requested
+
+    # Check that local adapter really did sync.
+    local_adapter = instance.adapter.instance_variable_get("@local")
+    all = local_adapter.get_all
+    expect(all.keys).to eq(["search", "history"])
+    expect(all["search"][:boolean]).to eq("true")
+    expect(all["history"][:boolean]).to eq(nil)
+  end
 end
