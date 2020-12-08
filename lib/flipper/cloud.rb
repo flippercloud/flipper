@@ -1,6 +1,9 @@
 require "flipper"
+require "flipper/middleware/setup_env"
+require "flipper/middleware/memoizer"
 require "flipper/cloud/configuration"
 require "flipper/cloud/dsl"
+require "flipper/cloud/middleware"
 
 module Flipper
   module Cloud
@@ -15,6 +18,22 @@ module Flipper
       configuration = Configuration.new(options.merge(token: token))
       yield configuration if block_given?
       DSL.new(configuration)
+    end
+
+    def self.app(flipper = nil, options = {})
+      env_key = options.fetch(:env_key, 'flipper')
+      memoizer_options = options.fetch(:memoizer_options, {})
+
+      app = ->(_) { [404, { 'Content-Type'.freeze => 'application/json'.freeze }, ['{}'.freeze]] }
+      builder = Rack::Builder.new
+      yield builder if block_given?
+      builder.use Flipper::Middleware::SetupEnv, flipper, env_key: env_key
+      builder.use Flipper::Middleware::Memoizer, memoizer_options.merge(env_key: env_key)
+      builder.use Flipper::Cloud::Middleware, env_key: env_key
+      builder.run app
+      klass = self
+      builder.define_singleton_method(:inspect) { klass.inspect } # pretty rake routes output
+      builder
     end
   end
 end
