@@ -36,7 +36,7 @@ RSpec.describe Flipper::Cloud do
 
     it 'sets correct token header' do
       headers = @http_client.instance_variable_get('@headers')
-      expect(headers['Feature-Flipper-Token']).to eq(token)
+      expect(headers['Flipper-Cloud-Token']).to eq(token)
     end
 
     it 'uses noop instrumenter' do
