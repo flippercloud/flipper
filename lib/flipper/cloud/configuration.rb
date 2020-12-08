@@ -53,6 +53,15 @@ module Flipper
       # the local in sync with cloud (default: 10).
       attr_accessor :sync_interval
 
+      # Public: The method to be used for synchronizing your local flipper
+      # adapter with cloud. (default: :poll, can also be :webhook).
+      attr_accessor :sync_method
+
+      VALID_SYNC_METHODS = Set[
+        :poll,
+        :webhook,
+      ].freeze
+
       def initialize(options = {})
         @token = options.fetch(:token)
         @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
@@ -60,11 +69,13 @@ module Flipper
         @open_timeout = options.fetch(:open_timeout, 5)
         @write_timeout = options.fetch(:write_timeout, 5)
         @sync_interval = options.fetch(:sync_interval, 10)
+        @sync_method = options.fetch(:sync_method, :poll)
         @local_adapter = options.fetch(:local_adapter) { Adapters::Memory.new }
         @debug_output = options[:debug_output]
         @adapter_block = ->(adapter) { adapter }
 
         self.url = options.fetch(:url, DEFAULT_URL)
+        validate
       end
 
       # Public: Read or customize the http adapter. Calling without a block will
@@ -82,7 +93,7 @@ module Flipper
         if block_given?
           @adapter_block = block
         else
-          @adapter_block.call sync_adapter
+          @adapter_block.call app_adapter
         end
       end
 
@@ -91,25 +102,33 @@ module Flipper
 
       private
 
+      def app_adapter
+        sync_method == :webhook ? local_adapter : sync_adapter
+      end
+
       def sync_adapter
-        sync_options = {
+        Flipper::Adapters::Sync.new(local_adapter, http_adapter, {
           instrumenter: instrumenter,
           interval: sync_interval,
-        }
-        Flipper::Adapters::Sync.new(local_adapter, http_adapter, sync_options)
+        })
       end
 
       def http_adapter
-        http_options = {
+        Flipper::Adapters::Http.new({
           url: @url,
           read_timeout: @read_timeout,
           open_timeout: @open_timeout,
           debug_output: @debug_output,
           headers: {
-            "Feature-Flipper-Token" => @token,
+            "Flipper-Cloud-Token" => @token,
           },
-        }
-        Flipper::Adapters::Http.new(http_options)
+        })
+      end
+
+      def validate
+        unless VALID_SYNC_METHODS.include?(@sync_method)
+          raise ArgumentError, "Unsupported sync_method. Valid options are (#{VALID_SYNC_METHODS.inspect})"
+        end
       end
     end
   end
