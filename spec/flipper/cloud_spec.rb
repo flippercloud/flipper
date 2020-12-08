@@ -67,6 +67,12 @@ RSpec.describe Flipper::Cloud do
     end
   end
 
+  it 'can initialize with no token explicitly provided' do
+    with_modified_env "FLIPPER_CLOUD_TOKEN" => "asdf" do
+      expect(described_class.new).to be_instance_of(Flipper::Cloud::DSL)
+    end
+  end
+
   it 'can set instrumenter' do
     instrumenter = Flipper::Instrumenters::Memory.new
     instance = described_class.new('asdf', instrumenter: instrumenter)

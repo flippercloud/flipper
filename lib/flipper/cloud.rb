@@ -14,8 +14,9 @@ module Flipper
     # options - The Hash of options. See Flipper::Cloud::Configuration.
     # block - The block that configuration will be yielded to allowing you to
     #         customize this cloud instance and its adapter.
-    def self.new(token, options = {})
-      configuration = Configuration.new(options.merge(token: token))
+    def self.new(token = nil, options = {})
+      options = options.merge(token: token) if token
+      configuration = Configuration.new(options)
       yield configuration if block_given?
       DSL.new(configuration)
     end

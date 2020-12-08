@@ -5,9 +5,6 @@ require "flipper/adapters/sync"
 module Flipper
   module Cloud
     class Configuration
-      # The default url should be the one, the only, the website.
-      DEFAULT_URL = "https://www.flippercloud.io/adapter".freeze
-
       # The set of valid ways that syncing can happpen.
       VALID_SYNC_METHODS = Set[
         :poll,
@@ -17,9 +14,8 @@ module Flipper
       # Public: The token corresponding to an environment on flippercloud.io.
       attr_accessor :token
 
-      # Public: The url for http adapter (default: Flipper::Cloud::DEFAULT_URL).
-      #         Really should only be customized for development work. Feel free
-      #         to forget you ever saw this.
+      # Public: The url for http adapter. Really should only be customized for
+       #        development work. Feel free to forget you ever saw this.
       attr_reader :url
 
       # Public: net/http read timeout for all http requests (default: 5).
@@ -61,22 +57,31 @@ module Flipper
 
       # Public: The method to be used for synchronizing your local flipper
       # adapter with cloud. (default: :poll, can also be :webhook).
-      attr_accessor :sync_method
+      attr_reader :sync_method
+
+      # Public: The secret used to verify if syncs in the middleware should
+      # occur or not.
+      attr_accessor :sync_secret
 
       def initialize(options = {})
-        @token = options.fetch(:token)
+        @token = options.fetch(:token) { ENV["FLIPPER_CLOUD_TOKEN"] }
+
+        if @token.nil?
+          raise ArgumentError, "Flipper::Cloud token is missing. Please set FLIPPER_CLOUD_TOKEN or provide the token used to validate webhooks (e.g. Flipper::Cloud.new('token'))."
+        end
+
         @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
         @read_timeout = options.fetch(:read_timeout, 5)
         @open_timeout = options.fetch(:open_timeout, 5)
         @write_timeout = options.fetch(:write_timeout, 5)
         @sync_interval = options.fetch(:sync_interval, 10)
-        @sync_method = options.fetch(:sync_method, :poll)
+        @sync_secret = options.fetch(:sync_secret) { ENV["FLIPPER_CLOUD_SYNC_SECRET"] }
         @local_adapter = options.fetch(:local_adapter) { Adapters::Memory.new }
         @debug_output = options[:debug_output]
         @adapter_block = ->(adapter) { adapter }
+        self.sync_method = options.fetch(:sync_method, :poll)
 
-        self.url = options.fetch(:url, DEFAULT_URL)
-        validate
+        self.url = options.fetch(:url) { ENV.fetch("FLIPPER_CLOUD_URL", "https://www.flippercloud.io/adapter".freeze) }
       end
 
       # Public: Read or customize the http adapter. Calling without a block will
@@ -108,6 +113,20 @@ module Flipper
         }).call
       end
 
+      def sync_method=(new_sync_method)
+        new_sync_method = new_sync_method.to_sym
+
+        unless VALID_SYNC_METHODS.include?(new_sync_method)
+          raise ArgumentError, "Unsupported sync_method. Valid options are (#{VALID_SYNC_METHODS.to_a.join(', ')})"
+        end
+
+        if new_sync_method == :webhook && sync_secret.nil?
+          raise ArgumentError, "Flipper::Cloud sync_secret is missing. Please set FLIPPER_CLOUD_SYNC_SECRET or provide the sync_secret used to validate webhooks."
+        end
+
+        @sync_method = new_sync_method
+      end
+
       private
 
       def app_adapter
@@ -131,12 +150,6 @@ module Flipper
             "Flipper-Cloud-Token" => @token,
           },
         })
-      end
-
-      def validate
-        unless VALID_SYNC_METHODS.include?(@sync_method)
-          raise ArgumentError, "Unsupported sync_method. Valid options are (#{VALID_SYNC_METHODS.inspect})"
-        end
       end
     end
   end

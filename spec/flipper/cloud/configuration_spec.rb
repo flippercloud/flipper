@@ -12,6 +12,13 @@ RSpec.describe Flipper::Cloud::Configuration do
     expect(instance.token).to eq(required_options[:token])
   end
 
+  it "can set token from ENV var" do
+    with_modified_env "FLIPPER_CLOUD_TOKEN" => "from_env" do
+      instance = described_class.new(required_options.reject { |k, v| k == :token })
+      expect(instance.token).to eq("from_env")
+    end
+  end
+
   it "can set instrumenter" do
     instrumenter = Object.new
     instance = described_class.new(required_options.merge(instrumenter: instrumenter))
@@ -70,7 +77,7 @@ RSpec.describe Flipper::Cloud::Configuration do
     expect(instance.adapter).to be_instance_of(Flipper::Adapters::Instrumented)
   end
 
-  it "can override url" do
+  it "can override url using options" do
     options = required_options.merge(url: "http://localhost:5000/adapter")
     instance = described_class.new(options)
     expect(instance.url).to eq("http://localhost:5000/adapter")
@@ -80,28 +87,55 @@ RSpec.describe Flipper::Cloud::Configuration do
     expect(instance.url).to eq("http://localhost:5000/adapter")
   end
 
+  it "can override URL using ENV var" do
+    with_modified_env "FLIPPER_CLOUD_URL" => "https://example.com" do
+      instance = described_class.new(required_options.reject { |k, v| k == :url })
+      expect(instance.url).to eq("https://example.com")
+    end
+  end
+
   it "raises ArgumentError for invalid sync_method" do
     expect {
       described_class.new(required_options.merge(sync_method: :foo))
-    }.to raise_error(ArgumentError, "Unsupported sync_method. Valid options are (#<Set: {:poll, :webhook}>)")
+    }.to raise_error(ArgumentError, "Unsupported sync_method. Valid options are (poll, webhook)")
   end
 
-  it "defaults to poll for synchronizing" do
+  it "defaults to sync_method to poll" do
     memory_adapter = Flipper::Adapters::Memory.new
     instance = described_class.new(required_options)
 
     expect(instance.sync_method).to eq(:poll)
   end
 
-  it "can use webhooks for synchronizing instead of polling" do
+  it "can use webhook for sync_method" do
     memory_adapter = Flipper::Adapters::Memory.new
     instance = described_class.new(required_options.merge({
+      sync_secret: "secret",
       sync_method: :webhook,
       local_adapter: memory_adapter,
     }))
 
     expect(instance.sync_method).to eq(:webhook)
     expect(instance.adapter).to be_instance_of(Flipper::Adapters::Memory)
+  end
+
+  it "can use string sync_method instead of symbol" do
+    memory_adapter = Flipper::Adapters::Memory.new
+    instance = described_class.new(required_options.merge({
+      sync_secret: "secret",
+      sync_method: "webhook",
+      local_adapter: memory_adapter,
+    }))
+
+    expect(instance.sync_method).to eq(:webhook)
+    expect(instance.adapter).to be_instance_of(Flipper::Adapters::Memory)
+  end
+
+  it "can override sync_secret using ENV var" do
+    with_modified_env "FLIPPER_CLOUD_SYNC_SECRET" => "from_env" do
+      instance = described_class.new(required_options.reject { |k, v| k == :sync_secret })
+      expect(instance.sync_secret).to eq("from_env")
+    end
   end
 
   it "can sync with cloud" do
