@@ -20,7 +20,7 @@ RSpec.describe Flipper::Cloud do
     end
 
     it 'returns Flipper::DSL instance' do
-      expect(@instance).to be_instance_of(Flipper::DSL)
+      expect(@instance).to be_instance_of(Flipper::Cloud::DSL)
     end
 
     it 'configures instance to use http adapter' do

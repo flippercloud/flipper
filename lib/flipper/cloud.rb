@@ -1,5 +1,6 @@
 require "flipper"
 require "flipper/cloud/configuration"
+require "flipper/cloud/dsl"
 
 module Flipper
   module Cloud
@@ -13,7 +14,7 @@ module Flipper
     def self.new(token, options = {})
       configuration = Configuration.new(options.merge(token: token))
       yield configuration if block_given?
-      Flipper.new(configuration.adapter, instrumenter: configuration.instrumenter)
+      DSL.new(configuration)
     end
   end
 end
