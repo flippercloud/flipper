@@ -8,6 +8,12 @@ module Flipper
       # The default url should be the one, the only, the website.
       DEFAULT_URL = "https://www.flippercloud.io/adapter".freeze
 
+      # The set of valid ways that syncing can happpen.
+      VALID_SYNC_METHODS = Set[
+        :poll,
+        :webhook,
+      ].freeze
+
       # Public: The token corresponding to an environment on flippercloud.io.
       attr_accessor :token
 
@@ -56,11 +62,6 @@ module Flipper
       # Public: The method to be used for synchronizing your local flipper
       # adapter with cloud. (default: :poll, can also be :webhook).
       attr_accessor :sync_method
-
-      VALID_SYNC_METHODS = Set[
-        :poll,
-        :webhook,
-      ].freeze
 
       def initialize(options = {})
         @token = options.fetch(:token)
