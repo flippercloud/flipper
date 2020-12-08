@@ -9,6 +9,10 @@ module Flipper
         @cloud_configuration = cloud_configuration
         super Flipper.new(@cloud_configuration.adapter, instrumenter: @cloud_configuration.instrumenter)
       end
+
+      def sync
+        @cloud_configuration.sync
+      end
     end
   end
 end
