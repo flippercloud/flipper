@@ -7,6 +7,7 @@ RSpec.describe Flipper::Cloud::DSL do
   it 'delegates everything to flipper instance' do
     cloud_configuration = Flipper::Cloud::Configuration.new({
       token: "asdf",
+      sync_secret: "tasty",
       sync_method: :webhook,
     })
     dsl = described_class.new(cloud_configuration)
@@ -23,10 +24,21 @@ RSpec.describe Flipper::Cloud::DSL do
       }).to_return(status: 200, body: '{"features": {}}', headers: {})
     cloud_configuration = Flipper::Cloud::Configuration.new({
       token: "asdf",
+      sync_secret: "tasty",
       sync_method: :webhook,
     })
     dsl = described_class.new(cloud_configuration)
     dsl.sync
     expect(stub).to have_been_requested
+  end
+
+  it 'delegates sync_secret to cloud configuration' do
+    cloud_configuration = Flipper::Cloud::Configuration.new({
+      token: "asdf",
+      sync_secret: "tasty",
+      sync_method: :webhook,
+    })
+    dsl = described_class.new(cloud_configuration)
+    expect(dsl.sync_secret).to eq("tasty")
   end
 end

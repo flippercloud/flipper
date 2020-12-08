@@ -1,3 +1,4 @@
+require 'securerandom'
 require 'helper'
 require 'flipper/cloud'
 require 'flipper/cloud/middleware'
@@ -7,6 +8,7 @@ RSpec.describe Flipper::Cloud::Middleware do
   let(:flipper) {
     Flipper::Cloud.new("regular") do |config|
       config.local_adapter = Flipper::Adapters::OperationLogger.new(Flipper::Adapters::Memory.new)
+      config.sync_secret = "regular_tasty"
       config.sync_method = :webhook
     end
   }
@@ -14,6 +16,7 @@ RSpec.describe Flipper::Cloud::Middleware do
   let(:env_flipper) {
     Flipper::Cloud.new("env") do |config|
       config.local_adapter = Flipper::Adapters::OperationLogger.new(Flipper::Adapters::Memory.new)
+      config.sync_secret = "env_tasty"
       config.sync_method = :webhook
     end
   }
@@ -27,10 +30,22 @@ RSpec.describe Flipper::Cloud::Middleware do
 
     it 'uses instance to sync' do
       stub = stub_request_for_token('regular')
-      post '/webhooks'
+      post '/webhooks', generate_request_body(flipper.sync_secret)
 
       expect(last_response.status).to eq(200)
       expect(stub).to have_been_requested
+    end
+  end
+
+  context 'when posted invalid sync secret' do
+    let(:app) { Flipper::Cloud.app(flipper) }
+
+    it 'uses instance to sync' do
+      stub = stub_request_for_token('regular')
+      post '/webhooks', generate_request_body("nope")
+
+      expect(last_response.status).to eq(403)
+      expect(stub).not_to have_been_requested
     end
   end
 
@@ -39,7 +54,7 @@ RSpec.describe Flipper::Cloud::Middleware do
 
     it 'uses env instance to sync' do
       stub = stub_request_for_token('env')
-      post '/webhooks', params, {'flipper' => env_flipper}
+      post '/webhooks', generate_request_body(env_flipper.sync_secret), {'flipper' => env_flipper}
 
       expect(last_response.status).to eq(200)
       expect(stub).to have_been_requested
@@ -51,7 +66,7 @@ RSpec.describe Flipper::Cloud::Middleware do
 
     it 'uses env instance to sync' do
       stub = stub_request_for_token('env')
-      post '/webhooks', params, {'flipper' => env_flipper}
+      post '/webhooks', generate_request_body(env_flipper.sync_secret), {'flipper' => env_flipper}
 
       expect(last_response.status).to eq(200)
       expect(stub).to have_been_requested
@@ -63,7 +78,7 @@ RSpec.describe Flipper::Cloud::Middleware do
 
     it 'uses provided env key instead of default' do
       stub = stub_request_for_token('env')
-      post '/webhooks', params, {
+      post '/webhooks', generate_request_body(env_flipper.sync_secret), {
         'flipper' => flipper,
         'flipper_cloud' => env_flipper,
       }
@@ -78,7 +93,7 @@ RSpec.describe Flipper::Cloud::Middleware do
 
     it 'works' do
       stub = stub_request_for_token('regular')
-      post '/webhooks'
+      post '/webhooks', generate_request_body(flipper.sync_secret)
 
       expect(last_response.status).to eq(200)
       expect(stub).to have_been_requested
@@ -101,6 +116,16 @@ RSpec.describe Flipper::Cloud::Middleware do
   end
 
   private
+
+  def generate_request_body(sync_secret)
+    JSON.generate({
+      "environment_id" => 1,
+      "webhook_id" => 1,
+      "webhook_secret" => sync_secret,
+      "delivery_id" => SecureRandom.uuid,
+      "action" => "sync",
+    })
+  end
 
   def stub_request_for_token(token)
     stub_request(:get, "https://www.flippercloud.io/adapter/features").

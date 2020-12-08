@@ -13,6 +13,10 @@ module Flipper
       def sync
         @cloud_configuration.sync
       end
+
+      def sync_secret
+        @cloud_configuration.sync_secret
+      end
     end
   end
 end
