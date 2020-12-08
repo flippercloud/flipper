@@ -98,7 +98,7 @@ RSpec.describe Flipper::Cloud::Configuration do
     instance = described_class.new(required_options.merge({
       sync_method: :webhook,
       local_adapter: memory_adapter,
-      }))
+    }))
 
     expect(instance.sync_method).to eq(:webhook)
     expect(instance.adapter).to be_instance_of(Flipper::Adapters::Memory)
