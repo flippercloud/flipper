@@ -23,6 +23,10 @@ RSpec.describe Flipper::Cloud do
       expect(@instance).to be_instance_of(Flipper::Cloud::DSL)
     end
 
+    it 'can read the cloud configuration' do
+      expect(@instance.cloud_configuration).to be_instance_of(Flipper::Cloud::Configuration)
+    end
+
     it 'configures instance to use http adapter' do
       expect(@http_adapter).to be_instance_of(Flipper::Adapters::Http)
     end

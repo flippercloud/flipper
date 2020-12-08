@@ -3,9 +3,11 @@ require 'forwardable'
 module Flipper
   module Cloud
     class DSL < SimpleDelegator
-      def initialize(configuration)
-        @configuration = configuration
-        super Flipper.new(@configuration.adapter, instrumenter: @configuration.instrumenter)
+      attr_reader :cloud_configuration
+
+      def initialize(cloud_configuration)
+        @cloud_configuration = cloud_configuration
+        super Flipper.new(@cloud_configuration.adapter, instrumenter: @cloud_configuration.instrumenter)
       end
     end
   end
