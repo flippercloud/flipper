@@ -17,6 +17,11 @@ module Flipper
       def sync_secret
         @cloud_configuration.sync_secret
       end
+
+      def inspect
+        inspect_id = ::Kernel::format "%x", (object_id * 2)
+        %(#<#{self.class}:0x#{inspect_id} @cloud_configuration=#{cloud_configuration.inspect}, flipper=#{__getobj__.inspect}>)
+      end
     end
   end
 end
