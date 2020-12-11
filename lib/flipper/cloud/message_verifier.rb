@@ -14,7 +14,7 @@ module Flipper
         "t=#{timestamp.to_i},#{version}=#{signature}"
       end
 
-      def initialize(secret: secret, version: DEFAULT_VERSION)
+      def initialize(secret:, version: DEFAULT_VERSION)
         @secret = secret
         @version = version || DEFAULT_VERSION
 
