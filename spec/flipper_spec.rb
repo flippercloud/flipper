@@ -217,13 +217,12 @@ RSpec.describe Flipper do
       expect(described_class.memoizing?).to eq(described_class.adapter.memoizing?)
     end
 
-    it 'delegates sync to instance and errors for OSS' do
-      expect {
-        described_class.sync
-      }.to raise_error(NoMethodError)
+    it 'delegates sync stuff to instance and errors for OSS' do
+      expect { described_class.sync }.to raise_error(NoMethodError)
+      expect { described_class.sync_secret }.to raise_error(NoMethodError)
     end
 
-    it 'delegates sync to instance for Flipper::Cloud' do
+    it 'delegates sync stuff to instance for Flipper::Cloud' do
       stub = stub_request(:get, "https://www.flippercloud.io/adapter/features").
         with({
           headers: {
@@ -240,6 +239,7 @@ RSpec.describe Flipper do
         config.default { Flipper::Cloud::DSL.new(cloud_configuration) }
       end
       described_class.sync
+      expect(described_class.sync_secret).to eq("tasty")
       expect(stub).to have_been_requested
     end
   end

@@ -66,7 +66,7 @@ module Flipper
                  :features, :feature, :[], :preload, :preload_all,
                  :adapter, :add, :exist?, :remove, :import,
                  :memoize=, :memoizing?,
-                 :sync # For Flipper::Cloud. Will error for OSS Flipper.
+                 :sync, :sync_secret # For Flipper::Cloud. Will error for OSS Flipper.
 
   # Public: Use this to register a group by name.
   #
