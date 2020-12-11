@@ -71,16 +71,15 @@ module Flipper
         end
 
         @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
-        @read_timeout = options.fetch(:read_timeout, 5)
-        @open_timeout = options.fetch(:open_timeout, 5)
-        @write_timeout = options.fetch(:write_timeout, 5)
-        @sync_interval = options.fetch(:sync_interval, 10)
+        @read_timeout = options.fetch(:read_timeout) { ENV.fetch("FLIPPER_CLOUD_READ_TIMEOUT", 5).to_f }
+        @open_timeout = options.fetch(:open_timeout) { ENV.fetch("FLIPPER_CLOUD_OPEN_TIMEOUT", 5).to_f }
+        @write_timeout = options.fetch(:write_timeout) { ENV.fetch("FLIPPER_CLOUD_WRITE_TIMEOUT", 5).to_f }
+        @sync_interval = options.fetch(:sync_interval) { ENV.fetch("FLIPPER_CLOUD_SYNC_INTERVAL", 10).to_f }
         @sync_secret = options.fetch(:sync_secret) { ENV["FLIPPER_CLOUD_SYNC_SECRET"] }
         @local_adapter = options.fetch(:local_adapter) { Adapters::Memory.new }
         @debug_output = options[:debug_output]
         @adapter_block = ->(adapter) { adapter }
-        self.sync_method = options.fetch(:sync_method, :poll)
-
+        self.sync_method = options.fetch(:sync_method) { ENV.fetch("FLIPPER_CLOUD_SYNC_METHOD", :poll).to_sym }
         self.url = options.fetch(:url) { ENV.fetch("FLIPPER_CLOUD_URL", "https://www.flippercloud.io/adapter".freeze) }
       end
 
