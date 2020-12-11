@@ -31,8 +31,9 @@ module Flipper
 
           begin
             message_verifier = MessageVerifier.new(secret: flipper.sync_secret)
-            message_verifier.verify(payload, signature)
-            flipper.sync
+            if message_verifier.verify(payload, signature)
+              flipper.sync
+            end
           rescue MessageVerifier::InvalidSignature
             status = 400
           end
