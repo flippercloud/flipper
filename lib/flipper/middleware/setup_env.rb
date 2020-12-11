@@ -7,7 +7,8 @@ module Flipper
       #
       # app - The app this middleware is included in.
       # flipper_or_block - The Flipper::DSL instance or a block that yields a
-      #                    Flipper::DSL instance to use for all operations.
+      #                    Flipper::DSL instance to use for all operations
+      #                    (optional, default: Flipper).
       #
       # Examples
       #
@@ -19,18 +20,27 @@ module Flipper
       #   # using with a block that yields a flipper instance
       #   use Flipper::Middleware::SetupEnv, lambda { Flipper.new(...) }
       #
-      def initialize(app, flipper_or_block, options = {})
+      #   # using default configured Flipper instance
+      #   Flipper.configure do |config|
+      #     config.default { Flipper.new(...) }
+      #   end
+      #   use Flipper::Middleware::SetupEnv
+      def initialize(app, flipper_or_block = nil, options = {})
         @app = app
         @env_key = options.fetch(:env_key, 'flipper')
 
         if flipper_or_block.respond_to?(:call)
           @flipper_block = flipper_or_block
         else
-          @flipper = flipper_or_block
+          @flipper = flipper_or_block || Flipper
         end
       end
 
       def call(env)
+        dup.call!(env)
+      end
+
+      def call!(env)
         env[@env_key] ||= flipper
         @app.call(env)
       end

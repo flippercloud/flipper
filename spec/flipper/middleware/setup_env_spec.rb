@@ -56,21 +56,57 @@ RSpec.describe Flipper::Middleware::SetupEnv do
     end
   end
 
-  context 'when flipper instance is nil' do
+  context 'when flipper instance or block are nil but env flipper is configured' do
     let(:app) do
       app = lambda do |env|
         [200, { 'Content-Type' => 'text/html' }, [env['flipper'].object_id.to_s]]
       end
       builder = Rack::Builder.new
-      builder.use described_class, nil
+      builder.use described_class
       builder.run app
       builder
     end
 
-    it 'leaves env flipper alone' do
+    it 'can use env flipper' do
       env_flipper = build_flipper
       get '/', {}, 'flipper' => env_flipper
       expect(last_response.body).to eq(env_flipper.object_id.to_s)
+    end
+  end
+
+  context 'when flipper instance or block are nil and default Flipper is configured' do
+    let(:app) do
+      Flipper.configure do |config|
+        config.default { flipper }
+      end
+      app = lambda do |env|
+        [200, { 'Content-Type' => 'text/html' }, [env['flipper'].object_id.to_s]]
+      end
+      builder = Rack::Builder.new
+      builder.use described_class
+      builder.run app
+      builder
+    end
+
+    it 'can use env flipper' do
+      get '/', {}, {}
+      expect(last_response.body).to eq(Flipper.object_id.to_s)
+    end
+  end
+
+  context 'when flipper instance or block are nil and default Flipper is NOT configured' do
+    let(:app) do
+      app = lambda do |env|
+        [200, { 'Content-Type' => 'text/html' }, [env['flipper'].enabled?(:search)]]
+      end
+      builder = Rack::Builder.new
+      builder.use described_class
+      builder.run app
+      builder
+    end
+
+    it 'can use env flipper' do
+      expect { get '/' }.to raise_error(Flipper::DefaultNotSet)
     end
   end
 end
