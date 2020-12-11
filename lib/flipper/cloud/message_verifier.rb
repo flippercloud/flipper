@@ -68,7 +68,7 @@ module Flipper
 
       private
 
-      # Extracts the timestamp and the signature(s) with the desired scheme
+      # Extracts the timestamp and the signature(s) with the desired version
       # from the header
       def get_timestamp_and_signatures(header)
         list_items = header.split(/,\s*/).map { |i| i.split("=", 2) }
