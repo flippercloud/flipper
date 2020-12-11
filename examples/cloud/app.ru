@@ -2,6 +2,7 @@
 #   env FLIPPER_CLOUD_TOKEN=<token> FLIPPER_CLOUD_SYNC_SECRET=<secret> FLIPPER_CLOUD_SYNC_METHOD=webhook bundle exec rackup examples/ui/basic.ru -p 9999
 #   env FLIPPER_CLOUD_TOKEN=<token> FLIPPER_CLOUD_SYNC_SECRET=<secret> FLIPPER_CLOUD_SYNC_METHOD=webhook bundle exec shotgun examples/ui/basic.ru -p 9999
 #   http://localhost:9999/
+#   http://localhost:9999/webhooks
 
 require 'pathname'
 root_path = Pathname(__FILE__).dirname.join('..').expand_path

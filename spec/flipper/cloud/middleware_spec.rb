@@ -22,39 +22,69 @@ RSpec.describe Flipper::Cloud::Middleware do
   }
 
   let(:app) { Flipper::Cloud.app(flipper) }
-  let(:body) { JSON.generate({features: {}}) }
-  let(:params) { {} }
+  let(:response_body) { JSON.generate({features: {}}) }
+  let(:request_body) {
+    JSON.generate({
+      "environment_id" => 1,
+      "webhook_id" => 1,
+      "delivery_id" => SecureRandom.uuid,
+      "action" => "sync",
+    })
+  }
+  let(:timestamp) { Time.now }
+  let(:signature) {
+    Flipper::Cloud::Webhook.compute_signature(timestamp, request_body, flipper.sync_secret)
+  }
+  let(:signature_header_value) {
+    Flipper::Cloud::Webhook.generate_header(timestamp, signature)
+  }
 
   context 'when initializing middleware with flipper instance' do
     let(:app) { Flipper::Cloud.app(flipper) }
 
     it 'uses instance to sync' do
       stub = stub_request_for_token('regular')
-      post '/webhooks', generate_request_body(flipper.sync_secret)
+      env = {
+        "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
+      }
+      post '/webhooks', request_body, env
 
       expect(last_response.status).to eq(200)
       expect(stub).to have_been_requested
     end
   end
 
-  context 'when posted invalid sync secret' do
+  context 'when signature is invalid' do
     let(:app) { Flipper::Cloud.app(flipper) }
+    let(:signature) {
+      Flipper::Cloud::Webhook.compute_signature(timestamp, request_body, "nope")
+    }
 
     it 'uses instance to sync' do
       stub = stub_request_for_token('regular')
-      post '/webhooks', generate_request_body("nope")
+      env = {
+        "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
+      }
+      post '/webhooks', request_body, env
 
-      expect(last_response.status).to eq(403)
+      expect(last_response.status).to eq(400)
       expect(stub).not_to have_been_requested
     end
   end
 
   context 'when initialized with flipper instance and flipper instance in env' do
     let(:app) { Flipper::Cloud.app(flipper) }
+    let(:signature) {
+      Flipper::Cloud::Webhook.compute_signature(timestamp, request_body, env_flipper.sync_secret)
+    }
 
     it 'uses env instance to sync' do
       stub = stub_request_for_token('env')
-      post '/webhooks', generate_request_body(env_flipper.sync_secret), {'flipper' => env_flipper}
+      env = {
+        "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
+        'flipper' => env_flipper,
+      }
+      post '/webhooks', request_body, env
 
       expect(last_response.status).to eq(200)
       expect(stub).to have_been_requested
@@ -63,10 +93,17 @@ RSpec.describe Flipper::Cloud::Middleware do
 
   context 'when initialized without flipper instance but flipper instance in env' do
     let(:app) { Flipper::Cloud.app }
+    let(:signature) {
+      Flipper::Cloud::Webhook.compute_signature(timestamp, request_body, env_flipper.sync_secret)
+    }
 
     it 'uses env instance to sync' do
       stub = stub_request_for_token('env')
-      post '/webhooks', generate_request_body(env_flipper.sync_secret), {'flipper' => env_flipper}
+      env = {
+        "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
+        'flipper' => env_flipper,
+      }
+      post '/webhooks', request_body, env
 
       expect(last_response.status).to eq(200)
       expect(stub).to have_been_requested
@@ -75,13 +112,18 @@ RSpec.describe Flipper::Cloud::Middleware do
 
   context 'when initialized with env_key' do
     let(:app) { Flipper::Cloud.app(flipper, env_key: 'flipper_cloud') }
+    let(:signature) {
+      Flipper::Cloud::Webhook.compute_signature(timestamp, request_body, env_flipper.sync_secret)
+    }
 
     it 'uses provided env key instead of default' do
       stub = stub_request_for_token('env')
-      post '/webhooks', generate_request_body(env_flipper.sync_secret), {
+      env = {
+        "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
         'flipper' => flipper,
         'flipper_cloud' => env_flipper,
       }
+      post '/webhooks', request_body, env
 
       expect(last_response.status).to eq(200)
       expect(stub).to have_been_requested
@@ -93,7 +135,10 @@ RSpec.describe Flipper::Cloud::Middleware do
 
     it 'works' do
       stub = stub_request_for_token('regular')
-      post '/webhooks', generate_request_body(flipper.sync_secret)
+      env = {
+        "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
+      }
+      post '/webhooks', request_body, env
 
       expect(last_response.status).to eq(200)
       expect(stub).to have_been_requested
@@ -117,22 +162,12 @@ RSpec.describe Flipper::Cloud::Middleware do
 
   private
 
-  def generate_request_body(sync_secret)
-    JSON.generate({
-      "environment_id" => 1,
-      "webhook_id" => 1,
-      "webhook_secret" => sync_secret,
-      "delivery_id" => SecureRandom.uuid,
-      "action" => "sync",
-    })
-  end
-
   def stub_request_for_token(token)
     stub_request(:get, "https://www.flippercloud.io/adapter/features").
       with({
         headers: {
           'Flipper-Cloud-Token' => token,
         },
-      }).to_return(status: 200, body: body, headers: {})
+      }).to_return(status: 200, body: response_body, headers: {})
   end
 end

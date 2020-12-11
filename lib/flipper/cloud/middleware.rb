@@ -1,3 +1,7 @@
+# frozen_string_literal: true
+
+require "flipper/cloud/webhook"
+
 module Flipper
   module Cloud
     class Middleware
@@ -6,7 +10,7 @@ module Flipper
 
       def initialize(app, options = {})
         @app = app
-        @env_key = options.fetch(:env_key, 'flipper'.freeze)
+        @env_key = options.fetch(:env_key, 'flipper')
       end
 
       def call(env)
@@ -16,15 +20,23 @@ module Flipper
       def call!(env)
         request = Rack::Request.new(env)
         if request.post? && request.path_info.match(WEBHOOK_PATH)
-          data = JSON.parse(request.body.read)
+          status = 200
+          headers = {
+            "Content-Type" => "application/json",
+          }
+          body = "{}"
+          payload = request.body.read
+          signature = request.env["HTTP_FLIPPER_CLOUD_SIGNATURE"]
           flipper = env.fetch(@env_key)
 
-          if data["webhook_secret"] && flipper.sync_secret == data["webhook_secret"]
+          begin
+            Webhook.verify_header(payload, signature, flipper.sync_secret)
             flipper.sync
-            [200, {'Content-Type'.freeze => 'application/json'.freeze}, ['{}'.freeze]]
-          else
-            [403, {'Content-Type'.freeze => 'application/json'.freeze}, ['{}'.freeze]]
+          rescue Signature::VerificationError
+            status = 400
           end
+
+          [status, headers, [body]]
         else
           @app.call(env)
         end
