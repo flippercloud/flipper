@@ -1,4 +1,5 @@
 require 'helper'
+require 'flipper/cloud'
 
 RSpec.describe Flipper do
   describe '.new' do
@@ -214,6 +215,32 @@ RSpec.describe Flipper do
 
     it 'delegates memoizing? to instance' do
       expect(described_class.memoizing?).to eq(described_class.adapter.memoizing?)
+    end
+
+    it 'delegates sync to instance and errors for OSS' do
+      expect {
+        described_class.sync
+      }.to raise_error(NoMethodError)
+    end
+
+    it 'delegates sync to instance for Flipper::Cloud' do
+      stub = stub_request(:get, "https://www.flippercloud.io/adapter/features").
+        with({
+          headers: {
+            'Flipper-Cloud-Token'=>'asdf',
+          },
+        }).to_return(status: 200, body: '{"features": {}}', headers: {})
+      cloud_configuration = Flipper::Cloud::Configuration.new({
+        token: "asdf",
+        sync_secret: "tasty",
+        sync_method: :webhook,
+      })
+
+      described_class.configure do |config|
+        config.default { Flipper::Cloud::DSL.new(cloud_configuration) }
+      end
+      described_class.sync
+      expect(stub).to have_been_requested
     end
   end
 
