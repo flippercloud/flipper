@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "flipper/cloud/webhook"
+require "flipper/cloud/message_verifier"
 
 module Flipper
   module Cloud
@@ -30,9 +30,10 @@ module Flipper
           flipper = env.fetch(@env_key)
 
           begin
-            Webhook.verify_header(payload, signature, flipper.sync_secret)
+            message_verifier = MessageVerifier.new(secret: flipper.sync_secret)
+            message_verifier.verify(payload, signature)
             flipper.sync
-          rescue Signature::VerificationError
+          rescue MessageVerifier::InvalidSignature
             status = 400
           end
 

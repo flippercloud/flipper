@@ -33,10 +33,10 @@ RSpec.describe Flipper::Cloud::Middleware do
   }
   let(:timestamp) { Time.now }
   let(:signature) {
-    Flipper::Cloud::Webhook.compute_signature(timestamp, request_body, flipper.sync_secret)
+    Flipper::Cloud::MessageVerifier.new(secret: flipper.sync_secret).generate(request_body, timestamp)
   }
   let(:signature_header_value) {
-    Flipper::Cloud::Webhook.generate_header(timestamp, signature)
+    Flipper::Cloud::MessageVerifier.new(secret: "").header(signature, timestamp)
   }
 
   context 'when initializing middleware with flipper instance' do
@@ -57,7 +57,7 @@ RSpec.describe Flipper::Cloud::Middleware do
   context 'when signature is invalid' do
     let(:app) { Flipper::Cloud.app(flipper) }
     let(:signature) {
-      Flipper::Cloud::Webhook.compute_signature(timestamp, request_body, "nope")
+      Flipper::Cloud::MessageVerifier.new(secret: "nope").generate(request_body, timestamp)
     }
 
     it 'uses instance to sync' do
@@ -75,7 +75,7 @@ RSpec.describe Flipper::Cloud::Middleware do
   context 'when initialized with flipper instance and flipper instance in env' do
     let(:app) { Flipper::Cloud.app(flipper) }
     let(:signature) {
-      Flipper::Cloud::Webhook.compute_signature(timestamp, request_body, env_flipper.sync_secret)
+      Flipper::Cloud::MessageVerifier.new(secret: env_flipper.sync_secret).generate(request_body, timestamp)
     }
 
     it 'uses env instance to sync' do
@@ -94,7 +94,7 @@ RSpec.describe Flipper::Cloud::Middleware do
   context 'when initialized without flipper instance but flipper instance in env' do
     let(:app) { Flipper::Cloud.app }
     let(:signature) {
-      Flipper::Cloud::Webhook.compute_signature(timestamp, request_body, env_flipper.sync_secret)
+      Flipper::Cloud::MessageVerifier.new(secret: env_flipper.sync_secret).generate(request_body, timestamp)
     }
 
     it 'uses env instance to sync' do
@@ -113,7 +113,7 @@ RSpec.describe Flipper::Cloud::Middleware do
   context 'when initialized with env_key' do
     let(:app) { Flipper::Cloud.app(flipper, env_key: 'flipper_cloud') }
     let(:signature) {
-      Flipper::Cloud::Webhook.compute_signature(timestamp, request_body, env_flipper.sync_secret)
+      Flipper::Cloud::MessageVerifier.new(secret: env_flipper.sync_secret).generate(request_body, timestamp)
     }
 
     it 'uses provided env key instead of default' do
