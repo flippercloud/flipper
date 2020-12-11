@@ -175,22 +175,22 @@ RSpec.describe Flipper::Adapters::Sync do
   end
 
   it 'synchronizes for #features' do
-    expect(subject).to receive(:sync)
+    expect(subject).to receive(:synchronize)
     subject.features
   end
 
   it 'synchronizes for #get' do
-    expect(subject).to receive(:sync)
+    expect(subject).to receive(:synchronize)
     subject.get sync[:search]
   end
 
   it 'synchronizes for #get_multi' do
-    expect(subject).to receive(:sync)
+    expect(subject).to receive(:synchronize)
     subject.get_multi [sync[:search]]
   end
 
   it 'synchronizes for #get_all' do
-    expect(subject).to receive(:sync)
+    expect(subject).to receive(:synchronize)
     subject.get_all
   end
 

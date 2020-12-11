@@ -34,26 +34,26 @@ module Flipper
           synchronizer = Synchronizer.new(@local, @remote, sync_options)
           IntervalSynchronizer.new(synchronizer, interval: options[:interval])
         end
-        sync
+        synchronize
       end
 
       def features
-        sync
+        synchronize
         @local.features
       end
 
       def get(feature)
-        sync
+        synchronize
         @local.get(feature)
       end
 
       def get_multi(features)
-        sync
+        synchronize
         @local.get_multi(features)
       end
 
       def get_all
-        sync
+        synchronize
         @local.get_all
       end
 
@@ -89,7 +89,7 @@ module Flipper
 
       private
 
-      def sync
+      def synchronize
         @synchronizer.call
       end
     end
