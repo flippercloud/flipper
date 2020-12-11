@@ -217,9 +217,9 @@ RSpec.describe Flipper do
       expect(described_class.memoizing?).to eq(described_class.adapter.memoizing?)
     end
 
-    it 'delegates sync stuff to instance and errors for OSS' do
-      expect { described_class.sync }.to raise_error(NoMethodError)
-      expect { described_class.sync_secret }.to raise_error(NoMethodError)
+    it 'delegates sync stuff to instance and does nothing' do
+      expect(described_class.sync).to be(nil)
+      expect(described_class.sync_secret).to be(nil)
     end
 
     it 'delegates sync stuff to instance for Flipper::Cloud' do

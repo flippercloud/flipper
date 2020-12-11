@@ -273,5 +273,13 @@ module Flipper
     def import(flipper)
       adapter.import(flipper.adapter)
     end
+
+    # Cloud DSL method that does nothing for open source version.
+    def sync
+    end
+
+    # Cloud DSL method that does nothing for open source version.
+    def sync_secret
+    end
   end
 end
