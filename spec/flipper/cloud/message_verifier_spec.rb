@@ -25,6 +25,17 @@ RSpec.describe Flipper::Cloud::MessageVerifier do
     end
   end
 
+  describe ".header" do
+    it "generates a header in valid format" do
+      version = "v1"
+      message_verifier = Flipper::Cloud::MessageVerifier.new(secret: secret, version: version)
+      signature = message_verifier.generate(payload, timestamp)
+
+      header = Flipper::Cloud::MessageVerifier.header(signature, timestamp, version)
+      expect(header).to eq("t=#{timestamp.to_i},#{version}=#{signature}")
+    end
+  end
+
   describe "#verify" do
     it "raises a InvalidSignature when the header does not have the expected format" do
       header = "i'm not even a real signature header"
@@ -89,6 +100,6 @@ RSpec.describe Flipper::Cloud::MessageVerifier do
     options[:payload] ||= payload
     options[:signature] ||= message_verifier.generate(options[:payload], options[:timestamp])
 
-    message_verifier.header(options[:signature], options[:timestamp])
+    Flipper::Cloud::MessageVerifier.header(options[:signature], options[:timestamp], options[:version])
   end
 end

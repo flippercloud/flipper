@@ -6,9 +6,17 @@ module Flipper
     class MessageVerifier
       class InvalidSignature < StandardError; end
 
-      def initialize(secret: secret, version: nil)
+      DEFAULT_VERSION = "v1"
+
+      def self.header(signature, timestamp, version = DEFAULT_VERSION)
+        raise ArgumentError, "timestamp should be an instance of Time" unless timestamp.is_a?(Time)
+        raise ArgumentError, "signature should be a string" unless signature.is_a?(String)
+        "t=#{timestamp.to_i},#{version}=#{signature}"
+      end
+
+      def initialize(secret: secret, version: DEFAULT_VERSION)
         @secret = secret
-        @version = version || "v1"
+        @version = version || DEFAULT_VERSION
 
         raise ArgumentError, "secret should be a string" unless @secret.is_a?(String)
         raise ArgumentError, "version should be a string" unless @version.is_a?(String)
@@ -22,10 +30,7 @@ module Flipper
       end
 
       def header(signature, timestamp)
-        raise ArgumentError, "timestamp should be an instance of Time" unless timestamp.is_a?(Time)
-        raise ArgumentError, "signature should be a string" unless signature.is_a?(String)
-
-        "t=#{timestamp.to_i},#{@version}=#{signature}"
+        self.class.header(signature, timestamp, @version)
       end
 
       # Public: Verifies the signature header for a given payload.
