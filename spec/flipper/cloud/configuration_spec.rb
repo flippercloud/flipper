@@ -143,7 +143,7 @@ RSpec.describe Flipper::Cloud::Configuration do
     }))
 
     expect(instance.sync_method).to eq(:webhook)
-    expect(instance.adapter).to be_instance_of(Flipper::Adapters::Memory)
+    expect(instance.adapter).to be_instance_of(Flipper::Adapters::DualWrite)
   end
 
   it "raises ArgumentError for invalid sync_method" do
@@ -171,7 +171,7 @@ RSpec.describe Flipper::Cloud::Configuration do
     }))
 
     expect(instance.sync_method).to eq(:webhook)
-    expect(instance.adapter).to be_instance_of(Flipper::Adapters::Memory)
+    expect(instance.adapter).to be_instance_of(Flipper::Adapters::DualWrite)
   end
 
   it "can set sync_secret" do

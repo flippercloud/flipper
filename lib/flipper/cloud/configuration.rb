@@ -1,5 +1,6 @@
 require "flipper/adapters/http"
 require "flipper/adapters/memory"
+require "flipper/adapters/dual_write"
 require "flipper/adapters/sync"
 
 module Flipper
@@ -129,7 +130,11 @@ module Flipper
       private
 
       def app_adapter
-        sync_method == :webhook ? local_adapter : sync_adapter
+        sync_method == :webhook ? dual_write_adapter : sync_adapter
+      end
+
+      def dual_write_adapter
+        Flipper::Adapters::DualWrite.new(local_adapter, http_adapter)
       end
 
       def sync_adapter
