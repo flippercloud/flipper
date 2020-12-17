@@ -152,6 +152,7 @@ module Flipper
           debug_output: @debug_output,
           headers: {
             "Flipper-Cloud-Token" => @token,
+            "Feature-Flipper-Token" => @token,
           },
         })
       end
