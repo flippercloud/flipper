@@ -43,6 +43,12 @@ RSpec.describe Flipper::Cloud::Middleware do
     let(:app) { Flipper::Cloud.app(flipper) }
 
     it 'uses instance to sync' do
+      Flipper.register(:admins) { |*args| false }
+      Flipper.register(:staff) { |*args| false }
+      Flipper.register(:basic) { |*args| false }
+      Flipper.register(:plus) { |*args| false }
+      Flipper.register(:premium) { |*args| false }
+
       stub = stub_request_for_token('regular')
       env = {
         "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
@@ -50,6 +56,15 @@ RSpec.describe Flipper::Cloud::Middleware do
       post '/webhooks', request_body, env
 
       expect(last_response.status).to eq(200)
+      expect(JSON.parse(last_response.body)).to eq({
+        "groups" => [
+          {"name" => "admins"},
+          {"name" => "staff"},
+          {"name" => "basic"},
+          {"name" => "plus"},
+          {"name" => "premium"},
+        ],
+      })
       expect(stub).to have_been_requested
     end
   end

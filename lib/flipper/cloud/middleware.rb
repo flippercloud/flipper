@@ -33,6 +33,9 @@ module Flipper
             message_verifier = MessageVerifier.new(secret: flipper.sync_secret)
             if message_verifier.verify(payload, signature)
               flipper.sync
+              body = JSON.generate({
+                groups: Flipper.group_names.map { |name| {name: name}}
+              })
             end
           rescue MessageVerifier::InvalidSignature
             status = 400
