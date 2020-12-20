@@ -11,6 +11,15 @@ RSpec.describe Flipper::Adapters::OperationLogger do
 
   it_should_behave_like 'a flipper adapter'
 
+  it 'shows itself when inspect' do
+    subject.features
+    output = subject.inspect
+    expect(output).to match(/OperationLogger/)
+    expect(output).to match(/operation_logger/)
+    expect(output).to match(/@type=:features/)
+    expect(output).to match(/@adapter=#<Flipper::Adapters::Memory/)
+  end
+
   it 'forwards missing methods to underlying adapter' do
     adapter = Class.new do
       def foo

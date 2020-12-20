@@ -117,6 +117,11 @@ module Flipper
       def reset
         @operations.clear
       end
+
+      def inspect
+        inspect_id = ::Kernel::format "%x", (object_id * 2)
+        %(#<#{self.class}:0x#{inspect_id} @name=#{name.inspect}, @operations=#{@operations.inspect}, @adapter=#{@adapter.inspect}>)
+      end
     end
   end
 end

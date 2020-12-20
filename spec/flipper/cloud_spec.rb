@@ -20,7 +20,11 @@ RSpec.describe Flipper::Cloud do
     end
 
     it 'returns Flipper::DSL instance' do
-      expect(@instance).to be_instance_of(Flipper::DSL)
+      expect(@instance).to be_instance_of(Flipper::Cloud::DSL)
+    end
+
+    it 'can read the cloud configuration' do
+      expect(@instance.cloud_configuration).to be_instance_of(Flipper::Cloud::Configuration)
     end
 
     it 'configures instance to use http adapter' do
@@ -36,7 +40,7 @@ RSpec.describe Flipper::Cloud do
 
     it 'sets correct token header' do
       headers = @http_client.instance_variable_get('@headers')
-      expect(headers['Feature-Flipper-Token']).to eq(token)
+      expect(headers['Flipper-Cloud-Token']).to eq(token)
     end
 
     it 'uses noop instrumenter' do
@@ -60,6 +64,12 @@ RSpec.describe Flipper::Cloud do
       expect(uri.scheme).to eq('https')
       expect(uri.host).to eq('www.fakeflipper.com')
       expect(uri.path).to eq('/sadpanda')
+    end
+  end
+
+  it 'can initialize with no token explicitly provided' do
+    with_modified_env "FLIPPER_CLOUD_TOKEN" => "asdf" do
+      expect(described_class.new).to be_instance_of(Flipper::Cloud::DSL)
     end
   end
 

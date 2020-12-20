@@ -17,6 +17,7 @@ gem 'rails', "~> #{ENV['RAILS_VERSION'] || '6.0.0'}"
 gem 'minitest', '~> 5.8'
 gem 'minitest-documentation'
 gem 'webmock', '~> 3.0'
+gem 'climate_control'
 
 group(:guard) do
   gem 'guard', '~> 2.15'

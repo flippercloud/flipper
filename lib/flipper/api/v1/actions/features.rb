@@ -11,19 +11,19 @@ module Flipper
           def get
             keys = params['keys']
             features = if keys
-                         names = keys.split(',')
-                         if names.empty?
-                           []
-                         else
-                           existing_feature_names = names.keep_if do |feature_name|
-                             feature_exists?(feature_name)
-                           end
+              names = keys.split(',')
+              if names.empty?
+                []
+              else
+                existing_feature_names = names.keep_if do |feature_name|
+                  feature_exists?(feature_name)
+                end
 
-                           flipper.preload(existing_feature_names)
-                         end
-                       else
-                         flipper.features
-                       end
+                flipper.preload(existing_feature_names)
+              end
+            else
+              flipper.features
+            end
 
             decorated_features = features.map do |feature|
               Decorators::Feature.new(feature).as_json
