@@ -1,3 +1,9 @@
+## 0.20.0
+
+## Additions/Changes
+
+* Add support for webhooks to `Flipper::Cloud` (https://github.com/jnunemaker/flipper/pull/489).
+
 ## 0.19.1
 
 ### Additions/Changes
