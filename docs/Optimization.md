@@ -15,7 +15,7 @@ Flipper.configure do |config|
 end
 
 # This assumes you setup a default flipper instance using configure.
-config.middleware.use Flipper::Middleware::Memoizer
+Rails.configuration.middleware.use Flipper::Middleware::Memoizer
 ```
 
 **Note**: Be sure that the middleware is high enough up in your stack that all feature checks are wrapped.
@@ -23,8 +23,8 @@ config.middleware.use Flipper::Middleware::Memoizer
 **Also Note**: If you haven't setup a default instance, you can pass the instance to `SetupEnv` as `Memoizer` uses whatever is setup in the `env`:
 
 ```ruby
-config.middleware.use Flipper::Middleware::SetupEnv, -> { Flipper.new(...) }
-config.middleware.use Flipper::Middleware::Memoizer
+Rails.configuration.middleware.use Flipper::Middleware::SetupEnv, -> { Flipper.new(...) }
+Rails.configuration.middleware.use Flipper::Middleware::Memoizer
 ```
 
 ### Options
@@ -33,18 +33,18 @@ The Memoizer middleware also supports a few options. Use either `preload` or `pr
 
 * **`:preload`** - An `Array` of feature names (`Symbol`) to preload for every request. Useful if you have features that are used on every endpoint. `preload` uses `Adapter#get_multi` to attempt to load the features in one network call instead of N+1 network calls.
     ```ruby
-    config.middleware.use Flipper::Middleware::Memoizer,
+    Rails.configuration.middleware.use Flipper::Middleware::Memoizer,
       preload: [:stats, :search, :some_feature]
     ```
 * **`:preload_all`** - A Boolean value (default: false) of whether or not all features should be preloaded. Using this results in a `preload_all` call with the result of `Adapter#get_all`. Any subsequent feature checks will be memoized and perform no network calls. I wouldn't recommend using this unless you have few features (< 100?) and nearly all of them are used on every request.
     ```ruby
-    config.middleware.use Flipper::Middleware::Memoizer,
+    Rails.configuration.middleware.use Flipper::Middleware::Memoizer,
       preload_all: true
     ```
 * **`:unless`** - A block that prevents preloading and memoization if it evaluates to true.
     ```ruby
     # skip preloading and memoizing if path starts with /assets
-    config.middleware.use Flipper::Middleware::Memoizer,
+    Rails.configuration.middleware.use Flipper::Middleware::Memoizer,
       unless: ->(request) { request.path.start_with?("/assets") }
     ```
 
