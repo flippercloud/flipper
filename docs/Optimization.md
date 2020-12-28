@@ -7,7 +7,7 @@ One optimization that flipper provides is a memoizing middleware. The memoizing 
 You can use the middleware like so for Rails:
 
 ```ruby
-# setup default instance (perhaps in config/initializer/flipper.rb)
+# setup default instance (perhaps in config/initializers/flipper.rb)
 Flipper.configure do |config|
   config.default do
     Flipper.new(...)
