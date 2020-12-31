@@ -87,6 +87,75 @@ RSpec.describe Flipper::Cloud::Middleware do
     end
   end
 
+  context "when flipper cloud responds with 402" do
+    let(:app) { Flipper::Cloud.app(flipper) }
+
+    it "results in 402" do
+      Flipper.register(:admins) { |*args| false }
+      Flipper.register(:staff) { |*args| false }
+      Flipper.register(:basic) { |*args| false }
+      Flipper.register(:plus) { |*args| false }
+      Flipper.register(:premium) { |*args| false }
+
+      stub = stub_request_for_token('regular', status: 402)
+      env = {
+        "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
+      }
+      post '/webhooks', request_body, env
+
+      expect(last_response.status).to eq(402)
+      expect(last_response.headers["Flipper-Cloud-Response-Error-Class"]).to eq("Flipper::Adapters::Http::Error")
+      expect(last_response.headers["Flipper-Cloud-Response-Error-Message"]).to eq("Failed with status: 402")
+      expect(stub).to have_been_requested
+    end
+  end
+
+  context "when flipper cloud responds with non-402 and non-2xx code" do
+    let(:app) { Flipper::Cloud.app(flipper) }
+
+    it "results in 500" do
+      Flipper.register(:admins) { |*args| false }
+      Flipper.register(:staff) { |*args| false }
+      Flipper.register(:basic) { |*args| false }
+      Flipper.register(:plus) { |*args| false }
+      Flipper.register(:premium) { |*args| false }
+
+      stub = stub_request_for_token('regular', status: 503)
+      env = {
+        "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
+      }
+      post '/webhooks', request_body, env
+
+      expect(last_response.status).to eq(500)
+      expect(last_response.headers["Flipper-Cloud-Response-Error-Class"]).to eq("Flipper::Adapters::Http::Error")
+      expect(last_response.headers["Flipper-Cloud-Response-Error-Message"]).to eq("Failed with status: 503")
+      expect(stub).to have_been_requested
+    end
+  end
+
+  context "when flipper cloud responds with timeout" do
+    let(:app) { Flipper::Cloud.app(flipper) }
+
+    it "results in 500" do
+      Flipper.register(:admins) { |*args| false }
+      Flipper.register(:staff) { |*args| false }
+      Flipper.register(:basic) { |*args| false }
+      Flipper.register(:plus) { |*args| false }
+      Flipper.register(:premium) { |*args| false }
+
+      stub = stub_request_for_token('regular', status: :timeout)
+      env = {
+        "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
+      }
+      post '/webhooks', request_body, env
+
+      expect(last_response.status).to eq(500)
+      expect(last_response.headers["Flipper-Cloud-Response-Error-Class"]).to eq("Net::OpenTimeout")
+      expect(last_response.headers["Flipper-Cloud-Response-Error-Message"]).to eq("execution expired")
+      expect(stub).to have_been_requested
+    end
+  end
+
   context 'when initialized with flipper instance and flipper instance in env' do
     let(:app) { Flipper::Cloud.app(flipper) }
     let(:signature) {
@@ -177,12 +246,17 @@ RSpec.describe Flipper::Cloud::Middleware do
 
   private
 
-  def stub_request_for_token(token)
-    stub_request(:get, "https://www.flippercloud.io/adapter/features").
+  def stub_request_for_token(token, status: 200)
+    stub = stub_request(:get, "https://www.flippercloud.io/adapter/features").
       with({
         headers: {
           'Flipper-Cloud-Token' => token,
         },
-      }).to_return(status: 200, body: response_body, headers: {})
+      })
+    if status == :timeout
+      stub.to_timeout
+    else
+      stub.to_return(status: status, body: response_body, headers: {})
+    end
   end
 end

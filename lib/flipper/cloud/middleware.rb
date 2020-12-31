@@ -32,10 +32,20 @@ module Flipper
           begin
             message_verifier = MessageVerifier.new(secret: flipper.sync_secret)
             if message_verifier.verify(payload, signature)
-              flipper.sync
-              body = JSON.generate({
-                groups: Flipper.group_names.map { |name| {name: name}}
-              })
+              begin
+                flipper.sync
+                body = JSON.generate({
+                  groups: Flipper.group_names.map { |name| {name: name}}
+                })
+              rescue Flipper::Adapters::Http::Error => error
+                status = error.response.code.to_i == 402 ? 402 : 500
+                headers["Flipper-Cloud-Response-Error-Class"] = error.class.name
+                headers["Flipper-Cloud-Response-Error-Message"] = error.message
+              rescue => error
+                status = 500
+                headers["Flipper-Cloud-Response-Error-Class"] = error.class.name
+                headers["Flipper-Cloud-Response-Error-Message"] = error.message
+              end
             end
           rescue MessageVerifier::InvalidSignature
             status = 400
