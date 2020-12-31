@@ -1,6 +1,12 @@
+## 0.20.1
+
+### Additions/Changes
+
+* Just a minor tweak to cloud webhook middleware to provide more debugging information about why a hook wasn't successful.
+
 ## 0.20.0
 
-## Additions/Changes
+### Additions/Changes
 
 * Add support for webhooks to `Flipper::Cloud` (https://github.com/jnunemaker/flipper/pull/489).
 
