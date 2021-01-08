@@ -3,6 +3,14 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     strategy:
       matrix:
         ruby: ['2.5', '2.6', '2.7']
@@ -10,22 +18,24 @@ jobs:
       RAILS_VERSION: 6.0.0
       SQLITE3_VERSION: 1.4.1
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/cache@v1
-      with:
-        path: vendor/bundle
-        key: ${{ runner.os }}-gem-${{ hashFiles('**/Gemfile.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-gem-
-    - name: Set up Ruby
-      uses: actions/setup-ruby@v1
-      with:
-        ruby-version: ${{ matrix.ruby }}
-    - name: Install libpq-dev
-      run: sudo apt-get -yqq install libpq-dev
-    - name: Install bundler
-      run: gem install bundler
-    - name: Run bundler
-      run: bundle install --jobs 4 --retry 3
-    - name: Run Rake
-      run: bundle exec rake
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Do some action caching
+        uses: actions/cache@v1
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-gem-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gem-
+      - name: Set up Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+      - name: Install libpq-dev
+        run: sudo apt-get -yqq install libpq-dev
+      - name: Install bundler
+        run: gem install bundler
+      - name: Run bundler
+        run: bundle install --jobs 4 --retry 3
+      - name: Run Rake
+        run: bundle exec rake
