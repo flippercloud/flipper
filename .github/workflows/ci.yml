@@ -18,6 +18,8 @@ jobs:
       RAILS_VERSION: 6.0.0
       SQLITE3_VERSION: 1.4.1
     steps:
+      - name: Setup memcached
+        uses: KeisukeYamashita/memcached-actions@v1
       - name: Check out repository code
         uses: actions/checkout@v2
       - name: Do some action caching
