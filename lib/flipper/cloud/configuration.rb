@@ -1,3 +1,4 @@
+require "socket"
 require "flipper/adapters/http"
 require "flipper/adapters/memory"
 require "flipper/adapters/dual_write"
@@ -153,6 +154,11 @@ module Flipper
           headers: {
             "Flipper-Cloud-Token" => @token,
             "Feature-Flipper-Token" => @token,
+            "Client-Lang" => "ruby",
+            "Client-Lang-Version" => "#{RUBY_VERSION} p#{RUBY_PATCHLEVEL} (#{RUBY_RELEASE_DATE})",
+            "Client-Platform" => RUBY_PLATFORM,
+            "Client-Engine" => defined?(RUBY_ENGINE) ? RUBY_ENGINE : "",
+            "Client-Hostname" => Socket.gethostname,
           },
         })
       end
