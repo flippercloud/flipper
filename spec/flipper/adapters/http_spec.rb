@@ -76,9 +76,9 @@ RSpec.describe Flipper::Adapters::Http do
         .to_return(status: 503, body: "", headers: {})
 
       adapter = described_class.new(url: 'http://app.com/flipper')
-      expect do
+      expect {
         adapter.get(flipper[:feature_panel])
-      end.to raise_error(Flipper::Adapters::Http::Error)
+      }.to raise_error(Flipper::Adapters::Http::Error)
     end
   end
 
@@ -88,9 +88,9 @@ RSpec.describe Flipper::Adapters::Http do
         .to_return(status: 503, body: "", headers: {})
 
       adapter = described_class.new(url: 'http://app.com/flipper')
-      expect do
+      expect {
         adapter.get_multi([flipper[:feature_panel]])
-      end.to raise_error(Flipper::Adapters::Http::Error)
+      }.to raise_error(Flipper::Adapters::Http::Error)
     end
   end
 
@@ -100,9 +100,9 @@ RSpec.describe Flipper::Adapters::Http do
         .to_return(status: 503, body: "", headers: {})
 
       adapter = described_class.new(url: 'http://app.com/flipper')
-      expect do
+      expect {
         adapter.get_all
-      end.to raise_error(Flipper::Adapters::Http::Error)
+      }.to raise_error(Flipper::Adapters::Http::Error)
     end
   end
 
@@ -112,9 +112,75 @@ RSpec.describe Flipper::Adapters::Http do
         .to_return(status: 503, body: "", headers: {})
 
       adapter = described_class.new(url: 'http://app.com/flipper')
-      expect do
+      expect {
         adapter.features
-      end.to raise_error(Flipper::Adapters::Http::Error)
+      }.to raise_error(Flipper::Adapters::Http::Error)
+    end
+  end
+
+  describe "#add" do
+    it "raises error when not successful" do
+      stub_request(:post, /app.com/)
+        .to_return(status: 503, body: "{}", headers: {})
+
+      adapter = described_class.new(url: 'http://app.com/flipper')
+      expect {
+        adapter.add(Flipper::Feature.new(:search, adapter))
+      }.to raise_error(Flipper::Adapters::Http::Error)
+    end
+  end
+
+  describe "#remove" do
+    it "raises error when not successful" do
+      stub_request(:delete, /app.com/)
+        .to_return(status: 503, body: "{}", headers: {})
+
+      adapter = described_class.new(url: 'http://app.com/flipper')
+      expect {
+        adapter.remove(Flipper::Feature.new(:search, adapter))
+      }.to raise_error(Flipper::Adapters::Http::Error)
+    end
+  end
+
+  describe "#clear" do
+    it "raises error when not successful" do
+      stub_request(:delete, /app.com/)
+        .to_return(status: 503, body: "{}", headers: {})
+
+      adapter = described_class.new(url: 'http://app.com/flipper')
+      expect {
+        adapter.clear(Flipper::Feature.new(:search, adapter))
+      }.to raise_error(Flipper::Adapters::Http::Error)
+    end
+  end
+
+  describe "#enable" do
+    it "raises error when not successful" do
+      stub_request(:post, /app.com/)
+        .to_return(status: 503, body: "{}", headers: {})
+
+      adapter = described_class.new(url: 'http://app.com/flipper')
+      feature = Flipper::Feature.new(:search, adapter)
+      gate = feature.gate(:boolean)
+      thing = gate.wrap(true)
+      expect {
+        adapter.enable(feature, gate, thing)
+      }.to raise_error(Flipper::Adapters::Http::Error)
+    end
+  end
+
+  describe "#disable" do
+    it "raises error when not successful" do
+      stub_request(:delete, /app.com/)
+        .to_return(status: 503, body: "{}", headers: {})
+
+      adapter = described_class.new(url: 'http://app.com/flipper')
+      feature = Flipper::Feature.new(:search, adapter)
+      gate = feature.gate(:boolean)
+      thing = gate.wrap(false)
+      expect {
+        adapter.disable(feature, gate, thing)
+      }.to raise_error(Flipper::Adapters::Http::Error)
     end
   end
 

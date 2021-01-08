@@ -144,6 +144,34 @@ RSpec.describe Flipper::Cloud do
     expect(cloud_flipper.adapter.get_all).to eq(get_all)
   end
 
+  it 'raises error for failure while importing' do
+    stub_request(:post, /www\.flippercloud\.io\/adapter\/features.*/).
+      with(headers: {
+          'Feature-Flipper-Token'=>'asdf',
+          'Flipper-Cloud-Token'=>'asdf',
+      }).to_return(status: 500, body: "{}")
+
+    flipper = Flipper.new(Flipper::Adapters::Memory.new)
+
+    flipper.enable(:test)
+    flipper.enable(:search)
+    flipper.enable_actor(:stats, Flipper::Actor.new("jnunemaker"))
+    flipper.enable_percentage_of_time(:logging, 5)
+
+    cloud_flipper = Flipper::Cloud.new("asdf")
+
+    get_all = {
+      "logging" => {actors: Set.new, boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: "5"},
+      "search" => {actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
+      "stats" => {actors: Set["jnunemaker"], boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
+      "test" => {actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
+    }
+
+    expect(flipper.adapter.get_all).to eq(get_all)
+    expect { cloud_flipper.import(flipper) }.to raise_error(Flipper::Adapters::Http::Error)
+    expect(flipper.adapter.get_all).to eq(get_all)
+  end
+
   it 'raises error for timeout while importing' do
     stub_request(:post, /www\.flippercloud\.io\/adapter\/features.*/).
       with(headers: {
