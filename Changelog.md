@@ -1,3 +1,9 @@
+## 0.21.0
+
+### Additions/Changes
+
+* Http adapter now raises error when enable/disable/add/remove/clear fail.
+
 ## 0.20.1
 
 ### Additions/Changes
