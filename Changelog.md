@@ -3,6 +3,7 @@
 ### Additions/Changes
 
 * Http adapter now raises error when enable/disable/add/remove/clear fail.
+* Cloud adapter sends some extra info like hostname, ruby version, etc. for debugging and decision making.
 
 ## 0.20.1
 
