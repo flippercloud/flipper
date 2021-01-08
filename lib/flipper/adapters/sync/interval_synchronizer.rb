@@ -19,7 +19,7 @@ module Flipper
         # Public: Initializes a new interval synchronizer.
         #
         # synchronizer - The Synchronizer to call when the interval has passed.
-        # interval - The Integer number of milliseconds between invocations of
+        # interval - The Integer number of seconds between invocations of
         #            the wrapped synchronizer.
         def initialize(synchronizer, interval: nil)
           @synchronizer = synchronizer
