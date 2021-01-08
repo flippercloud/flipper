@@ -15,13 +15,11 @@ jobs:
       uses: actions/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
-    - name: Build and test with Rake
-      env:
-        PGHOST: 127.0.0.1
-        PGUSER: postgres
-        RAILS_ENV: test
-      run: |
-        sudo apt-get -yqq install libpq-dev
-        gem install bundler
-        bundle install --jobs 4 --retry 3
-        bundle exec rake
+    - name: Install libpq-dev
+      run: sudo apt-get -yqq install libpq-dev
+    - name: Install bundler
+      run: gem install bundler
+    - name: Run bundler
+      run: bundle install --jobs 4 --retry 3
+    - name: Run Rake
+      run: bundle exec rake
