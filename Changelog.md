@@ -1,3 +1,9 @@
+## 0.20.3
+
+### Additions/Changes
+
+* Changed the internal structure of how the memory adapter stores things.
+
 ## 0.20.2
 
 ### Additions/Changes
