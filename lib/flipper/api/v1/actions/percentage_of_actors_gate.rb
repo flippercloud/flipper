@@ -30,9 +30,17 @@ module Flipper
 
           private
 
+          def percentage_param
+            @percentage_param ||= params['percentage'].to_s
+          end
+
           def percentage
             @percentage ||= begin
-              Integer(params['percentage'])
+              unless percentage_param.match(/\d/)
+                raise ArgumentError, "invalid numeric value: #{percentage_param}"
+              end
+
+              Flipper::Types::Percentage.new(percentage_param).value
             rescue ArgumentError, TypeError
               -1
             end
