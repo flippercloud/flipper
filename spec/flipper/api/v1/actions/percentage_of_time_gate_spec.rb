@@ -4,34 +4,80 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfTimeGate do
   let(:app) { build_api(flipper) }
 
   describe 'enable' do
-    before do
-      flipper[:my_feature].disable
-      post '/features/my_feature/percentage_of_time', percentage: '10'
+    shared_examples 'gates with percentage' do
+      it 'enables gate for feature' do
+        expect(flipper[path].enabled_gate_names).to include(:percentage_of_time)
+      end
+
+      it 'returns decorated feature with gate enabled for a percent of times' do
+        gate = json_response['gates'].find { |gate| gate['name'] == 'percentage_of_time' }
+        expect(gate['value']).to eq(percentage)
+      end
     end
 
-    it 'enables gate for feature' do
-      expect(flipper[:my_feature].enabled_gate_names).to include(:percentage_of_time)
+    context 'for feature with slash in name' do
+      let(:path) { 'my/feature' }
+
+      before do
+        flipper[path].disable
+        post "/features/#{path}/percentage_of_time", percentage: percentage
+      end
+
+      context 'with integer percentage' do
+        let(:percentage) { '10' }
+
+        it_behaves_like 'gates with percentage'
+      end
+
+      context 'with decimal percentage' do
+        let(:percentage) { '0.05' }
+
+        it_behaves_like 'gates with percentage'
+      end
     end
 
-    it 'returns decorated feature with gate enabled for 5% of time' do
-      gate = json_response['gates'].find { |gate| gate['name'] == 'percentage_of_time' }
-      expect(gate['value']).to eq('10')
-    end
-  end
+    context 'url-encoded request' do
+      let(:path) { :my_feature }
 
-  describe 'enable for feature with slash in name' do
-    before do
-      flipper["my/feature"].disable
-      post '/features/my/feature/percentage_of_time', percentage: '10'
+      before do
+        flipper[:my_feature].disable
+        post "/features/#{path}/percentage_of_time", percentage: percentage
+      end
+
+      context 'with integer percentage' do
+        let(:percentage) { '10' }
+
+        it_behaves_like 'gates with percentage'
+      end
+
+      context 'with decimal percentage' do
+        let(:percentage) { '0.05' }
+
+        it_behaves_like 'gates with percentage'
+      end
     end
 
-    it 'enables gate for feature' do
-      expect(flipper["my/feature"].enabled_gate_names).to include(:percentage_of_time)
-    end
+    context 'json request' do
+      let(:path) { :my_feature }
 
-    it 'returns decorated feature with gate enabled for 5% of time' do
-      gate = json_response['gates'].find { |gate| gate['name'] == 'percentage_of_time' }
-      expect(gate['value']).to eq('10')
+      before do
+        flipper[:my_feature].disable
+        post "/features/#{path}/percentage_of_time",
+             JSON.generate(percentage: percentage),
+             'CONTENT_TYPE' => 'application/json'
+      end
+
+      context 'with integer percentage' do
+        let(:percentage) { '10' }
+
+        it_behaves_like 'gates with percentage'
+      end
+
+      context 'with decimal percentage' do
+        let(:percentage) { '0.05' }
+
+        it_behaves_like 'gates with percentage'
+      end
     end
   end
 
@@ -93,7 +139,7 @@ RSpec.describe Flipper::Api::V1::Actions::PercentageOfTimeGate do
     end
   end
 
-  describe 'percentage parameter not an integer' do
+  describe 'percentage parameter not an number' do
     before do
       flipper[:my_feature].disable
       post '/features/my_feature/percentage_of_time', percentage: 'foo'
