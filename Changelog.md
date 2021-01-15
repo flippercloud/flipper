@@ -1,3 +1,9 @@
+## unreleased
+
+### Additions/Changes
+
+* Allow actors and time gates to deal with decimal percentages (https://github.com/jnunemaker/flipper/pull/492)
+
 ## 0.20.3
 
 ### Additions/Changes
