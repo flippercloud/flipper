@@ -22,6 +22,10 @@ module Flipper
       raise 'Not implemented'
     end
 
+    def disabled?(value)
+      !enabled?(value)
+    end
+
     # Internal: Check if a gate is open for a thing. Implemented in subclass.
     #
     # Returns true if gate open for thing, false if not.
