@@ -8,7 +8,7 @@ Simple, performant feature flags for Ruby.
 
 Control your software &mdash; don't let it control you. Read on for everything you need to get started with Flipper.
 
-We also have a hosted version (https://www.flippercloud.io) that is pretty sweet.
+We also have a hosted version (https://www.flippercloud.io) that is pretty sweet ([check out the rails demo](https://github.com/fewerandfaster/flipper-rails-demo)).
 
 ## Installation
 
