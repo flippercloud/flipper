@@ -20,3 +20,4 @@ log
 flipper.pstore
 .sass-cache
 bin
+.DS_Store
