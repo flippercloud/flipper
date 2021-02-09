@@ -1,23 +1,14 @@
-<pre>
-                                   __
-                               _.-~  )
-                    _..--~~~~,'   ,-/     _
-                 .-'. . . .'   ,-','    ,' )
-               ,'. . . _   ,--~,-'__..-'  ,'
-             ,'. . .  (@)' ---~~~~      ,'
-            /. . . . '~~             ,-'
-           /. . . . .             ,-'
-          ; . . . .  - .        ,'
-         : . . . .       _     /
-        . . . . .          `-.:
-       . . . ./  - .          )
-      .  . . |  _____..---.._/ _____
-~---~~~~----~~~~             ~~
-</pre>
+<p style="text-align:left;">
+  <a href="https://www.flippercloud.io"><img src="lib/flipper/ui/public/images/banner.jpg" alt="Flipper Logo" /></a>
+</p>
 
-Feature flipping is the act of enabling or disabling features or parts of your application, ideally without re-deploying or changing anything in your code base.
+# Flipper
 
-The goal of this gem is to make turning features on or off so easy that everyone does it. Whatever your data store, throughput, or experience, feature flipping should be easy and have minimal impact on your application.
+Simple, performant feature flags for Ruby.
+
+Control your software &mdash; don't let it control you. Read on for everything you need to get started with Flipper.
+
+We also have a hosted version (https://www.flippercloud.io) that is pretty sweet.
 
 ## Installation
 
@@ -33,16 +24,43 @@ Or install it yourself with:
 
     $ gem install flipper
 
+## Getting Started
+
+Flipper is built on adapters for maximum flexibility. Regardless of what database you are using, Flipper can performantly store data in it.
+
+To get started, pick one of our [supported adapters](docs/Adapters.md#officially-supported) and follow the instructions:
+
+* [Active Record](docs/active_record/README.md)
+* [Sequel](docs/sequel/README.md)
+* [Redis](docs/redis/README.md)
+* [Mongo](docs/mongo/README.md)
+* [Moneta](docs/moneta/README.md)
+
+Or [roll your own](docs/Adapters.md#roll-your-own). We even provide automatic (rspec and minitest) tests for you, so you know you've built it correctly.
+
+Once you've selected an adapter and followed the installation instructions, you should be good to go.
+
+If you prefer a web UI to an IRB console, you can setup the [Flipper UI](docs/ui/README.md).
+
+Or, (even better) use [Flipper Cloud](https://www.flippercloud.io) which comes with:
+
+* **everything in one place** &mdash; no need to bounce around from different application UIs or IRB consoles.
+* **permissions** &mdash; grant access to everyone in your organization or lockdown each project to particular people.
+* **multiple environments** &mdash; production, staging, enterprise, by continent, whatever you need.
+* **personal environments** &mdash; no more rake scripts or manual enable/disable to get your laptop to look like production. Every developer gets a personal environment that inherits from production that they can override as they please ([read more](https://www.johnnunemaker.com/flipper-cloud-environments/)).
+* **no maintenance** &mdash; we'll keep the lights on for you. We also have handy webhooks for keeping your app in sync with Cloud, so our availability won't affect yours. All your feature flag reads are local to your app.
+* **audit history** &mdash; every feature change and who made it.
+* **rollbacks** &mdash; enable or disable a feature accidentally? No problem. You can roll back to any point in the audit history with a single click.
 ## Examples
 
-The goal of the API for flipper was to have everything revolve around features and what ways they can be enabled. Start with top level and dig into a feature, then dig in further and enable that feature for a given type of access, as opposed to thinking about how the feature will be accessed first (ie: `stats.enable` vs `activate_group(:stats, ...)`).
+Want to get a quick feel for what it looks like to work with Flipper? Check out the following example or [check out the examples directory](examples/). You could also check out the [DSL](lib/flipper/dsl.rb) and [Feature](lib/flipper/feature.rb) classes for code/docs.
 
 ```ruby
 require 'flipper'
 
 Flipper.configure do |config|
   config.default do
-    # pick an adapter, this uses memory, any will do
+    # pick an adapter, this uses memory, any will do, see docs above
     adapter = Flipper::Adapters::Memory.new
 
     # pass adapter to handy DSL instance
@@ -68,9 +86,9 @@ else
 end
 ```
 
-Of course there are more [examples for you to peruse](examples/). You could also check out the [DSL](lib/flipper/dsl.rb) and [Feature](lib/flipper/feature.rb) classes for code/docs.
-
 ## Docs
+
+A few miscellaneous docs with more info for the hungry.
 
 * [Gates](docs/Gates.md) - Boolean, Groups, Actors, % of Actors, and % of Time
 * [Adapters](docs/Adapters.md) - Mongo, Redis, Cassandra, Active Record...
