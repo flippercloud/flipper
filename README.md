@@ -1,4 +1,4 @@
-<p style="text-align:left;">
+<p>
   <a href="https://www.flippercloud.io"><img src="lib/flipper/ui/public/images/banner.jpg" alt="Flipper Logo" /></a>
 </p>
 
