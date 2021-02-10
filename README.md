@@ -1,14 +1,10 @@
-<p>
-  <a href="https://www.flippercloud.io"><img src="lib/flipper/ui/public/images/banner.jpg" alt="Flipper Logo" /></a>
-</p>
+[![Flipper Mark](docs/images/banner.jpg)](https://www.flippercloud.io)
 
 # Flipper
 
-Simple, performant feature flags for Ruby.
+Beautiful, performant feature flags for Ruby.
 
 Control your software &mdash; don't let it control you. Read on for everything you need to get started with Flipper.
-
-We also have a hosted version (https://www.flippercloud.io) that is pretty sweet ([check out the rails demo](https://github.com/fewerandfaster/flipper-rails-demo)).
 
 ## Installation
 
@@ -36,24 +32,39 @@ To get started, pick one of our [supported adapters](docs/Adapters.md#officially
 * [Mongo](docs/mongo/README.md)
 * [Moneta](docs/moneta/README.md)
 
-Or [roll your own](docs/Adapters.md#roll-your-own). We even provide automatic (rspec and minitest) tests for you, so you know you've built it correctly.
+Or [roll your own](docs/Adapters.md#roll-your-own). We even provide automatic (rspec and minitest) tests for you, so you know you've built your custom adapter correctly.
 
 Once you've selected an adapter and followed the installation instructions, you should be good to go.
 
+## Flipper UI
+
 If you prefer a web UI to an IRB console, you can setup the [Flipper UI](docs/ui/README.md).
 
-Or, (even better) use [Flipper Cloud](https://www.flippercloud.io) which comes with:
+It's simple and pretty.
+
+![Flipper UI Screenshot](docs/ui/images/feature.png)
+
+
+
+## Flipper Cloud
+
+Or, (even better than OSS + UI) use [Flipper Cloud](https://www.flippercloud.io) which comes with:
 
 * **everything in one place** &mdash; no need to bounce around from different application UIs or IRB consoles.
 * **permissions** &mdash; grant access to everyone in your organization or lockdown each project to particular people.
 * **multiple environments** &mdash; production, staging, enterprise, by continent, whatever you need.
 * **personal environments** &mdash; no more rake scripts or manual enable/disable to get your laptop to look like production. Every developer gets a personal environment that inherits from production that they can override as they please ([read more](https://www.johnnunemaker.com/flipper-cloud-environments/)).
-* **no maintenance** &mdash; we'll keep the lights on for you. We also have handy webhooks for keeping your app in sync with Cloud, so our availability won't affect yours. All your feature flag reads are local to your app.
+* **no maintenance** &mdash; we'll keep the lights on for you. We also have handy webhooks for keeping your app in sync with Cloud, so **our availability won't affect yours**. All your feature flag reads are local to your app.
 * **audit history** &mdash; every feature change and who made it.
 * **rollbacks** &mdash; enable or disable a feature accidentally? No problem. You can roll back to any point in the audit history with a single click.
+
+[![Flipper Cloud Screenshot](docs/images/flipper_cloud.png)](https://www.flippercloud.io)
+
+Cloud is super simple to integrate with Rails ([demo app](https://github.com/fewerandfaster/flipper-rails-demo)), Sinatra or any other framework.
+
 ## Examples
 
-Want to get a quick feel for what it looks like to work with Flipper? Check out the following example or [check out the examples directory](examples/). You could also check out the [DSL](lib/flipper/dsl.rb) and [Feature](lib/flipper/feature.rb) classes for code/docs.
+Want to get a quick feel for what it looks like to work with Flipper? Check out the following example or the [examples directory](examples/). You might also want to peek at the [DSL](lib/flipper/dsl.rb) and [Feature](lib/flipper/feature.rb) classes for code/docs.
 
 ```ruby
 require 'flipper'
