@@ -4,7 +4,7 @@
 
 Beautiful, performant feature flags for Ruby.
 
-Control your software &mdash; don't let it control you. Read on for everything you need to get started with Flipper.
+Control your software &mdash; don't let it control you.
 
 ## Installation
 
