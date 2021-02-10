@@ -22,7 +22,7 @@ Or install it yourself with:
 
 ## Getting Started
 
-Flipper is built on adapters for maximum flexibility. Regardless of what database you are using, Flipper can performantly store data in it.
+Flipper is built on adapters for maximum flexibility. Regardless of what data store you are using, Flipper can performantly store data in it.
 
 To get started, pick one of our [supported adapters](docs/Adapters.md#officially-supported) and follow the instructions:
 
@@ -31,6 +31,7 @@ To get started, pick one of our [supported adapters](docs/Adapters.md#officially
 * [Redis](docs/redis/README.md)
 * [Mongo](docs/mongo/README.md)
 * [Moneta](docs/moneta/README.md)
+* [Rollout](docs/rollout/README.md)
 
 Or [roll your own](docs/Adapters.md#roll-your-own). We even provide automatic (rspec and minitest) tests for you, so you know you've built your custom adapter correctly.
 
