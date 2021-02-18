@@ -103,6 +103,14 @@ RSpec.describe Flipper::UI::Actions::Features do
         end
       end
 
+      context 'feature name contains whitespace between the words' do
+        let(:feature_name) { '  notifications _next   ' }
+
+        it 'adds feature without whitespace' do
+          expect(flipper.features.map(&:key)).to include('notifications_next')
+        end
+      end
+
       context 'for an invalid feature name' do
         context 'empty feature name' do
           let(:feature_name) { '' }
