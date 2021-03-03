@@ -169,6 +169,41 @@ The above configuration results in:
 
 ![banner](images/banner.png)
 
+#### Authorization
+
+Flipper UI can lock specific requests so that only some users have access to perform some actions.
+This functionality is accessed through the `Flipper::UI.configure` block shown below.
+
+When setting an authorization object Flipper UI will authorize before every action.
+The authorization object will need to repond to:
+ - `present?` (boolean) Whether to run authorization check or not.
+ - `call` (auth check response object) See below for more details.
+
+Flipper UI expects the response from the authorization check to respond to:
+ - `permitted` (boolean) of whether the action should be allowed,
+ - `message` (string) with the message to display (only needed if permitted is false).
+
+```ruby
+class Authorization
+  # whether to run authentication
+  def self.present?
+    true
+  end
+
+  # action: 'get', 'put', 'patch' or 'delete'
+  # request: the Rack::Request to auth
+  def self.call(action:, request:)
+    permitted = action == 'get'
+    message = permitted ? nil : 'You can only look' 
+    OpenStruct.new(permitted: permitted, message: message)
+  end
+end
+
+Flipper::UI.configure do |config|
+  config.authorization = Authorization
+end
+```
+
 #### Fun mode
 
 By default, Flipper UI displays a videoclip when there are no flags. The `fun` mode can be configured by using the `Flipper::UI.configure` block as seen below.

@@ -13,6 +13,12 @@ module Flipper
       # or full url ("https://app.example.com/").
       attr_accessor :application_breadcrumb_href
 
+      # Public: Object to repond to `.call` with an object that reponds to permit (boolean) and message (string).
+      # Defaults to nil.
+      # If set to falsey value, users of the UI can perform all actions.
+      # If set to object, users will be authed per action performed
+      attr_accessor :authorization
+
       # Public: Is feature creation allowed from the UI? Defaults to true. If
       # set to false, users of the UI cannot create features. All feature
       # creation will need to be done through the configured flipper instance.
@@ -63,6 +69,7 @@ module Flipper
         @add_actor_placeholder = "a flipper id"
         @descriptions_source = DEFAULT_DESCRIPTIONS_SOURCE
         @show_feature_description_in_list = false
+        @authorization = Struct.new(:present?).new(false)
       end
 
       def using_descriptions?

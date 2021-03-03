@@ -34,6 +34,19 @@ end
 adapter = Flipper::Adapters::PStore.new
 flipper = Flipper.new(adapter, instrumenter: ActiveSupport::Notifications)
 
+# class for locking UI to read only
+class ReadOnlyAuthorization
+  def self.present?
+    true
+  end
+
+  def self.call(action:, **_opts)
+    permitted = action == 'get'
+    message = permitted ? nil : 'You can only look'
+    OpenStruct.new(permitted: permitted, message: message)
+  end
+end
+
 Flipper::UI.configure do |config|
   # config.banner_text = 'Production Environment'
   # config.banner_class = 'danger'
@@ -52,6 +65,9 @@ Flipper::UI.configure do |config|
       "a/b" => "Why would someone use a slash? I don't know but someone did. Let's make this really long so they regret using slashes. Please don't use slashes.",
     }
   end
+
+  ## Uncomment next line to turn on read only authorization
+  # config.authorization = ReadOnlyAuthorization
 end
 
 # You can uncomment these to get some default data:

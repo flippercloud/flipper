@@ -86,6 +86,7 @@ module Flipper
           else
             []
           end
+        @authorization = Flipper::UI.configuration.authorization
       end
 
       # Public: Runs the request method for the provided request.
@@ -93,7 +94,10 @@ module Flipper
       # Returns whatever the request method returns in the action.
       def run
         if valid_request_method? && respond_to?(request_method_name)
-          catch(:halt) { send(request_method_name) }
+          catch(:halt) do
+            authorize if @authorization&.present?
+            send(request_method_name)
+          end
         else
           raise UI::RequestMethodNotSupported,
                 "#{self.class} does not support request method #{request_method_name.inspect}"
@@ -191,6 +195,16 @@ module Flipper
       def breadcrumb(text, href = nil)
         breadcrumb_href = href.nil? ? href : "#{script_name}#{href}"
         @breadcrumbs << Breadcrumb.new(text, breadcrumb_href)
+      end
+
+      # Private
+      def authorize
+        permissions = @authorization.call(action: request_method_name, request: @request)
+        return if permissions.permitted
+
+        @message = permissions.message
+        status 403
+        halt view_response(:authorization_failed)
       end
 
       # Private
