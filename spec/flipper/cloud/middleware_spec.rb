@@ -53,7 +53,7 @@ RSpec.describe Flipper::Cloud::Middleware do
       env = {
         "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
       }
-      post '/webhooks', request_body, env
+      post '/', request_body, env
 
       expect(last_response.status).to eq(200)
       expect(JSON.parse(last_response.body)).to eq({
@@ -80,7 +80,7 @@ RSpec.describe Flipper::Cloud::Middleware do
       env = {
         "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
       }
-      post '/webhooks', request_body, env
+      post '/', request_body, env
 
       expect(last_response.status).to eq(400)
       expect(stub).not_to have_been_requested
@@ -101,7 +101,7 @@ RSpec.describe Flipper::Cloud::Middleware do
       env = {
         "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
       }
-      post '/webhooks', request_body, env
+      post '/', request_body, env
 
       expect(last_response.status).to eq(402)
       expect(last_response.headers["Flipper-Cloud-Response-Error-Class"]).to eq("Flipper::Adapters::Http::Error")
@@ -124,7 +124,7 @@ RSpec.describe Flipper::Cloud::Middleware do
       env = {
         "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
       }
-      post '/webhooks', request_body, env
+      post '/', request_body, env
 
       expect(last_response.status).to eq(500)
       expect(last_response.headers["Flipper-Cloud-Response-Error-Class"]).to eq("Flipper::Adapters::Http::Error")
@@ -147,7 +147,7 @@ RSpec.describe Flipper::Cloud::Middleware do
       env = {
         "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
       }
-      post '/webhooks', request_body, env
+      post '/', request_body, env
 
       expect(last_response.status).to eq(500)
       expect(last_response.headers["Flipper-Cloud-Response-Error-Class"]).to eq("Net::OpenTimeout")
@@ -168,7 +168,7 @@ RSpec.describe Flipper::Cloud::Middleware do
         "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
         'flipper' => env_flipper,
       }
-      post '/webhooks', request_body, env
+      post '/', request_body, env
 
       expect(last_response.status).to eq(200)
       expect(stub).to have_been_requested
@@ -187,7 +187,7 @@ RSpec.describe Flipper::Cloud::Middleware do
         "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
         'flipper' => env_flipper,
       }
-      post '/webhooks', request_body, env
+      post '/', request_body, env
 
       expect(last_response.status).to eq(200)
       expect(stub).to have_been_requested
@@ -207,7 +207,7 @@ RSpec.describe Flipper::Cloud::Middleware do
         'flipper' => flipper,
         'flipper_cloud' => env_flipper,
       }
-      post '/webhooks', request_body, env
+      post '/', request_body, env
 
       expect(last_response.status).to eq(200)
       expect(stub).to have_been_requested
@@ -222,16 +222,46 @@ RSpec.describe Flipper::Cloud::Middleware do
       env = {
         "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
       }
-      post '/webhooks', request_body, env
+      post '/', request_body, env
 
       expect(last_response.status).to eq(200)
       expect(stub).to have_been_requested
     end
   end
 
+  context 'when using older /webhooks path' do
+    let(:app) { Flipper::Cloud.app(flipper) }
+
+    it 'uses instance to sync' do
+      Flipper.register(:admins) { |*args| false }
+      Flipper.register(:staff) { |*args| false }
+      Flipper.register(:basic) { |*args| false }
+      Flipper.register(:plus) { |*args| false }
+      Flipper.register(:premium) { |*args| false }
+
+      stub = stub_request_for_token('regular')
+      env = {
+        "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
+      }
+      post '/webhooks', request_body, env
+
+      expect(last_response.status).to eq(200)
+      expect(JSON.parse(last_response.body)).to eq({
+        "groups" => [
+          {"name" => "admins"},
+          {"name" => "staff"},
+          {"name" => "basic"},
+          {"name" => "plus"},
+          {"name" => "premium"},
+        ],
+      })
+      expect(stub).to have_been_requested
+    end
+  end
+
   describe 'Request method unsupported' do
     it 'skips middleware' do
-      get '/webhooks'
+      get '/'
       expect(last_response.status).to eq(404)
       expect(last_response.content_type).to eq("application/json")
       expect(last_response.body).to eq("{}")

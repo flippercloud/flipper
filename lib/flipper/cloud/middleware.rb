@@ -7,6 +7,8 @@ module Flipper
     class Middleware
       # Internal: The path to match for webhook requests.
       WEBHOOK_PATH = %r{\A/webhooks\/?\Z}
+      # Internal: The root path to match for requests.
+      ROOT_PATH = %r{\A/\Z}
 
       def initialize(app, options = {})
         @app = app
@@ -19,7 +21,7 @@ module Flipper
 
       def call!(env)
         request = Rack::Request.new(env)
-        if request.post? && request.path_info.match(WEBHOOK_PATH)
+        if request.post? && (request.path_info.match(ROOT_PATH) || request.path_info.match(WEBHOOK_PATH))
           status = 200
           headers = {
             "Content-Type" => "application/json",
