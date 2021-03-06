@@ -3,6 +3,7 @@
 ### Additions/Changes
 
 * Allow actors and time gates to deal with decimal percentages (https://github.com/jnunemaker/flipper/pull/492)
+* Change Flipper::Cloud::Middleware to receive webhooks at / in addition to /webhooks.
 
 ## 0.20.3
 
