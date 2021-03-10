@@ -2,15 +2,26 @@
 
 # Flipper
 
-Beautiful, performant feature flags for Ruby.
+> Beautiful, performant feature flags for Ruby.
+
+Flipper gives you control over who has access to features in your app.
+
+* Enable or disable features for everyone, specific actors, groups of actors, a percentage of actors, or a percentage of time.
+* Configure your feature flags from the console or a web UI
+* Regardless of what data store you are using, Flipper can performantly store your feature flags.
+* Use [Flipper Cloud](#flipper-cloud) to cascade features from multiple environments, share settings with your team, control permissions, keep an audit history, and rollback.
 
 Control your software &mdash; don't let it control you.
 
 ## Installation
 
-Add this line to your application's Gemfile:
+For Rails apps, add this line to your application's Gemfile:
 
-    gem 'flipper'
+    gem 'flipper-rails'
+
+For a plain ol' Ruby project, you'll need a storage [adapter](#adapters), but start with:
+
+    gem 'flipper'`
 
 And then execute:
 
@@ -22,11 +33,64 @@ Or install it yourself with:
 
 ## Getting Started
 
+Use `Flipper#enabled?` in your app to check if a feature is enabled.
+
+```ruby
+# check if search is enabled
+if Flipper.enabled? :search, current_user
+  puts 'Search away!'
+else
+  puts 'No search for you!'
+end
+```
+
+All features are disabled by default, so you'll need to explicitly enable them.
+
+#### Enable a feature for everyone
+
+```ruby
+Flipper.enable :search
+```
+
+#### Enable a feature for a specific actor
+
+```ruby
+Flipper.enable_actor :search, current_user
+```
+
+#### Enable a feature for a group of actors
+
+First tell Flipper about your groups:
+
+```ruby
+# config/initializers/flipper.rb
+Flipper.register(:admin) do |actor|
+  actor.respond_to?(:admin?) && actor.admin?
+end
+```
+
+Then enable the feature for that group:
+
+```ruby
+Flipper.enable_group :search, :admin
+```
+
+#### Enable a feature for a percentage of actors
+
+```ruby
+Flipper.enable_percentage_of_actors :search, 2
+```
+
+
+Read more about enabling and disabling features with [Gates](docs/Gates.md). Check out the [examples directory](examples/) for more, and take a peek at the [DSL](lib/flipper/dsl.rb) and [Feature](lib/flipper/feature.rb) classes for code/docs.
+
+## Adapters
+
 Flipper is built on adapters for maximum flexibility. Regardless of what data store you are using, Flipper can performantly store data in it.
 
-To get started, pick one of our [supported adapters](docs/Adapters.md#officially-supported) and follow the instructions:
+Pick one of our [supported adapters](docs/Adapters.md#officially-supported) and follow the installation instructions:
 
-* [Active Record](docs/active_record/README.md)
+* [Active Record](docs/active_record/README.md) (default for apps using `flipper-rails`)
 * [Sequel](docs/sequel/README.md)
 * [Redis](docs/redis/README.md)
 * [Mongo](docs/mongo/README.md)
@@ -35,7 +99,7 @@ To get started, pick one of our [supported adapters](docs/Adapters.md#officially
 
 Or [roll your own](docs/Adapters.md#roll-your-own). We even provide automatic (rspec and minitest) tests for you, so you know you've built your custom adapter correctly.
 
-Once you've selected an adapter and followed the installation instructions, you should be good to go.
+Read more about [Adapters](docs/Adapters.md).
 
 ## Flipper UI
 
@@ -63,50 +127,12 @@ Or, (even better than OSS + UI) use [Flipper Cloud](https://www.flippercloud.io)
 
 Cloud is super simple to integrate with Rails ([demo app](https://github.com/fewerandfaster/flipper-rails-demo)), Sinatra or any other framework.
 
-## Examples
-
-Want to get a quick feel for what it looks like to work with Flipper? Check out the following example or the [examples directory](examples/). You might also want to peek at the [DSL](lib/flipper/dsl.rb) and [Feature](lib/flipper/feature.rb) classes for code/docs.
-
-```ruby
-require 'flipper'
-
-Flipper.configure do |config|
-  config.default do
-    # pick an adapter, this uses memory, any will do, see docs above
-    adapter = Flipper::Adapters::Memory.new
-
-    # pass adapter to handy DSL instance
-    Flipper.new(adapter)
-  end
-end
-
-# check if search is enabled
-if Flipper.enabled?(:search)
-  puts 'Search away!'
-else
-  puts 'No search for you!'
-end
-
-puts 'Enabling Search...'
-Flipper.enable(:search)
-
-# check if search is enabled
-if Flipper.enabled?(:search)
-  puts 'Search away!'
-else
-  puts 'No search for you!'
-end
-```
-
-## Docs
+## Advanced
 
 A few miscellaneous docs with more info for the hungry.
 
-* [Gates](docs/Gates.md) - Boolean, Groups, Actors, % of Actors, and % of Time
-* [Adapters](docs/Adapters.md) - Mongo, Redis, Cassandra, Active Record...
 * [Instrumentation](docs/Instrumentation.md) - ActiveSupport::Notifications and Statsd
 * [Optimization](docs/Optimization.md) - Memoization middleware and Cache adapters
-* [Web Interface](docs/ui/README.md) - Point and click...
 * [API](docs/api/README.md) - HTTP API interface
 * [Caveats](docs/Caveats.md) - Flipper beware! (see what I did there)
 * [Docker-Compose](docs/DockerCompose.md) - Using docker-compose in contributing
