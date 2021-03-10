@@ -23,30 +23,28 @@ Or install it yourself with:
 
 ## Usage
 
-For your convenience a migration generator is provided to create the necessary migrations for using the active record adapter. By default this generates a migration that will create two database tables - flipper_features and flipper_gates.
+For your convenience a migration generator is provided to create the necessary migrations for using the active record adapter. By default this generates a migration that will create two database tables - `flipper_features` and `flipper_gates`.
 
     $ rails g flipper:active_record
 
-Once you have created and executed the migration, you can use the active record adapter like so:
+Note that the active record adapter requires the database tables to be created in order to work; failure to run the migration first will cause an exception to be raised when attempting to initialize the active record adapter.
+
+Flipper will be configured to use the ActiveReocrd adapter when `flipper-active_record` is loaded. But if you want to customize the adapter, you can add this to an initializer:
 
 ```ruby
-require 'flipper/adapters/active_record'
-adapter = Flipper::Adapters::ActiveRecord.new
-flipper = Flipper.new(adapter)
-# profit...
+# require 'flipper/adapters/active_record'
+# Flipper.configure do |config|
+#   config.default do
+#     Flipper.new(Flipper::Adapters::ActiveRecord.new)
+#   end
+# end
 ```
-
-Note that the active record adapter requires the database tables to be created in order to work; failure to run the migration first will cause an exception to be raised when attempting to initialize the active record adapter.
 
 ## Internals
 
 Each feature is stored as a row in a features table. Each gate is stored as a row in a gates table, related to the feature by the feature's key.
 
 ```ruby
-require 'flipper/adapters/active_record'
-adapter = Flipper::Adapters::ActiveRecord.new
-flipper = Flipper.new(adapter)
-
 # Register a few groups.
 Flipper.register(:admins) { |thing| thing.admin? }
 Flipper.register(:early_access) { |thing| thing.early_access? }
@@ -54,16 +52,16 @@ Flipper.register(:early_access) { |thing| thing.early_access? }
 # Create a user class that has flipper_id instance method.
 User = Struct.new(:flipper_id)
 
-flipper[:stats].enable
-flipper[:stats].enable_group :admins
-flipper[:stats].enable_group :early_access
-flipper[:stats].enable_actor User.new('25')
-flipper[:stats].enable_actor User.new('90')
-flipper[:stats].enable_actor User.new('180')
-flipper[:stats].enable_percentage_of_time 15
-flipper[:stats].enable_percentage_of_actors 45
+Flipper.enable :stats
+Flipper.enable_group :stats, :admins
+Flipper.enable_group :stats, :early_access
+Flipper.enable_actor :stats, User.new('25')
+Flipper.enable_actor :stats, User.new('90')
+Flipper.enable_actor :stats, User.new('180')
+Flipper.enable_percentage_of_time :stats, 15
+Flipper.enable_percentage_of_actors :stats, 45
 
-flipper[:search].enable
+Flipper.enable :search
 
 puts 'all rows in features table'
 pp Flipper::Adapters::ActiveRecord::Feature.all
