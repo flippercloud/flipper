@@ -13,7 +13,7 @@ module Flipper
     #
     #   # sets the default block to generate a new instance using ActiveRecord adapter
     #   configuration.default do
-    #     require "flipper-active-record"
+    #     require "flipper-active_record"
     #     Flipper.new(Flipper::Adapters::ActiveRecord.new)
     #   end
     #
