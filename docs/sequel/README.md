@@ -25,13 +25,20 @@ require 'generators/flipper/templates/sequel_migration'
 CreateFlipperTablesSequel.new(Sequel::Model.db).up
 ```
 
-Once you have created and executed the migration, you can use the sequel adapter like so:
+Once you have created and executed the migration, you can use the sequel adapter by simply requiring it:
 
 ```ruby
-require 'flipper/adapters/sequel'
-adapter = Flipper::Adapters::Sequel.new
-flipper = Flipper.new(adapter)
-# profit...
+require 'flipper-sequel`
+```
+
+If you want to customize the adapter, you can add this to an initializer:
+
+```ruby
+# Flipper.configure do |config|
+#   config.default do
+#     Flipper.new(Flipper::Adapters::Sequel.new)
+#   end
+# end
 ```
 
 ## Internals
