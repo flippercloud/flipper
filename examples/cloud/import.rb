@@ -9,15 +9,12 @@ $:.unshift(lib_path)
 require 'flipper'
 require 'flipper/cloud'
 
-memory_adapter = Flipper::Adapters::Memory.new
-flipper = Flipper.new(memory_adapter)
-
-flipper.enable(:test)
-flipper.enable(:search)
-flipper.enable_actor(:stats, Flipper::Actor.new("jnunemaker"))
-flipper.enable_percentage_of_time(:logging, 5)
+Flipper.enable(:test)
+Flipper.enable(:search)
+Flipper.enable_actor(:stats, Flipper::Actor.new("jnunemaker"))
+Flipper.enable_percentage_of_time(:logging, 5)
 
 cloud = Flipper::Cloud.new
 
 # makes cloud identical to memory flipper
-cloud.import(flipper)
+cloud.import(Flipper.instance)

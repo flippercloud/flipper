@@ -93,20 +93,4 @@ RSpec.describe Flipper::Middleware::SetupEnv do
       expect(last_response.body).to eq(Flipper.object_id.to_s)
     end
   end
-
-  context 'when flipper instance or block are nil and default Flipper is NOT configured' do
-    let(:app) do
-      app = lambda do |env|
-        [200, { 'Content-Type' => 'text/html' }, [env['flipper'].enabled?(:search)]]
-      end
-      builder = Rack::Builder.new
-      builder.use described_class
-      builder.run app
-      builder
-    end
-
-    it 'can use env flipper' do
-      expect { get '/' }.to raise_error(Flipper::DefaultNotSet)
-    end
-  end
 end

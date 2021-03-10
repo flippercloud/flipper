@@ -2,9 +2,7 @@ require File.expand_path('../example_setup', __FILE__)
 
 require 'flipper'
 
-adapter = Flipper::Adapters::Memory.new
-flipper = Flipper.new(adapter)
-stats = flipper[:stats]
+stats = Flipper[:stats]
 
 # Some class that represents what will be trying to do something
 class User
@@ -24,10 +22,10 @@ total = 100_000
 users = (1..total).map { |n| User.new(n) }
 
 perform_test = lambda { |number|
-  flipper[:stats].enable flipper.actors(number)
+  Flipper[:stats].enable Flipper.actors(number)
 
   enabled = users.map { |user|
-    flipper[:stats].enabled?(user) ? true : nil
+    Flipper[:stats].enabled?(user) ? true : nil
   }.compact
 
   actual = (enabled.size / total.to_f * 100).round(3)

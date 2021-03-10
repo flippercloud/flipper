@@ -1,7 +1,7 @@
 module Flipper
   class Configuration
     def initialize
-      @default = -> { raise DefaultNotSet }
+      @default = -> { Flipper.new(Flipper::Adapters::Memory.new) }
     end
 
     # Controls the default instance for flipper. When used with a block it
@@ -9,15 +9,15 @@ module Flipper
     # without a block, it performs a block invocation and returns the result.
     #
     #   configuration = Flipper::Configuration.new
-    #   configuration.default # => raises DefaultNotSet error.
+    #   configuration.default # => Flipper::DSL instance using Memory adapter
     #
-    #   # sets the default block to generate a new instance using Memory adapter
+    #   # sets the default block to generate a new instance using ActiveRecord adapter
     #   configuration.default do
-    #     require "flipper/adapters/memory"
-    #     Flipper.new(Flipper::Adapters::Memory.new)
+    #     require "flipper-active-record"
+    #     Flipper.new(Flipper::Adapters::ActiveRecord.new)
     #   end
     #
-    #   configuration.default # => Flipper::DSL instance using Memory adapter
+    #   configuration.default # => Flipper::DSL instance using ActiveRecord adapter
     #
     # Returns result of default block invocation if called without block. If
     # called with block, assigns the default block.

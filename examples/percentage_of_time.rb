@@ -2,12 +2,10 @@ require File.expand_path('../example_setup', __FILE__)
 
 require 'flipper'
 
-adapter = Flipper::Adapters::Memory.new
-flipper = Flipper.new(adapter)
-logging = flipper[:logging]
+logging = Flipper[:logging]
 
 perform_test = lambda do |number|
-  logging.enable flipper.time(number)
+  logging.enable Flipper.time(number)
 
   total = 100_000
   enabled = []
