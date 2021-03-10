@@ -18,12 +18,21 @@ Or install it yourself with:
 
 ## Usage
 
+In most cases, all you need to do is require the adapter. You must set the `MONGO_URL` or `FLIPPER_MONGO_URL` environment vairable to specify which Mongo database to connect to.
+
 ```ruby
-require 'flipper/adapters/mongo'
-collection = Mongo::Client.new(["127.0.0.1:27017"], database: 'testing')['flipper']
-adapter = Flipper::Adapters::Mongo.new(collection)
-flipper = Flipper.new(adapter)
-# profit...
+require 'flipper-mongo`
+```
+
+If you want to customize the adapter, you can add this to an initializer:
+
+```ruby
+# Flipper.configure do |config|
+#   config.default do
+#     collection = Mongo::Client.new(ENV["MONGO_URL"])["flipper"]
+#     Flipper.new(Flipper::Adapters::Mongo.new(collection))
+#   end
+# end
 ```
 
 ## Internals
