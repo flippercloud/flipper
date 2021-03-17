@@ -25,7 +25,7 @@ perform_test = lambda { |number|
   Flipper.enable_percentage_of_actors :stats, number
 
   enabled = users.map { |user|
-    Flipper[:stats].enabled?(user) ? true : nil
+    Flipper.enabled?(:stats, user) ? true : nil
   }.compact
 
   actual = (enabled.size / total.to_f * 100).round(3)
