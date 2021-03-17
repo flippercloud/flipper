@@ -3,10 +3,8 @@
 # feature for actors in a particular location or on a particular plan, but only
 # for a percentage of them. The percentage is a constant, but could easily be
 # plucked from memcached, redis, mysql or whatever.
-require File.expand_path('../example_setup', __FILE__)
+require 'bundler/setup'
 require 'flipper'
-
-stats = Flipper[:stats]
 
 # Some class that represents what will be trying to do something
 class User
@@ -32,13 +30,13 @@ Flipper.register(:experimental) do |actor|
 end
 
 # enable the experimental group
-flipper[:stats].enable_group :experimental
+Flipper.enable_group :stats, :experimental
 
 # create a bunch of fake users and see how many are enabled
 total = 10_000
 users = (1..total).map { |n| User.new(n) }
 enabled = users.map { |user|
-  flipper[:stats].enabled?(user) ? true : nil
+  Flipper.enabled?(:stats, user) ? true : nil
 }.compact
 
 # show the results

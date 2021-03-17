@@ -1,11 +1,6 @@
 # Usage (from the repo root):
 #   env FLIPPER_CLOUD_TOKEN=<token> bundle exec ruby examples/cloud/import.rb
-require 'pathname'
-require 'logger'
-root_path = Pathname(__FILE__).dirname.join('..').expand_path
-lib_path  = root_path.join('lib')
-$:.unshift(lib_path)
-
+require 'bundler/setup'
 require 'flipper'
 require 'flipper/cloud'
 

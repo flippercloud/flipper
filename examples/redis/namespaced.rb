@@ -1,5 +1,5 @@
+require 'bundler/setup'
 require 'pp'
-require 'pathname'
 require 'logger'
 begin
   require 'redis-namespace'
