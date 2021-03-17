@@ -17,4 +17,4 @@ Flipper.enable_percentage_of_time(:logging, 5)
 cloud = Flipper::Cloud.new
 
 # makes cloud identical to memory flipper
-cloud.import(Flipper.instance)
+cloud.import(Flipper)
