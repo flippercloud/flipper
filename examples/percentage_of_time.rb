@@ -5,7 +5,7 @@ require 'flipper'
 logging = Flipper[:logging]
 
 perform_test = lambda do |number|
-  logging.enable Flipper.time(number)
+  logging.enable_percentage_of_time number
 
   total = 100_000
   enabled = []
