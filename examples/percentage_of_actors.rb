@@ -22,7 +22,7 @@ total = 100_000
 users = (1..total).map { |n| User.new(n) }
 
 perform_test = lambda { |number|
-  Flipper[:stats].enable Flipper.actors(number)
+  Flipper.enable_percentage_of_actors :stats, number
 
   enabled = users.map { |user|
     Flipper[:stats].enabled?(user) ? true : nil
