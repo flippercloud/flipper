@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+
+# Exit if any example fails
+set -e
+
+# Run all examples individually
+for example in examples/**/*.rb; do
+  # Skip examples with a loop for now
+  if ! grep -q "loop do" "$example"; then
+    echo $example
+    ruby $example
+  fi
+done
