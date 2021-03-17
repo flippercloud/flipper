@@ -48,4 +48,6 @@ jobs:
       - name: Run Rake
         run: bundle exec rake
       - name: Run Examples
+        env:
+          FLIPPER_CLOUD_TOKEN: ${ secrets.FLIPPER_CLOUD_TOKEN }
         run: script/examples
