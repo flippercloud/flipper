@@ -33,7 +33,7 @@ puts "Stats for admin: #{stats.enabled?(admin)}"
 puts "Stats for non_admin: #{stats.enabled?(non_admin)}"
 
 puts "\nEnabling Stats for admins...\n\n"
-stats.enable(Flipper.group(:admins))
+stats.enable_group :admins
 
 puts "Stats for admin: #{stats.enabled?(admin)}"
 puts "Stats for non_admin: #{stats.enabled?(non_admin)}"
