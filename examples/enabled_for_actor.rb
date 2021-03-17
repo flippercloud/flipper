@@ -22,21 +22,15 @@ end
 user1 = User.new(1, true)
 user2 = User.new(2, false)
 
-# pick an adapter
-adapter = Flipper::Adapters::Memory.new
-
-# get a handy dsl instance
-flipper = Flipper.new(adapter)
-
 Flipper.register :admins do |actor|
   actor.admin?
 end
 
-flipper[:search].enable
-flipper[:stats].enable_actor user1
-flipper[:pro_stats].enable_percentage_of_actors 50
-flipper[:tweets].enable_group :admins
-flipper[:posts].enable_actor user2
+Flipper.enable :search
+Flipper.enable_actor :stats, user1
+Flipper.enable_percentage_of_actors :pro_stats, 50
+Flipper.enable_group :tweets, :admins
+Flipper.enable_actor :posts, user2
 
-pp flipper.features.select { |feature| feature.enabled?(user1) }.map(&:name)
-pp flipper.features.select { |feature| feature.enabled?(user2) }.map(&:name)
+pp Flipper.features.select { |feature| feature.enabled?(user1) }.map(&:name)
+pp Flipper.features.select { |feature| feature.enabled?(user2) }.map(&:name)
