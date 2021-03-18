@@ -1,6 +1,5 @@
 # env FLIPPER_CLOUD_TOKEN=<token> bundle exec ruby examples/cloud/cached_in_memory.rb
-require File.expand_path('../../example_setup', __FILE__)
-
+require 'bundler/setup'
 require 'flipper/cloud'
 require 'flipper/adapters/active_support_cache_store'
 require 'active_support/cache'

@@ -70,16 +70,6 @@ Want to get a quick feel for what it looks like to work with Flipper? Check out 
 ```ruby
 require 'flipper'
 
-Flipper.configure do |config|
-  config.default do
-    # pick an adapter, this uses memory, any will do, see docs above
-    adapter = Flipper::Adapters::Memory.new
-
-    # pass adapter to handy DSL instance
-    Flipper.new(adapter)
-  end
-end
-
 # check if search is enabled
 if Flipper.enabled?(:search)
   puts 'Search away!'

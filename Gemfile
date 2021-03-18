@@ -18,6 +18,7 @@ gem 'minitest', '~> 5.8'
 gem 'minitest-documentation'
 gem 'webmock', '~> 3.0'
 gem 'climate_control'
+gem 'redis-namespace'
 
 group(:guard) do
   gem 'guard', '~> 2.15'
