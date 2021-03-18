@@ -3,7 +3,7 @@ require File.expand_path('../lib/flipper/version', __FILE__)
 require File.expand_path('../lib/flipper/metadata', __FILE__)
 
 flipper_cloud_files = lambda do |file|
-  file =~ /cloud/ || file.start_with?("config")
+  file =~ /cloud/
 end
 
 Gem::Specification.new do |gem|
