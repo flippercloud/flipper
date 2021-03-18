@@ -6,7 +6,7 @@ module Flipper
 
         def initialize(response)
           @response = response
-          super("Failed with status: #{response.code}")
+          super("Failed with status: #{response.code} #{response.body}")
         end
       end
     end
