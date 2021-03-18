@@ -60,7 +60,6 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
     end
 
     it "defines #flipper_id on AR::Base" do
-      binding.pry
       expect(ActiveRecord::Base.ancestors).to include(Flipper::Identifier)
     end
   end
