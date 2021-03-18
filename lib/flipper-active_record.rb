@@ -8,4 +8,6 @@ ActiveSupport.on_load(:active_record) do
       Flipper.new(Flipper::Adapters::ActiveRecord.new)
     end
   end
+
+  ActiveRecord::Base.include Flipper::Identifier
 end
