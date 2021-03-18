@@ -46,7 +46,6 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
 
   it_should_behave_like 'a flipper adapter'
 
-
   it 'configures itself on load' do
     Flipper.configuration = nil
     Flipper.instance = nil
