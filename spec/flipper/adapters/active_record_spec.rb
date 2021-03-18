@@ -58,9 +58,5 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
     it 'configures itself' do
       expect(Flipper.adapter.adapter).to be_a(Flipper::Adapters::ActiveRecord)
     end
-
-    it "defines #flipper_id on AR::Base" do
-      expect(ActiveRecord::Base.ancestors).to include(Flipper::Identifier)
-    end
   end
 end

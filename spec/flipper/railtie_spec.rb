@@ -37,5 +37,11 @@ RSpec.describe Flipper::Railtie do
       application.config.flipper.memoizer.preload_all = true
       application.initialize!
     end
+
+    it "defines #flipper_id on AR::Base" do
+      application.initialize!
+      require 'active_record'
+      expect(ActiveRecord::Base.ancestors).to include(Flipper::Identifier)
+    end
   end
 end
