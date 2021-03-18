@@ -1,5 +1,4 @@
-require File.expand_path('../example_setup', __FILE__)
-
+require 'bundler/setup'
 require 'flipper'
 
 # Some class that represents what will be trying to do something

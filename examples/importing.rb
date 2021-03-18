@@ -1,4 +1,4 @@
-require File.expand_path('../example_setup', __FILE__)
+require 'bundler/setup'
 require_relative 'active_record/ar_setup'
 require 'flipper'
 require 'flipper/adapters/redis'

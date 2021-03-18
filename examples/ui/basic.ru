@@ -4,14 +4,7 @@
 #   bundle exec shotgun examples/ui/basic.ru -p 9999
 #   http://localhost:9999/
 #
-require "pp"
-require "logger"
-require "pathname"
-
-root_path = Pathname(__FILE__).dirname.join("..").expand_path
-lib_path  = root_path.join("lib")
-$:.unshift(lib_path)
-
+require 'bundler/setup'
 require "flipper-ui"
 require "flipper/adapters/pstore"
 require "active_support/notifications"

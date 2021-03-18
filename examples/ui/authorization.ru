@@ -4,13 +4,8 @@
 #   bundle exec shotgun examples/ui/authorization.ru -p 9999
 #   http://localhost:9999/
 #
-require "pp"
+require 'bundler/setup'
 require "logger"
-require "pathname"
-
-root_path = Pathname(__FILE__).dirname.join("..").expand_path
-lib_path  = root_path.join("lib")
-$:.unshift(lib_path)
 
 require "flipper-ui"
 require "flipper/adapters/pstore"
