@@ -9,15 +9,8 @@ Flipper.register(:team_actor) do |actor|
 end
 
 # Some class that represents actor that will be trying to do something
-class User
-  attr_reader :id
-
-  def initialize(id)
-    @id = id
-  end
-
-  # Must respond to flipper_id
-  alias_method :flipper_id, :id
+class User < Struct.new(:id)
+  include Flipper::Identifier
 end
 
 class Team

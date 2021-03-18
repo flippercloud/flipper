@@ -7,17 +7,8 @@ require 'bundler/setup'
 require 'flipper'
 
 # Some class that represents what will be trying to do something
-class User
-  attr_reader :id
-
-  def initialize(id)
-    @id = id
-  end
-
-  # Must respond to flipper_id
-  def flipper_id
-    "User;#{@id}"
-  end
+class User < Struct.new(:id)
+  include Flipper::Identifier
 end
 
 PERCENTAGE = 50
