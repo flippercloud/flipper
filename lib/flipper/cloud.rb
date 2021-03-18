@@ -4,6 +4,7 @@ require "flipper/middleware/memoizer"
 require "flipper/cloud/configuration"
 require "flipper/cloud/dsl"
 require "flipper/cloud/middleware"
+require "flipper/cloud/engine" if defined?(Rails::Engine)
 
 module Flipper
   module Cloud
