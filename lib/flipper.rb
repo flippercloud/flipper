@@ -164,3 +164,5 @@ require 'flipper/types/percentage'
 require 'flipper/types/percentage_of_actors'
 require 'flipper/types/percentage_of_time'
 require 'flipper/typecast'
+
+require "flipper/railtie" if defined?(Rails::Railtie)
