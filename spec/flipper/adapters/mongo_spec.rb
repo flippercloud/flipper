@@ -24,4 +24,14 @@ RSpec.describe Flipper::Adapters::Mongo do
   end
 
   it_should_behave_like 'a flipper adapter'
+
+  it 'configures itself on load' do
+    Flipper.configuration = nil
+    Flipper.instance = nil
+
+    require 'flipper-mongo'
+
+    ENV["MONGO_URL"] ||= "mongodb://127.0.0.1:27017/testing"
+    expect(Flipper.adapter.adapter).to be_a(Flipper::Adapters::Mongo)
+  end
 end

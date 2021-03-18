@@ -45,4 +45,15 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
   end
 
   it_should_behave_like 'a flipper adapter'
+
+
+  it 'configures itself on load' do
+    Flipper.configuration = nil
+    Flipper.instance = nil
+
+    require 'flipper-active_record'
+    ActiveSupport.run_load_hooks(:active_record, ActiveRecord::Base)
+
+    expect(Flipper.adapter.adapter).to be_a(Flipper::Adapters::ActiveRecord)
+  end
 end

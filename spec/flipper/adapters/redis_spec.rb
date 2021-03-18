@@ -18,4 +18,13 @@ RSpec.describe Flipper::Adapters::Redis do
   end
 
   it_should_behave_like 'a flipper adapter'
+
+  it 'configures itself on load' do
+    Flipper.configuration = nil
+    Flipper.instance = nil
+
+    require 'flipper-redis'
+
+    expect(Flipper.adapter.adapter).to be_a(Flipper::Adapters::Redis)
+  end
 end
