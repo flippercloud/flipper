@@ -24,15 +24,15 @@ In most cases, all you need to do is require the adapter. It will connect to the
 require 'flipper-redis`
 ```
 
-If you want to customize the adapter, you can add this to an initializer:
+**If you need to customize the adapter**, you can add this to an initializer:
 
 ```ruby
-# Flipper.configure do |config|
-#   config.default do
-#     client = Redis.new(url: ENV["FLIPPER_REDIS_URL"] || ENV["REDIS_URL"])
-#     Flipper.new(Flipper::Adapters::Redis.new(client))
-#   end
-# end
+Flipper.configure do |config|
+  config.default do
+    client = Redis.new(url: ENV["FLIPPER_REDIS_URL"] || ENV["REDIS_URL"])
+    Flipper.new(Flipper::Adapters::Redis.new(client))
+  end
+end
 ```
 
 ## Internals

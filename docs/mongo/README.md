@@ -24,15 +24,15 @@ In most cases, all you need to do is require the adapter. You must set the `MONG
 require 'flipper-mongo`
 ```
 
-If you want to customize the adapter, you can add this to an initializer:
+**If you need to customize the adapter**, you can add this to an initializer:
 
 ```ruby
-# Flipper.configure do |config|
-#   config.default do
-#     collection = Mongo::Client.new(ENV["MONGO_URL"])["flipper"]
-#     Flipper.new(Flipper::Adapters::Mongo.new(collection))
-#   end
-# end
+Flipper.configure do |config|
+  config.default do
+    collection = Mongo::Client.new(ENV["MONGO_URL"])["flipper"]
+    Flipper.new(Flipper::Adapters::Mongo.new(collection))
+  end
+end
 ```
 
 ## Internals
