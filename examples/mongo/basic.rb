@@ -1,9 +1,5 @@
-require 'pathname'
+require 'bundler/setup'
 require 'logger'
-
-root_path = Pathname(__FILE__).dirname.join('..').expand_path
-lib_path  = root_path.join('lib')
-$:.unshift(lib_path)
 
 require 'flipper/adapters/mongo'
 Mongo::Logger.logger.level = Logger::INFO

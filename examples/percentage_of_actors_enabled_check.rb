@@ -1,9 +1,5 @@
-require File.expand_path('../example_setup', __FILE__)
-
+require 'bundler/setup'
 require 'flipper'
-
-adapter = Flipper::Adapters::Memory.new
-flipper = Flipper.new(adapter)
 
 # Some class that represents what will be trying to do something
 class User
@@ -18,15 +14,16 @@ class User
 end
 
 # checking a bunch
-gate = Flipper::Gates::PercentageOfActors.new
-feature_name = "data_migration"
-percentage_enabled = 10
 total = 20_000
 enabled = []
+percentage_enabled = 10
+
+feature = Flipper[:data_migration]
+feature.enable_percentage_of_actors 10
 
 (1..total).each do |id|
   user = User.new(id)
-  if gate.open?(user, percentage_enabled, feature_name: feature_name)
+  if feature.enabled? user
     enabled << user
   end
 end
@@ -35,4 +32,4 @@ p actual: enabled.size, expected: total * (percentage_enabled * 0.01)
 
 # checking one
 user = User.new(1)
-p user_1_enabled: Flipper::Gates::PercentageOfActors.new.open?(user, percentage_enabled, feature_name: feature_name)
+p user_1_enabled: feature.enabled?(user)

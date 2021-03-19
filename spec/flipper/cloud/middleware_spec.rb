@@ -105,7 +105,7 @@ RSpec.describe Flipper::Cloud::Middleware do
 
       expect(last_response.status).to eq(402)
       expect(last_response.headers["Flipper-Cloud-Response-Error-Class"]).to eq("Flipper::Adapters::Http::Error")
-      expect(last_response.headers["Flipper-Cloud-Response-Error-Message"]).to eq("Failed with status: 402")
+      expect(last_response.headers["Flipper-Cloud-Response-Error-Message"]).to include("Failed with status: 402")
       expect(stub).to have_been_requested
     end
   end
@@ -128,7 +128,7 @@ RSpec.describe Flipper::Cloud::Middleware do
 
       expect(last_response.status).to eq(500)
       expect(last_response.headers["Flipper-Cloud-Response-Error-Class"]).to eq("Flipper::Adapters::Http::Error")
-      expect(last_response.headers["Flipper-Cloud-Response-Error-Message"]).to eq("Failed with status: 503")
+      expect(last_response.headers["Flipper-Cloud-Response-Error-Message"]).to include("Failed with status: 503")
       expect(stub).to have_been_requested
     end
   end

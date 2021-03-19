@@ -6,8 +6,7 @@
 # unavailable, but we are hoping to fix that soon by doing the cloud update in a
 # background thread.
 # env FLIPPER_CLOUD_TOKEN=<token> bundle exec ruby examples/cloud/local_adapter.rb
-require File.expand_path('../../example_setup', __FILE__)
-
+require 'bundler/setup'
 require 'logger'
 require 'flipper/cloud'
 require 'flipper/adapters/redis'

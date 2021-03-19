@@ -1,10 +1,7 @@
-require File.expand_path('../example_setup', __FILE__)
-
+require 'bundler/setup'
 require 'flipper'
 
-adapter = Flipper::Adapters::Memory.new
-flipper = Flipper.new(adapter)
-stats = flipper[:stats]
+stats = Flipper[:stats]
 
 # Register group
 Flipper.register(:team_actor) do |actor|

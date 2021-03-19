@@ -26,6 +26,10 @@ module Flipper
       # won't see a videoclip of Taylor Swift when there aren't any features
       attr_accessor :fun
 
+      # Public: Tired of seeing the awesome message about Cloud? Set this to
+      # false and it will go away. Defaults to true.
+      attr_accessor :cloud_recommendation
+
       # Public: What should show up in the form to add actors. This can be
       # different per application since flipper_id's can be whatever an
       # application needs. Defaults to "a flipper id".
@@ -60,6 +64,7 @@ module Flipper
         @feature_creation_enabled = true
         @feature_removal_enabled = true
         @fun = true
+        @cloud_recommendation = true
         @add_actor_placeholder = "a flipper id"
         @descriptions_source = DEFAULT_DESCRIPTIONS_SOURCE
         @show_feature_description_in_list = false

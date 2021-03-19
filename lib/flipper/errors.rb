@@ -16,9 +16,8 @@ module Flipper
   # use it.
   class DefaultNotSet < Flipper::Error
     def initialize(message = nil)
-      default = "Default flipper instance not configured. See " \
-                "Flipper.configure for how to configure the default instance."
-      super(message || default)
+      warn "Flipper::DefaultNotSet is deprecated and will be removed in 1.0"
+      super
     end
   end
 

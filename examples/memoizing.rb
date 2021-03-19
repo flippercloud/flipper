@@ -1,5 +1,4 @@
-require File.expand_path('../example_setup', __FILE__)
-
+require 'bundler/setup'
 require 'flipper'
 require 'flipper/adapters/operation_logger'
 require 'flipper/instrumentation/log_subscriber'
