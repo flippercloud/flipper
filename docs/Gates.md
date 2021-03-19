@@ -14,7 +14,7 @@ Flipper.enabled? :stats # check
 
 ## 2. Individual Actor
 
-Turn feature on for individual thing. Think enable feature for someone to test or for a buddy. The only requirement for an individual actor is that it must respond to `flipper_id`.
+Turn feature on for individual thing. Think enable feature for someone to test or for a buddy.
 
 ```ruby
 Flipper.enable_actor :stats, user
@@ -35,23 +35,30 @@ feature.enabled? user # true
 feature.disable_actor user
 ```
 
-The key is to make sure you do not enable two different types of objects for the same feature. Imagine that user has a `flipper_id` of 6 and group has a `flipper_id` of 6. Enabling search for user would automatically enable it for group, as they both have a `flipper_id` of 6.
-
-The one exception to this rule is if you have globally unique `flipper_ids`, such as UUIDs. If your `flipper_ids` are unique globally in your entire system, enabling two different types should be safe. Another way around this is to prefix the `flipper_id` with the class name like this:
+The only requirement for an individual actor is that it must have a unique `flipper_id`. Include the `Flipper::Identifier` module for a default implementation which combines the class name and `id` (e.g. `User:6`).
 
 ```ruby
-class User
+class User < Struct.new(:id)
+  include Flipper::Identifier
+end
+
+User.new(5).flipper_id # => "User;5"
+```
+
+You can also define your own implementation:
+
+```
+class Organization < Struct.new(:uuid)
   def flipper_id
-    "User;#{id}"
+    uuid
   end
 end
 
-class Organization
-  def flipper_id
-    "Organization;#{id}"
-  end
-end
+Organization.new("DEB3D850-39FB-444B-A1E9-404A990FDBE0").flipper_id
+# => "DEB3D850-39FB-444B-A1E9-404A990FDBE0"
 ```
+
+Just make sure each type of object has a unique `flipper_id`.
 
 ## 3. Percentage of Actors
 

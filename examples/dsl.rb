@@ -2,15 +2,8 @@ require 'bundler/setup'
 require 'flipper'
 
 # create a thing with an identifier
-class Person
-  attr_reader :id
-
-  def initialize(id)
-    @id = id
-  end
-
-  # Must respond to flipper_id
-  alias_method :flipper_id, :id
+class Person < Struct.new(:id)
+  include Flipper::Identifier
 end
 
 person = Person.new(1)

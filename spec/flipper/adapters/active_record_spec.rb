@@ -45,4 +45,22 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
   end
 
   it_should_behave_like 'a flipper adapter'
+
+  context 'requiring "flipper-active_record"' do
+    before do
+      Flipper.configuration = nil
+      Flipper.instance = nil
+
+      require 'flipper-active_record'
+      ActiveSupport.run_load_hooks(:active_record, ActiveRecord::Base)
+    end
+
+    it 'configures itself' do
+      expect(Flipper.adapter.adapter).to be_a(Flipper::Adapters::ActiveRecord)
+    end
+
+    it "defines #flipper_id on AR::Base" do
+      expect(ActiveRecord::Base.ancestors).to include(Flipper::Identifier)
+    end
+  end
 end

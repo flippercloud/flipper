@@ -28,4 +28,21 @@ RSpec.describe Flipper::Adapters::Sequel do
   end
 
   it_should_behave_like 'a flipper adapter'
+
+  context 'requiring "flipper-sequel"' do
+    before do
+      Flipper.configuration = nil
+      Flipper.instance = nil
+
+      require 'flipper-sequel'
+    end
+
+    it 'configures itself' do
+      expect(Flipper.adapter.adapter).to be_a(Flipper::Adapters::Sequel)
+    end
+
+    it "defines #flipper_id on AR::Base" do
+      expect(Sequel::Model.ancestors).to include(Flipper::Identifier)
+    end
+  end
 end
