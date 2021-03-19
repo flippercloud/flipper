@@ -59,6 +59,17 @@ RSpec.describe Flipper::UI::Configuration do
     end
   end
 
+  describe "#cloud_recommendation" do
+    it "has default value" do
+      expect(configuration.cloud_recommendation).to eq(true)
+    end
+
+    it "can be updated" do
+      configuration.cloud_recommendation = false
+      expect(configuration.cloud_recommendation).to eq(false)
+    end
+  end
+
   describe "#feature_removal_enabled" do
     it "has default value" do
       expect(configuration.feature_removal_enabled).to eq(true)
