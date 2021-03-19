@@ -5,3 +5,5 @@ Flipper.configure do |config|
     Flipper.new(Flipper::Adapters::Sequel.new)
   end
 end
+
+Sequel::Model.include Flipper::Identifier
