@@ -15,13 +15,13 @@ Control your software &mdash; don't let it control you.
 
 ## Installation
 
-For Rails apps, add this line to your application's Gemfile:
+Add this line to your application's Gemfile:
 
-    gem 'flipper-rails'
+    gem 'flipper'
 
-For a plain ol' Ruby project, you'll need a storage [adapter](#adapters), but start with:
+You'll also want to pick a storage [adapter](#adapters), for example:
 
-    gem 'flipper'`
+    gem 'flipper-active_record'`
 
 And then execute:
 
@@ -90,7 +90,7 @@ Flipper is built on adapters for maximum flexibility. Regardless of what data st
 
 Pick one of our [supported adapters](docs/Adapters.md#officially-supported) and follow the installation instructions:
 
-* [Active Record](docs/active_record/README.md) (default for apps using `flipper-rails`)
+* [Active Record](docs/active_record/README.md)
 * [Sequel](docs/sequel/README.md)
 * [Redis](docs/redis/README.md)
 * [Mongo](docs/mongo/README.md)
