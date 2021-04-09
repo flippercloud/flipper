@@ -16,7 +16,7 @@ RSpec.describe Flipper::Adapters::Rollout do
     begin
       redis.flushdb
     rescue Redis::CannotConnectError
-      skip 'Redis is not available' unless ENV['CI']
+      ENV['CI'] ? raise : skip('Redis not available')
     end
   end
 

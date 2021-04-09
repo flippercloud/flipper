@@ -10,7 +10,7 @@ class RedisCacheTest < MiniTest::Test
     memory_adapter = Flipper::Adapters::Memory.new
     @adapter = Flipper::Adapters::RedisCache.new(memory_adapter, @cache)
   rescue Redis::CannotConnectError
-    skip 'Redis is not available' unless ENV['CI']
+    ENV['CI'] ? raise : skip('Reids not available')
   end
 
   def teardown

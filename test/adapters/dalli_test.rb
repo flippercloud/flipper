@@ -13,7 +13,7 @@ class DalliTest < MiniTest::Test
     memory_adapter = Flipper::Adapters::Memory.new
     @adapter = Flipper::Adapters::Dalli.new(memory_adapter, @cache)
   rescue Dalli::NetworkError
-    skip 'Memcached not available' unless ENV['CI']
+    ENV['CI'] ? raise : skip('Memcached not available')
   end
 
   def teardown

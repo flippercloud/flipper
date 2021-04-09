@@ -9,6 +9,6 @@ class RedisTest < MiniTest::Test
     client = Redis.new(url: url).tap(&:flushdb)
     @adapter = Flipper::Adapters::Redis.new(client)
   rescue Redis::CannotConnectError
-    skip 'Redis is not available' unless ENV['CI']
+    ENV['CI'] ? raise : skip('Redis not available')
   end
 end
