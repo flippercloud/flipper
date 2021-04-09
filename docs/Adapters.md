@@ -14,6 +14,7 @@ I plan on supporting the adapters in the flipper repo. Other adapters are welcom
 * [PStore adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/pstore.rb) – great for when a local file is enough
 * [read-only adapter](https://github.com/jnunemaker/flipper/blob/master/docs/read-only)
 * [Redis adapter](https://github.com/jnunemaker/flipper/blob/master/docs/redis)
+* [Rollout adapter](rollout/README.md)
 * [Sequel adapter](https://github.com/jnunemaker/flipper/blob/master/docs/sequel)
 
 ## Community Supported
