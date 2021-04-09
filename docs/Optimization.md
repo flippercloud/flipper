@@ -8,7 +8,7 @@ By default, Flipper will preload and memoize all features to ensure one adapter 
 
 #### `preload`
 
-By default, flipper will preload all features before each request. This is recommended if you only have a few features (< 100?) and they are used on most requests. If you have a lot of features, but a few are used on most requests, you may want to customize preloading:
+By default, flipper will preload all features before each request. This is recommended if you only have a few features (< 100?) and they are used on most requests. If you have a lot of features, but only a few are used on most requests, you may want to customize preloading:
 
 ```ruby
 # config/initializers/flipper.rb
@@ -21,7 +21,7 @@ Rails.application.configure do
 end
 ```
 
-With preloading disabled, Flipper will still memoize feature checks.
+Feature checks are still memoized if preloading is disabled, ensuring one adapter call per feature during a request.
 
 #### `unless`
 
