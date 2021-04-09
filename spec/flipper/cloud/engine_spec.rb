@@ -36,25 +36,4 @@ RSpec.describe Flipper::Cloud::Engine do
       end
     end
   end
-
-  describe "routes" do
-    context "sync_method = :webhook" do
-      before { application.config.flipper.cloud.sync_method = :webhook }
-
-      it 'mounts cloud app' do
-        application.initialize!
-        expect(application.routes.recognize_path("/_flipper")).to be(anything)
-      end
-    end
-
-    context "sync_methd = :poll" do
-      before { application.config.flipper.cloud.sync_method = :poll }
-
-      it 'does not mount cloud app' do
-        application.initialize!
-        expect { application.routes.recognize_path("/_flipper") }.to raise_error(ActionController::RoutingError)
-      end
-    end
-  end
-
 end
