@@ -8,8 +8,7 @@ module Flipper
       #
       # app - The app this middleware is included in.
       # opts - The Hash of options.
-      #        :preload_all - Boolean of whether or not to preload all features.
-      #        :preload - Array of Symbol feature names to preload.
+      #        :preload - Boolean to preload all features or Array of Symbol feature names to preload.
       #
       # Examples
       #
@@ -24,6 +23,11 @@ module Flipper
       def initialize(app, opts = {})
         if opts.is_a?(Flipper::DSL) || opts.is_a?(Proc)
           raise 'Flipper::Middleware::Memoizer no longer initializes with a flipper instance or block. Read more at: https://git.io/vSo31.'
+        end
+
+        if opts[:preload_all]
+          warn "Flipper::Middleware::Memoizer: `preload_all` is deprecated, use `preload: true`"
+          opts[:preload] = true
         end
 
         @app = app
@@ -53,9 +57,9 @@ module Flipper
         original = flipper.memoizing?
         flipper.memoize = true
 
-        flipper.preload_all if @opts[:preload_all]
-
-        if (preload = @opts[:preload])
+        if @opts[:preload] === true
+          flipper.preload_all
+        elsif (preload = @opts[:preload])
           flipper.preload(preload)
         end
 

@@ -20,15 +20,15 @@ RSpec.describe Flipper::Railtie do
   end
 
   describe 'config' do
-    it 'memoizer.preload_all defaults to true' do
-      expect(subject.config.flipper.memoizer.preload_all).to eq(true)
+    it 'memoizer.preload defaults to true' do
+      expect(subject.config.flipper.memoizer).to eq({preload: true})
     end
   end
 
   describe 'initializers' do
     it 'adds Memoizer middleware by default' do
-      expect(application.config.flipper.memoizer).to eq(preload_all: true)
-      expect(Flipper::Middleware::Memoizer).to receive(:new).with(application.routes, preload_all: true)
+      expect(application.config.flipper.memoizer).to eq(preload: true)
+      expect(Flipper::Middleware::Memoizer).to receive(:new).with(application.routes, preload: true)
       expect(subject.middleware.last).to eq(Flipper::Middleware::Memoizer)
     end
 
@@ -39,7 +39,6 @@ RSpec.describe Flipper::Railtie do
 
     it 'passes preload config to memoizer' do
       expect(Flipper::Middleware::Memoizer).to receive(:new).with(application.routes, preload: [:stats, :search])
-      application.config.flipper.memoizer.delete :preload_all
       application.config.flipper.memoizer.preload = [:stats, :search]
       subject
     end

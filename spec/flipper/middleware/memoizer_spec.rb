@@ -103,14 +103,14 @@ RSpec.describe Flipper::Middleware::Memoizer do
     end
   end
 
-  context 'with preload_all' do
+  context 'with preload: true' do
     let(:app) do
       # ensure scoped for builder block, annoying...
       instance = flipper
       middleware = described_class
 
       Rack::Builder.new do
-        use middleware, preload_all: true
+        use middleware, preload: true
 
         map '/' do
           run ->(_env) { [200, {}, []] }

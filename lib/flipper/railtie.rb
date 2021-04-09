@@ -3,7 +3,7 @@ module Flipper
     config.before_configuration do
       config.flipper = ActiveSupport::OrderedOptions.new
       config.flipper.memoizer = ActiveSupport::OrderedOptions.new
-      config.flipper.memoizer.preload_all = true
+      config.flipper.memoizer.preload = true
     end
 
     initializer "flipper.memoizer" do |app|
