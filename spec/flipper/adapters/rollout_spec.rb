@@ -13,7 +13,11 @@ RSpec.describe Flipper::Adapters::Rollout do
   let(:destination_flipper) { Flipper.new(destination_adapter) }
 
   before do
-    redis.flushdb
+    begin
+      redis.flushdb
+    rescue Redis::CannotConnectError
+      skip 'Redis is not available' unless ENV['CI']
+    end
   end
 
   describe '#name' do
