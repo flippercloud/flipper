@@ -1,52 +1,65 @@
 # Optimization
 
-## Memoizing Middleware
+## Memoization
 
-One optimization that flipper provides is a memoizing middleware. The memoizing middleware ensures that you only make one adapter call per feature per request. This means if you check the same feature over and over, it will only make one Mongo, Redis, or whatever call per feature for the length of the request.
-
-You can use the middleware like so for Rails:
-
-```ruby
-# setup default instance (perhaps in config/initializers/flipper.rb)
-Flipper.configure do |config|
-  config.default do
-    Flipper.new(...)
-  end
-end
-
-# This assumes you setup a default flipper instance using configure.
-Rails.configuration.middleware.use Flipper::Middleware::Memoizer
-```
-
-**Note**: Be sure that the middleware is high enough up in your stack that all feature checks are wrapped.
-
-**Also Note**: If you haven't setup a default instance, you can pass the instance to `SetupEnv` as `Memoizer` uses whatever is setup in the `env`:
-
-```ruby
-Rails.configuration.middleware.use Flipper::Middleware::SetupEnv, -> { Flipper.new(...) }
-Rails.configuration.middleware.use Flipper::Middleware::Memoizer
-```
+By default, Flipper will preload and memoize all features to ensure one adapter call per request. This means no matter how many times you check features, Flipper will only make one network request to Mongo, Redis, or whatever adapter you are using for the length of the request.
 
 ### Options
 
-The Memoizer middleware also supports a few options. Use either `preload` or `preload_all`, not both.
+#### `preload`
 
-* **`:preload`** - An `Array` of feature names (`Symbol`) to preload for every request. Useful if you have features that are used on every endpoint. `preload` uses `Adapter#get_multi` to attempt to load the features in one network call instead of N+1 network calls.
-    ```ruby
-    Rails.configuration.middleware.use Flipper::Middleware::Memoizer,
-      preload: [:stats, :search, :some_feature]
-    ```
-* **`:preload_all`** - A Boolean value (default: false) of whether or not all features should be preloaded. Using this results in a `preload_all` call with the result of `Adapter#get_all`. Any subsequent feature checks will be memoized and perform no network calls. I wouldn't recommend using this unless you have few features (< 100?) and nearly all of them are used on every request.
-    ```ruby
-    Rails.configuration.middleware.use Flipper::Middleware::Memoizer,
-      preload_all: true
-    ```
-* **`:unless`** - A block that prevents preloading and memoization if it evaluates to true.
-    ```ruby
-    # skip preloading and memoizing if path starts with /assets
-    Rails.configuration.middleware.use Flipper::Middleware::Memoizer,
-      unless: ->(request) { request.path.start_with?("/assets") }
-    ```
+By default, flipper will preload all features before each request. This is recommended if you only have a few features (< 100?) and they are used on most requests. If you have a lot of features, but a few are used on most requests, you may want to customize preloading:
+
+```ruby
+# config/initializers/flipper.rb
+Rails.application.configure do
+  # Load specific features that are used on most requests
+  config.flipper.memoizer.preload = [:stats, :search, :some_feature]
+
+  # Disable preloading
+  config.flipper.memoizer.preload = false
+end
+```
+
+With preloading disabled, Flipper will still memoize feature checks.
+
+#### `unless`
+
+Prevent preloading and memoization by setting `unless` to a proc that evaluates to true.
+
+```ruby
+# config/initializers/flipper.rb
+Rails.application.configure do
+  config.flipper.memoizer.unless = ->(request) { request.path.start_with?("/assets") }
+end
+```
+
+#### Disable memoization
+
+To disable memoization entirely:
+
+```ruby
+Rails.application.configure do
+  config.flipper.memoizer = false
+end
+```
+
+### Advanced
+
+Memoization is implemented as a Rack middleware, which can be used manually in any Ruby app:
+
+```ruby
+use Flipper::Middleware::Memoizer,
+  preload: true,
+  unless: ->(request) { request.path.start_with?("/assets") }
+```
+
+**Also Note**: If you need to customize the instance of Flipper used by the memoizer, you can pass the instance to `SetupEnv`:
+
+```ruby
+use Flipper::Middleware::SetupEnv, -> { Flipper.new(...) }
+use Flipper::Middleware::Memoizer
+```
 
 ## Cache Adapters
 
