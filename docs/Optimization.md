@@ -4,9 +4,7 @@
 
 By default, Flipper will preload and memoize all features to ensure one adapter call per request. This means no matter how many times you check features, Flipper will only make one network request to Mongo, Redis, or whatever adapter you are using for the length of the request.
 
-### Options
-
-#### `preload`
+### Preloading
 
 By default, Flipper will preload all features before each request. This is recommended if you have a limited number of features (< 100?) and they are used on most requests. If you have a lot of features, but only a few are used on most requests, you may want to customize preloading:
 
@@ -23,7 +21,7 @@ end
 
 Features that are not preloaded are still memoized, ensuring one adapter call per feature during a request.
 
-#### `unless`
+### Skip memoization
 
 Prevent preloading and memoization by setting `unless` to a proc that evaluates to true.
 
@@ -34,7 +32,7 @@ Rails.application.configure do
 end
 ```
 
-#### Disable memoization
+### Disable memoization
 
 To disable memoization entirely:
 
