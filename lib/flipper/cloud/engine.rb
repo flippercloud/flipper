@@ -13,7 +13,8 @@ module Flipper
       end
 
       def default_cloud_sync_method
-        ENV["FLIPPER_CLOUD_SYNC_METHOD"]&.to_sym || (Rails.env.production? ? :webhook : :poll)
+        ENV["FLIPPER_CLOUD_SYNC_METHOD"]&.to_sym ||
+          ((ENV["FLIPPER_CLOUD_SYNC_SECRET"] || Rails.env.production?) ? :webhook : :poll)
       end
     end
   end

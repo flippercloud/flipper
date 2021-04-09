@@ -16,10 +16,16 @@ RSpec.describe Flipper::Cloud::Engine do
 
   describe 'config' do
     describe 'cloud.sync_method' do
-      it 'uses FLIPPER_CLOUD_SYNC_METHOD env variable' do
-        ENV['FLIPPER_CLOUD_SYNC_METHOD'] = 'webhook'
-        expect(application.config.flipper.cloud.sync_method).to eq(:webhook)
-        ENV.delete('FLIPPER_CLOUD_SYNC_METHOD')
+      it 'uses presence of FLIPPER_CLOUD_SYNC_SECRET env variable to enable webhook' do
+        with_modified_env 'FLIPPER_CLOUD_SYNC_SECRET' => 'xyz' do
+          expect(application.config.flipper.cloud.sync_method).to eq(:webhook)
+        end
+      end
+
+      it 'respects FLIPPER_CLOUD_SYNC_METHOD env variable' do
+        with_modified_env 'FLIPPER_CLOUD_SYNC_METHOD' => 'webhook' do
+          expect(application.config.flipper.cloud.sync_method).to eq(:webhook)
+        end
       end
 
       it 'defaults to :poll in development' do
