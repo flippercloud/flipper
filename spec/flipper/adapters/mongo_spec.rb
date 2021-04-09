@@ -20,7 +20,7 @@ RSpec.describe Flipper::Adapters::Mongo do
     begin
       collection.drop
     rescue Mongo::Error::NoServerAvailable
-      skip "Mongo not available"
+      skip 'Mongo not available' unless ENV['CI']
     rescue Mongo::Error::OperationFailure
     end
     collection.create

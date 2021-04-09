@@ -19,6 +19,7 @@ jobs:
       RAILS_VERSION: 6.0.0
       SQLITE3_VERSION: 1.4.1
       REDIS_URL: redis://localhost:6379/0
+      CI: true
     steps:
       - name: Setup memcached
         uses: KeisukeYamashita/memcached-actions@v1

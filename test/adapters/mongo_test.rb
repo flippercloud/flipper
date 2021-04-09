@@ -17,7 +17,7 @@ class MongoTest < MiniTest::Test
       collection.drop
       collection.create
     rescue Mongo::Error::NoServerAvailable
-      skip "Mongo not available"
+      skip 'Mongo not available' unless ENV['CI']
     rescue Mongo::Error::OperationFailure
     end
     @adapter = Flipper::Adapters::Mongo.new(collection)

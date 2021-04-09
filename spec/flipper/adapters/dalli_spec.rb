@@ -19,7 +19,7 @@ RSpec.describe Flipper::Adapters::Dalli do
     begin
       cache.flush
     rescue Dalli::NetworkError
-      skip "Memcached not available"
+      skip 'Memcached not available' unless ENV['CI']
     end
   end
 
