@@ -15,10 +15,6 @@ RSpec.describe Flipper::Cloud::Engine do
   end
 
   describe 'config' do
-    it 'memoizer.preload_all defaults to true' do
-      expect(application.config.flipper.memoizer.preload_all).to eq(true)
-    end
-
     describe 'cloud.sync_method' do
       it 'uses FLIPPER_CLOUD_SYNC_METHOD env variable' do
         ENV['FLIPPER_CLOUD_SYNC_METHOD'] = 'webhook'

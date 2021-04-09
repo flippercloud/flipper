@@ -6,8 +6,6 @@ module Flipper
       paths["config/routes.rb"] = ["lib/flipper/cloud/routes.rb"]
 
       config.before_configuration do
-        config.flipper.memoizer.preload_all = true
-
         config.flipper.cloud = ActiveSupport::InheritableOptions.new(
           sync_method: default_cloud_sync_method,
           path: '_flipper'

@@ -1,9 +1,9 @@
 module Flipper
   class Railtie < Rails::Railtie
     config.before_configuration do
-      config.flipper = ActiveSupport::OrderedOptions.new(
-        memoizer = ActiveSupport::OrderedOptions.new
-      )
+      config.flipper = ActiveSupport::OrderedOptions.new
+      config.flipper.memoizer = ActiveSupport::OrderedOptions.new
+      config.flipper.memoizer.preload_all = true
     end
 
     initializer "flipper.memoizer" do |app|
