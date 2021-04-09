@@ -2,6 +2,7 @@ require 'helper'
 require 'flipper/adapters/operation_logger'
 require 'flipper/adapters/dalli'
 require 'flipper/spec/shared_adapter_specs'
+require 'logger'
 
 RSpec.describe Flipper::Adapters::Dalli do
   let(:memory_adapter) do
@@ -14,7 +15,12 @@ RSpec.describe Flipper::Adapters::Dalli do
   subject { adapter }
 
   before do
-    cache.flush
+    Dalli.logger = Logger.new('/dev/null')
+    begin
+      cache.flush
+    rescue Dalli::NetworkError
+      skip "Memcached not available"
+    end
   end
 
   it_should_behave_like 'a flipper adapter'

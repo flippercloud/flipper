@@ -9,13 +9,15 @@ class MongoTest < MiniTest::Test
     port = '27017'
     logger = Logger.new('/dev/null')
     client = Mongo::Client.new(["#{host}:#{port}"],
-                               server_selection_timeout: 1,
+                               server_selection_timeout: 0.01,
                                database: 'testing',
                                logger: logger)
     collection = client['testing']
     begin
       collection.drop
       collection.create
+    rescue Mongo::Error::NoServerAvailable
+      skip "Mongo not available"
     rescue Mongo::Error::OperationFailure
     end
     @adapter = Flipper::Adapters::Mongo.new(collection)

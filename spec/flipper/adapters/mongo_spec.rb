@@ -11,13 +11,16 @@ RSpec.describe Flipper::Adapters::Mongo do
   let(:port) { ENV['MONGODB_PORT'] || 27017 }
 
   let(:client) do
-    Mongo::Client.new(["#{host}:#{port}"], server_selection_timeout: 1, database: 'testing')
+    logger = Logger.new('/dev/null')
+    Mongo::Client.new(["#{host}:#{port}"], server_selection_timeout: 0.01, database: 'testing', logger: logger)
   end
   let(:collection) { client['testing'] }
 
   before do
     begin
       collection.drop
+    rescue Mongo::Error::NoServerAvailable
+      skip "Mongo not available"
     rescue Mongo::Error::OperationFailure
     end
     collection.create
