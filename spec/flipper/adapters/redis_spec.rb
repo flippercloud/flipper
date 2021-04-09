@@ -14,7 +14,11 @@ RSpec.describe Flipper::Adapters::Redis do
   subject { described_class.new(client) }
 
   before do
-    client.flushdb
+    begin
+      client.flushdb
+    rescue Redis::CannotConnectError
+      ENV['CI'] ? raise : skip('Redis not available')
+    end
   end
 
   it_should_behave_like 'a flipper adapter'
