@@ -342,7 +342,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
     it 'eagerly caches known features for duration of request' do
       memory = Flipper::Adapters::Memory.new
       logged_memory = Flipper::Adapters::OperationLogger.new(memory)
-      cache = ActiveSupport::Cache::DalliStore.new(ENV['MEMCACHED_URL'])
+      cache = ActiveSupport::Cache::MemoryStore.new
       cache.clear
       cached = Flipper::Adapters::ActiveSupportCacheStore.new(logged_memory, cache, expires_in: 10)
       logged_cached = Flipper::Adapters::OperationLogger.new(cached)

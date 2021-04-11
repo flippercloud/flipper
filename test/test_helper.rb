@@ -1,3 +1,4 @@
+require 'bundler/setup'
 require 'flipper'
 require 'minitest/autorun'
 require 'minitest/unit'

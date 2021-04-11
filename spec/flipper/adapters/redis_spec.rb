@@ -14,7 +14,11 @@ RSpec.describe Flipper::Adapters::Redis do
   subject { described_class.new(client) }
 
   before do
-    client.flushdb
+    begin
+      client.flushdb
+    rescue Redis::CannotConnectError
+      ENV['CI'] ? raise : skip('Redis not available')
+    end
   end
 
   it_should_behave_like 'a flipper adapter'
@@ -23,7 +27,7 @@ RSpec.describe Flipper::Adapters::Redis do
     Flipper.configuration = nil
     Flipper.instance = nil
 
-    require 'flipper-redis'
+    load 'flipper-redis.rb'
 
     expect(Flipper.adapter.adapter).to be_a(Flipper::Adapters::Redis)
   end

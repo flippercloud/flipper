@@ -51,7 +51,7 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
       Flipper.configuration = nil
       Flipper.instance = nil
 
-      require 'flipper-active_record'
+      load 'flipper-active_record.rb'
       ActiveSupport.run_load_hooks(:active_record, ActiveRecord::Base)
     end
 

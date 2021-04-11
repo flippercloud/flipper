@@ -64,6 +64,9 @@ module SpecHelpers
 end
 
 RSpec.configure do |config|
+  config.order = :random
+  Kernel.srand config.seed
+
   config.include Rack::Test::Methods
   config.include SpecHelpers
 end
