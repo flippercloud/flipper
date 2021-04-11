@@ -27,7 +27,7 @@ RSpec.describe Flipper::Adapters::Redis do
     Flipper.configuration = nil
     Flipper.instance = nil
 
-    require 'flipper-redis'
+    load 'flipper-redis.rb'
 
     expect(Flipper.adapter.adapter).to be_a(Flipper::Adapters::Redis)
   end
