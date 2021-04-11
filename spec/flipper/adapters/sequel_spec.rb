@@ -34,7 +34,6 @@ RSpec.describe Flipper::Adapters::Sequel do
       Flipper.configuration = nil
       Flipper.instance = nil
 
-      # Use load to force-require even if previously required
       load 'flipper-sequel.rb'
     end
 
