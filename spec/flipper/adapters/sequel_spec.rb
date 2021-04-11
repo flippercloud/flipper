@@ -34,14 +34,15 @@ RSpec.describe Flipper::Adapters::Sequel do
       Flipper.configuration = nil
       Flipper.instance = nil
 
-      require 'flipper-sequel'
+      # Use load to force-require even if previously required
+      load 'flipper-sequel.rb'
     end
 
     it 'configures itself' do
       expect(Flipper.adapter.adapter).to be_a(Flipper::Adapters::Sequel)
     end
 
-    it "defines #flipper_id on AR::Base" do
+    it "defines #flipper_id on Sequel::Model" do
       expect(Sequel::Model.ancestors).to include(Flipper::Identifier)
     end
   end
