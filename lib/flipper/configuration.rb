@@ -6,6 +6,9 @@ module Flipper
     # Public: A boolean to determine if memoization should be enabled (default: true)
     attr_accessor :memoize
 
+    # Public: A lambda to determine if memoization should be skipped for a request
+    attr_accessor :memoize_unless
+
     # Public: An array of feature names or boolean to preload all for each request (default: true)
     attr_accessor :preload
 

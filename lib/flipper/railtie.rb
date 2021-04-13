@@ -8,7 +8,8 @@ module Flipper
       if config.memoize
         app.middleware.use Flipper::Middleware::Memoizer, {
           env_key: config.env_key,
-          preload: config.preload
+          preload: config.preload,
+          unless: config.memoize_unless
         }
       end
     end

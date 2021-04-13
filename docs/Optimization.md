@@ -10,12 +10,12 @@ By default, Flipper will preload all features before each request. This is recom
 
 ```ruby
 # config/initializers/flipper.rb
-Rails.application.configure do
+Flipper.configure do |config|
   # Load specific features that are used on most requests
-  config.flipper.memoizer.preload = [:stats, :search, :some_feature]
+  config.preload = [:stats, :search, :some_feature]
 
   # Disable preloading
-  config.flipper.memoizer.preload = false
+  config.preload = false
 end
 ```
 
@@ -27,8 +27,8 @@ Prevent preloading and memoization by setting `unless` to a proc that evaluates 
 
 ```ruby
 # config/initializers/flipper.rb
-Rails.application.configure do
-  config.flipper.memoizer.unless = ->(request) { request.path.start_with?("/assets") }
+Flipper.configure do |config|
+  config.memoize_unless = ->(request) { request.path.start_with?("/assets") }
 end
 ```
 
@@ -37,8 +37,8 @@ end
 To disable memoization entirely:
 
 ```ruby
-Rails.application.configure do
-  config.flipper.memoizer = false
+Flipper.configure do |config|
+  config.memoize = false
 end
 ```
 
