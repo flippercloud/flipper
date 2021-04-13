@@ -1,16 +1,12 @@
 # Default routes loaded by Flipper::Cloud::Engine
 Rails.application.routes.draw do
-  config = Flipper::Cloud::Engine.config.flipper
+  config = Flipper.configuration
 
-  if config.cloud.sync_method == :webhook
-    # FIXME: does it make sense to provide a Rails-specific config to fetch the instance? Or what should this be?
-    flipper = Flipper.instance
+  app = Flipper::Cloud.app(
+    nil, # FIXME: refactor cloud app to not require instance as first arg
+    env_key: config.env_key,
+    memoizer_options: { preload: config.preload }
+  )
 
-    app = Flipper::Cloud.app(flipper,
-      env_key: config.env_key,
-      memoizer_options: config.momoizer
-    )
-
-    mount app, at: config.cloud.path
-  end
+  mount app, at: config.app_path if config.sync_method == :webhook
 end

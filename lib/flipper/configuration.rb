@@ -1,7 +1,19 @@
 module Flipper
   class Configuration
-    def initialize
+    # Public: A name of the key in the rack environment for the current Flipper instance (default: 'flipper')
+    attr_accessor :env_key
+
+    # Public: A boolean to determine if memoization should be enabled (default: true)
+    attr_accessor :memoize
+
+    # Public: An array of feature names or boolean to preload all for each request (default: true)
+    attr_accessor :preload
+
+    def initialize(options = {})
       @default = -> { Flipper.new(Flipper::Adapters::Memory.new) }
+      @env_key = options.fetch(:env_key, 'flipper')
+      @memoize = options.fetch(:memoize, true)
+      @preload = options.fetch(:preload, true)
     end
 
     # Controls the default instance for flipper. When used with a block it

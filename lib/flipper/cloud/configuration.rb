@@ -6,7 +6,7 @@ require "flipper/adapters/sync"
 
 module Flipper
   module Cloud
-    class Configuration
+    class Configuration < Flipper::Configuration
       # The set of valid ways that syncing can happpen.
       VALID_SYNC_METHODS = Set[
         :poll,
@@ -65,13 +65,18 @@ module Flipper
       # occur or not.
       attr_accessor :sync_secret
 
+      attr_accessor :app_path
+
       def initialize(options = {})
+        super
+
         @token = options.fetch(:token) { ENV["FLIPPER_CLOUD_TOKEN"] }
 
         if @token.nil?
           raise ArgumentError, "Flipper::Cloud token is missing. Please set FLIPPER_CLOUD_TOKEN or provide the token (e.g. Flipper::Cloud.new('token'))."
         end
 
+        @default = -> { Flipper::Cloud::DSL.new(self) }
         @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
         @read_timeout = options.fetch(:read_timeout) { ENV.fetch("FLIPPER_CLOUD_READ_TIMEOUT", 5).to_f }
         @open_timeout = options.fetch(:open_timeout) { ENV.fetch("FLIPPER_CLOUD_OPEN_TIMEOUT", 5).to_f }
@@ -81,7 +86,8 @@ module Flipper
         @local_adapter = options.fetch(:local_adapter) { Adapters::Memory.new }
         @debug_output = options[:debug_output]
         @adapter_block = ->(adapter) { adapter }
-        self.sync_method = options.fetch(:sync_method) { ENV.fetch("FLIPPER_CLOUD_SYNC_METHOD", :poll).to_sym }
+        @app_path = options.fetch(:app_path, '_flipper')
+        self.sync_method = options.fetch(:sync_method) { default_sync_method }
         self.url = options.fetch(:url) { ENV.fetch("FLIPPER_CLOUD_URL", "https://www.flippercloud.io/adapter".freeze) }
       end
 
@@ -132,6 +138,11 @@ module Flipper
 
       def app_adapter
         sync_method == :webhook ? dual_write_adapter : sync_adapter
+      end
+
+      def default_sync_method
+        ENV["FLIPPER_CLOUD_SYNC_METHOD"]&.to_sym ||
+          (sync_secret ? :webhook : :poll)
       end
 
       def dual_write_adapter

@@ -139,7 +139,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
         [200, {}, []]
       end
 
-      middleware = described_class.new(app, preload_all: true)
+      middleware = described_class.new(app, preload: true)
       middleware.call(env)
 
       expect(adapter.operations.size).to be(1)
@@ -156,7 +156,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
         [200, {}, []]
       end
 
-      middleware = described_class.new(app, preload_all: true)
+      middleware = described_class.new(app, preload: true)
       middleware.call(env)
 
       expect(adapter.count(:get)).to be(1)
@@ -308,13 +308,13 @@ RSpec.describe Flipper::Middleware::Memoizer do
     end
   end
 
-  context 'with preload_all and unless option' do
+  context 'with preload:true and unless option' do
     let(:app) do
       # ensure scoped for builder block, annoying...
       middleware = described_class
 
       Rack::Builder.new do
-        use middleware, preload_all: true,
+        use middleware, preload: true,
                         unless: ->(request) { request.path.start_with?("/assets") }
 
         map '/' do
@@ -327,18 +327,18 @@ RSpec.describe Flipper::Middleware::Memoizer do
       end.to_app
     end
 
-    it 'does NOT preload_all if request matches unless block' do
+    it 'does NOT preload if request matches unless block' do
       expect(flipper).to receive(:preload_all).never
       get '/assets/foo.png', {}, 'flipper' => flipper
     end
 
-    it 'does preload_all if request does NOT match unless block' do
+    it 'does preload if request does NOT match unless block' do
       expect(flipper).to receive(:preload_all).once
       get '/some/other/path', {}, 'flipper' => flipper
     end
   end
 
-  context 'with preload_all and caching adapter' do
+  context 'with preload:true and caching adapter' do
     it 'eagerly caches known features for duration of request' do
       memory = Flipper::Adapters::Memory.new
       logged_memory = Flipper::Adapters::OperationLogger.new(memory)
@@ -363,7 +363,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
         [200, {}, []]
       end
 
-      middleware = described_class.new(app, preload_all: true)
+      middleware = described_class.new(app, preload: true)
 
       middleware.call('flipper' => flipper)
       expect(logged_cached.count(:get_all)).to be(1)

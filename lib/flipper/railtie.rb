@@ -1,14 +1,15 @@
 module Flipper
   class Railtie < Rails::Railtie
-    config.before_configuration do
-      config.flipper = ActiveSupport::OrderedOptions.new
-      config.flipper.memoizer = ActiveSupport::OrderedOptions.new
-      config.flipper.memoizer.preload = true
-    end
-
     initializer "flipper.memoizer" do |app|
-      if config.flipper.memoizer
-        app.middleware.use Flipper::Middleware::Memoizer, config.flipper.memoizer
+      config = Flipper.configuration
+
+      app.middleware.use Flipper::Middleware::SetupEnv, config.default, env_key: config.env_key
+
+      if config.memoize
+        app.middleware.use Flipper::Middleware::Memoizer, {
+          env_key: config.env_key,
+          preload: config.preload
+        }
       end
     end
 

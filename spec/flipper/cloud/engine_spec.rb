@@ -12,30 +12,22 @@ RSpec.describe Flipper::Cloud::Engine do
 
   before do
     Rails.application = nil
+
+    # Force loading of flipper to configure itself
+    load 'flipper-cloud.rb'
   end
 
-  describe 'config' do
-    describe 'cloud.sync_method' do
-      it 'uses presence of FLIPPER_CLOUD_SYNC_SECRET env variable to enable webhook' do
-        with_modified_env 'FLIPPER_CLOUD_SYNC_SECRET' => 'xyz' do
-          expect(application.config.flipper.cloud.sync_method).to eq(:webhook)
-        end
-      end
+  it "initializes cloud configuration" do
+    expect(Flipper.configuration).to be_a(Flipper::Cloud::Configuration)
+    expect(Flipper.instance).to be_a(Flipper::Cloud::DSL)
+  end
 
-      it 'respects FLIPPER_CLOUD_SYNC_METHOD env variable' do
-        with_modified_env 'FLIPPER_CLOUD_SYNC_METHOD' => 'webhook' do
-          expect(application.config.flipper.cloud.sync_method).to eq(:webhook)
-        end
-      end
+  it "configures webhook app" do
+    Flipper.configuration.sync_secret = 'abc'
+    Flipper.configuration.sync_method = :webhook
 
-      it 'defaults to :poll in development' do
-        expect(application.config.flipper.cloud.sync_method).to eq(:poll)
-      end
+    application.initialize!
 
-      it 'defaults to :webhook in production' do
-        expect(Rails.env).to receive(:production?).and_return(true)
-        expect(application.config.flipper.cloud.sync_method).to eq(:webhook)
-      end
-    end
+    # TOOD: test this…
   end
 end
