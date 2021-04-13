@@ -9,7 +9,6 @@ RSpec.describe Flipper::Cloud::DSL do
     cloud_configuration = Flipper::Cloud::Configuration.new({
       token: "asdf",
       sync_secret: "tasty",
-      sync_method: :webhook,
     })
     dsl = described_class.new(cloud_configuration)
     expect(dsl.features).to eq(Set.new)
@@ -26,7 +25,6 @@ RSpec.describe Flipper::Cloud::DSL do
     cloud_configuration = Flipper::Cloud::Configuration.new({
       token: "asdf",
       sync_secret: "tasty",
-      sync_method: :webhook,
     })
     dsl = described_class.new(cloud_configuration)
     dsl.sync
@@ -37,7 +35,6 @@ RSpec.describe Flipper::Cloud::DSL do
     cloud_configuration = Flipper::Cloud::Configuration.new({
       token: "asdf",
       sync_secret: "tasty",
-      sync_method: :webhook,
     })
     dsl = described_class.new(cloud_configuration)
     expect(dsl.sync_secret).to eq("tasty")
@@ -52,7 +49,6 @@ RSpec.describe Flipper::Cloud::DSL do
       cloud_configuration = Flipper::Cloud::Configuration.new({
         token: "asdf",
         sync_secret: "tasty",
-        sync_method: :webhook,
         local_adapter: local_adapter
       })
     end

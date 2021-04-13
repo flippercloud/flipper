@@ -232,7 +232,6 @@ RSpec.describe Flipper do
       cloud_configuration = Flipper::Cloud::Configuration.new({
         token: "asdf",
         sync_secret: "tasty",
-        sync_method: :webhook,
       })
 
       described_class.configure do |config|
