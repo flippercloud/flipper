@@ -205,7 +205,7 @@ RSpec.shared_examples_for 'a flipper adapter' do
 
     expect(subject.remove(feature)).to eq(true)
 
-    expect(subject.get(feature)).to eq(subject.default_config)
+    expect(subject.get(feature).values).to all(be_blank)
   end
 
   it 'can clear all the gate values for a feature' do

@@ -25,12 +25,13 @@ module Flipper
       attr_reader :name
 
       # Public
-      def initialize(adapter, cache, expires_in: nil)
+      def initialize(adapter, cache, expires_in: nil, write_through: false)
         @adapter = adapter
         @name = :active_support_cache_store
         @cache = cache
         @write_options = {}
         @write_options[:expires_in] = expires_in if expires_in
+        @write_through = write_through
       end
 
       # Public
@@ -49,7 +50,13 @@ module Flipper
       def remove(feature)
         result = @adapter.remove(feature)
         @cache.delete(FeaturesKey)
-        @cache.delete(key_for(feature.key))
+
+        if @write_through
+          @cache.write(key_for(feature.key), {}, @write_options)
+        else
+          @cache.delete(key_for(feature.key))
+        end
+
         result
       end
 
@@ -88,14 +95,26 @@ module Flipper
       ## Public
       def enable(feature, gate, thing)
         result = @adapter.enable(feature, gate, thing)
-        @cache.delete(key_for(feature.key))
+
+        if @write_through
+          @cache.write(key_for(feature.key), @adapter.get(feature), @write_options)
+        else
+          @cache.delete(key_for(feature.key))
+        end
+
         result
       end
 
       ## Public
       def disable(feature, gate, thing)
         result = @adapter.disable(feature, gate, thing)
-        @cache.delete(key_for(feature.key))
+
+        if @write_through
+          @cache.write(key_for(feature.key), @adapter.get(feature), @write_options)
+        else
+          @cache.delete(key_for(feature.key))
+        end
+
         result
       end
 
