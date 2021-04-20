@@ -9,7 +9,6 @@ RSpec.describe Flipper::Cloud::Middleware do
     Flipper::Cloud.new("regular") do |config|
       config.local_adapter = Flipper::Adapters::OperationLogger.new(Flipper::Adapters::Memory.new)
       config.sync_secret = "regular_tasty"
-      config.sync_method = :webhook
     end
   }
 
@@ -17,7 +16,6 @@ RSpec.describe Flipper::Cloud::Middleware do
     Flipper::Cloud.new("env") do |config|
       config.local_adapter = Flipper::Adapters::OperationLogger.new(Flipper::Adapters::Memory.new)
       config.sync_secret = "env_tasty"
-      config.sync_method = :webhook
     end
   }
 

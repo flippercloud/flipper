@@ -57,10 +57,6 @@ module Flipper
       # the local in sync with cloud (default: 10).
       attr_accessor :sync_interval
 
-      # Public: The method to be used for synchronizing your local flipper
-      # adapter with cloud. (default: :poll, can also be :webhook).
-      attr_reader :sync_method
-
       # Public: The secret used to verify if syncs in the middleware should
       # occur or not.
       attr_accessor :sync_secret
@@ -72,6 +68,11 @@ module Flipper
           raise ArgumentError, "Flipper::Cloud token is missing. Please set FLIPPER_CLOUD_TOKEN or provide the token (e.g. Flipper::Cloud.new('token'))."
         end
 
+        if ENV["FLIPPER_CLOUD_SYNC_METHOD"]
+          warn "FLIPPER_CLOUD_SYNC_METHOD is deprecated and has no effect."
+        end
+        self.sync_method = options[:sync_method] if options[:sync_method]
+
         @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
         @read_timeout = options.fetch(:read_timeout) { ENV.fetch("FLIPPER_CLOUD_READ_TIMEOUT", 5).to_f }
         @open_timeout = options.fetch(:open_timeout) { ENV.fetch("FLIPPER_CLOUD_OPEN_TIMEOUT", 5).to_f }
@@ -81,7 +82,6 @@ module Flipper
         @local_adapter = options.fetch(:local_adapter) { Adapters::Memory.new }
         @debug_output = options[:debug_output]
         @adapter_block = ->(adapter) { adapter }
-        self.sync_method = options.fetch(:sync_method) { ENV.fetch("FLIPPER_CLOUD_SYNC_METHOD", :poll).to_sym }
         self.url = options.fetch(:url) { ENV.fetch("FLIPPER_CLOUD_URL", "https://www.flippercloud.io/adapter".freeze) }
       end
 
@@ -114,18 +114,14 @@ module Flipper
         }).call
       end
 
-      def sync_method=(new_sync_method)
-        new_sync_method = new_sync_method.to_sym
+      # Public: The method that will be used to synchronize local adapter with
+      # cloud. (default: :poll, will be :webhook if sync_secret is set).
+      def sync_method
+        sync_secret ? :webhook : :poll
+      end
 
-        unless VALID_SYNC_METHODS.include?(new_sync_method)
-          raise ArgumentError, "Unsupported sync_method. Valid options are (#{VALID_SYNC_METHODS.to_a.join(', ')})"
-        end
-
-        if new_sync_method == :webhook && sync_secret.nil?
-          raise ArgumentError, "Flipper::Cloud sync_secret is missing. Please set FLIPPER_CLOUD_SYNC_SECRET or provide the sync_secret used to validate webhooks."
-        end
-
-        @sync_method = new_sync_method
+      def sync_method=(_)
+        warn "Flipper::Cloud: sync_method is deprecated and has no effect."
       end
 
       private
