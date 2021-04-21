@@ -35,7 +35,7 @@ feature.enabled? user # true
 feature.disable_actor user
 ```
 
-The only requirement for an individual actor is that it must have a unique `flipper_id`. Include the `Flipper::Identifier` module for a default implementation which combines the class name and `id` (e.g. `User:6`).
+The only requirement for an individual actor is that it must have a unique `flipper_id`. Include the `Flipper::Identifier` module for a default implementation which combines the class name and `id` (e.g. `User;6`).
 
 ```ruby
 class User < Struct.new(:id)
