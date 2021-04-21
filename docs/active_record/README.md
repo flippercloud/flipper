@@ -29,7 +29,7 @@ For your convenience a migration generator is provided to create the necessary m
 
 Note that the active record adapter requires the database tables to be created in order to work; failure to run the migration first will cause an exception to be raised when attempting to initialize the active record adapter.
 
-Flipper will be configured to use the ActiveReocrd adapter when `flipper-active_record` is loaded. But **if you need to customize the adapter**, you can add this to an initializer:
+Flipper will be configured to use the ActiveRecord adapter when `flipper-active_record` is loaded. But **if you need to customize the adapter**, you can add this to an initializer:
 
 ```ruby
 require 'flipper/adapters/active_record'
