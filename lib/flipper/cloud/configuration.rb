@@ -13,6 +13,8 @@ module Flipper
         :webhook,
       ].freeze
 
+      DEFAULT_URL = "https://www.flippercloud.io/adapter".freeze
+
       # Public: The token corresponding to an environment on flippercloud.io.
       attr_accessor :token
 
@@ -82,7 +84,7 @@ module Flipper
         @local_adapter = options.fetch(:local_adapter) { Adapters::Memory.new }
         @debug_output = options[:debug_output]
         @adapter_block = ->(adapter) { adapter }
-        self.url = options.fetch(:url) { ENV.fetch("FLIPPER_CLOUD_URL", "https://www.flippercloud.io/adapter".freeze) }
+        self.url = options.fetch(:url) { ENV.fetch("FLIPPER_CLOUD_URL", DEFAULT_URL) }
       end
 
       # Public: Read or customize the http adapter. Calling without a block will
