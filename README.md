@@ -7,7 +7,7 @@
 Flipper gives you control over who has access to features in your app.
 
 * Enable or disable features for everyone, specific actors, groups of actors, a percentage of actors, or a percentage of time.
-* Configure your feature flags from the console or a web UI
+* Configure your feature flags from the console or a web UI.
 * Regardless of what data store you are using, Flipper can performantly store your feature flags.
 * Use [Flipper Cloud](#flipper-cloud) to cascade features from multiple environments, share settings with your team, control permissions, keep an audit history, and rollback.
 
