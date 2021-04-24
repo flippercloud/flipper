@@ -1,3 +1,13 @@
+## Unreleased
+
+### Additions/Changes
+
+* Default to using memory adapter (https://github.com/jnunemaker/flipper/pull/501)
+* Adapters now configured on require when possible (https://github.com/jnunemaker/flipper/pull/502)
+* Added cloud recommendation to flipper-ui. Can be disabled with `Flipper::UI.configure { |config| config.cloud_recommendation = false }`. Just want to raise awareness that more is available if people want it (https://github.com/jnunemaker/flipper/pull/504)
+* Added default `flipper_id` implementation via `Flipper::Identifier` and automatically included it in ActiveRecord and Sequel models (https://github.com/jnunemaker/flipper/pull/505)
+* Deprecate superflous sync_method setting (https://github.com/jnunemaker/flipper/pull/511)
+
 ## 0.20.4
 
 ### Additions/Changes
