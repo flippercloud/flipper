@@ -37,5 +37,12 @@ module Flipper
       builder.define_singleton_method(:inspect) { klass.inspect } # pretty rake routes output
       builder
     end
+
+    # Configure Flipper to use Cloud
+    def self.configure
+      Flipper.configure do |config|
+        config.default { self.new(local_adapter: config.adapter) }
+      end
+    end
   end
 end
