@@ -35,7 +35,7 @@ feature.enabled? user # true
 feature.disable_actor user
 ```
 
-The only requirement for an individual actor is that it must have a unique `flipper_id`. Include the `Flipper::Identifier` module for a default implementation which combines the class name and `id` (e.g. `User:6`).
+The only requirement for an individual actor is that it must have a unique `flipper_id`. Include the `Flipper::Identifier` module for a default implementation which combines the class name and `id` (e.g. `User;6`).
 
 ```ruby
 class User < Struct.new(:id)
@@ -93,11 +93,11 @@ Turn this on for a percentage of time. Think load testing new features behind th
 # Register a feature called logging and turn it on for 5 percent of the time.
 # This could be on during one request and off the next
 # could even be on first time in request and off second time
-Flipper.enable_percentage_of_time 5
+Flipper.enable_percentage_of_time :logging, 5
 
 Flipper.enabled? :logging # this will return true 5% of the time.
 
-Flipper.disable_percentage_of_time # sets to 0
+Flipper.disable_percentage_of_time :logging # sets to 0
 
 # you can also save a reference to a specific feature
 feature = Flipper[:search]

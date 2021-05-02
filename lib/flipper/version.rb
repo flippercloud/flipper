@@ -1,3 +1,3 @@
 module Flipper
-  VERSION = '0.20.4'.freeze
+  VERSION = '0.21.0.rc1'.freeze
 end
