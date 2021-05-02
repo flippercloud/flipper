@@ -15,8 +15,14 @@ module Flipper
     # options - The Hash of options. See Flipper::Cloud::Configuration.
     # block - The block that configuration will be yielded to allowing you to
     #         customize this cloud instance and its adapter.
-    def self.new(token = nil, options = {})
-      options = options.merge(token: token) if token
+    def self.new(options = {}, deprecated_options = {})
+      if options.is_a?(String)
+        warn "`Flipper::Cloud.new(token)` is deprecated. Use `Flipper::Cloud.new(token: token)` " +
+          "or set the `FLIPPER_CLOUD_TOKEN` environment variable.\n" +
+          caller[0]
+        options = deprecated_options.merge(token: options)
+      end
+
       configuration = Configuration.new(options)
       yield configuration if block_given?
       DSL.new(configuration)

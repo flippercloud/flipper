@@ -6,14 +6,14 @@ require 'flipper/adapters/operation_logger'
 
 RSpec.describe Flipper::Cloud::Middleware do
   let(:flipper) {
-    Flipper::Cloud.new("regular") do |config|
+    Flipper::Cloud.new(token: "regular") do |config|
       config.local_adapter = Flipper::Adapters::OperationLogger.new(Flipper::Adapters::Memory.new)
       config.sync_secret = "regular_tasty"
     end
   }
 
   let(:env_flipper) {
-    Flipper::Cloud.new("env") do |config|
+    Flipper::Cloud.new(token: "env") do |config|
       config.local_adapter = Flipper::Adapters::OperationLogger.new(Flipper::Adapters::Memory.new)
       config.sync_secret = "env_tasty"
     end

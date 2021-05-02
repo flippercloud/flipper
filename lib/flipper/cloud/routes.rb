@@ -4,7 +4,6 @@ Rails.application.routes.draw do
   cloud_config = config.default.cloud_configuration
 
   app = Flipper::Cloud.app(
-    nil, # FIXME: refactor cloud app to not require instance as first arg
     env_key: config.env_key,
     memoizer_options: { preload: config.preload }
   )
