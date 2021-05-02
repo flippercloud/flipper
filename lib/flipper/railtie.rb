@@ -3,8 +3,6 @@ module Flipper
     initializer "flipper.memoizer" do |app|
       config = Flipper.configuration
 
-      app.middleware.use Flipper::Middleware::SetupEnv, config.default, env_key: config.env_key
-
       if config.memoize
         app.middleware.use Flipper::Middleware::Memoizer, {
           env_key: config.env_key,
