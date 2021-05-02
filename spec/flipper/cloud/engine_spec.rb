@@ -3,6 +3,13 @@ require 'rails'
 require 'flipper/cloud'
 
 RSpec.describe Flipper::Cloud::Engine do
+  let(:env) do
+    {
+      "FLIPPER_CLOUD_TOKEN" => "ASDF",
+      "FLIPPER_CLOUD_SYNC_SECRET" => "abc"
+    }
+  end
+
   let(:application) do
     Class.new(Rails::Application) do
       config.eager_load = false
@@ -20,11 +27,13 @@ RSpec.describe Flipper::Cloud::Engine do
   end
 
   it "initializes cloud configuration" do
-    expect(Flipper.instance).to be_a(Flipper::Cloud::DSL)
+    with_modified_env env do
+      expect(Flipper.instance).to be_a(Flipper::Cloud::DSL)
+    end
   end
 
   it "configures webhook app" do
-    with_modified_env "FLIPPER_CLOUD_SYNC_SECRET" => "abc" do
+    with_modified_env env do
       application.initialize!
 
       # TOOD: test this…
