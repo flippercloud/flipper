@@ -16,7 +16,7 @@ module Flipper
   # Public: Configure flipper.
   #
   #   Flipper.configure do |config|
-  #     config.default { ... }
+  #     config.adapter { ... }
   #   end
   #
   # Yields Flipper::Configuration instance.

@@ -38,7 +38,7 @@ rollout_flipper = Flipper.new(rollout_adapter)
 
 # setup flipper default instance
 Flipper.configure do |config|
-  config.default { Flipper.new(Flipper::Adapters::Redis.new(redis)) }
+  config.adapter { Flipper::Adapters::Redis.new(redis) }
 end
 
 # import rollout into redis flipper

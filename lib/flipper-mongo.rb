@@ -1,7 +1,7 @@
 require 'flipper/adapters/mongo'
 
 Flipper.configure do |config|
-  config.default do
+  config.adapter do
     url = ENV["FLIPPER_MONGO_URL"] || ENV["MONGO_URL"]
     collection = ENV["FLIPPER_MONGO_COLLECTION"] || "flipper"
 
@@ -9,6 +9,6 @@ Flipper.configure do |config|
       raise ArgumentError, "The MONGO_URL environment variable must be set. For example: mongodb://127.0.0.1:27017/flipper"
     end
 
-    Flipper.new(Flipper::Adapters::Mongo.new(Mongo::Client.new(url)[collection]))
+    Flipper::Adapters::Mongo.new(Mongo::Client.new(url)[collection])
   end
 end

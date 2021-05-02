@@ -1,3 +1,7 @@
 require "flipper/cloud"
 
-Flipper.configuration = Flipper::Cloud::Configuration.new
+Flipper.configure do |config|
+  config.default do
+    Flipper::Cloud.new(local_adapter: config.adapter)
+  end
+end

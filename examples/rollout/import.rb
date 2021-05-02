@@ -13,9 +13,7 @@ rollout_flipper = Flipper.new(rollout_adapter)
 
 # setup flipper default instance
 Flipper.configure do |config|
-  config.default do
-    Flipper.new(Flipper::Adapters::Redis.new(redis))
-  end
+  config.adapter { Flipper::Adapters::Redis.new(redis) }
 end
 
 # flush redis so we have clean state for script

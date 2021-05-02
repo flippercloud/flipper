@@ -35,8 +35,8 @@ require 'flipper-sequel`
 
 ```ruby
 Flipper.configure do |config|
-  config.default do
-    Flipper.new(Flipper::Adapters::Sequel.new)
+  config.adapter do
+    Flipper::Adapters::Sequel.new
   end
 end
 ```

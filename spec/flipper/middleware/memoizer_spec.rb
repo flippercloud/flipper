@@ -259,10 +259,9 @@ RSpec.describe Flipper::Middleware::Memoizer do
   context 'with Flipper setup in env' do
     it 'caches getting a feature for duration of request' do
       Flipper.configure do |config|
-        config.default do
+        config.adapter do
           memory = Flipper::Adapters::Memory.new
-          logged_adapter = Flipper::Adapters::OperationLogger.new(memory)
-          Flipper.new(logged_adapter)
+          Flipper::Adapters::OperationLogger.new(memory)
         end
       end
       Flipper.enable(:stats)
