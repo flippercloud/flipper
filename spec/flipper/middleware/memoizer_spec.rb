@@ -307,14 +307,16 @@ RSpec.describe Flipper::Middleware::Memoizer do
     end
   end
 
-  context 'with preload:true and unless option' do
+  context 'with preload:true' do
+    let(:options) { {preload: true} }
+
     let(:app) do
       # ensure scoped for builder block, annoying...
       middleware = described_class
+      opts = options
 
       Rack::Builder.new do
-        use middleware, preload: true,
-                        unless: ->(request) { request.path.start_with?("/assets") }
+        use middleware, opts
 
         map '/' do
           run ->(_env) { [200, {}, []] }
@@ -326,14 +328,37 @@ RSpec.describe Flipper::Middleware::Memoizer do
       end.to_app
     end
 
-    it 'does NOT preload if request matches unless block' do
-      expect(flipper).to receive(:preload_all).never
-      get '/assets/foo.png', {}, 'flipper' => flipper
+
+    context 'and unless option' do
+      before do
+        options[:unless] = ->(request) { request.path.start_with?("/assets") }
+      end
+
+      it 'does NOT preload if request matches unless block' do
+        expect(flipper).to receive(:preload_all).never
+        get '/assets/foo.png', {}, 'flipper' => flipper
+      end
+
+      it 'does preload if request does NOT match unless block' do
+        expect(flipper).to receive(:preload_all).once
+        get '/some/other/path', {}, 'flipper' => flipper
+      end
     end
 
-    it 'does preload if request does NOT match unless block' do
-      expect(flipper).to receive(:preload_all).once
-      get '/some/other/path', {}, 'flipper' => flipper
+    context 'and if option' do
+      before do
+        options[:if] = ->(request) { !request.path.start_with?("/assets") }
+      end
+
+      it 'does NOT preload if request does not match if block' do
+        expect(flipper).to receive(:preload_all).never
+        get '/assets/foo.png', {}, 'flipper' => flipper
+      end
+
+      it 'does preload if request matches if block' do
+        expect(flipper).to receive(:preload_all).once
+        get '/some/other/path', {}, 'flipper' => flipper
+      end
     end
   end
 

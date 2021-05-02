@@ -38,17 +38,23 @@ module Flipper
       def call(env)
         request = Rack::Request.new(env)
 
-        if skip_memoize?(request)
-          @app.call(env)
-        else
+        if memoize?(request)
           memoized_call(env)
+        else
+          @app.call(env)
         end
       end
 
       private
 
-      def skip_memoize?(request)
-        @opts[:unless] && @opts[:unless].call(request)
+      def memoize?(request)
+        if @opts[:if]
+          @opts[:if].call(request)
+        elsif @opts[:unless]
+          !@opts[:unless].call(request)
+        else
+          true
+        end
       end
 
       def memoized_call(env)

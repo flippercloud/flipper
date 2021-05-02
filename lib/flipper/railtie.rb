@@ -7,7 +7,7 @@ module Flipper
         app.middleware.use Flipper::Middleware::Memoizer, {
           env_key: config.env_key,
           preload: config.preload,
-          unless: config.memoize_unless
+          if: config.memoize.is_a?(Proc) ? config.memoize : nil
         }
       end
     end

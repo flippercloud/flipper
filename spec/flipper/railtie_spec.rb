@@ -43,7 +43,7 @@ RSpec.describe Flipper::Railtie do
       end
 
       expect(Flipper::Middleware::Memoizer).to receive(:new).with(application.routes,
-          env_key: 'my_flipper', preload: [:stats, :search]
+          env_key: 'my_flipper', preload: [:stats, :search], if: nil
       )
 
       subject # initialize

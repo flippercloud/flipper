@@ -23,12 +23,12 @@ Features that are not preloaded are still memoized, ensuring one adapter call pe
 
 ### Skip memoization
 
-Prevent preloading and memoization by setting `unless` to a proc that evaluates to true.
+Prevent preloading and memoization on specific requests by setting `memoize` to a proc that evaluates to false.
 
 ```ruby
 # config/initializers/flipper.rb
 Flipper.configure do |config|
-  config.memoize_unless = ->(request) { request.path.start_with?("/assets") }
+  config.memoize = ->(request) { !request.path.start_with?("/assets") }
 end
 ```
 
