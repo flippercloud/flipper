@@ -1,6 +1,7 @@
 # Default routes loaded by Flipper::Cloud::Engine
 Rails.application.routes.draw do
   config = Flipper.configuration
+  cloud_config = config.default.cloud_configuration
 
   app = Flipper::Cloud.app(
     nil, # FIXME: refactor cloud app to not require instance as first arg
@@ -8,5 +9,5 @@ Rails.application.routes.draw do
     memoizer_options: { preload: config.preload }
   )
 
-  mount app, at: config.app_path if config.sync_method == :webhook
+  mount app, at: cloud_config.app_path if cloud_config.sync_method == :webhook
 end

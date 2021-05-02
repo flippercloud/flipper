@@ -6,7 +6,7 @@ require "flipper/adapters/sync"
 
 module Flipper
   module Cloud
-    class Configuration < Flipper::Configuration
+    class Configuration
       # The set of valid ways that syncing can happpen.
       VALID_SYNC_METHODS = Set[
         :poll,
@@ -66,8 +66,6 @@ module Flipper
       attr_accessor :app_path
 
       def initialize(options = {})
-        super
-
         @token = options.fetch(:token) { ENV["FLIPPER_CLOUD_TOKEN"] }
 
         if @token.nil?
@@ -79,7 +77,6 @@ module Flipper
         end
         self.sync_method = options[:sync_method] if options[:sync_method]
 
-        @default = -> { Flipper::Cloud::DSL.new(self) }
         @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
         @read_timeout = options.fetch(:read_timeout) { ENV.fetch("FLIPPER_CLOUD_READ_TIMEOUT", 5).to_f }
         @open_timeout = options.fetch(:open_timeout) { ENV.fetch("FLIPPER_CLOUD_OPEN_TIMEOUT", 5).to_f }

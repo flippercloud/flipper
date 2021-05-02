@@ -18,16 +18,14 @@ RSpec.describe Flipper::Cloud::Engine do
   end
 
   it "initializes cloud configuration" do
-    expect(Flipper.configuration).to be_a(Flipper::Cloud::Configuration)
     expect(Flipper.instance).to be_a(Flipper::Cloud::DSL)
   end
 
   it "configures webhook app" do
-    Flipper.configuration.sync_secret = 'abc'
-    Flipper.configuration.sync_method = :webhook
+    with_modified_env "FLIPPER_CLOUD_SYNC_SECRET" => "abc" do
+      application.initialize!
 
-    application.initialize!
-
-    # TOOD: test this…
+      # TOOD: test this…
+    end
   end
 end
