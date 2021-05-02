@@ -38,8 +38,8 @@ module Flipper
       builder
     end
 
-    # Configure Flipper to use Cloud
-    def self.configure
+    # Private: Configure Flipper to use Cloud by default
+    def self.set_default
       Flipper.configure do |config|
         config.default { self.new(local_adapter: config.adapter) }
       end

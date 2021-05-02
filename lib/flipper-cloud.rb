@@ -1,3 +1,3 @@
 require "flipper/cloud"
 
-Flipper::Cloud.configure
+Flipper::Cloud.set_default
