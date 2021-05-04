@@ -63,10 +63,9 @@ module Flipper
         original = flipper.memoizing?
         flipper.memoize = true
 
-        if @opts[:preload] === true
-          flipper.preload_all
-        elsif (preload = @opts[:preload])
-          flipper.preload(preload)
+        case @opts[:preload]
+        when true then flipper.preload_all
+        when Array then flipper.preload(@opts[:preload])
         end
 
         response = @app.call(env)
