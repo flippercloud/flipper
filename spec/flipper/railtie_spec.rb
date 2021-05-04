@@ -23,6 +23,12 @@ RSpec.describe Flipper::Railtie do
   end
 
   describe 'initializers' do
+    it 'sets defaults' do
+      expect(application.config.flipper.env_key).to eq("flipper")
+      expect(application.config.flipper.memoize).to be(true)
+      expect(application.config.flipper.preload).to be(true)
+    end
+
     it 'uses Memoizer middleware if config.memoize = true' do
       expect(subject.middleware.last).to eq(Flipper::Middleware::Memoizer)
     end
