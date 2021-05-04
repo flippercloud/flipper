@@ -206,14 +206,17 @@ RSpec.describe Flipper do
       expect(described_class.adapter).to eq(described_class.instance.adapter)
     end
 
-    it 'delegates memoize= to instance' do
-      expect(described_class.adapter.memoizing?).to be(false)
-      described_class.memoize = true
-      expect(described_class.adapter.memoizing?).to be(true)
-    end
+    it 'delegates memoize to instance' do
+      expect(described_class.memoizing?).to be(false)
 
-    it 'delegates memoizing? to instance' do
-      expect(described_class.memoizing?).to eq(described_class.adapter.memoizing?)
+      called = false
+
+      described_class.memoize do |flipper|
+        called = true
+        expect(flipper.memoizing?).to be(true)
+      end
+
+      expect(called).to be(true)
     end
 
     it 'delegates sync stuff to instance and does nothing' do

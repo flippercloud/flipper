@@ -36,7 +36,7 @@ RSpec.describe Flipper::Adapters::Sequel do
     end
 
     it 'configures itself' do
-      expect(Flipper.adapter.adapter).to be_a(Flipper::Adapters::Sequel)
+      expect(Flipper.adapter).to be_a(Flipper::Adapters::Sequel)
     end
 
     it "defines #flipper_id on Sequel::Model" do

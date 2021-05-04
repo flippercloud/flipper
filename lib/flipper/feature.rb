@@ -36,6 +36,10 @@ module Flipper
       @adapter = adapter
     end
 
+    def ==(other)
+      other.is_a?(self.class) && other.to_s == to_s
+    end
+
     # Public: Enable this feature for something.
     #
     # Returns the result of Adapter#enable.

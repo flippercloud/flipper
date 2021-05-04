@@ -53,6 +53,15 @@ module Flipper
     Thread.current[:flipper_instance] = flipper
   end
 
+  # Public: Set the flipper instance for the duration of the given block.
+  def with_instance(new_instance, &block)
+    original_instance = self.instance
+    self.instance = new_instance
+    block.call
+  ensure
+    self.instance = original_instance
+  end
+
   # Public: All the methods delegated to instance. These should match the
   # interface of Flipper::DSL.
   def_delegators :instance,
@@ -65,7 +74,7 @@ module Flipper
                  :time, :percentage_of_time,
                  :features, :feature, :[], :preload, :preload_all,
                  :adapter, :add, :exist?, :remove, :import,
-                 :memoize=, :memoizing?,
+                 :memoize=, :memoizing?, :memoize,
                  :sync, :sync_secret # For Flipper::Cloud. Will error for OSS Flipper.
 
   # Public: Use this to register a group by name.

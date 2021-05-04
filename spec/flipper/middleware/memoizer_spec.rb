@@ -27,31 +27,30 @@ RSpec.describe Flipper::Middleware::Memoizer do
   end
 
   RSpec.shared_examples_for 'flipper middleware' do
-    it 'delegates' do
+    it 'delegates to app using memoized adapter' do
       called = false
-      app = lambda do |_env|
+      app = lambda do |env|
         called = true
+        expect(env['flipper'].adapter).to be_instance_of(Flipper::Adapters::Memoizable)
+        expect(Flipper.instance.adapter).to be_instance_of(Flipper::Adapters::Memoizable)
         [200, {}, nil]
       end
       middleware = described_class.new(app)
       middleware.call(env)
       expect(called).to eq(true)
+      expect(flipper.adapter).to eq(adapter)
     end
 
-    it 'clears the local cache with a successful request' do
-      flipper.adapter.cache['hello'] = 'world'
-      get '/', {}, 'flipper' => flipper
-      expect(flipper.adapter.cache).to be_empty
-    end
+    it 'resets global instance even when the request raises an error' do
+      Flipper.instance = :test
 
-    it 'clears the local cache even when the request raises an error' do
-      flipper.adapter.cache['hello'] = 'world'
       begin
         get '/fail', {}, 'flipper' => flipper
       rescue
         nil
       end
-      expect(flipper.adapter.cache).to be_empty
+
+      expect(Flipper.instance).to be(:test)
     end
 
     it 'caches getting a feature for duration of request' do
@@ -60,13 +59,13 @@ RSpec.describe Flipper::Middleware::Memoizer do
       # clear the log of operations
       adapter.reset
 
-      app = lambda do |_env|
-        flipper[:stats].enabled?
-        flipper[:stats].enabled?
-        flipper[:stats].enabled?
-        flipper[:stats].enabled?
-        flipper[:stats].enabled?
-        flipper[:stats].enabled?
+      app = lambda do |env|
+        env['flipper'][:stats].enabled?
+        env['flipper'][:stats].enabled?
+        env['flipper'][:stats].enabled?
+        env['flipper'][:stats].enabled?
+        env['flipper'][:stats].enabled?
+        env['flipper'][:stats].enabled?
         [200, {}, []]
       end
 
@@ -105,11 +104,11 @@ RSpec.describe Flipper::Middleware::Memoizer do
       # clear the log of operations
       adapter.reset
 
-      app = lambda do |_env|
-        flipper[:stats].enabled?
-        flipper[:stats].enabled?
-        flipper[:shiny].enabled?
-        flipper[:shiny].enabled?
+      app = lambda do |env|
+        env['flipper'][:stats].enabled?
+        env['flipper'][:stats].enabled?
+        env['flipper'][:shiny].enabled?
+        env['flipper'][:shiny].enabled?
         [200, {}, []]
       end
 
@@ -124,9 +123,9 @@ RSpec.describe Flipper::Middleware::Memoizer do
       # clear the log of operations
       adapter.reset
 
-      app = lambda do |_env|
-        flipper[:other].enabled?
-        flipper[:other].enabled?
+      app = lambda do |env|
+        env['flipper'][:other].enabled?
+        env['flipper'][:other].enabled?
         [200, {}, []]
       end
 
@@ -182,9 +181,10 @@ RSpec.describe Flipper::Middleware::Memoizer do
       # clear the log of operations
       adapter.reset
 
-      app = lambda do |_env|
-        flipper[:other].enabled?
-        flipper[:other].enabled?
+      app = lambda do |env|
+        expect(env['flipper'].adapter).to be_instance_of(Flipper::Adapters::Memoizable)
+        env['flipper'][:other].enabled?
+        env['flipper'][:other].enabled?
         [200, {}, []]
       end
 
@@ -204,7 +204,10 @@ RSpec.describe Flipper::Middleware::Memoizer do
 
       Rack::Builder.new do
         use middleware, preload: %i(stats)
-        # Second instance should be a noop
+        # Second instance with same preload options should be a noop
+        use middleware, preload: %i(stats)
+
+        # Different preload options
         use middleware, preload: true
 
         map '/' do
@@ -223,14 +226,12 @@ RSpec.describe Flipper::Middleware::Memoizer do
 
     include_examples 'flipper middleware'
 
-    it 'does not call preload in second instance' do
-      expect(flipper).not_to receive(:preload_all)
-
+    it 'does not preload in second instance' do
       output = get '/', {}, 'flipper' => flipper
 
-      expect(output).to match(/Flipper::Middleware::Memoizer appears to be running twice/)
       expect(adapter.count(:get_multi)).to be(1)
       expect(adapter.last(:get_multi).args).to eq([[flipper[:stats]]])
+      expect(adapter.count(:get_all)).to be(1)
     end
   end
 
@@ -270,38 +271,23 @@ RSpec.describe Flipper::Middleware::Memoizer do
 
   context 'with Flipper setup in env' do
     it 'caches getting a feature for duration of request' do
-      Flipper.configure do |config|
-        config.adapter do
-          memory = Flipper::Adapters::Memory.new
-          Flipper::Adapters::OperationLogger.new(memory)
-        end
-      end
-      Flipper.enable(:stats)
-      Flipper.adapter.reset # clear the log of operations
-
-      app = lambda do |_env|
+      app = described_class.new(lambda { |_env|
         Flipper.enabled?(:stats)
         Flipper.enabled?(:stats)
         Flipper.enabled?(:stats)
         [200, {}, []]
-      end
+      })
 
-      middleware = described_class.new(app)
-      middleware.call('flipper' => Flipper)
+      Flipper.instance = flipper
+      app.call('flipper' => Flipper)
 
-      expect(Flipper.adapter.count(:get)).to be(1)
+      expect(adapter.count(:get)).to be(1)
     end
   end
 
   context 'defaults to Flipper' do
     it 'caches getting a feature for duration of request' do
-      Flipper.configure do |config|
-        config.default do
-          memory_adapter = Flipper::Adapters::Memory.new
-          logged_adapter = Flipper::Adapters::OperationLogger.new(memory_adapter)
-          Flipper.new(logged_adapter)
-        end
-      end
+      Flipper.instance = flipper
       Flipper.enable(:stats)
       Flipper.adapter.reset # clear the log of operations
 
@@ -346,12 +332,12 @@ RSpec.describe Flipper::Middleware::Memoizer do
       end
 
       it 'does NOT preload if request matches unless block' do
-        expect(flipper).to receive(:preload_all).never
+        expect(adapter).to receive(:get_all).never
         get '/assets/foo.png', {}, 'flipper' => flipper
       end
 
       it 'does preload if request does NOT match unless block' do
-        expect(flipper).to receive(:preload_all).once
+        expect(adapter).to receive(:get_all).once.and_call_original
         get '/some/other/path', {}, 'flipper' => flipper
       end
     end
@@ -362,12 +348,12 @@ RSpec.describe Flipper::Middleware::Memoizer do
       end
 
       it 'does NOT preload if request does not match if block' do
-        expect(flipper).to receive(:preload_all).never
+        expect(adapter).to receive(:get_all).never
         get '/assets/foo.png', {}, 'flipper' => flipper
       end
 
       it 'does preload if request matches if block' do
-        expect(flipper).to receive(:preload_all).once
+        expect(adapter).to receive(:get_all).once.and_call_original
         get '/some/other/path', {}, 'flipper' => flipper
       end
     end
@@ -375,11 +361,11 @@ RSpec.describe Flipper::Middleware::Memoizer do
 
   context 'with preload:true and caching adapter' do
     let(:app) do
-      app = lambda do |_env|
-        flipper[:stats].enabled?
-        flipper[:stats].enabled?
-        flipper[:shiny].enabled?
-        flipper[:shiny].enabled?
+      app = lambda do |env|
+        env['flipper'][:stats].enabled?
+        env['flipper'][:stats].enabled?
+        env['flipper'][:shiny].enabled?
+        env['flipper'][:shiny].enabled?
         [200, {}, []]
       end
 

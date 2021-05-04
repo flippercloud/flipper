@@ -53,25 +53,13 @@ module Flipper
       end
 
       def memoized_call(env)
-        reset_on_body_close = false
         flipper = env.fetch(@env_key) { Flipper }
 
-        # Already memoizing. This instance does not need to do anything.
-        if flipper.memoizing?
-          warn "Flipper::Middleware::Memoizer appears to be running twice. Read how to resolve this at https://github.com/jnunemaker/flipper/pull/523"
-          return @app.call(env)
+        flipper.memoize preload: @opts[:preload] do |memoized|
+          Flipper.with_instance memoized do
+            @app.call env.merge(@env_key => memoized)
+          end
         end
-
-        flipper.memoize = true
-
-        case @opts[:preload]
-        when true then flipper.preload_all
-        when Array then flipper.preload(@opts[:preload])
-        end
-
-        @app.call(env)
-      ensure
-        flipper.memoize = false if flipper
       end
     end
   end

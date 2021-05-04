@@ -10,8 +10,6 @@ module Flipper
     # Private: What is being used to instrument all the things.
     attr_reader :instrumenter
 
-    def_delegators :@adapter, :memoize=, :memoizing?
-
     # Public: Returns a new instance of the DSL.
     #
     # adapter - The adapter that this DSL instance should use.
@@ -20,10 +18,13 @@ module Flipper
     #           :memoize - Should adapter be wrapped by memoize adapter or not.
     def initialize(adapter, options = {})
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
-      memoize = options.fetch(:memoize, true)
-      adapter = Adapters::Memoizable.new(adapter) if memoize
       @adapter = adapter
-      @memoized_features = {}
+      @features = {}
+
+      if options.has_key?(:memoize)
+        warn "The `:memoize` option is deprecated and has no effect. Call `#memoize` with a block to memoize"
+        warn caller[0]
+      end
     end
 
     # Public: Check if a feature is enabled.
@@ -181,7 +182,7 @@ module Flipper
         raise ArgumentError, "#{name} must be a String or Symbol"
       end
 
-      @memoized_features[name.to_sym] ||= Feature.new(name, @adapter, instrumenter: instrumenter)
+      @features[name.to_sym] ||= Feature.new(name, adapter, instrumenter: instrumenter)
     end
 
     # Public: Preload the features with the given names.
@@ -191,7 +192,7 @@ module Flipper
     # Returns an Array of Flipper::Feature.
     def preload(names)
       features = names.map { |name| feature(name) }
-      @adapter.get_multi(features)
+      adapter.get_multi(features)
       features
     end
 
@@ -199,7 +200,7 @@ module Flipper
     #
     # Returns an Array of Flipper::Feature.
     def preload_all
-      keys = @adapter.get_all.keys
+      keys = adapter.get_all.keys
       keys.map { |key| feature(key) }
     end
 
@@ -282,6 +283,34 @@ module Flipper
 
     # Cloud DSL method that does nothing for open source version.
     def sync_secret
+    end
+
+    # Private: Boolean indicating if the current instance is memoizing
+    def memoizing?
+      @adapter.is_a?(Adapters::Memoizable)
+    end
+
+    # Public: Yield a new instance to the given block that memoizes
+    def memoize(preload: true, &block)
+      # If already memoizing, just return self
+      instance = memoizing? ? self : with_adapter(Adapters::Memoizable.new(@adapter))
+
+      case preload
+      when true then instance.preload_all
+      when Array then instance.preload(preload)
+      end
+
+      block.call instance
+    end
+
+    def memoize=(_)
+      warn "#memoize= is deprecated. Call #memoize with a block"
+      warn caller[0]
+    end
+
+    # Private: Return a new instance with the given adapter
+    def with_adapter(adapter)
+      self.class.new(adapter, instrumenter: instrumenter)
     end
   end
 end

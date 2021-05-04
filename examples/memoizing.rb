@@ -18,17 +18,14 @@ Flipper.disable(:wick)
 Flipper.adapter.reset
 
 # Turn on memoization (the memoizing middleware does this per request).
-Flipper.memoize = true
-
-# Preload all the features.
-Flipper.preload_all
-
-# Do as many feature checks as your heart desires.
-%w[foo bar baz wick].each do |name|
-  Flipper.enabled?(name)
+Flipper.memoize(preload: true) do |flipper|
+  # Do as many feature checks as your heart desires.
+  %w[foo bar baz wick].each do |name|
+    flipper.enabled?(name)
+  end
 end
 
-# See that only one operation exists, a get_all (which is the preload_all).
+# See that only one operation exists, a get_all (which is the preload).
 pp Flipper.adapter.operations
 # [#<Flipper::Adapters::OperationLogger::Operation:0x00007fdcfe1100e8
 #   @args=[],

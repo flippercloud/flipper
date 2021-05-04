@@ -27,6 +27,6 @@ RSpec.describe Flipper::Adapters::Redis do
 
     silence { load 'flipper/adapters/redis.rb' }
 
-    expect(Flipper.adapter.adapter).to be_a(Flipper::Adapters::Redis)
+    expect(Flipper.adapter).to be_a(Flipper::Adapters::Redis)
   end
 end

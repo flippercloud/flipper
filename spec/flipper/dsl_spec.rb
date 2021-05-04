@@ -6,21 +6,6 @@ RSpec.describe Flipper::DSL do
   let(:adapter) { Flipper::Adapters::Memory.new }
 
   describe '#initialize' do
-    context 'when using default memoize strategy' do
-      it 'wraps the given adapter with Flipper::Adapters::Memoizable' do
-        dsl = described_class.new(adapter)
-        expect(dsl.adapter.class).to be(Flipper::Adapters::Memoizable)
-        expect(dsl.adapter.adapter).to be(adapter)
-      end
-    end
-
-    context 'when disabling memoization' do
-      it 'uses the given adapter directly' do
-        dsl = described_class.new(adapter, memoize: false)
-        expect(dsl.adapter).to be(adapter)
-      end
-    end
-
     it 'defaults instrumenter to noop' do
       dsl = described_class.new(adapter)
       expect(dsl.instrumenter).to be(Flipper::Instrumenters::Noop)
@@ -33,6 +18,13 @@ RSpec.describe Flipper::DSL do
         dsl = described_class.new(adapter, instrumenter: instrumenter)
         expect(dsl.instrumenter).to be(instrumenter)
       end
+    end
+  end
+
+  describe "#adapter" do
+    it 'uses the given adapter directly' do
+      dsl = described_class.new(adapter, memoize: false)
+      expect(dsl.adapter).to be(adapter)
     end
   end
 
@@ -349,20 +341,21 @@ RSpec.describe Flipper::DSL do
     end
   end
 
-  describe '#memoize=' do
-    it 'delegates to adapter' do
-      expect(subject.adapter).not_to be_memoizing
-      subject.memoize = true
-      expect(subject.adapter).to be_memoizing
-    end
-  end
+  describe "#memoize" do
+    it "wraps adapter in memoizing adapter" do
+      called = false
 
-  describe '#memoizing?' do
-    it 'delegates to adapter' do
-      subject.memoize = false
-      expect(subject.adapter.memoizing?).to eq(subject.memoizing?)
-      subject.memoize = true
-      expect(subject.adapter.memoizing?).to eq(subject.memoizing?)
+      expect(subject.memoizing?).to be(false)
+
+      subject.memoize do |instance|
+        called = true
+        expect(instance.memoizing?).to be(true)
+        expect(instance.adapter).to be_a(Flipper::Adapters::Memoizable)
+      end
+
+      expect(subject.adapter).to be_a(Flipper::Adapters::Memory)
+      expect(subject.memoizing?).to be(false)
+      expect(called).to be(true)
     end
   end
 end

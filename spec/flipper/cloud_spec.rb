@@ -12,8 +12,7 @@ RSpec.describe Flipper::Cloud do
 
     before do
       @instance = described_class.new(token: token)
-      memoized_adapter = @instance.adapter
-      sync_adapter = memoized_adapter.adapter
+      sync_adapter = @instance.adapter
       @http_adapter = sync_adapter.instance_variable_get('@remote')
       @http_client = @http_adapter.instance_variable_get('@client')
     end
@@ -52,8 +51,7 @@ RSpec.describe Flipper::Cloud do
       stub_request(:get, /fakeflipper\.com/).to_return(status: 200, body: "{}")
 
       @instance = described_class.new(token: 'asdf', url: 'https://www.fakeflipper.com/sadpanda')
-      memoized_adapter = @instance.adapter
-      sync_adapter = memoized_adapter.adapter
+      sync_adapter = @instance.adapter
       @http_adapter = sync_adapter.instance_variable_get('@remote')
       @http_client = @http_adapter.instance_variable_get('@client')
     end
@@ -83,8 +81,7 @@ RSpec.describe Flipper::Cloud do
         Flipper::Adapters::Instrumented.new(adapter)
       end
     end
-    # instance.adapter is memoizable adapter instance
-    expect(instance.adapter.adapter).to be_instance_of(Flipper::Adapters::Instrumented)
+    expect(instance.adapter).to be_instance_of(Flipper::Adapters::Instrumented)
   end
 
   it 'can set debug_output' do

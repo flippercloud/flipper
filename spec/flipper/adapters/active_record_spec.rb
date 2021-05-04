@@ -54,7 +54,7 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
     end
 
     it 'configures itself' do
-      expect(Flipper.adapter.adapter).to be_a(Flipper::Adapters::ActiveRecord)
+      expect(Flipper.adapter).to be_a(Flipper::Adapters::ActiveRecord)
     end
   end
 end
