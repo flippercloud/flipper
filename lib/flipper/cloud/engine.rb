@@ -4,7 +4,10 @@ module Flipper
   module Cloud
     class Engine < Rails::Engine
       initializer "flipper.cloud", after: :load_config_initializers do |app|
-        cloud_config = Flipper.configuration.default.cloud_configuration
+        flipper = Flipper.instance
+        next unless flipper.is_a?(Flipper::Cloud::DSL)
+
+        cloud_config = flipper.cloud_configuration
 
         if cloud_config.sync_method == :webhook
           cloud_app = Flipper::Cloud.app(

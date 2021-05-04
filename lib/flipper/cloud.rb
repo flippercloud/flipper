@@ -47,7 +47,14 @@ module Flipper
     # Private: Configure Flipper to use Cloud by default
     def self.set_default
       Flipper.configure do |config|
-        config.default { self.new(local_adapter: config.adapter) }
+        config.default do
+          if ENV["FLIPPER_CLOUD_TOKEN"]
+            self.new(local_adapter: config.adapter)
+          else
+            warn "Missing FLIPPER_CLOUD_TOKEN environment variable. Disabling Flipper::Cloud."
+            Flipper.new(config.adapter)
+          end
+        end
       end
     end
   end

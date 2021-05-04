@@ -53,6 +53,16 @@ RSpec.describe Flipper::Cloud::Engine do
     end
   end
 
+  context "without FLIPPER_CLOUD_TOKEN" do
+    it "gracefully skips configuring webhook app" do
+      with_modified_env "FLIPPER_CLOUD_TOKEN" => nil do
+        expect(silence { application.initialize! }).to match(/Missing FLIPPER_CLOUD_TOKEN/)
+        expect(Flipper.instance).to be_a(Flipper::DSL)
+        expect(find_route("/_flipper")).to be(nil)
+      end
+    end
+  end
+
   def find_route(path)
     # `routes.recognize_path` doesn't work with rack apps, so find route manually
     req = ActionDispatch::Request.new(Rack::MockRequest.env_for(path, method: "GET"))
