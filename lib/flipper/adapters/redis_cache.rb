@@ -148,7 +148,7 @@ module Flipper
         return [] if keys.empty?
 
         cache_keys = keys.map { |key| key_for(key) }
-        @cache.mget(cache_keys).map do |value|
+        @cache.mget(*cache_keys).map do |value|
           value ? Marshal.load(value) : nil
         end
       end
