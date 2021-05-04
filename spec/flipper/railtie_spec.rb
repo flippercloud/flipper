@@ -28,22 +28,21 @@ RSpec.describe Flipper::Railtie do
     end
 
     it 'does not use Memoizer middleware if config.memoize = false' do
-      application # load but don't initialize
-      Flipper.configuration.memoize = false
+      # load but don't initialize
+      application.config.flipper.memoize = false
 
       expect(subject.middleware.last).not_to eq(Flipper::Middleware::Memoizer)
     end
 
     it 'passes config to memoizer' do
-      application # load but don't initialize
-
-      Flipper.configure do |config|
-        config.env_key = 'my_flipper'
-        config.preload = [:stats, :search]
-      end
+      # load but don't initialize
+      application.config.flipper.update(
+        env_key: 'my_flipper',
+        preload: [:stats, :search]
+      )
 
       expect(Flipper::Middleware::Memoizer).to receive(:new).with(application.routes,
-          env_key: 'my_flipper', preload: [:stats, :search], if: nil
+        env_key: 'my_flipper', preload: [:stats, :search], if: nil
       )
 
       subject # initialize
