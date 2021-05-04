@@ -56,7 +56,8 @@ RSpec.describe Flipper::Cloud::Engine do
   context "without FLIPPER_CLOUD_TOKEN" do
     it "gracefully skips configuring webhook app" do
       with_modified_env "FLIPPER_CLOUD_TOKEN" => nil do
-        expect(silence { application.initialize! }).to match(/Missing FLIPPER_CLOUD_TOKEN/)
+        application.initialize!
+        expect(silence { Flipper.instance }).to match(/Missing FLIPPER_CLOUD_TOKEN/)
         expect(Flipper.instance).to be_a(Flipper::DSL)
         expect(find_route("/_flipper")).to be(nil)
       end

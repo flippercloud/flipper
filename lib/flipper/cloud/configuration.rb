@@ -63,8 +63,6 @@ module Flipper
       # occur or not.
       attr_accessor :sync_secret
 
-      attr_accessor :app_path
-
       def initialize(options = {})
         @token = options.fetch(:token) { ENV["FLIPPER_CLOUD_TOKEN"] }
 
@@ -86,7 +84,6 @@ module Flipper
         @local_adapter = options.fetch(:local_adapter) { Adapters::Memory.new }
         @debug_output = options[:debug_output]
         @adapter_block = ->(adapter) { adapter }
-        @app_path = options.fetch(:app_path, '_flipper')
         self.url = options.fetch(:url) { ENV.fetch("FLIPPER_CLOUD_URL", DEFAULT_URL) }
       end
 
