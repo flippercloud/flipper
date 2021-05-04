@@ -1,6 +1,6 @@
 module Flipper
   class Railtie < Rails::Railtie
-    initializer "flipper.memoizer" do |app|
+    initializer "flipper.memoizer", after: :load_config_initializers do |app|
       config = Flipper.configuration
 
       if config.memoize
