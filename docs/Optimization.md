@@ -14,7 +14,7 @@ Flipper.configure do |config|
   # Load specific features that are used on most requests
   config.preload = [:stats, :search, :some_feature]
 
-  # Disable preloading
+  # Or completely disable preloading
   config.preload = false
 end
 ```
