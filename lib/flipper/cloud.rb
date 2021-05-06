@@ -43,19 +43,5 @@ module Flipper
       builder.define_singleton_method(:inspect) { klass.inspect } # pretty rake routes output
       builder
     end
-
-    # Private: Configure Flipper to use Cloud by default
-    def self.set_default
-      Flipper.configure do |config|
-        config.default do
-          if ENV["FLIPPER_CLOUD_TOKEN"]
-            self.new(local_adapter: config.adapter)
-          else
-            warn "Missing FLIPPER_CLOUD_TOKEN environment variable. Disabling Flipper::Cloud."
-            Flipper.new(config.adapter)
-          end
-        end
-      end
-    end
   end
 end
