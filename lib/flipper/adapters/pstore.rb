@@ -216,3 +216,7 @@ module Flipper
     end
   end
 end
+
+Flipper.configure do |config|
+  config.adapter { Flipper::Adapters::PStore.new }
+end

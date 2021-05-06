@@ -210,3 +210,9 @@ module Flipper
     end
   end
 end
+
+Flipper.configure do |config|
+  config.adapter { Flipper::Adapters::Sequel.new }
+end
+
+Sequel::Model.include Flipper::Identifier
