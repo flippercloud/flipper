@@ -8,17 +8,18 @@ Initialize the HTTP adapter with a configuration Hash.
 ```ruby
 require 'flipper/adapters/http'
 
-configuration = {
-  url: 'http://app.com/mount-point', # required
-  headers: { 'X-Custom-Header' => 'foo' },
-  basic_auth_username: 'user123',
-  basic_auth_password: 'password123'
-  read_timeout: 5,
-  open_timeout: 2,
-}
-
-adapter = Flipper::Adapters::Http.new(configuration)
-flipper = Flipper.new(adapter)
+Flipper.configure do |config|
+  config.adapter do
+    Flipper::Adapters::Http.new({
+      url: 'http://app.com/mount-point', # required
+      headers: { 'X-Custom-Header' => 'foo' },
+      basic_auth_username: 'user123',
+      basic_auth_password: 'password123'
+      read_timeout: 5,
+      open_timeout: 2,
+    })
+  end
+end
 ```
 
 **Required keys**:

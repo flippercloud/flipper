@@ -28,10 +28,7 @@ require 'flipper-redis'
 
 ```ruby
 Flipper.configure do |config|
-  config.adapter do
-    client = Redis.new(url: ENV["FLIPPER_REDIS_URL"] || ENV["REDIS_URL"])
-    Flipper::Adapters::Redis.new(client)
-  end
+  config.adapter { Flipper::Adapters::Redis.new(Redis.new) }
 end
 ```
 

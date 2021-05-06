@@ -2,7 +2,7 @@
 
 ## Memoization
 
-By default, Flipper will preload and memoize all features to ensure one adapter call per request. This means no matter how many times you check features, Flipper will only make one network request to Mongo, Redis, or whatever adapter you are using for the length of the request.
+By default, Flipper will preload and memoize all features to ensure one adapter call per request. This means no matter how many times you check features, Flipper will only make one network request to Postgres, MySQL, Redis, Mongo or whatever adapter you are using for the length of the request.
 
 ### Preloading
 
@@ -72,11 +72,15 @@ https://github.com/petergoldstein/dalli
 Example using the Dalli cache adapter with the Memory adapter and a TTL of 600 seconds:
 
 ```ruby
-dalli_client = Dalli::Client.new('localhost:11211')
-memory_adapter = Flipper::Adapters::Memory.new
-adapter = Flipper::Adapters::Dalli.new(memory_adapter, dalli_client, 600)
-flipper = Flipper.new(adapter)
+Flipper.configure do |config|
+  config.adapter do
+    dalli = Dalli::Client.new('localhost:11211')
+    adapter = Flipper::Adapters::Memory.new
+    Flipper::Adapters::Dalli.new(adapter, dalli, 600)
+  end
+end
 ```
+
 ### RedisCache
 
 Applications using [Redis](https://redis.io/) via the [redis-rb](https://github.com/redis/redis-rb) client can take advantage of the RedisCache adapter.
@@ -86,12 +90,15 @@ Initialize `RedisCache`  with a flipper [adapter](https://github.com/jnunemaker/
 Example using the RedisCache adapter with the Memory adapter and a TTL of 4800 seconds:
 
 ```ruby
-  require 'flipper/adapters/redis_cache'
+require 'flipper/adapters/redis_cache'
 
-  redis = Redis.new(url: ENV['REDIS_URL'])
-  memory_adapter = Flipper::Adapters::Memory.new
-  adapter = Flipper::Adapters::RedisCache.new(memory_adapter, redis, 4800)
-  flipper = Flipper.new(adapter)
+Flipper.configure do |config|
+  config.adapter do
+    redis = Redis.new(url: ENV['REDIS_URL'])
+    memory_adapter = Flipper::Adapters::Memory.new
+    Flipper::Adapters::RedisCache.new(memory_adapter, redis, 4800)
+  end
+end
 ```
 
 ### ActiveSupportCacheStore
@@ -116,10 +123,15 @@ Example using the ActiveSupportCacheStore adapter with ActiveSupport's [MemorySt
 require 'active_support/cache'
 require 'flipper/adapters/active_support_cache_store'
 
-memory_adapter = Flipper::Adapters::Memory.new
-cache = ActiveSupport::Cache::MemoryStore.new
-adapter = Flipper::Adapters::ActiveSupportCacheStore.new(memory_adapter, cache, expires_in: 5.minutes)
-flipper = Flipper.new(adapter)
+Flipper.configure do |config|
+  config.adapter do
+    Flipper::Adapters::ActiveSupportCacheStore.new(
+      Flipper::Adapters::Memory.new,
+      ActiveSupport::Cache::MemoryStore.new # Or Rails.cache,
+      expires_in: 5.minutes
+    )
+  end
+end
 ```
 
 Setting `expires_in` is optional and will set an expiration time on Flipper cache keys.  If specified, all flipper keys will use this `expires_in` over the `expires_in` passed to your ActiveSupport cache constructor.
