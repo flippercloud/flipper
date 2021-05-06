@@ -18,7 +18,7 @@ RSpec.describe Flipper::Cloud::Engine do
     Rails.application = nil
 
     # Force loading of flipper to configure itself
-    load 'flipper/adapters/cloud.rb'
+    load 'flipper/cloud.rb'
   end
 
   it "initializes cloud configuration" do
