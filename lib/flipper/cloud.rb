@@ -59,3 +59,5 @@ module Flipper
     end
   end
 end
+
+Flipper::Cloud.set_default
