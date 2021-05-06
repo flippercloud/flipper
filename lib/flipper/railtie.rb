@@ -4,8 +4,17 @@ module Flipper
       config.flipper = ActiveSupport::OrderedOptions.new.update(
         env_key: "flipper",
         memoize: true,
-        preload: true
+        preload: true,
+        instrumenter: ActiveSupport::Notifications
       )
+    end
+
+    initializer "flipper", before: :load_config_initializers do |app|
+      Flipper.configure do |config|
+        config.default do
+          Flipper.new(config.adapter, instrumenter: app.config.flipper.instrumenter)
+        end
+      end
     end
 
     initializer "flipper.memoizer", after: :load_config_initializers do |app|

@@ -29,6 +29,12 @@ RSpec.describe Flipper::Railtie do
       expect(application.config.flipper.preload).to be(true)
     end
 
+    it "configures instrumentor on default instance" do
+      subject
+
+      expect(Flipper.instance.instrumenter).to eq(ActiveSupport::Notifications)
+    end
+
     it 'uses Memoizer middleware if config.memoize = true' do
       expect(subject.middleware.last).to eq(Flipper::Middleware::Memoizer)
     end

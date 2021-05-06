@@ -25,7 +25,10 @@ RSpec.describe Flipper::Cloud::Engine do
     stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
 
     with_modified_env env do
+      application.initialize!
+
       expect(Flipper.instance).to be_a(Flipper::Cloud::DSL)
+      expect(Flipper.instance.instrumenter).to be(ActiveSupport::Notifications)
     end
   end
 

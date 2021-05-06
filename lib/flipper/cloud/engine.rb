@@ -7,8 +7,24 @@ module Flipper
         config.flipper.cloud_path = "_flipper"
       end
 
-      initializer "flipper.cloud", after: :load_config_initializers do |app|
-        if ENV["FLIPPER_CLOUD_TOKEN"] && ENV["FLIPPER_CLOUD_SYNC_SECRET"]
+      initializer "flipper.cloud.default", before: :load_config_initializers do |app|
+        Flipper.configure do |config|
+          config.default do
+            if ENV["FLIPPER_CLOUD_TOKEN"]
+              Flipper::Cloud.new(
+                local_adapter: config.adapter,
+                instrumenter: app.config.flipper.instrumenter
+              )
+            else
+              warn "Missing FLIPPER_CLOUD_TOKEN environment variable. Disabling Flipper::Cloud."
+              Flipper.new(config.adapter)
+            end
+          end
+        end
+      end
+
+      initializer "flipper.cloud.webhook", after: :load_config_initializers do |app|
+        if ENV["FLIPPER_CLOUD_SYNC_SECRET"]
           config = app.config.flipper
 
           cloud_app = Flipper::Cloud.app(
