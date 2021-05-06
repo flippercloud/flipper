@@ -9,7 +9,7 @@ module Flipper
       )
     end
 
-    initializer "flipper", before: :load_config_initializers do |app|
+    initializer "flipper.default", before: :load_config_initializers do |app|
       Flipper.configure do |config|
         config.default do
           Flipper.new(config.adapter, instrumenter: app.config.flipper.instrumenter)
