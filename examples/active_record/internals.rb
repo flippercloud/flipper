@@ -2,8 +2,6 @@ require_relative "./ar_setup"
 
 # Requires the flipper-active_record gem to be installed.
 require 'flipper/adapters/active_record'
-adapter = Flipper::Adapters::ActiveRecord.new
-flipper = Flipper.new(adapter)
 
 # Register a few groups.
 Flipper.register(:admins) { |thing| thing.admin? }
@@ -12,16 +10,16 @@ Flipper.register(:early_access) { |thing| thing.early_access? }
 # Create a user class that has flipper_id instance method.
 User = Struct.new(:flipper_id)
 
-flipper[:stats].enable
-flipper[:stats].enable_group :admins
-flipper[:stats].enable_group :early_access
-flipper[:stats].enable_actor User.new('25')
-flipper[:stats].enable_actor User.new('90')
-flipper[:stats].enable_actor User.new('180')
-flipper[:stats].enable_percentage_of_time 15
-flipper[:stats].enable_percentage_of_actors 45
+Flipper[:stats].enable
+Flipper[:stats].enable_group :admins
+Flipper[:stats].enable_group :early_access
+Flipper[:stats].enable_actor User.new('25')
+Flipper[:stats].enable_actor User.new('90')
+Flipper[:stats].enable_actor User.new('180')
+Flipper[:stats].enable_percentage_of_time 15
+Flipper[:stats].enable_percentage_of_actors 45
 
-flipper[:search].enable
+Flipper[:search].enable
 
 puts 'all rows in features table'
 pp Flipper::Adapters::ActiveRecord::Feature.all
@@ -105,5 +103,5 @@ pp Flipper::Adapters::ActiveRecord::Gate.all
 puts
 
 puts 'flipper get of feature'
-pp adapter.get(flipper[:stats])
+pp adapter.get(Flipper[:stats])
 # flipper get of feature
