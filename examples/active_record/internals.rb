@@ -103,5 +103,5 @@ pp Flipper::Adapters::ActiveRecord::Gate.all
 puts
 
 puts 'flipper get of feature'
-pp adapter.get(Flipper[:stats])
+pp Flipper.adapter.get(Flipper[:stats])
 # flipper get of feature
