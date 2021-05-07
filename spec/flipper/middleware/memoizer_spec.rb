@@ -218,6 +218,39 @@ RSpec.describe Flipper::Middleware::Memoizer do
     end
   end
 
+  context 'with multiple instances' do
+    let(:app) do
+      # ensure scoped for builder block, annoying...
+      instance = flipper
+      middleware = described_class
+
+      Rack::Builder.new do
+        use middleware, preload: %i(stats)
+        # Second instance should be a noop
+        use middleware, preload: true
+
+        map '/' do
+          run ->(_env) { [200, {}, []] }
+        end
+
+        map '/fail' do
+          run ->(_env) { raise 'FAIL!' }
+        end
+      end.to_app
+    end
+
+    include_examples 'flipper middleware'
+
+    it 'does not call preload in second instance' do
+      expect(flipper).not_to receive(:preload_all)
+
+      get '/', {}, 'flipper' => flipper
+
+      expect(adapter.count(:get_multi)).to be(1)
+      expect(adapter.last(:get_multi).args).to eq([[flipper[:stats]]])
+    end
+  end
+
   context 'when an app raises an exception' do
     it 'resets memoize' do
       begin
