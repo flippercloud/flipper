@@ -15,10 +15,6 @@ RSpec.describe Flipper::Middleware::Memoizer do
   let(:flipper) { Flipper.new(adapter) }
   let(:env) { { 'flipper' => flipper } }
 
-  after do
-    flipper.memoize = nil
-  end
-
   it 'raises if initialized with app and flipper instance' do
     expect do
       described_class.new(app, flipper)
@@ -222,6 +218,44 @@ RSpec.describe Flipper::Middleware::Memoizer do
     end
   end
 
+  context 'with multiple instances' do
+    let(:app) do
+      # ensure scoped for builder block, annoying...
+      instance = flipper
+      middleware = described_class
+
+      Rack::Builder.new do
+        use middleware, preload: %i(stats)
+        # Second instance should be a noop
+        use middleware, preload: true
+
+        map '/' do
+          run ->(_env) { [200, {}, []] }
+        end
+
+        map '/fail' do
+          run ->(_env) { raise 'FAIL!' }
+        end
+      end.to_app
+    end
+
+    def get(uri, params = {}, env = {}, &block)
+      silence { super(uri, params, env, &block) }
+    end
+
+    include_examples 'flipper middleware'
+
+    it 'does not call preload in second instance' do
+      expect(flipper).not_to receive(:preload_all)
+
+      output = get '/', {}, 'flipper' => flipper
+
+      expect(output).to match(/Flipper::Middleware::Memoizer appears to be running twice/)
+      expect(adapter.count(:get_multi)).to be(1)
+      expect(adapter.last(:get_multi).args).to eq([[flipper[:stats]]])
+    end
+  end
+
   context 'when an app raises an exception' do
     it 'resets memoize' do
       begin
@@ -363,6 +397,18 @@ RSpec.describe Flipper::Middleware::Memoizer do
   end
 
   context 'with preload:true and caching adapter' do
+    let(:app) do
+      app = lambda do |_env|
+        flipper[:stats].enabled?
+        flipper[:stats].enabled?
+        flipper[:shiny].enabled?
+        flipper[:shiny].enabled?
+        [200, {}, []]
+      end
+
+      described_class.new(app, preload: true)
+    end
+
     it 'eagerly caches known features for duration of request' do
       memory = Flipper::Adapters::Memory.new
       logged_memory = Flipper::Adapters::OperationLogger.new(memory)
@@ -379,25 +425,15 @@ RSpec.describe Flipper::Middleware::Memoizer do
       logged_memory.reset
       logged_cached.reset
 
-      app = lambda do |_env|
-        flipper[:stats].enabled?
-        flipper[:stats].enabled?
-        flipper[:shiny].enabled?
-        flipper[:shiny].enabled?
-        [200, {}, []]
-      end
-
-      middleware = described_class.new(app, preload: true)
-
-      middleware.call('flipper' => flipper)
+      get '/', {}, 'flipper' => flipper
       expect(logged_cached.count(:get_all)).to be(1)
       expect(logged_memory.count(:get_all)).to be(1)
 
-      middleware.call('flipper' => flipper)
+      get '/', {}, 'flipper' => flipper
       expect(logged_cached.count(:get_all)).to be(2)
       expect(logged_memory.count(:get_all)).to be(1)
 
-      middleware.call('flipper' => flipper)
+      get '/', {}, 'flipper' => flipper
       expect(logged_cached.count(:get_all)).to be(3)
       expect(logged_memory.count(:get_all)).to be(1)
     end
