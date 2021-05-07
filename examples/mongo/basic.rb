@@ -1,7 +1,7 @@
 require 'bundler/setup'
 require 'logger'
 
-ENV["FLIPPER_MONGO_URL"] ||= "127.0.0.1:#{ENV["MONGODB_PORT"] || 27017}"
+ENV["FLIPPER_MONGO_URL"] ||= "mongodb://127.0.0.1:#{ENV["MONGODB_PORT"] || 27017}"
 require 'flipper/adapters/mongo'
 
 Flipper[:stats].enable
