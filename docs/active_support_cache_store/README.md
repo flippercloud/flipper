@@ -22,11 +22,17 @@ Or install it yourself with:
 require 'active_support/cache'
 require 'flipper/adapters/active_support_cache_store'
 
-memory_adapter = Flipper::Adapters::Memory.new
-cache = ActiveSupport::Cache::MemoryStore.new
-adapter = Flipper::Adapters::ActiveSupportCacheStore.new(memory_adapter, cache, expires_in: 5.minutes)
-flipper = Flipper.new(adapter)
+Flipper.configure do |config|
+  config.adapter do
+    Flipper::Adapters::ActiveSupportCacheStore.new(
+      Flipper::Adapters::Memory.new,
+      ActiveSupport::Cache::MemoryStore.new, # Or Rails.cache
+      expires_in: 5.minutes
+    )
+  end
+end
 ```
+
 Setting `expires_in` is optional and will set an expiration time on Flipper cache keys.  If specified, all flipper keys will use this `expires_in` over the `expires_in` passed to your ActiveSupport cache constructor.
 
 ## Internals

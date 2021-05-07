@@ -16,7 +16,7 @@ module Flipper
   # Public: Configure flipper.
   #
   #   Flipper.configure do |config|
-  #     config.default { ... }
+  #     config.adapter { ... }
   #   end
   #
   # Yields Flipper::Configuration instance.
@@ -164,3 +164,5 @@ require 'flipper/types/percentage'
 require 'flipper/types/percentage_of_actors'
 require 'flipper/types/percentage_of_time'
 require 'flipper/typecast'
+
+require "flipper/railtie" if defined?(Rails::Railtie)

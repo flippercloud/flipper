@@ -8,8 +8,7 @@ module Flipper
       #
       # app - The app this middleware is included in.
       # opts - The Hash of options.
-      #        :preload_all - Boolean of whether or not to preload all features.
-      #        :preload - Array of Symbol feature names to preload.
+      #        :preload - Boolean to preload all features or Array of Symbol feature names to preload.
       #
       # Examples
       #
@@ -26,6 +25,11 @@ module Flipper
           raise 'Flipper::Middleware::Memoizer no longer initializes with a flipper instance or block. Read more at: https://git.io/vSo31.'
         end
 
+        if opts[:preload_all]
+          warn "Flipper::Middleware::Memoizer: `preload_all` is deprecated, use `preload: true`"
+          opts[:preload] = true
+        end
+
         @app = app
         @opts = opts
         @env_key = opts.fetch(:env_key, 'flipper')
@@ -34,17 +38,23 @@ module Flipper
       def call(env)
         request = Rack::Request.new(env)
 
-        if skip_memoize?(request)
-          @app.call(env)
-        else
+        if memoize?(request)
           memoized_call(env)
+        else
+          @app.call(env)
         end
       end
 
       private
 
-      def skip_memoize?(request)
-        @opts[:unless] && @opts[:unless].call(request)
+      def memoize?(request)
+        if @opts[:if]
+          @opts[:if].call(request)
+        elsif @opts[:unless]
+          !@opts[:unless].call(request)
+        else
+          true
+        end
       end
 
       def memoized_call(env)
@@ -53,10 +63,9 @@ module Flipper
         original = flipper.memoizing?
         flipper.memoize = true
 
-        flipper.preload_all if @opts[:preload_all]
-
-        if (preload = @opts[:preload])
-          flipper.preload(preload)
+        case @opts[:preload]
+        when true then flipper.preload_all
+        when Array then flipper.preload(@opts[:preload])
         end
 
         response = @app.call(env)

@@ -7,8 +7,6 @@ require 'generators/flipper/templates/sequel_migration'
 CreateFlipperTablesSequel.new(Sequel::Model.db).up
 
 require 'flipper/adapters/sequel'
-adapter = Flipper::Adapters::Sequel.new
-flipper = Flipper.new(adapter)
 
 # Register a few groups.
 Flipper.register(:admins) { |thing| thing.admin? }
@@ -17,16 +15,16 @@ Flipper.register(:early_access) { |thing| thing.early_access? }
 # Create a user class that has flipper_id instance method.
 User = Struct.new(:flipper_id)
 
-flipper[:stats].enable
-flipper[:stats].enable_group :admins
-flipper[:stats].enable_group :early_access
-flipper[:stats].enable_actor User.new('25')
-flipper[:stats].enable_actor User.new('90')
-flipper[:stats].enable_actor User.new('180')
-flipper[:stats].enable_percentage_of_time 15
-flipper[:stats].enable_percentage_of_actors 45
+Flipper[:stats].enable
+Flipper[:stats].enable_group :admins
+Flipper[:stats].enable_group :early_access
+Flipper[:stats].enable_actor User.new('25')
+Flipper[:stats].enable_actor User.new('90')
+Flipper[:stats].enable_actor User.new('180')
+Flipper[:stats].enable_percentage_of_time 15
+Flipper[:stats].enable_percentage_of_actors 45
 
-flipper[:search].enable
+Flipper[:search].enable
 
 puts 'all rows in features table'
 pp Flipper::Adapters::Sequel::Feature.all
@@ -48,7 +46,7 @@ pp Flipper::Adapters::Sequel::Gate.all
 puts
 
 puts 'flipper get of feature'
-pp adapter.get(flipper[:stats])
+pp Flipper.adapter.get(Flipper[:stats])
 # {:boolean=>"true",
 #  :groups=>#<Set: {"admins", "early_access"}>,
 #  :actors=>#<Set: {"180", "25", "90"}>,

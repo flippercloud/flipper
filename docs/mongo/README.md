@@ -28,9 +28,9 @@ require 'flipper-mongo`
 
 ```ruby
 Flipper.configure do |config|
-  config.default do
+  config.adapter do
     collection = Mongo::Client.new(ENV["MONGO_URL"])["flipper"]
-    Flipper.new(Flipper::Adapters::Mongo.new(collection))
+    Flipper::Adapters::Mongo.new(collection)
   end
 end
 ```

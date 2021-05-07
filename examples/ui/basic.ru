@@ -11,7 +11,6 @@
 require 'bundler/setup'
 require "flipper-ui"
 require "flipper/adapters/pstore"
-require "active_support/notifications"
 
 Flipper.register(:admins) { |actor|
   actor.respond_to?(:admin?) && actor.admin?
@@ -20,16 +19,6 @@ Flipper.register(:admins) { |actor|
 Flipper.register(:early_access) { |actor|
   actor.respond_to?(:early?) && actor.early?
 }
-
-# Setup logging of flipper calls.
-if ENV["LOG"] == "1"
-  $logger = Logger.new(STDOUT)
-  require "flipper/instrumentation/log_subscriber"
-  Flipper::Instrumentation::LogSubscriber.logger = $logger
-end
-
-adapter = Flipper::Adapters::PStore.new
-flipper = Flipper.new(adapter, instrumenter: ActiveSupport::Notifications)
 
 Flipper::UI.configure do |config|
   # config.banner_text = 'Production Environment'
@@ -64,6 +53,6 @@ end
 # flipper[:new_cache].enable_percentage_of_actors 15
 # flipper["a/b"].add
 
-run Flipper::UI.app(flipper) { |builder|
+run Flipper::UI.app { |builder|
   builder.use Rack::Session::Cookie, secret: "_super_secret"
 }

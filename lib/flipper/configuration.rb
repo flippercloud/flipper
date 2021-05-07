@@ -1,7 +1,33 @@
 module Flipper
   class Configuration
-    def initialize
-      @default = -> { Flipper.new(Flipper::Adapters::Memory.new) }
+    def initialize(options = {})
+      @default = -> { Flipper.new(adapter) }
+      @adapter = -> { Flipper::Adapters::Memory.new }
+    end
+
+    # The default adapter to use.
+    #
+    # Pass a block to assign the adapter, and invoke without a block to
+    # return the configured adapter instance.
+    #
+    #   Flipper.configure do |config|
+    #     config.adapter # => instance of default Memory adapter
+    #
+    #     # Configure it to use the ActiveRecord adapter
+    #     config.adapter do
+    #       require "flipper-active_record"
+    #       Flipper::Adapters::ActiveRecord.new
+    #     end
+    #
+    #     config.adapter # => instance of ActiveRecord adapter
+    #  end
+    #
+    def adapter(&block)
+      if block_given?
+        @adapter = block
+      else
+        @adapter.call
+      end
     end
 
     # Controls the default instance for flipper. When used with a block it

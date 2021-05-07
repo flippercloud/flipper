@@ -12,7 +12,7 @@ RSpec.describe Flipper::Cloud do
     let(:token) { 'asdf' }
 
     before do
-      @instance = described_class.new(token)
+      @instance = described_class.new(token: token)
       memoized_adapter = @instance.adapter
       sync_adapter = memoized_adapter.adapter
       @http_adapter = sync_adapter.instance_variable_get('@remote')
@@ -52,7 +52,7 @@ RSpec.describe Flipper::Cloud do
     before do
       stub_request(:get, /fakeflipper\.com/).to_return(status: 200, body: "{}")
 
-      @instance = described_class.new('asdf', url: 'https://www.fakeflipper.com/sadpanda')
+      @instance = described_class.new(token: 'asdf', url: 'https://www.fakeflipper.com/sadpanda')
       memoized_adapter = @instance.adapter
       sync_adapter = memoized_adapter.adapter
       @http_adapter = sync_adapter.instance_variable_get('@remote')
@@ -75,12 +75,12 @@ RSpec.describe Flipper::Cloud do
 
   it 'can set instrumenter' do
     instrumenter = Flipper::Instrumenters::Memory.new
-    instance = described_class.new('asdf', instrumenter: instrumenter)
+    instance = described_class.new(token: 'asdf', instrumenter: instrumenter)
     expect(instance.instrumenter).to be(instrumenter)
   end
 
   it 'allows wrapping adapter with another adapter like the instrumenter' do
-    instance = described_class.new('asdf') do |config|
+    instance = described_class.new(token: 'asdf') do |config|
       config.adapter do |adapter|
         Flipper::Adapters::Instrumented.new(adapter)
       end
@@ -92,26 +92,26 @@ RSpec.describe Flipper::Cloud do
   it 'can set debug_output' do
     expect(Flipper::Adapters::Http::Client).to receive(:new)
       .with(hash_including(debug_output: STDOUT))
-    described_class.new('asdf', debug_output: STDOUT)
+    described_class.new(token: 'asdf', debug_output: STDOUT)
   end
 
   it 'can set read_timeout' do
     expect(Flipper::Adapters::Http::Client).to receive(:new)
       .with(hash_including(read_timeout: 1))
-    described_class.new('asdf', read_timeout: 1)
+    described_class.new(token: 'asdf', read_timeout: 1)
   end
 
   it 'can set open_timeout' do
     expect(Flipper::Adapters::Http::Client).to receive(:new)
       .with(hash_including(open_timeout: 1))
-    described_class.new('asdf', open_timeout: 1)
+    described_class.new(token: 'asdf', open_timeout: 1)
   end
 
   if RUBY_VERSION >= '2.6.0'
     it 'can set write_timeout' do
       expect(Flipper::Adapters::Http::Client).to receive(:new)
         .with(hash_including(open_timeout: 1))
-      described_class.new('asdf', open_timeout: 1)
+      described_class.new(token: 'asdf', open_timeout: 1)
     end
   end
 
@@ -129,7 +129,7 @@ RSpec.describe Flipper::Cloud do
     flipper.enable_actor(:stats, Flipper::Actor.new("jnunemaker"))
     flipper.enable_percentage_of_time(:logging, 5)
 
-    cloud_flipper = Flipper::Cloud.new("asdf")
+    cloud_flipper = Flipper::Cloud.new(token: "asdf")
 
     get_all = {
       "logging" => {actors: Set.new, boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: "5"},
@@ -158,7 +158,7 @@ RSpec.describe Flipper::Cloud do
     flipper.enable_actor(:stats, Flipper::Actor.new("jnunemaker"))
     flipper.enable_percentage_of_time(:logging, 5)
 
-    cloud_flipper = Flipper::Cloud.new("asdf")
+    cloud_flipper = Flipper::Cloud.new(token: "asdf")
 
     get_all = {
       "logging" => {actors: Set.new, boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: "5"},
@@ -186,7 +186,7 @@ RSpec.describe Flipper::Cloud do
     flipper.enable_actor(:stats, Flipper::Actor.new("jnunemaker"))
     flipper.enable_percentage_of_time(:logging, 5)
 
-    cloud_flipper = Flipper::Cloud.new("asdf")
+    cloud_flipper = Flipper::Cloud.new(token: "asdf")
 
     get_all = {
       "logging" => {actors: Set.new, boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: "5"},

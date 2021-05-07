@@ -61,6 +61,23 @@ module SpecHelpers
   def with_modified_env(options, &block)
     ClimateControl.modify(options, &block)
   end
+
+  def silence
+    # Store the original stderr and stdout in order to restore them later
+    original_stderr = $stderr
+    original_stdout = $stdout
+
+    # Redirect stderr and stdout
+    output = $stderr = $stdout = StringIO.new
+
+    yield
+
+    $stderr = original_stderr
+    $stdout = original_stdout
+
+    # Return output
+    output.string
+  end
 end
 
 RSpec.configure do |config|

@@ -4,12 +4,9 @@ require 'flipper/adapters/operation_logger'
 require 'flipper/instrumentation/log_subscriber'
 
 Flipper.configure do |config|
-  config.default do
+  config.adapter do
     # pick an adapter, this uses memory, any will do
-    adapter = Flipper::Adapters::OperationLogger.new(Flipper::Adapters::Memory.new)
-
-    # pass adapter to handy DSL instance
-    Flipper.new(adapter)
+    Flipper::Adapters::OperationLogger.new(Flipper::Adapters::Memory.new)
   end
 end
 

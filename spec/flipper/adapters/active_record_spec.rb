@@ -51,16 +51,12 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
       Flipper.configuration = nil
       Flipper.instance = nil
 
-      load 'flipper-active_record.rb'
+      load 'flipper/adapters/active_record.rb'
       ActiveSupport.run_load_hooks(:active_record, ActiveRecord::Base)
     end
 
     it 'configures itself' do
       expect(Flipper.adapter.adapter).to be_a(Flipper::Adapters::ActiveRecord)
-    end
-
-    it "defines #flipper_id on AR::Base" do
-      expect(ActiveRecord::Base.ancestors).to include(Flipper::Identifier)
     end
   end
 end

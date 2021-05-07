@@ -4,18 +4,17 @@ I plan on supporting the adapters in the flipper repo. Other adapters are welcom
 
 ## Officially Supported
 
-* [ActiveRecord adapter](https://github.com/jnunemaker/flipper/blob/master/docs/active_record) - Rails 3, 4, 5, and 6.
-* [ActiveSupportCacheStore adapter](https://github.com/jnunemaker/flipper/blob/master/docs/active_support_cache_store) - ActiveSupport::Cache::Store
-* [Cassanity adapter](https://github.com/jnunemaker/flipper-cassanity)
-* [Http adapter](https://github.com/jnunemaker/flipper/blob/master/docs/http)
-* [memory adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb) – great for tests
-* [Moneta adapter](https://github.com/jnunemaker/flipper/blob/master/docs/moneta)
+* [ActiveRecord adapter](https://github.com/jnunemaker/flipper/blob/master/docs/active_record) - Rails 5 and 6.
+* [Sequel adapter](https://github.com/jnunemaker/flipper/blob/master/docs/sequel)
+* [Redis adapter](https://github.com/jnunemaker/flipper/blob/master/docs/redis)
 * [Mongo adapter](https://github.com/jnunemaker/flipper/blob/master/docs/mongo)
 * [PStore adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/pstore.rb) – great for when a local file is enough
-* [read-only adapter](https://github.com/jnunemaker/flipper/blob/master/docs/read-only)
-* [Redis adapter](https://github.com/jnunemaker/flipper/blob/master/docs/redis)
-* [Rollout adapter](rollout/README.md)
-* [Sequel adapter](https://github.com/jnunemaker/flipper/blob/master/docs/sequel)
+* [Http adapter](https://github.com/jnunemaker/flipper/blob/master/docs/http) - great for using with `Flipper::Api`
+* [Moneta adapter](https://github.com/jnunemaker/flipper/blob/master/docs/moneta) - great for a variety of data stores
+* [ActiveSupportCacheStore adapter](https://github.com/jnunemaker/flipper/blob/master/docs/active_support_cache_store) - great for Rails caching
+* [Memory adapter](https://github.com/jnunemaker/flipper/blob/master/lib/flipper/adapters/memory.rb) – great for tests
+* [Read-only adapter](https://github.com/jnunemaker/flipper/blob/master/docs/read-only) - great for preventing writes from production console
+* [Rollout adapter](rollout/README.md) - great for switching from rollout to flipper
 
 ## Community Supported
 

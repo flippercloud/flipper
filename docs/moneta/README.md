@@ -21,12 +21,9 @@ Or install it yourself with:
 ```ruby
 require 'flipper/adapters/moneta'
 moneta = Moneta.new(:Memory)
-adapter = Flipper::Adapters::Moneta.new(moneta)
 
 Flipper.configure do |config|
-  config.default do
-    Flipper.new(adapter)
-  end
+  config.adapter { Flipper::Adapters::Moneta.new(moneta) }
 end
 ```
 
@@ -37,12 +34,9 @@ Each feature is stored as a key namespaced by `flipper_features`.
 ```ruby
 require 'flipper/adapters/moneta'
 moneta = Moneta.new(:Memory)
-adapter = Flipper::Adapters::Moneta.new(moneta)
 
 Flipper.configure do |config|
-  config.default do
-    Flipper.new(adapter)
-  end
+  config.adapter { Flipper::Adapters::Moneta.new(moneta) }
 end
 
 # Register a few groups.

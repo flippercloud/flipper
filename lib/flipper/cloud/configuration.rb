@@ -67,7 +67,7 @@ module Flipper
         @token = options.fetch(:token) { ENV["FLIPPER_CLOUD_TOKEN"] }
 
         if @token.nil?
-          raise ArgumentError, "Flipper::Cloud token is missing. Please set FLIPPER_CLOUD_TOKEN or provide the token (e.g. Flipper::Cloud.new('token'))."
+          raise ArgumentError, "Flipper::Cloud token is missing. Please set FLIPPER_CLOUD_TOKEN or provide the token (e.g. Flipper::Cloud.new(token: 'token'))."
         end
 
         if ENV["FLIPPER_CLOUD_SYNC_METHOD"]
