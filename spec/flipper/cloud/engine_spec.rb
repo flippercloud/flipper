@@ -14,6 +14,9 @@ RSpec.describe Flipper::Cloud::Engine do
     end
   end
 
+  # App for Rack::Test
+  let(:app) { application.routes }
+
   before do
     Rails.application = nil
 
@@ -37,7 +40,6 @@ RSpec.describe Flipper::Cloud::Engine do
       env.update "FLIPPER_CLOUD_SYNC_SECRET" => "test-secret"
     end
 
-    let(:app) { application.routes }
     let(:request_body) do
       JSON.generate({
         "environment_id" => 1,
@@ -54,15 +56,7 @@ RSpec.describe Flipper::Cloud::Engine do
       Flipper::Cloud::MessageVerifier.new(secret: "").header(signature, timestamp)
     }
 
-    it "mounts webhook app" do
-      with_modified_env env do
-        application.initialize!
-
-        expect(find_route("/_flipper")).to be_a(ActionDispatch::Journey::Route)
-      end
-    end
-
-    it "properly configures webhook app" do
+    it "configures webhook app" do
       with_modified_env env do
         application.initialize!
 
@@ -83,7 +77,8 @@ RSpec.describe Flipper::Cloud::Engine do
       with_modified_env env do
         application.initialize!
 
-        expect(find_route("/_flipper")).to be(nil)
+        post "/_flipper"
+        expect(last_response.status).to eq(404)
       end
     end
   end
@@ -94,17 +89,10 @@ RSpec.describe Flipper::Cloud::Engine do
         application.initialize!
         expect(silence { Flipper.instance }).to match(/Missing FLIPPER_CLOUD_TOKEN/)
         expect(Flipper.instance).to be_a(Flipper::DSL)
-        expect(find_route("/_flipper")).to be(nil)
+
+        post "/_flipper"
+        expect(last_response.status).to eq(404)
       end
     end
-  end
-
-  def find_route(path)
-    # `routes.recognize_path` doesn't work with rack apps, so find route manually
-    req = ActionDispatch::Request.new(Rack::MockRequest.env_for(path, method: "GET"))
-    matched_route = nil
-    application.routes.router.recognize(req) { |route,_| matched_route ||= route }
-
-    matched_route
   end
 end
