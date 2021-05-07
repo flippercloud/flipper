@@ -15,10 +15,6 @@ RSpec.describe Flipper::Middleware::Memoizer do
   let(:flipper) { Flipper.new(adapter) }
   let(:env) { { 'flipper' => flipper } }
 
-  after do
-    flipper.memoize = nil
-  end
-
   it 'raises if initialized with app and flipper instance' do
     expect do
       described_class.new(app, flipper)
@@ -363,6 +359,18 @@ RSpec.describe Flipper::Middleware::Memoizer do
   end
 
   context 'with preload:true and caching adapter' do
+    let(:app) do
+      app = lambda do |_env|
+        flipper[:stats].enabled?
+        flipper[:stats].enabled?
+        flipper[:shiny].enabled?
+        flipper[:shiny].enabled?
+        [200, {}, []]
+      end
+
+      described_class.new(app, preload: true)
+    end
+
     it 'eagerly caches known features for duration of request' do
       memory = Flipper::Adapters::Memory.new
       logged_memory = Flipper::Adapters::OperationLogger.new(memory)
@@ -379,25 +387,15 @@ RSpec.describe Flipper::Middleware::Memoizer do
       logged_memory.reset
       logged_cached.reset
 
-      app = lambda do |_env|
-        flipper[:stats].enabled?
-        flipper[:stats].enabled?
-        flipper[:shiny].enabled?
-        flipper[:shiny].enabled?
-        [200, {}, []]
-      end
-
-      middleware = described_class.new(app, preload: true)
-
-      middleware.call('flipper' => flipper)
+      get '/', {}, 'flipper' => flipper
       expect(logged_cached.count(:get_all)).to be(1)
       expect(logged_memory.count(:get_all)).to be(1)
 
-      middleware.call('flipper' => flipper)
+      get '/', {}, 'flipper' => flipper
       expect(logged_cached.count(:get_all)).to be(2)
       expect(logged_memory.count(:get_all)).to be(1)
 
-      middleware.call('flipper' => flipper)
+      get '/', {}, 'flipper' => flipper
       expect(logged_cached.count(:get_all)).to be(3)
       expect(logged_memory.count(:get_all)).to be(1)
     end

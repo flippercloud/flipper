@@ -60,7 +60,11 @@ module Flipper
       def memoized_call(env)
         reset_on_body_close = false
         flipper = env.fetch(@env_key) { Flipper }
-        original = flipper.memoizing?
+
+        # Already memoizing. Maybe the memization middleware is mounted twice?
+        # This instance does not need to do anything.
+        return @app.call(env) if flipper.memoizing?
+
         flipper.memoize = true
 
         case @opts[:preload]
@@ -70,12 +74,12 @@ module Flipper
 
         response = @app.call(env)
         response[2] = Rack::BodyProxy.new(response[2]) do
-          flipper.memoize = original
+          flipper.memoize = false
         end
         reset_on_body_close = true
         response
       ensure
-        flipper.memoize = original if flipper && !reset_on_body_close
+        flipper.memoize = false if flipper && !reset_on_body_close
       end
     end
   end
