@@ -239,13 +239,18 @@ RSpec.describe Flipper::Middleware::Memoizer do
       end.to_app
     end
 
+    def get(uri, params = {}, env = {}, &block)
+      silence { super(uri, params, env, &block) }
+    end
+
     include_examples 'flipper middleware'
 
     it 'does not call preload in second instance' do
       expect(flipper).not_to receive(:preload_all)
 
-      get '/', {}, 'flipper' => flipper
+      output = get '/', {}, 'flipper' => flipper
 
+      expect(output).to match(/Flipper::Middleware::Memoizer appears to be running twice/)
       expect(adapter.count(:get_multi)).to be(1)
       expect(adapter.last(:get_multi).args).to eq([[flipper[:stats]]])
     end

@@ -61,9 +61,11 @@ module Flipper
         reset_on_body_close = false
         flipper = env.fetch(@env_key) { Flipper }
 
-        # Already memoizing. Maybe the memization middleware is mounted twice?
-        # This instance does not need to do anything.
-        return @app.call(env) if flipper.memoizing?
+        # Already memoizing. This instance does not need to do anything.
+        if flipper.memoizing?
+          warn "Flipper::Middleware::Memoizer appears to be running twice. Read how to resolve this at https://github.com/jnunemaker/flipper/pull/523"
+          return @app.call(env)
+        end
 
         flipper.memoize = true
 
