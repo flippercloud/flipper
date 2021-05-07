@@ -13,6 +13,9 @@ module Flipper
       # Public: The name of the adapter.
       attr_reader :name
 
+      # Public: The name of the collection storing the feature data.
+      attr_reader :collection
+
       def initialize(collection)
         @collection = collection
         @name = :mongo

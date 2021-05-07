@@ -24,7 +24,7 @@ Flipper[:stats].enable_percentage_of_actors 45
 Flipper[:search].enable
 
 puts 'all docs in collection'
-pp collection.find.to_a
+pp Flipper.adapter.adapter.collection.find.to_a
 # all docs in collection
 # [{"_id"=>"stats",
 #   "actors"=>["25", "90", "180"],
