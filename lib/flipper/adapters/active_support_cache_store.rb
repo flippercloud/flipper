@@ -52,7 +52,7 @@ module Flipper
         @cache.delete(FeaturesKey)
 
         if @write_through
-          @cache.write(key_for(feature.key), {}, @write_options)
+          @cache.write(key_for(feature.key), default_config, @write_options)
         else
           @cache.delete(key_for(feature.key))
         end

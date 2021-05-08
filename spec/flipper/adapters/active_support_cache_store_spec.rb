@@ -40,7 +40,7 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
       let(:write_through) { true }
 
       it 'expires feature and writes an empty value to the cache' do
-        expect(cache.read(described_class.key_for(feature))).to be_empty
+        expect(cache.read(described_class.key_for(feature))).to eq(adapter.default_config)
         expect(cache.exist?(described_class.key_for(feature))).to be(true)
         expect(feature).not_to be_enabled
       end
