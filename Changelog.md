@@ -14,6 +14,7 @@
 
 * Allow actors and time gates to deal with decimal percentages (https://github.com/jnunemaker/flipper/pull/492)
 * Change Flipper::Cloud::Middleware to receive webhooks at / in addition to /webhooks.
+* Add `write_through` option to ActiveSupportCacheStore adapter to support write-through caching (https://github.com/jnunemaker/flipper/pull/512)
 
 ## 0.20.3
 
