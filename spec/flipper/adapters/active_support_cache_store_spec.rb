@@ -32,6 +32,7 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
 
     it 'expires feature and deletes the cache' do
       expect(cache.read(described_class.key_for(feature))).to be_nil
+      expect(cache.exist?(described_class.key_for(feature))).to be(false)
       expect(feature).not_to be_enabled
     end
 
@@ -40,6 +41,7 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
 
       it 'expires feature and writes an empty value to the cache' do
         expect(cache.read(described_class.key_for(feature))).to be_empty
+        expect(cache.exist?(described_class.key_for(feature))).to be(true)
         expect(feature).not_to be_enabled
       end
     end
@@ -54,6 +56,7 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
 
     it 'enables feature and deletes the cache' do
       expect(cache.read(described_class.key_for(feature))).to be_nil
+      expect(cache.exist?(described_class.key_for(feature))).to be(false)
       expect(feature).to be_enabled
     end
 
@@ -61,6 +64,7 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
       let(:write_through) { true }
 
       it 'expires feature and writes to the cache' do
+        expect(cache.exist?(described_class.key_for(feature))).to be(true)
         expect(cache.read(described_class.key_for(feature))).to include(boolean: 'true')
         expect(feature).to be_enabled
       end
@@ -76,6 +80,7 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
 
     it 'disables feature and deletes the cache' do
       expect(cache.read(described_class.key_for(feature))).to be_nil
+      expect(cache.exist?(described_class.key_for(feature))).to be(false)
       expect(feature).not_to be_enabled
     end
 
@@ -83,6 +88,7 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
       let(:write_through) { true }
 
       it 'expires feature and writes to the cache' do
+        expect(cache.exist?(described_class.key_for(feature))).to be(true)
         expect(cache.read(described_class.key_for(feature))).to include(boolean: nil)
         expect(feature).not_to be_enabled
       end
@@ -98,8 +104,6 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
       search.enable
 
       memory_adapter.reset
-      cache.delete(described_class.key_for(search))
-      cache.delete(described_class.key_for(other))
 
       adapter.get(stats)
       expect(cache.read(described_class.key_for(search))).to be(nil)
