@@ -7,6 +7,41 @@
 * Added cloud recommendation to flipper-ui. Can be disabled with `Flipper::UI.configure { |config| config.cloud_recommendation = false }`. Just want to raise awareness that more is available if people want it (https://github.com/jnunemaker/flipper/pull/504)
 * Added default `flipper_id` implementation via `Flipper::Identifier` and automatically included it in ActiveRecord and Sequel models (https://github.com/jnunemaker/flipper/pull/505)
 * Deprecate superflous sync_method setting (https://github.com/jnunemaker/flipper/pull/511)
+* Flipper is now pre-configured when used with Rails. By default, it will [memoize and preload all features for each request](docs/Optimization.md#memoization). (https://github.com/jnunemaker/flipper/pull/506)
+
+### Upgrading
+
+You should be able to upgrade to 0.21 without any breaking changes. However, if you want to simplify your setup, you can remove some configuration that is now handled automatically:
+
+1. Adapters are configured when on require, so unless you are using caching or other customizations, you can remove adapter configuration.
+
+    ```diff
+    # config/initializers/flipper.rb
+    - Flipper.configure do |config|
+    -   config.default { Flipper.new(Flipper::Adapters::ActiveRecord.new) }
+    - end
+    ```
+
+2. `Flipper::Middleware::Memoizer` will be enabled by default.
+
+    ```diff
+    # config/initializers/flipper.rb
+    - Rails.configuration.middleware.use Flipper::Middleware::Memoizer,
+    -   preload: [:stats, :search, :some_feature]
+    + Rails.application.configure do
+    +   # Uncomment to configure which features to preload on all requests
+    +   # config.flipper.preload = [:stats, :search, :some_feature]
+    + end
+    ```
+
+3. `#flipper_id`, which is used to enable features for specific actors, is now defined by [Flipper::Identifier](lib/flipper/identifier.rb) on all ActiveRecord and Sequel models. You can remove your implementation if it is in the form of `ModelName;id`.
+
+4. When using `flipper-cloud`, The `Flipper::Cloud.app` webhook receiver is now mounted at `/_flipper` by default.
+
+    ```diff
+    # config/routes.rb
+    - mount Flipper::Cloud.app, at: "/_flipper"
+    ```
 
 ## 0.20.4
 
