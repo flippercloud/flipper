@@ -5,7 +5,8 @@ module Flipper
         env_key: "flipper",
         memoize: true,
         preload: true,
-        instrumenter: ActiveSupport::Notifications
+        instrumenter: ActiveSupport::Notifications,
+        logging: true
       )
     end
 
@@ -27,6 +28,10 @@ module Flipper
           if: config.memoize.respond_to?(:call) ? config.memoize : nil
         }
       end
+    end
+
+    initializer "flipper.logging", after: :load_config_initializers do |app|
+      require "flipper/instrumentation/log_subscriber" if app.config.flipper.logging
     end
 
     initializer "flipper.identifier" do
