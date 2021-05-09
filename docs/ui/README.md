@@ -109,7 +109,7 @@ Minimal example for Rack:
 ```ruby
 # config.ru
 
-require 'flipper-ui'
+require 'flipper/ui'
 
 adapter = Flipper::Adapters::Memory.new
 flipper = Flipper.new(adapter)

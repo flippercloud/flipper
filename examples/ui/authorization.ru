@@ -7,7 +7,7 @@
 require 'bundler/setup'
 require "logger"
 
-require "flipper-ui"
+require "flipper/ui"
 require "flipper/adapters/pstore"
 require "active_support/notifications"
 

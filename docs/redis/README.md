@@ -21,7 +21,7 @@ Or install it yourself with:
 In most cases, all you need to do is require the adapter. It will connect to the Redis instance specified in the `REDIS_URL` or `FLIPPER_REDIS_URL` environment vairable, or localhost by default.
 
 ```ruby
-require 'flipper-redis'
+require 'flipper/adapters/redis'
 ```
 
 **If you need to customize the adapter**, you can add this to an initializer:

@@ -15,7 +15,7 @@ module Flipper
     #
     #     # Configure it to use the ActiveRecord adapter
     #     config.adapter do
-    #       require "flipper-active_record"
+    #       require "flipper/adapters/active_record"
     #       Flipper::Adapters::ActiveRecord.new
     #     end
     #
@@ -39,7 +39,7 @@ module Flipper
     #
     #   # sets the default block to generate a new instance using ActiveRecord adapter
     #   configuration.default do
-    #     require "flipper-active_record"
+    #     require "flipper/adapters/active_record"
     #     Flipper.new(Flipper::Adapters::ActiveRecord.new)
     #   end
     #

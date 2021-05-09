@@ -9,7 +9,7 @@
 #   http://localhost:9999/
 #
 require 'bundler/setup'
-require "flipper-ui"
+require "flipper/ui"
 require "flipper/adapters/pstore"
 
 Flipper.register(:admins) { |actor|
