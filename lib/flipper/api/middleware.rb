@@ -9,9 +9,15 @@ end
 module Flipper
   module Api
     class Middleware
-      def initialize(app, options = {})
+      def initialize(app, flipper = nil, options = {})
         @app = app
         @env_key = options.fetch(:env_key, 'flipper')
+
+        if flipper.respond_to?(:call)
+          @flipper_block = flipper
+        else
+          @flipper = flipper || Flipper
+        end
 
         @action_collection = ActionCollection.new
         @action_collection.add Api::V1::Actions::PercentageOfTimeGate
@@ -32,12 +38,18 @@ module Flipper
       def call!(env)
         request = Rack::Request.new(env)
         action_class = @action_collection.action_for_request(request)
+
         if action_class.nil?
           @app.call(env)
         else
-          flipper = env.fetch(@env_key)
-          action_class.run(flipper, request)
+          action_class.run(env[@env_key] || flipper, request)
         end
+      end
+
+      private
+
+      def flipper
+        @flipper ||= @flipper_block.call
       end
     end
   end

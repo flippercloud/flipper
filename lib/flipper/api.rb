@@ -15,9 +15,7 @@ module Flipper
       builder = Rack::Builder.new
       yield builder if block_given?
       builder.use Flipper::Api::JsonParams
-      builder.use Flipper::Middleware::SetupEnv, flipper, env_key: env_key
-      builder.use Flipper::Middleware::Memoizer, memoizer_options.merge(env_key: env_key)
-      builder.use Flipper::Api::Middleware, env_key: env_key
+      builder.use Flipper::Api::Middleware, flipper, env_key: env_key
       builder.run app
       klass = self
       builder.define_singleton_method(:inspect) { klass.inspect } # pretty rake routes output
