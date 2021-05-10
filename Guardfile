@@ -16,6 +16,8 @@ rspec_options = {
 guard 'rspec', rspec_options do
   watch(%r{^spec/.+_spec\.rb$})
   watch(%r{^lib/(.+)\.rb$}) { |m| "spec/#{m[1]}_spec.rb" }
+  watch('lib/flipper/ui/middleware.rb') { 'spec/flipper/ui_spec.rb' }
+  watch('lib/flipper/api/middleware.rb') { 'spec/flipper/api_spec.rb' }
   watch(/shared_adapter_specs\.rb$/) { 'spec' }
   watch('spec/helper.rb') { 'spec' }
 end
