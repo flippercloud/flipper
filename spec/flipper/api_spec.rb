@@ -1,6 +1,36 @@
 require 'helper'
 
 RSpec.describe Flipper::Api do
+  describe 'Initializing middleware with flipper instance' do
+    let(:app) { build_api(flipper) }
+
+    it 'works' do
+      flipper.enable :a
+      flipper.disable :b
+
+      get '/features'
+
+      expect(last_response.status).to be(200)
+      feature_names = json_response.fetch('features').map { |feature| feature.fetch('key') }
+      expect(feature_names).to eq(%w(a b))
+    end
+  end
+
+  describe 'Initializing middleware lazily with a block' do
+    let(:app) { build_api(-> { flipper }) }
+
+    it 'works' do
+      flipper.enable :a
+      flipper.disable :b
+
+      get '/features'
+
+      expect(last_response.status).to be(200)
+      feature_names = json_response.fetch('features').map { |feature| feature.fetch('key') }
+      expect(feature_names).to eq(%w(a b))
+    end
+  end
+
   context 'when initialized with flipper instance and flipper instance in env' do
     let(:app) { build_api(flipper) }
 
@@ -74,6 +104,12 @@ RSpec.describe Flipper::Api do
       get '/gibberish'
       expect(last_response.status).to eq(404)
       expect(json_response).to eq({})
+    end
+  end
+
+  describe 'Inspecting the built Rack app' do
+    it 'returns a String' do
+      expect(build_api(flipper).inspect).to be_a(String)
     end
   end
 end
