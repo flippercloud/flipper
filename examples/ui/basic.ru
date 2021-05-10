@@ -42,16 +42,16 @@ Flipper::UI.configure do |config|
 end
 
 # You can uncomment these to get some default data:
-# flipper[:search_performance_another_long_thing].enable
-# flipper[:gauges_tracking].enable
-# flipper[:unused].disable
-# flipper[:suits].enable_actor Flipper::Actor.new('1')
-# flipper[:suits].enable_actor Flipper::Actor.new('6')
-# flipper[:secrets].enable_group :admins
-# flipper[:secrets].enable_group :early_access
-# flipper[:logging].enable_percentage_of_time 5
-# flipper[:new_cache].enable_percentage_of_actors 15
-# flipper["a/b"].add
+# Flipper.enable(:search_performance_another_long_thing)
+# Flipper.disable(:gauges_tracking)
+# Flipper.disable(:unused)
+# Flipper.enable_actor(:suits, Flipper::Actor.new('1'))
+# Flipper.enable_actor(:suits, Flipper::Actor.new('6'))
+# Flipper.enable_group(:secrets, :admins)
+# Flipper.enable_group(:secrets, :early_access)
+# Flipper.enable_percentage_of_time(:logging, 5)
+# Flipper.enable_percentage_of_actors(:new_cache, 15)
+# Flipper.add("a/b")
 
 run Flipper::UI.app { |builder|
   builder.use Rack::Session::Cookie, secret: "_super_secret"
