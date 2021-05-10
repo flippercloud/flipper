@@ -17,7 +17,7 @@ test/tmp
 test/version_tmp
 tmp
 log
-flipper.pstore
+*.pstore
 .sass-cache
 bin
 .DS_Store
