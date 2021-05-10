@@ -44,9 +44,7 @@ module Flipper
       yield builder if block_given?
       builder.use Rack::Protection, rack_protection_options
       builder.use Rack::MethodOverride
-      builder.use Flipper::Middleware::SetupEnv, flipper, env_key: env_key
-      builder.use Flipper::Middleware::Memoizer, env_key: env_key
-      builder.use Flipper::UI::Middleware, env_key: env_key
+      builder.use Flipper::UI::Middleware, flipper, env_key: env_key
       builder.run app
       klass = self
       builder.define_singleton_method(:inspect) { klass.inspect } # pretty rake routes output
