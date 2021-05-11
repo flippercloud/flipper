@@ -6,7 +6,7 @@ module Flipper
         memoize: true,
         preload: true,
         instrumenter: ActiveSupport::Notifications,
-        logging: true
+        log: true
       )
     end
 
@@ -30,8 +30,8 @@ module Flipper
       end
     end
 
-    initializer "flipper.logging", after: :load_config_initializers do |app|
-      require "flipper/instrumentation/log_subscriber" if app.config.flipper.logging
+    initializer "flipper.log", after: :load_config_initializers do |app|
+      require "flipper/instrumentation/log_subscriber" if app.config.flipper.log
     end
 
     initializer "flipper.identifier" do
