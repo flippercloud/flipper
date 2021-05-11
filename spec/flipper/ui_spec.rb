@@ -24,19 +24,6 @@ RSpec.describe Flipper::UI do
     end
   end
 
-  describe 'Initializing middleware lazily with a block' do
-    let(:app) do
-      build_app(-> { flipper })
-    end
-
-    it 'works' do
-      flipper.enable :some_great_feature
-      get '/features'
-      expect(last_response.status).to be(200)
-      expect(last_response.body).to include('some_great_feature')
-    end
-  end
-
   describe 'Request method unsupported by action' do
     it 'raises error' do
       expect do

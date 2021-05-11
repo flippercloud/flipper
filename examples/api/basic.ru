@@ -13,13 +13,7 @@ require 'bundler/setup'
 require "flipper/api"
 require "flipper/adapters/pstore"
 
-Flipper.register(:admins) { |actor|
-  actor.respond_to?(:admin?) && actor.admin?
-}
-
 # You can uncomment this to get some default data:
 # Flipper.enable :logging
 
-run Flipper::Api.app { |builder|
-  builder.use Flipper::Middleware::Memoizer, preload: true
-}
+run Flipper::Api.app

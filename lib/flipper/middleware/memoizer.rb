@@ -15,7 +15,7 @@ module Flipper
       #   use Flipper::Middleware::Memoizer
       #
       #   # using with preload_all features
-      #   use Flipper::Middleware::Memoizer, preload_all: true
+      #   use Flipper::Middleware::Memoizer, preload: true
       #
       #   # using with preload specific features
       #   use Flipper::Middleware::Memoizer, preload: [:stats, :search, :some_feature]

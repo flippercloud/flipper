@@ -9,15 +9,10 @@ end
 module Flipper
   module UI
     class Middleware
-      def initialize(app, flipper = nil, options = {})
+      def initialize(app, options = {})
         @app = app
         @env_key = options.fetch(:env_key, 'flipper')
-
-        if flipper.respond_to?(:call)
-          @flipper_block = flipper
-        else
-          @flipper = flipper || Flipper
-        end
+        @flipper = options.fetch(:flipper) { Flipper }
 
         @action_collection = ActionCollection.new
 
@@ -49,14 +44,9 @@ module Flipper
         if action_class.nil?
           @app.call(env)
         else
-          action_class.run(env[@env_key] || flipper, request)
+          flipper = env.fetch(@env_key) { Flipper }
+          action_class.run(flipper, request)
         end
-      end
-
-      private
-
-      def flipper
-        @flipper ||= @flipper_block.call
       end
     end
   end

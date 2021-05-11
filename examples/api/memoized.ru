@@ -24,7 +24,11 @@ Flipper.configure do |config|
 end
 
 ActiveSupport::Notifications.subscribe(/.*/, ->(*args) {
-  p args: args
+  name, start, finish, id, data = args
+  case name
+  when "adapter_operation.flipper"
+    p data[:adapter_name] => data[:operation]
+  end
 })
 
 Flipper.register(:admins) { |actor|
