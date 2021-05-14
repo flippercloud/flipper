@@ -157,6 +157,7 @@ A few miscellaneous docs with more info for the hungry.
 | pic | @mention | area |
 |---|---|---|
 | ![@jnunemaker](https://avatars3.githubusercontent.com/u/235?s=64) | [@jnunemaker](https://github.com/jnunemaker) | most things |
+| ![@bkeepers](https://avatars3.githubusercontent.com/u/173?s=64) | [@bkeepers](https://github.com/bkeepers) | most things |
 | ![@alexwheeler](https://avatars3.githubusercontent.com/u/3260042?s=64) | [@alexwheeler](https://github.com/alexwheeler) | api |
 | ![@thetimbanks](https://avatars1.githubusercontent.com/u/471801?s=64) | [@thetimbanks](https://github.com/thetimbanks) | ui |
 | ![@lazebny](https://avatars1.githubusercontent.com/u/6276766?s=64) | [@lazebny](https://github.com/lazebny) | docker |
