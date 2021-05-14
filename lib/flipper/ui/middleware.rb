@@ -12,6 +12,7 @@ module Flipper
       def initialize(app, options = {})
         @app = app
         @env_key = options.fetch(:env_key, 'flipper')
+        @flipper = options.fetch(:flipper) { Flipper }
 
         @action_collection = ActionCollection.new
 
@@ -43,7 +44,7 @@ module Flipper
         if action_class.nil?
           @app.call(env)
         else
-          flipper = env.fetch(@env_key)
+          flipper = env.fetch(@env_key) { Flipper }
           action_class.run(flipper, request)
         end
       end

@@ -32,10 +32,11 @@ module Flipper
       def call!(env)
         request = Rack::Request.new(env)
         action_class = @action_collection.action_for_request(request)
+
         if action_class.nil?
           @app.call(env)
         else
-          flipper = env.fetch(@env_key)
+          flipper = env.fetch(@env_key) { Flipper }
           action_class.run(flipper, request)
         end
       end
