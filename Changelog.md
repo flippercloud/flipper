@@ -1,3 +1,10 @@
+## Unreleased
+
+## Additions/Changes
+
+* Enable log subscriber by default in Rails (https://github.com/jnunemaker/flipper/pull/525)
+* Remove memoizer from API and UI (https://github.com/jnunemaker/flipper/pull/527). If you are using the UI or API without configuring the default instance of Flipper, you'll need to enable memoization if you want it. For examples, see the examples/ui and examples/api directories.
+
 ## 0.21.0
 
 ### Additions/Changes
