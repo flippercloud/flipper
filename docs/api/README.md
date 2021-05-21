@@ -23,7 +23,7 @@ Or install it yourself as:
 ```ruby
 # config/routes.rb
 YourRailsApp::Application.routes.draw do
-  mount Flipper::Api.app(flipper) => '/flipper/api'
+  mount Flipper::Api.app(Flipper) => '/flipper/api'
 end
 ```
 
@@ -34,8 +34,8 @@ There can be more than one router in your application. Make sure if you choose a
 *bad:*
 ```ruby
 YourRailsApp::Application.routes.draw do
-  mount Flipper::UI.app(flipper) => '/flipper'
-  mount Flipper::Api.app(flipper) => '/flipper/api'
+  mount Flipper::UI.app(Flipper) => '/flipper'
+  mount Flipper::Api.app(Flipper) => '/flipper/api'
 end
 ```
 
@@ -44,8 +44,8 @@ In this case any requests to /flipper\* will be routed to Flipper::UI - includin
 *good:*
 ```ruby
 YourRailsApp::Application.routes.draw do
-  mount Flipper::Api.app(flipper) => '/flipper/api'
-  mount Flipper::UI.app(flipper) => '/flipper'
+  mount Flipper::Api.app(Flipper) => '/flipper/api'
+  mount Flipper::UI.app(Flipper) => '/flipper'
 end
 ````
 For more advanced mounting techniques and for suggestions on how to mount in a non-Rails application, it is recommend that you review the [`Flipper::UI` usage documentation](https://github.com/jnunemaker/flipper/blob/master/docs/ui/README.md#usage) as the same approaches apply to `Flipper::Api`.
