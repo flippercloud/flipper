@@ -36,6 +36,28 @@ RSpec.describe Flipper::DSL do
     end
   end
 
+  describe '#enabled?' do
+    it 'returns true if the feature is enabled' do
+      subject.enable(:stats)
+      expect(subject.enabled?(:stats)).to be(true)
+    end
+
+    it 'returns false if the feature is NOT enabled' do
+      expect(subject.enabled?(:stats)).to be(false)
+    end
+  end
+
+  describe '#disabled?' do
+    it 'returns true if the feature is disabled' do
+      expect(subject.disabled?(:stats)).to be(true)
+    end
+
+    it 'returns false if the feature is NOT disabled' do
+      subject.enable(:stats)
+      expect(subject.disabled?(:stats)).to be(false)
+    end
+  end
+
   describe '#preload' do
     let(:instrumenter) { double('Instrumentor', instrument: nil) }
     let(:dsl) { described_class.new(adapter, instrumenter: instrumenter) }

@@ -522,6 +522,24 @@ RSpec.describe Flipper do
     end
   end
 
+  describe '#disabled?' do
+    context 'with no arguments' do
+      it 'defaults to true' do
+        expect(feature.disabled?).to eq(true)
+      end
+    end
+
+    context 'with no arguments, but boolean enabled' do
+      before do
+        feature.enable
+      end
+
+      it 'returns false' do
+        expect(feature.disabled?).to eq(false)
+      end
+    end
+  end
+
   context 'enabling multiple groups, disabling everything, then enabling one group' do
     before do
       feature.enable(admin_group)
