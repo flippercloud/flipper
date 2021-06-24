@@ -97,11 +97,17 @@ module Flipper
       end
 
       def get_all
-        db_gates = @gate_class.fetch(<<-SQL).to_a
-          SELECT ff.key AS feature_key, fg.key, fg.value
-          FROM #{@feature_class.table_name} ff
-          LEFT JOIN #{@gate_class.table_name} fg ON ff.key = fg.feature_key
-        SQL
+        # TODO: make this more succinct
+        features_sql =
+          @feature_class
+            .select(:key.qualify(@feature_class.table_name.to_sym).as(:feature_key))
+            .select_append(:key.qualify(@gate_class.table_name.to_sym))
+            .select_append(:value.qualify(@gate_class.table_name.to_sym))
+            .left_join(@gate_class.table_name.to_sym, feature_key: :key)
+            .sql
+
+        db_gates = @gate_class.fetch(features_sql).to_a
+
         grouped_db_gates = db_gates.group_by(&:feature_key)
         result = Hash.new { |hash, key| hash[key] = default_config }
         features = grouped_db_gates.keys.map { |key| Flipper::Feature.new(key, self) }
