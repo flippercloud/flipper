@@ -103,11 +103,10 @@ module Flipper
       def get_all
         features = ::Arel::Table.new(@feature_class.table_name.to_sym)
         gates = ::Arel::Table.new(@gate_class.table_name.to_sym)
-
-        rows_query = features.join(gates, Arel::Nodes::OuterJoin).on(features[:key].eq(gates[:feature_key]))
-                             .project(features[:key].as('feature_key'), gates[:key], gates[:value])
+        rows_query = features.join(gates, Arel::Nodes::OuterJoin)
+          .on(features[:key].eq(gates[:feature_key]))
+          .project(features[:key].as('feature_key'), gates[:key], gates[:value])
         rows = ::ActiveRecord::Base.connection.select_all rows_query
-
         db_gates = rows.map { |row| Gate.new(row) }
         grouped_db_gates = db_gates.group_by(&:feature_key)
         result = Hash.new { |hash, key| hash[key] = default_config }
