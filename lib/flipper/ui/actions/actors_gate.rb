@@ -27,7 +27,7 @@ module Flipper
           value = params['value'].to_s.strip
 
           if Util.blank?(value)
-            error = Rack::Utils.escape("#{value.inspect} is not a valid actor value.")
+            error = "#{value.inspect} is not a valid actor value."
             redirect_to("/features/#{feature.key}/actors?error=#{error}")
           end
 

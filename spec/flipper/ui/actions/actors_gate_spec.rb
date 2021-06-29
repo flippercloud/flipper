@@ -61,6 +61,23 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
         expect(last_response.headers['Location']).to eq('/features/search')
       end
 
+      context "when feature name contains space" do
+        before do
+          post 'features/sp%20ace/actors',
+               { 'value' => value, 'operation' => 'enable', 'authenticity_token' => token },
+               'rack.session' => session
+        end
+
+        it 'adds item to members' do
+          expect(flipper["sp ace"].actors_value).to include('User;6')
+        end
+
+        it "redirects back to feature" do
+          expect(last_response.status).to be(302)
+          expect(last_response.headers['Location']).to eq('/features/sp%20ace')
+        end
+      end
+
       context 'value contains whitespace' do
         let(:value) { '  User;6  ' }
 
@@ -75,7 +92,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
 
           it 'redirects back to feature' do
             expect(last_response.status).to be(302)
-            expect(last_response.headers['Location']).to eq('/features/search/actors?error=%22%22+is+not+a+valid+actor+value.')
+            expect(last_response.headers['Location']).to eq('/features/search/actors?error=%22%22%20is%20not%20a%20valid%20actor%20value.')
           end
         end
 
@@ -84,7 +101,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
 
           it 'redirects back to feature' do
             expect(last_response.status).to be(302)
-            expect(last_response.headers['Location']).to eq('/features/search/actors?error=%22%22+is+not+a+valid+actor+value.')
+            expect(last_response.headers['Location']).to eq('/features/search/actors?error=%22%22%20is%20not%20a%20valid%20actor%20value.')
           end
         end
       end

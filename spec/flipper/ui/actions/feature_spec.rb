@@ -29,6 +29,24 @@ RSpec.describe Flipper::UI::Actions::Feature do
       expect(last_response.headers['Location']).to eq('/features')
     end
 
+    context "with space in feature name" do
+      before do
+        flipper.enable "sp ace"
+        delete '/features/sp%20ace',
+               { 'authenticity_token' => token },
+               'rack.session' => session
+      end
+
+      it 'removes feature' do
+        expect(flipper.features.map(&:key)).not_to include('sp ace')
+      end
+
+      it 'redirects to features' do
+        expect(last_response.status).to be(302)
+        expect(last_response.headers['Location']).to eq('/features')
+      end
+    end
+
     context 'when feature_removal_enabled is set to false' do
       around do |example|
         begin

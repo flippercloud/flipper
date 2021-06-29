@@ -151,7 +151,7 @@ module Flipper
       # location - The String location to set the Location header to.
       def redirect_to(location)
         status 302
-        header 'Location', "#{script_name}#{location}"
+        header 'Location', "#{script_name}#{Rack::Utils.escape_path(location)}"
         halt [@code, @headers, ['']]
       end
 

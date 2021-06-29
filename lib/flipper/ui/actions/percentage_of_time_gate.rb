@@ -16,7 +16,7 @@ module Flipper
           begin
             feature.enable_percentage_of_time params['value']
           rescue ArgumentError => exception
-            error = Rack::Utils.escape("Invalid percentage of time value: #{exception.message}")
+            error = "Invalid percentage of time value: #{exception.message}"
             redirect_to("/features/#{@feature.key}?error=#{error}")
           end
 
