@@ -95,11 +95,24 @@ RSpec.describe Flipper::UI::Actions::Features do
         expect(last_response.headers['Location']).to eq('/features/notifications_next')
       end
 
-      context 'feature name contains whitespace' do
+      context 'feature name has whitespace at beginning and end' do
         let(:feature_name) { '  notifications_next   ' }
 
         it 'adds feature without whitespace' do
           expect(flipper.features.map(&:key)).to include('notifications_next')
+        end
+      end
+
+      context 'feature name contains space' do
+        let(:feature_name) { 'notifications next' }
+
+        it 'adds feature with space' do
+          expect(flipper.features.map(&:key)).to include('notifications next')
+        end
+
+        it 'redirects to feature' do
+          expect(last_response.status).to be(302)
+          expect(last_response.headers['Location']).to eq('/features/notifications%20next')
         end
       end
 
@@ -113,7 +126,7 @@ RSpec.describe Flipper::UI::Actions::Features do
 
           it 'redirects back to feature' do
             expect(last_response.status).to be(302)
-            expect(last_response.headers['Location']).to eq('/features/new?error=%22%22+is+not+a+valid+feature+name.')
+            expect(last_response.headers['Location']).to eq('/features/new?error=%22%22%20is%20not%20a%20valid%20feature%20name.')
           end
         end
 
@@ -126,7 +139,7 @@ RSpec.describe Flipper::UI::Actions::Features do
 
           it 'redirects back to feature' do
             expect(last_response.status).to be(302)
-            expect(last_response.headers['Location']).to eq('/features/new?error=%22%22+is+not+a+valid+feature+name.')
+            expect(last_response.headers['Location']).to eq('/features/new?error=%22%22%20is%20not%20a%20valid%20feature%20name.')
           end
         end
       end

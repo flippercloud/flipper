@@ -49,14 +49,14 @@ module Flipper
           value = params['value'].to_s.strip
 
           if Util.blank?(value)
-            error = Rack::Utils.escape("#{value.inspect} is not a valid feature name.")
+            error = "#{value.inspect} is not a valid feature name."
             redirect_to("/features/new?error=#{error}")
           end
 
           feature = flipper[value]
           feature.add
 
-          redirect_to "/features/#{Rack::Utils.escape_path(value)}"
+          redirect_to "/features/#{value}"
         end
       end
     end
