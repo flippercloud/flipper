@@ -47,7 +47,8 @@ jobs:
         run: gem install bundler
       - name: Run bundler
         run: bundle install --jobs 4 --retry 3
-        env: ${{ matrix.rails }}
+        env:
+          RAILS_VERSION: ${{ matrix.rails }}
       - name: Run Rake
         run: bundle exec rake
       - name: Run Examples
