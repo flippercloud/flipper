@@ -15,9 +15,8 @@ jobs:
     strategy:
       matrix:
         ruby: ['2.5', '2.6', '2.7']
-        rails: ['6.0.0']
+        rails: ['6.0.0', '6.1.0']
     env:
-      RAILS_VERSION: 6.0.0
       SQLITE3_VERSION: 1.4.1
       REDIS_URL: redis://localhost:6379/0
       CI: true
