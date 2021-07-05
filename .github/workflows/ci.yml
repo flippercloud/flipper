@@ -1,7 +1,8 @@
 name: CI
 on: [push, pull_request]
 jobs:
-  build:
+  test:
+    name: Test on ruby ${{ matrix.ruby }} and rails ${{ matrix.rails }}
     runs-on: ubuntu-latest
     services:
       redis:
@@ -36,7 +37,7 @@ jobs:
           key: ${{ runner.os }}-gem-${{ hashFiles('**/Gemfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-gem-
-      - name: Set up Ruby
+      - name: Set up Ruby ${{ matrix.ruby }}
         uses: actions/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
@@ -44,12 +45,12 @@ jobs:
         run: sudo apt-get -yqq install libpq-dev
       - name: Install bundler
         run: gem install bundler
-      - name: Run bundler
-        run: bundle install --jobs 4 --retry 3
+      - name: Run Rake with Rails ${{ matrix.rails }}
         env:
           RAILS_VERSION: ${{ matrix.rails }}
-      - name: Run Rake
-        run: bundle exec rake
+        run: |
+          bundle install --jobs 4 --retry 3
+          bundle exec rake
       - name: Run Examples
         env:
           FLIPPER_CLOUD_TOKEN: ${{ secrets.FLIPPER_CLOUD_TOKEN }}
