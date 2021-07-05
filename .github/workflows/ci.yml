@@ -18,6 +18,7 @@ jobs:
     strategy:
       matrix:
         ruby: ['2.5', '2.6', '2.7']
+        rails: ['6.0.0']
     env:
       RAILS_VERSION: 6.0.0
       SQLITE3_VERSION: 1.4.1
@@ -49,6 +50,7 @@ jobs:
         run: gem install bundler
       - name: Run bundler
         run: bundle install --jobs 4 --retry 3
+        env: ${{ matrix.rails }}
       - name: Run Rake
         run: bundle exec rake
       - name: Run Examples
