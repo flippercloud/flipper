@@ -51,7 +51,8 @@ jobs:
         run: |
           bundle install --jobs 4 --retry 3
           bundle exec rake
-      - name: Run Examples
+      - name: Run Examples with Rails ${{ matrix.rails }}
         env:
           FLIPPER_CLOUD_TOKEN: ${{ secrets.FLIPPER_CLOUD_TOKEN }}
+          RAILS_VERSION: ${{ matrix.rails }}
         run: script/examples
