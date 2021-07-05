@@ -1,10 +1,8 @@
 name: CI
-on:
-  push:
-    branches: [master]
-  pull_request:
+on: [push, pull_request]
 jobs:
-  build:
+  test:
+    name: Test on ruby ${{ matrix.ruby }} and rails ${{ matrix.rails }}
     runs-on: ubuntu-latest
     services:
       redis:
@@ -18,8 +16,8 @@ jobs:
     strategy:
       matrix:
         ruby: ['2.5', '2.6', '2.7']
+        rails: ['5.2', '6.0.0', '6.1.0']
     env:
-      RAILS_VERSION: 6.0.0
       SQLITE3_VERSION: 1.4.1
       REDIS_URL: redis://localhost:6379/0
       CI: true
@@ -36,10 +34,10 @@ jobs:
         uses: actions/cache@v1
         with:
           path: vendor/bundle
-          key: ${{ runner.os }}-gem-${{ hashFiles('**/Gemfile.lock') }}
+          key: ${{ runner.os }}-gems-${{ matrix.ruby }}-${{ matrix.rails }}-${{ hashFiles('**/Gemfile.lock') }}
           restore-keys: |
-            ${{ runner.os }}-gem-
-      - name: Set up Ruby
+            ${{ runner.os }}-gems-${{ matrix.ruby }}-${{ matrix.rails }}-
+      - name: Set up Ruby ${{ matrix.ruby }}
         uses: actions/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
@@ -47,11 +45,14 @@ jobs:
         run: sudo apt-get -yqq install libpq-dev
       - name: Install bundler
         run: gem install bundler
-      - name: Run bundler
-        run: bundle install --jobs 4 --retry 3
-      - name: Run Rake
-        run: bundle exec rake
-      - name: Run Examples
+      - name: Run Rake with Rails ${{ matrix.rails }}
+        env:
+          RAILS_VERSION: ${{ matrix.rails }}
+        run: |
+          bundle install --jobs 4 --retry 3
+          bundle exec rake
+      - name: Run Examples with Rails ${{ matrix.rails }}
         env:
           FLIPPER_CLOUD_TOKEN: ${{ secrets.FLIPPER_CLOUD_TOKEN }}
+          RAILS_VERSION: ${{ matrix.rails }}
         run: script/examples
