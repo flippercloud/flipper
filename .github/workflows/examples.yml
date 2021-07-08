@@ -1,4 +1,4 @@
-name: CI
+name: Examples
 on: [push, pull_request]
 jobs:
   test:
@@ -45,9 +45,12 @@ jobs:
         run: sudo apt-get -yqq install libpq-dev
       - name: Install bundler
         run: gem install bundler
-      - name: Run Rake with Rails ${{ matrix.rails }}
+      - name: Bundle install with Rails ${{ matrix.rails }}
         env:
           RAILS_VERSION: ${{ matrix.rails }}
-        run: |
-          bundle install --jobs 4 --retry 3
-          bundle exec rake
+        run: bundle install --jobs 4 --retry 3
+      - name: Run Examples with Rails ${{ matrix.rails }}
+        env:
+          FLIPPER_CLOUD_TOKEN: ${{ secrets.FLIPPER_CLOUD_TOKEN }}
+          RAILS_VERSION: ${{ matrix.rails }}
+        run: script/examples
