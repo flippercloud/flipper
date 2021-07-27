@@ -179,7 +179,11 @@ module Flipper
         @gate_class.db.transaction do
           clear(feature) if clear_feature
           @gate_class.where(args).delete
-          @gate_class.create(gate_attrs(feature, gate, thing))
+
+          begin
+            @gate_class.create(gate_attrs(feature, gate, thing))
+          rescue ::Sequel::UniqueConstraintViolation
+          end
         end
       end
 

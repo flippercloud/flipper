@@ -173,10 +173,15 @@ module Flipper
         @gate_class.transaction do
           clear(feature) if clear_feature
           @gate_class.where(feature_key: feature.key, key: gate.key).destroy_all
-          @gate_class.create! do |g|
-            g.feature_key = feature.key
-            g.key = gate.key
-            g.value = thing.value.to_s
+          begin
+            @gate_class.create! do |g|
+              g.feature_key = feature.key
+              g.key = gate.key
+              g.value = thing.value.to_s
+            end
+          rescue ::ActiveRecord::RecordNotUnique
+            # assume this happened concurrently with the same thing and its fine
+            # see https://github.com/jnunemaker/flipper/issues/544
           end
         end
 
