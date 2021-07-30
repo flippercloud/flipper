@@ -21,7 +21,7 @@
     <div class="card">
       <%# Gate State Header %>
       <div class="card-header">
-        <span class="octicon octicon-squirrel <%= @feature.color_class %> mr-2"></span>
+        <span class="status <%= @feature.color_class %> mr-2"></span>
         <%= @feature.gate_state_title %>
       </div>
 
@@ -69,8 +69,8 @@
                   <%== csrf_input_tag %>
                   <input type="hidden" name="operation" value="disable">
                   <input type="hidden" name="value" value="<%= item %>">
-                  <button type="submit" value="Disable" class="btn btn-link btn-sm text-danger" data-toggle="tooltip" title="Disable <%= item %>" data-placement="left">
-                    <span class="octicon octicon-trashcan"></span>
+                  <button type="submit" value="Disable" class="btn btn-outline-danger btn-sm text-danger" data-toggle="tooltip" title="Disable <%= item %>" data-placement="left">
+                    Delete
                   </button>
                 </form>
               </div>
