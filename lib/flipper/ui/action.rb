@@ -26,6 +26,36 @@ module Flipper
                                              'delete'.freeze,
                                            ]).freeze
 
+      SOURCES = {
+        bootstrap_css: {
+          src: "https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css".freeze,
+          hash: "sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm".freeze
+        }.freeze,
+        jquery_js: {
+          src: "https://code.jquery.com/jquery-3.2.1.slim.min.js".freeze,
+          hash: "sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN".freeze
+        }.freeze,
+        popper_js: {
+          src: "https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js".freeze,
+          hash: "sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q".freeze
+        }.freeze,
+        bootstrap_js: {
+          src: "https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js".freeze,
+          hash: "sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl".freeze
+        }.freeze
+      }.freeze
+      SCRIPT_SRCS = SOURCES.values_at(:jquery_js, :popper_js, :bootstrap_js).map { |s| s[:src] }
+      STYLE_SRCS = SOURCES.values_at(:bootstrap_css).map { |s| s[:src] }
+      CONTENT_SECURITY_POLICY = <<-CSP.delete("\n")
+        default-src 'none';
+        img-src 'self';
+        font-src 'self';
+        script-src 'report-sample' 'self' #{SCRIPT_SRCS.join(' ')};
+        style-src 'self' 'unsafe-inline' #{STYLE_SRCS.join(' ')};
+        style-src-attr 'unsafe-inline' ;
+        style-src-elem 'self' #{STYLE_SRCS.join(' ')};
+      CSP
+
       # Public: Call this in subclasses so the action knows its route.
       #
       # regex - The Regexp that this action should run for.
@@ -130,6 +160,7 @@ module Flipper
       # Returns a response.
       def view_response(name)
         header 'Content-Type', 'text/html'
+        header 'Content-Security-Policy', CONTENT_SECURITY_POLICY
         body = view_with_layout { view_without_layout name }
         halt [@code, @headers, [body]]
       end
@@ -236,6 +267,22 @@ module Flipper
 
       def valid_request_method?
         VALID_REQUEST_METHOD_NAMES.include?(request_method_name)
+      end
+
+      def bootstrap_css
+        SOURCES[:bootstrap_css]
+      end
+
+      def bootstrap_js
+        SOURCES[:bootstrap_js]
+      end
+
+      def popper_js
+        SOURCES[:popper_js]
+      end
+
+      def jquery_js
+        SOURCES[:jquery_js]
       end
     end
   end
