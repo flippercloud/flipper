@@ -20,14 +20,4 @@ RSpec.describe Flipper::UI::Actions::File do
       expect(last_response.status).to be(200)
     end
   end
-
-  describe 'GET /octicons/octicons.eot' do
-    before do
-      get '/octicons/octicons.eot'
-    end
-
-    it 'responds with 200' do
-      expect(last_response.status).to be(200)
-    end
-  end
 end

@@ -40,7 +40,7 @@
       <% @features.each do |feature| %>
         <div class="feature row align-items-center mt-0 px-3 border-bottom">
           <div class="col-1 col-md-auto">
-            <span class="octicon octicon-squirrel <%= feature.color_class %>" data-toggle="tooltip" title=<%= feature.state.to_s.capitalize %>></span>
+            <span class="status <%= feature.color_class %>" data-toggle="tooltip" title=<%= feature.state.to_s.capitalize %>></span>
           </div>
           <div class="col-10">
             <a href="<%= "#{script_name}/features/#{feature.key}" %>" class="d-block px-0 py-3 btn text-left text-dark">
