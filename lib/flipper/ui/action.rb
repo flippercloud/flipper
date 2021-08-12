@@ -26,6 +26,16 @@ module Flipper
                                              'delete'.freeze,
                                            ]).freeze
 
+      CONTENT_SECURITY_POLICY = <<-CSP.delete("\n")
+        default-src 'none';
+        img-src 'self';
+        font-src 'self';
+        script-src 'report-sample' 'self' https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js https://code.jquery.com/jquery-3.2.1.slim.min.js https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js;
+        style-src 'self' 'unsafe-inline' https://maxcdn.bootstrapcdn.com;
+        style-src-attr 'unsafe-inline' ;
+        style-src-elem 'self' https://maxcdn.bootstrapcdn.com;
+      CSP
+
       # Public: Call this in subclasses so the action knows its route.
       #
       # regex - The Regexp that this action should run for.
@@ -130,6 +140,7 @@ module Flipper
       # Returns a response.
       def view_response(name)
         header 'Content-Type', 'text/html'
+        header 'Content-Security-Policy', CONTENT_SECURITY_POLICY
         body = view_with_layout { view_without_layout name }
         halt [@code, @headers, [body]]
       end
