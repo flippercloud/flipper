@@ -37,7 +37,8 @@ module Flipper
           # Sync all the gate values.
           remote_get_all.each do |feature_key, remote_gates_hash|
             feature = Feature.new(feature_key, @local)
-            local_gates_hash = local_get_all[feature_key] || @local.default_config
+            # Check if feature_key is in hash before accessing to prevent unintended hash modification
+            local_gates_hash = local_get_all.key?(feature_key) ? local_get_all[feature_key] : @local.default_config
             local_gate_values = GateValues.new(local_gates_hash)
             remote_gate_values = GateValues.new(remote_gates_hash)
             FeatureSynchronizer.new(feature, local_gate_values, remote_gate_values).call
