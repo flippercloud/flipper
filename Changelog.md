@@ -1,3 +1,12 @@
+## 0.23.0
+
+## Additions/Changes
+
+* Remove Octicons and replace with a pure CSS status circle (https://github.com/jnunemaker/flipper/pull/547)
+* Rescue unique errors in AR and Sequel when setting value (https://github.com/jnunemaker/flipper/commit/87f5a98bce7baad7a27b75b5bce3256967769f27)
+* Add a Content-Security-Policy to flipper-ui (https://github.com/jnunemaker/flipper/pull/552)
+* Fix Synchronizer issue that occurs for ActiveRecord adapter (https://github.com/jnunemaker/flipper/pull/554)
+
 ## 0.22.0
 
 ## Additions/Changes
