@@ -24,20 +24,22 @@ module Flipper
 
         def post
           feature = flipper[feature_name]
-          value = params['value'].to_s.strip
+          values = params['value'].to_s.strip.split(',').map(&:strip)
 
-          if Util.blank?(value)
-            error = "#{value.inspect} is not a valid actor value."
+          if Util.blank?(values)
+            error = "#{values.inspect} is not a valid actor value."
             redirect_to("/features/#{feature.key}/actors?error=#{error}")
           end
 
-          actor = Flipper::Actor.new(value)
+          values.each do |value|
+            actor = Flipper::Actor.new(value)
 
-          case params['operation']
-          when 'enable'
-            feature.enable_actor actor
-          when 'disable'
-            feature.disable_actor actor
+            case params['operation']
+            when 'enable'
+              feature.enable_actor actor
+            when 'disable'
+              feature.disable_actor actor
+            end
           end
 
           redirect_to("/features/#{feature.key}")
