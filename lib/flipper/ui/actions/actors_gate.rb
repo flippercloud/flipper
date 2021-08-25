@@ -24,7 +24,7 @@ module Flipper
 
         def post
           feature = flipper[feature_name]
-          values = params['value'].to_s.strip.split(Flipper::UI.configuration.actors_list_separator_symbol).map(&:strip)
+          values = params['value'].to_s.split(Flipper::UI.configuration.actors_list_separator_symbol).map(&:strip)
 
           if Util.blank?(params['value'].to_s.strip)
             error = "#{params['value'].to_s.strip.inspect} is not a valid actor value."
