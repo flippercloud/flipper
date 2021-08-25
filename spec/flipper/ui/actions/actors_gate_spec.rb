@@ -45,6 +45,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
   describe 'POST /features/:feature/actors' do
     context 'enabling an actor' do
       let(:value) { 'User;6' }
+      let(:multi_value) { 'User;5, User;7, User;9, User;12' }
 
       before do
         post 'features/search/actors',
@@ -53,7 +54,18 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
       end
 
       it 'adds item to members' do
-        expect(flipper[:search].actors_value).to include('User;6')
+        expect(flipper[:search].actors_value).to include(value)
+      end
+
+      it 'adds item to multiple members' do
+        post 'features/search/actors',
+             { 'value' => multi_value, 'operation' => 'enable', 'authenticity_token' => token },
+             'rack.session' => session
+
+        expect(flipper[:search].actors_value).to include('User;5')
+        expect(flipper[:search].actors_value).to include('User;7')
+        expect(flipper[:search].actors_value).to include('User;9')
+        expect(flipper[:search].actors_value).to include('User;12')
       end
 
       it 'redirects back to feature' do
@@ -80,9 +92,21 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
 
       context 'value contains whitespace' do
         let(:value) { '  User;6  ' }
+        let(:multi_value) { '  User;5  ,  User;7   ,  User;9 ,  User;12 ' }
 
         it 'adds item without whitespace' do
           expect(flipper[:search].actors_value).to include('User;6')
+        end
+
+        it 'adds item to multi members without whitespace' do
+          post 'features/search/actors',
+             { 'value' => multi_value, 'operation' => 'enable', 'authenticity_token' => token },
+             'rack.session' => session
+
+          expect(flipper[:search].actors_value).to include('User;5')
+          expect(flipper[:search].actors_value).to include('User;7')
+          expect(flipper[:search].actors_value).to include('User;9')
+          expect(flipper[:search].actors_value).to include('User;12')
         end
       end
 
@@ -109,16 +133,29 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
 
     context 'disabling an actor' do
       let(:value) { 'User;6' }
+      let(:multi_value) { 'User;5, User;7, User;9, User;12' }
 
       before do
-        flipper[:search].enable_actor Flipper::Actor.new('User;6')
+        flipper[:search].enable_actor Flipper::Actor.new(value)
         post 'features/search/actors',
              { 'value' => value, 'operation' => 'disable', 'authenticity_token' => token },
              'rack.session' => session
       end
 
       it 'removes item from members' do
-        expect(flipper[:search].actors_value).not_to include('User;6')
+        expect(flipper[:search].actors_value).not_to include(value)
+      end
+
+      it 'removes item from multi members' do
+        multi_value.split(',').map(&:strip).each do |value|
+          flipper[:search].enable_actor Flipper::Actor.new(value)
+        end
+
+        post 'features/search/actors',
+             { 'value' => multi_value, 'operation' => 'disable', 'authenticity_token' => token },
+             'rack.session' => session
+
+        expect(flipper[:search].actors_value).not_to eq(Set.new(multi_value.split(',').map(&:strip)))
       end
 
       it 'redirects back to feature' do
@@ -128,9 +165,20 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
 
       context 'value contains whitespace' do
         let(:value) { '  User;6  ' }
+        let(:multi_value) { '  User;5  ,  User;7   ,  User;9 ,  User;12 ' }
 
         it 'removes item without whitespace' do
           expect(flipper[:search].actors_value).not_to include('User;6')
+        end
+
+        it 'removes item without whitespace' do
+          multi_value.split(',').map(&:strip).each do |value|
+            flipper[:search].enable_actor Flipper::Actor.new(value)
+          end
+          post 'features/search/actors',
+              { 'value' => multi_value, 'operation' => 'disable', 'authenticity_token' => token },
+              'rack.session' => session
+          expect(flipper[:search].actors_value).not_to eq(Set.new(multi_value.split(',').map(&:strip)))
         end
       end
     end
