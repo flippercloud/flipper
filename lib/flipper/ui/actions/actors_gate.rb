@@ -26,12 +26,12 @@ module Flipper
           feature = flipper[feature_name]
           values = params['value'].to_s.strip.split(',').map(&:strip)
 
-          values.each do |value|
-            if Util.blank?(value)
-              error = "#{value.inspect} is not a valid actor value."
-              return redirect_to("/features/#{feature.key}/actors?error=#{error}")
-            end
+          if Util.blank?(params['value'].to_s.strip)
+            error = "#{params['value'].to_s.strip.inspect} is not a valid actor value."
+            redirect_to("/features/#{feature.key}/actors?error=#{error}")
+          end
 
+          values.each do |value|
             actor = Flipper::Actor.new(value)
 
             case params['operation']
