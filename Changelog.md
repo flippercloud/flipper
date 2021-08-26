@@ -1,6 +1,12 @@
+## Unreleased
+
+### Additions/Changes
+
+* Allow adding multiple actors at once in flipper-ui via comma separation (configurable via `Flipper::UI.configuration.actors_separator`) (https://github.com/jnunemaker/flipper/pull/556)
+
 ## 0.22.1
 
-## Additions/Changes
+### Additions/Changes
 
 * Remove Octicons and replace with a pure CSS status circle (https://github.com/jnunemaker/flipper/pull/547)
 * Rescue unique errors in AR and Sequel when setting value (https://github.com/jnunemaker/flipper/commit/87f5a98bce7baad7a27b75b5bce3256967769f27)
@@ -9,7 +15,7 @@
 
 ## 0.22.0
 
-## Additions/Changes
+### Additions/Changes
 
 * Enable log subscriber by default in Rails (https://github.com/jnunemaker/flipper/pull/525)
 * Remove memoizer from API and UI (https://github.com/jnunemaker/flipper/pull/527). If you are using the UI or API without configuring the default instance of Flipper, you'll need to enable memoization if you want it. For examples, see the examples/ui and examples/api directories.
