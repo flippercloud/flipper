@@ -44,9 +44,10 @@ module Flipper
       # Default false. Only works when using descriptions.
       attr_accessor :show_feature_description_in_list
 
-      # Public: Change separator symbol for adding actors list
-      # Default is comma `,`
-      attr_accessor :actors_list_separator_symbol
+      # Public: What should be used to denote you are trying to add multiple
+      # actors at once (instead of just a single actor).
+      # Default is comma ",".
+      attr_accessor :actors_separator
 
       VALID_BANNER_CLASS_VALUES = %w(
         danger
@@ -72,7 +73,7 @@ module Flipper
         @add_actor_placeholder = "a flipper id"
         @descriptions_source = DEFAULT_DESCRIPTIONS_SOURCE
         @show_feature_description_in_list = false
-        @actors_list_separator_symbol = ','
+        @actors_separator = ','
       end
 
       def using_descriptions?
