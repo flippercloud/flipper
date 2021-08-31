@@ -550,14 +550,106 @@ RSpec.describe Flipper do
     end
   end
 
-  it "works" do
-    rule = Flipper::Rule.new(
-        {"type" => "property", "value" => "plan"},
-        {"type" => "operator", "value" => "eq"},
-        {"type" => "string", "value" => "basic"}
-    )
-    feature.enable rule
 
-    expect(feature.enabled?(basic_plan_thing)).to be(true)
+  context "for rule" do
+    it "works" do
+      rule = Flipper::Rule.new(
+          {"type" => "property", "value" => "plan"},
+          {"type" => "operator", "value" => "eq"},
+          {"type" => "string", "value" => "basic"}
+      )
+      feature.enable rule
+
+      expect(feature.enabled?(basic_plan_thing)).to be(true)
+      expect(feature.enabled?(premium_plan_thing)).to be(false)
+    end
+  end
+
+  context "for Any" do
+    it "works" do
+      rule = Flipper::Any.new(
+        Flipper::Rule.new(
+          {"type" => "property", "value" => "plan"},
+          {"type" => "operator", "value" => "eq"},
+          {"type" => "string", "value" => "basic"}
+        ),
+        Flipper::Rule.new(
+          {"type" => "property", "value" => "plan"},
+          {"type" => "operator", "value" => "eq"},
+          {"type" => "string", "value" => "plus"}
+        )
+      )
+      feature.enable rule
+
+      expect(feature.enabled?(basic_plan_thing)).to be(true)
+      expect(feature.enabled?(premium_plan_thing)).to be(false)
+    end
+  end
+
+  context "for All" do
+    it "works" do
+      true_actor = Flipper::Actor.new("User;1", {
+        "plan" => "basic",
+        "age" => 21,
+      })
+      false_actor = Flipper::Actor.new("User;1", {
+        "plan" => "basic",
+        "age" => 20,
+      })
+      rule = Flipper::All.new(
+        Flipper::Rule.new(
+          {"type" => "property", "value" => "plan"},
+          {"type" => "operator", "value" => "eq"},
+          {"type" => "string", "value" => "basic"}
+        ),
+        Flipper::Rule.new(
+          {"type" => "property", "value" => "age"},
+          {"type" => "operator", "value" => "eq"},
+          {"type" => "integer", "value" => 21}
+        )
+      )
+      feature.enable rule
+
+      expect(feature.enabled?(true_actor)).to be(true)
+      expect(feature.enabled?(false_actor)).to be(false)
+    end
+
+    it "works when nested" do
+      admin_actor = Flipper::Actor.new("User;1", {
+        "admin" => true,
+      })
+      true_actor = Flipper::Actor.new("User;1", {
+        "plan" => "basic",
+        "age" => 21,
+      })
+      false_actor = Flipper::Actor.new("User;1", {
+        "plan" => "basic",
+        "age" => 20,
+      })
+      rule = Flipper::Any.new(
+        Flipper::Rule.new(
+          {"type" => "property", "value" => "admin"},
+          {"type" => "operator", "value" => "eq"},
+          {"type" => "string", "value" => true}
+        ),
+        Flipper::All.new(
+          Flipper::Rule.new(
+            {"type" => "property", "value" => "plan"},
+            {"type" => "operator", "value" => "eq"},
+            {"type" => "string", "value" => "basic"}
+          ),
+          Flipper::Rule.new(
+            {"type" => "property", "value" => "age"},
+            {"type" => "operator", "value" => "eq"},
+            {"type" => "integer", "value" => 21}
+          )
+        )
+      )
+      feature.enable rule
+
+      expect(feature.enabled?(admin_actor)).to be(true)
+      expect(feature.enabled?(true_actor)).to be(true)
+      expect(feature.enabled?(false_actor)).to be(false)
+    end
   end
 end

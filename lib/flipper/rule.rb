@@ -2,8 +2,19 @@ module Flipper
   class Rule
 
     def self.from_hash(hash)
-      value = hash.fetch("value")
-      new(value.fetch("left"), value.fetch("operator"), value.fetch("right"))
+      type = hash.fetch("type")
+
+      case type
+      when "Any"
+        value = hash.fetch("value")
+        Any.new(*value.map { |v| from_hash(v) })
+      when "All"
+        value = hash.fetch("value")
+        All.new(*value.map { |v| from_hash(v) })
+      when "Rule"
+        value = hash.fetch("value")
+        new(value.fetch("left"), value.fetch("operator"), value.fetch("right"))
+      end
     end
 
     def initialize(left, operator, right)
