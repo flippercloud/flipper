@@ -16,6 +16,7 @@ module Flipper
           boolean: nil,
           groups: Set.new,
           actors: Set.new,
+          rules: Set.new,
           percentage_of_actors: nil,
           percentage_of_time: nil,
         }

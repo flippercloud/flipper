@@ -342,6 +342,7 @@ module Flipper
       @gates ||= [
         Gates::Boolean.new,
         Gates::Actor.new,
+        Gates::Rule.new,
         Gates::PercentageOfActors.new,
         Gates::PercentageOfTime.new,
         Gates::Group.new,

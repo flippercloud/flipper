@@ -22,6 +22,17 @@ RSpec.describe Flipper do
     double 'Non Flipper Thing', flipper_id: 1,  admin?: nil, dev?: false
   end
 
+  let(:basic_plan_thing) do
+    double 'Non Flipper Thing', flipper_id: 1, flipper_properties: {
+      "plan" => "basic",
+    }
+  end
+  let(:premium_plan_thing) do
+    double 'Non Flipper Thing', flipper_id: 10, flipper_properties: {
+      "plan" => "premium",
+    }
+  end
+
   let(:pitt)        { Flipper::Actor.new(1) }
   let(:clooney)     { Flipper::Actor.new(10) }
 
@@ -537,5 +548,16 @@ RSpec.describe Flipper do
     it 'does not enable feature for object in not enabled group' do
       expect(feature.enabled?(dev_thing)).to eq(false)
     end
+  end
+
+  it "works" do
+    rule = Flipper::Rule.new(
+        {"type" => "property", "value" => "plan"},
+        {"type" => "operator", "value" => "eq"},
+        {"type" => "string", "value" => "basic"}
+    )
+    feature.enable rule
+
+    expect(feature.enabled?(basic_plan_thing)).to be(true)
   end
 end
