@@ -1,3 +1,4 @@
+require 'json'
 require 'pstore'
 require 'set'
 require 'flipper'
@@ -91,6 +92,8 @@ module Flipper
             write key(feature, gate), thing.value.to_s
           when :set
             set_add key(feature, gate), thing.value.to_s
+          when :json
+            set_add key(feature, gate), JSON.dump(thing.value)
           else
             raise "#{gate} is not supported by this adapter yet"
           end
@@ -111,6 +114,10 @@ module Flipper
         when :set
           @store.transaction do
             set_delete key(feature, gate), thing.value.to_s
+          end
+        when :json
+          @store.transaction do
+            set_delete key(feature, gate), JSON.dump(thing.value)
           end
         else
           raise "#{gate} is not supported by this adapter yet"
@@ -159,6 +166,8 @@ module Flipper
               read key(feature, gate)
             when :set
               set_members key(feature, gate)
+            when :json
+              set_members(key(feature, gate))
             else
               raise "#{gate} is not supported by this adapter yet"
             end
