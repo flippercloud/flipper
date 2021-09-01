@@ -120,7 +120,7 @@ module Flipper
       # Public: Enables a gate for a given thing.
       #
       # feature - The Flipper::Feature for the gate.
-      # gate - The Flipper::Gate to disable.
+      # gate - The Flipper::Gate to enable.
       # thing - The Flipper::Type being enabled for the gate.
       #
       # Returns true.
@@ -132,6 +132,8 @@ module Flipper
           set(feature, gate, thing)
         when :set
           enable_multi(feature, gate, thing)
+        when :json
+          set_json(feature, gate, thing)
         else
           unsupported_data_type gate.data_type
         end
@@ -154,6 +156,8 @@ module Flipper
           set(feature, gate, thing)
         when :set
           @gate_class.where(feature_key: feature.key, key: gate.key, value: thing.value).destroy_all
+        when :json
+          @gate_class.where(feature_key: feature.key, key: gate.key, value: JSON.dump(thing.value)).destroy_all
         else
           unsupported_data_type gate.data_type
         end
@@ -200,6 +204,14 @@ module Flipper
         # already added so no need move on with life
       end
 
+      def set_json(feature, gate, thing)
+        @gate_class.create! do |g|
+          g.feature_key = feature.key
+          g.key = gate.key
+          g.value = JSON.dump(thing.value)
+        end
+      end
+
       def result_for_feature(feature, db_gates)
         db_gates ||= []
         result = {}
@@ -216,6 +228,8 @@ module Flipper
               end
             when :set
               db_gates.select { |db_gate| db_gate.key == gate.key.to_s }.map(&:value).to_set
+            when :json
+              db_gates.select { |db_gate| db_gate.key == gate.key.to_s }.map { |gate| JSON.load(gate.value) }.to_set
             else
               unsupported_data_type gate.data_type
             end
