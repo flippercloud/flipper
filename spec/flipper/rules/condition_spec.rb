@@ -1,12 +1,12 @@
 require 'helper'
 
-RSpec.describe Flipper::Rule do
+RSpec.describe Flipper::Rules::Condition do
   let(:feature_name) { "search" }
 
   describe "#open?" do
     context "eq" do
       let(:rule) {
-        Flipper::Rule.new(
+        Flipper::Rules::Condition.new(
           {"type" => "property", "value" => "plan"},
           {"type" => "operator", "value" => "eq"},
           {"type" => "string", "value" => "basic"}
@@ -30,7 +30,7 @@ RSpec.describe Flipper::Rule do
 
     context "neq" do
       let(:rule) {
-        Flipper::Rule.new(
+        Flipper::Rules::Condition.new(
           {"type" => "property", "value" => "plan"},
           {"type" => "operator", "value" => "neq"},
           {"type" => "string", "value" => "basic"}
@@ -54,7 +54,7 @@ RSpec.describe Flipper::Rule do
 
     context "gt" do
       let(:rule) {
-        Flipper::Rule.new(
+        Flipper::Rules::Condition.new(
           {"type" => "property", "value" => "age"},
           {"type" => "operator", "value" => "gt"},
           {"type" => "integer", "value" => 20}
@@ -78,7 +78,7 @@ RSpec.describe Flipper::Rule do
 
     context "gte" do
       let(:rule) {
-        Flipper::Rule.new(
+        Flipper::Rules::Condition.new(
           {"type" => "property", "value" => "age"},
           {"type" => "operator", "value" => "gte"},
           {"type" => "integer", "value" => 20}
@@ -102,7 +102,7 @@ RSpec.describe Flipper::Rule do
 
     context "lt" do
       let(:rule) {
-        Flipper::Rule.new(
+        Flipper::Rules::Condition.new(
           {"type" => "property", "value" => "age"},
           {"type" => "operator", "value" => "lt"},
           {"type" => "integer", "value" => 21}
@@ -126,7 +126,7 @@ RSpec.describe Flipper::Rule do
 
     context "lt with rand type" do
       let(:rule) {
-        Flipper::Rule.new(
+        Flipper::Rules::Condition.new(
           {"type" => "random", "value" => 100},
           {"type" => "operator", "value" => "lt"},
           {"type" => "integer", "value" => 25}
@@ -147,7 +147,7 @@ RSpec.describe Flipper::Rule do
 
     context "lte" do
       let(:rule) {
-        Flipper::Rule.new(
+        Flipper::Rules::Condition.new(
           {"type" => "property", "value" => "age"},
           {"type" => "operator", "value" => "lte"},
           {"type" => "integer", "value" => 21}
@@ -171,7 +171,7 @@ RSpec.describe Flipper::Rule do
 
     context "in" do
       let(:rule) {
-        Flipper::Rule.new(
+        Flipper::Rules::Condition.new(
           {"type" => "property", "value" => "age"},
           {"type" => "operator", "value" => "in"},
           {"type" => "array", "value" => [20, 21, 22]}
@@ -195,7 +195,7 @@ RSpec.describe Flipper::Rule do
 
     context "nin" do
       let(:rule) {
-        Flipper::Rule.new(
+        Flipper::Rules::Condition.new(
           {"type" => "property", "value" => "age"},
           {"type" => "operator", "value" => "nin"},
           {"type" => "array", "value" => [20, 21, 22]}
@@ -219,7 +219,7 @@ RSpec.describe Flipper::Rule do
 
     context "percentage" do
       let(:rule) {
-        Flipper::Rule.new(
+        Flipper::Rules::Condition.new(
           {"type" => "property", "value" => "flipper_id"},
           {"type" => "operator", "value" => "percentage"},
           {"type" => "integer", "value" => 25}

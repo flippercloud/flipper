@@ -553,7 +553,7 @@ RSpec.describe Flipper do
 
   context "for rule" do
     it "works" do
-      rule = Flipper::Rule.new(
+      rule = Flipper::Rules::Condition.new(
         {"type" => "property", "value" => "plan"},
         {"type" => "operator", "value" => "eq"},
         {"type" => "string", "value" => "basic"}
@@ -568,12 +568,12 @@ RSpec.describe Flipper do
   context "for Any" do
     it "works" do
       rule = Flipper::Any.new(
-        Flipper::Rule.new(
+        Flipper::Rules::Condition.new(
           {"type" => "property", "value" => "plan"},
           {"type" => "operator", "value" => "eq"},
           {"type" => "string", "value" => "basic"}
         ),
-        Flipper::Rule.new(
+        Flipper::Rules::Condition.new(
           {"type" => "property", "value" => "plan"},
           {"type" => "operator", "value" => "eq"},
           {"type" => "string", "value" => "plus"}
@@ -597,12 +597,12 @@ RSpec.describe Flipper do
         "age" => 20,
       })
       rule = Flipper::All.new(
-        Flipper::Rule.new(
+        Flipper::Rules::Condition.new(
           {"type" => "property", "value" => "plan"},
           {"type" => "operator", "value" => "eq"},
           {"type" => "string", "value" => "basic"}
         ),
-        Flipper::Rule.new(
+        Flipper::Rules::Condition.new(
           {"type" => "property", "value" => "age"},
           {"type" => "operator", "value" => "eq"},
           {"type" => "integer", "value" => 21}
@@ -627,18 +627,18 @@ RSpec.describe Flipper do
         "age" => 20,
       })
       rule = Flipper::Any.new(
-        Flipper::Rule.new(
+        Flipper::Rules::Condition.new(
           {"type" => "property", "value" => "admin"},
           {"type" => "operator", "value" => "eq"},
           {"type" => "string", "value" => true}
         ),
         Flipper::All.new(
-          Flipper::Rule.new(
+          Flipper::Rules::Condition.new(
             {"type" => "property", "value" => "plan"},
             {"type" => "operator", "value" => "eq"},
             {"type" => "string", "value" => "basic"}
           ),
-          Flipper::Rule.new(
+          Flipper::Rules::Condition.new(
             {"type" => "property", "value" => "age"},
             {"type" => "operator", "value" => "eq"},
             {"type" => "integer", "value" => 21}

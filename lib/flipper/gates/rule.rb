@@ -25,15 +25,15 @@ module Flipper
       def open?(context)
         rules = context.values[key]
         rules.any? { |hash|
-          rule = Flipper::Rule.from_hash(hash)
+          rule = Flipper::Rules.build(hash)
           rule.open?(context.feature_name, context.thing)
         }
       end
 
       def protects?(thing)
-        thing.is_a?(Flipper::Rule) ||
-          thing.is_a?(Flipper::Any) ||
-          thing.is_a?(Flipper::All)
+        thing.is_a?(Flipper::Rules::Condition) ||
+          thing.is_a?(Flipper::Rules::Any) ||
+          thing.is_a?(Flipper::Rules::All)
       end
     end
   end

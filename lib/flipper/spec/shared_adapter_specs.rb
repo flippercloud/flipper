@@ -63,12 +63,12 @@ RSpec.shared_examples_for 'a flipper adapter' do
   end
 
   it 'can enable, disable and get value for rule gate' do
-    basic_rule = Flipper::Rule.new(
+    basic_rule = Flipper::Rules::Condition.new(
       {"type" => "property", "value" => "plan"},
       {"type" => "operator", "value" => "eq"},
       {"type" => "string", "value" => "basic"}
     )
-    age_rule = Flipper::Rule.new(
+    age_rule = Flipper::Rules::Condition.new(
       {"type" => "property", "value" => "age"},
       {"type" => "operator", "value" => "gte"},
       {"type" => "integer", "value" => 21}
