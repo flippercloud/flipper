@@ -84,6 +84,10 @@ module Flipper
           update feature.key, '$addToSet' => {
             gate.key.to_s => thing.value.to_s,
           }
+        when :json
+          update feature.key, '$addToSet' => {
+            gate.key.to_s => JSON.dump(thing.value),
+          }
         else
           unsupported_data_type gate.data_type
         end
@@ -106,6 +110,8 @@ module Flipper
           update feature.key, '$set' => { gate.key.to_s => thing.value.to_s }
         when :set
           update feature.key, '$pull' => { gate.key.to_s => thing.value.to_s }
+        when :json
+          update feature.key, '$pull' => { gate.key.to_s => JSON.dump(thing.value) }
         else
           unsupported_data_type gate.data_type
         end
@@ -167,6 +173,8 @@ module Flipper
               doc[gate.key.to_s]
             when :set
               doc.fetch(gate.key.to_s) { Set.new }.to_set
+            when :json
+              doc.fetch(gate.key.to_s) { Set.new }.map! { |member| JSON.parse(member) }.to_set
             else
               unsupported_data_type gate.data_type
             end
