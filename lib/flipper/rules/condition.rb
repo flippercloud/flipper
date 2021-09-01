@@ -59,13 +59,9 @@ module Flipper
         case type
         when "property"
           attributes[hash.fetch("value")]
-        when "array"
-          hash.fetch("value")
-        when "string"
-          hash.fetch("value")
         when "random"
           rand hash.fetch("value")
-        when "integer"
+        when "array", "string", "integer"
           hash.fetch("value")
         else
           raise "type not found: #{type.inspect}"
