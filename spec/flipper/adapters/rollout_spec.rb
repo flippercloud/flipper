@@ -4,7 +4,7 @@ require 'rollout'
 require 'flipper/adapters/rollout'
 require 'flipper/spec/shared_adapter_specs'
 
-RSpec.describe Flipper::Adapters::Rollout do
+RSpec.describe Flipper::Adapters::Rollout, focus: true do
   let(:redis) { Redis.new }
   let(:rollout) { Rollout.new(redis) }
   let(:source_adapter) { described_class.new(rollout) }
@@ -37,6 +37,7 @@ RSpec.describe Flipper::Adapters::Rollout do
         boolean: nil,
         groups: Set.new([:admins]),
         actors: Set.new(["1"]),
+        rules: Set.new,
         percentage_of_actors: 20.0,
         percentage_of_time: nil,
       }
@@ -50,6 +51,7 @@ RSpec.describe Flipper::Adapters::Rollout do
         boolean: true,
         groups: Set.new,
         actors: Set.new,
+        rules: Set.new,
         percentage_of_actors: nil,
         percentage_of_time: nil,
       }
@@ -65,6 +67,7 @@ RSpec.describe Flipper::Adapters::Rollout do
         boolean: true,
         groups: Set.new,
         actors: Set.new,
+        rules: Set.new,
         percentage_of_actors: nil,
         percentage_of_time: nil,
       }
