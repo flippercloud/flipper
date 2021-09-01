@@ -554,9 +554,9 @@ RSpec.describe Flipper do
   context "for rule" do
     it "works" do
       rule = Flipper::Rule.new(
-          {"type" => "property", "value" => "plan"},
-          {"type" => "operator", "value" => "eq"},
-          {"type" => "string", "value" => "basic"}
+        {"type" => "property", "value" => "plan"},
+        {"type" => "operator", "value" => "eq"},
+        {"type" => "string", "value" => "basic"}
       )
       feature.enable rule
 
