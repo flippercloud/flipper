@@ -128,9 +128,9 @@ module Flipper
           set(feature, gate, thing, clear: true)
         when :integer
           set(feature, gate, thing)
-        when :set
+        when :set, :json
           begin
-            @gate_class.create(gate_attrs(feature, gate, thing))
+            @gate_class.create(gate_attrs(feature, gate, thing, json: gate.data_type == :json))
           rescue ::Sequel::UniqueConstraintViolation
           end
         else
@@ -153,9 +153,8 @@ module Flipper
           clear(feature)
         when :integer
           set(feature, gate, thing)
-        when :set
-          @gate_class.where(gate_attrs(feature, gate, thing))
-                     .delete
+        when :set, :json
+          @gate_class.where(gate_attrs(feature, gate, thing, json: gate.data_type == :json)).delete
         else
           unsupported_data_type gate.data_type
         end
@@ -187,11 +186,11 @@ module Flipper
         end
       end
 
-      def gate_attrs(feature, gate, thing)
+      def gate_attrs(feature, gate, thing, json: false)
         {
           feature_key: feature.key.to_s,
           key: gate.key.to_s,
-          value: thing.value.to_s,
+          value: json ? JSON.dump(thing.value) : thing.value.to_s,
         }
       end
 
@@ -210,6 +209,8 @@ module Flipper
               end
             when :set
               db_gates.select { |db_gate| db_gate.key == gate.key.to_s }.map(&:value).to_set
+            when :json
+              db_gates.select { |db_gate| db_gate.key == gate.key.to_s }.map {|gate| JSON.load(gate.value) }.to_set
             else
               unsupported_data_type gate.data_type
             end
