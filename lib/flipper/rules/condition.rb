@@ -22,7 +22,7 @@ module Flipper
         }
       end
 
-      def open?(feature_name, actor)
+      def matches?(feature_name, actor)
         attributes = actor.flipper_properties
         left_value = evaluate(@left, attributes)
         right_value = evaluate(@right, attributes)

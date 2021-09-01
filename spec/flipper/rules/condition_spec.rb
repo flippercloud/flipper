@@ -3,7 +3,7 @@ require 'helper'
 RSpec.describe Flipper::Rules::Condition do
   let(:feature_name) { "search" }
 
-  describe "#open?" do
+  describe "#matches?" do
     context "eq" do
       let(:rule) {
         Flipper::Rules::Condition.new(
@@ -17,14 +17,14 @@ RSpec.describe Flipper::Rules::Condition do
         actor = Flipper::Actor.new("User;1", {
           "plan" => "basic",
         })
-        expect(rule.open?(feature_name, actor)).to be(true)
+        expect(rule.matches?(feature_name, actor)).to be(true)
       end
 
       it "returns false when property does not match" do
         actor = Flipper::Actor.new("User;1", {
           "plan" => "premium",
         })
-        expect(rule.open?(feature_name, actor)).to be(false)
+        expect(rule.matches?(feature_name, actor)).to be(false)
       end
     end
 
@@ -41,14 +41,14 @@ RSpec.describe Flipper::Rules::Condition do
         actor = Flipper::Actor.new("User;1", {
           "plan" => "premium",
         })
-        expect(rule.open?(feature_name, actor)).to be(true)
+        expect(rule.matches?(feature_name, actor)).to be(true)
       end
 
       it "returns false when property does match" do
         actor = Flipper::Actor.new("User;1", {
           "plan" => "basic",
         })
-        expect(rule.open?(feature_name, actor)).to be(false)
+        expect(rule.matches?(feature_name, actor)).to be(false)
       end
     end
 
@@ -65,14 +65,14 @@ RSpec.describe Flipper::Rules::Condition do
         actor = Flipper::Actor.new("User;1", {
           "age" => 21,
         })
-        expect(rule.open?(feature_name, actor)).to be(true)
+        expect(rule.matches?(feature_name, actor)).to be(true)
       end
 
       it "returns false when property does NOT match" do
         actor = Flipper::Actor.new("User;1", {
           "age" => 20,
         })
-        expect(rule.open?(feature_name, actor)).to be(false)
+        expect(rule.matches?(feature_name, actor)).to be(false)
       end
     end
 
@@ -89,14 +89,14 @@ RSpec.describe Flipper::Rules::Condition do
         actor = Flipper::Actor.new("User;1", {
           "age" => 20,
         })
-        expect(rule.open?(feature_name, actor)).to be(true)
+        expect(rule.matches?(feature_name, actor)).to be(true)
       end
 
       it "returns false when property does NOT match" do
         actor = Flipper::Actor.new("User;1", {
           "age" => 19,
         })
-        expect(rule.open?(feature_name, actor)).to be(false)
+        expect(rule.matches?(feature_name, actor)).to be(false)
       end
     end
 
@@ -113,14 +113,14 @@ RSpec.describe Flipper::Rules::Condition do
         actor = Flipper::Actor.new("User;1", {
           "age" => 20,
         })
-        expect(rule.open?(feature_name, actor)).to be(true)
+        expect(rule.matches?(feature_name, actor)).to be(true)
       end
 
       it "returns false when property does NOT match" do
         actor = Flipper::Actor.new("User;1", {
           "age" => 21,
         })
-        expect(rule.open?(feature_name, actor)).to be(false)
+        expect(rule.matches?(feature_name, actor)).to be(false)
       end
     end
 
@@ -137,7 +137,7 @@ RSpec.describe Flipper::Rules::Condition do
         results = []
         (1..1000).to_a.each do |n|
           actor = Flipper::Actor.new("User;#{n}")
-          results << rule.open?(feature_name, actor)
+          results << rule.matches?(feature_name, actor)
         end
 
         enabled, disabled = results.partition { |r| r }
@@ -158,14 +158,14 @@ RSpec.describe Flipper::Rules::Condition do
         actor = Flipper::Actor.new("User;1", {
           "age" => 21,
         })
-        expect(rule.open?(feature_name, actor)).to be(true)
+        expect(rule.matches?(feature_name, actor)).to be(true)
       end
 
       it "returns false when property does NOT match" do
         actor = Flipper::Actor.new("User;1", {
           "age" => 22,
         })
-        expect(rule.open?(feature_name, actor)).to be(false)
+        expect(rule.matches?(feature_name, actor)).to be(false)
       end
     end
 
@@ -182,14 +182,14 @@ RSpec.describe Flipper::Rules::Condition do
         actor = Flipper::Actor.new("User;1", {
           "age" => 21,
         })
-        expect(rule.open?(feature_name, actor)).to be(true)
+        expect(rule.matches?(feature_name, actor)).to be(true)
       end
 
       it "returns false when property does NOT match" do
         actor = Flipper::Actor.new("User;1", {
           "age" => 10,
         })
-        expect(rule.open?(feature_name, actor)).to be(false)
+        expect(rule.matches?(feature_name, actor)).to be(false)
       end
     end
 
@@ -206,14 +206,14 @@ RSpec.describe Flipper::Rules::Condition do
         actor = Flipper::Actor.new("User;1", {
           "age" => 10,
         })
-        expect(rule.open?(feature_name, actor)).to be(true)
+        expect(rule.matches?(feature_name, actor)).to be(true)
       end
 
       it "returns false when property does NOT match" do
         actor = Flipper::Actor.new("User;1", {
           "age" => 20,
         })
-        expect(rule.open?(feature_name, actor)).to be(false)
+        expect(rule.matches?(feature_name, actor)).to be(false)
       end
     end
 
@@ -230,7 +230,7 @@ RSpec.describe Flipper::Rules::Condition do
         results = []
         (1..1000).to_a.each do |n|
           actor = Flipper::Actor.new("User;#{n}")
-          results << rule.open?(feature_name, actor)
+          results << rule.matches?(feature_name, actor)
         end
 
         enabled, disabled = results.partition { |r| r }
@@ -239,7 +239,7 @@ RSpec.describe Flipper::Rules::Condition do
 
       it "returns false when property does NOT match" do
         actor = Flipper::Actor.new("User;1")
-        expect(rule.open?(feature_name, actor)).to be(false)
+        expect(rule.matches?(feature_name, actor)).to be(false)
       end
     end
   end

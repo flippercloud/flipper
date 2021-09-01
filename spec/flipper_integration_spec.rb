@@ -567,7 +567,7 @@ RSpec.describe Flipper do
 
   context "for Any" do
     it "works" do
-      rule = Flipper::Any.new(
+      rule = Flipper::Rules::Any.new(
         Flipper::Rules::Condition.new(
           {"type" => "property", "value" => "plan"},
           {"type" => "operator", "value" => "eq"},
@@ -596,7 +596,7 @@ RSpec.describe Flipper do
         "plan" => "basic",
         "age" => 20,
       })
-      rule = Flipper::All.new(
+      rule = Flipper::Rules::All.new(
         Flipper::Rules::Condition.new(
           {"type" => "property", "value" => "plan"},
           {"type" => "operator", "value" => "eq"},
@@ -626,13 +626,13 @@ RSpec.describe Flipper do
         "plan" => "basic",
         "age" => 20,
       })
-      rule = Flipper::Any.new(
+      rule = Flipper::Rules::Any.new(
         Flipper::Rules::Condition.new(
           {"type" => "property", "value" => "admin"},
           {"type" => "operator", "value" => "eq"},
           {"type" => "string", "value" => true}
         ),
-        Flipper::All.new(
+        Flipper::Rules::All.new(
           Flipper::Rules::Condition.new(
             {"type" => "property", "value" => "plan"},
             {"type" => "operator", "value" => "eq"},

@@ -3,8 +3,8 @@ require 'flipper/rules/all'
 module Flipper
   module Rules
     class All < Any
-      def open?(feature_name, actor)
-        @rules.all? { |rule| rule.open?(feature_name, actor) }
+      def matches?(feature_name, actor)
+        @rules.all? { |rule| rule.matches?(feature_name, actor) }
       end
     end
   end

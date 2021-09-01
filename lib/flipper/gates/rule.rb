@@ -26,7 +26,7 @@ module Flipper
         rules = context.values[key]
         rules.any? { |hash|
           rule = Flipper::Rules.build(hash)
-          rule.open?(context.feature_name, context.thing)
+          rule.matches?(context.feature_name, context.thing)
         }
       end
 
