@@ -14,6 +14,8 @@ module Flipper
           "flipper_features",
           ::ActiveRecord::Base.table_name_suffix,
         ].join
+
+        has_many :gates, foreign_key: "feature_key", primary_key: "key"
       end
 
       # Private: Do not use outside of this adapter.
@@ -23,6 +25,8 @@ module Flipper
           "flipper_gates",
           ::ActiveRecord::Base.table_name_suffix,
         ].join
+
+        serialize :value, JSON
       end
 
       # Public: The name of the adapter.
@@ -101,19 +105,13 @@ module Flipper
       end
 
       def get_all
-        features = ::Arel::Table.new(@feature_class.table_name.to_sym)
-        gates = ::Arel::Table.new(@gate_class.table_name.to_sym)
-        rows_query = features.join(gates, Arel::Nodes::OuterJoin)
-          .on(features[:key].eq(gates[:feature_key]))
-          .project(features[:key].as('feature_key'), gates[:key], gates[:value])
-        rows = ::ActiveRecord::Base.connection.select_all rows_query
-        db_gates = rows.map { |row| Gate.new(row) }
-        grouped_db_gates = db_gates.group_by(&:feature_key)
         result = Hash.new { |hash, key| hash[key] = default_config }
-        features = grouped_db_gates.keys.map { |key| Flipper::Feature.new(key, self) }
-        features.each do |feature|
-          result[feature.key] = result_for_feature(feature, grouped_db_gates[feature.key])
+
+        @feature_class.includes(:gates).all.each do |f|
+          feature = Flipper::Feature.new(f.key, self)
+          result[feature.key] = result_for_feature(feature, f.gates)
         end
+
         result
       end
 
@@ -130,10 +128,8 @@ module Flipper
           set(feature, gate, thing, clear: true)
         when :integer
           set(feature, gate, thing)
-        when :set
+        when :set, :json
           enable_multi(feature, gate, thing)
-        when :json
-          set_json(feature, gate, thing)
         else
           unsupported_data_type gate.data_type
         end
@@ -157,7 +153,7 @@ module Flipper
         when :set
           @gate_class.where(feature_key: feature.key, key: gate.key, value: thing.value).destroy_all
         when :json
-          @gate_class.where(feature_key: feature.key, key: gate.key, value: JSON.dump(thing.value)).destroy_all
+          @gate_class.where(feature_key: feature.key, key: gate.key, value: thing.value).destroy_all
         else
           unsupported_data_type gate.data_type
         end
@@ -196,20 +192,12 @@ module Flipper
         @gate_class.create! do |g|
           g.feature_key = feature.key
           g.key = gate.key
-          g.value = thing.value.to_s
+          g.value = thing.value
         end
 
         nil
       rescue ::ActiveRecord::RecordNotUnique
         # already added so no need move on with life
-      end
-
-      def set_json(feature, gate, thing)
-        @gate_class.create! do |g|
-          g.feature_key = feature.key
-          g.key = gate.key
-          g.value = JSON.dump(thing.value)
-        end
       end
 
       def result_for_feature(feature, db_gates)
@@ -226,10 +214,8 @@ module Flipper
               if detected_db_gate = db_gates.detect { |db_gate| db_gate.key == gate.key.to_s }
                 detected_db_gate.value
               end
-            when :set
+            when :set, :json
               db_gates.select { |db_gate| db_gate.key == gate.key.to_s }.map(&:value).to_set
-            when :json
-              db_gates.select { |db_gate| db_gate.key == gate.key.to_s }.map { |gate| JSON.load(gate.value) }.to_set
             else
               unsupported_data_type gate.data_type
             end

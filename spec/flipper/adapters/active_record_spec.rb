@@ -27,7 +27,7 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
       CREATE TABLE flipper_gates (
         id integer PRIMARY KEY,
         feature_key text NOT NULL,
-        key text NOT NULL,
+        key string NOT NULL,
         value text DEFAULT NULL,
         created_at datetime NOT NULL,
         updated_at datetime NOT NULL
