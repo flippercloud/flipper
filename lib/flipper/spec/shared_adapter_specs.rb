@@ -5,10 +5,11 @@ RSpec.shared_examples_for 'a flipper adapter' do
   let(:feature) { flipper[:stats] }
 
   let(:boolean_gate) { feature.gate(:boolean) }
+  let(:rule_gate)    { feature.gate(:rule) }
   let(:group_gate)   { feature.gate(:group) }
   let(:actor_gate)   { feature.gate(:actor) }
   let(:actors_gate)  { feature.gate(:percentage_of_actors) }
-  let(:time_gate) { feature.gate(:percentage_of_time) }
+  let(:time_gate)    { feature.gate(:percentage_of_time) }
 
   before do
     Flipper.register(:admins) do |actor|
@@ -58,8 +59,33 @@ RSpec.shared_examples_for 'a flipper adapter' do
     expect(subject.enable(feature, time_gate, flipper.time(45))).to eq(true)
 
     expect(subject.disable(feature, boolean_gate, flipper.boolean(false))).to eq(true)
-
     expect(subject.get(feature)).to eq(subject.default_config)
+  end
+
+  it 'can enable, disable and get value for rule gate' do
+    basic_rule = Flipper::Rule.new(
+      {"type" => "property", "value" => "plan"},
+      {"type" => "operator", "value" => "eq"},
+      {"type" => "string", "value" => "basic"}
+    )
+    age_rule = Flipper::Rule.new(
+      {"type" => "property", "value" => "age"},
+      {"type" => "operator", "value" => "gte"},
+      {"type" => "integer", "value" => 21}
+    )
+    expect(subject.enable(feature, rule_gate, basic_rule)).to eq(true)
+    expect(subject.enable(feature, rule_gate, age_rule)).to eq(true)
+    result = subject.get(feature)
+    expect(result[:rules]).to include(basic_rule.value)
+    expect(result[:rules]).to include(age_rule.value)
+
+    expect(subject.disable(feature, rule_gate, basic_rule)).to eq(true)
+    result = subject.get(feature)
+    expect(result[:rules]).to include(age_rule.value)
+
+    expect(subject.disable(feature, rule_gate, age_rule)).to eq(true)
+    result = subject.get(feature)
+    expect(result[:rules]).to be_empty
   end
 
   it 'can enable, disable and get value for group gate' do

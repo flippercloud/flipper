@@ -78,6 +78,8 @@ module Flipper
           @client.hset feature.key, gate.key, thing.value.to_s
         when :set
           @client.hset feature.key, to_field(gate, thing), 1
+        when :json
+          @client.hset feature.key, to_json_field(gate, thing), 1
         else
           unsupported_data_type gate.data_type
         end
@@ -100,6 +102,8 @@ module Flipper
           @client.hset feature.key, gate.key, thing.value.to_s
         when :set
           @client.hdel feature.key, to_field(gate, thing)
+        when :json
+          @client.hdel feature.key, to_json_field(gate, thing)
         else
           unsupported_data_type gate.data_type
         end
@@ -148,6 +152,8 @@ module Flipper
               doc[gate.key.to_s]
             when :set
               fields_to_gate_value fields, gate
+            when :json
+              json_fields_to_gate_value fields, gate
             else
               unsupported_data_type gate.data_type
             end
@@ -161,6 +167,10 @@ module Flipper
         "#{gate.key}/#{thing.value}"
       end
 
+      def to_json_field(gate, thing)
+        "#{gate.key}/#{JSON.dump(thing.value)}"
+      end
+
       # Private: Returns a set of values given an array of fields and a gate.
       #
       # Returns a Set of the values enabled for the gate.
@@ -169,6 +179,10 @@ module Flipper
         keys = fields.grep(regex)
         values = keys.map { |key| key.split('/', 2).last }
         values.to_set
+      end
+
+      def json_fields_to_gate_value(fields, gate)
+        fields_to_gate_value(fields, gate).map! { |member| JSON.parse(member) }
       end
 
       # Private

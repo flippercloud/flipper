@@ -167,7 +167,7 @@ module Flipper
             when :set
               set_members key(feature, gate)
             when :json
-              set_members(key(feature, gate))
+              set_members(key(feature, gate)).map { |member| JSON.parse(member) }.to_set
             else
               raise "#{gate} is not supported by this adapter yet"
             end
