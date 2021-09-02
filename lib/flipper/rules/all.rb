@@ -1,4 +1,4 @@
-require 'flipper/rules/all'
+require 'flipper/rules/any'
 
 module Flipper
   module Rules
