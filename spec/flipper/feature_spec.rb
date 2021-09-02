@@ -650,6 +650,38 @@ RSpec.describe Flipper::Feature do
     end
   end
 
+  describe '#enable_rule/disable_rule' do
+    context "with rule instance" do
+      it "updates gate values to include rule" do
+        rule = Flipper::Rules::Condition.new(
+          {"type" => "property", "value" => "plan"},
+          {"type" => "operator", "value" => "eq"},
+          {"type" => "string", "value" => "basic"}
+        )
+        expect(subject.gate_values.rules).to be_empty
+        subject.enable_rule(rule)
+        expect(subject.gate_values.rules).to eq(Set[rule.value])
+        subject.disable_rule(rule)
+        expect(subject.gate_values.rules).to be_empty
+      end
+    end
+
+    context "with Hash" do
+      it "updates gate values to include rule" do
+        rule = Flipper::Rules::Condition.new(
+          {"type" => "property", "value" => "plan"},
+          {"type" => "operator", "value" => "eq"},
+          {"type" => "string", "value" => "basic"}
+        )
+        expect(subject.gate_values.rules).to be_empty
+        subject.enable_rule(rule.value)
+        expect(subject.gate_values.rules).to eq(Set[rule.value])
+        subject.disable_rule(rule.value)
+        expect(subject.gate_values.rules).to be_empty
+      end
+    end
+  end
+
   describe '#enable_actor/disable_actor' do
     context 'with object that responds to flipper_id' do
       it 'updates the gate values to include the actor' do

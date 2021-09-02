@@ -121,11 +121,11 @@ module Flipper
 
     # Public: Enables a rule for a feature.
     #
-    # rule - a flipper rule instance.
+    # rule - a rule or Hash that can be converted to a rule.
     #
     # Returns result of enable.
     def enable_rule(rule)
-      enable rule
+      enable Rules.wrap(rule)
     end
 
     # Public: Enables a feature for an actor.
@@ -170,11 +170,11 @@ module Flipper
 
     # Public: Disables a rule for a feature.
     #
-    # rule - a flipper rule instance.
+    # rule - a rule or Hash that can be converted to a rule.
     #
     # Returns result of disable.
     def disable_rule(rule)
-      disable rule
+      disable Rules.wrap(rule)
     end
 
     # Public: Disables a feature for an actor.
