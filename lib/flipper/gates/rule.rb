@@ -31,9 +31,7 @@ module Flipper
       end
 
       def protects?(thing)
-        thing.is_a?(Flipper::Rules::Condition) ||
-          thing.is_a?(Flipper::Rules::Any) ||
-          thing.is_a?(Flipper::Rules::All)
+        thing.is_a?(Flipper::Rules::Rule)
       end
     end
   end

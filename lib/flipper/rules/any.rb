@@ -1,6 +1,8 @@
+require 'flipper/rules/rule'
+
 module Flipper
   module Rules
-    class Any
+    class Any < Rule
       def self.build(rules)
         new(*rules.map { |rule| Flipper::Rules.build(rule) })
       end

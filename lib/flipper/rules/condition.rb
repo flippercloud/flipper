@@ -1,6 +1,8 @@
+require 'flipper/rules/rule'
+
 module Flipper
   module Rules
-    class Condition
+    class Condition < Rule
       OPERATIONS = {
         "eq"  => -> (left:, right:, **) { left == right },
         "neq" => -> (left:, right:, **) { left != right },
