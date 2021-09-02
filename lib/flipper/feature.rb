@@ -119,6 +119,15 @@ module Flipper
       end
     end
 
+    # Public: Enables a rule for a feature.
+    #
+    # rule - a Flipper::Rule instance.
+    #
+    # Returns result of enable.
+    def enable_rule(rule)
+      enable rule
+    end
+
     # Public: Enables a feature for an actor.
     #
     # actor - a Flipper::Types::Actor instance or an object that responds
@@ -157,6 +166,15 @@ module Flipper
     # Returns result of enable.
     def enable_percentage_of_actors(percentage)
       enable Types::PercentageOfActors.wrap(percentage)
+    end
+
+    # Public: Disables a rule for a feature.
+    #
+    # rule - a Flipper::Rule instance.
+    #
+    # Returns result of disable.
+    def disable_rule(rule)
+      disable rule
     end
 
     # Public: Disables a feature for an actor.
@@ -255,6 +273,13 @@ module Flipper
     # Returns Set of String group names.
     def groups_value
       gate_values.groups
+    end
+
+    # Public: Get the adapter value for the rules gate.
+    #
+    # Returns Set of rules.
+    def rules_value
+      gate_values.rules
     end
 
     # Public: Get the adapter value for the actors gate.

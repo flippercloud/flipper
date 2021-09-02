@@ -95,7 +95,7 @@ module Flipper
       end
 
       def enable(feature, gate, thing)
-        body = request_body_for_gate(gate, thing.value.to_s)
+        body = request_body_for_gate(gate, thing.value)
         query_string = gate.key == :groups ? "?allow_unregistered_groups=true" : ""
         response = @client.post("/features/#{feature.key}/#{gate.key}#{query_string}", body)
         raise Error, response unless response.is_a?(Net::HTTPOK)
@@ -103,7 +103,7 @@ module Flipper
       end
 
       def disable(feature, gate, thing)
-        body = request_body_for_gate(gate, thing.value.to_s)
+        body = request_body_for_gate(gate, thing.value)
         query_string = gate.key == :groups ? "?allow_unregistered_groups=true" : ""
         response = case gate.key
         when :percentage_of_actors, :percentage_of_time
@@ -128,11 +128,13 @@ module Flipper
         when :boolean
           {}
         when :groups
-          { name: value }
+          { name: value.to_s }
         when :actors
-          { flipper_id: value }
+          { flipper_id: value.to_s }
         when :percentage_of_actors, :percentage_of_time
-          { percentage: value }
+          { percentage: value.to_s }
+        when :rules
+          value
         else
           raise "#{gate.key} is not a valid flipper gate key"
         end
@@ -156,12 +158,14 @@ module Flipper
         case gate.data_type
         when :boolean, :integer
           value ? value.to_s : value
-        when :set
+        when :set, :json
           value ? value.to_set : Set.new
         else
-          unsupported_data_type(gate.data_type)
+          unsupported_data_type gate.data_type
         end
       end
+
+      private
 
       def unsupported_data_type(data_type)
         raise "#{data_type} is not supported by this adapter"

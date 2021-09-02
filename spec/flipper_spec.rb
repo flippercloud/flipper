@@ -65,7 +65,18 @@ RSpec.describe Flipper do
 
   describe "delegation to instance" do
     let(:group) { Flipper::Types::Group.new(:admins) }
-    let(:actor) { Flipper::Actor.new("1") }
+    let(:actor) {
+      Flipper::Actor.new("1", {
+        "plan" => "basic",
+      })
+    }
+    let(:rule) {
+      Flipper::Rule.new(
+        {"type" => "property", "value" => "plan"},
+        {"type" => "operator", "value" => "eq"},
+        {"type" => "string", "value" => "basic"}
+      )
+    }
 
     before do
       described_class.configure do |config|
@@ -95,6 +106,16 @@ RSpec.describe Flipper do
 
     it 'delegates boolean to instance' do
       expect(described_class.boolean).to eq(described_class.instance.boolean)
+    end
+
+    it 'delegates enable_rule to instance' do
+      described_class.enable_rule(:search, rule)
+      expect(described_class.instance.enabled?(:search, actor)).to be(true)
+    end
+
+    it 'delegates disable_rule to instance' do
+      described_class.disable_rule(:search, rule)
+      expect(described_class.instance.enabled?(:search, actor)).to be(false)
     end
 
     it 'delegates enable_actor to instance' do

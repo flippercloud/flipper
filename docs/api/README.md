@@ -882,3 +882,11 @@ The `flipper_id` parameter is invalid or missing.  `flipper_id` cannot be empty.
 ####  5: Name Invalid
 
 The `name` parameter is missing.  Make sure your request's body contains a `name` parameter.
+
+####  6: Type Invalid
+
+The `type` parameter is missing.  Make sure your request's body contains a `type` parameter.
+
+####  7: Value Invalid
+
+The `value` parameter is missing.  Make sure your request's body contains a `value` parameter.

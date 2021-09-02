@@ -64,7 +64,7 @@ RSpec.describe Flipper::Feature do
       instance.gates.each do |gate|
         expect(gate).to be_a(Flipper::Gate)
       end
-      expect(instance.gates.size).to be(5)
+      expect(instance.gates.size).to be(6)
     end
   end
 
@@ -802,12 +802,14 @@ RSpec.describe Flipper::Feature do
               :actor,
               :boolean,
               :group,
+              :rule,
             ])
 
       expect(subject.disabled_gate_names.to_set).to eq(Set[
               :actor,
               :boolean,
               :group,
+              :rule,
             ])
     end
   end

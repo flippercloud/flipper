@@ -44,6 +44,16 @@ module Flipper
       feature(name).enable(*args)
     end
 
+    # Public: Enable a feature for a rule.
+    #
+    # name - The String or Symbol name of the feature.
+    # rule - a Flipper::Rule instance.
+    #
+    # Returns result of Feature#enable.
+    def enable_rule(name, rule)
+      feature(name).enable_rule(rule)
+    end
+
     # Public: Enable a feature for an actor.
     #
     # name - The String or Symbol name of the feature.
@@ -96,6 +106,16 @@ module Flipper
     # Returns the result of the feature instance disable call.
     def disable(name, *args)
       feature(name).disable(*args)
+    end
+
+    # Public: Disable a feature for a rule.
+    #
+    # name - The String or Symbol name of the feature.
+    # rule - a Flipper::Rule instance.
+    #
+    # Returns result of Feature#disable.
+    def disable_rule(name, rule)
+      feature(name).disable_rule(rule)
     end
 
     # Public: Disable a feature for an actor.
@@ -241,6 +261,15 @@ module Flipper
     # Raises ArgumentError if thing does not respond to `flipper_id`.
     def actor(thing)
       Types::Actor.new(thing)
+    end
+
+    # Public: Wraps an object as a flipper rule.
+    #
+    # hash - The Hash that you would like to turn into a rule.
+    #
+    # Returns an instance of Flipper::Rule.
+    def rule(hash)
+      Rule.from_hash(hash)
     end
 
     # Public: Shortcut for getting a percentage of time instance.

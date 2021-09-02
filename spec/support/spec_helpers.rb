@@ -42,6 +42,14 @@ module SpecHelpers
     }
   end
 
+  def api_positive_percentage_error_response
+    {
+      'code' => 3,
+      'message' => 'Percentage must be a positive number less than or equal to 100.',
+      'more_info' => api_error_code_reference_url,
+    }
+  end
+
   def api_flipper_id_is_missing_response
     {
       'code' => 4,
@@ -50,10 +58,18 @@ module SpecHelpers
     }
   end
 
-  def api_positive_percentage_error_response
+  def api_rule_type_invalid_response
     {
-      'code' => 3,
-      'message' => 'Percentage must be a positive number less than or equal to 100.',
+      'code' => 6,
+      'message' => 'Required parameter rule type is missing.',
+      'more_info' => api_error_code_reference_url,
+    }
+  end
+
+  def api_rule_value_invalid_response
+    {
+      'code' => 7,
+      'message' => 'Required parameter rule value is missing.',
       'more_info' => api_error_code_reference_url,
     }
   end
