@@ -43,7 +43,7 @@ RSpec.describe Flipper::Adapters::ReadOnly do
   end
 
   it 'can get feature' do
-    rule = Flipper::Rule.new(
+    rule = Flipper::Rules::Condition.new(
         {"type" => "property", "value" => "plan"},
         {"type" => "operator", "value" => "eq"},
         {"type" => "string", "value" => "basic"}
@@ -61,7 +61,7 @@ RSpec.describe Flipper::Adapters::ReadOnly do
                                        actors: Set['22'],
                                        rules: Set[
                                          {
-                                           "type" => "Rule",
+                                           "type" => "Condition",
                                            "value" => {
                                              "left" => {"type" => "property", "value" => "plan"},
                                              "operator" => {"type" => "operator", "value" => "eq"},

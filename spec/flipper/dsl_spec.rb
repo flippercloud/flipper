@@ -142,13 +142,13 @@ RSpec.describe Flipper::DSL do
   describe '#rule' do
     context 'for Hash' do
       it 'returns rule instance' do
-        rule = Flipper::Rule.new(
+        rule = Flipper::Rules::Condition.new(
           {"type" => "property", "value" => "plan"},
           {"type" => "operator", "value" => "eq"},
           {"type" => "string", "value" => "basic"}
         )
         result = subject.rule(rule.value)
-        expect(result).to be_instance_of(Flipper::Rule)
+        expect(result).to be_instance_of(Flipper::Rules::Condition)
         expect(result.value).to eq(rule.value)
       end
     end

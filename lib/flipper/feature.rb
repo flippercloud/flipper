@@ -121,7 +121,7 @@ module Flipper
 
     # Public: Enables a rule for a feature.
     #
-    # rule - a Flipper::Rule instance.
+    # rule - a flipper rule instance.
     #
     # Returns result of enable.
     def enable_rule(rule)
@@ -170,7 +170,7 @@ module Flipper
 
     # Public: Disables a rule for a feature.
     #
-    # rule - a Flipper::Rule instance.
+    # rule - a flipper rule instance.
     #
     # Returns result of disable.
     def disable_rule(rule)

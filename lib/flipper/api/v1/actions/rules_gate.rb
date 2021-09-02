@@ -13,7 +13,7 @@ module Flipper
           def post
             ensure_valid_params
             feature = flipper[feature_name]
-            feature.enable Flipper::Rule.from_hash(rule_hash)
+            feature.enable Flipper::Rules.build(rule_hash)
 
             decorated_feature = Decorators::Feature.new(feature)
             json_response(decorated_feature.as_json, 200)
@@ -22,7 +22,7 @@ module Flipper
           def delete
             ensure_valid_params
             feature = flipper[feature_name]
-            feature.disable Flipper::Rule.from_hash(rule_hash)
+            feature.disable Flipper::Rules.build(rule_hash)
 
             decorated_feature = Decorators::Feature.new(feature)
             json_response(decorated_feature.as_json, 200)

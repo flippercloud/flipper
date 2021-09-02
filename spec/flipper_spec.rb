@@ -71,7 +71,7 @@ RSpec.describe Flipper do
       })
     }
     let(:rule) {
-      Flipper::Rule.new(
+      Flipper::Rules::Condition.new(
         {"type" => "property", "value" => "plan"},
         {"type" => "operator", "value" => "eq"},
         {"type" => "string", "value" => "basic"}

@@ -47,7 +47,7 @@ module Flipper
     # Public: Enable a feature for a rule.
     #
     # name - The String or Symbol name of the feature.
-    # rule - a Flipper::Rule instance.
+    # rule - a flipper rule instance.
     #
     # Returns result of Feature#enable.
     def enable_rule(name, rule)
@@ -111,7 +111,7 @@ module Flipper
     # Public: Disable a feature for a rule.
     #
     # name - The String or Symbol name of the feature.
-    # rule - a Flipper::Rule instance.
+    # rule - a flipper rule instance.
     #
     # Returns result of Feature#disable.
     def disable_rule(name, rule)
@@ -267,9 +267,9 @@ module Flipper
     #
     # hash - The Hash that you would like to turn into a rule.
     #
-    # Returns an instance of Flipper::Rule.
+    # Returns an instance of flipper rule
     def rule(hash)
-      Rule.from_hash(hash)
+      Rules.build(hash)
     end
 
     # Public: Shortcut for getting a percentage of time instance.

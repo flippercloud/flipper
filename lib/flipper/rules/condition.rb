@@ -15,8 +15,8 @@ module Flipper
           scaling_factor = 1_000
           id = "#{feature_name}#{left}"
           left && right && (Zlib.crc32(id) % (100 * scaling_factor) < right * scaling_factor)
-      end
-      }
+        end
+      }.freeze
 
       def self.build(hash)
         new(hash.fetch("left"), hash.fetch("operator"), hash.fetch("right"))
