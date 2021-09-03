@@ -3,6 +3,41 @@ require 'helper'
 RSpec.describe Flipper::Rules::Condition do
   let(:feature_name) { "search" }
 
+  describe "#eql?" do
+    let(:rule) {
+      Flipper::Rules::Condition.new(
+        {"type" => "property", "value" => "plan"},
+        {"type" => "operator", "value" => "eq"},
+        {"type" => "string", "value" => "basic"}
+      )
+    }
+
+    it "returns true if equal" do
+      other_rule = Flipper::Rules::Condition.new(
+        {"type" => "property", "value" => "plan"},
+        {"type" => "operator", "value" => "eq"},
+        {"type" => "string", "value" => "basic"}
+      )
+      expect(rule).to eql(other_rule)
+      expect(rule == other_rule).to be(true)
+    end
+
+    it "returns false if not equal" do
+      other_rule = Flipper::Rules::Condition.new(
+        {"type" => "property", "value" => "plan"},
+        {"type" => "operator", "value" => "eq"},
+        {"type" => "string", "value" => "premium"}
+      )
+      expect(rule).not_to eql(other_rule)
+      expect(rule == other_rule).to be(false)
+    end
+
+    it "returns false if not rule" do
+      expect(rule).not_to eql(Object.new)
+      expect(rule == Object.new).to be(false)
+    end
+  end
+
   describe "#matches?" do
     context "eq" do
       let(:rule) {

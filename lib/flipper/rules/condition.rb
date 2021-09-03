@@ -24,6 +24,8 @@ module Flipper
         new(hash.fetch("left"), hash.fetch("operator"), hash.fetch("right"))
       end
 
+      attr_reader :left, :operator, :right
+
       def initialize(left, operator, right)
         @left = left
         @operator = operator
@@ -40,6 +42,14 @@ module Flipper
           }
         }
       end
+
+      def eql?(other)
+        self.class.eql?(other.class) &&
+          @left == other.left &&
+          @operator == other.operator &&
+          @right == other.right
+      end
+      alias_method :==, :eql?
 
       def matches?(feature_name, actor)
         attributes = actor.flipper_properties
