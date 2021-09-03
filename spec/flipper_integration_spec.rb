@@ -550,7 +550,6 @@ RSpec.describe Flipper do
     end
   end
 
-
   context "for rule" do
     it "works" do
       rule = Flipper::Rules::Condition.new(
