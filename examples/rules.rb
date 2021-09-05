@@ -156,22 +156,37 @@ Flipper.disable_rule :something, percentage_of_actors
 
 puts "\n\n% of Actors Per Type Rule"
 ###########################################################
-percentage_of_actors_per_type = Flipper::Rules::All.new(
-  Flipper::Rules::Condition.new(
-    {"type" => "property", "value" => "type"},
-    {"type" => "operator", "value" => "eq"},
-    {"type" => "string", "value" => "User"}
+percentage_of_actors_per_type = Flipper::Rules::Any.new(
+  Flipper::Rules::All.new(
+    Flipper::Rules::Condition.new(
+      {"type" => "property", "value" => "type"},
+      {"type" => "operator", "value" => "eq"},
+      {"type" => "string", "value" => "User"}
+    ),
+    Flipper::Rules::Condition.new(
+      {"type" => "property", "value" => "flipper_id"},
+      {"type" => "operator", "value" => "percentage"},
+      {"type" => "integer", "value" => 40}
+    )
   ),
-  Flipper::Rules::Condition.new(
-    {"type" => "property", "value" => "flipper_id"},
-    {"type" => "operator", "value" => "percentage"},
-    {"type" => "integer", "value" => 40}
+  Flipper::Rules::All.new(
+    Flipper::Rules::Condition.new(
+      {"type" => "property", "value" => "type"},
+      {"type" => "operator", "value" => "eq"},
+      {"type" => "string", "value" => "Org"}
+    ),
+    Flipper::Rules::Condition.new(
+      {"type" => "property", "value" => "flipper_id"},
+      {"type" => "operator", "value" => "percentage"},
+      {"type" => "integer", "value" => 10}
+    )
   )
 )
+
 ###########################################################
 Flipper.enable_rule :something, percentage_of_actors_per_type
 p should_be_false: Flipper.enabled?(:something, user) # not in the 40% enabled for Users
 p should_be_true: Flipper.enabled?(:something, other_user)
 p should_be_true: Flipper.enabled?(:something, admin_user)
-p should_be_false: Flipper.enabled?(:something, org) # not a User
+p should_be_false: Flipper.enabled?(:something, org) # not in the 10% of enabled for Orgs
 Flipper.disable_rule :something, percentage_of_actors_per_type
