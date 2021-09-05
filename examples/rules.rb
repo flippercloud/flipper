@@ -10,6 +10,7 @@ user = User.new(1, {
   "age" => 39,
 })
 
+puts 'Verbose'
 p Flipper.enabled?(:something, user)
 any_rule = Flipper::Rules::Any.new(
   Flipper::Rules::Condition.new(
@@ -29,3 +30,22 @@ p Flipper.enabled?(:something, user)
 
 Flipper.disable_rule :something, any_rule
 p Flipper.enabled?(:something, user)
+
+puts
+puts 'Fancy'
+p Flipper.enabled?(:something, user)
+any_rule = Flipper.any(
+  Flipper.property("plan").eq("basic"),
+  Flipper.property("age").gte(21)
+)
+
+Flipper.enable_rule :something, any_rule
+p Flipper.enabled?(:something, user)
+
+Flipper.disable_rule :something, any_rule
+p Flipper.enabled?(:something, user)
+
+Flipper.enable_rule :something, Flipper.any(
+  Flipper.property("plan").eq("basic"),
+  Flipper.property("age").gte(21)
+)

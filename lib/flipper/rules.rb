@@ -1,6 +1,7 @@
 require 'flipper/rules/condition'
 require 'flipper/rules/any'
 require 'flipper/rules/all'
+require 'flipper/rules/property'
 
 module Flipper
   module Rules
