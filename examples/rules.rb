@@ -6,16 +6,25 @@ class User < Struct.new(:id, :flipper_properties)
 end
 
 user = User.new(1, {
+  "type" => "User",
+  "id" => 1,
+  "flipper_id" => "User;1",
   "plan" => "basic",
   "age" => 39,
   "roles" => ["team_user"]
 })
 
 admin_user = User.new(2, {
+  "type" => "User",
+  "id" => 2,
+  "flipper_id" => "User;2",
   "roles" => ["admin", "team_user"],
 })
 
 other_user = User.new(3, {
+  "type" => "User",
+  "id" => 3,
+  "flipper_id" => "User;3",
   "plan" => "plus",
   "age" => 18,
   "roles" => ["org_admin"]
@@ -38,6 +47,7 @@ admin_rule = Flipper::Rules::Condition.new(
 )
 
 puts "Single Rule"
+###########################################################
 p should_be_false: Flipper.enabled?(:something, user)
 puts "Enabling single rule"
 Flipper.enable_rule :something, plan_rule
@@ -50,8 +60,10 @@ p should_be_false: Flipper.enabled?(:something, user)
 
 
 puts "\n\nAny Rule"
-p should_be_false: Flipper.enabled?(:something, user)
+###########################################################
 any_rule = Flipper::Rules::Any.new(plan_rule, age_rule)
+###########################################################
+p should_be_false: Flipper.enabled?(:something, user)
 puts "Enabling any rule"
 Flipper.enable_rule :something, any_rule
 p should_be_true: Flipper.enabled?(:something, user)
@@ -63,8 +75,10 @@ p should_be_false: Flipper.enabled?(:something, user)
 
 
 puts "\n\nAll Rule"
-p should_be_false: Flipper.enabled?(:something, user)
+###########################################################
 all_rule = Flipper::Rules::All.new(plan_rule, age_rule)
+###########################################################
+p should_be_false: Flipper.enabled?(:something, user)
 puts "Enabling all rule"
 Flipper.enable_rule :something, all_rule
 p should_be_true: Flipper.enabled?(:something, user)
@@ -76,7 +90,9 @@ p should_be_false: Flipper.enabled?(:something, user)
 
 
 puts "\n\nNested Rule"
+###########################################################
 nested_rule = Flipper::Rules::Any.new(admin_rule, all_rule)
+###########################################################
 p should_be_false: Flipper.enabled?(:something, user)
 p should_be_false: Flipper.enabled?(:something, admin_user)
 p should_be_false: Flipper.enabled?(:something, other_user)
@@ -90,3 +106,30 @@ Flipper.disable_rule :something, nested_rule
 p should_be_false: Flipper.enabled?(:something, user)
 p should_be_false: Flipper.enabled?(:something, admin_user)
 p should_be_false: Flipper.enabled?(:something, other_user)
+
+puts "\n\nBoolean Rule"
+###########################################################
+boolean_rule = Flipper::Rules::Condition.new(
+  {"type" => "boolean", "value" => true},
+  {"type" => "operator", "value" => "eq"},
+  {"type" => "boolean", "value" => true},
+)
+###########################################################
+Flipper.enable_rule :something, boolean_rule
+p should_be_true: Flipper.enabled?(:something)
+p should_be_true: Flipper.enabled?(:something, user)
+Flipper.disable_rule :something, boolean_rule
+
+puts "\n\nSet of Actors Rule"
+###########################################################
+set_of_actors_rule = Flipper::Rules::Condition.new(
+  {"type" => "property", "value" => "flipper_id"},
+  {"type" => "operator", "value" => "in"},
+  {"type" => "array", "value" => ["User;1", "User;3"]},
+)
+###########################################################
+Flipper.enable_rule :something, set_of_actors_rule
+p should_be_true: Flipper.enabled?(:something, user)
+p should_be_true: Flipper.enabled?(:something, other_user)
+p should_be_false: Flipper.enabled?(:something, admin_user)
+Flipper.disable_rule :something, set_of_actors_rule
