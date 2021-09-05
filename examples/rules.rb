@@ -5,6 +5,15 @@ class User < Struct.new(:id, :flipper_properties)
   include Flipper::Identifier
 end
 
+class Org < Struct.new(:id, :flipper_properties)
+  include Flipper::Identifier
+end
+
+org = Org.new(1, {
+  "type" => "Org",
+  "id" => 1,
+})
+
 user = User.new(1, {
   "type" => "User",
   "id" => 1,
@@ -58,7 +67,6 @@ puts "Disabling single rule"
 Flipper.disable_rule :something, plan_rule
 p should_be_false: Flipper.enabled?(:something, user)
 
-
 puts "\n\nAny Rule"
 ###########################################################
 any_rule = Flipper::Rules::Any.new(plan_rule, age_rule)
@@ -73,7 +81,6 @@ puts "Disabling any rule"
 Flipper.disable_rule :something, any_rule
 p should_be_false: Flipper.enabled?(:something, user)
 
-
 puts "\n\nAll Rule"
 ###########################################################
 all_rule = Flipper::Rules::All.new(plan_rule, age_rule)
@@ -87,7 +94,6 @@ p should_be_false: Flipper.enabled?(:something, other_user)
 puts "Disabling all rule"
 Flipper.disable_rule :something, all_rule
 p should_be_false: Flipper.enabled?(:something, user)
-
 
 puts "\n\nNested Rule"
 ###########################################################
@@ -112,7 +118,7 @@ puts "\n\nBoolean Rule"
 boolean_rule = Flipper::Rules::Condition.new(
   {"type" => "boolean", "value" => true},
   {"type" => "operator", "value" => "eq"},
-  {"type" => "boolean", "value" => true},
+  {"type" => "boolean", "value" => true}
 )
 ###########################################################
 Flipper.enable_rule :something, boolean_rule
@@ -125,7 +131,7 @@ puts "\n\nSet of Actors Rule"
 set_of_actors_rule = Flipper::Rules::Condition.new(
   {"type" => "property", "value" => "flipper_id"},
   {"type" => "operator", "value" => "in"},
-  {"type" => "array", "value" => ["User;1", "User;3"]},
+  {"type" => "array", "value" => ["User;1", "User;3"]}
 )
 ###########################################################
 Flipper.enable_rule :something, set_of_actors_rule
@@ -133,3 +139,39 @@ p should_be_true: Flipper.enabled?(:something, user)
 p should_be_true: Flipper.enabled?(:something, other_user)
 p should_be_false: Flipper.enabled?(:something, admin_user)
 Flipper.disable_rule :something, set_of_actors_rule
+
+puts "\n\n% of Actors Rule"
+###########################################################
+percentage_of_actors = Flipper::Rules::Condition.new(
+  {"type" => "property", "value" => "flipper_id"},
+  {"type" => "operator", "value" => "percentage"},
+  {"type" => "integer", "value" => 30}
+)
+###########################################################
+Flipper.enable_rule :something, percentage_of_actors
+p should_be_false: Flipper.enabled?(:something, user)
+p should_be_false: Flipper.enabled?(:something, other_user)
+p should_be_true: Flipper.enabled?(:something, admin_user)
+Flipper.disable_rule :something, percentage_of_actors
+
+puts "\n\n% of Actors Per Type Rule"
+###########################################################
+percentage_of_actors_per_type = Flipper::Rules::All.new(
+  Flipper::Rules::Condition.new(
+    {"type" => "property", "value" => "type"},
+    {"type" => "operator", "value" => "eq"},
+    {"type" => "string", "value" => "User"}
+  ),
+  Flipper::Rules::Condition.new(
+    {"type" => "property", "value" => "flipper_id"},
+    {"type" => "operator", "value" => "percentage"},
+    {"type" => "integer", "value" => 40}
+  )
+)
+###########################################################
+Flipper.enable_rule :something, percentage_of_actors_per_type
+p should_be_false: Flipper.enabled?(:something, user) # not in the 40% enabled for Users
+p should_be_true: Flipper.enabled?(:something, other_user)
+p should_be_true: Flipper.enabled?(:something, admin_user)
+p should_be_false: Flipper.enabled?(:something, org) # not a User
+Flipper.disable_rule :something, percentage_of_actors_per_type
