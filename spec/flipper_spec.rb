@@ -372,4 +372,28 @@ RSpec.describe Flipper do
       expect(described_class.instance_variable_get('@groups_registry')).to eq(registry)
     end
   end
+
+  describe ".property" do
+    it "returns Flipper::Rules::Property instance" do
+      expect(Flipper.property("name")).to eq(Flipper::Rules::Property.new("name"))
+    end
+  end
+
+  describe ".any" do
+    let(:age_rule) { Flipper.property(:age).gte(21) }
+    let(:plan_rule) { Flipper.property(:plan).eq("basic") }
+
+    it "returns Flipper::Rules::Any instance" do
+      expect(Flipper.any(age_rule, plan_rule)).to eq(Flipper::Rules::Any.new(age_rule, plan_rule))
+    end
+  end
+
+  describe ".all" do
+    let(:age_rule) { Flipper.property(:age).gte(21) }
+    let(:plan_rule) { Flipper.property(:plan).eq("basic") }
+
+    it "returns Flipper::Rules::All instance" do
+      expect(Flipper.all(age_rule, plan_rule)).to eq(Flipper::Rules::All.new(age_rule, plan_rule))
+    end
+  end
 end
