@@ -22,6 +22,20 @@ RSpec.describe Flipper::Rules::Property do
     end
   end
 
+  describe "equality" do
+    it "returns true if equal" do
+      expect(described_class.new("name").eql?(described_class.new("name"))).to be(true)
+    end
+
+    it "returns false if name does not match" do
+      expect(described_class.new("name").eql?(described_class.new("age"))).to be(false)
+    end
+
+    it "returns false for different class" do
+      expect(described_class.new("name").eql?(Object.new)).to be(false)
+    end
+  end
+
   describe "#eq" do
     context "with string" do
       it "returns equal condition" do

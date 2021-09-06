@@ -14,6 +14,12 @@ module Flipper
         }
       end
 
+      def eql?(other)
+        self.class.eql?(other.class) &&
+          @name == other.name
+      end
+      alias_method :==, :eql?
+
       def eq(object)
         type, object = Rules.typed(object)
         Flipper::Rules::Condition.new(
