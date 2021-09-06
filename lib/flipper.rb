@@ -69,17 +69,16 @@ module Flipper
                  :memoize=, :memoizing?,
                  :sync, :sync_secret # For Flipper::Cloud. Will error for OSS Flipper.
 
-
-  def property(*args)
-    Flipper::Rules::Property.new(*args)
+  def property(name)
+    Flipper::Rules::Property.new(name)
   end
 
-  def any(*args)
-    Flipper::Rules::Any.new(*args)
+  def any(*rules)
+    Flipper::Rules::Any.new(*rules)
   end
 
-  def all(*args)
-    Flipper::Rules::All.new(*args)
+  def all(*rules)
+    Flipper::Rules::All.new(*rules)
   end
 
   # Public: Use this to register a group by name.
