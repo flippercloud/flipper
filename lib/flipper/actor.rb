@@ -6,7 +6,7 @@ module Flipper
 
     def initialize(flipper_id, flipper_properties = {})
       @flipper_id = flipper_id
-      @flipper_properties = flipper_properties.merge("flipper_id" => flipper_id)
+      @flipper_properties = flipper_properties
     end
 
     def eql?(other)

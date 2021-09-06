@@ -39,6 +39,45 @@ RSpec.describe Flipper::Rules::Condition do
   end
 
   describe "#matches?" do
+    context "with no actor" do
+      it "does not error for condition that returns true" do
+        rule = Flipper::Rules::Condition.new(
+          {"type" => "boolean", "value" => true},
+          {"type" => "operator", "value" => "eq"},
+          {"type" => "boolean", "value" => true},
+        )
+        expect(rule.matches?(feature_name, nil)).to be(true)
+      end
+
+      it "does not error for condition that returns false" do
+        rule = Flipper::Rules::Condition.new(
+          {"type" => "boolean", "value" => true},
+          {"type" => "operator", "value" => "eq"},
+          {"type" => "boolean", "value" => false},
+        )
+        expect(rule.matches?(feature_name, nil)).to be(false)
+      end
+    end
+
+    context "with non-Flipper::Actor object that quacks like a duck" do
+      it "works" do
+        user_class = Class.new(Struct.new(:id, :flipper_properties)) do
+          def flipper_id
+            "User;#{id}"
+          end
+        end
+        user = user_class.new(1, {})
+
+        rule = Flipper::Rules::Condition.new(
+          {"type" => "property", "value" => "flipper_id"},
+          {"type" => "operator", "value" => "eq"},
+          {"type" => "string", "value" => "User;1"}
+        )
+        expect(rule.matches?(feature_name, user)).to be(true)
+        expect(rule.matches?(feature_name, user_class.new(2, {}))).to be(false)
+      end
+    end
+
     context "eq" do
       let(:rule) {
         Flipper::Rules::Condition.new(

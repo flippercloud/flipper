@@ -51,10 +51,10 @@ module Flipper
       end
       alias_method :==, :eql?
 
-      def matches?(feature_name, actor)
-        attributes = actor.flipper_properties
-        left_value = evaluate(@left, attributes)
-        right_value = evaluate(@right, attributes)
+      def matches?(feature_name, actor = nil)
+        properties = actor ? actor.flipper_properties.merge("flipper_id" => actor.flipper_id) : {}.freeze
+        left_value = evaluate(@left, properties)
+        right_value = evaluate(@right, properties)
         operator_name = @operator.fetch("value")
         operation = OPERATIONS.fetch(operator_name) do
           raise "operator not implemented: #{operator_name}"
@@ -65,16 +65,18 @@ module Flipper
 
       private
 
-      def evaluate(hash, attributes)
+      def evaluate(hash, properties)
         type = hash.fetch("type")
 
         case type
         when "property"
-          attributes[hash.fetch("value")]
+          properties[hash.fetch("value")]
         when "random"
           rand hash.fetch("value")
-        when "array", "string", "integer"
+        when "array", "string", "integer", "boolean"
           hash.fetch("value")
+        when "null"
+          nil
         else
           raise "type not found: #{type.inspect}"
         end
