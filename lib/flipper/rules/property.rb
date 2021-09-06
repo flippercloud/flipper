@@ -1,8 +1,10 @@
 module Flipper
   module Rules
     class Property
+      attr_reader :name
+
       def initialize(name)
-        @name = name
+        @name = name.to_s
       end
 
       def value
@@ -13,18 +15,20 @@ module Flipper
       end
 
       def eq(object)
+        type, object = Rules.typed(object)
         Flipper::Rules::Condition.new(
           value,
           {"type" => "operator", "value" => "eq"},
-          {"type" => typeof(object), "value" => object}
+          {"type" => type, "value" => object}
         )
       end
 
       def neq(object)
+        type, object = Rules.typed(object)
         Flipper::Rules::Condition.new(
           value,
           {"type" => "operator", "value" => "neq"},
-          {"type" => typeof(object), "value" => object}
+          {"type" => type, "value" => object}
         )
       end
 
@@ -32,7 +36,7 @@ module Flipper
         Flipper::Rules::Condition.new(
           value,
           {"type" => "operator", "value" => "gt"},
-          {"type" => "integer", "value" => object}
+          {"type" => "integer", "value" => Rules.require_integer(object)}
         )
       end
 
@@ -40,7 +44,7 @@ module Flipper
         Flipper::Rules::Condition.new(
           value,
           {"type" => "operator", "value" => "gte"},
-          {"type" => "integer", "value" => object}
+          {"type" => "integer", "value" => Rules.require_integer(object)}
         )
       end
 
@@ -48,7 +52,7 @@ module Flipper
         Flipper::Rules::Condition.new(
           value,
           {"type" => "operator", "value" => "lt"},
-          {"type" => "integer", "value" => object}
+          {"type" => "integer", "value" => Rules.require_integer(object)}
         )
       end
 
@@ -56,7 +60,7 @@ module Flipper
         Flipper::Rules::Condition.new(
           value,
           {"type" => "operator", "value" => "lte"},
-          {"type" => "integer", "value" => object}
+          {"type" => "integer", "value" => Rules.require_integer(object)}
         )
       end
 
@@ -64,7 +68,7 @@ module Flipper
         Flipper::Rules::Condition.new(
           value,
           {"type" => "operator", "value" => "in"},
-          {"type" => "array", "value" => object}
+          {"type" => "array", "value" => Rules.require_array(object)}
         )
       end
 
@@ -72,7 +76,7 @@ module Flipper
         Flipper::Rules::Condition.new(
           value,
           {"type" => "operator", "value" => "nin"},
-          {"type" => "array", "value" => object}
+          {"type" => "array", "value" => Rules.require_array(object)}
         )
       end
 
@@ -80,22 +84,8 @@ module Flipper
         Flipper::Rules::Condition.new(
           value,
           {"type" => "operator", "value" => "percentage"},
-          {"type" => "integer", "value" => object}
+          {"type" => "integer", "value" => Rules.require_integer(object)}
         )
-      end
-
-      private
-
-      def typeof(object)
-        if object.is_a?(String)
-          "string"
-        elsif object.is_a?(Integer)
-          "integer"
-        elsif object.respond_to?(:to_a)
-          "array"
-        else
-          raise "unsupported type inference for #{object.inspect}"
-        end
       end
     end
   end
