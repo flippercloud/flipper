@@ -39,16 +39,8 @@ other_user = User.new(3, {
   "roles" => ["org_admin"]
 })
 
-age_rule = Flipper::Rules::Condition.new(
-  {"type" => "property", "value" => "age"},
-  {"type" => "operator", "value" => "gte"},
-  {"type" => "integer", "value" => 21}
-)
-plan_rule = Flipper::Rules::Condition.new(
-  {"type" => "property", "value" => "plan"},
-  {"type" => "operator", "value" => "eq"},
-  {"type" => "string", "value" => "basic"}
-)
+age_rule = Flipper.property(:age).gte(21)
+plan_rule = Flipper.property(:plan).eq("basic")
 admin_rule = Flipper::Rules::Condition.new(
   {"type" => "string", "value" => "admin"},
   {"type" => "operator", "value" => "in"},
@@ -69,7 +61,7 @@ p should_be_false: Flipper.enabled?(:something, user)
 
 puts "\n\nAny Rule"
 ###########################################################
-any_rule = Flipper::Rules::Any.new(plan_rule, age_rule)
+any_rule = Flipper.any(plan_rule, age_rule)
 ###########################################################
 p should_be_false: Flipper.enabled?(:something, user)
 puts "Enabling any rule"
@@ -83,7 +75,7 @@ p should_be_false: Flipper.enabled?(:something, user)
 
 puts "\n\nAll Rule"
 ###########################################################
-all_rule = Flipper::Rules::All.new(plan_rule, age_rule)
+all_rule = Flipper.all(plan_rule, age_rule)
 ###########################################################
 p should_be_false: Flipper.enabled?(:something, user)
 puts "Enabling all rule"
@@ -97,7 +89,7 @@ p should_be_false: Flipper.enabled?(:something, user)
 
 puts "\n\nNested Rule"
 ###########################################################
-nested_rule = Flipper::Rules::Any.new(admin_rule, all_rule)
+nested_rule = Flipper.any(admin_rule, all_rule)
 ###########################################################
 p should_be_false: Flipper.enabled?(:something, user)
 p should_be_false: Flipper.enabled?(:something, admin_user)
@@ -128,11 +120,7 @@ Flipper.disable_rule :something, boolean_rule
 
 puts "\n\nSet of Actors Rule"
 ###########################################################
-set_of_actors_rule = Flipper::Rules::Condition.new(
-  {"type" => "property", "value" => "flipper_id"},
-  {"type" => "operator", "value" => "in"},
-  {"type" => "array", "value" => ["User;1", "User;3"]}
-)
+set_of_actors_rule = Flipper.property(:flipper_id).in(["User;1", "User;3"])
 ###########################################################
 Flipper.enable_rule :something, set_of_actors_rule
 p should_be_true: Flipper.enabled?(:something, user)
@@ -142,11 +130,7 @@ Flipper.disable_rule :something, set_of_actors_rule
 
 puts "\n\n% of Actors Rule"
 ###########################################################
-percentage_of_actors = Flipper::Rules::Condition.new(
-  {"type" => "property", "value" => "flipper_id"},
-  {"type" => "operator", "value" => "percentage"},
-  {"type" => "integer", "value" => 30}
-)
+percentage_of_actors = Flipper.property(:flipper_id).percentage(30)
 ###########################################################
 Flipper.enable_rule :something, percentage_of_actors
 p should_be_false: Flipper.enabled?(:something, user)
@@ -156,30 +140,14 @@ Flipper.disable_rule :something, percentage_of_actors
 
 puts "\n\n% of Actors Per Type Rule"
 ###########################################################
-percentage_of_actors_per_type = Flipper::Rules::Any.new(
-  Flipper::Rules::All.new(
-    Flipper::Rules::Condition.new(
-      {"type" => "property", "value" => "type"},
-      {"type" => "operator", "value" => "eq"},
-      {"type" => "string", "value" => "User"}
-    ),
-    Flipper::Rules::Condition.new(
-      {"type" => "property", "value" => "flipper_id"},
-      {"type" => "operator", "value" => "percentage"},
-      {"type" => "integer", "value" => 40}
-    )
+percentage_of_actors_per_type = Flipper.any(
+  Flipper.all(
+    Flipper.property(:type).eq("User"),
+    Flipper.property(:flipper_id).percentage(40),
   ),
-  Flipper::Rules::All.new(
-    Flipper::Rules::Condition.new(
-      {"type" => "property", "value" => "type"},
-      {"type" => "operator", "value" => "eq"},
-      {"type" => "string", "value" => "Org"}
-    ),
-    Flipper::Rules::Condition.new(
-      {"type" => "property", "value" => "flipper_id"},
-      {"type" => "operator", "value" => "percentage"},
-      {"type" => "integer", "value" => 10}
-    )
+  Flipper.all(
+    Flipper.property(:type).eq("Org"),
+    Flipper.property(:flipper_id).percentage(10),
   )
 )
 ###########################################################
