@@ -16,7 +16,7 @@ RSpec.describe Flipper::Rules::Operator do
   describe "#to_h" do
     it "returns Hash with type and value" do
       expect(described_class.new("eq").to_h).to eq({
-        "type" => "operator",
+        "type" => "Operator",
         "value" => "eq",
       })
     end

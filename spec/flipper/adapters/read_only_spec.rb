@@ -44,9 +44,9 @@ RSpec.describe Flipper::Adapters::ReadOnly do
 
   it 'can get feature' do
     rule = Flipper::Rules::Condition.new(
-        {"type" => "property", "value" => "plan"},
-        {"type" => "operator", "value" => "eq"},
-        {"type" => "string", "value" => "basic"}
+        {"type" => "Property", "value" => "plan"},
+        {"type" => "Operator", "value" => "eq"},
+        {"type" => "String", "value" => "basic"}
     )
     actor22 = Flipper::Actor.new('22')
     adapter.enable(feature, boolean_gate, flipper.boolean)
@@ -63,9 +63,9 @@ RSpec.describe Flipper::Adapters::ReadOnly do
                                          {
                                            "type" => "Condition",
                                            "value" => {
-                                             "left" => {"type" => "property", "value" => "plan"},
-                                             "operator" => {"type" => "operator", "value" => "eq"},
-                                             "right" => {"type" => "string", "value" => "basic"},
+                                             "left" => {"type" => "Property", "value" => "plan"},
+                                             "operator" => {"type" => "Operator", "value" => "eq"},
+                                             "right" => {"type" => "String", "value" => "basic"},
                                             }
                                           }
                                       ],

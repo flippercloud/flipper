@@ -4,7 +4,7 @@ module Flipper
       attr_reader :type, :value
 
       def initialize(value)
-        @type = "operator".freeze
+        @type = "Operator".freeze
         @value = value.to_s
       end
 

@@ -654,9 +654,9 @@ RSpec.describe Flipper::Feature do
     context "with rule instance" do
       it "updates gate values to include rule" do
         rule = Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "plan"},
-          {"type" => "operator", "value" => "eq"},
-          {"type" => "string", "value" => "basic"}
+          {"type" => "Property", "value" => "plan"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "String", "value" => "basic"}
         )
         expect(subject.gate_values.rules).to be_empty
         subject.enable_rule(rule)
@@ -669,9 +669,9 @@ RSpec.describe Flipper::Feature do
     context "with Hash" do
       it "updates gate values to include rule" do
         rule = Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "plan"},
-          {"type" => "operator", "value" => "eq"},
-          {"type" => "string", "value" => "basic"}
+          {"type" => "Property", "value" => "plan"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "String", "value" => "basic"}
         )
         expect(subject.gate_values.rules).to be_empty
         subject.enable_rule(rule.value)

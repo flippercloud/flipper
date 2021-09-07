@@ -69,13 +69,13 @@ module Flipper
         type = hash.fetch("type")
 
         case type
-        when "property"
+        when "Property"
           properties[hash.fetch("value")]
-        when "random"
+        when "Random"
           rand hash.fetch("value")
-        when "array", "string", "integer", "boolean"
+        when "Array", "String", "Integer", "Boolean"
           hash.fetch("value")
-        when "null"
+        when "Null"
           nil
         else
           raise "type not found: #{type.inspect}"

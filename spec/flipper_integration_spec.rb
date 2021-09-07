@@ -553,9 +553,9 @@ RSpec.describe Flipper do
   context "for rule" do
     it "works" do
       rule = Flipper::Rules::Condition.new(
-        {"type" => "property", "value" => "plan"},
-        {"type" => "operator", "value" => "eq"},
-        {"type" => "string", "value" => "basic"}
+        {"type" => "Property", "value" => "plan"},
+        {"type" => "Operator", "value" => "eq"},
+        {"type" => "String", "value" => "basic"}
       )
       feature.enable rule
 
@@ -568,14 +568,14 @@ RSpec.describe Flipper do
     it "works" do
       rule = Flipper::Rules::Any.new(
         Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "plan"},
-          {"type" => "operator", "value" => "eq"},
-          {"type" => "string", "value" => "basic"}
+          {"type" => "Property", "value" => "plan"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "String", "value" => "basic"}
         ),
         Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "plan"},
-          {"type" => "operator", "value" => "eq"},
-          {"type" => "string", "value" => "plus"}
+          {"type" => "Property", "value" => "plan"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "String", "value" => "plus"}
         )
       )
       feature.enable rule
@@ -597,14 +597,14 @@ RSpec.describe Flipper do
       })
       rule = Flipper::Rules::All.new(
         Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "plan"},
-          {"type" => "operator", "value" => "eq"},
-          {"type" => "string", "value" => "basic"}
+          {"type" => "Property", "value" => "plan"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "String", "value" => "basic"}
         ),
         Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "age"},
-          {"type" => "operator", "value" => "eq"},
-          {"type" => "integer", "value" => 21}
+          {"type" => "Property", "value" => "age"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "Integer", "value" => 21}
         )
       )
       feature.enable rule
@@ -627,20 +627,20 @@ RSpec.describe Flipper do
       })
       rule = Flipper::Rules::Any.new(
         Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "admin"},
-          {"type" => "operator", "value" => "eq"},
-          {"type" => "string", "value" => true}
+          {"type" => "Property", "value" => "admin"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "String", "value" => true}
         ),
         Flipper::Rules::All.new(
           Flipper::Rules::Condition.new(
-            {"type" => "property", "value" => "plan"},
-            {"type" => "operator", "value" => "eq"},
-            {"type" => "string", "value" => "basic"}
+            {"type" => "Property", "value" => "plan"},
+            {"type" => "Operator", "value" => "eq"},
+            {"type" => "String", "value" => "basic"}
           ),
           Flipper::Rules::Condition.new(
-            {"type" => "property", "value" => "age"},
-            {"type" => "operator", "value" => "eq"},
-            {"type" => "integer", "value" => 21}
+            {"type" => "Property", "value" => "age"},
+            {"type" => "Operator", "value" => "eq"},
+            {"type" => "Integer", "value" => 21}
           )
         )
       )

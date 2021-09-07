@@ -4,16 +4,16 @@ RSpec.describe Flipper::Rules::All do
   let(:feature_name) { "search" }
   let(:plan_condition) {
     Flipper::Rules::Condition.new(
-      {"type" => "property", "value" => "plan"},
-      {"type" => "operator", "value" => "eq"},
-      {"type" => "string", "value" => "basic"}
+      {"type" => "Property", "value" => "plan"},
+      {"type" => "Operator", "value" => "eq"},
+      {"type" => "String", "value" => "basic"}
     )
   }
   let(:age_condition) {
     Flipper::Rules::Condition.new(
-      {"type" => "property", "value" => "age"},
-      {"type" => "operator", "value" => "gte"},
-      {"type" => "integer", "value" => 21}
+      {"type" => "Property", "value" => "age"},
+      {"type" => "Operator", "value" => "gte"},
+      {"type" => "Integer", "value" => 21}
     )
   }
   let(:any_rule) {
@@ -87,14 +87,14 @@ RSpec.describe Flipper::Rules::All do
     it "returns true if equal" do
       other_rule = Flipper::Rules::All.new(
         Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "plan"},
-          {"type" => "operator", "value" => "eq"},
-          {"type" => "string", "value" => "basic"}
+          {"type" => "Property", "value" => "plan"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "String", "value" => "basic"}
         ),
         Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "age"},
-          {"type" => "operator", "value" => "gte"},
-          {"type" => "integer", "value" => 21}
+          {"type" => "Property", "value" => "age"},
+          {"type" => "Operator", "value" => "gte"},
+          {"type" => "Integer", "value" => 21}
         )
       )
       expect(rule).to eql(other_rule)
@@ -104,14 +104,14 @@ RSpec.describe Flipper::Rules::All do
     it "returns false if not equal" do
       other_rule = Flipper::Rules::All.new(
         Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "plan"},
-          {"type" => "operator", "value" => "eq"},
-          {"type" => "string", "value" => "premium"}
+          {"type" => "Property", "value" => "plan"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "String", "value" => "premium"}
         ),
         Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "age"},
-          {"type" => "operator", "value" => "gte"},
-          {"type" => "integer", "value" => 21}
+          {"type" => "Property", "value" => "age"},
+          {"type" => "Operator", "value" => "gte"},
+          {"type" => "Integer", "value" => 21}
         )
       )
       expect(rule).not_to eql(other_rule)
@@ -128,14 +128,14 @@ RSpec.describe Flipper::Rules::All do
     let(:rule) {
       Flipper::Rules::All.new(
         Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "plan"},
-          {"type" => "operator", "value" => "eq"},
-          {"type" => "string", "value" => "basic"}
+          {"type" => "Property", "value" => "plan"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "String", "value" => "basic"}
         ),
         Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "age"},
-          {"type" => "operator", "value" => "gte"},
-          {"type" => "integer", "value" => 21}
+          {"type" => "Property", "value" => "age"},
+          {"type" => "Operator", "value" => "gte"},
+          {"type" => "Integer", "value" => 21}
         )
       )
     }

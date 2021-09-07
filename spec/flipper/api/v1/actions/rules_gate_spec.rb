@@ -10,9 +10,9 @@ RSpec.describe Flipper::Api::V1::Actions::RulesGate do
   }
   let(:rule) {
     Flipper::Rules::Condition.new(
-      {"type" => "property", "value" => "plan"},
-      {"type" => "operator", "value" => "eq"},
-      {"type" => "string", "value" => "basic"}
+      {"type" => "Property", "value" => "plan"},
+      {"type" => "Operator", "value" => "eq"},
+      {"type" => "String", "value" => "basic"}
     )
   }
 

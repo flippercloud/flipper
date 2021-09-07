@@ -16,7 +16,7 @@ RSpec.describe Flipper::Rules::Property do
   describe "#to_h" do
     it "returns Hash with type and value" do
       expect(described_class.new("plan").to_h).to eq({
-        "type" => "property",
+        "type" => "Property",
         "value" => "plan",
       })
     end
@@ -40,9 +40,9 @@ RSpec.describe Flipper::Rules::Property do
     context "with string" do
       it "returns equal condition" do
         expect(described_class.new(:plan).eq("basic")).to eq(Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "plan"},
-          {"type" => "operator", "value" => "eq"},
-          {"type" => "string", "value" => "basic"}
+          {"type" => "Property", "value" => "plan"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "String", "value" => "basic"}
         ))
       end
     end
@@ -50,9 +50,9 @@ RSpec.describe Flipper::Rules::Property do
     context "with boolean" do
       it "returns equal condition" do
         expect(described_class.new(:admin).eq(true)).to eq(Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "admin"},
-          {"type" => "operator", "value" => "eq"},
-          {"type" => "boolean", "value" => true}
+          {"type" => "Property", "value" => "admin"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "Boolean", "value" => true}
         ))
       end
     end
@@ -60,9 +60,9 @@ RSpec.describe Flipper::Rules::Property do
     context "with integer" do
       it "returns equal condition" do
         expect(described_class.new(:age).eq(21)).to eq(Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "age"},
-          {"type" => "operator", "value" => "eq"},
-          {"type" => "integer", "value" => 21}
+          {"type" => "Property", "value" => "age"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "Integer", "value" => 21}
         ))
       end
     end
@@ -70,9 +70,9 @@ RSpec.describe Flipper::Rules::Property do
     context "with array" do
       it "returns equal condition" do
         expect(described_class.new(:roles).eq(["admin"])).to eq(Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "roles"},
-          {"type" => "operator", "value" => "eq"},
-          {"type" => "array", "value" => ["admin"]}
+          {"type" => "Property", "value" => "roles"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "Array", "value" => ["admin"]}
         ))
       end
     end
@@ -80,9 +80,9 @@ RSpec.describe Flipper::Rules::Property do
     context "with nil" do
       it "returns equal condition" do
         expect(described_class.new(:admin).eq(nil)).to eq(Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "admin"},
-          {"type" => "operator", "value" => "eq"},
-          {"type" => "null", "value" => nil}
+          {"type" => "Property", "value" => "admin"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "Null", "value" => nil}
         ))
       end
     end
@@ -92,9 +92,9 @@ RSpec.describe Flipper::Rules::Property do
     context "with string" do
       it "returns not equal condition" do
         expect(described_class.new(:plan).neq("basic")).to eq(Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "plan"},
-          {"type" => "operator", "value" => "neq"},
-          {"type" => "string", "value" => "basic"}
+          {"type" => "Property", "value" => "plan"},
+          {"type" => "Operator", "value" => "neq"},
+          {"type" => "String", "value" => "basic"}
         ))
       end
     end
@@ -102,9 +102,9 @@ RSpec.describe Flipper::Rules::Property do
     context "with boolean" do
       it "returns not equal condition" do
         expect(described_class.new(:admin).neq(true)).to eq(Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "admin"},
-          {"type" => "operator", "value" => "neq"},
-          {"type" => "boolean", "value" => true}
+          {"type" => "Property", "value" => "admin"},
+          {"type" => "Operator", "value" => "neq"},
+          {"type" => "Boolean", "value" => true}
         ))
       end
     end
@@ -112,9 +112,9 @@ RSpec.describe Flipper::Rules::Property do
     context "with integer" do
       it "returns not equal condition" do
         expect(described_class.new(:age).neq(21)).to eq(Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "age"},
-          {"type" => "operator", "value" => "neq"},
-          {"type" => "integer", "value" => 21}
+          {"type" => "Property", "value" => "age"},
+          {"type" => "Operator", "value" => "neq"},
+          {"type" => "Integer", "value" => 21}
         ))
       end
     end
@@ -122,9 +122,9 @@ RSpec.describe Flipper::Rules::Property do
     context "with array" do
       it "returns not equal condition" do
         expect(described_class.new(:roles).neq(["admin"])).to eq(Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "roles"},
-          {"type" => "operator", "value" => "neq"},
-          {"type" => "array", "value" => ["admin"]}
+          {"type" => "Property", "value" => "roles"},
+          {"type" => "Operator", "value" => "neq"},
+          {"type" => "Array", "value" => ["admin"]}
         ))
       end
     end
@@ -132,9 +132,9 @@ RSpec.describe Flipper::Rules::Property do
     context "with nil" do
       it "returns not equal condition" do
         expect(described_class.new(:admin).neq(nil)).to eq(Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "admin"},
-          {"type" => "operator", "value" => "neq"},
-          {"type" => "null", "value" => nil}
+          {"type" => "Property", "value" => "admin"},
+          {"type" => "Operator", "value" => "neq"},
+          {"type" => "Null", "value" => nil}
         ))
       end
     end
@@ -144,9 +144,9 @@ RSpec.describe Flipper::Rules::Property do
     context "with integer" do
       it "returns condition" do
         expect(described_class.new(:age).gt(21)).to eq(Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "age"},
-          {"type" => "operator", "value" => "gt"},
-          {"type" => "integer", "value" => 21}
+          {"type" => "Property", "value" => "age"},
+          {"type" => "Operator", "value" => "gt"},
+          {"type" => "Integer", "value" => 21}
         ))
       end
     end
@@ -180,9 +180,9 @@ RSpec.describe Flipper::Rules::Property do
     context "with integer" do
       it "returns condition" do
         expect(described_class.new(:age).gte(21)).to eq(Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "age"},
-          {"type" => "operator", "value" => "gte"},
-          {"type" => "integer", "value" => 21}
+          {"type" => "Property", "value" => "age"},
+          {"type" => "Operator", "value" => "gte"},
+          {"type" => "Integer", "value" => 21}
         ))
       end
     end
@@ -216,9 +216,9 @@ RSpec.describe Flipper::Rules::Property do
     context "with integer" do
       it "returns condition" do
         expect(described_class.new(:age).lt(21)).to eq(Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "age"},
-          {"type" => "operator", "value" => "lt"},
-          {"type" => "integer", "value" => 21}
+          {"type" => "Property", "value" => "age"},
+          {"type" => "Operator", "value" => "lt"},
+          {"type" => "Integer", "value" => 21}
         ))
       end
     end
@@ -252,9 +252,9 @@ RSpec.describe Flipper::Rules::Property do
     context "with integer" do
       it "returns condition" do
         expect(described_class.new(:age).lte(21)).to eq(Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "age"},
-          {"type" => "operator", "value" => "lte"},
-          {"type" => "integer", "value" => 21}
+          {"type" => "Property", "value" => "age"},
+          {"type" => "Operator", "value" => "lte"},
+          {"type" => "Integer", "value" => 21}
         ))
       end
     end
@@ -288,9 +288,9 @@ RSpec.describe Flipper::Rules::Property do
     context "with array" do
       it "returns condition" do
         expect(described_class.new(:role).in(["admin"])).to eq(Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "role"},
-          {"type" => "operator", "value" => "in"},
-          {"type" => "array", "value" => ["admin"]}
+          {"type" => "Property", "value" => "role"},
+          {"type" => "Operator", "value" => "in"},
+          {"type" => "Array", "value" => ["admin"]}
         ))
       end
     end
@@ -324,9 +324,9 @@ RSpec.describe Flipper::Rules::Property do
     context "with array" do
       it "returns condition" do
         expect(described_class.new(:role).nin(["admin"])).to eq(Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "role"},
-          {"type" => "operator", "value" => "nin"},
-          {"type" => "array", "value" => ["admin"]}
+          {"type" => "Property", "value" => "role"},
+          {"type" => "Operator", "value" => "nin"},
+          {"type" => "Array", "value" => ["admin"]}
         ))
       end
     end
@@ -360,9 +360,9 @@ RSpec.describe Flipper::Rules::Property do
     context "with integer" do
       it "returns condition" do
         expect(described_class.new(:flipper_id).percentage(25)).to eq(Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "flipper_id"},
-          {"type" => "operator", "value" => "percentage"},
-          {"type" => "integer", "value" => 25}
+          {"type" => "Property", "value" => "flipper_id"},
+          {"type" => "Operator", "value" => "percentage"},
+          {"type" => "Integer", "value" => 25}
         ))
       end
     end

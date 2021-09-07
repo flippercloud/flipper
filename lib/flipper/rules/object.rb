@@ -5,12 +5,12 @@ module Flipper
   module Rules
     class Object
       SUPPORTED_VALUE_TYPES_MAP = {
-        String     => "string",
-        Integer    => "integer",
-        NilClass   => "null",
-        TrueClass  => "boolean",
-        FalseClass => "boolean",
-        Array      => "array",
+        String     => "String",
+        Integer    => "Integer",
+        NilClass   => "Null",
+        TrueClass  => "Boolean",
+        FalseClass => "Boolean",
+        Array      => "Array",
       }.freeze
 
       SUPPORTED_VALUE_TYPES = SUPPORTED_VALUE_TYPES_MAP.keys.freeze
@@ -133,7 +133,7 @@ module Flipper
       def self.integer_or_object(object)
         case object
         when Integer
-          {"type" => "integer", "value" => object}
+          {"type" => "Integer", "value" => object}
         when Flipper::Rules::Object
           object.to_h
         else
@@ -144,7 +144,7 @@ module Flipper
       def self.array_or_object(object)
         case object
         when Array
-          {"type" => "array", "value" => object}
+          {"type" => "Array", "value" => object}
         when Flipper::Rules::Object
           object.to_h
         else

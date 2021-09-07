@@ -6,17 +6,17 @@ RSpec.describe Flipper::Rules::Condition do
   describe "#eql?" do
     let(:rule) {
       Flipper::Rules::Condition.new(
-        {"type" => "property", "value" => "plan"},
-        {"type" => "operator", "value" => "eq"},
-        {"type" => "string", "value" => "basic"}
+        {"type" => "Property", "value" => "plan"},
+        {"type" => "Operator", "value" => "eq"},
+        {"type" => "String", "value" => "basic"}
       )
     }
 
     it "returns true if equal" do
       other_rule = Flipper::Rules::Condition.new(
-        {"type" => "property", "value" => "plan"},
-        {"type" => "operator", "value" => "eq"},
-        {"type" => "string", "value" => "basic"}
+        {"type" => "Property", "value" => "plan"},
+        {"type" => "Operator", "value" => "eq"},
+        {"type" => "String", "value" => "basic"}
       )
       expect(rule).to eql(other_rule)
       expect(rule == other_rule).to be(true)
@@ -24,9 +24,9 @@ RSpec.describe Flipper::Rules::Condition do
 
     it "returns false if not equal" do
       other_rule = Flipper::Rules::Condition.new(
-        {"type" => "property", "value" => "plan"},
-        {"type" => "operator", "value" => "eq"},
-        {"type" => "string", "value" => "premium"}
+        {"type" => "Property", "value" => "plan"},
+        {"type" => "Operator", "value" => "eq"},
+        {"type" => "String", "value" => "premium"}
       )
       expect(rule).not_to eql(other_rule)
       expect(rule == other_rule).to be(false)
@@ -42,18 +42,18 @@ RSpec.describe Flipper::Rules::Condition do
     context "with no actor" do
       it "does not error for condition that returns true" do
         rule = Flipper::Rules::Condition.new(
-          {"type" => "boolean", "value" => true},
-          {"type" => "operator", "value" => "eq"},
-          {"type" => "boolean", "value" => true},
+          {"type" => "Boolean", "value" => true},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "Boolean", "value" => true},
         )
         expect(rule.matches?(feature_name, nil)).to be(true)
       end
 
       it "does not error for condition that returns false" do
         rule = Flipper::Rules::Condition.new(
-          {"type" => "boolean", "value" => true},
-          {"type" => "operator", "value" => "eq"},
-          {"type" => "boolean", "value" => false},
+          {"type" => "Boolean", "value" => true},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "Boolean", "value" => false},
         )
         expect(rule.matches?(feature_name, nil)).to be(false)
       end
@@ -69,9 +69,9 @@ RSpec.describe Flipper::Rules::Condition do
         user = user_class.new(1, {})
 
         rule = Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "flipper_id"},
-          {"type" => "operator", "value" => "eq"},
-          {"type" => "string", "value" => "User;1"}
+          {"type" => "Property", "value" => "flipper_id"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "String", "value" => "User;1"}
         )
         expect(rule.matches?(feature_name, user)).to be(true)
         expect(rule.matches?(feature_name, user_class.new(2, {}))).to be(false)
@@ -81,9 +81,9 @@ RSpec.describe Flipper::Rules::Condition do
     context "eq" do
       let(:rule) {
         Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "plan"},
-          {"type" => "operator", "value" => "eq"},
-          {"type" => "string", "value" => "basic"}
+          {"type" => "Property", "value" => "plan"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "String", "value" => "basic"}
         )
       }
 
@@ -105,9 +105,9 @@ RSpec.describe Flipper::Rules::Condition do
     context "neq" do
       let(:rule) {
         Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "plan"},
-          {"type" => "operator", "value" => "neq"},
-          {"type" => "string", "value" => "basic"}
+          {"type" => "Property", "value" => "plan"},
+          {"type" => "Operator", "value" => "neq"},
+          {"type" => "String", "value" => "basic"}
         )
       }
 
@@ -129,9 +129,9 @@ RSpec.describe Flipper::Rules::Condition do
     context "gt" do
       let(:rule) {
         Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "age"},
-          {"type" => "operator", "value" => "gt"},
-          {"type" => "integer", "value" => 20}
+          {"type" => "Property", "value" => "age"},
+          {"type" => "Operator", "value" => "gt"},
+          {"type" => "Integer", "value" => 20}
         )
       }
 
@@ -153,9 +153,9 @@ RSpec.describe Flipper::Rules::Condition do
     context "gte" do
       let(:rule) {
         Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "age"},
-          {"type" => "operator", "value" => "gte"},
-          {"type" => "integer", "value" => 20}
+          {"type" => "Property", "value" => "age"},
+          {"type" => "Operator", "value" => "gte"},
+          {"type" => "Integer", "value" => 20}
         )
       }
 
@@ -177,9 +177,9 @@ RSpec.describe Flipper::Rules::Condition do
     context "lt" do
       let(:rule) {
         Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "age"},
-          {"type" => "operator", "value" => "lt"},
-          {"type" => "integer", "value" => 21}
+          {"type" => "Property", "value" => "age"},
+          {"type" => "Operator", "value" => "lt"},
+          {"type" => "Integer", "value" => 21}
         )
       }
 
@@ -201,9 +201,9 @@ RSpec.describe Flipper::Rules::Condition do
     context "lt with rand type" do
       let(:rule) {
         Flipper::Rules::Condition.new(
-          {"type" => "random", "value" => 100},
-          {"type" => "operator", "value" => "lt"},
-          {"type" => "integer", "value" => 25}
+          {"type" => "Random", "value" => 100},
+          {"type" => "Operator", "value" => "lt"},
+          {"type" => "Integer", "value" => 25}
         )
       }
 
@@ -222,9 +222,9 @@ RSpec.describe Flipper::Rules::Condition do
     context "lte" do
       let(:rule) {
         Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "age"},
-          {"type" => "operator", "value" => "lte"},
-          {"type" => "integer", "value" => 21}
+          {"type" => "Property", "value" => "age"},
+          {"type" => "Operator", "value" => "lte"},
+          {"type" => "Integer", "value" => 21}
         )
       }
 
@@ -246,9 +246,9 @@ RSpec.describe Flipper::Rules::Condition do
     context "in" do
       let(:rule) {
         Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "age"},
-          {"type" => "operator", "value" => "in"},
-          {"type" => "array", "value" => [20, 21, 22]}
+          {"type" => "Property", "value" => "age"},
+          {"type" => "Operator", "value" => "in"},
+          {"type" => "Array", "value" => [20, 21, 22]}
         )
       }
 
@@ -270,9 +270,9 @@ RSpec.describe Flipper::Rules::Condition do
     context "nin" do
       let(:rule) {
         Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "age"},
-          {"type" => "operator", "value" => "nin"},
-          {"type" => "array", "value" => [20, 21, 22]}
+          {"type" => "Property", "value" => "age"},
+          {"type" => "Operator", "value" => "nin"},
+          {"type" => "Array", "value" => [20, 21, 22]}
         )
       }
 
@@ -294,9 +294,9 @@ RSpec.describe Flipper::Rules::Condition do
     context "percentage" do
       let(:rule) {
         Flipper::Rules::Condition.new(
-          {"type" => "property", "value" => "flipper_id"},
-          {"type" => "operator", "value" => "percentage"},
-          {"type" => "integer", "value" => 25}
+          {"type" => "Property", "value" => "flipper_id"},
+          {"type" => "Operator", "value" => "percentage"},
+          {"type" => "Integer", "value" => 25}
         )
       }
 
