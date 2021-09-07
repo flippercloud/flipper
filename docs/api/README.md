@@ -93,6 +93,11 @@ Returns an array of feature objects:
           "value": []
         },
         {
+          "key": "rules",
+          "name": "rule",
+          "value": []
+        },
+        {
           "key": "percentage_of_actors",
           "name": "percentage_of_actors",
           "value": 0
@@ -121,6 +126,11 @@ Returns an array of feature objects:
         {
           "key": "actors",
           "name": "actor",
+          "value": []
+        },
+        {
+          "key": "rules",
+          "name": "rule",
           "value": []
         },
         {
@@ -197,6 +207,11 @@ Returns an individual feature object:
     {
       "key": "actors",
       "name": "actor",
+      "value": []
+    },
+    {
+      "key": "rules",
+      "name": "rule",
       "value": []
     },
     {
@@ -308,6 +323,11 @@ Successful enabling of the boolean gate will return a 200 HTTP status and the fe
       "value": []
     },
     {
+      "key": "rules",
+      "name": "rule",
+      "value": []
+    },
+    {
       "key": "percentage_of_actors",
       "name": "percentage_of_actors",
       "value": 0
@@ -360,6 +380,11 @@ Successful disabling of the boolean gate will return a 200 HTTP status and the f
     {
       "key": "actors",
       "name": "actor",
+      "value": []
+    },
+    {
+      "key": "rules",
+      "name": "rule",
       "value": []
     },
     {
@@ -563,6 +588,11 @@ Successful enabling of the group will return a 200 HTTP status and the feature o
       "value": []
     },
     {
+      "key": "rules",
+      "name": "rule",
+      "value": []
+    },
+    {
       "key": "percentage_of_actors",
       "name": "percentage_of_actors",
       "value": 0
@@ -616,6 +646,11 @@ Successful disabling of the group will return a 200 HTTP status and the feature 
     {
       "key": "actors",
       "name": "actor",
+      "value": []
+    },
+    {
+      "key": "rules",
+      "name": "rule",
       "value": []
     },
     {
@@ -675,6 +710,11 @@ Successful enabling of the actor will return a 200 HTTP status and the feature o
       "value": ["User;1"]
     },
     {
+      "key": "rules",
+      "name": "rule",
+      "value": []
+    },
+    {
       "key": "percentage_of_actors",
       "name": "percentage_of_actors",
       "value": 0
@@ -728,6 +768,11 @@ Successful disabling of the actor will return a 200 HTTP status and the feature 
     {
       "key": "actors",
       "name": "actor",
+      "value": []
+    },
+    {
+      "key": "rules",
+      "name": "rule",
       "value": []
     },
     {
@@ -787,6 +832,11 @@ Successful enabling of a percentage of actors will return a 200 HTTP status and 
       "value": []
     },
     {
+      "key": "rules",
+      "name": "rule",
+      "value": []
+    },
+    {
       "key": "percentage_of_actors",
       "name": "percentage_of_actors",
       "value": 20
@@ -838,6 +888,11 @@ Successful disabling of a percentage of actors will set the percentage to 0 and 
     {
       "key": "actors",
       "name": "actor",
+      "value": []
+    },
+    {
+      "key": "rules",
+      "name": "rule",
       "value": []
     },
     {
@@ -897,6 +952,11 @@ Successful enabling of a percentage of time will return a 200 HTTP status and th
       "value": []
     },
     {
+      "key": "rules",
+      "name": "rule",
+      "value": []
+    },
+    {
       "key": "percentage_of_actors",
       "name": "percentage_of_actors",
       "value": 0
@@ -948,6 +1008,11 @@ Successful disabling of a percentage of time will set the percentage to 0 and re
     {
       "key": "actors",
       "name": "actor",
+      "value": []
+    },
+    {
+      "key": "rules",
+      "name": "rule",
       "value": []
     },
     {
