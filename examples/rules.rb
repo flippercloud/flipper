@@ -17,7 +17,6 @@ org = Org.new(1, {
 user = User.new(1, {
   "type" => "User",
   "id" => 1,
-  "flipper_id" => "User;1",
   "plan" => "basic",
   "age" => 39,
   "roles" => ["team_user"]
@@ -26,14 +25,12 @@ user = User.new(1, {
 admin_user = User.new(2, {
   "type" => "User",
   "id" => 2,
-  "flipper_id" => "User;2",
   "roles" => ["admin", "team_user"],
 })
 
 other_user = User.new(3, {
   "type" => "User",
   "id" => 3,
-  "flipper_id" => "User;3",
   "plan" => "plus",
   "age" => 18,
   "roles" => ["org_admin"]
@@ -41,11 +38,7 @@ other_user = User.new(3, {
 
 age_rule = Flipper.property(:age).gte(21)
 plan_rule = Flipper.property(:plan).eq("basic")
-admin_rule = Flipper::Rules::Condition.new(
-  {"type" => "string", "value" => "admin"},
-  {"type" => "operator", "value" => "in"},
-  {"type" => "property", "value" => "roles"}
-)
+admin_rule = Flipper.object("admin").in(Flipper.property(:roles))
 
 puts "Single Rule"
 p should_be_false: Flipper.enabled?(:something, user)

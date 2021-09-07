@@ -40,7 +40,7 @@ module Flipper
         Flipper::Rules::Condition.new(
           to_h,
           Operator.new(:eq).to_h,
-          Object.new(object).to_h
+          self.class.primitive_or_property(object).to_h
         )
       end
 
@@ -48,7 +48,7 @@ module Flipper
         Flipper::Rules::Condition.new(
           to_h,
           Operator.new(:neq).to_h,
-          Rules::Object.new(object).to_h
+          self.class.primitive_or_property(object).to_h
         )
       end
 
@@ -56,7 +56,7 @@ module Flipper
         Flipper::Rules::Condition.new(
           to_h,
           Operator.new(:gt).to_h,
-          {"type" => "integer", "value" => require_integer(object)}
+          self.class.integer_or_property(object)
         )
       end
 
@@ -64,7 +64,7 @@ module Flipper
         Flipper::Rules::Condition.new(
           to_h,
           Operator.new(:gte).to_h,
-          {"type" => "integer", "value" => require_integer(object)}
+          self.class.integer_or_property(object)
         )
       end
 
@@ -72,7 +72,7 @@ module Flipper
         Flipper::Rules::Condition.new(
           to_h,
           Operator.new(:lt).to_h,
-          {"type" => "integer", "value" => require_integer(object)}
+          self.class.integer_or_property(object)
         )
       end
 
@@ -80,7 +80,7 @@ module Flipper
         Flipper::Rules::Condition.new(
           to_h,
           Operator.new(:lte).to_h,
-          {"type" => "integer", "value" => require_integer(object)}
+          self.class.integer_or_property(object)
         )
       end
 
@@ -88,7 +88,7 @@ module Flipper
         Flipper::Rules::Condition.new(
           to_h,
           Operator.new(:in).to_h,
-          {"type" => "array", "value" => require_array(object)}
+          self.class.array_or_property(object)
         )
       end
 
@@ -96,7 +96,7 @@ module Flipper
         Flipper::Rules::Condition.new(
           to_h,
           Operator.new(:nin).to_h,
-          {"type" => "array", "value" => require_array(object)}
+          self.class.array_or_property(object)
         )
       end
 
@@ -104,7 +104,7 @@ module Flipper
         Flipper::Rules::Condition.new(
           to_h,
           Operator.new(:percentage).to_h,
-          {"type" => "integer", "value" => require_integer(object)}
+          self.class.integer_or_property(object)
         )
       end
 
@@ -122,14 +122,34 @@ module Flipper
         SUPPORTED_VALUE_TYPES_MAP[type_class]
       end
 
-      def require_integer(object)
-        raise ArgumentError, "object must be integer" unless object.is_a?(Integer)
-        object
+      def self.primitive_or_property(object)
+        if object.is_a?(Flipper::Rules::Property)
+          object
+        else
+          Object.new(object)
+        end
       end
 
-      def require_array(object)
-        raise ArgumentError, "object must be array" unless object.is_a?(Array)
-        object
+      def self.integer_or_property(object)
+        case object
+        when Integer
+          {"type" => "integer", "value" => object}
+        when Flipper::Rules::Property
+          object.to_h
+        else
+          raise ArgumentError, "object must be integer or property" unless object.is_a?(Integer)
+        end
+      end
+
+      def self.array_or_property(object)
+        case object
+        when Array
+          {"type" => "array", "value" => object}
+        when Flipper::Rules::Property
+          object.to_h
+        else
+          raise ArgumentError, "object must be array or property" unless object.is_a?(Array)
+        end
       end
     end
   end

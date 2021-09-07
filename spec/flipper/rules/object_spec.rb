@@ -132,6 +132,16 @@ RSpec.describe Flipper::Rules::Object do
         ))
       end
     end
+
+    context "with property" do
+      it "returns equal condition" do
+        expect(described_class.new("admin").eq(Flipper.property(:name))).to eq(Flipper::Rules::Condition.new(
+          {"type" => "string", "value" => "admin"},
+          {"type" => "operator", "value" => "eq"},
+          {"type" => "property", "value" => "name"}
+        ))
+      end
+    end
   end
 
   describe "#neq" do
@@ -184,6 +194,16 @@ RSpec.describe Flipper::Rules::Object do
         ))
       end
     end
+
+    context "with property" do
+      it "returns not equal condition" do
+        expect(described_class.new("plan").neq(Flipper.property(:name))).to eq(Flipper::Rules::Condition.new(
+          {"type" => "string", "value" => "plan"},
+          {"type" => "operator", "value" => "neq"},
+          {"type" => "property", "value" => "name"}
+        ))
+      end
+    end
   end
 
   describe "#gt" do
@@ -193,6 +213,16 @@ RSpec.describe Flipper::Rules::Object do
           {"type" => "string", "value" => "age"},
           {"type" => "operator", "value" => "gt"},
           {"type" => "integer", "value" => 21}
+        ))
+      end
+    end
+
+    context "with property" do
+      it "returns condition" do
+        expect(described_class.new(21).gt(Flipper.property(:age))).to eq(Flipper::Rules::Condition.new(
+          {"type" => "integer", "value" => 21},
+          {"type" => "operator", "value" => "gt"},
+          {"type" => "property", "value" => "age"}
         ))
       end
     end
@@ -233,6 +263,16 @@ RSpec.describe Flipper::Rules::Object do
       end
     end
 
+    context "with property" do
+      it "returns condition" do
+        expect(described_class.new(21).gte(Flipper.property(:age))).to eq(Flipper::Rules::Condition.new(
+          {"type" => "integer", "value" => 21},
+          {"type" => "operator", "value" => "gte"},
+          {"type" => "property", "value" => "age"}
+        ))
+      end
+    end
+
     context "with string" do
       it "raises error" do
         expect { described_class.new("age").gte("231") }.to raise_error(ArgumentError)
@@ -265,6 +305,16 @@ RSpec.describe Flipper::Rules::Object do
           {"type" => "string", "value" => "age"},
           {"type" => "operator", "value" => "lt"},
           {"type" => "integer", "value" => 21}
+        ))
+      end
+    end
+
+    context "with property" do
+      it "returns condition" do
+        expect(described_class.new(21).lt(Flipper.property(:age))).to eq(Flipper::Rules::Condition.new(
+          {"type" => "integer", "value" => 21},
+          {"type" => "operator", "value" => "lt"},
+          {"type" => "property", "value" => "age"}
         ))
       end
     end
@@ -305,6 +355,16 @@ RSpec.describe Flipper::Rules::Object do
       end
     end
 
+    context "with property" do
+      it "returns condition" do
+        expect(described_class.new(21).lte(Flipper.property(:age))).to eq(Flipper::Rules::Condition.new(
+          {"type" => "integer", "value" => 21},
+          {"type" => "operator", "value" => "lte"},
+          {"type" => "property", "value" => "age"}
+        ))
+      end
+    end
+
     context "with string" do
       it "raises error" do
         expect { described_class.new("age").lte("231") }.to raise_error(ArgumentError)
@@ -337,6 +397,16 @@ RSpec.describe Flipper::Rules::Object do
           {"type" => "string", "value" => "role"},
           {"type" => "operator", "value" => "in"},
           {"type" => "array", "value" => ["admin"]}
+        ))
+      end
+    end
+
+    context "with property" do
+      it "returns condition" do
+        expect(described_class.new("admin").in(Flipper.property(:roles))).to eq(Flipper::Rules::Condition.new(
+          {"type" => "string", "value" => "admin"},
+          {"type" => "operator", "value" => "in"},
+          {"type" => "property", "value" => "roles"}
         ))
       end
     end
@@ -377,6 +447,16 @@ RSpec.describe Flipper::Rules::Object do
       end
     end
 
+    context "with property" do
+      it "returns condition" do
+        expect(described_class.new("admin").nin(Flipper.property(:roles))).to eq(Flipper::Rules::Condition.new(
+          {"type" => "string", "value" => "admin"},
+          {"type" => "operator", "value" => "nin"},
+          {"type" => "property", "value" => "roles"}
+        ))
+      end
+    end
+
     context "with string" do
       it "raises error" do
         expect { described_class.new("role").nin("231") }.to raise_error(ArgumentError)
@@ -409,6 +489,16 @@ RSpec.describe Flipper::Rules::Object do
           {"type" => "string", "value" => "flipper_id"},
           {"type" => "operator", "value" => "percentage"},
           {"type" => "integer", "value" => 25}
+        ))
+      end
+    end
+
+    context "with property" do
+      it "returns condition" do
+        expect(described_class.new("flipper_id").percentage(Flipper.property(:percentage))).to eq(Flipper::Rules::Condition.new(
+          {"type" => "string", "value" => "flipper_id"},
+          {"type" => "operator", "value" => "percentage"},
+          {"type" => "property", "value" => "percentage"}
         ))
       end
     end
