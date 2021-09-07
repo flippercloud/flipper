@@ -376,6 +376,150 @@ Successful disabling of the boolean gate will return a 200 HTTP status and the f
 }
 ```
 
+### Enable Rule
+
+**URL**
+
+`POST /features/{feature_name}/rules`
+
+**Parameters**
+
+* `feature_name` - The name of the feature
+
+* `type` - The type of rule being enabled
+
+* `value` - The JSON representation of the rule being enabled.
+
+**Request**
+
+```
+curl -X POST -H "Content-Type: application/json" -d '{"type":"Condition","value":{"left":{"type":"Property","value":"plan"},"operator":{"type":"Operator","value":"eq"},"right":{"type":"String","value":"basic"}}}' http://example.com/flipper/api/features/reports/rules
+```
+
+**Response**
+
+Successful enabling of the group will return a 200 HTTP status and the feature object as the response body.
+
+```json
+{
+  "key": "reports",
+  "state": "conditional",
+  "gates": [
+    {
+      "key": "boolean",
+      "name": "boolean",
+      "value": null
+    },
+    {
+      "key": "actors",
+      "name": "actor",
+      "value": []
+    },
+    {
+      "key": "rules",
+      "name": "rule",
+      "value": [
+        {
+          "type": "Condition",
+          "value": {
+            "left": {
+              "type": "Property",
+              "value": "plan"
+            },
+            "operator": {
+              "type": "Operator",
+              "value": "eq"
+            },
+            "right": {
+              "type": "String",
+              "value": "basic"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "key": "percentage_of_actors",
+      "name": "percentage_of_actors",
+      "value": null
+    },
+    {
+      "key": "percentage_of_time",
+      "name": "percentage_of_time",
+      "value": null
+    },
+    {
+      "key": "groups",
+      "name": "group",
+      "value": []
+    }
+  ]
+}
+```
+
+### Disable Rule
+
+**URL**
+
+`DELETE /features/{feature_name}/rules`
+
+**Parameters**
+
+* `feature_name` - The name of the feature
+
+* `type` - The type of rule being enabled
+
+* `value` - The JSON representation of the rule being enabled.
+
+**Request**
+
+```
+curl -X DELETE -H "Content-Type: application/json" -d '{"type":"Condition","value":{"left":{"type":"Property","value":"plan"},"operator":{"type":"Operator","value":"eq"},"right":{"type":"String","value":"basic"}}}' http://example.com/flipper/api/features/reports/rules
+```
+
+**Response**
+
+Successful disabling of the group will return a 200 HTTP status and the feature object as the response body.
+
+```json
+{
+  "key": "reports",
+  "state": "off",
+  "gates": [
+    {
+      "key": "boolean",
+      "name": "boolean",
+      "value": null
+    },
+    {
+      "key": "actors",
+      "name": "actor",
+      "value": []
+    },
+    {
+      "key": "rules",
+      "name": "rule",
+      "value": []
+    },
+    {
+      "key": "percentage_of_actors",
+      "name": "percentage_of_actors",
+      "value": null
+    },
+    {
+      "key": "percentage_of_time",
+      "name": "percentage_of_time",
+      "value": null
+    },
+    {
+      "key": "groups",
+      "name": "group",
+      "value": []
+    }
+  ]
+}
+```
+
 ### Enable Group
 
 **URL**
