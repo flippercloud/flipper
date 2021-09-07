@@ -2,12 +2,12 @@ module Flipper
   module Rules
     class Object
       SUPPORTED_VALUE_TYPES_MAP = {
-        String => "string",
-        Integer => "integer",
-        NilClass => "null",
-        TrueClass => "boolean",
+        String     => "string",
+        Integer    => "integer",
+        NilClass   => "null",
+        TrueClass  => "boolean",
         FalseClass => "boolean",
-        Array => "array",
+        Array      => "array",
       }.freeze
 
       SUPPORTED_VALUE_TYPES = SUPPORTED_VALUE_TYPES_MAP.keys.freeze
