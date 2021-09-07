@@ -73,6 +73,14 @@ module Flipper
     Flipper::Rules::Property.new(name)
   end
 
+  def object(object)
+    Flipper::Rules::Object.new(object)
+  end
+
+  def operator(name)
+    Flipper::Rules::Object.new(name)
+  end
+
   def any(*rules)
     Flipper::Rules::Any.new(*rules)
   end

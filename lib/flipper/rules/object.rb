@@ -1,3 +1,6 @@
+require "flipper/rules/condition"
+require "flipper/rules/operator"
+
 module Flipper
   module Rules
     class Object
@@ -36,15 +39,15 @@ module Flipper
       def eq(object)
         Flipper::Rules::Condition.new(
           to_h,
-          {"type" => "operator", "value" => "eq"},
-          Rules::Object.new(object).to_h
+          Operator.new(:eq).to_h,
+          Object.new(object).to_h
         )
       end
 
       def neq(object)
         Flipper::Rules::Condition.new(
           to_h,
-          {"type" => "operator", "value" => "neq"},
+          Operator.new(:neq).to_h,
           Rules::Object.new(object).to_h
         )
       end
@@ -52,7 +55,7 @@ module Flipper
       def gt(object)
         Flipper::Rules::Condition.new(
           to_h,
-          {"type" => "operator", "value" => "gt"},
+          Operator.new(:gt).to_h,
           {"type" => "integer", "value" => require_integer(object)}
         )
       end
@@ -60,7 +63,7 @@ module Flipper
       def gte(object)
         Flipper::Rules::Condition.new(
           to_h,
-          {"type" => "operator", "value" => "gte"},
+          Operator.new(:gte).to_h,
           {"type" => "integer", "value" => require_integer(object)}
         )
       end
@@ -68,7 +71,7 @@ module Flipper
       def lt(object)
         Flipper::Rules::Condition.new(
           to_h,
-          {"type" => "operator", "value" => "lt"},
+          Operator.new(:lt).to_h,
           {"type" => "integer", "value" => require_integer(object)}
         )
       end
@@ -76,7 +79,7 @@ module Flipper
       def lte(object)
         Flipper::Rules::Condition.new(
           to_h,
-          {"type" => "operator", "value" => "lte"},
+          Operator.new(:lte).to_h,
           {"type" => "integer", "value" => require_integer(object)}
         )
       end
@@ -84,7 +87,7 @@ module Flipper
       def in(object)
         Flipper::Rules::Condition.new(
           to_h,
-          {"type" => "operator", "value" => "in"},
+          Operator.new(:in).to_h,
           {"type" => "array", "value" => require_array(object)}
         )
       end
@@ -92,7 +95,7 @@ module Flipper
       def nin(object)
         Flipper::Rules::Condition.new(
           to_h,
-          {"type" => "operator", "value" => "nin"},
+          Operator.new(:nin).to_h,
           {"type" => "array", "value" => require_array(object)}
         )
       end
@@ -100,7 +103,7 @@ module Flipper
       def percentage(object)
         Flipper::Rules::Condition.new(
           to_h,
-          {"type" => "operator", "value" => "percentage"},
+          Operator.new(:percentage).to_h,
           {"type" => "integer", "value" => require_integer(object)}
         )
       end
