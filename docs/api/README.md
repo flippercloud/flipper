@@ -487,6 +487,7 @@ Successful disabling of the group will return a 200 HTTP status and the feature 
   ]
 }
 ```
+
 ### Enable Actor
 
 **URL**
@@ -542,6 +543,7 @@ Successful enabling of the actor will return a 200 HTTP status and the feature o
   ]
 }
 ```
+
 ### Disable Actor
 
 **URL**
@@ -653,6 +655,7 @@ Successful enabling of a percentage of actors will return a 200 HTTP status and 
   ]
 }
 ```
+
 ### Disable Percentage of Actors
 
 **URL**
@@ -706,6 +709,7 @@ Successful disabling of a percentage of actors will set the percentage to 0 and 
   ]
 }
 ```
+
 ### Enable Percentage of Time
 
 **URL**
@@ -761,6 +765,7 @@ Successful enabling of a percentage of time will return a 200 HTTP status and th
   ]
 }
 ```
+
 ### Disable Percentage of Time
 
 **URL**
