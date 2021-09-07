@@ -73,6 +73,10 @@ module Flipper
     Flipper::Rules::Property.new(name)
   end
 
+  def random(name)
+    Flipper::Rules::Random.new(name)
+  end
+
   def object(object)
     Flipper::Rules::Object.new(object)
   end

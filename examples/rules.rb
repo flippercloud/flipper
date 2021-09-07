@@ -116,11 +116,7 @@ refute Flipper.enabled?(:something, admin_user)
 refute Flipper.enabled?(:something, other_user)
 
 puts "\n\nBoolean Rule"
-boolean_rule = Flipper::Rules::Condition.new(
-  {"type" => "boolean", "value" => true},
-  {"type" => "operator", "value" => "eq"},
-  {"type" => "boolean", "value" => true}
-)
+boolean_rule = Flipper.object(true).eq(true)
 Flipper.enable_rule :something, boolean_rule
 assert Flipper.enabled?(:something)
 assert Flipper.enabled?(:something, user)
@@ -161,14 +157,12 @@ refute Flipper.enabled?(:something, org) # not in the 10% of enabled for Orgs
 Flipper.disable_rule :something, percentage_of_actors_per_type
 
 puts "\n\nPercentage of Time Rule"
-percentage_of_time_rule = Flipper::Rules::Condition.new(
-  {"type" => "random", "value" => 100},
-  {"type" => "operator", "value" => "lt"},
-  {"type" => "integer", "value" => 50}
-)
+percentage_of_time_rule = Flipper.random(100).lt(50)
 Flipper.enable_rule :something, percentage_of_time_rule
 results = (1..10000).map { |n| Flipper.enabled?(:something, user) }
 enabled, disabled = results.partition { |r| r }
-assert (4500..5500).include?(enabled.size)
-assert (4500..5500).include?(disabled.size)
+p enabled: enabled.size
+p disabled: disabled.size
+assert (4_700..5_200).include?(enabled.size)
+assert (4_700..5_200).include?(disabled.size)
 Flipper.disable_rule :something, percentage_of_time_rule

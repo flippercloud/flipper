@@ -1,9 +1,11 @@
 require 'flipper/rules/condition'
 require 'flipper/rules/any'
 require 'flipper/rules/all'
+
 require 'flipper/rules/operator'
 require 'flipper/rules/object'
 require 'flipper/rules/property'
+require 'flipper/rules/random'
 
 module Flipper
   module Rules

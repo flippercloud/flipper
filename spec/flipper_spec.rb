@@ -379,6 +379,18 @@ RSpec.describe Flipper do
     end
   end
 
+  describe ".random" do
+    it "returns Flipper::Rules::Random instance" do
+      expect(Flipper.random(100)).to eq(Flipper::Rules::Random.new(100))
+    end
+  end
+
+  describe ".object" do
+    it "returns Flipper::Rules::Object instance" do
+      expect(Flipper.object("test")).to eq(Flipper::Rules::Object.new("test"))
+    end
+  end
+
   describe ".any" do
     let(:age_rule) { Flipper.property(:age).gte(21) }
     let(:plan_rule) { Flipper.property(:plan).eq("basic") }
