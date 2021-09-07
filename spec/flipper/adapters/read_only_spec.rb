@@ -66,8 +66,8 @@ RSpec.describe Flipper::Adapters::ReadOnly do
                                              "left" => {"type" => "Property", "value" => "plan"},
                                              "operator" => {"type" => "Operator", "value" => "eq"},
                                              "right" => {"type" => "String", "value" => "basic"},
-                                            }
-                                          }
+                                           }
+                                         }
                                       ],
                                        percentage_of_actors: '25',
                                        percentage_of_time: '45')
