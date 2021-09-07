@@ -26,14 +26,14 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
                   'value' => 'true',
                 },
                 {
-                  'key' => 'actors',
-                  'name' => 'actor',
-                  'value' => ['10'],
-                },
-                {
                   'key' => 'rules',
                   'name' => 'rule',
                   'value' => [],
+                },
+                {
+                  'key' => 'actors',
+                  'name' => 'actor',
+                  'value' => ['10'],
                 },
                 {
                   'key' => 'percentage_of_actors',
@@ -126,13 +126,13 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
               'value' => nil,
             },
             {
-              'key' => 'actors',
-              'name' => 'actor',
+              'key' => 'rules',
+              'name' => 'rule',
               'value' => [],
             },
             {
-              'key' => 'rules',
-              'name' => 'rule',
+              'key' => 'actors',
+              'name' => 'actor',
               'value' => [],
             },
             {

@@ -23,13 +23,13 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
               'value' => 'true',
             },
             {
-              'key' => 'actors',
-              'name' => 'actor',
+              'key' => 'rules',
+              'name' => 'rule',
               'value' => [],
             },
             {
-              'key' => 'rules',
-              'name' => 'rule',
+              'key' => 'actors',
+              'name' => 'actor',
               'value' => [],
             },
             {
@@ -72,13 +72,13 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
               'value' => nil,
             },
             {
-              'key' => 'actors',
-              'name' => 'actor',
+              'key' => 'rules',
+              'name' => 'rule',
               'value' => [],
             },
             {
-              'key' => 'rules',
-              'name' => 'rule',
+              'key' => 'actors',
+              'name' => 'actor',
               'value' => [],
             },
             {
@@ -137,13 +137,13 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
               'value' => 'true',
             },
             {
-              'key' => 'actors',
-              'name' => 'actor',
+              'key' => 'rules',
+              'name' => 'rule',
               'value' => [],
             },
             {
-              'key' => 'rules',
-              'name' => 'rule',
+              'key' => 'actors',
+              'name' => 'actor',
               'value' => [],
             },
             {
@@ -186,13 +186,13 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
               'value' => 'true',
             },
             {
-              'key' => 'actors',
-              'name' => 'actor',
+              'key' => 'rules',
+              'name' => 'rule',
               'value' => [],
             },
             {
-              'key' => 'rules',
-              'name' => 'rule',
+              'key' => 'actors',
+              'name' => 'actor',
               'value' => [],
             },
             {
