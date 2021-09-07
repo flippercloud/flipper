@@ -13,9 +13,9 @@ RSpec.describe Flipper::Rules::Property do
     end
   end
 
-  describe "#value" do
+  describe "#to_h" do
     it "returns Hash with type and value" do
-      expect(described_class.new("plan").value).to eq({
+      expect(described_class.new("plan").to_h).to eq({
         "type" => "property",
         "value" => "plan",
       })
