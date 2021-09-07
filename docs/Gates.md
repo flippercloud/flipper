@@ -12,7 +12,41 @@ Flipper.disable :stats # turn off
 Flipper.enabled? :stats # check
 ```
 
-## 2. Individual Actor
+## 2. Rule
+
+Turn feature on for one or more rules. Rules have the same power and flexibility as groups. But the benefit is that they can be changed at runtime (because they are stored in adapter), whereas groups cannot (because they are defined in code).
+
+A rule is made up of a left value, operator and right value and can be combined with other rules to define pretty complex logic (and, or, eq, neq, gt, gte, lt, lte, in, nin, and percentage).
+
+**Note**: Eventually all other gates will be deprecated in favor of rules since rules can easily power all other gates.
+
+To make rules useful, you'll need to ensure that actors respond to `flipper_properties`.
+
+```ruby
+class User < Struct.new(:id, :flipper_properties)
+  include Flipper::Identifier
+end
+
+basic_user = User.new(1, {"plan" => "basic", "age" => 30})
+premium_user = User.new(2, {"plan" => "premium", "age" => 40})
+
+# enable stats feature for anything where property == "basic"
+Flipper.enable_rule :stats, Flipper.property(:plan).eq("basic")
+Flipper.enabled? :stats, basic_user # true
+Flipper.enabled? :stats, premium_user # false
+
+# enable stats for anyone on basic plan or age >= 40
+Flipper.enable_rule :stats, Flipper.any(
+  Flipper.property(:plan).eq("basic"),
+  Flipper.property(:age).gte(40),
+)
+Flipper.enabled? :stats, basic_user # true because plan == "basic"
+Flipper.enabled? :stats, premium_user # true because age >= 40
+```
+
+To learn more, check out the plethora of code samples in [examples/rules.rb](https://github.com/jnunemaker/flipper/blob/master/examples/rules.rb).
+
+## 3. Individual Actor
 
 Turn feature on for individual thing. Think enable feature for someone to test or for a buddy.
 
@@ -60,7 +94,7 @@ Organization.new("DEB3D850-39FB-444B-A1E9-404A990FDBE0").flipper_id
 
 Just make sure each type of object has a unique `flipper_id`.
 
-## 3. Percentage of Actors
+## 4. Percentage of Actors
 
 Turn this on for a percentage of actors (think user, member, account, group, whatever). Consistently on or off for this user as long as percentage increases. Think slow rollout of a new feature to a percentage of things.
 
@@ -85,7 +119,7 @@ feature.enabled? user
 feature.disable_percentage_of_actors # sets to 0
 ```
 
-## 4. Percentage of Time
+## 5. Percentage of Time
 
 Turn this on for a percentage of time. Think load testing new features behind the scenes and such.
 
@@ -108,7 +142,7 @@ feature.disable_percentage_of_time
 
 Timeness is not a good idea for enabling new features in the UI. Most of the time you want a feature on or off for a user, but there are definitely times when I have found percentage of time to be very useful.
 
-## 5. Group
+## 6. Group
 
 Turn on feature based on the return value of block. Super flexible way to turn on a feature for multiple things (users, people, accounts, etc.) as long as the thing returns true when passed to the block.
 
