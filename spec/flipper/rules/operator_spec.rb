@@ -29,6 +29,10 @@ RSpec.describe Flipper::Rules::Operator do
       instance = described_class.new(:eq)
       expect(instance.name).to eq("eq")
     end
+
+    it "raises error for unknown operator" do
+      expect { described_class.new("nope") }.to raise_error(ArgumentError, "Operator 'nope' could not be found")
+    end
   end
 
   describe "#to_h" do

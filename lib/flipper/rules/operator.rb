@@ -18,6 +18,10 @@ module Flipper
       def initialize(value)
         @type = "Operator".freeze
         @value = value.to_s
+
+        unless Condition::OPERATIONS.key?(@value)
+          raise ArgumentError, "Operator '#{@value}' could not be found"
+        end
       end
 
       def name
