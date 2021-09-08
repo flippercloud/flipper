@@ -1,15 +1,33 @@
 require 'helper'
 
 RSpec.describe Flipper::Rules::Operator do
+  describe ".wrap" do
+    context "with Hash" do
+      it "returns instance" do
+        instance = described_class.wrap({"type" => "Operator", "value" => "eq"})
+        expect(instance).to be_instance_of(described_class)
+        expect(instance.name).to eq("eq")
+      end
+    end
+
+    context "with instance" do
+      it "returns intance" do
+        instance = described_class.wrap(described_class.new("eq"))
+        expect(instance).to be_instance_of(described_class)
+        expect(instance.name).to eq("eq")
+      end
+    end
+  end
+
   describe "#initialize" do
     it "works with string name" do
-      property = described_class.new("eq")
-      expect(property.name).to eq("eq")
+      instance = described_class.new("eq")
+      expect(instance.name).to eq("eq")
     end
 
     it "works with symbol name" do
-      property = described_class.new(:eq)
-      expect(property.name).to eq("eq")
+      instance = described_class.new(:eq)
+      expect(instance.name).to eq("eq")
     end
   end
 

@@ -28,7 +28,7 @@ module Flipper
 
       def initialize(left, operator, right)
         @left = left
-        @operator = operator
+        @operator = Operator.wrap(operator)
         @right = right
       end
 
@@ -37,7 +37,7 @@ module Flipper
           "type" => "Condition",
           "value" => {
             "left" => @left,
-            "operator" => @operator,
+            "operator" => @operator.to_h,
             "right" => @right,
           }
         }
@@ -55,9 +55,8 @@ module Flipper
         properties = actor ? actor.flipper_properties.merge("flipper_id" => actor.flipper_id) : {}.freeze
         left_value = evaluate(@left, properties)
         right_value = evaluate(@right, properties)
-        operator_name = @operator.fetch("value")
-        operation = OPERATIONS.fetch(operator_name) do
-          raise "operator not implemented: #{operator_name}"
+        operation = OPERATIONS.fetch(@operator.name) do
+          raise "operator not implemented: #{@operator.name}"
         end
 
         !!operation.call(left: left_value, right: right_value, feature_name: feature_name)
