@@ -65,5 +65,11 @@ RSpec.describe Flipper::Railtie do
       require 'active_record'
       expect(ActiveRecord::Base.ancestors).to include(Flipper::Identifier)
     end
+
+    it "defines #flipper_properties on AR::Base" do
+      subject
+      require 'active_record'
+      expect(ActiveRecord::Base.ancestors).to include(Flipper::Model::ActiveRecord)
+    end
   end
 end
