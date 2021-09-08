@@ -1,9 +1,91 @@
 require 'helper'
 
 RSpec.describe Flipper::Rules::Object do
+  describe ".wrap" do
+    context "with Hash" do
+      it "returns instance" do
+        instance = described_class.wrap({"type" => "Integer", "value" => 2})
+        expect(instance).to be_instance_of(described_class)
+        expect(instance.type).to eq("Integer")
+        expect(instance.value).to eq(2)
+      end
+    end
+
+    context "with instance" do
+      it "returns instance" do
+        instance = described_class.wrap(described_class.new(2))
+        expect(instance).to be_instance_of(described_class)
+        expect(instance.type).to eq("Integer")
+        expect(instance.value).to eq(2)
+      end
+    end
+
+    context "with string" do
+      it "returns instance" do
+        instance = described_class.wrap("test")
+        expect(instance).to be_instance_of(described_class)
+        expect(instance.type).to eq("String")
+        expect(instance.value).to eq("test")
+      end
+    end
+
+    context "with integer" do
+      it "returns instance" do
+        instance = described_class.wrap(21)
+        expect(instance).to be_instance_of(described_class)
+        expect(instance.type).to eq("Integer")
+        expect(instance.value).to eq(21)
+      end
+    end
+
+    context "with nil" do
+      it "returns instance" do
+        instance = described_class.wrap(nil)
+        expect(instance).to be_instance_of(described_class)
+        expect(instance.type).to eq("Null")
+        expect(instance.value).to be(nil)
+      end
+    end
+
+    context "with true" do
+      it "returns instance" do
+        instance = described_class.wrap(true)
+        expect(instance).to be_instance_of(described_class)
+        expect(instance.type).to eq("Boolean")
+        expect(instance.value).to be(true)
+      end
+    end
+
+    context "with false" do
+      it "returns instance" do
+        instance = described_class.wrap(false)
+        expect(instance).to be_instance_of(described_class)
+        expect(instance.type).to eq("Boolean")
+        expect(instance.value).to be(false)
+      end
+    end
+
+    context "with array" do
+      it "returns instance" do
+        instance = described_class.wrap(["test"])
+        expect(instance).to be_instance_of(described_class)
+        expect(instance.type).to eq("Array")
+        expect(instance.value).to eq(["test"])
+      end
+    end
+
+    context "with unsupported type" do
+      it "raises ArgumentError" do
+        expect {
+          described_class.wrap(Set.new)
+        }.to raise_error(ArgumentError, /is not a supported primitive\. Object must be one of: String, Integer, NilClass, TrueClass, FalseClass, Array\./)
+      end
+    end
+  end
+
   describe "#initialize" do
     context "with string" do
-      it "returns array of type and value" do
+      it "returns instance" do
         instance = described_class.new("test")
         expect(instance.type).to eq("String")
         expect(instance.value).to eq("test")
@@ -11,7 +93,7 @@ RSpec.describe Flipper::Rules::Object do
     end
 
     context "with integer" do
-      it "returns array of type and value" do
+      it "returns instance" do
         instance = described_class.new(21)
         expect(instance.type).to eq("Integer")
         expect(instance.value).to eq(21)
@@ -19,7 +101,7 @@ RSpec.describe Flipper::Rules::Object do
     end
 
     context "with nil" do
-      it "returns array of type and value" do
+      it "returns instance" do
         instance = described_class.new(nil)
         expect(instance.type).to eq("Null")
         expect(instance.value).to be(nil)
@@ -27,7 +109,7 @@ RSpec.describe Flipper::Rules::Object do
     end
 
     context "with true" do
-      it "returns array of type and value" do
+      it "returns instance" do
         instance = described_class.new(true)
         expect(instance.type).to eq("Boolean")
         expect(instance.value).to be(true)
@@ -35,7 +117,7 @@ RSpec.describe Flipper::Rules::Object do
     end
 
     context "with false" do
-      it "returns array of type and value" do
+      it "returns instance" do
         instance = described_class.new(false)
         expect(instance.type).to eq("Boolean")
         expect(instance.value).to be(false)
@@ -43,7 +125,7 @@ RSpec.describe Flipper::Rules::Object do
     end
 
     context "with array" do
-      it "returns array of type and value" do
+      it "returns instance" do
         instance = described_class.new(["test"])
         expect(instance.type).to eq("Array")
         expect(instance.value).to eq(["test"])
@@ -51,7 +133,7 @@ RSpec.describe Flipper::Rules::Object do
     end
 
     context "with unsupported type" do
-      it "returns array of type and value" do
+      it "raises ArgumentError" do
         expect {
           described_class.new({})
         }.to raise_error(ArgumentError, /{} is not a supported primitive\. Object must be one of: String, Integer, NilClass, TrueClass, FalseClass, Array\./)

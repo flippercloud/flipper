@@ -10,6 +10,22 @@ RSpec.describe Flipper::Rules::Operator do
       end
     end
 
+    context "with String" do
+      it "returns instance" do
+        instance = described_class.wrap("eq")
+        expect(instance).to be_instance_of(described_class)
+        expect(instance.name).to eq("eq")
+      end
+    end
+
+    context "with Symbol" do
+      it "returns instance" do
+        instance = described_class.wrap(:eq)
+        expect(instance).to be_instance_of(described_class)
+        expect(instance.name).to eq("eq")
+      end
+    end
+
     context "with instance" do
       it "returns intance" do
         instance = described_class.wrap(described_class.new("eq"))

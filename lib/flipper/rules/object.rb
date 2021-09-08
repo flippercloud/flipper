@@ -19,13 +19,17 @@ module Flipper
       def self.wrap(object)
         return object if object.is_a?(Flipper::Rules::Object)
 
-        type = object.fetch("type")
-        value = object.fetch("value")
+        if object.is_a?(Hash)
+          type = object.fetch("type")
+          value = object.fetch("value")
 
-        if SUPPORTED_TYPE_NAMES.include?(type)
-          new(value)
+          if SUPPORTED_TYPE_NAMES.include?(type)
+            new(value)
+          else
+            Rules.const_get(type).new(value)
+          end
         else
-          Rules.const_get(type).new(value)
+          new(object)
         end
       end
 
@@ -57,72 +61,72 @@ module Flipper
 
       def eq(object)
         Flipper::Rules::Condition.new(
-          to_h,
-          Operator.new(:eq).to_h,
-          self.class.primitive_or_object(object).to_h
+          self,
+          Operator.new(:eq),
+          self.class.primitive_or_object(object)
         )
       end
 
       def neq(object)
         Flipper::Rules::Condition.new(
-          to_h,
-          Operator.new(:neq).to_h,
-          self.class.primitive_or_object(object).to_h
+          self,
+          Operator.new(:neq),
+          self.class.primitive_or_object(object)
         )
       end
 
       def gt(object)
         Flipper::Rules::Condition.new(
-          to_h,
-          Operator.new(:gt).to_h,
+          self,
+          Operator.new(:gt),
           self.class.integer_or_object(object)
         )
       end
 
       def gte(object)
         Flipper::Rules::Condition.new(
-          to_h,
-          Operator.new(:gte).to_h,
+          self,
+          Operator.new(:gte),
           self.class.integer_or_object(object)
         )
       end
 
       def lt(object)
         Flipper::Rules::Condition.new(
-          to_h,
-          Operator.new(:lt).to_h,
+          self,
+          Operator.new(:lt),
           self.class.integer_or_object(object)
         )
       end
 
       def lte(object)
         Flipper::Rules::Condition.new(
-          to_h,
-          Operator.new(:lte).to_h,
+          self,
+          Operator.new(:lte),
           self.class.integer_or_object(object)
         )
       end
 
       def in(object)
         Flipper::Rules::Condition.new(
-          to_h,
-          Operator.new(:in).to_h,
+          self,
+          Operator.new(:in),
           self.class.array_or_object(object)
         )
       end
 
       def nin(object)
         Flipper::Rules::Condition.new(
-          to_h,
-          Operator.new(:nin).to_h,
+          self,
+          Operator.new(:nin),
           self.class.array_or_object(object)
         )
       end
 
       def percentage(object)
         Flipper::Rules::Condition.new(
-          to_h,
-          Operator.new(:percentage).to_h,
+          self,
+          Operator.new(:percentage),
           self.class.integer_or_object(object)
         )
       end
@@ -152,9 +156,9 @@ module Flipper
       def self.integer_or_object(object)
         case object
         when Integer
-          {"type" => "Integer", "value" => object}
+          Object.new(object)
         when Flipper::Rules::Object
-          object.to_h
+          object
         else
           raise ArgumentError, "object must be integer or property" unless object.is_a?(Integer)
         end
@@ -163,9 +167,9 @@ module Flipper
       def self.array_or_object(object)
         case object
         when Array
-          {"type" => "Array", "value" => object}
+          Object.new(object)
         when Flipper::Rules::Object
-          object.to_h
+          object
         else
           raise ArgumentError, "object must be array or property" unless object.is_a?(Array)
         end

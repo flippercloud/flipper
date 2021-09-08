@@ -30,7 +30,14 @@ module Flipper
       def self.wrap(object)
         return object if object.is_a?(Flipper::Rules::Operator)
 
-        new(object.fetch("value"))
+        case object
+        when Hash
+          new(object.fetch("value"))
+        when String, Symbol
+          new(object)
+        else
+          raise ArgumentError, "#{object.inspect} cannot be converted into an operator"
+        end
       end
 
       def initialize(value)
