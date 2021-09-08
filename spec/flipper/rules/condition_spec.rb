@@ -59,6 +59,30 @@ RSpec.describe Flipper::Rules::Condition do
       end
     end
 
+    context "with actor that does NOT respond to flipper_properties but does respond to flipper_id" do
+      it "does not error" do
+        user = Struct.new(:flipper_id).new("User;1")
+        rule = Flipper::Rules::Condition.new(
+          {"type" => "Boolean", "value" => true},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "Boolean", "value" => true},
+        )
+        expect(rule.matches?(feature_name, user)).to be(true)
+      end
+    end
+
+    context "with actor that does respond to flipper_properties but does NOT respond to flipper_id" do
+      it "does not error" do
+        user = Struct.new(:flipper_properties).new({"id" => 1, "type" => "User"})
+        rule = Flipper::Rules::Condition.new(
+          {"type" => "Boolean", "value" => true},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "Boolean", "value" => true},
+        )
+        expect(rule.matches?(feature_name, user)).to be(true)
+      end
+    end
+
     context "with non-Flipper::Actor object that quacks like a duck" do
       it "works" do
         user_class = Class.new(Struct.new(:id, :flipper_properties)) do
