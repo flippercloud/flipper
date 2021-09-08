@@ -4,8 +4,12 @@ module Flipper
   module Rules
     class Random < Object
       def initialize(value)
-        @type = "random".freeze
+        @type = "Random".freeze
         @value = value
+      end
+
+      def evaluate(properties)
+        rand value
       end
     end
   end

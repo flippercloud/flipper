@@ -4,7 +4,7 @@ require "flipper/rules/operator"
 module Flipper
   module Rules
     class Object
-      SUPPORTED_VALUE_TYPES_MAP = {
+      SUPPORTED_TYPES_MAP = {
         String     => "String",
         Integer    => "Integer",
         NilClass   => "Null",
@@ -13,7 +13,21 @@ module Flipper
         Array      => "Array",
       }.freeze
 
-      SUPPORTED_VALUE_TYPES = SUPPORTED_VALUE_TYPES_MAP.keys.freeze
+      SUPPORTED_TYPE_CLASSES = SUPPORTED_TYPES_MAP.keys.freeze
+      SUPPORTED_TYPE_NAMES = SUPPORTED_TYPES_MAP.values.freeze
+
+      def self.wrap(object)
+        return object if object.is_a?(Flipper::Rules::Object)
+
+        type = object.fetch("type")
+        value = object.fetch("value")
+
+        if SUPPORTED_TYPE_NAMES.include?(type)
+          new(value)
+        else
+          Rules.const_get(type).new(value)
+        end
+      end
 
       attr_reader :type, :value
 
@@ -35,6 +49,11 @@ module Flipper
           @value == other.value
       end
       alias_method :==, :eql?
+
+      def evaluate(properties)
+        return nil if type == "Null".freeze
+        value
+      end
 
       def eq(object)
         Flipper::Rules::Condition.new(
@@ -111,15 +130,15 @@ module Flipper
       private
 
       def type_of(object)
-        type_class = SUPPORTED_VALUE_TYPES.detect { |klass, type| object.is_a?(klass) }
+        type_class = SUPPORTED_TYPE_CLASSES.detect { |klass, type| object.is_a?(klass) }
 
         if type_class.nil?
           raise ArgumentError,
             "#{object.inspect} is not a supported primitive." +
-            " Object must be one of: #{SUPPORTED_VALUE_TYPES.join(", ")}."
+            " Object must be one of: #{SUPPORTED_TYPE_CLASSES.join(", ")}."
         end
 
-        SUPPORTED_VALUE_TYPES_MAP[type_class]
+        SUPPORTED_TYPES_MAP[type_class]
       end
 
       def self.primitive_or_object(object)

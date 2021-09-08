@@ -1,4 +1,5 @@
 require 'flipper/rules/rule'
+require 'flipper/rules/properties'
 
 module Flipper
   module Rules
@@ -10,18 +11,18 @@ module Flipper
       attr_reader :left, :operator, :right
 
       def initialize(left, operator, right)
-        @left = left
+        @left = Object.wrap(left)
         @operator = Operator.wrap(operator)
-        @right = right
+        @right = Object.wrap(right)
       end
 
       def value
         {
           "type" => "Condition",
           "value" => {
-            "left" => @left,
+            "left" => @left.to_h,
             "operator" => @operator.to_h,
-            "right" => @right,
+            "right" => @right.to_h,
           }
         }
       end
@@ -35,50 +36,10 @@ module Flipper
       alias_method :==, :eql?
 
       def matches?(feature_name, actor = nil)
-        properties = flipper_properties(actor)
-        left_value = evaluate(@left, properties)
-        right_value = evaluate(@right, properties)
+        properties = Properties.from_actor(actor)
+        left_value = @left.evaluate(properties)
+        right_value = @right.evaluate(properties)
         !!@operator.call(left: left_value, right: right_value, feature_name: feature_name)
-      end
-
-      private
-
-      DEFAULT_PROPERTIES = {}.freeze
-
-      def flipper_properties(actor)
-        properties = if actor
-          if actor.respond_to?(:flipper_properties)
-            actor.flipper_properties
-          else
-            warn "#{actor.inspect} does not respond to `flipper_properties` but should."
-            DEFAULT_PROPERTIES
-          end
-        else
-          DEFAULT_PROPERTIES
-        end
-
-        if actor.respond_to?(:flipper_id)
-          properties = properties.merge("flipper_id" => actor.flipper_id)
-        end
-
-        properties
-      end
-
-      def evaluate(hash, properties = DEFAULT_PROPERTIES)
-        type = hash.fetch("type")
-
-        case type
-        when "Property"
-          properties[hash.fetch("value")]
-        when "Random"
-          rand hash.fetch("value")
-        when "Array", "String", "Integer", "Boolean"
-          hash.fetch("value")
-        when "Null"
-          nil
-        else
-          raise "type not found: #{type.inspect}"
-        end
       end
     end
   end

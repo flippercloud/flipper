@@ -11,6 +11,10 @@ module Flipper
       def name
         @value
       end
+
+      def evaluate(properties)
+        properties[value]
+      end
     end
   end
 end

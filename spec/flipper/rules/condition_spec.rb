@@ -3,6 +3,24 @@ require 'helper'
 RSpec.describe Flipper::Rules::Condition do
   let(:feature_name) { "search" }
 
+  describe "#value" do
+    it "returns Hash with type and value" do
+      rule = Flipper::Rules::Condition.new(
+        {"type" => "Property", "value" => "flipper_id"},
+        {"type" => "Operator", "value" => "eq"},
+        {"type" => "String", "value" => "User;1"}
+      )
+      expect(rule.value).to eq({
+        "type" => "Condition",
+        "value" => {
+          "left" => {"type" => "Property", "value" => "flipper_id"},
+          "operator" => {"type" => "Operator", "value" => "eq"},
+          "right" => {"type" => "String", "value" => "User;1"},
+        },
+      })
+    end
+  end
+
   describe "#eql?" do
     let(:rule) {
       Flipper::Rules::Condition.new(
