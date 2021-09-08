@@ -1,6 +1,7 @@
 require 'set'
 require 'flipper'
 require 'sequel'
+require 'flipper/model/sequel'
 
 module Flipper
   module Adapters
@@ -224,4 +225,4 @@ Flipper.configure do |config|
   config.adapter { Flipper::Adapters::Sequel.new }
 end
 
-Sequel::Model.include Flipper::Identifier
+Sequel::Model.include Flipper::Model::Sequel
