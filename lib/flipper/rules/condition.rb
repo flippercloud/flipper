@@ -3,23 +3,6 @@ require 'flipper/rules/rule'
 module Flipper
   module Rules
     class Condition < Rule
-      OPERATIONS = {
-        "eq"  => -> (left:, right:, **) { left == right },
-        "neq" => -> (left:, right:, **) { left != right },
-        "gt"  => -> (left:, right:, **) { left && right && left > right },
-        "gte" => -> (left:, right:, **) { left && right && left >= right },
-        "lt"  => -> (left:, right:, **) { left && right && left < right },
-        "lte" => -> (left:, right:, **) { left && right && left <= right },
-        "in"  => -> (left:, right:, **) { left && right && right.include?(left) },
-        "nin" => -> (left:, right:, **) { left && right && !right.include?(left) },
-        "percentage" => -> (left:, right:, feature_name:) do
-          # this is to support up to 3 decimal places in percentages
-          scaling_factor = 1_000
-          id = "#{feature_name}#{left}"
-          left && right && (Zlib.crc32(id) % (100 * scaling_factor) < right * scaling_factor)
-        end
-      }.freeze
-
       def self.build(hash)
         new(hash.fetch("left"), hash.fetch("operator"), hash.fetch("right"))
       end
@@ -55,11 +38,7 @@ module Flipper
         properties = actor ? actor.flipper_properties.merge("flipper_id" => actor.flipper_id) : {}.freeze
         left_value = evaluate(@left, properties)
         right_value = evaluate(@right, properties)
-        operation = OPERATIONS.fetch(@operator.name) do
-          raise "operator not implemented: #{@operator.name}"
-        end
-
-        !!operation.call(left: left_value, right: right_value, feature_name: feature_name)
+        !!@operator.call(left: left_value, right: right_value, feature_name: feature_name)
       end
 
       private

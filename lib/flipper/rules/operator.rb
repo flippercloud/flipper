@@ -1,6 +1,24 @@
 module Flipper
   module Rules
     class Operator
+
+      OPERATIONS = {
+        "eq"  => -> (left:, right:, **) { left == right },
+        "neq" => -> (left:, right:, **) { left != right },
+        "gt"  => -> (left:, right:, **) { left && right && left > right },
+        "gte" => -> (left:, right:, **) { left && right && left >= right },
+        "lt"  => -> (left:, right:, **) { left && right && left < right },
+        "lte" => -> (left:, right:, **) { left && right && left <= right },
+        "in"  => -> (left:, right:, **) { left && right && right.include?(left) },
+        "nin" => -> (left:, right:, **) { left && right && !right.include?(left) },
+        "percentage" => -> (left:, right:, feature_name:) do
+          # this is to support up to 3 decimal places in percentages
+          scaling_factor = 1_000
+          id = "#{feature_name}#{left}"
+          left && right && (Zlib.crc32(id) % (100 * scaling_factor) < right * scaling_factor)
+        end
+      }.freeze
+
       attr_reader :type, :value
 
       # Ensures object is an Flipper::Rules::Operator..
@@ -18,10 +36,9 @@ module Flipper
       def initialize(value)
         @type = "Operator".freeze
         @value = value.to_s
-
-        unless Condition::OPERATIONS.key?(@value)
+        @block = OPERATIONS.fetch(@value) {
           raise ArgumentError, "Operator '#{@value}' could not be found"
-        end
+        }
       end
 
       def name
@@ -41,6 +58,10 @@ module Flipper
           @value == other.value
       end
       alias_method :==, :eql?
+
+      def call(*args)
+        @block.call(*args)
+      end
     end
   end
 end
