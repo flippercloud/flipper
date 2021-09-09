@@ -1,17 +1,14 @@
 module Flipper
   module Rules
-    class Operator
-      attr_reader :type, :value
-
-      # Builds a Flipper::Rules::Operator based on an object.
+    module Operator
+      # Builds a flipper operator based on an object.
       #
-      # object - The Hash, String, Symbol or Flipper::Rules::Operator
+      # object - The Hash, String, Symbol or Flipper::Rules::Operators::*
       # representation of an operator.
       #
-      # Returns Flipper::Rules::Operator.
-      # Raises Flipper::Errors::OperatorNotFound if not a known operator.
+      # Returns Flipper::Rules::Operator::* instance.
       def self.build(object)
-        return object if object.is_a?(Flipper::Rules::Operator)
+        return object if object.is_a?(Flipper::Rules::Operators::Base)
 
         operator_class = case object
         when Hash
@@ -22,45 +19,18 @@ module Flipper
           raise ArgumentError, "#{object.inspect} cannot be converted into an operator"
         end
 
-        Rules.const_get(operator_class.to_s.capitalize).new
-      end
-
-      def initialize(value)
-        @type = "Operator".freeze
-        @value = value.to_s
-      end
-
-      def name
-        @value
-      end
-
-      def to_h
-        {
-          "type" => @type,
-          "value" => @value,
-        }
-      end
-
-      def eql?(other)
-        self.class.eql?(other.class) &&
-          @type == other.type &&
-          @value == other.value
-      end
-      alias_method :==, :eql?
-
-      def call(*args)
-        raise NotImplementedError
+        Operators.const_get(operator_class.to_s.capitalize).new
       end
     end
   end
 end
 
-require "flipper/rules/eq"
-require "flipper/rules/neq"
-require "flipper/rules/gt"
-require "flipper/rules/gte"
-require "flipper/rules/lt"
-require "flipper/rules/lte"
-require "flipper/rules/in"
-require "flipper/rules/nin"
-require "flipper/rules/percentage"
+require "flipper/rules/operators/eq"
+require "flipper/rules/operators/neq"
+require "flipper/rules/operators/gt"
+require "flipper/rules/operators/gte"
+require "flipper/rules/operators/lt"
+require "flipper/rules/operators/lte"
+require "flipper/rules/operators/in"
+require "flipper/rules/operators/nin"
+require "flipper/rules/operators/percentage"

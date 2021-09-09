@@ -61,55 +61,55 @@ module Flipper
 
       def eq(object)
         Flipper::Rules::Condition.new(
-          self, Eq.new, self.class.primitive_or_object(object)
+          self, Operators::Eq.new, self.class.primitive_or_object(object)
         )
       end
 
       def neq(object)
         Flipper::Rules::Condition.new(
-          self, Neq.new, self.class.primitive_or_object(object)
+          self, Operators::Neq.new, self.class.primitive_or_object(object)
         )
       end
 
       def gt(object)
         Flipper::Rules::Condition.new(
-          self, Gt.new, self.class.integer_or_object(object)
+          self, Operators::Gt.new, self.class.integer_or_object(object)
         )
       end
 
       def gte(object)
         Flipper::Rules::Condition.new(
-          self, Gte.new, self.class.integer_or_object(object)
+          self, Operators::Gte.new, self.class.integer_or_object(object)
         )
       end
 
       def lt(object)
         Flipper::Rules::Condition.new(
-          self, Lt.new, self.class.integer_or_object(object)
+          self, Operators::Lt.new, self.class.integer_or_object(object)
         )
       end
 
       def lte(object)
         Flipper::Rules::Condition.new(
-          self, Lte.new, self.class.integer_or_object(object)
+          self, Operators::Lte.new, self.class.integer_or_object(object)
         )
       end
 
       def in(object)
         Flipper::Rules::Condition.new(
-          self, In.new, self.class.array_or_object(object)
+          self, Operators::In.new, self.class.array_or_object(object)
         )
       end
 
       def nin(object)
         Flipper::Rules::Condition.new(
-          self, Nin.new, self.class.array_or_object(object)
+          self, Operators::Nin.new, self.class.array_or_object(object)
         )
       end
 
       def percentage(object)
         Flipper::Rules::Condition.new(
-          self, Percentage.new, self.class.integer_or_object(object)
+          self, Operators::Percentage.new, self.class.integer_or_object(object)
         )
       end
 
