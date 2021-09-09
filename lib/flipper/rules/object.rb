@@ -61,73 +61,55 @@ module Flipper
 
       def eq(object)
         Flipper::Rules::Condition.new(
-          self,
-          Operator.new(:eq),
-          self.class.primitive_or_object(object)
+          self, Eq.new, self.class.primitive_or_object(object)
         )
       end
 
       def neq(object)
         Flipper::Rules::Condition.new(
-          self,
-          Operator.new(:neq),
-          self.class.primitive_or_object(object)
+          self, Neq.new, self.class.primitive_or_object(object)
         )
       end
 
       def gt(object)
         Flipper::Rules::Condition.new(
-          self,
-          Operator.new(:gt),
-          self.class.integer_or_object(object)
+          self, Gt.new, self.class.integer_or_object(object)
         )
       end
 
       def gte(object)
         Flipper::Rules::Condition.new(
-          self,
-          Operator.new(:gte),
-          self.class.integer_or_object(object)
+          self, Gte.new, self.class.integer_or_object(object)
         )
       end
 
       def lt(object)
         Flipper::Rules::Condition.new(
-          self,
-          Operator.new(:lt),
-          self.class.integer_or_object(object)
+          self, Lt.new, self.class.integer_or_object(object)
         )
       end
 
       def lte(object)
         Flipper::Rules::Condition.new(
-          self,
-          Operator.new(:lte),
-          self.class.integer_or_object(object)
+          self, Lte.new, self.class.integer_or_object(object)
         )
       end
 
       def in(object)
         Flipper::Rules::Condition.new(
-          self,
-          Operator.new(:in),
-          self.class.array_or_object(object)
+          self, In.new, self.class.array_or_object(object)
         )
       end
 
       def nin(object)
         Flipper::Rules::Condition.new(
-          self,
-          Operator.new(:nin),
-          self.class.array_or_object(object)
+          self, Nin.new, self.class.array_or_object(object)
         )
       end
 
       def percentage(object)
         Flipper::Rules::Condition.new(
-          self,
-          Operator.new(:percentage),
-          self.class.integer_or_object(object)
+          self, Percentage.new, self.class.integer_or_object(object)
         )
       end
 

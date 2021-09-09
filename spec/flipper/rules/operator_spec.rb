@@ -1,34 +1,34 @@
 require 'helper'
 
 RSpec.describe Flipper::Rules::Operator do
-  describe ".wrap" do
+  describe ".build" do
     context "with Hash" do
       it "returns instance" do
-        instance = described_class.wrap({"type" => "Operator", "value" => "eq"})
-        expect(instance).to be_instance_of(described_class)
+        instance = described_class.build({"type" => "Operator", "value" => "eq"})
+        expect(instance).to be_a(described_class)
         expect(instance.name).to eq("eq")
       end
     end
 
     context "with String" do
       it "returns instance" do
-        instance = described_class.wrap("eq")
-        expect(instance).to be_instance_of(described_class)
+        instance = described_class.build("eq")
+        expect(instance).to be_a(described_class)
         expect(instance.name).to eq("eq")
       end
     end
 
     context "with Symbol" do
       it "returns instance" do
-        instance = described_class.wrap(:eq)
-        expect(instance).to be_instance_of(described_class)
+        instance = described_class.build(:eq)
+        expect(instance).to be_a(described_class)
         expect(instance.name).to eq("eq")
       end
     end
 
     context "with instance" do
       it "returns intance" do
-        instance = described_class.wrap(described_class.new("eq"))
+        instance = described_class.build(described_class.new("eq"))
         expect(instance).to be_instance_of(described_class)
         expect(instance.name).to eq("eq")
       end
@@ -44,10 +44,6 @@ RSpec.describe Flipper::Rules::Operator do
     it "works with symbol name" do
       instance = described_class.new(:eq)
       expect(instance.name).to eq("eq")
-    end
-
-    it "raises error for unknown operator" do
-      expect { described_class.new("nope") }.to raise_error(ArgumentError, "Operator 'nope' could not be found")
     end
   end
 

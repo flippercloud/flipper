@@ -1,51 +1,33 @@
 module Flipper
   module Rules
     class Operator
-
-      OPERATIONS = {
-        "eq"  => -> (left:, right:, **) { left == right },
-        "neq" => -> (left:, right:, **) { left != right },
-        "gt"  => -> (left:, right:, **) { left && right && left > right },
-        "gte" => -> (left:, right:, **) { left && right && left >= right },
-        "lt"  => -> (left:, right:, **) { left && right && left < right },
-        "lte" => -> (left:, right:, **) { left && right && left <= right },
-        "in"  => -> (left:, right:, **) { left && right && right.include?(left) },
-        "nin" => -> (left:, right:, **) { left && right && !right.include?(left) },
-        "percentage" => -> (left:, right:, feature_name:) do
-          # this is to support up to 3 decimal places in percentages
-          scaling_factor = 1_000
-          id = "#{feature_name}#{left}"
-          left && right && (Zlib.crc32(id) % (100 * scaling_factor) < right * scaling_factor)
-        end
-      }.freeze
-
       attr_reader :type, :value
 
-      # Ensures object is an Flipper::Rules::Operator..
+      # Builds a Flipper::Rules::Operator based on an object.
       #
-      # object - The Hash or Flipper::Rules::Operator. instance.
+      # object - The Hash, String, Symbol or Flipper::Rules::Operator
+      # representation of an operator.
       #
       # Returns Flipper::Rules::Operator.
       # Raises Flipper::Errors::OperatorNotFound if not a known operator.
-      def self.wrap(object)
+      def self.build(object)
         return object if object.is_a?(Flipper::Rules::Operator)
 
-        case object
+        operator_class = case object
         when Hash
-          new(object.fetch("value"))
+          object.fetch("value")
         when String, Symbol
-          new(object)
+          object
         else
           raise ArgumentError, "#{object.inspect} cannot be converted into an operator"
         end
+
+        Rules.const_get(operator_class.to_s.capitalize).new
       end
 
       def initialize(value)
         @type = "Operator".freeze
         @value = value.to_s
-        @block = OPERATIONS.fetch(@value) {
-          raise ArgumentError, "Operator '#{@value}' could not be found"
-        }
       end
 
       def name
@@ -67,8 +49,18 @@ module Flipper
       alias_method :==, :eql?
 
       def call(*args)
-        @block.call(*args)
+        raise NotImplementedError
       end
     end
   end
 end
+
+require "flipper/rules/eq"
+require "flipper/rules/neq"
+require "flipper/rules/gt"
+require "flipper/rules/gte"
+require "flipper/rules/lt"
+require "flipper/rules/lte"
+require "flipper/rules/in"
+require "flipper/rules/nin"
+require "flipper/rules/percentage"

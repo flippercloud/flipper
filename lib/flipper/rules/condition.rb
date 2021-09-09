@@ -12,7 +12,7 @@ module Flipper
 
       def initialize(left, operator, right)
         @left = Object.wrap(left)
-        @operator = Operator.wrap(operator)
+        @operator = Operator.build(operator)
         @right = Object.wrap(right)
       end
 
