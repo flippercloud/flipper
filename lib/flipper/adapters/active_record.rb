@@ -29,6 +29,11 @@ module Flipper
         serialize :value, JSON
       end
 
+      VALUE_TO_TEXT_WARNING = <<-EOS
+        Your database needs migrated to use the latest Flipper features.
+        See https://github.com/jnunemaker/flipper/issues/557
+      EOS
+
       # Public: The name of the adapter.
       attr_reader :name
 
@@ -48,6 +53,8 @@ module Flipper
         @name = options.fetch(:name, :active_record)
         @feature_class = options.fetch(:feature_class) { Feature }
         @gate_class = options.fetch(:gate_class) { Gate }
+
+        warn VALUE_TO_TEXT_WARNING unless value_is_text?
       end
 
       # Public: The set of known features.
@@ -128,7 +135,10 @@ module Flipper
           set(feature, gate, thing, clear: true)
         when :integer
           set(feature, gate, thing)
-        when :set, :json
+        when :set
+          enable_multi(feature, gate, thing)
+        when :json
+          raise VALUE_TO_TEXT_WARNING unless value_is_text?
           enable_multi(feature, gate, thing)
         else
           unsupported_data_type gate.data_type
@@ -150,9 +160,7 @@ module Flipper
           clear(feature)
         when :integer
           set(feature, gate, thing)
-        when :set
-          @gate_class.where(feature_key: feature.key, key: gate.key, value: thing.value).destroy_all
-        when :json
+        when :set, :json
           @gate_class.where(feature_key: feature.key, key: gate.key, value: thing.value).destroy_all
         else
           unsupported_data_type gate.data_type
@@ -221,6 +229,12 @@ module Flipper
             end
         end
         result
+      end
+
+      # Check if value column is text instead of string
+      # See TODO:link/to/PR
+      def value_is_text?
+        @gate_class.column_for_attribute(:value).type == :text
       end
     end
   end

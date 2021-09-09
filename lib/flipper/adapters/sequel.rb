@@ -29,6 +29,11 @@ module Flipper
         ::Sequel::Model.require_valid_table = old
       end
 
+      VALUE_TO_TEXT_WARNING = <<-EOS
+        Your database needs migrated to use the latest Flipper features.
+        See https://github.com/jnunemaker/flipper/issues/557
+      EOS
+
       # Public: The name of the adapter.
       attr_reader :name
 
@@ -48,6 +53,8 @@ module Flipper
         @name = options.fetch(:name, :sequel)
         @feature_class = options.fetch(:feature_class) { Feature }
         @gate_class = options.fetch(:gate_class) { Gate }
+
+        warn VALUE_TO_TEXT_WARNING unless value_is_text?
       end
 
       # Public: The set of known features.
@@ -129,11 +136,11 @@ module Flipper
           set(feature, gate, thing, clear: true)
         when :integer
           set(feature, gate, thing)
-        when :set, :json
-          begin
-            @gate_class.create(gate_attrs(feature, gate, thing, json: gate.data_type == :json))
-          rescue ::Sequel::UniqueConstraintViolation
-          end
+        when :set
+          enable_multi(feature, gate, thing)
+        when :json
+          raise VALUE_TO_TEXT_WARNING unless value_is_text?
+          enable_multi(feature, gate, thing)
         else
           unsupported_data_type gate.data_type
         end
@@ -187,6 +194,13 @@ module Flipper
         end
       end
 
+      def enable_multi(feature, gate, thing)
+        begin
+          @gate_class.create(gate_attrs(feature, gate, thing, json: gate.data_type == :json))
+        rescue ::Sequel::UniqueConstraintViolation
+        end
+      end
+
       def gate_attrs(feature, gate, thing, json: false)
         {
           feature_key: feature.key.to_s,
@@ -216,6 +230,12 @@ module Flipper
               unsupported_data_type gate.data_type
             end
         end
+      end
+
+      # Check if value column is text instead of string
+      # See TODO:link/to/PR
+      def value_is_text?
+        @gate_class.db_schema[:value][:db_type] == "text"
       end
     end
   end
