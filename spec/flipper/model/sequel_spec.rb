@@ -1,8 +1,5 @@
 require 'helper'
-require 'sequel'
 require 'flipper/model/sequel'
-
-Sequel::Model.db = Sequel.sqlite(':memory:')
 
 RSpec.describe Flipper::Model::Sequel do
   before(:each) do
