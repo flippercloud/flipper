@@ -39,7 +39,8 @@ module Flipper
 
     initializer "flipper.identifier" do
       ActiveSupport.on_load(:active_record) do
-        ActiveRecord::Base.include Flipper::Identifier
+        require "flipper/model/active_record"
+        ActiveRecord::Base.include Flipper::Model::ActiveRecord
       end
     end
   end
