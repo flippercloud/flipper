@@ -4,7 +4,7 @@ RSpec.describe Flipper::Rules::Object do
   describe ".wrap" do
     context "with Hash" do
       it "returns instance" do
-        instance = described_class.wrap({"type" => "Integer", "value" => 2})
+        instance = described_class.build({"type" => "Integer", "value" => 2})
         expect(instance).to be_instance_of(described_class)
         expect(instance.type).to eq("Integer")
         expect(instance.value).to eq(2)
@@ -13,7 +13,7 @@ RSpec.describe Flipper::Rules::Object do
 
     context "with instance" do
       it "returns instance" do
-        instance = described_class.wrap(described_class.new(2))
+        instance = described_class.build(described_class.new(2))
         expect(instance).to be_instance_of(described_class)
         expect(instance.type).to eq("Integer")
         expect(instance.value).to eq(2)
@@ -22,7 +22,7 @@ RSpec.describe Flipper::Rules::Object do
 
     context "with string" do
       it "returns instance" do
-        instance = described_class.wrap("test")
+        instance = described_class.build("test")
         expect(instance).to be_instance_of(described_class)
         expect(instance.type).to eq("String")
         expect(instance.value).to eq("test")
@@ -31,7 +31,7 @@ RSpec.describe Flipper::Rules::Object do
 
     context "with integer" do
       it "returns instance" do
-        instance = described_class.wrap(21)
+        instance = described_class.build(21)
         expect(instance).to be_instance_of(described_class)
         expect(instance.type).to eq("Integer")
         expect(instance.value).to eq(21)
@@ -40,7 +40,7 @@ RSpec.describe Flipper::Rules::Object do
 
     context "with nil" do
       it "returns instance" do
-        instance = described_class.wrap(nil)
+        instance = described_class.build(nil)
         expect(instance).to be_instance_of(described_class)
         expect(instance.type).to eq("Null")
         expect(instance.value).to be(nil)
@@ -49,7 +49,7 @@ RSpec.describe Flipper::Rules::Object do
 
     context "with true" do
       it "returns instance" do
-        instance = described_class.wrap(true)
+        instance = described_class.build(true)
         expect(instance).to be_instance_of(described_class)
         expect(instance.type).to eq("Boolean")
         expect(instance.value).to be(true)
@@ -58,7 +58,7 @@ RSpec.describe Flipper::Rules::Object do
 
     context "with false" do
       it "returns instance" do
-        instance = described_class.wrap(false)
+        instance = described_class.build(false)
         expect(instance).to be_instance_of(described_class)
         expect(instance.type).to eq("Boolean")
         expect(instance.value).to be(false)
@@ -67,7 +67,7 @@ RSpec.describe Flipper::Rules::Object do
 
     context "with array" do
       it "returns instance" do
-        instance = described_class.wrap(["test"])
+        instance = described_class.build(["test"])
         expect(instance).to be_instance_of(described_class)
         expect(instance.type).to eq("Array")
         expect(instance.value).to eq(["test"])
@@ -77,7 +77,7 @@ RSpec.describe Flipper::Rules::Object do
     context "with unsupported type" do
       it "raises ArgumentError" do
         expect {
-          described_class.wrap(Set.new)
+          described_class.build(Set.new)
         }.to raise_error(ArgumentError, /is not a supported primitive\. Object must be one of: String, Integer, NilClass, TrueClass, FalseClass, Array\./)
       end
     end

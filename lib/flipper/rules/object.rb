@@ -16,7 +16,7 @@ module Flipper
       SUPPORTED_TYPE_CLASSES = SUPPORTED_TYPES_MAP.keys.freeze
       SUPPORTED_TYPE_NAMES = SUPPORTED_TYPES_MAP.values.freeze
 
-      def self.wrap(object)
+      def self.build(object)
         return object if object.is_a?(Flipper::Rules::Object)
 
         if object.is_a?(Hash)

@@ -11,9 +11,9 @@ module Flipper
       attr_reader :left, :operator, :right
 
       def initialize(left, operator, right)
-        @left = Object.wrap(left)
+        @left = Object.build(left)
         @operator = Operator.build(operator)
-        @right = Object.wrap(right)
+        @right = Object.build(right)
       end
 
       def value
