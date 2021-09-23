@@ -285,54 +285,6 @@ RSpec.describe Flipper::Rules::Condition do
       end
     end
 
-    context "in" do
-      let(:rule) {
-        Flipper::Rules::Condition.new(
-          {"type" => "Property", "value" => "age"},
-          {"type" => "Operator", "value" => "in"},
-          {"type" => "Array", "value" => [20, 21, 22]}
-        )
-      }
-
-      it "returns true when property matches" do
-        actor = Flipper::Actor.new("User;1", {
-          "age" => 21,
-        })
-        expect(rule.matches?(feature_name, actor)).to be(true)
-      end
-
-      it "returns false when property does NOT match" do
-        actor = Flipper::Actor.new("User;1", {
-          "age" => 10,
-        })
-        expect(rule.matches?(feature_name, actor)).to be(false)
-      end
-    end
-
-    context "nin" do
-      let(:rule) {
-        Flipper::Rules::Condition.new(
-          {"type" => "Property", "value" => "age"},
-          {"type" => "Operator", "value" => "nin"},
-          {"type" => "Array", "value" => [20, 21, 22]}
-        )
-      }
-
-      it "returns true when property matches" do
-        actor = Flipper::Actor.new("User;1", {
-          "age" => 10,
-        })
-        expect(rule.matches?(feature_name, actor)).to be(true)
-      end
-
-      it "returns false when property does NOT match" do
-        actor = Flipper::Actor.new("User;1", {
-          "age" => 20,
-        })
-        expect(rule.matches?(feature_name, actor)).to be(false)
-      end
-    end
-
     context "percentage" do
       let(:rule) {
         Flipper::Rules::Condition.new(

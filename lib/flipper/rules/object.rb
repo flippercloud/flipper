@@ -10,7 +10,6 @@ module Flipper
         NilClass   => "Null",
         TrueClass  => "Boolean",
         FalseClass => "Boolean",
-        Array      => "Array",
       }.freeze
 
       SUPPORTED_TYPE_CLASSES = SUPPORTED_TYPES_MAP.keys.freeze
@@ -92,18 +91,6 @@ module Flipper
       def lte(object)
         Flipper::Rules::Condition.new(
           self, Operators::Lte.new, self.class.integer_or_object(object)
-        )
-      end
-
-      def in(object)
-        Flipper::Rules::Condition.new(
-          self, Operators::In.new, self.class.array_or_object(object)
-        )
-      end
-
-      def nin(object)
-        Flipper::Rules::Condition.new(
-          self, Operators::Nin.new, self.class.array_or_object(object)
         )
       end
 

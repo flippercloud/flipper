@@ -35,13 +35,14 @@ user = User.new(1, {
   "id" => 1,
   "plan" => "basic",
   "age" => 39,
-  "roles" => ["team_user"]
+  "team_user" => true,
 })
 
 admin_user = User.new(2, {
   "type" => "User",
   "id" => 2,
-  "roles" => ["admin", "team_user"],
+  "admin" => true,
+  "team_user" => true,
 })
 
 other_user = User.new(3, {
@@ -49,12 +50,12 @@ other_user = User.new(3, {
   "id" => 3,
   "plan" => "plus",
   "age" => 18,
-  "roles" => ["org_admin"]
+  "org_admin" => true,
 })
 
 age_rule = Flipper.property(:age).gte(21)
 plan_rule = Flipper.property(:plan).eq("basic")
-admin_rule = Flipper.object("admin").in(Flipper.property(:roles))
+admin_rule = Flipper.property(:admin).eq(true)
 
 puts "Single Rule"
 refute Flipper.enabled?(:something, user)
@@ -123,7 +124,10 @@ assert Flipper.enabled?(:something, user)
 Flipper.disable_rule :something, boolean_rule
 
 puts "\n\nSet of Actors Rule"
-set_of_actors_rule = Flipper.property(:flipper_id).in(["User;1", "User;3"])
+set_of_actors_rule = Flipper.any(
+  Flipper.property(:flipper_id).eq("User;1"),
+  Flipper.property(:flipper_id).eq("User;3"),
+)
 Flipper.enable_rule :something, set_of_actors_rule
 assert Flipper.enabled?(:something, user)
 assert Flipper.enabled?(:something, other_user)

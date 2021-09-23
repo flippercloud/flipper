@@ -67,16 +67,6 @@ RSpec.describe Flipper::Rules::Property do
       end
     end
 
-    context "with array" do
-      it "returns equal condition" do
-        expect(described_class.new(:roles).eq(["admin"])).to eq(Flipper::Rules::Condition.new(
-          {"type" => "Property", "value" => "roles"},
-          {"type" => "Operator", "value" => "eq"},
-          {"type" => "Array", "value" => ["admin"]}
-        ))
-      end
-    end
-
     context "with nil" do
       it "returns equal condition" do
         expect(described_class.new(:admin).eq(nil)).to eq(Flipper::Rules::Condition.new(
@@ -115,16 +105,6 @@ RSpec.describe Flipper::Rules::Property do
           {"type" => "Property", "value" => "age"},
           {"type" => "Operator", "value" => "neq"},
           {"type" => "Integer", "value" => 21}
-        ))
-      end
-    end
-
-    context "with array" do
-      it "returns not equal condition" do
-        expect(described_class.new(:roles).neq(["admin"])).to eq(Flipper::Rules::Condition.new(
-          {"type" => "Property", "value" => "roles"},
-          {"type" => "Operator", "value" => "neq"},
-          {"type" => "Array", "value" => ["admin"]}
         ))
       end
     end
@@ -280,78 +260,6 @@ RSpec.describe Flipper::Rules::Property do
     context "with nil" do
       it "raises error" do
         expect { described_class.new(:age).lte(nil) }.to raise_error(ArgumentError)
-      end
-    end
-  end
-
-  describe "#in" do
-    context "with array" do
-      it "returns condition" do
-        expect(described_class.new(:role).in(["admin"])).to eq(Flipper::Rules::Condition.new(
-          {"type" => "Property", "value" => "role"},
-          {"type" => "Operator", "value" => "in"},
-          {"type" => "Array", "value" => ["admin"]}
-        ))
-      end
-    end
-
-    context "with string" do
-      it "raises error" do
-        expect { described_class.new(:role).in("231") }.to raise_error(ArgumentError)
-      end
-    end
-
-    context "with boolean" do
-      it "raises error" do
-        expect { described_class.new(:role).in(true) }.to raise_error(ArgumentError)
-      end
-    end
-
-    context "with integer" do
-      it "raises error" do
-        expect { described_class.new(:role).in(21) }.to raise_error(ArgumentError)
-      end
-    end
-
-    context "with nil" do
-      it "raises error" do
-        expect { described_class.new(:role).in(nil) }.to raise_error(ArgumentError)
-      end
-    end
-  end
-
-  describe "#nin" do
-    context "with array" do
-      it "returns condition" do
-        expect(described_class.new(:role).nin(["admin"])).to eq(Flipper::Rules::Condition.new(
-          {"type" => "Property", "value" => "role"},
-          {"type" => "Operator", "value" => "nin"},
-          {"type" => "Array", "value" => ["admin"]}
-        ))
-      end
-    end
-
-    context "with string" do
-      it "raises error" do
-        expect { described_class.new(:role).nin("231") }.to raise_error(ArgumentError)
-      end
-    end
-
-    context "with boolean" do
-      it "raises error" do
-        expect { described_class.new(:role).nin(true) }.to raise_error(ArgumentError)
-      end
-    end
-
-    context "with integer" do
-      it "raises error" do
-        expect { described_class.new(:role).nin(21) }.to raise_error(ArgumentError)
-      end
-    end
-
-    context "with nil" do
-      it "raises error" do
-        expect { described_class.new(:role).nin(nil) }.to raise_error(ArgumentError)
       end
     end
   end
