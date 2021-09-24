@@ -16,6 +16,14 @@ module Flipper
         @right = Object.build(right)
       end
 
+      def all
+        Flipper::Rules::All.new(self)
+      end
+
+      def any
+        Flipper::Rules::Any.new(self)
+      end
+
       def value
         {
           "type" => "Condition",
