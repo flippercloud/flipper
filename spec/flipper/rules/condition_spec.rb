@@ -29,6 +29,75 @@ RSpec.describe Flipper::Rules::Condition do
     end
   end
 
+  describe "#add" do
+    context "with single rule" do
+      it "wraps self with any and adds new rule" do
+        rule = Flipper::Rules::Condition.new(
+          {"type" => "Property", "value" => "flipper_id"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "String", "value" => "User;1"}
+        )
+        rule2 = Flipper::Rules::Condition.new(
+          {"type" => "Property", "value" => "flipper_id"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "String", "value" => "User;2"}
+        )
+
+        result = rule.add(rule2)
+        expect(result).to be_instance_of(Flipper::Rules::Any)
+        expect(result.rules).to eq([rule, rule2])
+      end
+    end
+
+    context "with multiple rules" do
+      it "wraps self with any and adds new rules" do
+        rule = Flipper::Rules::Condition.new(
+          {"type" => "Property", "value" => "flipper_id"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "String", "value" => "User;1"}
+        )
+        rule2 = Flipper::Rules::Condition.new(
+          {"type" => "Property", "value" => "flipper_id"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "String", "value" => "User;2"}
+        )
+        rule3 = Flipper::Rules::Condition.new(
+          {"type" => "Property", "value" => "flipper_id"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "String", "value" => "User;3"}
+        )
+
+        result = rule.add(rule2, rule3)
+        expect(result).to be_instance_of(Flipper::Rules::Any)
+        expect(result.rules).to eq([rule, rule2, rule3])
+      end
+    end
+
+    context "with array of rules" do
+      it "wraps self with any and adds new rules" do
+        rule = Flipper::Rules::Condition.new(
+          {"type" => "Property", "value" => "flipper_id"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "String", "value" => "User;1"}
+        )
+        rule2 = Flipper::Rules::Condition.new(
+          {"type" => "Property", "value" => "flipper_id"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "String", "value" => "User;2"}
+        )
+        rule3 = Flipper::Rules::Condition.new(
+          {"type" => "Property", "value" => "flipper_id"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "String", "value" => "User;3"}
+        )
+
+        result = rule.add([rule2, rule3])
+        expect(result).to be_instance_of(Flipper::Rules::Any)
+        expect(result.rules).to eq([rule, rule2, rule3])
+      end
+    end
+  end
+
   describe "#value" do
     it "returns Hash with type and value" do
       rule = Flipper::Rules::Condition.new(

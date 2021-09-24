@@ -21,6 +21,14 @@ module Flipper
         self
       end
 
+      def add(*rules)
+        self.class.new(@rules + rules.flatten)
+      end
+
+      def remove(*rules)
+        self.class.new(@rules - rules.flatten)
+      end
+
       def value
         {
           "type" => self.class.name.split('::').last,

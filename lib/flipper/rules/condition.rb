@@ -24,6 +24,14 @@ module Flipper
         Flipper::Rules::Any.new(self)
       end
 
+      def add(*rules)
+        any.add(*rules)
+      end
+
+      def remove(*rules)
+        any.remove(*rules)
+      end
+
       def value
         {
           "type" => "Condition",

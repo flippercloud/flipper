@@ -86,6 +86,85 @@ RSpec.describe Flipper::Rules::Any do
     end
   end
 
+  describe "#add" do
+    context "with single rule" do
+      it "returns new instance with rule added" do
+        rule2 = Flipper::Rules::Condition.new(
+          {"type" => "Property", "value" => "flipper_id"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "String", "value" => "User;2"}
+        )
+        result = rule.add rule2
+        expect(result).not_to be(rule)
+        expect(result.rules).to eq([rule.rules, rule2].flatten)
+      end
+    end
+
+    context "with multiple rules" do
+      it "returns new instance with rule added" do
+        rule2 = Flipper::Rules::Condition.new(
+          {"type" => "Property", "value" => "flipper_id"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "String", "value" => "User;2"}
+        )
+        rule3 = Flipper::Rules::Condition.new(
+          {"type" => "Property", "value" => "flipper_id"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "String", "value" => "User;3"}
+        )
+
+        result = rule.add rule2, rule3
+        expect(result).not_to be(rule)
+        expect(result.rules).to eq([rule.rules, rule2, rule3].flatten)
+      end
+    end
+
+    context "with array of rules" do
+      it "returns new instance with rule added" do
+        rule2 = Flipper::Rules::Condition.new(
+          {"type" => "Property", "value" => "flipper_id"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "String", "value" => "User;2"}
+        )
+        rule3 = Flipper::Rules::Condition.new(
+          {"type" => "Property", "value" => "flipper_id"},
+          {"type" => "Operator", "value" => "eq"},
+          {"type" => "String", "value" => "User;3"}
+        )
+
+        result = rule.add [rule2, rule3]
+        expect(result).not_to be(rule)
+        expect(result.rules).to eq([rule.rules, rule2, rule3].flatten)
+      end
+    end
+  end
+
+  describe "#remove" do
+    context "with single rule" do
+      it "returns new instance with rule removed" do
+        result = rule.remove age_condition
+        expect(result).not_to be(rule)
+        expect(result.rules).to eq([plan_condition])
+      end
+    end
+
+    context "with multiple rules" do
+      it "returns new instance with rules removed" do
+        result = rule.remove age_condition, plan_condition
+        expect(result).not_to be(rule)
+        expect(result.rules).to eq([])
+      end
+    end
+
+    context "with array of rules" do
+      it "returns new instance with rules removed" do
+        result = rule.remove [age_condition, plan_condition]
+        expect(result).not_to be(rule)
+        expect(result.rules).to eq([])
+      end
+    end
+  end
+
   describe "#value" do
     it "returns type and value" do
       expect(rule.value).to eq({
