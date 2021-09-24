@@ -352,7 +352,7 @@ RSpec.describe Flipper::Rules::Condition do
         end
 
         enabled, disabled = results.partition { |r| r }
-        expect(enabled.size).to be_within(30).of(250)
+        expect(enabled.size).to be_within(50).of(250)
       end
     end
 
