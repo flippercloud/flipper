@@ -17,6 +17,10 @@ def refute(value)
   end
 end
 
+def reset
+  Flipper.disable_rule :something
+end
+
 class User < Struct.new(:id, :flipper_properties)
   include Flipper::Identifier
 end
@@ -67,7 +71,7 @@ refute Flipper.enabled?(:something, admin_user)
 refute Flipper.enabled?(:something, other_user)
 
 puts "Disabling single rule"
-Flipper.disable_rule :something, plan_rule
+reset
 refute Flipper.enabled?(:something, user)
 
 puts "\n\nAny Rule"
@@ -81,7 +85,7 @@ refute Flipper.enabled?(:something, admin_user)
 refute Flipper.enabled?(:something, other_user)
 
 puts "Disabling any rule"
-Flipper.disable_rule :something, any_rule
+reset
 refute Flipper.enabled?(:something, user)
 
 puts "\n\nAll Rule"
@@ -95,7 +99,7 @@ refute Flipper.enabled?(:something, admin_user)
 refute Flipper.enabled?(:something, other_user)
 
 puts "Disabling all rule"
-Flipper.disable_rule :something, all_rule
+reset
 refute Flipper.enabled?(:something, user)
 
 puts "\n\nNested Rule"
@@ -111,7 +115,7 @@ assert Flipper.enabled?(:something, admin_user)
 refute Flipper.enabled?(:something, other_user)
 
 puts "Disabling nested rule"
-Flipper.disable_rule :something, nested_rule
+reset
 refute Flipper.enabled?(:something, user)
 refute Flipper.enabled?(:something, admin_user)
 refute Flipper.enabled?(:something, other_user)
@@ -121,7 +125,7 @@ boolean_rule = Flipper.object(true).eq(true)
 Flipper.enable_rule :something, boolean_rule
 assert Flipper.enabled?(:something)
 assert Flipper.enabled?(:something, user)
-Flipper.disable_rule :something, boolean_rule
+reset
 
 puts "\n\nSet of Actors Rule"
 set_of_actors_rule = Flipper.any(
@@ -132,7 +136,7 @@ Flipper.enable_rule :something, set_of_actors_rule
 assert Flipper.enabled?(:something, user)
 assert Flipper.enabled?(:something, other_user)
 refute Flipper.enabled?(:something, admin_user)
-Flipper.disable_rule :something, set_of_actors_rule
+reset
 
 puts "\n\n% of Actors Rule"
 percentage_of_actors = Flipper.property(:flipper_id).percentage(30)
@@ -140,7 +144,7 @@ Flipper.enable_rule :something, percentage_of_actors
 refute Flipper.enabled?(:something, user)
 refute Flipper.enabled?(:something, other_user)
 assert Flipper.enabled?(:something, admin_user)
-Flipper.disable_rule :something, percentage_of_actors
+reset
 
 puts "\n\n% of Actors Per Type Rule"
 percentage_of_actors_per_type = Flipper.any(
@@ -158,7 +162,7 @@ refute Flipper.enabled?(:something, user) # not in the 40% enabled for Users
 assert Flipper.enabled?(:something, other_user)
 assert Flipper.enabled?(:something, admin_user)
 refute Flipper.enabled?(:something, org) # not in the 10% of enabled for Orgs
-Flipper.disable_rule :something, percentage_of_actors_per_type
+reset
 
 puts "\n\nPercentage of Time Rule"
 percentage_of_time_rule = Flipper.random(100).lt(50)
@@ -169,4 +173,25 @@ p enabled: enabled.size
 p disabled: disabled.size
 assert (4_700..5_200).include?(enabled.size)
 assert (4_700..5_200).include?(disabled.size)
-Flipper.disable_rule :something, percentage_of_time_rule
+reset
+
+puts "\n\nChanging single rule to all rule"
+Flipper.enable_rule :something, plan_rule
+Flipper.enable_rule :something, Flipper.rule(:something).all.add(age_rule)
+assert Flipper.enabled?(:something, user)
+refute Flipper.enabled?(:something, admin_user)
+refute Flipper.enabled?(:something, other_user)
+
+puts "\n\nChanging single rule to any rule"
+Flipper.enable_rule :something, plan_rule
+Flipper.enable_rule :something, Flipper.rule(:something).any.add(age_rule, admin_rule)
+assert Flipper.enabled?(:something, user)
+assert Flipper.enabled?(:something, admin_user)
+refute Flipper.enabled?(:something, other_user)
+
+puts "\n\nChanging single rule to any rule by adding to condition"
+Flipper.enable_rule :something, plan_rule
+Flipper.enable_rule :something, Flipper.rule(:something).add(admin_rule)
+assert Flipper.enabled?(:something, user)
+assert Flipper.enabled?(:something, admin_user)
+refute Flipper.enabled?(:something, other_user)
