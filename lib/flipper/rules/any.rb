@@ -13,6 +13,14 @@ module Flipper
         @rules = rules.flatten
       end
 
+      def all
+        Flipper::Rules::All.new(self)
+      end
+
+      def any
+        self
+      end
+
       def value
         {
           "type" => self.class.name.split('::').last,

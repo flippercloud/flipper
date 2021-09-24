@@ -71,6 +71,21 @@ RSpec.describe Flipper::Rules::Any do
     end
   end
 
+  describe "#all" do
+    it "wraps self with all" do
+      result = rule.all
+      expect(result).to be_instance_of(Flipper::Rules::All)
+      expect(result.rules).to eq([rule])
+    end
+  end
+
+  describe "#any" do
+    it "returns self" do
+      result = rule.any
+      expect(result).to be(rule)
+    end
+  end
+
   describe "#value" do
     it "returns type and value" do
       expect(rule.value).to eq({
