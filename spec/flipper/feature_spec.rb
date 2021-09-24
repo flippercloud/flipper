@@ -650,6 +650,18 @@ RSpec.describe Flipper::Feature do
     end
   end
 
+  describe '#rule' do
+    it "returns nil if feature has no rule" do
+      expect(subject.rule).to be(nil)
+    end
+
+    it "returns rule if feature has rule" do
+      rule = Flipper.property(:plan).eq("basic")
+      subject.enable_rule rule
+      expect(subject.rule).to eq(rule)
+    end
+  end
+
   describe '#enable_rule/disable_rule' do
     context "with rule instance" do
       it "updates gate values to equal rule" do

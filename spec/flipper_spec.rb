@@ -108,6 +108,15 @@ RSpec.describe Flipper do
       expect(described_class.boolean).to eq(described_class.instance.boolean)
     end
 
+    it 'delegates rule to instance' do
+      expect(described_class.rule(:search)).to be(nil)
+
+      rule = Flipper.property(:plan).eq("basic")
+      Flipper.instance.enable_rule :search, rule
+
+      expect(described_class.rule(:search)).to eq(rule)
+    end
+
     it 'delegates enable_rule to instance' do
       described_class.enable_rule(:search, rule)
       expect(described_class.instance.enabled?(:search, actor)).to be(true)

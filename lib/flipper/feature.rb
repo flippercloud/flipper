@@ -272,6 +272,10 @@ module Flipper
       Flipper.groups - enabled_groups
     end
 
+    def rule
+      Flipper::Rules.build(rule_value) if rule_value
+    end
+
     # Public: Get the adapter value for the groups gate.
     #
     # Returns Set of String group names.

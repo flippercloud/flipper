@@ -140,17 +140,14 @@ RSpec.describe Flipper::DSL do
   end
 
   describe '#rule' do
-    context 'for Hash' do
-      it 'returns rule instance' do
-        rule = Flipper::Rules::Condition.new(
-          {"type" => "Property", "value" => "plan"},
-          {"type" => "Operator", "value" => "eq"},
-          {"type" => "String", "value" => "basic"}
-        )
-        result = subject.rule(rule.value)
-        expect(result).to be_instance_of(Flipper::Rules::Condition)
-        expect(result.value).to eq(rule.value)
-      end
+    it "returns nil if feature has no rule" do
+      expect(subject.rule(:stats)).to be(nil)
+    end
+
+    it "returns rule if feature has rule" do
+      rule = Flipper.property(:plan).eq("basic")
+      subject[:stats].enable_rule rule
+      expect(subject.rule(:stats)).to eq(rule)
     end
   end
 

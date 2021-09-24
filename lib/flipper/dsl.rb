@@ -263,13 +263,13 @@ module Flipper
       Types::Actor.new(thing)
     end
 
-    # Public: Wraps an object as a Flipper::Rules::Rule.
+    # Public: Gets the rule for the feature.
     #
-    # thing - The rule or Hash that you would like to wrap.
+    # name - The String or Symbol name of the feature.
     #
     # Returns an instance of Flipper::Rules::Rule.
-    def rule(thing)
-      Rules.wrap(thing)
+    def rule(name)
+      feature(name).rule
     end
 
     # Public: Shortcut for getting a percentage of time instance.
