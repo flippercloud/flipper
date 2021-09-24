@@ -61,9 +61,14 @@ module Flipper
         basic_rule = Flipper.property(:plan).eq("basic")
         age_rule = Flipper.property(:age).gte(21)
         any_rule = Flipper.any(basic_rule, age_rule)
+
         assert_equal true, @adapter.enable(@feature, @rule_gate, any_rule)
         result = @adapter.get(@feature)
         assert_equal any_rule.value, result[:rule]
+
+        assert_equal true, @adapter.enable(@feature, @rule_gate, basic_rule)
+        result = @adapter.get(@feature)
+        assert_equal basic_rule.value, result[:rule]
 
         assert_equal true, @adapter.disable(@feature, @rule_gate, basic_rule)
         result = @adapter.get(@feature)

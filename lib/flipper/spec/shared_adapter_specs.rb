@@ -66,9 +66,14 @@ RSpec.shared_examples_for 'a flipper adapter' do
     basic_rule = Flipper.property(:plan).eq("basic")
     age_rule = Flipper.property(:age).gte(21)
     any_rule = Flipper.any(basic_rule, age_rule)
+
     expect(subject.enable(feature, rule_gate, any_rule)).to eq(true)
     result = subject.get(feature)
     expect(result[:rule]).to eq(any_rule.value)
+
+    expect(subject.enable(feature, rule_gate, basic_rule)).to eq(true)
+    result = subject.get(feature)
+    expect(result[:rule]).to eq(basic_rule.value)
 
     expect(subject.disable(feature, rule_gate, basic_rule)).to eq(true)
     result = subject.get(feature)
