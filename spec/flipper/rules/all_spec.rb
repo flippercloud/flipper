@@ -62,7 +62,7 @@ RSpec.describe Flipper::Rules::All do
       end
     end
 
-    context "for Array with All rule" do
+    context "for Array with Any rule" do
       it "builds instance" do
         instance = Flipper::Rules::All.build(any_rule.value)
         expect(instance).to be_instance_of(Flipper::Rules::All)
