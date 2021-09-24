@@ -8,7 +8,7 @@ module Flipper
 
       # Internal: Name converted to value safe for adapter.
       def key
-        :rules
+        :rule
       end
 
       def data_type
@@ -16,18 +16,17 @@ module Flipper
       end
 
       def enabled?(value)
-        !value.empty?
+        value && !value.empty?
       end
 
       # Internal: Checks if the gate is open for a thing.
       #
       # Returns true if gate open for thing, false if not.
       def open?(context)
-        rules = context.values[key]
-        rules.any? { |hash|
-          rule = Flipper::Rules.build(hash)
-          rule.matches?(context.feature_name, context.thing)
-        }
+        data = context.values[key]
+        return false if data.nil? || data.empty?
+        rule = Flipper::Rules.build(data)
+        rule.matches?(context.feature_name, context.thing)
       end
 
       def protects?(thing)

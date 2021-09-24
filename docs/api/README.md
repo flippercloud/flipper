@@ -93,9 +93,9 @@ Returns an array of feature objects:
           "value": []
         },
         {
-          "key": "rules",
+          "key": "rule",
           "name": "rule",
-          "value": []
+          "value": nil
         },
         {
           "key": "percentage_of_actors",
@@ -129,9 +129,9 @@ Returns an array of feature objects:
           "value": []
         },
         {
-          "key": "rules",
+          "key": "rule",
           "name": "rule",
-          "value": []
+          "value": nil
         },
         {
           "key": "percentage_of_actors",
@@ -210,9 +210,9 @@ Returns an individual feature object:
       "value": []
     },
     {
-      "key": "rules",
+      "key": "rule",
       "name": "rule",
-      "value": []
+      "value": nil
     },
     {
       "key": "percentage_of_actors",
@@ -323,9 +323,9 @@ Successful enabling of the boolean gate will return a 200 HTTP status and the fe
       "value": []
     },
     {
-      "key": "rules",
+      "key": "rule",
       "name": "rule",
-      "value": []
+      "value": nil
     },
     {
       "key": "percentage_of_actors",
@@ -383,9 +383,9 @@ Successful disabling of the boolean gate will return a 200 HTTP status and the f
       "value": []
     },
     {
-      "key": "rules",
+      "key": "rule",
       "name": "rule",
-      "value": []
+      "value": nil
     },
     {
       "key": "percentage_of_actors",
@@ -405,7 +405,7 @@ Successful disabling of the boolean gate will return a 200 HTTP status and the f
 
 **URL**
 
-`POST /features/{feature_name}/rules`
+`POST /features/{feature_name}/rule`
 
 **Parameters**
 
@@ -413,12 +413,12 @@ Successful disabling of the boolean gate will return a 200 HTTP status and the f
 
 * `type` - The type of rule being enabled
 
-* `value` - The JSON representation of the rule being enabled.
+* `value` - The JSON representation of the rule.
 
 **Request**
 
 ```
-curl -X POST -H "Content-Type: application/json" -d '{"type":"Condition","value":{"left":{"type":"Property","value":"plan"},"operator":{"type":"Operator","value":"eq"},"right":{"type":"String","value":"basic"}}}' http://example.com/flipper/api/features/reports/rules
+curl -X POST -H "Content-Type: application/json" -d '{"type":"Condition","value":{"left":{"type":"Property","value":"plan"},"operator":{"type":"Operator","value":"eq"},"right":{"type":"String","value":"basic"}}}' http://example.com/flipper/api/features/reports/rule
 ```
 
 **Response**
@@ -441,24 +441,22 @@ Successful enabling of the group will return a 200 HTTP status and the feature o
       "value": []
     },
     {
-      "key": "rules",
+      "key": "rule",
       "name": "rule",
-      "value": [
-        {
-          "type": "Condition",
-          "value": {
-            "left": {
-              "type": "Property",
-              "value": "plan"
-            },
-            "operator": {
-              "type": "Operator",
-              "value": "eq"
-            },
-            "right": {
-              "type": "String",
-              "value": "basic"
-            }
+      "value": {
+        "type": "Condition",
+        "value": {
+          "left": {
+            "type": "Property",
+            "value": "plan"
+          },
+          "operator": {
+            "type": "Operator",
+            "value": "eq"
+          },
+          "right": {
+            "type": "String",
+            "value": "basic"
           }
         }
       ]
@@ -486,7 +484,7 @@ Successful enabling of the group will return a 200 HTTP status and the feature o
 
 **URL**
 
-`DELETE /features/{feature_name}/rules`
+`DELETE /features/{feature_name}/rule`
 
 **Parameters**
 
@@ -494,12 +492,12 @@ Successful enabling of the group will return a 200 HTTP status and the feature o
 
 * `type` - The type of rule being enabled
 
-* `value` - The JSON representation of the rule being enabled.
+* `value` - The JSON representation of the rule.
 
 **Request**
 
 ```
-curl -X DELETE -H "Content-Type: application/json" -d '{"type":"Condition","value":{"left":{"type":"Property","value":"plan"},"operator":{"type":"Operator","value":"eq"},"right":{"type":"String","value":"basic"}}}' http://example.com/flipper/api/features/reports/rules
+curl -X DELETE -H "Content-Type: application/json" -d '{"type":"Condition","value":{"left":{"type":"Property","value":"plan"},"operator":{"type":"Operator","value":"eq"},"right":{"type":"String","value":"basic"}}}' http://example.com/flipper/api/features/reports/rule
 ```
 
 **Response**
@@ -522,9 +520,9 @@ Successful disabling of the group will return a 200 HTTP status and the feature 
       "value": []
     },
     {
-      "key": "rules",
+      "key": "rule",
       "name": "rule",
-      "value": []
+      "value": nil
     },
     {
       "key": "percentage_of_actors",
@@ -588,9 +586,9 @@ Successful enabling of the group will return a 200 HTTP status and the feature o
       "value": []
     },
     {
-      "key": "rules",
+      "key": "rule",
       "name": "rule",
-      "value": []
+      "value": nil
     },
     {
       "key": "percentage_of_actors",
@@ -649,9 +647,9 @@ Successful disabling of the group will return a 200 HTTP status and the feature 
       "value": []
     },
     {
-      "key": "rules",
+      "key": "rule",
       "name": "rule",
-      "value": []
+      "value": nil
     },
     {
       "key": "percentage_of_actors",
@@ -710,9 +708,9 @@ Successful enabling of the actor will return a 200 HTTP status and the feature o
       "value": ["User;1"]
     },
     {
-      "key": "rules",
+      "key": "rule",
       "name": "rule",
-      "value": []
+      "value": nil
     },
     {
       "key": "percentage_of_actors",
@@ -771,9 +769,9 @@ Successful disabling of the actor will return a 200 HTTP status and the feature 
       "value": []
     },
     {
-      "key": "rules",
+      "key": "rule",
       "name": "rule",
-      "value": []
+      "value": nil
     },
     {
       "key": "percentage_of_actors",
@@ -832,9 +830,9 @@ Successful enabling of a percentage of actors will return a 200 HTTP status and 
       "value": []
     },
     {
-      "key": "rules",
+      "key": "rule",
       "name": "rule",
-      "value": []
+      "value": nil
     },
     {
       "key": "percentage_of_actors",
@@ -891,9 +889,9 @@ Successful disabling of a percentage of actors will set the percentage to 0 and 
       "value": []
     },
     {
-      "key": "rules",
+      "key": "rule",
       "name": "rule",
-      "value": []
+      "value": nil
     },
     {
       "key": "percentage_of_actors",
@@ -952,9 +950,9 @@ Successful enabling of a percentage of time will return a 200 HTTP status and th
       "value": []
     },
     {
-      "key": "rules",
+      "key": "rule",
       "name": "rule",
-      "value": []
+      "value": nil
     },
     {
       "key": "percentage_of_actors",
@@ -1011,9 +1009,9 @@ Successful disabling of a percentage of time will set the percentage to 0 and re
       "value": []
     },
     {
-      "key": "rules",
+      "key": "rule",
       "name": "rule",
-      "value": []
+      "value": nil
     },
     {
       "key": "percentage_of_actors",

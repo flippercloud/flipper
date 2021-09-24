@@ -93,7 +93,7 @@ module Flipper
           when :set
             set_add key(feature, gate), thing.value.to_s
           when :json
-            set_add key(feature, gate), JSON.dump(thing.value)
+            write key(feature, gate), JSON.dump(thing.value)
           else
             raise "#{gate} is not supported by this adapter yet"
           end
@@ -117,7 +117,7 @@ module Flipper
           end
         when :json
           @store.transaction do
-            set_delete key(feature, gate), JSON.dump(thing.value)
+            delete key(feature, gate)
           end
         else
           raise "#{gate} is not supported by this adapter yet"
@@ -160,14 +160,16 @@ module Flipper
         result = {}
 
         feature.gates.each do |gate|
+          key = key(feature, gate)
           result[gate.key] =
             case gate.data_type
             when :boolean, :integer
-              read key(feature, gate)
+              read key
             when :set
-              set_members key(feature, gate)
+              set_members key
             when :json
-              set_members(key(feature, gate)).map { |member| JSON.parse(member) }.to_set
+              value = read(key)
+              JSON.parse(value) if value
             else
               raise "#{gate} is not supported by this adapter yet"
             end

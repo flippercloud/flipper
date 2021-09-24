@@ -58,29 +58,16 @@ module Flipper
       end
 
       def test_can_enable_disable_and_get_value_for_rule_gate
-        basic_rule = Flipper::Rules::Condition.new(
-          {"type" => "Property", "value" => "plan"},
-          {"type" => "Operator", "value" => "eq"},
-          {"type" => "String", "value" => "basic"}
-        )
-        age_rule = Flipper::Rules::Condition.new(
-          {"type" => "Property", "value" => "age"},
-          {"type" => "Operator", "value" => "gte"},
-          {"type" => "Integer", "value" => 21}
-        )
-        assert_equal true, @adapter.enable(@feature, @rule_gate, basic_rule)
-        assert_equal true, @adapter.enable(@feature, @rule_gate, age_rule)
+        basic_rule = Flipper.property(:plan).eq("basic")
+        age_rule = Flipper.property(:age).gte(21)
+        any_rule = Flipper.any(basic_rule, age_rule)
+        assert_equal true, @adapter.enable(@feature, @rule_gate, any_rule)
         result = @adapter.get(@feature)
-        assert_includes result[:rules], basic_rule.value
-        assert_includes result[:rules], age_rule.value
+        assert_equal any_rule.value, result[:rule]
 
         assert_equal true, @adapter.disable(@feature, @rule_gate, basic_rule)
         result = @adapter.get(@feature)
-        assert_includes result[:rules], age_rule.value
-
-        assert_equal true, @adapter.disable(@feature, @rule_gate, age_rule)
-        result = @adapter.get(@feature)
-        assert result[:rules].empty?
+        assert_nil result[:rule]
       end
 
       def test_can_enable_disable_get_value_for_group_gate

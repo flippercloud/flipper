@@ -114,7 +114,7 @@ module Flipper
     # rule - a Flipper::Rules::Rule instance or a Hash.
     #
     # Returns result of Feature#disable.
-    def disable_rule(name, rule)
+    def disable_rule(name, rule = nil)
       feature(name).disable_rule(rule)
     end
 

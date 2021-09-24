@@ -72,7 +72,7 @@ module Flipper
           moneta[key(feature.key)] = result
         when :json
           result = get(feature)
-          result[gate.key] << thing.value
+          result[gate.key] = thing.value
           moneta[key(feature.key)] = result
         end
         true
@@ -99,7 +99,7 @@ module Flipper
           moneta[key(feature.key)] = result
         when :json
           result = get(feature)
-          result[gate.key] = result[gate.key].delete(thing.value)
+          result[gate.key] = nil
           moneta[key(feature.key)] = result
         end
         true

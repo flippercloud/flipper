@@ -19,7 +19,7 @@ RSpec.describe Flipper::Api::V1::Actions::RulesGate do
   describe 'enable' do
     before do
       flipper[:my_feature].disable_rule(rule)
-      post '/features/my_feature/rules', JSON.dump(rule.value), "CONTENT_TYPE" => "application/json"
+      post '/features/my_feature/rule', JSON.dump(rule.value), "CONTENT_TYPE" => "application/json"
     end
 
     it 'enables feature for rule' do
@@ -29,15 +29,15 @@ RSpec.describe Flipper::Api::V1::Actions::RulesGate do
     end
 
     it 'returns decorated feature with rule enabled' do
-      gate = json_response['gates'].find { |gate| gate['key'] == 'rules' }
-      expect(gate['value']).to eq([rule.value])
+      gate = json_response['gates'].find { |gate| gate['key'] == 'rule' }
+      expect(gate['value']).to eq(rule.value)
     end
   end
 
   describe 'disable' do
     before do
       flipper[:my_feature].enable_rule(rule)
-      delete '/features/my_feature/rules', JSON.dump(rule.value), "CONTENT_TYPE" => "application/json"
+      delete '/features/my_feature/rule', JSON.dump(rule.value), "CONTENT_TYPE" => "application/json"
     end
 
     it 'disables rule for feature' do
@@ -47,15 +47,15 @@ RSpec.describe Flipper::Api::V1::Actions::RulesGate do
     end
 
     it 'returns decorated feature with rule gate disabled' do
-      gate = json_response['gates'].find { |gate| gate['key'] == 'rules' }
-      expect(gate['value']).to be_empty
+      gate = json_response['gates'].find { |gate| gate['key'] == 'rule' }
+      expect(gate['value']).to be(nil)
     end
   end
 
   describe 'enable feature with slash in name' do
     before do
       flipper["my/feature"].disable_rule(rule)
-      post '/features/my/feature/rules', JSON.dump(rule.value), "CONTENT_TYPE" => "application/json"
+      post '/features/my/feature/rule', JSON.dump(rule.value), "CONTENT_TYPE" => "application/json"
     end
 
     it 'enables feature for rule' do
@@ -65,15 +65,15 @@ RSpec.describe Flipper::Api::V1::Actions::RulesGate do
     end
 
     it 'returns decorated feature with rule enabled' do
-      gate = json_response['gates'].find { |gate| gate['key'] == 'rules' }
-      expect(gate['value']).to eq([rule.value])
+      gate = json_response['gates'].find { |gate| gate['key'] == 'rule' }
+      expect(gate['value']).to eq(rule.value)
     end
   end
 
   describe 'enable feature with space in name' do
     before do
       flipper["sp ace"].disable_rule(rule)
-      post '/features/sp%20ace/rules', JSON.dump(rule.value), "CONTENT_TYPE" => "application/json"
+      post '/features/sp%20ace/rule', JSON.dump(rule.value), "CONTENT_TYPE" => "application/json"
     end
 
     it 'enables feature for rule' do
@@ -83,8 +83,8 @@ RSpec.describe Flipper::Api::V1::Actions::RulesGate do
     end
 
     it 'returns decorated feature with rule enabled' do
-      gate = json_response['gates'].find { |gate| gate['key'] == 'rules' }
-      expect(gate['value']).to eq([rule.value])
+      gate = json_response['gates'].find { |gate| gate['key'] == 'rule' }
+      expect(gate['value']).to eq(rule.value)
     end
   end
 
@@ -92,7 +92,7 @@ RSpec.describe Flipper::Api::V1::Actions::RulesGate do
     before do
       data = rule.value
       data.delete("type")
-      post '/features/my_feature/rules', JSON.dump(data), "CONTENT_TYPE" => "application/json"
+      post '/features/my_feature/rule', JSON.dump(data), "CONTENT_TYPE" => "application/json"
     end
 
     it 'returns correct error response' do
@@ -105,12 +105,11 @@ RSpec.describe Flipper::Api::V1::Actions::RulesGate do
     before do
       data = rule.value
       data.delete("type")
-      delete '/features/my_feature/rules'
+      delete '/features/my_feature/rule'
     end
 
     it 'returns correct error response' do
-      expect(last_response.status).to eq(422)
-      expect(json_response).to eq(api_rule_type_invalid_response)
+      expect(last_response.status).to eq(200)
     end
   end
 
@@ -118,7 +117,7 @@ RSpec.describe Flipper::Api::V1::Actions::RulesGate do
     before do
       data = rule.value
       data.delete("value")
-      post '/features/my_feature/rules', JSON.dump(data), "CONTENT_TYPE" => "application/json"
+      post '/features/my_feature/rule', JSON.dump(data), "CONTENT_TYPE" => "application/json"
     end
 
     it 'returns correct error response' do
@@ -131,12 +130,11 @@ RSpec.describe Flipper::Api::V1::Actions::RulesGate do
     before do
       data = rule.value
       data.delete("value")
-      delete '/features/my_feature/rules', JSON.dump(data), "CONTENT_TYPE" => "application/json"
+      delete '/features/my_feature/rule', JSON.dump(data), "CONTENT_TYPE" => "application/json"
     end
 
     it 'returns correct error response' do
-      expect(last_response.status).to eq(422)
-      expect(json_response).to eq(api_rule_value_invalid_response)
+      expect(last_response.status).to eq(200)
     end
   end
 
@@ -144,7 +142,7 @@ RSpec.describe Flipper::Api::V1::Actions::RulesGate do
     before do
       data = rule.value
       data["type"] = nil
-      post '/features/my_feature/rules', JSON.dump(data), "CONTENT_TYPE" => "application/json"
+      post '/features/my_feature/rule', JSON.dump(data), "CONTENT_TYPE" => "application/json"
     end
 
     it 'returns correct error response' do
@@ -157,12 +155,11 @@ RSpec.describe Flipper::Api::V1::Actions::RulesGate do
     before do
       data = rule.value
       data["type"] = nil
-      delete '/features/my_feature/rules', JSON.dump(data), "CONTENT_TYPE" => "application/json"
+      delete '/features/my_feature/rule', JSON.dump(data), "CONTENT_TYPE" => "application/json"
     end
 
     it 'returns correct error response' do
-      expect(last_response.status).to eq(422)
-      expect(json_response).to eq(api_rule_type_invalid_response)
+      expect(last_response.status).to eq(200)
     end
   end
 
@@ -170,7 +167,7 @@ RSpec.describe Flipper::Api::V1::Actions::RulesGate do
     before do
       data = rule.value
       data["value"] = nil
-      post '/features/my_feature/rules', JSON.dump(data), "CONTENT_TYPE" => "application/json"
+      post '/features/my_feature/rule', JSON.dump(data), "CONTENT_TYPE" => "application/json"
     end
 
     it 'returns correct error response' do
@@ -183,18 +180,17 @@ RSpec.describe Flipper::Api::V1::Actions::RulesGate do
     before do
       data = rule.value
       data["value"] = nil
-      delete '/features/my_feature/rules', JSON.dump(data), "CONTENT_TYPE" => "application/json"
+      delete '/features/my_feature/rule', JSON.dump(data), "CONTENT_TYPE" => "application/json"
     end
 
     it 'returns correct error response' do
-      expect(last_response.status).to eq(422)
-      expect(json_response).to eq(api_rule_value_invalid_response)
+      expect(last_response.status).to eq(200)
     end
   end
 
   describe 'enable missing feature' do
     before do
-      post '/features/my_feature/rules', JSON.dump(rule.value), "CONTENT_TYPE" => "application/json"
+      post '/features/my_feature/rule', JSON.dump(rule.value), "CONTENT_TYPE" => "application/json"
     end
 
     it 'enables rule for feature' do
@@ -204,14 +200,14 @@ RSpec.describe Flipper::Api::V1::Actions::RulesGate do
     end
 
     it 'returns decorated feature with rule enabled' do
-      gate = json_response['gates'].find { |gate| gate['key'] == 'rules' }
-      expect(gate['value']).to eq([rule.value])
+      gate = json_response['gates'].find { |gate| gate['key'] == 'rule' }
+      expect(gate['value']).to eq(rule.value)
     end
   end
 
   describe 'disable missing feature' do
     before do
-      delete '/features/my_feature/rules', JSON.dump(rule.value), "CONTENT_TYPE" => "application/json"
+      delete '/features/my_feature/rule', "CONTENT_TYPE" => "application/json"
     end
 
     it 'disables rule for feature' do
@@ -221,8 +217,8 @@ RSpec.describe Flipper::Api::V1::Actions::RulesGate do
     end
 
     it 'returns decorated feature with rule gate disabled' do
-      gate = json_response['gates'].find { |gate| gate['key'] == 'rules' }
-      expect(gate['value']).to be_empty
+      gate = json_response['gates'].find { |gate| gate['key'] == 'rule' }
+      expect(gate['value']).to be(nil)
     end
   end
 end

@@ -8,21 +8,20 @@ module Flipper
         class RulesGate < Api::Action
           include FeatureNameFromRoute
 
-          route %r{\A/features/(?<feature_name>.*)/rules/?\Z}
+          route %r{\A/features/(?<feature_name>.*)/rule/?\Z}
 
           def post
             ensure_valid_params
             feature = flipper[feature_name]
-            feature.enable Flipper::Rules.build(rule_hash)
+            feature.enable_rule Flipper::Rules.build(rule_hash)
 
             decorated_feature = Decorators::Feature.new(feature)
             json_response(decorated_feature.as_json, 200)
           end
 
           def delete
-            ensure_valid_params
             feature = flipper[feature_name]
-            feature.disable Flipper::Rules.build(rule_hash)
+            feature.disable_rule
 
             decorated_feature = Decorators::Feature.new(feature)
             json_response(decorated_feature.as_json, 200)

@@ -54,7 +54,7 @@ module Flipper
         @feature_class = options.fetch(:feature_class) { Feature }
         @gate_class = options.fetch(:gate_class) { Gate }
 
-        warn VALUE_TO_TEXT_WARNING unless value_is_text?
+        warn VALUE_TO_TEXT_WARNING if value_not_text?
       end
 
       # Public: The set of known features.
@@ -139,8 +139,7 @@ module Flipper
         when :set
           enable_multi(feature, gate, thing)
         when :json
-          raise VALUE_TO_TEXT_WARNING unless value_is_text?
-          enable_multi(feature, gate, thing)
+          set(feature, gate, thing, json: true)
         else
           unsupported_data_type gate.data_type
         end
@@ -161,7 +160,9 @@ module Flipper
           clear(feature)
         when :integer
           set(feature, gate, thing)
-        when :set, :json
+        when :json
+          delete(feature, gate)
+        when :set
           @gate_class.where(gate_attrs(feature, gate, thing, json: gate.data_type == :json)).delete
         else
           unsupported_data_type gate.data_type
@@ -178,20 +179,23 @@ module Flipper
 
       def set(feature, gate, thing, options = {})
         clear_feature = options.fetch(:clear, false)
-        args = {
-          feature_key: feature.key,
-          key: gate.key.to_s,
-        }
+        json_feature = options.fetch(:json, false)
+
+        raise VALUE_TO_TEXT_WARNING if json_feature && value_not_text?
 
         @gate_class.db.transaction do
           clear(feature) if clear_feature
-          @gate_class.where(args).delete
+          delete(feature, gate)
 
           begin
-            @gate_class.create(gate_attrs(feature, gate, thing))
+            @gate_class.create(gate_attrs(feature, gate, thing, json: json_feature))
           rescue ::Sequel::UniqueConstraintViolation
           end
         end
+      end
+
+      def delete(feature, gate)
+        @gate_class.where(feature_key: feature.key, key: gate.key.to_s).delete
       end
 
       def enable_multi(feature, gate, thing)
@@ -225,7 +229,9 @@ module Flipper
             when :set
               db_gates.select { |db_gate| db_gate.key == gate.key.to_s }.map(&:value).to_set
             when :json
-              db_gates.select { |db_gate| db_gate.key == gate.key.to_s }.map {|gate| JSON.load(gate.value) }.to_set
+              if detected_db_gate = db_gates.detect { |db_gate| db_gate.key == gate.key.to_s }
+                JSON.parse(detected_db_gate.value)
+              end
             else
               unsupported_data_type gate.data_type
             end
@@ -234,8 +240,8 @@ module Flipper
 
       # Check if value column is text instead of string
       # See TODO:link/to/PR
-      def value_is_text?
-        @gate_class.db_schema[:value][:db_type] == "text"
+      def value_not_text?
+        @gate_class.db_schema[:value][:db_type] != "text"
       end
     end
   end

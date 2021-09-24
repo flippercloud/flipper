@@ -25,7 +25,7 @@ module Flipper
           private
 
           # Set of types that should be represented as Array in JSON.
-          JSON_ARRAY_TYPES = Set[:set, :json].freeze
+          JSON_ARRAY_TYPES = Set[:set].freeze
 
           # json doesn't like sets
           def value_as_json

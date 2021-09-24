@@ -9,7 +9,7 @@ module Flipper
       class FeatureSynchronizer
         extend Forwardable
 
-        def_delegator :@local_gate_values, :rules, :local_rules
+        def_delegator :@local_gate_values, :rule, :local_rule
         def_delegator :@local_gate_values, :boolean, :local_boolean
         def_delegator :@local_gate_values, :actors, :local_actors
         def_delegator :@local_gate_values, :groups, :local_groups
@@ -18,7 +18,7 @@ module Flipper
         def_delegator :@local_gate_values, :percentage_of_time,
                       :local_percentage_of_time
 
-        def_delegator :@remote_gate_values, :rules, :remote_rules
+        def_delegator :@remote_gate_values, :rule, :remote_rule
         def_delegator :@remote_gate_values, :boolean, :remote_boolean
         def_delegator :@remote_gate_values, :actors, :remote_actors
         def_delegator :@remote_gate_values, :groups, :remote_groups
@@ -44,7 +44,7 @@ module Flipper
             @feature.disable if local_boolean_enabled?
             sync_groups
             sync_actors
-            sync_rules
+            sync_rule
             sync_percentage_of_actors
             sync_percentage_of_time
           end
@@ -52,16 +52,10 @@ module Flipper
 
         private
 
-        def sync_rules
-          remote_rules_added = remote_rules - local_rules
-          remote_rules_added.each do |rule_hash|
-            @feature.enable_rule Rules.build(rule_hash)
-          end
+        def sync_rule
+          return if local_rule == remote_rule
 
-          remote_rules_removed = local_rules - remote_rules
-          remote_rules_removed.each do |rule_hash|
-            @feature.disable_rule Rules.build(rule_hash)
-          end
+          @feature.enable_rule remote_rule
         end
 
         def sync_actors

@@ -66,7 +66,7 @@ RSpec.describe Flipper::Adapters::Sync::FeatureSynchronizer do
         boolean: nil,
         actors: Set["1"],
         groups: Set["staff"],
-        rules: Set[plan_rule.value],
+        rule: plan_rule.value,
         percentage_of_time: 10,
         percentage_of_actors: 15,
       }
@@ -78,42 +78,31 @@ RSpec.describe Flipper::Adapters::Sync::FeatureSynchronizer do
       expect(local_gate_values_hash.fetch(:boolean)).to be(nil)
       expect(local_gate_values_hash.fetch(:actors)).to eq(Set["1"])
       expect(local_gate_values_hash.fetch(:groups)).to eq(Set["staff"])
-      expect(local_gate_values_hash.fetch(:rules)).to eq(Set[plan_rule.value])
+      expect(local_gate_values_hash.fetch(:rule)).to eq(plan_rule.value)
       expect(local_gate_values_hash.fetch(:percentage_of_time)).to eq("10")
       expect(local_gate_values_hash.fetch(:percentage_of_actors)).to eq("15")
     end
 
-    it "adds remotely added rules" do
-      remote = Flipper::GateValues.new(rules: Set[plan_rule.value, age_rule.value])
+    it "updates rule when remote is updated" do
+      any_rule = Flipper.any(plan_rule, age_rule)
+      remote = Flipper::GateValues.new(rule: any_rule.value)
       feature.enable_rule(age_rule)
       adapter.reset
 
       described_class.new(feature, feature.gate_values, remote).call
 
-      expect(feature.rules_value).to eq(Set[plan_rule.value, age_rule.value])
+      expect(feature.rule_value).to eq(any_rule.value)
       expect_only_enable
     end
 
-    it "removes remotely removed rules" do
-      remote = Flipper::GateValues.new(rules: Set[plan_rule.value])
-      feature.enable_rule(plan_rule)
-      feature.enable_rule(age_rule)
-      adapter.reset
-
-      described_class.new(feature, feature.gate_values, remote).call
-
-      expect(feature.rules_value).to eq(Set[plan_rule.value])
-      expect_only_disable
-    end
-
-    it "does nothing to rules if in sync" do
-      remote = Flipper::GateValues.new(rules: Set[plan_rule.value])
+    it "does nothing to rule if in sync" do
+      remote = Flipper::GateValues.new(rule: plan_rule.value)
       feature.enable_rule(plan_rule)
       adapter.reset
 
       described_class.new(feature, feature.gate_values, remote).call
 
-      expect(feature.rules_value).to eq(Set[plan_rule.value])
+      expect(feature.rule_value).to eq(plan_rule.value)
       expect_no_enable_or_disable
     end
 

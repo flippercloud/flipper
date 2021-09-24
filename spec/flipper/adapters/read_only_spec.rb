@@ -56,21 +56,21 @@ RSpec.describe Flipper::Adapters::ReadOnly do
     adapter.enable(feature, time_gate, flipper.time(45))
     adapter.enable(feature, rule_gate, rule)
 
-    expect(subject.get(feature)).to eq(boolean: 'true',
-                                       groups: Set['admins'],
-                                       actors: Set['22'],
-                                       rules: Set[
-                                         {
-                                           "type" => "Condition",
-                                           "value" => {
-                                             "left" => {"type" => "Property", "value" => "plan"},
-                                             "operator" => {"type" => "Operator", "value" => "eq"},
-                                             "right" => {"type" => "String", "value" => "basic"},
-                                           }
-                                         }
-                                      ],
-                                       percentage_of_actors: '25',
-                                       percentage_of_time: '45')
+    expect(subject.get(feature)).to eq({
+      boolean: 'true',
+      groups: Set['admins'],
+      actors: Set['22'],
+      rule: {
+        "type" => "Condition",
+        "value" => {
+          "left" => {"type" => "Property", "value" => "plan"},
+          "operator" => {"type" => "Operator", "value" => "eq"},
+          "right" => {"type" => "String", "value" => "basic"},
+        }
+      },
+      percentage_of_actors: '25',
+      percentage_of_time: '45',
+    })
   end
 
   it 'can get features' do

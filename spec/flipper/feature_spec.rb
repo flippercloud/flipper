@@ -652,32 +652,34 @@ RSpec.describe Flipper::Feature do
 
   describe '#enable_rule/disable_rule' do
     context "with rule instance" do
-      it "updates gate values to include rule" do
+      it "updates gate values to equal rule" do
         rule = Flipper::Rules::Condition.new(
           {"type" => "Property", "value" => "plan"},
           {"type" => "Operator", "value" => "eq"},
           {"type" => "String", "value" => "basic"}
         )
-        expect(subject.gate_values.rules).to be_empty
+        other_rule = Flipper.property(:age).gte(21)
+        expect(subject.gate_values.rule).to be(nil)
         subject.enable_rule(rule)
-        expect(subject.gate_values.rules).to eq(Set[rule.value])
-        subject.disable_rule(rule)
-        expect(subject.gate_values.rules).to be_empty
+        expect(subject.gate_values.rule).to eq(rule.value)
+        subject.disable_rule(other_rule)
+        expect(subject.gate_values.rule).to be(nil)
       end
     end
 
     context "with Hash" do
-      it "updates gate values to include rule" do
+      it "updates gate values to equal rule" do
         rule = Flipper::Rules::Condition.new(
           {"type" => "Property", "value" => "plan"},
           {"type" => "Operator", "value" => "eq"},
           {"type" => "String", "value" => "basic"}
         )
-        expect(subject.gate_values.rules).to be_empty
+        other_rule = Flipper.property(:age).gte(21)
+        expect(subject.gate_values.rule).to be(nil)
         subject.enable_rule(rule.value)
-        expect(subject.gate_values.rules).to eq(Set[rule.value])
-        subject.disable_rule(rule.value)
-        expect(subject.gate_values.rules).to be_empty
+        expect(subject.gate_values.rule).to eq(rule.value)
+        subject.disable_rule(other_rule.value)
+        expect(subject.gate_values.rule).to be(nil)
       end
     end
   end

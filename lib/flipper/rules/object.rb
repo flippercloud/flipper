@@ -132,17 +132,6 @@ module Flipper
           raise ArgumentError, "object must be integer or property" unless object.is_a?(Integer)
         end
       end
-
-      def self.array_or_object(object)
-        case object
-        when Array
-          Object.new(object)
-        when Flipper::Rules::Object
-          object
-        else
-          raise ArgumentError, "object must be array or property" unless object.is_a?(Array)
-        end
-      end
     end
   end
 end

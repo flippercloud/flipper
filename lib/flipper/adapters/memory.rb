@@ -72,7 +72,7 @@ module Flipper
         when :set
           @source[feature.key][gate.key] << thing.value.to_s
         when :json
-          @source[feature.key][gate.key] << thing.value
+          @source[feature.key][gate.key] = thing.value
         else
           raise "#{gate} is not supported by this adapter yet"
         end
@@ -92,7 +92,7 @@ module Flipper
         when :set
           @source[feature.key][gate.key].delete thing.value.to_s
         when :json
-          @source[feature.key][gate.key].delete thing.value
+          @source[feature.key].delete(gate.key)
         else
           raise "#{gate} is not supported by this adapter yet"
         end

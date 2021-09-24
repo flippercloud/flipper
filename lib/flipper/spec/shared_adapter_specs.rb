@@ -63,29 +63,16 @@ RSpec.shared_examples_for 'a flipper adapter' do
   end
 
   it 'can enable, disable and get value for rule gate' do
-    basic_rule = Flipper::Rules::Condition.new(
-      {"type" => "Property", "value" => "plan"},
-      {"type" => "Operator", "value" => "eq"},
-      {"type" => "String", "value" => "basic"}
-    )
-    age_rule = Flipper::Rules::Condition.new(
-      {"type" => "Property", "value" => "age"},
-      {"type" => "Operator", "value" => "gte"},
-      {"type" => "Integer", "value" => 21}
-    )
-    expect(subject.enable(feature, rule_gate, basic_rule)).to eq(true)
-    expect(subject.enable(feature, rule_gate, age_rule)).to eq(true)
+    basic_rule = Flipper.property(:plan).eq("basic")
+    age_rule = Flipper.property(:age).gte(21)
+    any_rule = Flipper.any(basic_rule, age_rule)
+    expect(subject.enable(feature, rule_gate, any_rule)).to eq(true)
     result = subject.get(feature)
-    expect(result[:rules]).to include(basic_rule.value)
-    expect(result[:rules]).to include(age_rule.value)
+    expect(result[:rule]).to eq(any_rule.value)
 
     expect(subject.disable(feature, rule_gate, basic_rule)).to eq(true)
     result = subject.get(feature)
-    expect(result[:rules]).to include(age_rule.value)
-
-    expect(subject.disable(feature, rule_gate, age_rule)).to eq(true)
-    result = subject.get(feature)
-    expect(result[:rules]).to be_empty
+    expect(result[:rule]).to be(nil)
   end
 
   it 'can enable, disable and get value for group gate' do

@@ -173,8 +173,12 @@ module Flipper
     # rule - a rule or Hash that can be converted to a rule.
     #
     # Returns result of disable.
-    def disable_rule(rule)
-      disable Rules.wrap(rule)
+    def disable_rule(rule = nil)
+      if rule
+        disable Rules.wrap(rule)
+      else
+        disable Flipper.object(true).eq(false)
+      end
     end
 
     # Public: Disables a feature for an actor.
@@ -275,11 +279,11 @@ module Flipper
       gate_values.groups
     end
 
-    # Public: Get the adapter value for the rules gate.
+    # Public: Get the adapter value for the rule gate.
     #
-    # Returns Set of rules.
-    def rules_value
-      gate_values.rules
+    # Returns rule.
+    def rule_value
+      gate_values.rule
     end
 
     # Public: Get the adapter value for the actors gate.

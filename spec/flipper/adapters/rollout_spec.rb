@@ -37,7 +37,7 @@ RSpec.describe Flipper::Adapters::Rollout do
         boolean: nil,
         groups: Set.new([:admins]),
         actors: Set.new(["1"]),
-        rules: Set.new,
+        rule: nil,
         percentage_of_actors: 20.0,
         percentage_of_time: nil,
       }
@@ -51,7 +51,7 @@ RSpec.describe Flipper::Adapters::Rollout do
         boolean: true,
         groups: Set.new,
         actors: Set.new,
-        rules: Set.new,
+        rule: nil,
         percentage_of_actors: nil,
         percentage_of_time: nil,
       }
@@ -67,7 +67,7 @@ RSpec.describe Flipper::Adapters::Rollout do
         boolean: true,
         groups: Set.new,
         actors: Set.new,
-        rules: Set.new,
+        rule: nil,
         percentage_of_actors: nil,
         percentage_of_time: nil,
       }

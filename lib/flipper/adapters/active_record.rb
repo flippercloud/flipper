@@ -54,7 +54,7 @@ module Flipper
         @feature_class = options.fetch(:feature_class) { Feature }
         @gate_class = options.fetch(:gate_class) { Gate }
 
-        warn VALUE_TO_TEXT_WARNING unless value_is_text?
+        warn VALUE_TO_TEXT_WARNING if value_not_text?
       end
 
       # Public: The set of known features.
@@ -135,10 +135,9 @@ module Flipper
           set(feature, gate, thing, clear: true)
         when :integer
           set(feature, gate, thing)
-        when :set
-          enable_multi(feature, gate, thing)
         when :json
-          raise VALUE_TO_TEXT_WARNING unless value_is_text?
+          set(feature, gate, thing, json: true)
+        when :set
           enable_multi(feature, gate, thing)
         else
           unsupported_data_type gate.data_type
@@ -160,7 +159,9 @@ module Flipper
           clear(feature)
         when :integer
           set(feature, gate, thing)
-        when :set, :json
+        when :json
+          delete(feature, gate)
+        when :set
           @gate_class.where(feature_key: feature.key, key: gate.key, value: thing.value).destroy_all
         else
           unsupported_data_type gate.data_type
@@ -178,14 +179,18 @@ module Flipper
 
       def set(feature, gate, thing, options = {})
         clear_feature = options.fetch(:clear, false)
+        json_feature = options.fetch(:json, false)
+
+        raise VALUE_TO_TEXT_WARNING if json_feature && value_not_text?
+
         @gate_class.transaction do
           clear(feature) if clear_feature
-          @gate_class.where(feature_key: feature.key, key: gate.key).destroy_all
+          delete(feature, gate)
           begin
             @gate_class.create! do |g|
               g.feature_key = feature.key
               g.key = gate.key
-              g.value = thing.value.to_s
+              g.value = json_feature ? JSON.dump(thing.value) : thing.value.to_s
             end
           rescue ::ActiveRecord::RecordNotUnique
             # assume this happened concurrently with the same thing and its fine
@@ -194,6 +199,10 @@ module Flipper
         end
 
         nil
+      end
+
+      def delete(feature, gate)
+        @gate_class.where(feature_key: feature.key, key: gate.key).destroy_all
       end
 
       def enable_multi(feature, gate, thing)
@@ -214,15 +223,15 @@ module Flipper
         feature.gates.each do |gate|
           result[gate.key] =
             case gate.data_type
-            when :boolean
+            when :boolean, :integer
               if detected_db_gate = db_gates.detect { |db_gate| db_gate.key == gate.key.to_s }
                 detected_db_gate.value
               end
-            when :integer
+            when :json
               if detected_db_gate = db_gates.detect { |db_gate| db_gate.key == gate.key.to_s }
-                detected_db_gate.value
+                JSON.parse(detected_db_gate.value)
               end
-            when :set, :json
+            when :set
               db_gates.select { |db_gate| db_gate.key == gate.key.to_s }.map(&:value).to_set
             else
               unsupported_data_type gate.data_type
@@ -233,8 +242,8 @@ module Flipper
 
       # Check if value column is text instead of string
       # See TODO:link/to/PR
-      def value_is_text?
-        @gate_class.column_for_attribute(:value).type == :text
+      def value_not_text?
+        @gate_class.column_for_attribute(:value).type != :text
       end
     end
   end

@@ -133,7 +133,7 @@ module Flipper
           { flipper_id: value.to_s }
         when :percentage_of_actors, :percentage_of_time
           { percentage: value.to_s }
-        when :rules
+        when :rule
           value
         else
           raise "#{gate.key} is not a valid flipper gate key"
@@ -158,7 +158,9 @@ module Flipper
         case gate.data_type
         when :boolean, :integer
           value ? value.to_s : value
-        when :set, :json
+        when :json
+          value
+        when :set
           value ? value.to_set : Set.new
         else
           unsupported_data_type gate.data_type
