@@ -123,7 +123,7 @@ RSpec.describe Flipper do
     end
 
     it 'delegates disable_rule to instance' do
-      described_class.disable_rule(:search, Flipper.object(true).eq(false))
+      described_class.disable_rule(:search)
       expect(described_class.instance.enabled?(:search, actor)).to be(false)
     end
 
