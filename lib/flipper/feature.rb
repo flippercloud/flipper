@@ -173,12 +173,8 @@ module Flipper
     # rule - a rule or Hash that can be converted to a rule.
     #
     # Returns result of disable.
-    def disable_rule(rule = nil)
-      if rule
-        disable Rules.wrap(rule)
-      else
-        disable Flipper.object(true).eq(false)
-      end
+    def disable_rule
+      disable Flipper.all # just need a rule to clear
     end
 
     # Public: Disables a feature for an actor.

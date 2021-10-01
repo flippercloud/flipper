@@ -664,7 +664,7 @@ RSpec.describe Flipper::Feature do
 
   describe '#enable_rule/disable_rule' do
     context "with rule instance" do
-      it "updates gate values to equal rule" do
+      it "updates gate values to equal rule or clears rule" do
         rule = Flipper::Rules::Condition.new(
           {"type" => "Property", "value" => "plan"},
           {"type" => "Operator", "value" => "eq"},
@@ -674,13 +674,13 @@ RSpec.describe Flipper::Feature do
         expect(subject.gate_values.rule).to be(nil)
         subject.enable_rule(rule)
         expect(subject.gate_values.rule).to eq(rule.value)
-        subject.disable_rule(other_rule)
+        subject.disable_rule
         expect(subject.gate_values.rule).to be(nil)
       end
     end
 
     context "with Hash" do
-      it "updates gate values to equal rule" do
+      it "updates gate values to equal rule or clears rule" do
         rule = Flipper::Rules::Condition.new(
           {"type" => "Property", "value" => "plan"},
           {"type" => "Operator", "value" => "eq"},
@@ -690,7 +690,7 @@ RSpec.describe Flipper::Feature do
         expect(subject.gate_values.rule).to be(nil)
         subject.enable_rule(rule.value)
         expect(subject.gate_values.rule).to eq(rule.value)
-        subject.disable_rule(other_rule.value)
+        subject.disable_rule
         expect(subject.gate_values.rule).to be(nil)
       end
     end

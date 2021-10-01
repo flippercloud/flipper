@@ -108,14 +108,13 @@ module Flipper
       feature(name).disable(*args)
     end
 
-    # Public: Disable a feature for a rule.
+    # Public: Disable rule for feature.
     #
     # name - The String or Symbol name of the feature.
-    # rule - a Flipper::Rules::Rule instance or a Hash.
     #
     # Returns result of Feature#disable.
-    def disable_rule(name, rule = nil)
-      feature(name).disable_rule(rule)
+    def disable_rule(name)
+      feature(name).disable_rule
     end
 
     # Public: Disable a feature for an actor.
