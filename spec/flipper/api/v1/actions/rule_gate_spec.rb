@@ -1,6 +1,6 @@
 require 'helper'
 
-RSpec.describe Flipper::Api::V1::Actions::RulesGate do
+RSpec.describe Flipper::Api::V1::Actions::RuleGate do
   let(:app) { build_api(flipper) }
   let(:actor) {
     Flipper::Actor.new('1', {
@@ -18,7 +18,7 @@ RSpec.describe Flipper::Api::V1::Actions::RulesGate do
 
   describe 'enable' do
     before do
-      flipper[:my_feature].disable_rule(rule)
+      flipper[:my_feature].disable_rule
       post '/features/my_feature/rule', JSON.dump(rule.value), "CONTENT_TYPE" => "application/json"
     end
 
@@ -54,7 +54,7 @@ RSpec.describe Flipper::Api::V1::Actions::RulesGate do
 
   describe 'enable feature with slash in name' do
     before do
-      flipper["my/feature"].disable_rule(rule)
+      flipper["my/feature"].disable_rule
       post '/features/my/feature/rule', JSON.dump(rule.value), "CONTENT_TYPE" => "application/json"
     end
 
@@ -72,7 +72,7 @@ RSpec.describe Flipper::Api::V1::Actions::RulesGate do
 
   describe 'enable feature with space in name' do
     before do
-      flipper["sp ace"].disable_rule(rule)
+      flipper["sp ace"].disable_rule
       post '/features/sp%20ace/rule', JSON.dump(rule.value), "CONTENT_TYPE" => "application/json"
     end
 

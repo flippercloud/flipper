@@ -5,7 +5,7 @@ module Flipper
   module Api
     module V1
       module Actions
-        class RulesGate < Api::Action
+        class RuleGate < Api::Action
           include FeatureNameFromRoute
 
           route %r{\A/features/(?<feature_name>.*)/rule/?\Z}
