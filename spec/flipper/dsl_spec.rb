@@ -249,6 +249,33 @@ RSpec.describe Flipper::DSL do
     end
   end
 
+  describe '#enable_rule/disable_rule' do
+    it 'enables and disables the feature for the rule' do
+      rule = Flipper.property(:plan).eq("basic")
+
+      expect(subject[:stats].rule).to be(nil)
+      subject.enable_rule(:stats, rule)
+      expect(subject[:stats].rule).to eq(rule)
+
+      subject.disable_rule(:stats)
+      expect(subject[:stats].rule).to be(nil)
+    end
+  end
+
+  describe '#add_rule/remove_rule' do
+    it 'enables and disables the feature for the rule' do
+      condition = Flipper.property(:plan).eq("basic")
+      rule = Flipper.any(condition)
+
+      expect(subject[:stats].rule).to be(nil)
+      subject.add_rule(:stats, rule)
+      expect(subject[:stats].rule).to eq(rule)
+
+      subject.remove_rule(:stats, condition)
+      expect(subject[:stats].rule).to eq(Flipper.any)
+    end
+  end
+
   describe '#enable_actor/disable_actor' do
     it 'enables and disables the feature for actor' do
       actor = Flipper::Actor.new(5)

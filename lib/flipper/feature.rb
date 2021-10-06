@@ -128,6 +128,19 @@ module Flipper
       enable Rules.wrap(rule)
     end
 
+    # Public: Add a rule for a feature.
+    #
+    # rule_to_add - a rule or Hash that can be converted to a rule.
+    #
+    # Returns result of enable.
+    def add_rule(rule_to_add)
+      if (current_rule = rule)
+        enable current_rule.add(rule_to_add)
+      else
+        enable rule_to_add
+      end
+    end
+
     # Public: Enables a feature for an actor.
     #
     # actor - a Flipper::Types::Actor instance or an object that responds
@@ -175,6 +188,18 @@ module Flipper
     # Returns result of disable.
     def disable_rule
       disable Flipper.all # just need a rule to clear
+    end
+
+    # Public: Remove a rule from a feature. Does nothing if no rule is
+    # currently enabled.
+    #
+    # rule_to_remove - a rule or Hash that can be converted to a rule.
+    #
+    # Returns result of enable or nil (if no rule enabled).
+    def remove_rule(rule_to_remove)
+      if (current_rule = rule)
+        enable current_rule.remove(rule_to_remove)
+      end
     end
 
     # Public: Disables a feature for an actor.

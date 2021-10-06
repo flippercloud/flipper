@@ -54,6 +54,15 @@ module Flipper
       feature(name).enable_rule(rule)
     end
 
+    # Public: Add a rule to a feature.
+    #
+    # rule - a rule or Hash that can be converted to a rule.
+    #
+    # Returns result of enable.
+    def add_rule(name, rule)
+      feature(name).add_rule(rule)
+    end
+
     # Public: Enable a feature for an actor.
     #
     # name - The String or Symbol name of the feature.
@@ -115,6 +124,15 @@ module Flipper
     # Returns result of Feature#disable.
     def disable_rule(name)
       feature(name).disable_rule
+    end
+
+    # Public: Remove a rule from a feature.
+    #
+    # rule - a rule or Hash that can be converted to a rule.
+    #
+    # Returns result of enable.
+    def remove_rule(name, rule)
+      feature(name).remove_rule(rule)
     end
 
     # Public: Disable a feature for an actor.

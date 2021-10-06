@@ -696,6 +696,325 @@ RSpec.describe Flipper::Feature do
     end
   end
 
+  describe "#add_rule" do
+    context "when nothing enabled" do
+      context "with Condition instance" do
+        it "sets rule to Condition" do
+          rule = Flipper.property(:plan).eq("basic")
+          subject.add_rule(rule)
+          expect(subject.rule).to be_instance_of(Flipper::Rules::Condition)
+          expect(subject.rule).to eq(rule)
+        end
+      end
+
+      context "with Any instance" do
+        it "sets rule to Any" do
+          rule = Flipper.any(Flipper.property(:plan).eq("basic"))
+          subject.add_rule(rule)
+          expect(subject.rule).to be_instance_of(Flipper::Rules::Any)
+          expect(subject.rule).to eq(rule)
+        end
+      end
+
+      context "with All instance" do
+        it "sets rule to All" do
+          rule = Flipper.all(Flipper.property(:plan).eq("basic"))
+          subject.add_rule(rule)
+          expect(subject.rule).to be_instance_of(Flipper::Rules::All)
+          expect(subject.rule).to eq(rule)
+        end
+      end
+    end
+
+    context "when Condition enabled" do
+      let(:rule) { Flipper.property(:plan).eq("basic") }
+
+      before do
+        subject.enable_rule rule
+      end
+
+      context "with Condition instance" do
+        it "changes rule to Any and adds new Condition" do
+          new_rule = Flipper.property(:age).gte(21)
+          subject.add_rule(new_rule)
+          expect(subject.rule).to be_instance_of(Flipper::Rules::Any)
+          expect(subject.rule.rules).to include(rule)
+          expect(subject.rule.rules).to include(new_rule)
+        end
+      end
+
+      context "with Any instance" do
+        it "changes rule to Any and adds new Any" do
+          new_rule = Flipper.any(Flipper.property(:age).eq(21))
+          subject.add_rule new_rule
+          expect(subject.rule).to be_instance_of(Flipper::Rules::Any)
+          expect(subject.rule.rules).to include(rule)
+          expect(subject.rule.rules).to include(new_rule)
+        end
+      end
+
+      context "with All instance" do
+        it "changes rule to Any and adds new All" do
+          new_rule = Flipper.all(Flipper.property(:plan).eq("basic"))
+          subject.add_rule new_rule
+          expect(subject.rule).to be_instance_of(Flipper::Rules::Any)
+          expect(subject.rule.rules).to include(rule)
+          expect(subject.rule.rules).to include(new_rule)
+        end
+      end
+    end
+
+    context "when Any enabled" do
+      let(:condition) { Flipper.property(:plan).eq("basic") }
+      let(:rule) { Flipper.any(condition) }
+
+      before do
+        subject.enable_rule rule
+      end
+
+      context "with Condition instance" do
+        it "adds Condition to Any" do
+          new_rule = Flipper.property(:age).gte(21)
+          subject.add_rule(new_rule)
+          expect(subject.rule).to be_instance_of(Flipper::Rules::Any)
+          expect(subject.rule.rules).to include(condition)
+          expect(subject.rule.rules).to include(new_rule)
+        end
+      end
+
+      context "with Any instance" do
+        it "adds Any to Any" do
+          new_rule = Flipper.any(Flipper.property(:age).gte(21))
+          subject.add_rule(new_rule)
+          expect(subject.rule).to be_instance_of(Flipper::Rules::Any)
+          expect(subject.rule.rules).to include(condition)
+          expect(subject.rule.rules).to include(new_rule)
+        end
+      end
+
+      context "with All instance" do
+        it "adds All to Any" do
+          new_rule = Flipper.all(Flipper.property(:age).gte(21))
+          subject.add_rule(new_rule)
+          expect(subject.rule).to be_instance_of(Flipper::Rules::Any)
+          expect(subject.rule.rules).to include(condition)
+          expect(subject.rule.rules).to include(new_rule)
+        end
+      end
+    end
+
+    context "when All enabled" do
+      let(:condition) { Flipper.property(:plan).eq("basic") }
+      let(:rule) { Flipper.all(condition) }
+
+      before do
+        subject.enable_rule rule
+      end
+
+      context "with Condition instance" do
+        it "adds Condition to All" do
+          new_rule = Flipper.property(:age).gte(21)
+          subject.add_rule(new_rule)
+          expect(subject.rule).to be_instance_of(Flipper::Rules::All)
+          expect(subject.rule.rules).to include(condition)
+          expect(subject.rule.rules).to include(new_rule)
+        end
+      end
+
+      context "with Any instance" do
+        it "adds Any to All" do
+          new_rule = Flipper.any(Flipper.property(:age).gte(21))
+          subject.add_rule(new_rule)
+          expect(subject.rule).to be_instance_of(Flipper::Rules::All)
+          expect(subject.rule.rules).to include(condition)
+          expect(subject.rule.rules).to include(new_rule)
+        end
+      end
+
+      context "with All instance" do
+        it "adds All to All" do
+          new_rule = Flipper.all(Flipper.property(:age).gte(21))
+          subject.add_rule(new_rule)
+          expect(subject.rule).to be_instance_of(Flipper::Rules::All)
+          expect(subject.rule.rules).to include(condition)
+          expect(subject.rule.rules).to include(new_rule)
+        end
+      end
+    end
+  end
+
+  describe '#remove_rule' do
+    context "when nothing enabled" do
+      context "with Condition instance" do
+        it "does nothing" do
+          rule = Flipper.property(:plan).eq("basic")
+          subject.remove_rule(rule)
+          expect(subject.rule).to be(nil)
+        end
+      end
+
+      context "with Any instance" do
+        it "does nothing" do
+          rule = Flipper.any(Flipper.property(:plan).eq("basic"))
+          subject.remove_rule rule
+          expect(subject.rule).to be(nil)
+        end
+      end
+
+      context "with All instance" do
+        it "does nothing" do
+          rule = Flipper.all(Flipper.property(:plan).eq("basic"))
+          subject.remove_rule rule
+          expect(subject.rule).to be(nil)
+        end
+      end
+    end
+
+    context "when Condition enabled" do
+      let(:rule) { Flipper.property(:plan).eq("basic") }
+
+      before do
+        subject.enable_rule rule
+      end
+
+      context "with Condition instance" do
+        it "changes rule to Any and removes Condition if it matches" do
+          new_rule = Flipper.property(:plan).eq("basic")
+          subject.remove_rule new_rule
+          expect(subject.rule).to eq(Flipper.any)
+        end
+
+        it "changes rule to Any if Condition doesn't match" do
+          new_rule = Flipper.property(:plan).eq("premium")
+          subject.remove_rule new_rule
+          expect(subject.rule).to eq(Flipper.any(rule))
+        end
+      end
+
+      context "with Any instance" do
+        it "changes rule to Any and does nothing" do
+          new_rule = Flipper.any(Flipper.property(:plan).eq("basic"))
+          subject.remove_rule new_rule
+          expect(subject.rule).to eq(Flipper.any(rule))
+        end
+      end
+
+      context "with All instance" do
+        it "changes rule to Any and does nothing" do
+          new_rule = Flipper.all(Flipper.property(:plan).eq("basic"))
+          subject.remove_rule new_rule
+          expect(subject.rule).to eq(Flipper.any(rule))
+        end
+      end
+    end
+
+    context "when Any enabled" do
+      let(:condition) { Flipper.property(:plan).eq("basic") }
+      let(:rule) { Flipper.any condition }
+
+      before do
+        subject.enable_rule rule
+      end
+
+      context "with Condition instance" do
+        it "removes Condition if it matches" do
+          subject.remove_rule condition
+          expect(subject.rule).to eq(Flipper.any)
+        end
+
+        it "does nothing if Condition does not match" do
+          subject.remove_rule Flipper.property(:plan).eq("premium")
+          expect(subject.rule).to eq(rule)
+        end
+      end
+
+      context "with Any instance" do
+        it "removes Any if it matches" do
+          new_rule = Flipper.any(Flipper.property(:plan).eq("premium"))
+          subject.add_rule new_rule
+          expect(subject.rule.rules.size).to be(2)
+          subject.remove_rule new_rule
+          expect(subject.rule).to eq(rule)
+        end
+
+        it "does nothing if Any does not match" do
+          new_rule = Flipper.any(Flipper.property(:plan).eq("premium"))
+          subject.remove_rule new_rule
+          expect(subject.rule).to eq(rule)
+        end
+      end
+
+      context "with All instance" do
+        it "removes All if it matches" do
+          new_rule = Flipper.all(Flipper.property(:plan).eq("premium"))
+          subject.add_rule new_rule
+          expect(subject.rule.rules.size).to be(2)
+          subject.remove_rule new_rule
+          expect(subject.rule).to eq(rule)
+        end
+
+        it "does nothing if All does not match" do
+          new_rule = Flipper.all(Flipper.property(:plan).eq("premium"))
+          subject.remove_rule new_rule
+          expect(subject.rule).to eq(rule)
+        end
+      end
+    end
+
+    context "when All enabled" do
+      let(:condition) { Flipper.property(:plan).eq("basic") }
+      let(:rule) { Flipper.all condition }
+
+      before do
+        subject.enable_rule rule
+      end
+
+      context "with Condition instance" do
+        it "removes Condition if it matches" do
+          subject.remove_rule condition
+          expect(subject.rule).to eq(Flipper.all)
+        end
+
+        it "does nothing if Condition does not match" do
+          subject.remove_rule Flipper.property(:plan).eq("premium")
+          expect(subject.rule).to eq(rule)
+        end
+      end
+
+      context "with Any instance" do
+        it "removes Any if it matches" do
+          new_rule = Flipper.any(Flipper.property(:plan).eq("premium"))
+          subject.add_rule new_rule
+          expect(subject.rule.rules.size).to be(2)
+          subject.remove_rule new_rule
+          expect(subject.rule).to eq(rule)
+        end
+
+        it "does nothing if Any does not match" do
+          new_rule = Flipper.any(Flipper.property(:plan).eq("premium"))
+          subject.remove_rule new_rule
+          expect(subject.rule).to eq(rule)
+        end
+      end
+
+      context "with All instance" do
+        it "removes All if it matches" do
+          new_rule = Flipper.all(Flipper.property(:plan).eq("premium"))
+          subject.add_rule new_rule
+          expect(subject.rule.rules.size).to be(2)
+          subject.remove_rule new_rule
+          expect(subject.rule).to eq(rule)
+        end
+
+        it "does nothing if All does not match" do
+          new_rule = Flipper.all(Flipper.property(:plan).eq("premium"))
+          subject.remove_rule new_rule
+          expect(subject.rule).to eq(rule)
+        end
+      end
+    end
+  end
+
   describe '#enable_actor/disable_actor' do
     context 'with object that responds to flipper_id' do
       it 'updates the gate values to include the actor' do

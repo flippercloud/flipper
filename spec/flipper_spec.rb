@@ -127,6 +127,18 @@ RSpec.describe Flipper do
       expect(described_class.instance.enabled?(:search, actor)).to be(false)
     end
 
+    it 'delegates add_rule to instance' do
+      described_class.add_rule(:search, rule)
+      expect(described_class.instance.enabled?(:search, actor)).to be(true)
+    end
+
+    it 'delegates remove_rule to instance' do
+      described_class.enable_rule(:search, Flipper.any(rule))
+      expect(described_class.instance.enabled?(:search, actor)).to be(true)
+      described_class.remove_rule(:search, rule)
+      expect(described_class.instance.enabled?(:search, actor)).to be(false)
+    end
+
     it 'delegates enable_actor to instance' do
       described_class.enable_actor(:search, actor)
       expect(described_class.instance.enabled?(:search, actor)).to be(true)
