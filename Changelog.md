@@ -1,8 +1,12 @@
-## Unreleased
+## 0.22.2
 
 ### Additions/Changes
 
 * Allow adding multiple actors at once in flipper-ui via comma separation (configurable via `Flipper::UI.configuration.actors_separator`) (https://github.com/jnunemaker/flipper/pull/556)
+
+### Bug Fixes
+
+* Fix railtie initialization to avoid altering middleware order (https://github.com/jnunemaker/flipper/pull/563)
 
 ## 0.22.1
 
