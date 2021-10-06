@@ -24,19 +24,17 @@ In most cases, all you need to do is require the adapter. You must set the `MONG
 require 'flipper-mongo`
 ```
 
-**If you're using Mongoid**, you can add this to an initializers:
+**If you're using Mongoid**, you can add this to an initializer:
 
 ```ruby
 Flipper.configure do |config|
-  config.default do
-    collection = Mongoid.default_client['flipper']
-    adapter = Flipper::Adapters::Mongo.new(collection)
-    Flipper.new(adapter)
+  config.adapter do
+    Flipper::Adapters::Mongo.new(Mongoid.default_client['flipper'])
   end
 end
 ```
 
-**If you need to customize the adapter**, you can add this to an initializer:
+Or **if you need to customize the adapter** in any other way, you can add this to an initializer:
 
 ```ruby
 Flipper.configure do |config|
