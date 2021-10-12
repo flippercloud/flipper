@@ -31,6 +31,10 @@ Or install it yourself with:
 
     $ gem install flipper
 
+## Stay Up to Date
+
+[💌 &nbsp;Subscribe](http://flippercloud.io/oss/subscribe) and I'll send you short and sweet emails when we release new versions.
+
 ## Getting Started
 
 Use `Flipper#enabled?` in your app to check if a feature is enabled.
