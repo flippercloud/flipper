@@ -28,12 +28,12 @@ module Flipper
 
       SOURCES = {
         bootstrap_css: {
-          src: "https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css".freeze,
-          hash: "sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm".freeze
+          src: "https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css".freeze,
+          hash: "sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l".freeze
         }.freeze,
         jquery_js: {
-          src: "https://code.jquery.com/jquery-3.2.1.slim.min.js".freeze,
-          hash: "sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN".freeze
+          src: "https://code.jquery.com/jquery-3.5.1.slim.min.js".freeze,
+          hash: "sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj".freeze
         }.freeze,
         popper_js: {
           src: "https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js".freeze,
