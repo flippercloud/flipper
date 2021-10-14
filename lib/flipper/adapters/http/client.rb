@@ -70,9 +70,19 @@ module Flipper
         end
 
         def build_request(http_method, uri, headers, options)
+          request_headers = {
+            "Client-Language" => "ruby",
+            "Client-Language-Version" => "#{RUBY_VERSION} p#{RUBY_PATCHLEVEL} (#{RUBY_RELEASE_DATE})",
+            "Client-Platform" => RUBY_PLATFORM,
+            "Client-Engine" => defined?(RUBY_ENGINE) ? RUBY_ENGINE : "",
+            "Client-Pid" => Process.pid.to_s,
+            "Client-Thread" => Thread.current.object_id.to_s,
+            "Client-Hostname" => Socket.gethostname,
+          }.merge(headers)
+
           body = options[:body]
           request = http_method.new(uri.request_uri)
-          request.initialize_http_header(headers) if headers
+          request.initialize_http_header(request_headers)
           request.body = body if body
 
           if @basic_auth_username && @basic_auth_password

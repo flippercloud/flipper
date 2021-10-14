@@ -151,15 +151,11 @@ module Flipper
           debug_output: @debug_output,
           headers: {
             "Flipper-Cloud-Token" => @token,
-            "Feature-Flipper-Token" => @token,
-            "Client-Lang" => "ruby",
-            "Client-Lang-Version" => "#{RUBY_VERSION} p#{RUBY_PATCHLEVEL} (#{RUBY_RELEASE_DATE})",
-            "Client-Platform" => RUBY_PLATFORM,
-            "Client-Engine" => defined?(RUBY_ENGINE) ? RUBY_ENGINE : "",
-            "Client-Hostname" => Socket.gethostname,
           },
         })
       end
     end
   end
 end
+
+# "FLIPPER_TIMESTAMP".freeze => Flipper::Timestamp.generate.to_s,
