@@ -157,5 +157,3 @@ module Flipper
     end
   end
 end
-
-# "FLIPPER_TIMESTAMP".freeze => Flipper::Timestamp.generate.to_s,
