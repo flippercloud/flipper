@@ -3,6 +3,7 @@ require 'flipper/ui/configuration'
 require 'flipper/ui/error'
 require 'erubi'
 require 'json'
+require 'sanitize'
 
 module Flipper
   module UI

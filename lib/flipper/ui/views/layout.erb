@@ -13,7 +13,7 @@
     <div class="container mw-600">
       <%- unless Flipper::UI.configuration.banner_text.nil? -%>
         <div class="alert alert-<%= Flipper::UI.configuration.banner_class %> text-center font-weight-bold">
-          <%== Flipper::UI.configuration.banner_text %>
+          <%== Sanitize.fragment(Flipper::UI.configuration.banner_text, Sanitize::Config::BASIC) %>
         </div>
       <%- end -%>
 

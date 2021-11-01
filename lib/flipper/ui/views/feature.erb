@@ -9,7 +9,7 @@
     <div class="col">
       <div class="card">
         <div class="card-body">
-          <%== @feature.description %>
+          <%== Sanitize.fragment(@feature.description, Sanitize::Config::BASIC) %>
         </div>
       </div>
     </div>
