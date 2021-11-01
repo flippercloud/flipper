@@ -4,6 +4,7 @@ require "flipper/adapters/memory"
 require "flipper/adapters/dual_write"
 require "flipper/adapters/sync"
 require "flipper/cloud/instrumenter"
+require "flipper/cloud/registry"
 require "brow"
 
 module Flipper
@@ -130,13 +131,16 @@ module Flipper
       def brow
         uri = URI.parse(url)
         uri.path = "#{uri.path}/events".squeeze("/")
+        events_url = uri.to_s
 
-        Brow::Client.new({
-          url: uri.to_s,
-          headers: {
-            "Flipper-Cloud-Token" => @token,
-          }
-        })
+        Registry.default.fetch(events_url) {
+          Brow::Client.new({
+            url: events_url,
+            headers: {
+              "Flipper-Cloud-Token" => @token,
+            }
+          })
+        }
       end
 
       # Public: The method that will be used to synchronize local adapter with

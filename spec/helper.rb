@@ -21,6 +21,7 @@ Dir[FlipperRoot.join('spec/support/**/*.rb')].sort.each { |f| require f }
 
 RSpec.configure do |config|
   config.before(:example) do
+    Flipper::Cloud::Registry.default.clear
     Flipper.unregister_groups
     Flipper.configuration = nil
   end
