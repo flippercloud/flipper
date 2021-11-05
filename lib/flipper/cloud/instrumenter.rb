@@ -25,7 +25,6 @@ module Flipper
         dimensions = {
           "feature" => payload[:feature_name].to_s,
           "result" => payload[:result].to_s,
-          "ts" => Time.now.utc,
         }
         if (thing = payload[:thing])
           dimensions["flipper_id"] = thing.value.to_s
@@ -35,6 +34,7 @@ module Flipper
           type: "enabled",
           dimensions: dimensions,
           measures: {},
+          ts: Time.now.utc,
         }
         @brow.push event
       end
