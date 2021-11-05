@@ -137,6 +137,9 @@ module Flipper
           Brow::Client.new({
             url: events_url,
             headers: {
+              "Accept" => "application/json",
+              "Content-Type" => "application/json",
+              "User-Agent" => "Flipper HTTP Adapter v#{VERSION}",
               "Flipper-Cloud-Token" => @token,
             }
           })

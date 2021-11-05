@@ -255,19 +255,15 @@ RSpec.describe Flipper::Cloud::Configuration do
     Brow.logger = Logger.new(File::NULL)
     brow = described_class.new(required_options).brow
 
-    begin
-      stub = stub_request(:post, "https://www.flippercloud.io/adapter/events")
-        .with { |request|
-          data = JSON.parse(request.body)
-          data.keys == ["uuid", "messages"] && data["messages"] == [{"n" => 1}]
-        }
-        .to_return(status: 201, body: "{}", headers: {})
+    stub = stub_request(:post, "https://www.flippercloud.io/adapter/events")
+      .with { |request|
+        data = JSON.parse(request.body)
+        data.keys == ["uuid", "messages"] && data["messages"] == [{"n" => 1}]
+      }
+      .to_return(status: 201, body: "{}", headers: {})
 
-      brow.push n: 1
-      brow.flush
-      expect(stub).to have_been_requested.times(1)
-    ensure
-      brow.shutdown
-    end
+    brow.push({"n" => 1})
+    brow.worker.stop
+    expect(stub).to have_been_requested.times(1)
   end
 end
