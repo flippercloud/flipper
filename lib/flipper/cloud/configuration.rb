@@ -139,7 +139,7 @@ module Flipper
             headers: {
               "Accept" => "application/json",
               "Content-Type" => "application/json",
-              "User-Agent" => "Flipper HTTP Adapter v#{VERSION}",
+              "User-Agent" => "Flipper v#{VERSION} via Brow v#{Brow::VERSION}",
               "Flipper-Cloud-Token" => @token,
             }
           })
