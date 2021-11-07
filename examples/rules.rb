@@ -29,9 +29,13 @@ class Org < Struct.new(:id, :flipper_properties)
   include Flipper::Identifier
 end
 
+NOW = Time.now.to_i
+DAY = 60 * 60 * 24
+
 org = Org.new(1, {
   "type" => "Org",
   "id" => 1,
+  "now" => NOW,
 })
 
 user = User.new(1, {
@@ -40,6 +44,7 @@ user = User.new(1, {
   "plan" => "basic",
   "age" => 39,
   "team_user" => true,
+  "now" => NOW,
 })
 
 admin_user = User.new(2, {
@@ -47,6 +52,7 @@ admin_user = User.new(2, {
   "id" => 2,
   "admin" => true,
   "team_user" => true,
+  "now" => NOW,
 })
 
 other_user = User.new(3, {
@@ -55,6 +61,7 @@ other_user = User.new(3, {
   "plan" => "plus",
   "age" => 18,
   "org_admin" => true,
+  "now" => NOW + DAY,
 })
 
 age_rule = Flipper.property(:age).gte(21)
@@ -192,6 +199,13 @@ refute Flipper.enabled?(:something, other_user)
 puts "\n\nChanging single rule to any rule by adding to condition"
 Flipper.enable_rule :something, plan_rule
 Flipper.enable_rule :something, Flipper.rule(:something).add(admin_rule)
+assert Flipper.enabled?(:something, user)
+assert Flipper.enabled?(:something, admin_user)
+refute Flipper.enabled?(:something, other_user)
+
+puts "\n\nEnabling based on time"
+scheduled_time_rule = Flipper.property(:now).gte(NOW)
+Flipper.enable_rule :something, scheduled_time_rule
 assert Flipper.enabled?(:something, user)
 assert Flipper.enabled?(:something, admin_user)
 refute Flipper.enabled?(:something, other_user)
