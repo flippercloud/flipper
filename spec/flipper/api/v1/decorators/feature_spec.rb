@@ -2,35 +2,27 @@ require 'helper'
 
 RSpec.describe Flipper::Api::V1::Decorators::Feature do
   describe "#as_json" do
-    subject { described_class.new(flipper[:my_feature]).as_json }
+    context "with exclude_gates set to true" do
+      subject { described_class.new(flipper[:my_feature]).as_json(exclude_gates: true) }
 
-    context "with include_feature_gate_data set to true" do
-      before do
-        @original_include_feature_gate_data = Flipper::Api.configuration.include_feature_gate_data
-        Flipper::Api.configuration.include_feature_gate_data = true
+      it "returns json WITHOUT feature gate data" do
+        expect(subject.keys).to_not include("gates")
       end
+    end
 
-      after do
-        Flipper::Api.configuration.include_feature_gate_data = @original_include_feature_gate_data
-      end
+    context "with exclude_gates set to false" do
+      subject { described_class.new(flipper[:my_feature]).as_json(exclude_gates: false) }
 
-      it "json has feature gate data" do
+      it "returns json WITH feature gate data" do
         expect(subject.keys).to include("gates")
       end
     end
 
-    context "with include_feature_gate_data set to false" do
-      before do
-        @original_include_feature_gate_data = Flipper::Api.configuration.include_feature_gate_data
-        Flipper::Api.configuration.include_feature_gate_data = false
-      end
+    context "without exclude_gates set" do
+      subject { described_class.new(flipper[:my_feature]).as_json }
 
-      after do
-        Flipper::Api.configuration.include_feature_gate_data = @original_include_feature_gate_data
-      end
-
-      it "json DOES NOT have feature gate data" do
-        expect(subject.keys).to_not include("gates")
+      it "returns json WITH feature gate data" do
+        expect(subject.keys).to include("gates")
       end
     end
   end
