@@ -1,3 +1,11 @@
+## Unreleased
+
+### Additions/Changes
+
+* Allow some HTML in banner and descriptions (https://github.com/jnunemaker/flipper/pull/570).
+* Moved some cloud headers to http client (https://github.com/jnunemaker/flipper/pull/567).
+* Update flipper-ui jquery and bootstrap versions (https://github.com/jnunemaker/flipper/issues/565 and https://github.com/jnunemaker/flipper/pull/566).
+
 ## 0.22.2
 
 ### Additions/Changes
