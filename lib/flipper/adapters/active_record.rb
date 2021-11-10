@@ -25,8 +25,6 @@ module Flipper
           "flipper_gates",
           ::ActiveRecord::Base.table_name_suffix,
         ].join
-
-        serialize :value, JSON
       end
 
       VALUE_TO_TEXT_WARNING = <<-EOS
