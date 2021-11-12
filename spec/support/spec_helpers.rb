@@ -31,7 +31,7 @@ module SpecHelpers
   end
 
   def api_error_code_reference_url
-    'https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference'
+    'https://flippercloud.io/docs/api#error-code-reference'
   end
 
   def api_not_found_response

@@ -43,7 +43,7 @@
 * Added cloud recommendation to flipper-ui. Can be disabled with `Flipper::UI.configure { |config| config.cloud_recommendation = false }`. Just want to raise awareness that more is available if people want it (https://github.com/jnunemaker/flipper/pull/504)
 * Added default `flipper_id` implementation via `Flipper::Identifier` and automatically included it in ActiveRecord and Sequel models (https://github.com/jnunemaker/flipper/pull/505)
 * Deprecate superflous sync_method setting (https://github.com/jnunemaker/flipper/pull/511)
-* Flipper is now pre-configured when used with Rails. By default, it will [memoize and preload all features for each request](docs/Optimization.md#memoization). (https://github.com/jnunemaker/flipper/pull/506)
+* Flipper is now pre-configured when used with Rails. By default, it will [memoize and preload all features for each request](https://flippercloud.io/docs/optimization#memoization). (https://github.com/jnunemaker/flipper/pull/506)
 
 ### Upgrading
 
