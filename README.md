@@ -21,7 +21,7 @@ Add this line to your application's Gemfile:
 
     gem 'flipper'
 
-You'll also want to pick a storage [adapter](#adapters), for example:
+You'll also want to pick a storage [adapter](https://flippercloud.io/docs/adapters), for example:
 
     gem 'flipper-active_record'
 
