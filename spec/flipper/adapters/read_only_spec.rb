@@ -43,11 +43,7 @@ RSpec.describe Flipper::Adapters::ReadOnly do
   end
 
   it 'can get feature' do
-    rule = Flipper::Rules::Condition.new(
-        {"type" => "Property", "value" => "plan"},
-        {"type" => "Operator", "value" => "eq"},
-        {"type" => "String", "value" => "basic"}
-    )
+    rule = Flipper.property(:plan).eq("basic")
     actor22 = Flipper::Actor.new('22')
     adapter.enable(feature, boolean_gate, flipper.boolean)
     adapter.enable(feature, group_gate, flipper.group(:admins))

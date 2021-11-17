@@ -1,3 +1,5 @@
+require "flipper/expression"
+
 module Flipper
   module Gates
     class Rule < Gate
@@ -25,12 +27,39 @@ module Flipper
       def open?(context)
         data = context.values[key]
         return false if data.nil? || data.empty?
-        rule = Flipper::Rules.build(data)
-        rule.matches?(context.feature_name, context.thing)
+        expression = Flipper::Expression.build(data)
+        result = expression.evaluate(
+          feature_name: context.feature_name,
+          properties: properties(context.thing)
+        )
+        !!result
       end
 
       def protects?(thing)
-        thing.is_a?(Flipper::Rules::Rule)
+        thing.is_a?(Flipper::Expression)
+      end
+
+      private
+
+      # Internal
+      DEFAULT_PROPERTIES = {}.freeze
+
+      def properties(actor)
+        return DEFAULT_PROPERTIES if actor.nil?
+
+        properties = {}
+
+        if actor.respond_to?(:flipper_properties)
+          properties.update(actor.flipper_properties)
+        else
+          warn "#{actor.inspect} does not respond to `flipper_properties` but should."
+        end
+
+        if actor.respond_to?(:flipper_id)
+          properties["flipper_id".freeze] = actor.flipper_id
+        end
+
+        properties
       end
     end
   end

@@ -125,7 +125,7 @@ module Flipper
     #
     # Returns result of enable.
     def enable_rule(rule)
-      enable Rules.wrap(rule)
+      enable Expression.build(rule)
     end
 
     # Public: Add a rule for a feature.
@@ -294,7 +294,7 @@ module Flipper
     end
 
     def rule
-      Flipper::Rules.build(rule_value) if rule_value
+      Flipper::Expression.build(rule_value) if rule_value
     end
 
     # Public: Get the adapter value for the groups gate.

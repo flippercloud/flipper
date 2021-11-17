@@ -8,13 +8,7 @@ RSpec.describe Flipper::Api::V1::Actions::RuleGate do
       "age" => 21,
     })
   }
-  let(:rule) {
-    Flipper::Rules::Condition.new(
-      {"type" => "Property", "value" => "plan"},
-      {"type" => "Operator", "value" => "eq"},
-      {"type" => "String", "value" => "basic"}
-    )
-  }
+  let(:rule) { Flipper.property(:plan).eq("basic") }
 
   describe 'enable' do
     before do

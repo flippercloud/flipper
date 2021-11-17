@@ -47,7 +47,7 @@ module Flipper
     # Public: Enable a feature for a rule.
     #
     # name - The String or Symbol name of the feature.
-    # rule - a Flipper::Rules::Rule instance or a Hash.
+    # rule - a Flipper::Expression instance or a Hash.
     #
     # Returns result of Feature#enable.
     def enable_rule(name, rule)
@@ -284,7 +284,7 @@ module Flipper
     #
     # name - The String or Symbol name of the feature.
     #
-    # Returns an instance of Flipper::Rules::Rule.
+    # Returns an instance of Flipper::Expression.
     def rule(name)
       feature(name).rule
     end

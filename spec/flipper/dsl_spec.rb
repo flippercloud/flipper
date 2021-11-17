@@ -264,14 +264,14 @@ RSpec.describe Flipper::DSL do
 
   describe '#add_rule/remove_rule' do
     it 'enables and disables the feature for the rule' do
-      condition = Flipper.property(:plan).eq("basic")
-      rule = Flipper.any(condition)
+      expression = Flipper.property(:plan).eq("basic")
+      rule = Flipper.any(expression)
 
       expect(subject[:stats].rule).to be(nil)
       subject.add_rule(:stats, rule)
       expect(subject[:stats].rule).to eq(rule)
 
-      subject.remove_rule(:stats, condition)
+      subject.remove_rule(:stats, expression)
       expect(subject[:stats].rule).to eq(Flipper.any)
     end
   end

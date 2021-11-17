@@ -70,27 +70,19 @@ module Flipper
                  :sync, :sync_secret # For Flipper::Cloud. Will error for OSS Flipper.
 
   def property(name)
-    Flipper::Rules::Property.new(name)
+    Flipper::Expressions::Property.new(name)
   end
 
   def random(name)
-    Flipper::Rules::Random.new(name)
+    Flipper::Expressions::Random.new(name)
   end
 
-  def object(object)
-    Flipper::Rules::Object.new(object)
+  def any(*args)
+    Flipper::Expressions::Any.new(args)
   end
 
-  def operator(name)
-    Flipper::Rules::Object.new(name)
-  end
-
-  def any(*rules)
-    Flipper::Rules::Any.new(*rules)
-  end
-
-  def all(*rules)
-    Flipper::Rules::All.new(*rules)
+  def all(*args)
+    Flipper::Expressions::All.new(args)
   end
 
   # Public: Use this to register a group by name.
@@ -181,7 +173,7 @@ require 'flipper/identifier'
 require 'flipper/middleware/memoizer'
 require 'flipper/middleware/setup_env'
 require 'flipper/registry'
-require 'flipper/rules'
+require 'flipper/expression'
 require 'flipper/type'
 require 'flipper/types/actor'
 require 'flipper/types/boolean'

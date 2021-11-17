@@ -552,11 +552,10 @@ RSpec.describe Flipper do
 
   context "for rule" do
     it "works" do
-      rule = Flipper::Rules::Condition.new(
-        {"type" => "Property", "value" => "plan"},
-        {"type" => "Operator", "value" => "eq"},
-        {"type" => "String", "value" => "basic"}
-      )
+      rule = Flipper::Expressions::Equal.new([
+        Flipper::Expressions::Property.new("plan"),
+        Flipper::Expressions::String.new("basic"),
+      ])
       feature.enable rule
 
       expect(feature.enabled?(basic_plan_thing)).to be(true)
@@ -566,18 +565,16 @@ RSpec.describe Flipper do
 
   context "for Any" do
     it "works" do
-      rule = Flipper::Rules::Any.new(
-        Flipper::Rules::Condition.new(
-          {"type" => "Property", "value" => "plan"},
-          {"type" => "Operator", "value" => "eq"},
-          {"type" => "String", "value" => "basic"}
-        ),
-        Flipper::Rules::Condition.new(
-          {"type" => "Property", "value" => "plan"},
-          {"type" => "Operator", "value" => "eq"},
-          {"type" => "String", "value" => "plus"}
-        )
-      )
+      rule = Flipper::Expressions::Any.new([
+        Flipper::Expressions::Equal.new([
+          Flipper::Expressions::Property.new("plan"),
+          Flipper::Expressions::String.new("basic"),
+        ]),
+        Flipper::Expressions::Equal.new([
+          Flipper::Expressions::Property.new("plan"),
+          Flipper::Expressions::String.new("plus"),
+        ])
+      ])
       feature.enable rule
 
       expect(feature.enabled?(basic_plan_thing)).to be(true)
@@ -595,18 +592,16 @@ RSpec.describe Flipper do
         "plan" => "basic",
         "age" => 20,
       })
-      rule = Flipper::Rules::All.new(
-        Flipper::Rules::Condition.new(
-          {"type" => "Property", "value" => "plan"},
-          {"type" => "Operator", "value" => "eq"},
-          {"type" => "String", "value" => "basic"}
-        ),
-        Flipper::Rules::Condition.new(
-          {"type" => "Property", "value" => "age"},
-          {"type" => "Operator", "value" => "eq"},
-          {"type" => "Integer", "value" => 21}
-        )
-      )
+      rule = Flipper::Expressions::All.new([
+        Flipper::Expressions::Equal.new([
+          Flipper::Expressions::Property.new("plan"),
+          Flipper::Expressions::String.new("basic"),
+        ]),
+        Flipper::Expressions::Equal.new([
+          Flipper::Expressions::Property.new("age"),
+          Flipper::Expressions::Number.new(21),
+        ])
+      ])
       feature.enable rule
 
       expect(feature.enabled?(true_actor)).to be(true)
@@ -625,25 +620,23 @@ RSpec.describe Flipper do
         "plan" => "basic",
         "age" => 20,
       })
-      rule = Flipper::Rules::Any.new(
-        Flipper::Rules::Condition.new(
-          {"type" => "Property", "value" => "admin"},
-          {"type" => "Operator", "value" => "eq"},
-          {"type" => "String", "value" => true}
-        ),
-        Flipper::Rules::All.new(
-          Flipper::Rules::Condition.new(
-            {"type" => "Property", "value" => "plan"},
-            {"type" => "Operator", "value" => "eq"},
-            {"type" => "String", "value" => "basic"}
-          ),
-          Flipper::Rules::Condition.new(
-            {"type" => "Property", "value" => "age"},
-            {"type" => "Operator", "value" => "eq"},
-            {"type" => "Integer", "value" => 21}
-          )
-        )
-      )
+      rule = Flipper::Expressions::Any.new([
+        Flipper::Expressions::Equal.new([
+          Flipper::Expressions::Property.new("admin"),
+          Flipper::Expressions::Boolean.new(true),
+        ]),
+        Flipper::Expressions::All.new([
+          Flipper::Expressions::Equal.new([
+            Flipper::Expressions::Property.new("plan"),
+            Flipper::Expressions::String.new("basic"),
+          ]),
+          Flipper::Expressions::Equal.new([
+            Flipper::Expressions::Property.new("age"),
+            Flipper::Expressions::Number.new(21),
+          ])
+        ])
+      ])
+
       feature.enable rule
 
       expect(feature.enabled?(admin_actor)).to be(true)

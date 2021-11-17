@@ -665,11 +665,7 @@ RSpec.describe Flipper::Feature do
   describe '#enable_rule/disable_rule' do
     context "with rule instance" do
       it "updates gate values to equal rule or clears rule" do
-        rule = Flipper::Rules::Condition.new(
-          {"type" => "Property", "value" => "plan"},
-          {"type" => "Operator", "value" => "eq"},
-          {"type" => "String", "value" => "basic"}
-        )
+        rule = Flipper.property(:plan).eq("basic")
         other_rule = Flipper.property(:age).gte(21)
         expect(subject.gate_values.rule).to be(nil)
         subject.enable_rule(rule)
@@ -681,11 +677,7 @@ RSpec.describe Flipper::Feature do
 
     context "with Hash" do
       it "updates gate values to equal rule or clears rule" do
-        rule = Flipper::Rules::Condition.new(
-          {"type" => "Property", "value" => "plan"},
-          {"type" => "Operator", "value" => "eq"},
-          {"type" => "String", "value" => "basic"}
-        )
+        rule = Flipper.property(:plan).eq("basic")
         other_rule = Flipper.property(:age).gte(21)
         expect(subject.gate_values.rule).to be(nil)
         subject.enable_rule(rule.value)
@@ -698,11 +690,11 @@ RSpec.describe Flipper::Feature do
 
   describe "#add_rule" do
     context "when nothing enabled" do
-      context "with Condition instance" do
-        it "sets rule to Condition" do
+      context "with Expression instance" do
+        it "sets rule to Expression" do
           rule = Flipper.property(:plan).eq("basic")
           subject.add_rule(rule)
-          expect(subject.rule).to be_instance_of(Flipper::Rules::Condition)
+          expect(subject.rule).to be_instance_of(Flipper::Expressions::Equal)
           expect(subject.rule).to eq(rule)
         end
       end
@@ -711,7 +703,7 @@ RSpec.describe Flipper::Feature do
         it "sets rule to Any" do
           rule = Flipper.any(Flipper.property(:plan).eq("basic"))
           subject.add_rule(rule)
-          expect(subject.rule).to be_instance_of(Flipper::Rules::Any)
+          expect(subject.rule).to be_instance_of(Flipper::Expressions::Any)
           expect(subject.rule).to eq(rule)
         end
       end
@@ -720,26 +712,26 @@ RSpec.describe Flipper::Feature do
         it "sets rule to All" do
           rule = Flipper.all(Flipper.property(:plan).eq("basic"))
           subject.add_rule(rule)
-          expect(subject.rule).to be_instance_of(Flipper::Rules::All)
+          expect(subject.rule).to be_instance_of(Flipper::Expressions::All)
           expect(subject.rule).to eq(rule)
         end
       end
     end
 
-    context "when Condition enabled" do
+    context "when Expression enabled" do
       let(:rule) { Flipper.property(:plan).eq("basic") }
 
       before do
         subject.enable_rule rule
       end
 
-      context "with Condition instance" do
-        it "changes rule to Any and adds new Condition" do
+      context "with Expression instance" do
+        it "changes rule to Any and adds new Expression" do
           new_rule = Flipper.property(:age).gte(21)
           subject.add_rule(new_rule)
-          expect(subject.rule).to be_instance_of(Flipper::Rules::Any)
-          expect(subject.rule.rules).to include(rule)
-          expect(subject.rule.rules).to include(new_rule)
+          expect(subject.rule).to be_instance_of(Flipper::Expressions::Any)
+          expect(subject.rule.args).to include(rule)
+          expect(subject.rule.args).to include(new_rule)
         end
       end
 
@@ -747,9 +739,9 @@ RSpec.describe Flipper::Feature do
         it "changes rule to Any and adds new Any" do
           new_rule = Flipper.any(Flipper.property(:age).eq(21))
           subject.add_rule new_rule
-          expect(subject.rule).to be_instance_of(Flipper::Rules::Any)
-          expect(subject.rule.rules).to include(rule)
-          expect(subject.rule.rules).to include(new_rule)
+          expect(subject.rule).to be_instance_of(Flipper::Expressions::Any)
+          expect(subject.rule.args).to include(rule)
+          expect(subject.rule.args).to include(new_rule)
         end
       end
 
@@ -757,9 +749,9 @@ RSpec.describe Flipper::Feature do
         it "changes rule to Any and adds new All" do
           new_rule = Flipper.all(Flipper.property(:plan).eq("basic"))
           subject.add_rule new_rule
-          expect(subject.rule).to be_instance_of(Flipper::Rules::Any)
-          expect(subject.rule.rules).to include(rule)
-          expect(subject.rule.rules).to include(new_rule)
+          expect(subject.rule).to be_instance_of(Flipper::Expressions::Any)
+          expect(subject.rule.args).to include(rule)
+          expect(subject.rule.args).to include(new_rule)
         end
       end
     end
@@ -772,13 +764,13 @@ RSpec.describe Flipper::Feature do
         subject.enable_rule rule
       end
 
-      context "with Condition instance" do
-        it "adds Condition to Any" do
+      context "with Expression instance" do
+        it "adds Expression to Any" do
           new_rule = Flipper.property(:age).gte(21)
           subject.add_rule(new_rule)
-          expect(subject.rule).to be_instance_of(Flipper::Rules::Any)
-          expect(subject.rule.rules).to include(condition)
-          expect(subject.rule.rules).to include(new_rule)
+          expect(subject.rule).to be_instance_of(Flipper::Expressions::Any)
+          expect(subject.rule.args).to include(condition)
+          expect(subject.rule.args).to include(new_rule)
         end
       end
 
@@ -786,9 +778,9 @@ RSpec.describe Flipper::Feature do
         it "adds Any to Any" do
           new_rule = Flipper.any(Flipper.property(:age).gte(21))
           subject.add_rule(new_rule)
-          expect(subject.rule).to be_instance_of(Flipper::Rules::Any)
-          expect(subject.rule.rules).to include(condition)
-          expect(subject.rule.rules).to include(new_rule)
+          expect(subject.rule).to be_instance_of(Flipper::Expressions::Any)
+          expect(subject.rule.args).to include(condition)
+          expect(subject.rule.args).to include(new_rule)
         end
       end
 
@@ -796,9 +788,9 @@ RSpec.describe Flipper::Feature do
         it "adds All to Any" do
           new_rule = Flipper.all(Flipper.property(:age).gte(21))
           subject.add_rule(new_rule)
-          expect(subject.rule).to be_instance_of(Flipper::Rules::Any)
-          expect(subject.rule.rules).to include(condition)
-          expect(subject.rule.rules).to include(new_rule)
+          expect(subject.rule).to be_instance_of(Flipper::Expressions::Any)
+          expect(subject.rule.args).to include(condition)
+          expect(subject.rule.args).to include(new_rule)
         end
       end
     end
@@ -811,13 +803,13 @@ RSpec.describe Flipper::Feature do
         subject.enable_rule rule
       end
 
-      context "with Condition instance" do
-        it "adds Condition to All" do
+      context "with Expression instance" do
+        it "adds Expression to All" do
           new_rule = Flipper.property(:age).gte(21)
           subject.add_rule(new_rule)
-          expect(subject.rule).to be_instance_of(Flipper::Rules::All)
-          expect(subject.rule.rules).to include(condition)
-          expect(subject.rule.rules).to include(new_rule)
+          expect(subject.rule).to be_instance_of(Flipper::Expressions::All)
+          expect(subject.rule.args).to include(condition)
+          expect(subject.rule.args).to include(new_rule)
         end
       end
 
@@ -825,9 +817,9 @@ RSpec.describe Flipper::Feature do
         it "adds Any to All" do
           new_rule = Flipper.any(Flipper.property(:age).gte(21))
           subject.add_rule(new_rule)
-          expect(subject.rule).to be_instance_of(Flipper::Rules::All)
-          expect(subject.rule.rules).to include(condition)
-          expect(subject.rule.rules).to include(new_rule)
+          expect(subject.rule).to be_instance_of(Flipper::Expressions::All)
+          expect(subject.rule.args).to include(condition)
+          expect(subject.rule.args).to include(new_rule)
         end
       end
 
@@ -835,9 +827,9 @@ RSpec.describe Flipper::Feature do
         it "adds All to All" do
           new_rule = Flipper.all(Flipper.property(:age).gte(21))
           subject.add_rule(new_rule)
-          expect(subject.rule).to be_instance_of(Flipper::Rules::All)
-          expect(subject.rule.rules).to include(condition)
-          expect(subject.rule.rules).to include(new_rule)
+          expect(subject.rule).to be_instance_of(Flipper::Expressions::All)
+          expect(subject.rule.args).to include(condition)
+          expect(subject.rule.args).to include(new_rule)
         end
       end
     end
@@ -845,7 +837,7 @@ RSpec.describe Flipper::Feature do
 
   describe '#remove_rule' do
     context "when nothing enabled" do
-      context "with Condition instance" do
+      context "with Expression instance" do
         it "does nothing" do
           rule = Flipper.property(:plan).eq("basic")
           subject.remove_rule(rule)
@@ -870,21 +862,21 @@ RSpec.describe Flipper::Feature do
       end
     end
 
-    context "when Condition enabled" do
+    context "when Expression enabled" do
       let(:rule) { Flipper.property(:plan).eq("basic") }
 
       before do
         subject.enable_rule rule
       end
 
-      context "with Condition instance" do
-        it "changes rule to Any and removes Condition if it matches" do
+      context "with Expression instance" do
+        it "changes rule to Any and removes Expression if it matches" do
           new_rule = Flipper.property(:plan).eq("basic")
           subject.remove_rule new_rule
           expect(subject.rule).to eq(Flipper.any)
         end
 
-        it "changes rule to Any if Condition doesn't match" do
+        it "changes rule to Any if Expression doesn't match" do
           new_rule = Flipper.property(:plan).eq("premium")
           subject.remove_rule new_rule
           expect(subject.rule).to eq(Flipper.any(rule))
@@ -916,13 +908,13 @@ RSpec.describe Flipper::Feature do
         subject.enable_rule rule
       end
 
-      context "with Condition instance" do
-        it "removes Condition if it matches" do
+      context "with Expression instance" do
+        it "removes Expression if it matches" do
           subject.remove_rule condition
           expect(subject.rule).to eq(Flipper.any)
         end
 
-        it "does nothing if Condition does not match" do
+        it "does nothing if Expression does not match" do
           subject.remove_rule Flipper.property(:plan).eq("premium")
           expect(subject.rule).to eq(rule)
         end
@@ -932,7 +924,8 @@ RSpec.describe Flipper::Feature do
         it "removes Any if it matches" do
           new_rule = Flipper.any(Flipper.property(:plan).eq("premium"))
           subject.add_rule new_rule
-          expect(subject.rule.rules.size).to be(2)
+          p subject.rule
+          expect(subject.rule.args.size).to be(2)
           subject.remove_rule new_rule
           expect(subject.rule).to eq(rule)
         end
@@ -948,7 +941,7 @@ RSpec.describe Flipper::Feature do
         it "removes All if it matches" do
           new_rule = Flipper.all(Flipper.property(:plan).eq("premium"))
           subject.add_rule new_rule
-          expect(subject.rule.rules.size).to be(2)
+          expect(subject.rule.args.size).to be(2)
           subject.remove_rule new_rule
           expect(subject.rule).to eq(rule)
         end
@@ -969,13 +962,13 @@ RSpec.describe Flipper::Feature do
         subject.enable_rule rule
       end
 
-      context "with Condition instance" do
-        it "removes Condition if it matches" do
+      context "with Expression instance" do
+        it "removes Expression if it matches" do
           subject.remove_rule condition
           expect(subject.rule).to eq(Flipper.all)
         end
 
-        it "does nothing if Condition does not match" do
+        it "does nothing if Expression does not match" do
           subject.remove_rule Flipper.property(:plan).eq("premium")
           expect(subject.rule).to eq(rule)
         end
@@ -985,7 +978,7 @@ RSpec.describe Flipper::Feature do
         it "removes Any if it matches" do
           new_rule = Flipper.any(Flipper.property(:plan).eq("premium"))
           subject.add_rule new_rule
-          expect(subject.rule.rules.size).to be(2)
+          expect(subject.rule.args.size).to be(2)
           subject.remove_rule new_rule
           expect(subject.rule).to eq(rule)
         end
@@ -1001,7 +994,7 @@ RSpec.describe Flipper::Feature do
         it "removes All if it matches" do
           new_rule = Flipper.all(Flipper.property(:plan).eq("premium"))
           subject.add_rule new_rule
-          expect(subject.rule.rules.size).to be(2)
+          expect(subject.rule.args.size).to be(2)
           subject.remove_rule new_rule
           expect(subject.rule).to eq(rule)
         end

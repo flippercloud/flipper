@@ -71,11 +71,10 @@ RSpec.describe Flipper do
       })
     }
     let(:rule) {
-      Flipper::Rules::Condition.new(
-        {"type" => "Property", "value" => "plan"},
-        {"type" => "Operator", "value" => "eq"},
-        {"type" => "String", "value" => "basic"}
-      )
+      Flipper::Expressions::Equal.new([
+        Flipper::Expressions::Property.new("plan"),
+        Flipper::Expressions::String.new("basic"),
+      ])
     }
 
     before do
@@ -395,20 +394,14 @@ RSpec.describe Flipper do
   end
 
   describe ".property" do
-    it "returns Flipper::Rules::Property instance" do
-      expect(Flipper.property("name")).to eq(Flipper::Rules::Property.new("name"))
+    it "returns Flipper::Expressions::Property instance" do
+      expect(Flipper.property("name")).to eq(Flipper::Expressions::Property.new("name"))
     end
   end
 
   describe ".random" do
-    it "returns Flipper::Rules::Random instance" do
-      expect(Flipper.random(100)).to eq(Flipper::Rules::Random.new(100))
-    end
-  end
-
-  describe ".object" do
-    it "returns Flipper::Rules::Object instance" do
-      expect(Flipper.object("test")).to eq(Flipper::Rules::Object.new("test"))
+    it "returns Flipper::Expressions::Random instance" do
+      expect(Flipper.random(100)).to eq(Flipper::Expressions::Random.new(100))
     end
   end
 
@@ -416,8 +409,10 @@ RSpec.describe Flipper do
     let(:age_rule) { Flipper.property(:age).gte(21) }
     let(:plan_rule) { Flipper.property(:plan).eq("basic") }
 
-    it "returns Flipper::Rules::Any instance" do
-      expect(Flipper.any(age_rule, plan_rule)).to eq(Flipper::Rules::Any.new(age_rule, plan_rule))
+    it "returns Flipper::Expressions::Any instance" do
+      expect(Flipper.any(age_rule, plan_rule)).to eq(
+        Flipper::Expressions::Any.new([age_rule, plan_rule])
+      )
     end
   end
 
@@ -425,8 +420,10 @@ RSpec.describe Flipper do
     let(:age_rule) { Flipper.property(:age).gte(21) }
     let(:plan_rule) { Flipper.property(:plan).eq("basic") }
 
-    it "returns Flipper::Rules::All instance" do
-      expect(Flipper.all(age_rule, plan_rule)).to eq(Flipper::Rules::All.new(age_rule, plan_rule))
+    it "returns Flipper::Expressions::All instance" do
+      expect(Flipper.all(age_rule, plan_rule)).to eq(
+        Flipper::Expressions::All.new([age_rule, plan_rule])
+      )
     end
   end
 end
