@@ -924,7 +924,6 @@ RSpec.describe Flipper::Feature do
         it "removes Any if it matches" do
           new_rule = Flipper.any(Flipper.property(:plan).eq("premium"))
           subject.add_rule new_rule
-          p subject.rule
           expect(subject.rule.args.size).to be(2)
           subject.remove_rule new_rule
           expect(subject.rule).to eq(rule)
