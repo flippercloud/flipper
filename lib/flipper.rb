@@ -69,6 +69,14 @@ module Flipper
                  :memoize=, :memoizing?,
                  :sync, :sync_secret # For Flipper::Cloud. Will error for OSS Flipper.
 
+  def any(*args)
+    Flipper::Expressions::Any.new(args)
+  end
+
+  def all(*args)
+    Flipper::Expressions::All.new(args)
+  end
+
   def property(name)
     Flipper::Expressions::Property.new(name)
   end
@@ -77,16 +85,8 @@ module Flipper
     Flipper::Expressions::Random.new(name)
   end
 
-  def object(object)
-    Flipper::Expressions::Object.new(object)
-  end
-
-  def any(*args)
-    Flipper::Expressions::Any.new(args)
-  end
-
-  def all(*args)
-    Flipper::Expressions::All.new(args)
+  def value(value)
+    Flipper::Expressions::Value.new(value)
   end
 
   # Public: Use this to register a group by name.

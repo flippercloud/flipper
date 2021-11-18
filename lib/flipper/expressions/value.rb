@@ -2,7 +2,7 @@ require "flipper/expression"
 
 module Flipper
   module Expressions
-    class Object < Expression
+    class Value < Expression
       def initialize(args)
         super Array(args)
       end

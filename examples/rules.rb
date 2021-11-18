@@ -130,7 +130,7 @@ refute Flipper.enabled?(:something, admin_user)
 refute Flipper.enabled?(:something, other_user)
 
 puts "\n\nBoolean Rule"
-boolean_rule = Flipper.object(true).eq(true)
+boolean_rule = Flipper.value(true).eq(true)
 Flipper.enable_rule :something, boolean_rule
 assert Flipper.enabled?(:something)
 assert Flipper.enabled?(:something, user)

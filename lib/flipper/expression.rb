@@ -121,18 +121,6 @@ module Flipper
   end
 end
 
-require "flipper/expressions/all"
-require "flipper/expressions/any"
-require "flipper/expressions/boolean"
-require "flipper/expressions/equal"
-require "flipper/expressions/greater_than_or_equal_to"
-require "flipper/expressions/greater_than"
-require "flipper/expressions/less_than_or_equal_to"
-require "flipper/expressions/less_than"
-require "flipper/expressions/not_equal"
-require "flipper/expressions/number"
-require "flipper/expressions/object"
-require "flipper/expressions/percentage"
-require "flipper/expressions/property"
-require "flipper/expressions/random"
-require "flipper/expressions/string"
+Dir[File.join(File.dirname(__FILE__), 'expressions', '*.rb')].sort.each do |file|
+  require "flipper/expressions/#{File.basename(file, '.rb')}"
+end
