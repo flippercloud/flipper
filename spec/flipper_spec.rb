@@ -71,10 +71,7 @@ RSpec.describe Flipper do
       })
     }
     let(:rule) {
-      Flipper::Expressions::Equal.new([
-        Flipper::Expressions::Property.new("plan"),
-        Flipper::Expressions::String.new("basic"),
-      ])
+      Flipper.property(:plan).eq("basic")
     }
 
     before do

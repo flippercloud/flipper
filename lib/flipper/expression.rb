@@ -1,15 +1,12 @@
 module Flipper
   class Expression
-    SUPPORTED_TYPES_MAP = {
-      String     => "String",
-      Numeric    => "Number",
-      NilClass   => "Null",
-      TrueClass  => "Boolean",
-      FalseClass => "Boolean",
-    }.freeze
-
-    SUPPORTED_TYPE_CLASSES = SUPPORTED_TYPES_MAP.keys.freeze
-    SUPPORTED_TYPE_NAMES = SUPPORTED_TYPES_MAP.values.freeze
+    SUPPORTED_TYPE_CLASSES = [
+      String,
+      Numeric,
+      NilClass,
+      TrueClass,
+      FalseClass,
+    ].freeze
 
     def self.build(object)
       return object if object.is_a?(Flipper::Expression)
@@ -64,7 +61,7 @@ module Flipper
     end
 
     def equal(object)
-      Expressions::Equal.new([self, Expression.build(typed(object))])
+      Expressions::Equal.new([self, build(object)])
     end
     alias eq equal
 
@@ -100,23 +97,14 @@ module Flipper
     private
 
     def build(object)
-      Expression.build(typed(object))
-    end
+      return object if object.is_a?(Flipper::Expression)
 
-    def typed(object)
-      {type_of(object) => [object]}
-    end
-
-    def type_of(object)
-      type_class = SUPPORTED_TYPE_CLASSES.detect { |klass, type| object.is_a?(klass) }
-
-      if type_class.nil?
-        raise ArgumentError,
-          "#{object.inspect} is not a supported primitive." +
-          " Object must be one of: #{SUPPORTED_TYPE_CLASSES.join(", ")}."
+      case object
+      when *SUPPORTED_TYPE_CLASSES
+        Expression.build({"Value" => [object]})
+      else
+        raise ArgumentError, "#{object} is not a supported type"
       end
-
-      SUPPORTED_TYPES_MAP[type_class]
     end
   end
 end

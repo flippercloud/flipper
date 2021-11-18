@@ -81,6 +81,10 @@ module Flipper
     Flipper::Expressions::Property.new(name)
   end
 
+  def value(value)
+    Flipper::Expressions::Value.new(value)
+  end
+
   def random(name)
     Flipper::Expressions::Random.new(name)
   end

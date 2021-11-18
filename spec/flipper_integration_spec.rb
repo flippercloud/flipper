@@ -552,10 +552,7 @@ RSpec.describe Flipper do
 
   context "for rule" do
     it "works" do
-      rule = Flipper::Expressions::Equal.new([
-        Flipper::Expressions::Property.new("plan"),
-        Flipper::Expressions::String.new("basic"),
-      ])
+      rule = Flipper.property(:plan).eq("basic")
       feature.enable rule
 
       expect(feature.enabled?(basic_plan_thing)).to be(true)
@@ -565,16 +562,10 @@ RSpec.describe Flipper do
 
   context "for Any" do
     it "works" do
-      rule = Flipper::Expressions::Any.new([
-        Flipper::Expressions::Equal.new([
-          Flipper::Expressions::Property.new("plan"),
-          Flipper::Expressions::String.new("basic"),
-        ]),
-        Flipper::Expressions::Equal.new([
-          Flipper::Expressions::Property.new("plan"),
-          Flipper::Expressions::String.new("plus"),
-        ])
-      ])
+      rule = Flipper.any(
+        Flipper.property(:plan).eq("basic"),
+        Flipper.property(:plan).eq("plus"),
+      )
       feature.enable rule
 
       expect(feature.enabled?(basic_plan_thing)).to be(true)
@@ -592,16 +583,10 @@ RSpec.describe Flipper do
         "plan" => "basic",
         "age" => 20,
       })
-      rule = Flipper::Expressions::All.new([
-        Flipper::Expressions::Equal.new([
-          Flipper::Expressions::Property.new("plan"),
-          Flipper::Expressions::String.new("basic"),
-        ]),
-        Flipper::Expressions::Equal.new([
-          Flipper::Expressions::Property.new("age"),
-          Flipper::Expressions::Number.new(21),
-        ])
-      ])
+      rule = Flipper.all(
+        Flipper.property(:plan).eq("basic"),
+        Flipper.property(:age).eq(21)
+      )
       feature.enable rule
 
       expect(feature.enabled?(true_actor)).to be(true)
@@ -620,22 +605,13 @@ RSpec.describe Flipper do
         "plan" => "basic",
         "age" => 20,
       })
-      rule = Flipper::Expressions::Any.new([
-        Flipper::Expressions::Equal.new([
-          Flipper::Expressions::Property.new("admin"),
-          Flipper::Expressions::Boolean.new(true),
-        ]),
-        Flipper::Expressions::All.new([
-          Flipper::Expressions::Equal.new([
-            Flipper::Expressions::Property.new("plan"),
-            Flipper::Expressions::String.new("basic"),
-          ]),
-          Flipper::Expressions::Equal.new([
-            Flipper::Expressions::Property.new("age"),
-            Flipper::Expressions::Number.new(21),
-          ])
-        ])
-      ])
+      rule = Flipper.any(
+        Flipper.property(:admin).eq(true),
+        Flipper.all(
+          Flipper.property(:plan).eq("basic"),
+          Flipper.property(:age).eq(21)
+        )
+      )
 
       feature.enable rule
 

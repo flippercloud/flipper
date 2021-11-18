@@ -4,8 +4,8 @@ RSpec.describe Flipper::Expressions::LessThanOrEqual do
   describe "#evaluate" do
     it "returns true when equal" do
       expression = described_class.new([
-        Flipper::Expressions::Number.new([2]),
-        Flipper::Expressions::Number.new([2]),
+        Flipper::Expressions::Value.new([2]),
+        Flipper::Expressions::Value.new([2]),
       ])
 
       expect(expression.evaluate).to be(true)
@@ -13,8 +13,8 @@ RSpec.describe Flipper::Expressions::LessThanOrEqual do
 
     it "returns true when less" do
       expression = described_class.new([
-        Flipper::Expressions::Number.new([1]),
-        Flipper::Expressions::Number.new([2]),
+        Flipper::Expressions::Value.new([1]),
+        Flipper::Expressions::Value.new([2]),
       ])
 
       expect(expression.evaluate).to be(true)
@@ -22,8 +22,8 @@ RSpec.describe Flipper::Expressions::LessThanOrEqual do
 
     it "returns false when greater" do
       expression = described_class.new([
-        Flipper::Expressions::Number.new([2]),
-        Flipper::Expressions::Number.new([1]),
+        Flipper::Expressions::Value.new([2]),
+        Flipper::Expressions::Value.new([1]),
       ])
 
       expect(expression.evaluate).to be(false)

@@ -59,7 +59,7 @@ RSpec.describe Flipper::Adapters::ReadOnly do
       rule: {
         "Equal" => [
           {"Property" => ["plan"]},
-          {"String" => ["basic"]},
+          {"Value" => ["basic"]},
         ]
       },
       percentage_of_actors: '25',
