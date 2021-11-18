@@ -1,5 +1,16 @@
 module Flipper
   class Expression
+    SUPPORTED_TYPES_MAP = {
+      String     => "String",
+      Numeric    => "Number",
+      NilClass   => "Null",
+      TrueClass  => "Boolean",
+      FalseClass => "Boolean",
+    }.freeze
+
+    SUPPORTED_TYPE_CLASSES = SUPPORTED_TYPES_MAP.keys.freeze
+    SUPPORTED_TYPE_NAMES = SUPPORTED_TYPES_MAP.values.freeze
+
     def self.build(object)
       return object if object.is_a?(Flipper::Expression)
 
@@ -52,31 +63,56 @@ module Flipper
       Expressions::All.new([self])
     end
 
-    def eq(*args)
-      Expressions::Equal.new([self].concat(args))
+    def equal(object)
+      Expressions::Equal.new([self, Expression.build(typed(object))])
+    end
+    alias eq equal
+
+    def not_equal(object)
+      Expressions::NotEqual.new([self, build(object)])
+    end
+    alias neq not_equal
+
+    def greater_than(object)
+      Expressions::GreaterThan.new([self, build(object)])
+    end
+    alias gt greater_than
+
+    def greater_than_or_equal(object)
+      Expressions::GreaterThan.new([self, build(object)])
+    end
+    alias gte greater_than_or_equal
+
+    def less_than(object)
+      Expressions::GreaterThan.new([self, build(object)])
+    end
+    alias lt less_than
+
+    def less_than_or_equal(object)
+      Expressions::GreaterThan.new([self, build(object)])
+    end
+    alias lte less_than_or_equal
+
+    private
+
+    def build(object)
+      Expression.build(typed(object))
     end
 
-    def neq(*args)
-      Expressions::NotEqual.new([self].concat(args))
+    def typed(object)
+      {type_of(object) => [object]}
     end
 
-    #####################################################################
-    # TODO: convert naked primitive to Number, String, Boolean, etc.
-    #####################################################################
-    def gt(*args)
-      Expressions::GreaterThan.new([self].concat(args))
-    end
+    def type_of(object)
+      type_class = SUPPORTED_TYPE_CLASSES.detect { |klass, type| object.is_a?(klass) }
 
-    def gte(*args)
-      Expressions::GreaterThan.new([self].concat(args))
-    end
+      if type_class.nil?
+        raise ArgumentError,
+          "#{object.inspect} is not a supported primitive." +
+          " Object must be one of: #{SUPPORTED_TYPE_CLASSES.join(", ")}."
+      end
 
-    def lt(*args)
-      Expressions::GreaterThan.new([self].concat(args))
-    end
-
-    def lte(*args)
-      Expressions::GreaterThan.new([self].concat(args))
+      SUPPORTED_TYPES_MAP[type_class]
     end
   end
 end

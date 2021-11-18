@@ -57,12 +57,10 @@ RSpec.describe Flipper::Adapters::ReadOnly do
       groups: Set['admins'],
       actors: Set['22'],
       rule: {
-        "type" => "Condition",
-        "value" => {
-          "left" => {"type" => "Property", "value" => "plan"},
-          "operator" => {"type" => "Operator", "value" => "eq"},
-          "right" => {"type" => "String", "value" => "basic"},
-        }
+        "Equal" => [
+          {"Property" => ["plan"]},
+          {"String" => ["basic"]},
+        ]
       },
       percentage_of_actors: '25',
       percentage_of_time: '45',
