@@ -21,7 +21,7 @@ module Flipper
         type = object.keys.first
         args = object.values.first
         Expressions.const_get(type).new(args)
-      when String, Symbol, Numeric, TrueClass, FalseClass
+      when *SUPPORTED_TYPE_CLASSES
         object
       else
         raise ArgumentError, "#{object.inspect} cannot be converted into a rule expression"
