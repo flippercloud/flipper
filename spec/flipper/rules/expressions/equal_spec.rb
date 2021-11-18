@@ -35,4 +35,20 @@ RSpec.describe Flipper::Expressions::Equal do
       expect(expression.evaluate).to be(false)
     end
   end
+
+  describe "#value" do
+    it "returns Hash" do
+      expression = Flipper::Expressions::Equal.new([
+        Flipper::Expressions::Property.new(["plan"]),
+        Flipper::Expressions::String.new(["basic"]),
+      ])
+
+      expect(expression.value).to eq({
+        "Equal" => [
+          {"Property" => ["plan"]},
+          {"String" => ["basic"]},
+        ],
+      })
+    end
+  end
 end

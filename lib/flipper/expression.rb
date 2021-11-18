@@ -30,7 +30,7 @@ module Flipper
 
     def value
       {
-        self.class.name => args.map { |arg|
+        self.class.name.split("::").last => args.map { |arg|
           arg.is_a?(Expression) ? arg.value : arg
         }
       }
