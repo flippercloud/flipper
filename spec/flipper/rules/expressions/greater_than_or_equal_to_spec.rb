@@ -1,6 +1,6 @@
 require 'helper'
 
-RSpec.describe Flipper::Expressions::GreaterThanOrEqualTo do
+RSpec.describe Flipper::Expressions::GreaterThanOrEqual do
   describe "#evaluate" do
     it "returns true when equal" do
       expression = described_class.new([

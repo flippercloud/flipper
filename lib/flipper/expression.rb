@@ -79,7 +79,7 @@ module Flipper
     alias gt greater_than
 
     def greater_than_or_equal(object)
-      Expressions::GreaterThanOrEqualTo.new([self, build(object)])
+      Expressions::GreaterThanOrEqual.new([self, build(object)])
     end
     alias gte greater_than_or_equal
 
@@ -89,7 +89,7 @@ module Flipper
     alias lt less_than
 
     def less_than_or_equal(object)
-      Expressions::LessThanOrEqualTo.new([self, build(object)])
+      Expressions::LessThanOrEqual.new([self, build(object)])
     end
     alias lte less_than_or_equal
 

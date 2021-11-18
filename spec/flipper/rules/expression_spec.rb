@@ -17,15 +17,15 @@ RSpec.describe Flipper::Expression do
       ])
     end
 
-    it "can build GreaterThanOrEqualTo" do
+    it "can build GreaterThanOrEqual" do
       expression = Flipper::Expression.build({
-        "GreaterThanOrEqualTo" => [
+        "GreaterThanOrEqual" => [
           {"Number" => [2]},
           {"Number" => [1]},
         ]
       })
 
-      expect(expression).to be_instance_of(Flipper::Expressions::GreaterThanOrEqualTo)
+      expect(expression).to be_instance_of(Flipper::Expressions::GreaterThanOrEqual)
       expect(expression.args).to eq([
         Flipper::Expressions::Number.new([2]),
         Flipper::Expressions::Number.new([1]),
@@ -47,15 +47,15 @@ RSpec.describe Flipper::Expression do
       ])
     end
 
-    it "can build LessThanOrEqualTo" do
+    it "can build LessThanOrEqual" do
       expression = Flipper::Expression.build({
-        "LessThanOrEqualTo" => [
+        "LessThanOrEqual" => [
           {"Number" => [2]},
           {"Number" => [1]},
         ]
       })
 
-      expect(expression).to be_instance_of(Flipper::Expressions::LessThanOrEqualTo)
+      expect(expression).to be_instance_of(Flipper::Expressions::LessThanOrEqual)
       expect(expression.args).to eq([
         Flipper::Expressions::Number.new([2]),
         Flipper::Expressions::Number.new([1]),
