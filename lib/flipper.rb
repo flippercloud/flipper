@@ -77,6 +77,10 @@ module Flipper
     Flipper::Expressions::Random.new(name)
   end
 
+  def object(object)
+    Flipper::Expressions::Object.new(object)
+  end
+
   def any(*args)
     Flipper::Expressions::Any.new(args)
   end

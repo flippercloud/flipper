@@ -58,18 +58,10 @@ module SpecHelpers
     }
   end
 
-  def api_rule_type_invalid_response
+  def api_rule_invalid_response
     {
       'code' => 6,
-      'message' => 'Required parameter rule type is missing.',
-      'more_info' => api_error_code_reference_url,
-    }
-  end
-
-  def api_rule_value_invalid_response
-    {
-      'code' => 7,
-      'message' => 'Required parameter rule value is missing.',
+      'message' => 'The provided expression was not valid.',
       'more_info' => api_error_code_reference_url,
     }
   end

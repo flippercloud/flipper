@@ -13,7 +13,8 @@ RSpec.describe Flipper::Api::V1::Actions::RuleGate do
   describe 'enable' do
     before do
       flipper[:my_feature].disable_rule
-      post '/features/my_feature/rule', JSON.dump(rule.value), "CONTENT_TYPE" => "application/json"
+      post '/features/my_feature/rule', JSON.dump(rule.value),
+        "CONTENT_TYPE" => "application/json"
     end
 
     it 'enables feature for rule' do
@@ -31,7 +32,8 @@ RSpec.describe Flipper::Api::V1::Actions::RuleGate do
   describe 'disable' do
     before do
       flipper[:my_feature].enable_rule(rule)
-      delete '/features/my_feature/rule', JSON.dump(rule.value), "CONTENT_TYPE" => "application/json"
+      delete '/features/my_feature/rule', JSON.dump({}),
+        "CONTENT_TYPE" => "application/json"
     end
 
     it 'disables rule for feature' do
@@ -49,7 +51,8 @@ RSpec.describe Flipper::Api::V1::Actions::RuleGate do
   describe 'enable feature with slash in name' do
     before do
       flipper["my/feature"].disable_rule
-      post '/features/my/feature/rule', JSON.dump(rule.value), "CONTENT_TYPE" => "application/json"
+      post '/features/my/feature/rule', JSON.dump(rule.value),
+        "CONTENT_TYPE" => "application/json"
     end
 
     it 'enables feature for rule' do
@@ -67,7 +70,8 @@ RSpec.describe Flipper::Api::V1::Actions::RuleGate do
   describe 'enable feature with space in name' do
     before do
       flipper["sp ace"].disable_rule
-      post '/features/sp%20ace/rule', JSON.dump(rule.value), "CONTENT_TYPE" => "application/json"
+      post '/features/sp%20ace/rule', JSON.dump(rule.value),
+        "CONTENT_TYPE" => "application/json"
     end
 
     it 'enables feature for rule' do
@@ -82,103 +86,16 @@ RSpec.describe Flipper::Api::V1::Actions::RuleGate do
     end
   end
 
-  describe 'enable missing type parameter' do
+  describe 'enable with invalid data' do
     before do
-      data = rule.value
-      data.delete("type")
-      post '/features/my_feature/rule', JSON.dump(data), "CONTENT_TYPE" => "application/json"
+      data = {"blah" => "blah"}
+      post '/features/my_feature/rule', JSON.dump(data),
+        "CONTENT_TYPE" => "application/json"
     end
 
     it 'returns correct error response' do
       expect(last_response.status).to eq(422)
-      expect(json_response).to eq(api_rule_type_invalid_response)
-    end
-  end
-
-  describe 'disable missing type parameter' do
-    before do
-      data = rule.value
-      data.delete("type")
-      delete '/features/my_feature/rule'
-    end
-
-    it 'returns correct error response' do
-      expect(last_response.status).to eq(200)
-    end
-  end
-
-  describe 'enable missing value parameter' do
-    before do
-      data = rule.value
-      data.delete("value")
-      post '/features/my_feature/rule', JSON.dump(data), "CONTENT_TYPE" => "application/json"
-    end
-
-    it 'returns correct error response' do
-      expect(last_response.status).to eq(422)
-      expect(json_response).to eq(api_rule_value_invalid_response)
-    end
-  end
-
-  describe 'disable missing value parameter' do
-    before do
-      data = rule.value
-      data.delete("value")
-      delete '/features/my_feature/rule', JSON.dump(data), "CONTENT_TYPE" => "application/json"
-    end
-
-    it 'returns correct error response' do
-      expect(last_response.status).to eq(200)
-    end
-  end
-
-  describe 'enable nil type parameter' do
-    before do
-      data = rule.value
-      data["type"] = nil
-      post '/features/my_feature/rule', JSON.dump(data), "CONTENT_TYPE" => "application/json"
-    end
-
-    it 'returns correct error response' do
-      expect(last_response.status).to eq(422)
-      expect(json_response).to eq(api_rule_type_invalid_response)
-    end
-  end
-
-  describe 'disable nil type parameter' do
-    before do
-      data = rule.value
-      data["type"] = nil
-      delete '/features/my_feature/rule', JSON.dump(data), "CONTENT_TYPE" => "application/json"
-    end
-
-    it 'returns correct error response' do
-      expect(last_response.status).to eq(200)
-    end
-  end
-
-  describe 'enable nil value parameter' do
-    before do
-      data = rule.value
-      data["value"] = nil
-      post '/features/my_feature/rule', JSON.dump(data), "CONTENT_TYPE" => "application/json"
-    end
-
-    it 'returns correct error response' do
-      expect(last_response.status).to eq(422)
-      expect(json_response).to eq(api_rule_value_invalid_response)
-    end
-  end
-
-  describe 'disable nil value parameter' do
-    before do
-      data = rule.value
-      data["value"] = nil
-      delete '/features/my_feature/rule', JSON.dump(data), "CONTENT_TYPE" => "application/json"
-    end
-
-    it 'returns correct error response' do
-      expect(last_response.status).to eq(200)
+      expect(json_response).to eq(api_rule_invalid_response)
     end
   end
 

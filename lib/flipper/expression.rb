@@ -79,19 +79,23 @@ module Flipper
     alias gt greater_than
 
     def greater_than_or_equal(object)
-      Expressions::GreaterThan.new([self, build(object)])
+      Expressions::GreaterThanOrEqualTo.new([self, build(object)])
     end
     alias gte greater_than_or_equal
 
     def less_than(object)
-      Expressions::GreaterThan.new([self, build(object)])
+      Expressions::LessThan.new([self, build(object)])
     end
     alias lt less_than
 
     def less_than_or_equal(object)
-      Expressions::GreaterThan.new([self, build(object)])
+      Expressions::LessThanOrEqualTo.new([self, build(object)])
     end
     alias lte less_than_or_equal
+
+    def percentage(object)
+      Expressions::Percentage.new([self, build(object)])
+    end
 
     private
 
@@ -117,8 +121,8 @@ module Flipper
   end
 end
 
-require "flipper/expressions/any"
 require "flipper/expressions/all"
+require "flipper/expressions/any"
 require "flipper/expressions/boolean"
 require "flipper/expressions/equal"
 require "flipper/expressions/greater_than_or_equal_to"
@@ -127,6 +131,7 @@ require "flipper/expressions/less_than_or_equal_to"
 require "flipper/expressions/less_than"
 require "flipper/expressions/not_equal"
 require "flipper/expressions/number"
+require "flipper/expressions/object"
 require "flipper/expressions/percentage"
 require "flipper/expressions/property"
 require "flipper/expressions/random"

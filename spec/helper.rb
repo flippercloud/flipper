@@ -24,7 +24,6 @@ RSpec.configure do |config|
     Flipper.unregister_groups
     Flipper.configuration = nil
   end
-  # config.fail_fast = true
 
   config.disable_monkey_patching!
 
