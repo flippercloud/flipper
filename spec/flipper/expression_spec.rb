@@ -126,6 +126,24 @@ RSpec.describe Flipper::Expression do
     end
   end
 
+  describe "#initialize" do
+    it "works with Array" do
+      expect(described_class.new([1]).args).to eq([1])
+    end
+
+    it "raises ArgumentError if not Array" do
+      [
+        "asdf",
+        1,
+        {"foo" => "bar"},
+      ].each do |value|
+        expect {
+          described_class.new(value)
+        }.to raise_error(ArgumentError, /args must be an Array but was #{value.inspect}/)
+      end
+    end
+  end
+
   describe "#eql?" do
     it "returns true for same class and args" do
       expression = Flipper::Expression.new(["foo"])

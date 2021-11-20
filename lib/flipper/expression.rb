@@ -29,7 +29,7 @@ module Flipper
 
     def initialize(args)
       unless args.is_a?(Array)
-        raise ArgumentError, "args must always be an Array but was #{args.inspect}"
+        raise ArgumentError, "args must be an Array but was #{args.inspect}"
       end
       @args = self.class.build(args)
     end
