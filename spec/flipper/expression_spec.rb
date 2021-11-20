@@ -125,4 +125,44 @@ RSpec.describe Flipper::Expression do
       expect(expression.args).to eq(["basic"])
     end
   end
+
+  describe "#eql?" do
+    it "returns true for same class and args" do
+      expression = Flipper::Expressions::Value.new("foo")
+      other = Flipper::Expressions::Value.new("foo")
+      expect(expression.eql?(other)).to be(true)
+    end
+
+    it "returns false for different class" do
+      expression = Flipper::Expressions::Value.new("foo")
+      other = Object.new
+      expect(expression.eql?(other)).to be(false)
+    end
+
+    it "returns false for different args" do
+      expression = Flipper::Expressions::Value.new("foo")
+      other = Flipper::Expressions::Value.new("bar")
+      expect(expression.eql?(other)).to be(false)
+    end
+  end
+
+  describe "#==" do
+    it "returns true for same class and args" do
+      expression = Flipper::Expressions::Value.new("foo")
+      other = Flipper::Expressions::Value.new("foo")
+      expect(expression == other).to be(true)
+    end
+
+    it "returns false for different class" do
+      expression = Flipper::Expressions::Value.new("foo")
+      other = Object.new
+      expect(expression == other).to be(false)
+    end
+
+    it "returns false for different args" do
+      expression = Flipper::Expressions::Value.new("foo")
+      other = Flipper::Expressions::Value.new("bar")
+      expect(expression == other).to be(false)
+    end
+  end
 end
