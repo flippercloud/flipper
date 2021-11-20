@@ -128,40 +128,40 @@ RSpec.describe Flipper::Expression do
 
   describe "#eql?" do
     it "returns true for same class and args" do
-      expression = Flipper::Expression.new("foo")
-      other = Flipper::Expression.new("foo")
+      expression = Flipper::Expression.new(["foo"])
+      other = Flipper::Expression.new(["foo"])
       expect(expression.eql?(other)).to be(true)
     end
 
     it "returns false for different class" do
-      expression = Flipper::Expression.new("foo")
+      expression = Flipper::Expression.new(["foo"])
       other = Object.new
       expect(expression.eql?(other)).to be(false)
     end
 
     it "returns false for different args" do
-      expression = Flipper::Expression.new("foo")
-      other = Flipper::Expression.new("bar")
+      expression = Flipper::Expression.new(["foo"])
+      other = Flipper::Expression.new(["bar"])
       expect(expression.eql?(other)).to be(false)
     end
   end
 
   describe "#==" do
     it "returns true for same class and args" do
-      expression = Flipper::Expression.new("foo")
-      other = Flipper::Expression.new("foo")
+      expression = Flipper::Expression.new(["foo"])
+      other = Flipper::Expression.new(["foo"])
       expect(expression == other).to be(true)
     end
 
     it "returns false for different class" do
-      expression = Flipper::Expression.new("foo")
+      expression = Flipper::Expression.new(["foo"])
       other = Object.new
       expect(expression == other).to be(false)
     end
 
     it "returns false for different args" do
-      expression = Flipper::Expression.new("foo")
-      other = Flipper::Expression.new("bar")
+      expression = Flipper::Expression.new(["foo"])
+      other = Flipper::Expression.new(["bar"])
       expect(expression == other).to be(false)
     end
   end

@@ -28,6 +28,9 @@ module Flipper
     attr_reader :args
 
     def initialize(args)
+      unless args.is_a?(Array)
+        raise ArgumentError, "args must always be an Array but was #{args.inspect}"
+      end
       @args = self.class.build(args)
     end
 
