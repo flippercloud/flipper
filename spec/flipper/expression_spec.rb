@@ -183,4 +183,79 @@ RSpec.describe Flipper::Expression do
       expect(expression == other).to be(false)
     end
   end
+
+  describe "#add" do
+    it "converts to Any and adds new expressions" do
+      expression = described_class.new(["something"])
+      first = Flipper.value(true).eq(true)
+      second = Flipper.value(false).eq(false)
+      new_expression = expression.add(first, second)
+      expect(new_expression).to be_instance_of(Flipper::Expressions::Any)
+      expect(new_expression.args).to eq([
+        expression,
+        first,
+        second,
+      ])
+    end
+  end
+
+  describe "#remove" do
+    it "converts to Any and removes any expressions that match" do
+      expression = described_class.new(["something"])
+      first = Flipper.value(true).eq(true)
+      second = Flipper.value(false).eq(false)
+      new_expression = expression.remove(described_class.new(["something"]), first, second)
+      expect(new_expression).to be_instance_of(Flipper::Expressions::Any)
+      expect(new_expression.args).to eq([])
+    end
+  end
+
+  it "can convert to Any" do
+    expression = described_class.new(["something"])
+    converted = expression.any
+    expect(converted).to be_instance_of(Flipper::Expressions::Any)
+    expect(converted.args).to eq([expression])
+  end
+
+  it "can convert to All" do
+    expression = described_class.new(["something"])
+    converted = expression.all
+    expect(converted).to be_instance_of(Flipper::Expressions::All)
+    expect(converted.args).to eq([expression])
+  end
+
+  [
+    [[2], [3], "equal", "eq", Flipper::Expressions::Equal],
+    [[2], [3], "not_equal", "neq", Flipper::Expressions::NotEqual],
+    [[2], [3], "greater_than", "gt", Flipper::Expressions::GreaterThan],
+    [[2], [3], "greater_than_or_equal", "gte", Flipper::Expressions::GreaterThanOrEqual],
+    [[2], [3], "less_than", "lt", Flipper::Expressions::LessThan],
+    [[2], [3], "less_than_or_equal", "lte", Flipper::Expressions::LessThanOrEqual],
+  ].each do |(args, other_args, method_name, shortcut_name, klass)|
+    it "can convert to #{klass}" do
+      expression = described_class.new(args)
+      other = described_class.new(other_args)
+      converted = expression.send(method_name, other)
+      expect(converted).to be_instance_of(klass)
+      expect(converted.args).to eq([expression, other])
+    end
+
+    it "can convert to #{klass} using #{shortcut_name}" do
+      expression = described_class.new(args)
+      other = described_class.new(other_args)
+      converted = expression.send(shortcut_name, other)
+      expect(converted).to be_instance_of(klass)
+      expect(converted.args).to eq([expression, other])
+    end
+  end
+
+  it "can convert to Percentage" do
+    expression = Flipper.value("User;1")
+    converted = expression.percentage(40)
+    expect(converted).to be_instance_of(Flipper::Expressions::Percentage)
+    expect(converted.args).to eq([
+      expression,
+      Flipper.value(40)
+    ])
+  end
 end
