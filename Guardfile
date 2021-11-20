@@ -21,5 +21,7 @@ guard 'rspec', rspec_options do
   watch('lib/flipper/api/middleware.rb') { 'spec/flipper/api_spec.rb' }
   watch(/shared_adapter_specs\.rb$/) { 'spec' }
   watch('spec/helper.rb') { 'spec' }
-  watch(%r{.*}) { 'spec' }
+
+  # To run all specs on every change... (useful with focus and fit)
+  # watch(%r{.*}) { 'spec' }
 end
