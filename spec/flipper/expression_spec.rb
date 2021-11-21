@@ -124,6 +124,15 @@ RSpec.describe Flipper::Expression do
       expect(expression).to be_instance_of(Flipper::Expressions::Value)
       expect(expression.args).to eq(["basic"])
     end
+
+    it "can build Property" do
+      expression = Flipper::Expression.build({
+        "Property" => ["flipper_id"]
+      })
+
+      expect(expression).to be_instance_of(Flipper::Expressions::Property)
+      expect(expression.args).to eq(["flipper_id"])
+    end
   end
 
   describe "#initialize" do
@@ -240,6 +249,22 @@ RSpec.describe Flipper::Expression do
       expect(converted.args).to eq([expression, other])
     end
 
+    it "builds args into expressions when converting to #{klass}" do
+      expression = described_class.new(args)
+      other = Flipper.property(:age)
+      converted = expression.send(method_name, other.value)
+      expect(converted).to be_instance_of(klass)
+      expect(converted.args).to eq([expression, other])
+    end
+
+    it "builds array args into expressions when converting to #{klass}" do
+      expression = described_class.new(args)
+      other = Flipper.random(100)
+      converted = expression.send(method_name, [other.value])
+      expect(converted).to be_instance_of(klass)
+      expect(converted.args).to eq([expression, [other]])
+    end
+
     it "can convert to #{klass} using #{shortcut_name}" do
       expression = described_class.new(args)
       other = described_class.new(other_args)
@@ -253,9 +278,6 @@ RSpec.describe Flipper::Expression do
     expression = Flipper.value("User;1")
     converted = expression.percentage(40)
     expect(converted).to be_instance_of(Flipper::Expressions::Percentage)
-    expect(converted.args).to eq([
-      expression,
-      Flipper.value(40)
-    ])
+    expect(converted.args).to eq([expression, Flipper.value(40)])
   end
 end

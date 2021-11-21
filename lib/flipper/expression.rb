@@ -8,7 +8,7 @@ module Flipper
       FalseClass,
     ].freeze
 
-    def self.build(object)
+    def self.build(object, convert_to_values: false)
       return object if object.is_a?(Flipper::Expression)
 
       case object
@@ -19,7 +19,7 @@ module Flipper
         args = object.values.first
         Expressions.const_get(type).new(args)
       when *SUPPORTED_TYPE_CLASSES
-        object
+        convert_to_values ? Expressions::Value.new(object) : object
       else
         raise ArgumentError, "#{object.inspect} cannot be converted into a rule expression"
       end
@@ -64,50 +64,37 @@ module Flipper
     end
 
     def equal(object)
-      Expressions::Equal.new([self, build(object)])
+      Expressions::Equal.new([self, self.class.build(object, convert_to_values: true)])
     end
     alias eq equal
 
     def not_equal(object)
-      Expressions::NotEqual.new([self, build(object)])
+      Expressions::NotEqual.new([self, self.class.build(object, convert_to_values: true)])
     end
     alias neq not_equal
 
     def greater_than(object)
-      Expressions::GreaterThan.new([self, build(object)])
+      Expressions::GreaterThan.new([self, self.class.build(object, convert_to_values: true)])
     end
     alias gt greater_than
 
     def greater_than_or_equal(object)
-      Expressions::GreaterThanOrEqual.new([self, build(object)])
+      Expressions::GreaterThanOrEqual.new([self, self.class.build(object, convert_to_values: true)])
     end
     alias gte greater_than_or_equal
 
     def less_than(object)
-      Expressions::LessThan.new([self, build(object)])
+      Expressions::LessThan.new([self, self.class.build(object, convert_to_values: true)])
     end
     alias lt less_than
 
     def less_than_or_equal(object)
-      Expressions::LessThanOrEqual.new([self, build(object)])
+      Expressions::LessThanOrEqual.new([self, self.class.build(object, convert_to_values: true)])
     end
     alias lte less_than_or_equal
 
     def percentage(object)
-      Expressions::Percentage.new([self, build(object)])
-    end
-
-    private
-
-    def build(object)
-      return object if object.is_a?(Flipper::Expression)
-
-      case object
-      when *SUPPORTED_TYPE_CLASSES
-        Expression.build({"Value" => [object]})
-      else
-        raise ArgumentError, "#{object} is not a supported type"
-      end
+      Expressions::Percentage.new([self, self.class.build(object, convert_to_values: true)])
     end
   end
 end

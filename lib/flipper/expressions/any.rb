@@ -11,10 +11,6 @@ module Flipper
         self
       end
 
-      def all
-        Expressions::All.new([self])
-      end
-
       def add(*expressions)
         self.class.new(args + expressions.flatten)
       end

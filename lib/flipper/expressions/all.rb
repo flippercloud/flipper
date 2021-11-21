@@ -7,10 +7,6 @@ module Flipper
         args.all? { |arg| arg.evaluate(feature_name: feature_name, properties: properties) == true }
       end
 
-      def any
-        Expressions::Any.new([self])
-      end
-
       def all
         self
       end
