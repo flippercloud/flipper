@@ -39,6 +39,22 @@ RSpec.describe Flipper::Expressions::Equal do
       expect(expression.evaluate(properties: properties)).to be(true)
     end
 
+    it "works when nested" do
+      expression = described_class.new([
+        Flipper.value(true),
+        Flipper.all(
+          Flipper.property(:stinky).eq(true),
+          Flipper.value("admin").eq(Flipper.property(:role)),
+        ),
+      ])
+
+      properties = {
+        "stinky" => true,
+        "role" => "admin",
+      }
+      expect(expression.evaluate(properties: properties)).to be(true)
+    end
+
     it "returns false when not equal" do
       expression = described_class.new([
         Flipper.value("basic"),

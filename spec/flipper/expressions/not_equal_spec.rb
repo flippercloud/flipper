@@ -11,6 +11,19 @@ RSpec.describe Flipper::Expressions::NotEqual do
       expect(expression.evaluate).to be(true)
     end
 
+    it "returns true when properties not equal" do
+      expression = described_class.new([
+        Flipper.property(:first),
+        Flipper.property(:second),
+      ])
+
+      properties = {
+        "first" => "foo",
+        "second" => "bar",
+      }
+      expect(expression.evaluate(properties: properties)).to be(true)
+    end
+
     it "returns false when equal" do
       expression = described_class.new([
         Flipper.value("basic"),
@@ -18,6 +31,19 @@ RSpec.describe Flipper::Expressions::NotEqual do
       ])
 
       expect(expression.evaluate).to be(false)
+    end
+
+    it "returns false when properties are equal" do
+      expression = described_class.new([
+        Flipper.property(:first),
+        Flipper.property(:second),
+      ])
+
+      properties = {
+        "first" => "foo",
+        "second" => "foo",
+      }
+      expect(expression.evaluate(properties: properties)).to be(false)
     end
   end
 
