@@ -1,17 +1,19 @@
 require 'helper'
 
 RSpec.describe Flipper::Expressions::Value do
-  it "can initialize with string" do
-    expect(described_class.new("basic").args).to eq(["basic"])
-  end
+  describe "#initialize" do
+    it "works with string" do
+      expect(described_class.new("basic").args).to eq(["basic"])
+    end
 
-  it "can initialize with number" do
-    expect(described_class.new(1).args).to eq([1])
-  end
+    it "works with number" do
+      expect(described_class.new(1).args).to eq([1])
+    end
 
-  it "can initialize with array" do
-    expect(described_class.new(["basic"]).args).to eq(["basic"])
-    expect(described_class.new(["basic"]).args).to eq(["basic"])
+    it "works with array" do
+      expect(described_class.new(["basic"]).args).to eq(["basic"])
+      expect(described_class.new(["basic"]).args).to eq(["basic"])
+    end
   end
 
   describe "#evaluate" do
