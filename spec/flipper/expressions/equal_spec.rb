@@ -18,7 +18,7 @@ RSpec.describe Flipper::Expressions::Equal do
 
   describe "#evaluate" do
     it "returns true when equal" do
-      expression = Flipper::Expressions::Equal.new([
+      expression = described_class.new([
         Flipper::Expressions::Value.new(["basic"]),
         Flipper::Expressions::Value.new(["basic"]),
       ])
@@ -27,7 +27,7 @@ RSpec.describe Flipper::Expressions::Equal do
     end
 
     it "returns false when not equal" do
-      expression = Flipper::Expressions::Equal.new([
+      expression = described_class.new([
         Flipper::Expressions::Value.new(["basic"]),
         Flipper::Expressions::Value.new(["plus"]),
       ])
@@ -38,7 +38,7 @@ RSpec.describe Flipper::Expressions::Equal do
 
   describe "#value" do
     it "returns Hash" do
-      expression = Flipper::Expressions::Equal.new([
+      expression = described_class.new([
         Flipper::Expressions::Property.new(["plan"]),
         Flipper::Expressions::Value.new(["basic"]),
       ])

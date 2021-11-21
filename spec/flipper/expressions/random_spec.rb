@@ -17,4 +17,16 @@ RSpec.describe Flipper::Expressions::Random do
       expect(result).to be <= 10
     end
   end
+
+  describe "#value" do
+    it "returns Hash" do
+      expression = described_class.new([
+        100,
+      ])
+
+      expect(expression.value).to eq({
+        "Random" => [100],
+      })
+    end
+  end
 end

@@ -4,8 +4,8 @@ RSpec.describe Flipper::Expressions::NotEqual do
   describe "#evaluate" do
     it "returns true when not equal" do
       expression = described_class.new([
-        Flipper::Expressions::Value.new("basic"),
-        Flipper::Expressions::Value.new("plus"),
+        Flipper.value("basic"),
+        Flipper.value("plus"),
       ])
 
       expect(expression.evaluate).to be(true)
@@ -13,11 +13,27 @@ RSpec.describe Flipper::Expressions::NotEqual do
 
     it "returns false when equal" do
       expression = described_class.new([
-        Flipper::Expressions::Value.new("basic"),
-        Flipper::Expressions::Value.new("basic"),
+        Flipper.value("basic"),
+        Flipper.value("basic"),
       ])
 
       expect(expression.evaluate).to be(false)
+    end
+  end
+
+  describe "#value" do
+    it "returns Hash" do
+      expression = described_class.new([
+        Flipper.value(20),
+        Flipper.value(10),
+      ])
+
+      expect(expression.value).to eq({
+        "NotEqual" => [
+          {"Value" => [20]},
+          {"Value" => [10]},
+        ],
+      })
     end
   end
 end

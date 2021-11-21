@@ -20,4 +20,14 @@ RSpec.describe Flipper::Expressions::Value do
       expect(expression.evaluate).to eq("basic")
     end
   end
+
+  describe "#value" do
+    it "returns Hash" do
+      expression = described_class.new([20])
+
+      expect(expression.value).to eq({
+        "Value" => [20],
+      })
+    end
+  end
 end

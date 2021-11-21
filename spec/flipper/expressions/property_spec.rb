@@ -31,4 +31,16 @@ RSpec.describe Flipper::Expressions::Property do
       expect(expression.evaluate).to be(nil)
     end
   end
+
+  describe "#value" do
+    it "returns Hash" do
+      expression = described_class.new([
+        "flipper_id",
+      ])
+
+      expect(expression.value).to eq({
+        "Property" => ["flipper_id"],
+      })
+    end
+  end
 end

@@ -29,4 +29,20 @@ RSpec.describe Flipper::Expressions::LessThanOrEqual do
       expect(expression.evaluate).to be(false)
     end
   end
+
+  describe "#value" do
+    it "returns Hash" do
+      expression = described_class.new([
+        Flipper.value(20),
+        Flipper.value(10),
+      ])
+
+      expect(expression.value).to eq({
+        "LessThanOrEqual" => [
+          {"Value" => [20]},
+          {"Value" => [10]},
+        ],
+      })
+    end
+  end
 end

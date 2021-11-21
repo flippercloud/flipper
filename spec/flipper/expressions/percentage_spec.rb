@@ -30,4 +30,20 @@ RSpec.describe Flipper::Expressions::Percentage do
       expect(expression.evaluate(feature_name: "b")).to be(false)
     end
   end
+
+  describe "#value" do
+    it "returns Hash" do
+      expression = described_class.new([
+        Flipper.value("User;1"),
+        Flipper.value(10),
+      ])
+
+      expect(expression.value).to eq({
+        "Percentage" => [
+          {"Value" => ["User;1"]},
+          {"Value" => [10]},
+        ],
+      })
+    end
+  end
 end
