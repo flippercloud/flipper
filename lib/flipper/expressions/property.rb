@@ -4,11 +4,11 @@ module Flipper
   module Expressions
     class Property < Expression
       def initialize(args)
-        super Array(args).map(&:to_s)
+        super Array(args)
       end
 
       def evaluate(context = {})
-        key = args[0]
+        key = evaluate_arg(0, context)
 
         if properties = context[:properties]
           properties[key]

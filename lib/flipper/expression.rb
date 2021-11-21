@@ -20,6 +20,8 @@ module Flipper
         Expressions.const_get(type).new(args)
       when *SUPPORTED_TYPE_CLASSES
         convert_to_values ? Expressions::Value.new(object) : object
+      when Symbol
+        convert_to_values ? Expressions::Value.new(object.to_s) : object.to_s
       else
         raise ArgumentError, "#{object.inspect} cannot be converted into a rule expression"
       end
@@ -99,8 +101,14 @@ module Flipper
 
     private
 
-    def evaluate_arg(arg, context = {})
-      arg.evaluate(context)
+    def evaluate_arg(index, context = {})
+      object = args[index]
+
+      if object.is_a?(Flipper::Expression)
+        object.evaluate(context)
+      else
+        object
+      end
     end
   end
 end

@@ -8,8 +8,8 @@ module Flipper
       def evaluate(context = {})
         return false unless args[0] && args[1]
 
-        text = evaluate_arg(args[0], context)
-        percentage = evaluate_arg(args[1], context)
+        text = evaluate_arg(0, context)
+        percentage = evaluate_arg(1, context)
 
         return false unless text && percentage
 
