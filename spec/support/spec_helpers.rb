@@ -1,4 +1,4 @@
-require 'climate_control'
+require 'ice_age'
 require 'json'
 require 'rack/test'
 
@@ -56,10 +56,6 @@ module SpecHelpers
       'message' => 'Percentage must be a positive number less than or equal to 100.',
       'more_info' => api_error_code_reference_url,
     }
-  end
-
-  def with_modified_env(options, &block)
-    ClimateControl.modify(options, &block)
   end
 
   def silence
