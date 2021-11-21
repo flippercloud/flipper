@@ -7,7 +7,7 @@ module Flipper
         super Array(args)
       end
 
-      def evaluate(feature_name: "", properties: {})
+      def evaluate(context = {})
         args[0]
       end
     end

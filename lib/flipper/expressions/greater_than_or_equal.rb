@@ -3,11 +3,11 @@ require "flipper/expression"
 module Flipper
   module Expressions
     class GreaterThanOrEqual < Expression
-      def evaluate(feature_name: "", properties: {})
+      def evaluate(context = {})
         return false unless args[0] && args[1]
 
-        left = args[0].evaluate(feature_name: feature_name, properties: properties)
-        right = args[1].evaluate(feature_name: feature_name, properties: properties)
+        left = args[0].evaluate(context)
+        right = args[1].evaluate(context)
 
         left && right && left >= right
       end

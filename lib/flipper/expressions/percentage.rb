@@ -5,15 +5,16 @@ module Flipper
     class Percentage < Expression
       SCALING_FACTOR = 1_000
 
-      def evaluate(feature_name: "", properties: {})
+      def evaluate(context = {})
         return false unless args[0] && args[1]
 
-        left = args[0].evaluate(feature_name: feature_name, properties: properties)
-        right = args[1].evaluate(feature_name: feature_name, properties: properties)
+        text = evaluate_arg(args[0], context)
+        percentage = evaluate_arg(args[1], context)
 
-        return false unless left && right
+        return false unless text && percentage
 
-        Zlib.crc32("#{feature_name}#{left}") % (100 * SCALING_FACTOR) < right * SCALING_FACTOR
+        prefix = context[:feature_name] || ""
+        Zlib.crc32("#{prefix}#{text}") % (100 * SCALING_FACTOR) < percentage * SCALING_FACTOR
       end
     end
   end

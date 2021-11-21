@@ -7,9 +7,14 @@ module Flipper
         super Array(args).map(&:to_s)
       end
 
-      def evaluate(feature_name: "", properties: {})
+      def evaluate(context = {})
         key = args[0]
-        properties[key]
+
+        if properties = context[:properties]
+          properties[key]
+        else
+          nil
+        end
       end
     end
   end

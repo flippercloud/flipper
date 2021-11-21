@@ -3,8 +3,8 @@ require "flipper/expression"
 module Flipper
   module Expressions
     class Any < Expression
-      def evaluate(feature_name: "", properties: {})
-        args.any? { |arg| arg.evaluate(feature_name: feature_name, properties: properties) == true }
+      def evaluate(context = {})
+        args.any? { |arg| arg.evaluate(context) == true }
       end
 
       def any

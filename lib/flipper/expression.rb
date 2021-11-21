@@ -96,6 +96,12 @@ module Flipper
     def percentage(object)
       Expressions::Percentage.new([self, self.class.build(object, convert_to_values: true)])
     end
+
+    private
+
+    def evaluate_arg(arg, context = {})
+      arg.evaluate(context)
+    end
   end
 end
 
