@@ -96,13 +96,13 @@ RSpec.describe Flipper::Expressions::Equal do
       expect(expression.evaluate).to be(false)
     end
 
-    it "returns false when three args" do
+    it "only evaluates first two arguments equality" do
       expression = described_class.new([
-        Flipper.value(10),
+        Flipper.value(20),
         Flipper.value(20),
         Flipper.value(30),
       ])
-      expect(expression.evaluate).to be(false)
+      expect(expression.evaluate).to be(true)
     end
   end
 
