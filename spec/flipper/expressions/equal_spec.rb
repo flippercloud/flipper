@@ -85,6 +85,25 @@ RSpec.describe Flipper::Expressions::Equal do
       }
       expect(expression.evaluate(properties: properties)).to be(false)
     end
+
+    it "returns false when no args" do
+      expression = described_class.new([])
+      expect(expression.evaluate).to be(false)
+    end
+
+    it "returns false when one arg" do
+      expression = described_class.new([Flipper.value(10)])
+      expect(expression.evaluate).to be(false)
+    end
+
+    it "returns false when three args" do
+      expression = described_class.new([
+        Flipper.value(10),
+        Flipper.value(20),
+        Flipper.value(30),
+      ])
+      expect(expression.evaluate).to be(false)
+    end
   end
 
   describe "#value" do

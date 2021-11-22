@@ -4,6 +4,7 @@ module Flipper
   module Expressions
     class Equal < Expression
       def evaluate(context = {})
+        return false if args.size > 2
         return false unless args[0] && args[1]
 
         left = evaluate_arg(0, context)
