@@ -4,12 +4,12 @@ RSpec.shared_examples_for 'a flipper adapter' do
   let(:flipper) { Flipper.new(subject) }
   let(:feature) { flipper[:stats] }
 
-  let(:boolean_gate) { feature.gate(:boolean) }
-  let(:rule_gate)    { feature.gate(:rule) }
-  let(:group_gate)   { feature.gate(:group) }
-  let(:actor_gate)   { feature.gate(:actor) }
-  let(:actors_gate)  { feature.gate(:percentage_of_actors) }
-  let(:time_gate)    { feature.gate(:percentage_of_time) }
+  let(:boolean_gate)    { feature.gate(:boolean) }
+  let(:expression_gate) { feature.gate(:expression) }
+  let(:group_gate)      { feature.gate(:group) }
+  let(:actor_gate)      { feature.gate(:actor) }
+  let(:actors_gate)     { feature.gate(:percentage_of_actors) }
+  let(:time_gate)       { feature.gate(:percentage_of_time) }
 
   before do
     Flipper.register(:admins) do |actor|
@@ -62,22 +62,22 @@ RSpec.shared_examples_for 'a flipper adapter' do
     expect(subject.get(feature)).to eq(subject.default_config)
   end
 
-  it 'can enable, disable and get value for rule gate' do
-    basic_rule = Flipper.property(:plan).eq("basic")
-    age_rule = Flipper.property(:age).gte(21)
-    any_rule = Flipper.any(basic_rule, age_rule)
+  it 'can enable, disable and get value for expression gate' do
+    basic_expression = Flipper.property(:plan).eq("basic")
+    age_expression = Flipper.property(:age).gte(21)
+    any_expression = Flipper.any(basic_expression, age_expression)
 
-    expect(subject.enable(feature, rule_gate, any_rule)).to eq(true)
+    expect(subject.enable(feature, expression_gate, any_expression)).to eq(true)
     result = subject.get(feature)
-    expect(result[:rule]).to eq(any_rule.value)
+    expect(result[:expression]).to eq(any_expression.value)
 
-    expect(subject.enable(feature, rule_gate, basic_rule)).to eq(true)
+    expect(subject.enable(feature, expression_gate, basic_expression)).to eq(true)
     result = subject.get(feature)
-    expect(result[:rule]).to eq(basic_rule.value)
+    expect(result[:expression]).to eq(basic_expression.value)
 
-    expect(subject.disable(feature, rule_gate, basic_rule)).to eq(true)
+    expect(subject.disable(feature, expression_gate, basic_expression)).to eq(true)
     result = subject.get(feature)
-    expect(result[:rule]).to be(nil)
+    expect(result[:expression]).to be(nil)
   end
 
   it 'can enable, disable and get value for group gate' do

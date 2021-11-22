@@ -2,15 +2,15 @@ require "flipper/expression"
 
 module Flipper
   module Gates
-    class Rule < Gate
+    class Expression < Gate
       # Internal: The name of the gate. Used for instrumentation, etc.
       def name
-        :rule
+        :expression
       end
 
       # Internal: Name converted to value safe for adapter.
       def key
-        :rule
+        :expression
       end
 
       def data_type

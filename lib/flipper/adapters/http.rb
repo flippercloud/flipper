@@ -133,7 +133,7 @@ module Flipper
           { flipper_id: value.to_s }
         when :percentage_of_actors, :percentage_of_time
           { percentage: value.to_s }
-        when :rule
+        when :expression
           value
         else
           raise "#{gate.key} is not a valid flipper gate key"

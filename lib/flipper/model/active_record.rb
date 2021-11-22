@@ -3,7 +3,7 @@ module Flipper
     module ActiveRecord
       include Flipper::Identifier
 
-      # Properties used to evaluate rules
+      # Properties used to evaluate expressions
       def flipper_properties
         {"type" => self.class.name}.merge(attributes)
       end

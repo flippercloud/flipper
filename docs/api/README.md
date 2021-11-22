@@ -93,8 +93,8 @@ Returns an array of feature objects:
           "value": []
         },
         {
-          "key": "rule",
-          "name": "rule",
+          "key": "expression",
+          "name": "expression",
           "value": nil
         },
         {
@@ -129,8 +129,8 @@ Returns an array of feature objects:
           "value": []
         },
         {
-          "key": "rule",
-          "name": "rule",
+          "key": "expression",
+          "name": "expression",
           "value": nil
         },
         {
@@ -210,8 +210,8 @@ Returns an individual feature object:
       "value": []
     },
     {
-      "key": "rule",
-      "name": "rule",
+      "key": "expression",
+      "name": "expression",
       "value": nil
     },
     {
@@ -323,8 +323,8 @@ Successful enabling of the boolean gate will return a 200 HTTP status and the fe
       "value": []
     },
     {
-      "key": "rule",
-      "name": "rule",
+      "key": "expression",
+      "name": "expression",
       "value": nil
     },
     {
@@ -383,8 +383,8 @@ Successful disabling of the boolean gate will return a 200 HTTP status and the f
       "value": []
     },
     {
-      "key": "rule",
-      "name": "rule",
+      "key": "expression",
+      "name": "expression",
       "value": nil
     },
     {
@@ -401,24 +401,24 @@ Successful disabling of the boolean gate will return a 200 HTTP status and the f
 }
 ```
 
-### Enable Rule
+### Enable Expression
 
 **URL**
 
-`POST /features/{feature_name}/rule`
+`POST /features/{feature_name}/expression`
 
 **Parameters**
 
 * `feature_name` - The name of the feature
 
-* `type` - The type of rule being enabled
+* `type` - The type of expression being enabled
 
-* `value` - The JSON representation of the rule.
+* `value` - The JSON representation of the expression.
 
 **Request**
 
 ```
-curl -X POST -H "Content-Type: application/json" -d '{"type":"Condition","value":{"left":{"type":"Property","value":"plan"},"operator":{"type":"Operator","value":"eq"},"right":{"type":"String","value":"basic"}}}' http://example.com/flipper/api/features/reports/rule
+curl -X POST -H "Content-Type: application/json" -d '{"type":"Condition","value":{"left":{"type":"Property","value":"plan"},"operator":{"type":"Operator","value":"eq"},"right":{"type":"String","value":"basic"}}}' http://example.com/flipper/api/features/reports/expression
 ```
 
 **Response**
@@ -441,8 +441,8 @@ Successful enabling of the group will return a 200 HTTP status and the feature o
       "value": []
     },
     {
-      "key": "rule",
-      "name": "rule",
+      "key": "expression",
+      "name": "expression",
       "value": {
         "type": "Condition",
         "value": {
@@ -480,24 +480,24 @@ Successful enabling of the group will return a 200 HTTP status and the feature o
 }
 ```
 
-### Disable Rule
+### Disable Expression
 
 **URL**
 
-`DELETE /features/{feature_name}/rule`
+`DELETE /features/{feature_name}/expression`
 
 **Parameters**
 
 * `feature_name` - The name of the feature
 
-* `type` - The type of rule being enabled
+* `type` - The type of expression being enabled
 
-* `value` - The JSON representation of the rule.
+* `value` - The JSON representation of the expression.
 
 **Request**
 
 ```
-curl -X DELETE -H "Content-Type: application/json" -d '{"type":"Condition","value":{"left":{"type":"Property","value":"plan"},"operator":{"type":"Operator","value":"eq"},"right":{"type":"String","value":"basic"}}}' http://example.com/flipper/api/features/reports/rule
+curl -X DELETE -H "Content-Type: application/json" -d '{"type":"Condition","value":{"left":{"type":"Property","value":"plan"},"operator":{"type":"Operator","value":"eq"},"right":{"type":"String","value":"basic"}}}' http://example.com/flipper/api/features/reports/expression
 ```
 
 **Response**
@@ -520,8 +520,8 @@ Successful disabling of the group will return a 200 HTTP status and the feature 
       "value": []
     },
     {
-      "key": "rule",
-      "name": "rule",
+      "key": "expression",
+      "name": "expression",
       "value": nil
     },
     {
@@ -586,8 +586,8 @@ Successful enabling of the group will return a 200 HTTP status and the feature o
       "value": []
     },
     {
-      "key": "rule",
-      "name": "rule",
+      "key": "expression",
+      "name": "expression",
       "value": nil
     },
     {
@@ -647,8 +647,8 @@ Successful disabling of the group will return a 200 HTTP status and the feature 
       "value": []
     },
     {
-      "key": "rule",
-      "name": "rule",
+      "key": "expression",
+      "name": "expression",
       "value": nil
     },
     {
@@ -708,8 +708,8 @@ Successful enabling of the actor will return a 200 HTTP status and the feature o
       "value": ["User;1"]
     },
     {
-      "key": "rule",
-      "name": "rule",
+      "key": "expression",
+      "name": "expression",
       "value": nil
     },
     {
@@ -769,8 +769,8 @@ Successful disabling of the actor will return a 200 HTTP status and the feature 
       "value": []
     },
     {
-      "key": "rule",
-      "name": "rule",
+      "key": "expression",
+      "name": "expression",
       "value": nil
     },
     {
@@ -830,8 +830,8 @@ Successful enabling of a percentage of actors will return a 200 HTTP status and 
       "value": []
     },
     {
-      "key": "rule",
-      "name": "rule",
+      "key": "expression",
+      "name": "expression",
       "value": nil
     },
     {
@@ -889,8 +889,8 @@ Successful disabling of a percentage of actors will set the percentage to 0 and 
       "value": []
     },
     {
-      "key": "rule",
-      "name": "rule",
+      "key": "expression",
+      "name": "expression",
       "value": nil
     },
     {
@@ -950,8 +950,8 @@ Successful enabling of a percentage of time will return a 200 HTTP status and th
       "value": []
     },
     {
-      "key": "rule",
-      "name": "rule",
+      "key": "expression",
+      "name": "expression",
       "value": nil
     },
     {
@@ -1009,8 +1009,8 @@ Successful disabling of a percentage of time will set the percentage to 0 and re
       "value": []
     },
     {
-      "key": "rule",
-      "name": "rule",
+      "key": "expression",
+      "name": "expression",
       "value": nil
     },
     {

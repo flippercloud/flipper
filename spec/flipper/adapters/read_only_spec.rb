@@ -6,12 +6,12 @@ RSpec.describe Flipper::Adapters::ReadOnly do
   let(:flipper) { Flipper.new(subject) }
   let(:feature) { flipper[:stats] }
 
-  let(:boolean_gate) { feature.gate(:boolean) }
-  let(:group_gate)   { feature.gate(:group) }
-  let(:actor_gate)   { feature.gate(:actor) }
-  let(:rule_gate)   { feature.gate(:rule) }
-  let(:actors_gate)  { feature.gate(:percentage_of_actors) }
-  let(:time_gate)    { feature.gate(:percentage_of_time) }
+  let(:boolean_gate)    { feature.gate(:boolean) }
+  let(:group_gate)      { feature.gate(:group) }
+  let(:actor_gate)      { feature.gate(:actor) }
+  let(:expression_gate) { feature.gate(:expression) }
+  let(:actors_gate)     { feature.gate(:percentage_of_actors) }
+  let(:time_gate)       { feature.gate(:percentage_of_time) }
 
   subject { described_class.new(adapter) }
 
@@ -43,20 +43,20 @@ RSpec.describe Flipper::Adapters::ReadOnly do
   end
 
   it 'can get feature' do
-    rule = Flipper.property(:plan).eq("basic")
+    expression = Flipper.property(:plan).eq("basic")
     actor22 = Flipper::Actor.new('22')
     adapter.enable(feature, boolean_gate, flipper.boolean)
     adapter.enable(feature, group_gate, flipper.group(:admins))
     adapter.enable(feature, actor_gate, flipper.actor(actor22))
     adapter.enable(feature, actors_gate, flipper.actors(25))
     adapter.enable(feature, time_gate, flipper.time(45))
-    adapter.enable(feature, rule_gate, rule)
+    adapter.enable(feature, expression_gate, expression)
 
     expect(subject.get(feature)).to eq({
       boolean: 'true',
       groups: Set['admins'],
       actors: Set['22'],
-      rule: {
+      expression: {
         "Equal" => [
           {"Property" => ["plan"]},
           {"Value" => ["basic"]},

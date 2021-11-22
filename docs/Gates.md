@@ -12,15 +12,15 @@ Flipper.disable :stats # turn off
 Flipper.enabled? :stats # check
 ```
 
-## 2. Rule
+## 2. Expression
 
-Turn feature on for one or more rules. Rules have the same power and flexibility as groups. But the benefit is that they can be changed at runtime (because they are stored in adapter), whereas groups cannot (because they are defined in code).
+Turn feature on for one or more expressions. Expressions have the same power and flexibility as groups. But the benefit is that they can be changed at runtime (because they are stored in adapter), whereas groups cannot (because they are defined in code).
 
-A rule is made up of a left value, operator and right value and can be combined with other rules to define pretty complex logic (and, or, eq, neq, gt, gte, lt, lte, in, nin, and percentage).
+An expression is made up of a left value, operator and right value and can be combined with other expressions to define pretty complex logic (and, or, eq, neq, gt, gte, lt, lte, in, nin, and percentage).
 
-**Note**: Eventually all other gates will be deprecated in favor of rules since rules can easily power all other gates.
+**Note**: Eventually all other gates will be deprecated in favor of expressions since expressions can easily power all other gates.
 
-To make rules useful, you'll need to ensure that actors respond to `flipper_properties`.
+To make expressions useful, you'll need to ensure that actors respond to `flipper_properties`.
 
 ```ruby
 class User < Struct.new(:id, :flipper_properties)
@@ -31,12 +31,12 @@ basic_user = User.new(1, {"plan" => "basic", "age" => 30})
 premium_user = User.new(2, {"plan" => "premium", "age" => 40})
 
 # enable stats feature for anything where property == "basic"
-Flipper.enable_rule :stats, Flipper.property(:plan).eq("basic")
+Flipper.enable :stats, Flipper.property(:plan).eq("basic")
 Flipper.enabled? :stats, basic_user # true
 Flipper.enabled? :stats, premium_user # false
 
 # enable stats for anyone on basic plan or age >= 40
-Flipper.enable_rule :stats, Flipper.any(
+Flipper.enable :stats, Flipper.any(
   Flipper.property(:plan).eq("basic"),
   Flipper.property(:age).gte(40),
 )
@@ -44,7 +44,7 @@ Flipper.enabled? :stats, basic_user # true because plan == "basic"
 Flipper.enabled? :stats, premium_user # true because age >= 40
 ```
 
-To learn more, check out the plethora of code samples in [examples/rules.rb](https://github.com/jnunemaker/flipper/blob/master/examples/rules.rb).
+To learn more, check out the plethora of code samples in [examples/expressions.rb](https://github.com/jnunemaker/flipper/blob/master/examples/expressions.rb).
 
 ## 3. Individual Actor
 

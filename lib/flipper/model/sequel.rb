@@ -3,7 +3,7 @@ module Flipper
     module Sequel
       include Flipper::Identifier
 
-      # Properties used to evaluate rules
+      # Properties used to evaluate expressions
       def flipper_properties
         {"type" => self.class.name}.update(to_hash.transform_keys(&:to_s))
       end

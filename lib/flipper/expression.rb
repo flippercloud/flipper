@@ -23,7 +23,7 @@ module Flipper
       when Symbol
         convert_to_values ? Expressions::Value.new(object.to_s) : object.to_s
       else
-        raise ArgumentError, "#{object.inspect} cannot be converted into a rule expression"
+        raise ArgumentError, "#{object.inspect} cannot be converted into an expression"
       end
     end
 

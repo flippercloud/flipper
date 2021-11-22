@@ -58,7 +58,7 @@ module SpecHelpers
     }
   end
 
-  def api_rule_invalid_response
+  def api_expression_invalid_response
     {
       'code' => 6,
       'message' => 'The provided expression was not valid.',

@@ -550,10 +550,10 @@ RSpec.describe Flipper do
     end
   end
 
-  context "for rule" do
+  context "for expression" do
     it "works" do
-      rule = Flipper.property(:plan).eq("basic")
-      feature.enable rule
+      expression = Flipper.property(:plan).eq("basic")
+      feature.enable expression
 
       expect(feature.enabled?(basic_plan_thing)).to be(true)
       expect(feature.enabled?(premium_plan_thing)).to be(false)
@@ -562,11 +562,11 @@ RSpec.describe Flipper do
 
   context "for Any" do
     it "works" do
-      rule = Flipper.any(
+      expression = Flipper.any(
         Flipper.property(:plan).eq("basic"),
         Flipper.property(:plan).eq("plus"),
       )
-      feature.enable rule
+      feature.enable expression
 
       expect(feature.enabled?(basic_plan_thing)).to be(true)
       expect(feature.enabled?(premium_plan_thing)).to be(false)
@@ -583,11 +583,11 @@ RSpec.describe Flipper do
         "plan" => "basic",
         "age" => 20,
       })
-      rule = Flipper.all(
+      expression = Flipper.all(
         Flipper.property(:plan).eq("basic"),
         Flipper.property(:age).eq(21)
       )
-      feature.enable rule
+      feature.enable expression
 
       expect(feature.enabled?(true_actor)).to be(true)
       expect(feature.enabled?(false_actor)).to be(false)
@@ -605,7 +605,7 @@ RSpec.describe Flipper do
         "plan" => "basic",
         "age" => 20,
       })
-      rule = Flipper.any(
+      expression = Flipper.any(
         Flipper.property(:admin).eq(true),
         Flipper.all(
           Flipper.property(:plan).eq("basic"),
@@ -613,7 +613,7 @@ RSpec.describe Flipper do
         )
       )
 
-      feature.enable rule
+      feature.enable expression
 
       expect(feature.enabled?(admin_actor)).to be(true)
       expect(feature.enabled?(true_actor)).to be(true)

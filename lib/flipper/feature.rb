@@ -119,25 +119,25 @@ module Flipper
       end
     end
 
-    # Public: Enables a rule for a feature.
+    # Public: Enables an expression_to_add for a feature.
     #
-    # rule - a rule or Hash that can be converted to a rule.
+    # expression - an Expression or Hash that can be converted to an expression.
     #
     # Returns result of enable.
-    def enable_rule(rule)
-      enable Expression.build(rule)
+    def enable_expression(expression)
+      enable Expression.build(expression)
     end
 
-    # Public: Add a rule for a feature.
+    # Public: Add an expression for a feature.
     #
-    # rule_to_add - a rule or Hash that can be converted to a rule.
+    # expression_to_add - an expression or Hash that can be converted to an expression.
     #
     # Returns result of enable.
-    def add_rule(rule_to_add)
-      if (current_rule = rule)
-        enable current_rule.add(rule_to_add)
+    def add_expression(expression_to_add)
+      if (current_expression = expression)
+        enable current_expression.add(expression_to_add)
       else
-        enable rule_to_add
+        enable expression_to_add
       end
     end
 
@@ -181,24 +181,24 @@ module Flipper
       enable Types::PercentageOfActors.wrap(percentage)
     end
 
-    # Public: Disables a rule for a feature.
+    # Public: Disables an expression for a feature.
     #
-    # rule - a rule or Hash that can be converted to a rule.
+    # expression - an expression or Hash that can be converted to an expression.
     #
     # Returns result of disable.
-    def disable_rule
-      disable Flipper.all # just need a rule to clear
+    def disable_expression
+      disable Flipper.all # just need an expression to clear
     end
 
-    # Public: Remove a rule from a feature. Does nothing if no rule is
+    # Public: Remove an expression from a feature. Does nothing if no expression is
     # currently enabled.
     #
-    # rule_to_remove - a rule or Hash that can be converted to a rule.
+    # expression - an Expression or Hash that can be converted to an expression.
     #
-    # Returns result of enable or nil (if no rule enabled).
-    def remove_rule(rule_to_remove)
-      if (current_rule = rule)
-        enable current_rule.remove(rule_to_remove)
+    # Returns result of enable or nil (if no expression enabled).
+    def remove_expression(expression_to_remove)
+      if (current_expression = expression)
+        enable current_expression.remove(expression_to_remove)
       end
     end
 
@@ -293,8 +293,8 @@ module Flipper
       Flipper.groups - enabled_groups
     end
 
-    def rule
-      Flipper::Expression.build(rule_value) if rule_value
+    def expression
+      Flipper::Expression.build(expression_value) if expression_value
     end
 
     # Public: Get the adapter value for the groups gate.
@@ -304,11 +304,11 @@ module Flipper
       gate_values.groups
     end
 
-    # Public: Get the adapter value for the rule gate.
+    # Public: Get the adapter value for the expression gate.
     #
-    # Returns rule.
-    def rule_value
-      gate_values.rule
+    # Returns expression.
+    def expression_value
+      gate_values.expression
     end
 
     # Public: Get the adapter value for the actors gate.
@@ -395,7 +395,7 @@ module Flipper
     def gates
       @gates ||= [
         Gates::Boolean.new,
-        Gates::Rule.new,
+        Gates::Expression.new,
         Gates::Actor.new,
         Gates::PercentageOfActors.new,
         Gates::PercentageOfTime.new,

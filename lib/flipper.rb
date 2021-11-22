@@ -57,7 +57,8 @@ module Flipper
   # interface of Flipper::DSL.
   def_delegators :instance,
                  :enabled?, :enable, :disable, :bool, :boolean,
-                 :enable_rule, :disable_rule, :rule, :add_rule, :remove_rule,
+                 :enable_expression, :disable_expression,
+                 :expression, :add_expression, :remove_expression,
                  :enable_actor, :disable_actor, :actor,
                  :enable_group, :disable_group,
                  :enable_percentage_of_actors, :disable_percentage_of_actors,

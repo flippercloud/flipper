@@ -9,7 +9,7 @@ module Flipper
       'boolean' => '@boolean',
       'actors' => '@actors',
       'groups' => '@groups',
-      'rule' => '@rule',
+      'expression' => '@expression',
       'percentage_of_time' => '@percentage_of_time',
       'percentage_of_actors' => '@percentage_of_actors',
     }.freeze
@@ -17,7 +17,7 @@ module Flipper
     attr_reader :boolean
     attr_reader :actors
     attr_reader :groups
-    attr_reader :rule
+    attr_reader :expression
     attr_reader :percentage_of_actors
     attr_reader :percentage_of_time
 
@@ -25,7 +25,7 @@ module Flipper
       @boolean = Typecast.to_boolean(adapter_values[:boolean])
       @actors = Typecast.to_set(adapter_values[:actors])
       @groups = Typecast.to_set(adapter_values[:groups])
-      @rule = adapter_values[:rule]
+      @expression = adapter_values[:expression]
       @percentage_of_actors = Typecast.to_percentage(adapter_values[:percentage_of_actors])
       @percentage_of_time = Typecast.to_percentage(adapter_values[:percentage_of_time])
     end
@@ -41,7 +41,7 @@ module Flipper
         boolean == other.boolean &&
         actors == other.actors &&
         groups == other.groups &&
-        rule == other.rule &&
+        expression == other.expression &&
         percentage_of_actors == other.percentage_of_actors &&
         percentage_of_time == other.percentage_of_time
     end

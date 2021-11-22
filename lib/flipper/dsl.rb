@@ -44,23 +44,23 @@ module Flipper
       feature(name).enable(*args)
     end
 
-    # Public: Enable a feature for a rule.
+    # Public: Enable a feature for an expression.
     #
     # name - The String or Symbol name of the feature.
-    # rule - a Flipper::Expression instance or a Hash.
+    # expression - a Flipper::Expression instance or a Hash.
     #
     # Returns result of Feature#enable.
-    def enable_rule(name, rule)
-      feature(name).enable_rule(rule)
+    def enable_expression(name, expression)
+      feature(name).enable_expression(expression)
     end
 
-    # Public: Add a rule to a feature.
+    # Public: Add an expression to a feature.
     #
-    # rule - a rule or Hash that can be converted to a rule.
+    # expression - an expression or Hash that can be converted to an expression.
     #
     # Returns result of enable.
-    def add_rule(name, rule)
-      feature(name).add_rule(rule)
+    def add_expression(name, expression)
+      feature(name).add_expression(expression)
     end
 
     # Public: Enable a feature for an actor.
@@ -117,22 +117,22 @@ module Flipper
       feature(name).disable(*args)
     end
 
-    # Public: Disable rule for feature.
+    # Public: Disable expression for feature.
     #
     # name - The String or Symbol name of the feature.
     #
     # Returns result of Feature#disable.
-    def disable_rule(name)
-      feature(name).disable_rule
+    def disable_expression(name)
+      feature(name).disable_expression
     end
 
-    # Public: Remove a rule from a feature.
+    # Public: Remove an expression from a feature.
     #
-    # rule - a rule or Hash that can be converted to a rule.
+    # expression - an Expression or Hash that can be converted to an expression.
     #
     # Returns result of enable.
-    def remove_rule(name, rule)
-      feature(name).remove_rule(rule)
+    def remove_expression(name, expression)
+      feature(name).remove_expression(expression)
     end
 
     # Public: Disable a feature for an actor.
@@ -280,13 +280,13 @@ module Flipper
       Types::Actor.new(thing)
     end
 
-    # Public: Gets the rule for the feature.
+    # Public: Gets the expression for the feature.
     #
     # name - The String or Symbol name of the feature.
     #
     # Returns an instance of Flipper::Expression.
-    def rule(name)
-      feature(name).rule
+    def expression(name)
+      feature(name).expression
     end
 
     # Public: Shortcut for getting a percentage of time instance.

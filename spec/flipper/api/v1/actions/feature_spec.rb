@@ -23,8 +23,8 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
               'value' => 'true',
             },
             {
-              'key' => 'rule',
-              'name' => 'rule',
+              'key' => 'expression',
+              'name' => 'expression',
               'value' => nil,
             },
             {
@@ -72,8 +72,8 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
               'value' => nil,
             },
             {
-              'key' => 'rule',
-              'name' => 'rule',
+              'key' => 'expression',
+              'name' => 'expression',
               'value' => nil,
             },
             {
@@ -137,8 +137,8 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
               'value' => 'true',
             },
             {
-              'key' => 'rule',
-              'name' => 'rule',
+              'key' => 'expression',
+              'name' => 'expression',
               'value' => nil,
             },
             {
@@ -186,8 +186,8 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
               'value' => 'true',
             },
             {
-              'key' => 'rule',
-              'name' => 'rule',
+              'key' => 'expression',
+              'name' => 'expression',
               'value' => nil,
             },
             {

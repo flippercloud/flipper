@@ -70,9 +70,7 @@ RSpec.describe Flipper do
         "plan" => "basic",
       })
     }
-    let(:rule) {
-      Flipper.property(:plan).eq("basic")
-    }
+    let(:expression) { Flipper.property(:plan).eq("basic") }
 
     before do
       described_class.configure do |config|
@@ -104,34 +102,34 @@ RSpec.describe Flipper do
       expect(described_class.boolean).to eq(described_class.instance.boolean)
     end
 
-    it 'delegates rule to instance' do
-      expect(described_class.rule(:search)).to be(nil)
+    it 'delegates expression to instance' do
+      expect(described_class.expression(:search)).to be(nil)
 
-      rule = Flipper.property(:plan).eq("basic")
-      Flipper.instance.enable_rule :search, rule
+      expression = Flipper.property(:plan).eq("basic")
+      Flipper.instance.enable_expression :search, expression
 
-      expect(described_class.rule(:search)).to eq(rule)
+      expect(described_class.expression(:search)).to eq(expression)
     end
 
-    it 'delegates enable_rule to instance' do
-      described_class.enable_rule(:search, rule)
+    it 'delegates enable_expression to instance' do
+      described_class.enable_expression(:search, expression)
       expect(described_class.instance.enabled?(:search, actor)).to be(true)
     end
 
-    it 'delegates disable_rule to instance' do
-      described_class.disable_rule(:search)
+    it 'delegates disable_expression to instance' do
+      described_class.disable_expression(:search)
       expect(described_class.instance.enabled?(:search, actor)).to be(false)
     end
 
-    it 'delegates add_rule to instance' do
-      described_class.add_rule(:search, rule)
+    it 'delegates add_expression to instance' do
+      described_class.add_expression(:search, expression)
       expect(described_class.instance.enabled?(:search, actor)).to be(true)
     end
 
-    it 'delegates remove_rule to instance' do
-      described_class.enable_rule(:search, Flipper.any(rule))
+    it 'delegates remove_expression to instance' do
+      described_class.enable_expression(:search, Flipper.any(expression))
       expect(described_class.instance.enabled?(:search, actor)).to be(true)
-      described_class.remove_rule(:search, rule)
+      described_class.remove_expression(:search, expression)
       expect(described_class.instance.enabled?(:search, actor)).to be(false)
     end
 
@@ -403,23 +401,23 @@ RSpec.describe Flipper do
   end
 
   describe ".any" do
-    let(:age_rule) { Flipper.property(:age).gte(21) }
-    let(:plan_rule) { Flipper.property(:plan).eq("basic") }
+    let(:age_expression) { Flipper.property(:age).gte(21) }
+    let(:plan_expression) { Flipper.property(:plan).eq("basic") }
 
     it "returns Flipper::Expressions::Any instance" do
-      expect(Flipper.any(age_rule, plan_rule)).to eq(
-        Flipper::Expressions::Any.new([age_rule, plan_rule])
+      expect(Flipper.any(age_expression, plan_expression)).to eq(
+        Flipper::Expressions::Any.new([age_expression, plan_expression])
       )
     end
   end
 
   describe ".all" do
-    let(:age_rule) { Flipper.property(:age).gte(21) }
-    let(:plan_rule) { Flipper.property(:plan).eq("basic") }
+    let(:age_expression) { Flipper.property(:age).gte(21) }
+    let(:plan_expression) { Flipper.property(:plan).eq("basic") }
 
     it "returns Flipper::Expressions::All instance" do
-      expect(Flipper.all(age_rule, plan_rule)).to eq(
-        Flipper::Expressions::All.new([age_rule, plan_rule])
+      expect(Flipper.all(age_expression, plan_expression)).to eq(
+        Flipper::Expressions::All.new([age_expression, plan_expression])
       )
     end
   end

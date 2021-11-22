@@ -139,15 +139,15 @@ RSpec.describe Flipper::DSL do
     end
   end
 
-  describe '#rule' do
-    it "returns nil if feature has no rule" do
-      expect(subject.rule(:stats)).to be(nil)
+  describe '#expression' do
+    it "returns nil if feature has no expression" do
+      expect(subject.expression(:stats)).to be(nil)
     end
 
-    it "returns rule if feature has rule" do
-      rule = Flipper.property(:plan).eq("basic")
-      subject[:stats].enable_rule rule
-      expect(subject.rule(:stats)).to eq(rule)
+    it "returns expression if feature has expression" do
+      expression = Flipper.property(:plan).eq("basic")
+      subject[:stats].enable_expression expression
+      expect(subject.expression(:stats)).to eq(expression)
     end
   end
 
@@ -249,30 +249,30 @@ RSpec.describe Flipper::DSL do
     end
   end
 
-  describe '#enable_rule/disable_rule' do
-    it 'enables and disables the feature for the rule' do
-      rule = Flipper.property(:plan).eq("basic")
+  describe '#enable_expression/disable_expression' do
+    it 'enables and disables the feature for the expression' do
+      expression = Flipper.property(:plan).eq("basic")
 
-      expect(subject[:stats].rule).to be(nil)
-      subject.enable_rule(:stats, rule)
-      expect(subject[:stats].rule).to eq(rule)
+      expect(subject[:stats].expression).to be(nil)
+      subject.enable_expression(:stats, expression)
+      expect(subject[:stats].expression).to eq(expression)
 
-      subject.disable_rule(:stats)
-      expect(subject[:stats].rule).to be(nil)
+      subject.disable_expression(:stats)
+      expect(subject[:stats].expression).to be(nil)
     end
   end
 
-  describe '#add_rule/remove_rule' do
-    it 'enables and disables the feature for the rule' do
+  describe '#add_expression/remove_expression' do
+    it 'enables and disables the feature for the expression' do
       expression = Flipper.property(:plan).eq("basic")
-      rule = Flipper.any(expression)
+      any_expression = Flipper.any(expression)
 
-      expect(subject[:stats].rule).to be(nil)
-      subject.add_rule(:stats, rule)
-      expect(subject[:stats].rule).to eq(rule)
+      expect(subject[:stats].expression).to be(nil)
+      subject.add_expression(:stats, any_expression)
+      expect(subject[:stats].expression).to eq(any_expression)
 
-      subject.remove_rule(:stats, expression)
-      expect(subject[:stats].rule).to eq(Flipper.any)
+      subject.remove_expression(:stats, expression)
+      expect(subject[:stats].expression).to eq(Flipper.any)
     end
   end
 

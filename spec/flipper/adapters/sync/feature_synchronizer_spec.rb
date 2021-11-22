@@ -9,8 +9,8 @@ RSpec.describe Flipper::Adapters::Sync::FeatureSynchronizer do
   end
   let(:flipper) { Flipper.new(adapter) }
   let(:feature) { flipper[:search] }
-  let(:plan_rule) { Flipper.property(:plan).eq("basic") }
-  let(:age_rule) { Flipper.property(:age).gte(21) }
+  let(:plan_expression) { Flipper.property(:plan).eq("basic") }
+  let(:age_expression) { Flipper.property(:age).gte(21) }
 
   context "when remote disabled" do
     let(:remote) { Flipper::GateValues.new({}) }
@@ -66,7 +66,7 @@ RSpec.describe Flipper::Adapters::Sync::FeatureSynchronizer do
         boolean: nil,
         actors: Set["1"],
         groups: Set["staff"],
-        rule: plan_rule.value,
+        expression: plan_expression.value,
         percentage_of_time: 10,
         percentage_of_actors: 15,
       }
@@ -78,31 +78,31 @@ RSpec.describe Flipper::Adapters::Sync::FeatureSynchronizer do
       expect(local_gate_values_hash.fetch(:boolean)).to be(nil)
       expect(local_gate_values_hash.fetch(:actors)).to eq(Set["1"])
       expect(local_gate_values_hash.fetch(:groups)).to eq(Set["staff"])
-      expect(local_gate_values_hash.fetch(:rule)).to eq(plan_rule.value)
+      expect(local_gate_values_hash.fetch(:expression)).to eq(plan_expression.value)
       expect(local_gate_values_hash.fetch(:percentage_of_time)).to eq("10")
       expect(local_gate_values_hash.fetch(:percentage_of_actors)).to eq("15")
     end
 
-    it "updates rule when remote is updated" do
-      any_rule = Flipper.any(plan_rule, age_rule)
-      remote = Flipper::GateValues.new(rule: any_rule.value)
-      feature.enable_rule(age_rule)
+    it "updates expression when remote is updated" do
+      any_expression = Flipper.any(plan_expression, age_expression)
+      remote = Flipper::GateValues.new(expression: any_expression.value)
+      feature.enable_expression(age_expression)
       adapter.reset
 
       described_class.new(feature, feature.gate_values, remote).call
 
-      expect(feature.rule_value).to eq(any_rule.value)
+      expect(feature.expression_value).to eq(any_expression.value)
       expect_only_enable
     end
 
-    it "does nothing to rule if in sync" do
-      remote = Flipper::GateValues.new(rule: plan_rule.value)
-      feature.enable_rule(plan_rule)
+    it "does nothing to expression if in sync" do
+      remote = Flipper::GateValues.new(expression: plan_expression.value)
+      feature.enable_expression(plan_expression)
       adapter.reset
 
       described_class.new(feature, feature.gate_values, remote).call
 
-      expect(feature.rule_value).to eq(plan_rule.value)
+      expect(feature.expression_value).to eq(plan_expression.value)
       expect_no_enable_or_disable
     end
 

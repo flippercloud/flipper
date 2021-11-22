@@ -650,358 +650,358 @@ RSpec.describe Flipper::Feature do
     end
   end
 
-  describe '#rule' do
-    it "returns nil if feature has no rule" do
-      expect(subject.rule).to be(nil)
+  describe '#expression' do
+    it "returns nil if feature has no expression" do
+      expect(subject.expression).to be(nil)
     end
 
-    it "returns rule if feature has rule" do
-      rule = Flipper.property(:plan).eq("basic")
-      subject.enable_rule rule
-      expect(subject.rule).to eq(rule)
+    it "returns expression if feature has expression" do
+      expression = Flipper.property(:plan).eq("basic")
+      subject.enable_expression expression
+      expect(subject.expression).to eq(expression)
     end
   end
 
-  describe '#enable_rule/disable_rule' do
-    context "with rule instance" do
-      it "updates gate values to equal rule or clears rule" do
-        rule = Flipper.property(:plan).eq("basic")
-        other_rule = Flipper.property(:age).gte(21)
-        expect(subject.gate_values.rule).to be(nil)
-        subject.enable_rule(rule)
-        expect(subject.gate_values.rule).to eq(rule.value)
-        subject.disable_rule
-        expect(subject.gate_values.rule).to be(nil)
+  describe '#enable_expression/disable_expression' do
+    context "with expression instance" do
+      it "updates gate values to equal expression or clears expression" do
+        expression = Flipper.property(:plan).eq("basic")
+        other_expression = Flipper.property(:age).gte(21)
+        expect(subject.gate_values.expression).to be(nil)
+        subject.enable_expression(expression)
+        expect(subject.gate_values.expression).to eq(expression.value)
+        subject.disable_expression
+        expect(subject.gate_values.expression).to be(nil)
       end
     end
 
     context "with Hash" do
-      it "updates gate values to equal rule or clears rule" do
-        rule = Flipper.property(:plan).eq("basic")
-        other_rule = Flipper.property(:age).gte(21)
-        expect(subject.gate_values.rule).to be(nil)
-        subject.enable_rule(rule.value)
-        expect(subject.gate_values.rule).to eq(rule.value)
-        subject.disable_rule
-        expect(subject.gate_values.rule).to be(nil)
+      it "updates gate values to equal expression or clears expression" do
+        expression = Flipper.property(:plan).eq("basic")
+        other_expression = Flipper.property(:age).gte(21)
+        expect(subject.gate_values.expression).to be(nil)
+        subject.enable_expression(expression.value)
+        expect(subject.gate_values.expression).to eq(expression.value)
+        subject.disable_expression
+        expect(subject.gate_values.expression).to be(nil)
       end
     end
   end
 
-  describe "#add_rule" do
+  describe "#add_expression" do
     context "when nothing enabled" do
       context "with Expression instance" do
-        it "sets rule to Expression" do
-          rule = Flipper.property(:plan).eq("basic")
-          subject.add_rule(rule)
-          expect(subject.rule).to be_instance_of(Flipper::Expressions::Equal)
-          expect(subject.rule).to eq(rule)
+        it "sets expression to Expression" do
+          expression = Flipper.property(:plan).eq("basic")
+          subject.add_expression(expression)
+          expect(subject.expression).to be_instance_of(Flipper::Expressions::Equal)
+          expect(subject.expression).to eq(expression)
         end
       end
 
       context "with Any instance" do
-        it "sets rule to Any" do
-          rule = Flipper.any(Flipper.property(:plan).eq("basic"))
-          subject.add_rule(rule)
-          expect(subject.rule).to be_instance_of(Flipper::Expressions::Any)
-          expect(subject.rule).to eq(rule)
+        it "sets expression to Any" do
+          expression = Flipper.any(Flipper.property(:plan).eq("basic"))
+          subject.add_expression(expression)
+          expect(subject.expression).to be_instance_of(Flipper::Expressions::Any)
+          expect(subject.expression).to eq(expression)
         end
       end
 
       context "with All instance" do
-        it "sets rule to All" do
-          rule = Flipper.all(Flipper.property(:plan).eq("basic"))
-          subject.add_rule(rule)
-          expect(subject.rule).to be_instance_of(Flipper::Expressions::All)
-          expect(subject.rule).to eq(rule)
+        it "sets expression to All" do
+          expression = Flipper.all(Flipper.property(:plan).eq("basic"))
+          subject.add_expression(expression)
+          expect(subject.expression).to be_instance_of(Flipper::Expressions::All)
+          expect(subject.expression).to eq(expression)
         end
       end
     end
 
     context "when Expression enabled" do
-      let(:rule) { Flipper.property(:plan).eq("basic") }
+      let(:expression) { Flipper.property(:plan).eq("basic") }
 
       before do
-        subject.enable_rule rule
+        subject.enable_expression expression
       end
 
       context "with Expression instance" do
-        it "changes rule to Any and adds new Expression" do
-          new_rule = Flipper.property(:age).gte(21)
-          subject.add_rule(new_rule)
-          expect(subject.rule).to be_instance_of(Flipper::Expressions::Any)
-          expect(subject.rule.args).to include(rule)
-          expect(subject.rule.args).to include(new_rule)
+        it "changes expression to Any and adds new Expression" do
+          new_expression = Flipper.property(:age).gte(21)
+          subject.add_expression(new_expression)
+          expect(subject.expression).to be_instance_of(Flipper::Expressions::Any)
+          expect(subject.expression.args).to include(expression)
+          expect(subject.expression.args).to include(new_expression)
         end
       end
 
       context "with Any instance" do
-        it "changes rule to Any and adds new Any" do
-          new_rule = Flipper.any(Flipper.property(:age).eq(21))
-          subject.add_rule new_rule
-          expect(subject.rule).to be_instance_of(Flipper::Expressions::Any)
-          expect(subject.rule.args).to include(rule)
-          expect(subject.rule.args).to include(new_rule)
+        it "changes expression to Any and adds new Any" do
+          new_expression = Flipper.any(Flipper.property(:age).eq(21))
+          subject.add_expression new_expression
+          expect(subject.expression).to be_instance_of(Flipper::Expressions::Any)
+          expect(subject.expression.args).to include(expression)
+          expect(subject.expression.args).to include(new_expression)
         end
       end
 
       context "with All instance" do
-        it "changes rule to Any and adds new All" do
-          new_rule = Flipper.all(Flipper.property(:plan).eq("basic"))
-          subject.add_rule new_rule
-          expect(subject.rule).to be_instance_of(Flipper::Expressions::Any)
-          expect(subject.rule.args).to include(rule)
-          expect(subject.rule.args).to include(new_rule)
+        it "changes expression to Any and adds new All" do
+          new_expression = Flipper.all(Flipper.property(:plan).eq("basic"))
+          subject.add_expression new_expression
+          expect(subject.expression).to be_instance_of(Flipper::Expressions::Any)
+          expect(subject.expression.args).to include(expression)
+          expect(subject.expression.args).to include(new_expression)
         end
       end
     end
 
     context "when Any enabled" do
       let(:condition) { Flipper.property(:plan).eq("basic") }
-      let(:rule) { Flipper.any(condition) }
+      let(:expression) { Flipper.any(condition) }
 
       before do
-        subject.enable_rule rule
+        subject.enable_expression expression
       end
 
       context "with Expression instance" do
         it "adds Expression to Any" do
-          new_rule = Flipper.property(:age).gte(21)
-          subject.add_rule(new_rule)
-          expect(subject.rule).to be_instance_of(Flipper::Expressions::Any)
-          expect(subject.rule.args).to include(condition)
-          expect(subject.rule.args).to include(new_rule)
+          new_expression = Flipper.property(:age).gte(21)
+          subject.add_expression(new_expression)
+          expect(subject.expression).to be_instance_of(Flipper::Expressions::Any)
+          expect(subject.expression.args).to include(condition)
+          expect(subject.expression.args).to include(new_expression)
         end
       end
 
       context "with Any instance" do
         it "adds Any to Any" do
-          new_rule = Flipper.any(Flipper.property(:age).gte(21))
-          subject.add_rule(new_rule)
-          expect(subject.rule).to be_instance_of(Flipper::Expressions::Any)
-          expect(subject.rule.args).to include(condition)
-          expect(subject.rule.args).to include(new_rule)
+          new_expression = Flipper.any(Flipper.property(:age).gte(21))
+          subject.add_expression(new_expression)
+          expect(subject.expression).to be_instance_of(Flipper::Expressions::Any)
+          expect(subject.expression.args).to include(condition)
+          expect(subject.expression.args).to include(new_expression)
         end
       end
 
       context "with All instance" do
         it "adds All to Any" do
-          new_rule = Flipper.all(Flipper.property(:age).gte(21))
-          subject.add_rule(new_rule)
-          expect(subject.rule).to be_instance_of(Flipper::Expressions::Any)
-          expect(subject.rule.args).to include(condition)
-          expect(subject.rule.args).to include(new_rule)
+          new_expression = Flipper.all(Flipper.property(:age).gte(21))
+          subject.add_expression(new_expression)
+          expect(subject.expression).to be_instance_of(Flipper::Expressions::Any)
+          expect(subject.expression.args).to include(condition)
+          expect(subject.expression.args).to include(new_expression)
         end
       end
     end
 
     context "when All enabled" do
       let(:condition) { Flipper.property(:plan).eq("basic") }
-      let(:rule) { Flipper.all(condition) }
+      let(:expression) { Flipper.all(condition) }
 
       before do
-        subject.enable_rule rule
+        subject.enable_expression expression
       end
 
       context "with Expression instance" do
         it "adds Expression to All" do
-          new_rule = Flipper.property(:age).gte(21)
-          subject.add_rule(new_rule)
-          expect(subject.rule).to be_instance_of(Flipper::Expressions::All)
-          expect(subject.rule.args).to include(condition)
-          expect(subject.rule.args).to include(new_rule)
+          new_expression = Flipper.property(:age).gte(21)
+          subject.add_expression(new_expression)
+          expect(subject.expression).to be_instance_of(Flipper::Expressions::All)
+          expect(subject.expression.args).to include(condition)
+          expect(subject.expression.args).to include(new_expression)
         end
       end
 
       context "with Any instance" do
         it "adds Any to All" do
-          new_rule = Flipper.any(Flipper.property(:age).gte(21))
-          subject.add_rule(new_rule)
-          expect(subject.rule).to be_instance_of(Flipper::Expressions::All)
-          expect(subject.rule.args).to include(condition)
-          expect(subject.rule.args).to include(new_rule)
+          new_expression = Flipper.any(Flipper.property(:age).gte(21))
+          subject.add_expression(new_expression)
+          expect(subject.expression).to be_instance_of(Flipper::Expressions::All)
+          expect(subject.expression.args).to include(condition)
+          expect(subject.expression.args).to include(new_expression)
         end
       end
 
       context "with All instance" do
         it "adds All to All" do
-          new_rule = Flipper.all(Flipper.property(:age).gte(21))
-          subject.add_rule(new_rule)
-          expect(subject.rule).to be_instance_of(Flipper::Expressions::All)
-          expect(subject.rule.args).to include(condition)
-          expect(subject.rule.args).to include(new_rule)
+          new_expression = Flipper.all(Flipper.property(:age).gte(21))
+          subject.add_expression(new_expression)
+          expect(subject.expression).to be_instance_of(Flipper::Expressions::All)
+          expect(subject.expression.args).to include(condition)
+          expect(subject.expression.args).to include(new_expression)
         end
       end
     end
   end
 
-  describe '#remove_rule' do
+  describe '#remove_expression' do
     context "when nothing enabled" do
       context "with Expression instance" do
         it "does nothing" do
-          rule = Flipper.property(:plan).eq("basic")
-          subject.remove_rule(rule)
-          expect(subject.rule).to be(nil)
+          expression = Flipper.property(:plan).eq("basic")
+          subject.remove_expression(expression)
+          expect(subject.expression).to be(nil)
         end
       end
 
       context "with Any instance" do
         it "does nothing" do
-          rule = Flipper.any(Flipper.property(:plan).eq("basic"))
-          subject.remove_rule rule
-          expect(subject.rule).to be(nil)
+          expression = Flipper.any(Flipper.property(:plan).eq("basic"))
+          subject.remove_expression expression
+          expect(subject.expression).to be(nil)
         end
       end
 
       context "with All instance" do
         it "does nothing" do
-          rule = Flipper.all(Flipper.property(:plan).eq("basic"))
-          subject.remove_rule rule
-          expect(subject.rule).to be(nil)
+          expression = Flipper.all(Flipper.property(:plan).eq("basic"))
+          subject.remove_expression expression
+          expect(subject.expression).to be(nil)
         end
       end
     end
 
     context "when Expression enabled" do
-      let(:rule) { Flipper.property(:plan).eq("basic") }
+      let(:expression) { Flipper.property(:plan).eq("basic") }
 
       before do
-        subject.enable_rule rule
+        subject.enable_expression expression
       end
 
       context "with Expression instance" do
-        it "changes rule to Any and removes Expression if it matches" do
-          new_rule = Flipper.property(:plan).eq("basic")
-          subject.remove_rule new_rule
-          expect(subject.rule).to eq(Flipper.any)
+        it "changes expression to Any and removes Expression if it matches" do
+          new_expression = Flipper.property(:plan).eq("basic")
+          subject.remove_expression new_expression
+          expect(subject.expression).to eq(Flipper.any)
         end
 
-        it "changes rule to Any if Expression doesn't match" do
-          new_rule = Flipper.property(:plan).eq("premium")
-          subject.remove_rule new_rule
-          expect(subject.rule).to eq(Flipper.any(rule))
+        it "changes expression to Any if Expression doesn't match" do
+          new_expression = Flipper.property(:plan).eq("premium")
+          subject.remove_expression new_expression
+          expect(subject.expression).to eq(Flipper.any(expression))
         end
       end
 
       context "with Any instance" do
-        it "changes rule to Any and does nothing" do
-          new_rule = Flipper.any(Flipper.property(:plan).eq("basic"))
-          subject.remove_rule new_rule
-          expect(subject.rule).to eq(Flipper.any(rule))
+        it "changes expression to Any and does nothing" do
+          new_expression = Flipper.any(Flipper.property(:plan).eq("basic"))
+          subject.remove_expression new_expression
+          expect(subject.expression).to eq(Flipper.any(expression))
         end
       end
 
       context "with All instance" do
-        it "changes rule to Any and does nothing" do
-          new_rule = Flipper.all(Flipper.property(:plan).eq("basic"))
-          subject.remove_rule new_rule
-          expect(subject.rule).to eq(Flipper.any(rule))
+        it "changes expression to Any and does nothing" do
+          new_expression = Flipper.all(Flipper.property(:plan).eq("basic"))
+          subject.remove_expression new_expression
+          expect(subject.expression).to eq(Flipper.any(expression))
         end
       end
     end
 
     context "when Any enabled" do
       let(:condition) { Flipper.property(:plan).eq("basic") }
-      let(:rule) { Flipper.any condition }
+      let(:expression) { Flipper.any condition }
 
       before do
-        subject.enable_rule rule
+        subject.enable_expression expression
       end
 
       context "with Expression instance" do
         it "removes Expression if it matches" do
-          subject.remove_rule condition
-          expect(subject.rule).to eq(Flipper.any)
+          subject.remove_expression condition
+          expect(subject.expression).to eq(Flipper.any)
         end
 
         it "does nothing if Expression does not match" do
-          subject.remove_rule Flipper.property(:plan).eq("premium")
-          expect(subject.rule).to eq(rule)
+          subject.remove_expression Flipper.property(:plan).eq("premium")
+          expect(subject.expression).to eq(expression)
         end
       end
 
       context "with Any instance" do
         it "removes Any if it matches" do
-          new_rule = Flipper.any(Flipper.property(:plan).eq("premium"))
-          subject.add_rule new_rule
-          expect(subject.rule.args.size).to be(2)
-          subject.remove_rule new_rule
-          expect(subject.rule).to eq(rule)
+          new_expression = Flipper.any(Flipper.property(:plan).eq("premium"))
+          subject.add_expression new_expression
+          expect(subject.expression.args.size).to be(2)
+          subject.remove_expression new_expression
+          expect(subject.expression).to eq(expression)
         end
 
         it "does nothing if Any does not match" do
-          new_rule = Flipper.any(Flipper.property(:plan).eq("premium"))
-          subject.remove_rule new_rule
-          expect(subject.rule).to eq(rule)
+          new_expression = Flipper.any(Flipper.property(:plan).eq("premium"))
+          subject.remove_expression new_expression
+          expect(subject.expression).to eq(expression)
         end
       end
 
       context "with All instance" do
         it "removes All if it matches" do
-          new_rule = Flipper.all(Flipper.property(:plan).eq("premium"))
-          subject.add_rule new_rule
-          expect(subject.rule.args.size).to be(2)
-          subject.remove_rule new_rule
-          expect(subject.rule).to eq(rule)
+          new_expression = Flipper.all(Flipper.property(:plan).eq("premium"))
+          subject.add_expression new_expression
+          expect(subject.expression.args.size).to be(2)
+          subject.remove_expression new_expression
+          expect(subject.expression).to eq(expression)
         end
 
         it "does nothing if All does not match" do
-          new_rule = Flipper.all(Flipper.property(:plan).eq("premium"))
-          subject.remove_rule new_rule
-          expect(subject.rule).to eq(rule)
+          new_expression = Flipper.all(Flipper.property(:plan).eq("premium"))
+          subject.remove_expression new_expression
+          expect(subject.expression).to eq(expression)
         end
       end
     end
 
     context "when All enabled" do
       let(:condition) { Flipper.property(:plan).eq("basic") }
-      let(:rule) { Flipper.all condition }
+      let(:expression) { Flipper.all condition }
 
       before do
-        subject.enable_rule rule
+        subject.enable_expression expression
       end
 
       context "with Expression instance" do
         it "removes Expression if it matches" do
-          subject.remove_rule condition
-          expect(subject.rule).to eq(Flipper.all)
+          subject.remove_expression condition
+          expect(subject.expression).to eq(Flipper.all)
         end
 
         it "does nothing if Expression does not match" do
-          subject.remove_rule Flipper.property(:plan).eq("premium")
-          expect(subject.rule).to eq(rule)
+          subject.remove_expression Flipper.property(:plan).eq("premium")
+          expect(subject.expression).to eq(expression)
         end
       end
 
       context "with Any instance" do
         it "removes Any if it matches" do
-          new_rule = Flipper.any(Flipper.property(:plan).eq("premium"))
-          subject.add_rule new_rule
-          expect(subject.rule.args.size).to be(2)
-          subject.remove_rule new_rule
-          expect(subject.rule).to eq(rule)
+          new_expression = Flipper.any(Flipper.property(:plan).eq("premium"))
+          subject.add_expression new_expression
+          expect(subject.expression.args.size).to be(2)
+          subject.remove_expression new_expression
+          expect(subject.expression).to eq(expression)
         end
 
         it "does nothing if Any does not match" do
-          new_rule = Flipper.any(Flipper.property(:plan).eq("premium"))
-          subject.remove_rule new_rule
-          expect(subject.rule).to eq(rule)
+          new_expression = Flipper.any(Flipper.property(:plan).eq("premium"))
+          subject.remove_expression new_expression
+          expect(subject.expression).to eq(expression)
         end
       end
 
       context "with All instance" do
         it "removes All if it matches" do
-          new_rule = Flipper.all(Flipper.property(:plan).eq("premium"))
-          subject.add_rule new_rule
-          expect(subject.rule.args.size).to be(2)
-          subject.remove_rule new_rule
-          expect(subject.rule).to eq(rule)
+          new_expression = Flipper.all(Flipper.property(:plan).eq("premium"))
+          subject.add_expression new_expression
+          expect(subject.expression.args.size).to be(2)
+          subject.remove_expression new_expression
+          expect(subject.expression).to eq(expression)
         end
 
         it "does nothing if All does not match" do
-          new_rule = Flipper.all(Flipper.property(:plan).eq("premium"))
-          subject.remove_rule new_rule
-          expect(subject.rule).to eq(rule)
+          new_expression = Flipper.all(Flipper.property(:plan).eq("premium"))
+          subject.remove_expression new_expression
+          expect(subject.expression).to eq(expression)
         end
       end
     end
@@ -1159,14 +1159,14 @@ RSpec.describe Flipper::Feature do
               :actor,
               :boolean,
               :group,
-              :rule,
+              :expression,
             ])
 
       expect(subject.disabled_gate_names.to_set).to eq(Set[
               :actor,
               :boolean,
               :group,
-              :rule,
+              :expression,
             ])
     end
   end

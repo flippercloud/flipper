@@ -5,17 +5,17 @@ module Flipper
   module Api
     module V1
       module Actions
-        class RuleGate < Api::Action
+        class ExpressionGate < Api::Action
           include FeatureNameFromRoute
 
-          route %r{\A/features/(?<feature_name>.*)/rule/?\Z}
+          route %r{\A/features/(?<feature_name>.*)/expression/?\Z}
 
           def post
             feature = flipper[feature_name]
 
             begin
-              expression = Flipper::Expression.build(rule_hash)
-              feature.enable_rule expression
+              expression = Flipper::Expression.build(expression_hash)
+              feature.enable_expression expression
               decorated_feature = Decorators::Feature.new(feature)
               json_response(decorated_feature.as_json, 200)
             rescue NameError => exception
@@ -25,7 +25,7 @@ module Flipper
 
           def delete
             feature = flipper[feature_name]
-            feature.disable_rule
+            feature.disable_expression
 
             decorated_feature = Decorators::Feature.new(feature)
             json_response(decorated_feature.as_json, 200)
@@ -33,8 +33,8 @@ module Flipper
 
           private
 
-          def rule_hash
-            @rule_hash ||= request.env["parsed_request_body".freeze] || {}.freeze
+          def expression_hash
+            @expression_hash ||= request.env["parsed_request_body".freeze] || {}.freeze
           end
         end
       end

@@ -20,7 +20,7 @@ def refute(value)
 end
 
 def reset
-  Flipper.disable_rule :something
+  Flipper.disable_expression :something
 end
 
 class User < Struct.new(:id, :flipper_properties)
@@ -66,96 +66,96 @@ other_user = User.new(3, {
   "now" => NOW - DAY,
 })
 
-age_rule = Flipper.property(:age).gte(21)
-plan_rule = Flipper.property(:plan).eq("basic")
-admin_rule = Flipper.property(:admin).eq(true)
+age_expression = Flipper.property(:age).gte(21)
+plan_expression = Flipper.property(:plan).eq("basic")
+admin_expression = Flipper.property(:admin).eq(true)
 
-puts "Single Rule"
+puts "Single Expression"
 refute Flipper.enabled?(:something, user)
 
-puts "Enabling single rule"
-Flipper.enable_rule :something, plan_rule
+puts "Enabling single expression"
+Flipper.enable :something, plan_expression
 assert Flipper.enabled?(:something, user)
 refute Flipper.enabled?(:something, admin_user)
 refute Flipper.enabled?(:something, other_user)
 
-puts "Disabling single rule"
+puts "Disabling single expression"
 reset
 refute Flipper.enabled?(:something, user)
 
-puts "\n\nAny Rule"
-any_rule = Flipper.any(plan_rule, age_rule)
+puts "\n\nAny Expression"
+any_expression = Flipper.any(plan_expression, age_expression)
 refute Flipper.enabled?(:something, user)
 
-puts "Enabling any rule"
-Flipper.enable_rule :something, any_rule
+puts "Enabling any expression"
+Flipper.enable :something, any_expression
 assert Flipper.enabled?(:something, user)
 refute Flipper.enabled?(:something, admin_user)
 refute Flipper.enabled?(:something, other_user)
 
-puts "Disabling any rule"
+puts "Disabling any expression"
 reset
 refute Flipper.enabled?(:something, user)
 
-puts "\n\nAll Rule"
-all_rule = Flipper.all(plan_rule, age_rule)
+puts "\n\nAll Expression"
+all_expression = Flipper.all(plan_expression, age_expression)
 refute Flipper.enabled?(:something, user)
 
-puts "Enabling all rule"
-Flipper.enable_rule :something, all_rule
+puts "Enabling all expression"
+Flipper.enable :something, all_expression
 assert Flipper.enabled?(:something, user)
 refute Flipper.enabled?(:something, admin_user)
 refute Flipper.enabled?(:something, other_user)
 
-puts "Disabling all rule"
+puts "Disabling all expression"
 reset
 refute Flipper.enabled?(:something, user)
 
-puts "\n\nNested Rule"
-nested_rule = Flipper.any(admin_rule, all_rule)
+puts "\n\nNested Expression"
+nested_expression = Flipper.any(admin_expression, all_expression)
 refute Flipper.enabled?(:something, user)
 refute Flipper.enabled?(:something, admin_user)
 refute Flipper.enabled?(:something, other_user)
 
-puts "Enabling nested rule"
-Flipper.enable_rule :something, nested_rule
+puts "Enabling nested expression"
+Flipper.enable :something, nested_expression
 assert Flipper.enabled?(:something, user)
 assert Flipper.enabled?(:something, admin_user)
 refute Flipper.enabled?(:something, other_user)
 
-puts "Disabling nested rule"
+puts "Disabling nested expression"
 reset
 refute Flipper.enabled?(:something, user)
 refute Flipper.enabled?(:something, admin_user)
 refute Flipper.enabled?(:something, other_user)
 
-puts "\n\nBoolean Rule"
-boolean_rule = Flipper.value(true).eq(true)
-Flipper.enable_rule :something, boolean_rule
+puts "\n\nBoolean Expression"
+boolean_expression = Flipper.value(true).eq(true)
+Flipper.enable :something, boolean_expression
 assert Flipper.enabled?(:something)
 assert Flipper.enabled?(:something, user)
 reset
 
-puts "\n\nSet of Actors Rule"
-set_of_actors_rule = Flipper.any(
+puts "\n\nSet of Actors Expression"
+set_of_actors_expression = Flipper.any(
   Flipper.property(:flipper_id).eq("User;1"),
   Flipper.property(:flipper_id).eq("User;3"),
 )
-Flipper.enable_rule :something, set_of_actors_rule
+Flipper.enable :something, set_of_actors_expression
 assert Flipper.enabled?(:something, user)
 assert Flipper.enabled?(:something, other_user)
 refute Flipper.enabled?(:something, admin_user)
 reset
 
-puts "\n\n% of Actors Rule"
+puts "\n\n% of Actors Expression"
 percentage_of_actors = Flipper.property(:flipper_id).percentage(30)
-Flipper.enable_rule :something, percentage_of_actors
+Flipper.enable :something, percentage_of_actors
 refute Flipper.enabled?(:something, user)
 refute Flipper.enabled?(:something, other_user)
 assert Flipper.enabled?(:something, admin_user)
 reset
 
-puts "\n\n% of Actors Per Type Rule"
+puts "\n\n% of Actors Per Type Expression"
 percentage_of_actors_per_type = Flipper.any(
   Flipper.all(
     Flipper.property(:type).eq("User"),
@@ -166,16 +166,16 @@ percentage_of_actors_per_type = Flipper.any(
     Flipper.property(:flipper_id).percentage(10),
   )
 )
-Flipper.enable_rule :something, percentage_of_actors_per_type
+Flipper.enable :something, percentage_of_actors_per_type
 refute Flipper.enabled?(:something, user) # not in the 40% enabled for Users
 assert Flipper.enabled?(:something, other_user)
 assert Flipper.enabled?(:something, admin_user)
 refute Flipper.enabled?(:something, org) # not in the 10% of enabled for Orgs
 reset
 
-puts "\n\nPercentage of Time Rule"
-percentage_of_time_rule = Flipper.random(100).lt(50)
-Flipper.enable_rule :something, percentage_of_time_rule
+puts "\n\nPercentage of Time Expression"
+percentage_of_time_expression = Flipper.random(100).lt(50)
+Flipper.enable :something, percentage_of_time_expression
 results = (1..10000).map { |n| Flipper.enabled?(:something, user) }
 enabled, disabled = results.partition { |r| r }
 p enabled: enabled.size
@@ -184,30 +184,30 @@ assert (4_700..5_200).include?(enabled.size)
 assert (4_700..5_200).include?(disabled.size)
 reset
 
-puts "\n\nChanging single rule to all rule"
-Flipper.enable_rule :something, plan_rule
-Flipper.enable_rule :something, Flipper.rule(:something).all.add(age_rule)
+puts "\n\nChanging single expression to all expression"
+Flipper.enable :something, plan_expression
+Flipper.enable :something, Flipper.expression(:something).all.add(age_expression)
 assert Flipper.enabled?(:something, user)
 refute Flipper.enabled?(:something, admin_user)
 refute Flipper.enabled?(:something, other_user)
 
-puts "\n\nChanging single rule to any rule"
-Flipper.enable_rule :something, plan_rule
-Flipper.enable_rule :something, Flipper.rule(:something).any.add(age_rule, admin_rule)
+puts "\n\nChanging single expression to any expression"
+Flipper.enable :something, plan_expression
+Flipper.enable :something, Flipper.expression(:something).any.add(age_expression, admin_expression)
 assert Flipper.enabled?(:something, user)
 assert Flipper.enabled?(:something, admin_user)
 refute Flipper.enabled?(:something, other_user)
 
-puts "\n\nChanging single rule to any rule by adding to condition"
-Flipper.enable_rule :something, plan_rule
-Flipper.enable_rule :something, Flipper.rule(:something).add(admin_rule)
+puts "\n\nChanging single expression to any expression by adding to condition"
+Flipper.enable :something, plan_expression
+Flipper.enable :something, Flipper.expression(:something).add(admin_expression)
 assert Flipper.enabled?(:something, user)
 assert Flipper.enabled?(:something, admin_user)
 refute Flipper.enabled?(:something, other_user)
 
 puts "\n\nEnabling based on time"
-scheduled_time_rule = Flipper.property(:now).gte(NOW)
-Flipper.enable_rule :something, scheduled_time_rule
+scheduled_time_expression = Flipper.property(:now).gte(NOW)
+Flipper.enable :something, scheduled_time_expression
 assert Flipper.enabled?(:something, user)
 assert Flipper.enabled?(:something, admin_user)
 refute Flipper.enabled?(:something, other_user)

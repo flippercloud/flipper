@@ -7,7 +7,7 @@ module Flipper
         @feature = @flipper[:stats]
         @boolean_gate = @feature.gate(:boolean)
         @group_gate = @feature.gate(:group)
-        @rule_gate = @feature.gate(:rule)
+        @expression_gate = @feature.gate(:expression)
         @actor_gate = @feature.gate(:actor)
         @actors_gate = @feature.gate(:percentage_of_actors)
         @time_gate = @feature.gate(:percentage_of_time)
@@ -57,22 +57,22 @@ module Flipper
         assert_equal @adapter.default_config, @adapter.get(@feature)
       end
 
-      def test_can_enable_disable_and_get_value_for_rule_gate
-        basic_rule = Flipper.property(:plan).eq("basic")
-        age_rule = Flipper.property(:age).gte(21)
-        any_rule = Flipper.any(basic_rule, age_rule)
+      def test_can_enable_disable_and_get_value_for_expression_gate
+        basic_expression = Flipper.property(:plan).eq("basic")
+        age_expression = Flipper.property(:age).gte(21)
+        any_expression = Flipper.any(basic_expression, age_expression)
 
-        assert_equal true, @adapter.enable(@feature, @rule_gate, any_rule)
+        assert_equal true, @adapter.enable(@feature, @expression_gate, any_expression)
         result = @adapter.get(@feature)
-        assert_equal any_rule.value, result[:rule]
+        assert_equal any_expression.value, result[:expression]
 
-        assert_equal true, @adapter.enable(@feature, @rule_gate, basic_rule)
+        assert_equal true, @adapter.enable(@feature, @expression_gate, basic_expression)
         result = @adapter.get(@feature)
-        assert_equal basic_rule.value, result[:rule]
+        assert_equal basic_expression.value, result[:expression]
 
-        assert_equal true, @adapter.disable(@feature, @rule_gate, basic_rule)
+        assert_equal true, @adapter.disable(@feature, @expression_gate, basic_expression)
         result = @adapter.get(@feature)
-        assert_nil result[:rule]
+        assert_nil result[:expression]
       end
 
       def test_can_enable_disable_get_value_for_group_gate
