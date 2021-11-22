@@ -18,7 +18,7 @@ module Flipper
       end
 
       def enabled?(value)
-        value && !value.empty?
+        !value.nil? && !value.empty?
       end
 
       # Internal: Checks if the gate is open for a thing.
@@ -36,7 +36,11 @@ module Flipper
       end
 
       def protects?(thing)
-        thing.is_a?(Flipper::Expression)
+        thing.is_a?(Flipper::Expression) || thing.is_a?(Hash)
+      end
+
+      def wrap(thing)
+        Flipper::Expression.build(thing)
       end
 
       private
@@ -54,6 +58,8 @@ module Flipper
         else
           warn "#{actor.inspect} does not respond to `flipper_properties` but should."
         end
+
+        properties.transform_keys!(&:to_s)
 
         if actor.respond_to?(:flipper_id)
           properties["flipper_id".freeze] = actor.flipper_id
