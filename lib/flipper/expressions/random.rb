@@ -8,7 +8,7 @@ module Flipper
       end
 
       def evaluate(context = {})
-        rand args[0]
+        rand evaluate_arg(0, context)
       end
     end
   end

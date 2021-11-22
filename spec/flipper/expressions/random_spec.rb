@@ -18,6 +18,13 @@ RSpec.describe Flipper::Expressions::Random do
       expect(result).to be >= 0
       expect(result).to be <= 10
     end
+
+    it "returns random number based on seed that is Value" do
+      expression = described_class.new([Flipper.value(10)])
+      result = expression.evaluate
+      expect(result).to be >= 0
+      expect(result).to be <= 10
+    end
   end
 
   describe "#value" do
