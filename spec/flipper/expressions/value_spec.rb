@@ -21,6 +21,11 @@ RSpec.describe Flipper::Expressions::Value do
       expression = described_class.new(["basic"])
       expect(expression.evaluate).to eq("basic")
     end
+
+    it "returns arg when it needs evaluation" do
+      expression = described_class.new([Flipper.value("basic")])
+      expect(expression.evaluate).to eq("basic")
+    end
   end
 
   describe "#value" do

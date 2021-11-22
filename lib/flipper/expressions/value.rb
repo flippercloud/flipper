@@ -8,7 +8,7 @@ module Flipper
       end
 
       def evaluate(context = {})
-        args[0]
+        evaluate_arg(0, context)
       end
     end
   end

@@ -6,8 +6,8 @@ module Flipper
       def evaluate(context = {})
         return false unless args[0] && args[1]
 
-        left = args[0].evaluate(context)
-        right = args[1].evaluate(context)
+        left = evaluate_arg(0, context)
+        right = evaluate_arg(1, context)
 
         left != right
       end
