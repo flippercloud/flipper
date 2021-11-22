@@ -9,7 +9,9 @@ module Flipper
         left = args[0].evaluate(context)
         right = args[1].evaluate(context)
 
-        left && right && left >= right
+        return false unless left && right
+
+        left >= right
       end
     end
   end
