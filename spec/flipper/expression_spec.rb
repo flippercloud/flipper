@@ -17,15 +17,15 @@ RSpec.describe Flipper::Expression do
       ])
     end
 
-    it "can build GreaterThanOrEqual" do
+    it "can build GreaterThanOrEqualTo" do
       expression = Flipper::Expression.build({
-        "GreaterThanOrEqual" => [
+        "GreaterThanOrEqualTo" => [
           {"Value" => [2]},
           {"Value" => [1]},
         ]
       })
 
-      expect(expression).to be_instance_of(Flipper::Expressions::GreaterThanOrEqual)
+      expect(expression).to be_instance_of(Flipper::Expressions::GreaterThanOrEqualTo)
       expect(expression.args).to eq([
         Flipper.value(2),
         Flipper.value(1),
@@ -47,15 +47,15 @@ RSpec.describe Flipper::Expression do
       ])
     end
 
-    it "can build LessThanOrEqual" do
+    it "can build LessThanOrEqualTo" do
       expression = Flipper::Expression.build({
-        "LessThanOrEqual" => [
+        "LessThanOrEqualTo" => [
           {"Value" => [2]},
           {"Value" => [1]},
         ]
       })
 
-      expect(expression).to be_instance_of(Flipper::Expressions::LessThanOrEqual)
+      expect(expression).to be_instance_of(Flipper::Expressions::LessThanOrEqualTo)
       expect(expression.args).to eq([
         Flipper.value(2),
         Flipper.value(1),
@@ -237,9 +237,11 @@ RSpec.describe Flipper::Expression do
     [[2], [3], "equal", "eq", Flipper::Expressions::Equal],
     [[2], [3], "not_equal", "neq", Flipper::Expressions::NotEqual],
     [[2], [3], "greater_than", "gt", Flipper::Expressions::GreaterThan],
-    [[2], [3], "greater_than_or_equal", "gte", Flipper::Expressions::GreaterThanOrEqual],
+    [[2], [3], "greater_than_or_equal_to", "gte", Flipper::Expressions::GreaterThanOrEqualTo],
+    [[2], [3], "greater_than_or_equal_to", "greater_than_or_equal", Flipper::Expressions::GreaterThanOrEqualTo],
     [[2], [3], "less_than", "lt", Flipper::Expressions::LessThan],
-    [[2], [3], "less_than_or_equal", "lte", Flipper::Expressions::LessThanOrEqual],
+    [[2], [3], "less_than_or_equal_to", "lte", Flipper::Expressions::LessThanOrEqualTo],
+    [[2], [3], "less_than_or_equal_to", "less_than_or_equal", Flipper::Expressions::LessThanOrEqualTo],
   ].each do |(args, other_args, method_name, shortcut_name, klass)|
     it "can convert to #{klass}" do
       expression = described_class.new(args)

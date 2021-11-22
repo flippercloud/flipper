@@ -2,7 +2,7 @@ require "flipper/expression"
 
 module Flipper
   module Expressions
-    class GreaterThanOrEqual < Expression
+    class GreaterThanOrEqualTo < Expression
       def evaluate(context = {})
         return false unless args[0] && args[1]
 

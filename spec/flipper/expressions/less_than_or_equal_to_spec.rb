@@ -1,6 +1,6 @@
 require 'helper'
 
-RSpec.describe Flipper::Expressions::LessThanOrEqual do
+RSpec.describe Flipper::Expressions::LessThanOrEqualTo do
   describe "#evaluate" do
     it "returns true when equal" do
       expression = described_class.new([
@@ -38,7 +38,7 @@ RSpec.describe Flipper::Expressions::LessThanOrEqual do
       ])
 
       expect(expression.value).to eq({
-        "LessThanOrEqual" => [
+        "LessThanOrEqualTo" => [
           {"Value" => [20]},
           {"Value" => [10]},
         ],
