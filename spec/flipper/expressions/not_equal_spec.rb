@@ -45,6 +45,15 @@ RSpec.describe Flipper::Expressions::NotEqual do
       }
       expect(expression.evaluate(properties: properties)).to be(false)
     end
+
+    it "only evaluates first two arguments equality" do
+      expression = described_class.new([
+        Flipper.value(20),
+        Flipper.value(10),
+        Flipper.value(20),
+      ])
+      expect(expression.evaluate).to be(true)
+    end
   end
 
   describe "#value" do
