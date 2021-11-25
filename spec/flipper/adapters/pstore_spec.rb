@@ -15,4 +15,15 @@ RSpec.describe Flipper::Adapters::PStore do
   it 'defaults path to flipper.pstore' do
     expect(described_class.new.path).to eq('flipper.pstore')
   end
+
+  describe '.thread_safe' do
+    it 'defaults to false' do
+      expect(subject.thread_safe).to be false
+    end
+
+    it 'can be set to true' do
+      store = described_class.new(subject.path, true)
+      expect(store.thread_safe).to be true
+    end
+  end
 end
