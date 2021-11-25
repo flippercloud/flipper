@@ -70,7 +70,6 @@ You should be able to upgrade to 0.21 without any breaking changes. However, if 
     +   #
     +   # Or, you may want to disable preloading entirely (if you have hundreds of features):
     +   # config.flipper.preload = false
-    +   #
     + end
     ```
 
