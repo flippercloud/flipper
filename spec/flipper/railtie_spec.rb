@@ -4,29 +4,23 @@ require 'flipper/railtie'
 
 RSpec.describe Flipper::Railtie do
   let(:application) do
-    app = Class.new(Rails::Application).new(
+    Class.new(Rails::Application).new(
       railties: [Flipper::Railtie],
-      ordered_railties: [Flipper::Railtie]
-    )
-    app.config.eager_load = false
-    app.config.logger = ActiveSupport::Logger.new($stdout)
-    app.run_load_hooks!
+    ).tap do |app|
+      app.config.eager_load = false
+      app.run_load_hooks!
+    end
   end
 
-  before do
-    Rails.application = nil
-  end
+  let(:config) { application.config.flipper }
 
-  subject do
-    application.initialize!
-    application
-  end
+  subject { application.initialize! }
 
   describe 'initializers' do
     it 'sets defaults' do
-      expect(application.config.flipper.env_key).to eq("flipper")
-      expect(application.config.flipper.memoize).to be(true)
-      expect(application.config.flipper.preload).to be(true)
+      expect(config.env_key).to eq("flipper")
+      expect(config.memoize).to be(true)
+      expect(config.preload).to be(true)
     end
 
     it "configures instrumentor on default instance" do
@@ -36,19 +30,19 @@ RSpec.describe Flipper::Railtie do
     end
 
     it 'uses Memoizer middleware if config.memoize = true' do
-      expect(subject.middleware.last).to eq(Flipper::Middleware::Memoizer)
+      expect(subject.middleware).to include(Flipper::Middleware::Memoizer)
     end
 
     it 'does not use Memoizer middleware if config.memoize = false' do
       # load but don't initialize
-      application.config.flipper.memoize = false
+      config.memoize = false
 
-      expect(subject.middleware.last).not_to eq(Flipper::Middleware::Memoizer)
+      expect(subject.middleware).not_to include(Flipper::Middleware::Memoizer)
     end
 
     it 'passes config to memoizer' do
       # load but don't initialize
-      application.config.flipper.update(
+      config.update(
         env_key: 'my_flipper',
         preload: [:stats, :search]
       )
