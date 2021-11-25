@@ -22,9 +22,10 @@ module Flipper
 
       # Public
       def initialize(path = 'flipper.pstore', thread_safe = false)
+        @name = :pstore
         @path = path
         @store = ::PStore.new(path, thread_safe)
-        @name = :pstore
+        @thread_safe = thread_safe
       end
 
       # Public: The set of known features.
