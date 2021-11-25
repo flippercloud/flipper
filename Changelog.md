@@ -58,7 +58,7 @@ You should be able to upgrade to 0.21 without any breaking changes. However, if 
     - end
     ```
 
-2. `Flipper::Middleware::Memoizer` will be enabled by default -- including preloading.
+2. `Flipper::Middleware::Memoizer` will be enabled by default -- including preloading. **Note**: You may want to disable preloading (see below) if you have > 100 features.
 
     ```diff
     # config/initializers/flipper.rb
@@ -68,7 +68,7 @@ You should be able to upgrade to 0.21 without any breaking changes. However, if 
     +   # Uncomment to configure which features to preload on all requests
     +   # config.flipper.preload = [:stats, :search, :some_feature]
     +   #
-    +   # Or, you may want to disable preloading entirely (if you have hundreds of features):
+    +   # Or, you may want to disable preloading entirely:
     +   # config.flipper.preload = false
     + end
     ```
