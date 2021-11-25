@@ -58,33 +58,27 @@ module Flipper
       end
 
       def add(feature)
-        result = @remote.add(feature)
-        @local.add(feature)
-        result
+        @remote.add(feature).tap { @local.add(feature) }
       end
 
       def remove(feature)
-        result = @remote.remove(feature)
-        @local.remove(feature)
-        result
+        @remote.remove(feature).tap { @local.remove(feature) }
       end
 
       def clear(feature)
-        result = @remote.clear(feature)
-        @local.clear(feature)
-        result
+        @remote.clear(feature).tap { @local.clear(feature) }
       end
 
       def enable(feature, gate, thing)
-        result = @remote.enable(feature, gate, thing)
-        @local.enable(feature, gate, thing)
-        result
+        @remote.enable(feature, gate, thing).tap do
+          @local.enable(feature, gate, thing)
+        end
       end
 
       def disable(feature, gate, thing)
-        result = @remote.disable(feature, gate, thing)
-        @local.disable(feature, gate, thing)
-        result
+        @remote.disable(feature, gate, thing).tap do
+          @local.disable(feature, gate, thing)
+        end
       end
 
       private
