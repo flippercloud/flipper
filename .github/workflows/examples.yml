@@ -2,6 +2,7 @@ name: Examples
 on: [push, pull_request]
 jobs:
   test:
+    if: github.repository_owner == 'jnunemaker'
     name: Test on ruby ${{ matrix.ruby }} and rails ${{ matrix.rails }}
     runs-on: ubuntu-latest
     services:
