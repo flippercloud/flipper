@@ -5,6 +5,8 @@
 * Allow some HTML in banner and descriptions (https://github.com/jnunemaker/flipper/pull/570).
 * Moved some cloud headers to http client (https://github.com/jnunemaker/flipper/pull/567).
 * Update flipper-ui jquery and bootstrap versions (https://github.com/jnunemaker/flipper/issues/565 and https://github.com/jnunemaker/flipper/pull/566).
+* Moved docs to www.flippercloud.io/docs (https://github.com/jnunemaker/flipper/pull/574).
+* PStore adapter now defaults to thread safe (https://github.com/jnunemaker/flipper/commit/4048704fefe41b716015294a19a0b94546637630).
 
 ## 0.22.2
 
