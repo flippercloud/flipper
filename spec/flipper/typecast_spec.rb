@@ -1,4 +1,3 @@
-require 'helper'
 require 'flipper/typecast'
 
 RSpec.describe Flipper::Typecast do

@@ -1,4 +1,3 @@
-require 'helper'
 require 'flipper/identifier'
 
 RSpec.describe Flipper::Identifier do

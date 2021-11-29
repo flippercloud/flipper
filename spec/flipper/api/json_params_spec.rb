@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::Api::JsonParams do
   let(:app) do
     app = lambda do |env|

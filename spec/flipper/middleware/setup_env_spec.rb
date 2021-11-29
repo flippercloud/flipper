@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::Middleware::SetupEnv do
   context 'with flipper instance' do
     let(:app) do

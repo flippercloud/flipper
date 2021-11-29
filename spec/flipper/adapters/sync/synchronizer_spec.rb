@@ -1,4 +1,3 @@
-require "helper"
 require "flipper/adapters/memory"
 require "flipper/instrumenters/memory"
 require "flipper/adapters/sync/synchronizer"

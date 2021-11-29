@@ -1,4 +1,3 @@
-require 'helper'
 require 'flipper/cloud'
 require 'flipper/adapters/instrumented'
 require 'flipper/instrumenters/memory'

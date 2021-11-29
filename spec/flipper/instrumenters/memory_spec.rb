@@ -1,4 +1,3 @@
-require 'helper'
 require 'flipper/instrumenters/memory'
 
 RSpec.describe Flipper::Instrumenters::Memory do

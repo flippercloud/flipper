@@ -1,7 +1,5 @@
-require 'helper'
 require 'flipper/adapters/operation_logger'
 require 'flipper/adapters/dalli'
-require 'flipper/spec/shared_adapter_specs'
 require 'logger'
 
 RSpec.describe Flipper::Adapters::Dalli do

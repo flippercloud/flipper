@@ -1,4 +1,3 @@
-require 'helper'
 require 'flipper/registry'
 
 RSpec.describe Flipper::Registry do

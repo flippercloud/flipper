@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::UI::Actions::Features do
   let(:token) do
     if Rack::Protection::AuthenticityToken.respond_to?(:random_token)

@@ -1,7 +1,5 @@
-require 'helper'
 require 'flipper/adapters/http'
 require 'flipper/adapters/pstore'
-require 'flipper/spec/shared_adapter_specs'
 require 'rack/handler/webrick'
 
 FLIPPER_SPEC_API_PORT = ENV.fetch('FLIPPER_SPEC_API_PORT', 9001).to_i

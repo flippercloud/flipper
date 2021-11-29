@@ -1,4 +1,3 @@
-require 'helper'
 require 'flipper/dsl'
 
 RSpec.describe Flipper::DSL do

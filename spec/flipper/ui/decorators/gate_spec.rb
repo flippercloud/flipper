@@ -1,4 +1,3 @@
-require 'helper'
 require 'flipper/ui/decorators/gate'
 
 RSpec.describe Flipper::UI::Decorators::Gate do

@@ -1,4 +1,3 @@
-require 'helper'
 require 'flipper/adapters/instrumented'
 require 'flipper/instrumentation/statsd'
 require 'statsd'
