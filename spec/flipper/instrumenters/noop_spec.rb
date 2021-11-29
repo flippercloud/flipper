@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::Instrumenters::Noop do
   describe '.instrument' do
     context 'with name' do

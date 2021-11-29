@@ -1,6 +1,4 @@
-require 'helper'
 require 'flipper/adapters/redis'
-require 'flipper/spec/shared_adapter_specs'
 
 RSpec.describe Flipper::Adapters::Redis do
   let(:client) do

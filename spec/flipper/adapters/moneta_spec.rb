@@ -1,6 +1,4 @@
-require 'helper'
 require 'flipper/adapters/moneta'
-require 'flipper/spec/shared_adapter_specs'
 
 RSpec.describe Flipper::Adapters::Moneta do
   let(:moneta) { Moneta.new(:Memory) }

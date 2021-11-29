@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::Actor do
   it 'initializes with and knows flipper_id' do
     actor = described_class.new("User;235")

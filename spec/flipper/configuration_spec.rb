@@ -1,4 +1,3 @@
-require 'helper'
 require 'flipper/configuration'
 
 RSpec.describe Flipper::Configuration do

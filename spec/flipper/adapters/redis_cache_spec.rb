@@ -1,7 +1,5 @@
-require 'helper'
 require 'flipper/adapters/operation_logger'
 require 'flipper/adapters/redis_cache'
-require 'flipper/spec/shared_adapter_specs'
 
 RSpec.describe Flipper::Adapters::RedisCache do
   let(:client) do

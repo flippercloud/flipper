@@ -1,4 +1,3 @@
-require 'helper'
 require 'rails'
 require 'flipper/cloud'
 

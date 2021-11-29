@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
   let(:app) { build_api(flipper) }
 

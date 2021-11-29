@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::Api::V1::Actions::PercentageOfActorsGate do
   let(:app) { build_api(flipper) }
 

@@ -1,4 +1,3 @@
-require "helper"
 require "flipper/adapters/sync/interval_synchronizer"
 
 RSpec.describe Flipper::Adapters::Sync::IntervalSynchronizer do

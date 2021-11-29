@@ -1,4 +1,3 @@
-require 'helper'
 require 'flipper/types/group'
 
 RSpec.describe Flipper::Types::Group do

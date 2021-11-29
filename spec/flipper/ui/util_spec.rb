@@ -1,4 +1,3 @@
-require 'helper'
 require 'flipper/ui/util'
 
 RSpec.describe Flipper::UI::Util do
