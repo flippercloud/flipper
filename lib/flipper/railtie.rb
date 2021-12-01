@@ -18,7 +18,7 @@ module Flipper
       end
     end
 
-    initializer "flipper.memoizer" do |app|
+    initializer "flipper.memoizer", after: :load_config_initializers do |app|
       config = app.config.flipper
 
       if config.memoize
@@ -30,8 +30,9 @@ module Flipper
       end
     end
 
-    initializer "flipper.log" do |app|
+    initializer "flipper.log", after: :load_config_initializers do |app|
       config = app.config.flipper
+
       if config.log && config.instrumenter == ActiveSupport::Notifications
         require "flipper/instrumentation/log_subscriber"
       end
