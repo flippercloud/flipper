@@ -3,11 +3,8 @@ require 'flipper/railtie'
 
 RSpec.describe Flipper::Railtie do
   let(:application) do
-    Class.new(Rails::Application).new(
-      railties: [Flipper::Railtie],
-    ).tap do |app|
-      app.config.eager_load = false
-      app.run_load_hooks!
+    Class.new(Rails::Application).create(railties: [Flipper::Railtie]) do
+      config.eager_load = false
     end
   end
 
