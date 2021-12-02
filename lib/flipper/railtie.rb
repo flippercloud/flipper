@@ -10,6 +10,12 @@ module Flipper
       )
     end
 
+    initializer "flipper.identifier" do
+      ActiveSupport.on_load(:active_record) do
+        ActiveRecord::Base.include Flipper::Identifier
+      end
+    end
+
     initializer "flipper.default", before: :load_config_initializers do |app|
       Flipper.configure do |config|
         config.default do
@@ -18,29 +24,23 @@ module Flipper
       end
     end
 
-    initializer "flipper.memoizer", after: :load_config_initializers do |app|
-      config = app.config.flipper
-
-      if config.memoize
-        app.middleware.use Flipper::Middleware::Memoizer, {
-          env_key: config.env_key,
-          preload: config.preload,
-          if: config.memoize.respond_to?(:call) ? config.memoize : nil
-        }
-      end
-    end
-
     initializer "flipper.log", after: :load_config_initializers do |app|
-      config = app.config.flipper
+      flipper = app.config.flipper
 
-      if config.log && config.instrumenter == ActiveSupport::Notifications
+      if flipper.log && flipper.instrumenter == ActiveSupport::Notifications
         require "flipper/instrumentation/log_subscriber"
       end
     end
 
-    initializer "flipper.identifier" do
-      ActiveSupport.on_load(:active_record) do
-        ActiveRecord::Base.include Flipper::Identifier
+    initializer "flipper.memoizer", after: :load_config_initializers do |app|
+      flipper = app.config.flipper
+
+      if flipper.memoize
+        app.middleware.use Flipper::Middleware::Memoizer, {
+          env_key: flipper.env_key,
+          preload: flipper.preload,
+          if: flipper.memoize.respond_to?(:call) ? flipper.memoize : nil
+        }
       end
     end
   end
