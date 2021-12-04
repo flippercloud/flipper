@@ -1,3 +1,5 @@
+require "json"
+
 module Flipper
   module Adapters
     class Http
@@ -6,7 +8,23 @@ module Flipper
 
         def initialize(response)
           @response = response
-          super("Failed with status: #{response.code}")
+          message = "Failed with status: #{response.code}"
+
+          begin
+            data = JSON.parse(response.body)
+
+            if error_message = data["message"]
+              message << "\n\n#{data["message"]}"
+            end
+
+            if more_info = data["more_info"]
+              message << "\n#{data["more_info"]}"
+            end
+          rescue => exception
+            # welp we tried
+          end
+
+          super(message)
         end
       end
     end
