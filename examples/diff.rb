@@ -1,8 +1,5 @@
 require 'bundler/setup'
-require_relative 'active_record/ar_setup'
 require 'flipper'
-require 'flipper/adapters/redis'
-require 'flipper/adapters/active_record'
 
 # Say you are using memory...
 full_adapter = Flipper::Adapters::Memory.new
@@ -39,3 +36,16 @@ diff.operations.each do |operation|
 
   puts message
 end
+
+# output:
+# Flipper[:search].enable
+# Flipper[:verbose_logging].enable_percentage_of_time(5)
+# Flipper[:new_feature].enable_percentage_of_actors(5)
+# Flipper[:issues].enable_actor("1")
+# Flipper[:issues].enable_actor("2")
+# Flipper[:request_tracing].enable_group("staff")
+# Flipper[:search].add
+# Flipper[:verbose_logging].add
+# Flipper[:new_feature].add
+# Flipper[:issues].add
+# Flipper[:request_tracing].add
