@@ -7,7 +7,8 @@
 * Update flipper-ui jquery and bootstrap versions (https://github.com/jnunemaker/flipper/issues/565 and https://github.com/jnunemaker/flipper/pull/566).
 * Moved docs to www.flippercloud.io/docs (https://github.com/jnunemaker/flipper/pull/574).
 * PStore adapter now defaults to thread safe and no longer supports `.thread_safe` (https://github.com/jnunemaker/flipper/commit/4048704fefe41b716015294a19a0b94546637630).
-* Failover adapter (https://github.com/jnunemaker/flipper/pull/584).
+* Add failover adapter (https://github.com/jnunemaker/flipper/pull/584).
+* Improve http adapter error message (https://github.com/jnunemaker/flipper/pull/587).
 
 ## 0.22.2
 
