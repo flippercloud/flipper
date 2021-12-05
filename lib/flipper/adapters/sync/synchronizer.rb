@@ -1,6 +1,4 @@
-require "flipper/feature"
-require "flipper/gate_values"
-require "flipper/adapters/sync/feature_synchronizer"
+require "flipper/adapters/sync/adapter_diff"
 
 module Flipper
   module Adapters
@@ -31,26 +29,8 @@ module Flipper
         private
 
         def sync
-          local_get_all = @local.get_all
-          remote_get_all = @remote.get_all
-
-          # Sync all the gate values.
-          remote_get_all.each do |feature_key, remote_gates_hash|
-            feature = Feature.new(feature_key, @local)
-            # Check if feature_key is in hash before accessing to prevent unintended hash modification
-            local_gates_hash = local_get_all.key?(feature_key) ? local_get_all[feature_key] : @local.default_config
-            local_gate_values = GateValues.new(local_gates_hash)
-            remote_gate_values = GateValues.new(remote_gates_hash)
-            FeatureSynchronizer.new(feature, local_gate_values, remote_gate_values).call
-          end
-
-          # Add features that are missing in local and present in remote.
-          features_to_add = remote_get_all.keys - local_get_all.keys
-          features_to_add.each { |key| Feature.new(key, @local).add }
-
-          # Remove features that are present in local and missing in remote.
-          features_to_remove = local_get_all.keys - remote_get_all.keys
-          features_to_remove.each { |key| Feature.new(key, @local).remove }
+          diff = AdapterDiff.new(@local, @remote)
+          diff.operations.each(&:apply)
 
           nil
         rescue => exception
