@@ -9,7 +9,7 @@
 * PStore adapter now defaults to thread safe and no longer supports `.thread_safe` (https://github.com/jnunemaker/flipper/commit/4048704fefe41b716015294a19a0b94546637630).
 * Add failover adapter (https://github.com/jnunemaker/flipper/pull/584).
 * Improve http adapter error message (https://github.com/jnunemaker/flipper/pull/587).
-* Rails 7 support.
+* Rails 7 support (mostly in https://github.com/jnunemaker/flipper/pull/592).
 
 ## 0.22.2
 
