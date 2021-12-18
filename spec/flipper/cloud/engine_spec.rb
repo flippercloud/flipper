@@ -18,6 +18,8 @@ RSpec.describe Flipper::Cloud::Engine do
 
   before do
     Rails.application = nil
+    ActiveSupport::Dependencies.autoload_paths = ActiveSupport::Dependencies.autoload_paths.dup
+    ActiveSupport::Dependencies.autoload_once_paths = ActiveSupport::Dependencies.autoload_once_paths.dup
 
     # Force loading of flipper to configure itself
     load 'flipper/cloud.rb'
