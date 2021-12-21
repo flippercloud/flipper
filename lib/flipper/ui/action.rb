@@ -24,7 +24,7 @@ module Flipper
                                              'get'.freeze,
                                              'post'.freeze,
                                              'put'.freeze,
-                                             'delete'.freeze
+                                             'delete'.freeze,
                                            ]).freeze
 
       SOURCES = {
