@@ -1,3 +1,10 @@
+## Unreleased 
+
+### Additions/Changes
+
+* Relax dalli version constraint (https://github.com/jnunemaker/flipper/pull/596)
+
+
 ## 0.23.0
 
 ### Additions/Changes
