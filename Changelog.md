@@ -1,9 +1,12 @@
-## Unreleased 
+## Unreleased
 
 ### Additions/Changes
 
 * Relax dalli version constraint (https://github.com/jnunemaker/flipper/pull/596)
 
+### Bug Fixes
+
+* Fix railtie initialization to mount middleware after config/intializers/* (https://github.com/jnunemaker/flipper/pull/586)
 
 ## 0.23.0
 
