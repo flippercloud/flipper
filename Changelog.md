@@ -1,4 +1,11 @@
-## Unreleased
+## Unreleased 
+
+### Additions/Changes
+
+* Relax dalli version constraint (https://github.com/jnunemaker/flipper/pull/596)
+
+
+## 0.23.0
 
 ### Additions/Changes
 
@@ -7,6 +14,9 @@
 * Update flipper-ui jquery and bootstrap versions (https://github.com/jnunemaker/flipper/issues/565 and https://github.com/jnunemaker/flipper/pull/566).
 * Moved docs to www.flippercloud.io/docs (https://github.com/jnunemaker/flipper/pull/574).
 * PStore adapter now defaults to thread safe and no longer supports `.thread_safe` (https://github.com/jnunemaker/flipper/commit/4048704fefe41b716015294a19a0b94546637630).
+* Add failover adapter (https://github.com/jnunemaker/flipper/pull/584).
+* Improve http adapter error message (https://github.com/jnunemaker/flipper/pull/587).
+* Rails 7 support (mostly in https://github.com/jnunemaker/flipper/pull/592).
 
 ## 0.22.2
 

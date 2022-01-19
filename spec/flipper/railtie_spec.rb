@@ -8,6 +8,11 @@ RSpec.describe Flipper::Railtie do
     end
   end
 
+  before do
+    ActiveSupport::Dependencies.autoload_paths = ActiveSupport::Dependencies.autoload_paths.dup
+    ActiveSupport::Dependencies.autoload_once_paths = ActiveSupport::Dependencies.autoload_once_paths.dup
+  end
+
   let(:config) { application.config.flipper }
 
   subject { application.initialize! }

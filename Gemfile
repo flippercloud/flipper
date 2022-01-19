@@ -13,7 +13,7 @@ gem 'statsd-ruby', '~> 1.2.1'
 gem 'rspec', '~> 3.0'
 gem 'rack-test', '~> 0.6.3'
 gem 'sqlite3', "~> #{ENV['SQLITE3_VERSION'] || '1.4.1'}"
-gem 'rails', "~> #{ENV['RAILS_VERSION'] || '6.0.0'}"
+gem 'rails', "~> #{ENV['RAILS_VERSION'] || '7.0.0'}"
 gem 'minitest', '~> 5.8'
 gem 'minitest-documentation'
 gem 'webmock', '~> 3.0'
