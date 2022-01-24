@@ -240,4 +240,21 @@ RSpec.describe Flipper::Cloud::Configuration do
     expect(all["search"][:boolean]).to eq("true")
     expect(all["history"][:boolean]).to eq(nil)
   end
+
+  it "can setup brow to report events to cloud" do
+    # skip logging brow
+    Brow.logger = Logger.new(File::NULL)
+    brow = described_class.new(required_options).brow
+
+    stub = stub_request(:post, "https://www.flippercloud.io/adapter/events")
+      .with { |request|
+        data = JSON.parse(request.body)
+        data.keys == ["uuid", "messages"] && data["messages"] == [{"n" => 1}]
+      }
+      .to_return(status: 201, body: "{}", headers: {})
+
+    brow.push({"n" => 1})
+    brow.worker.stop
+    expect(stub).to have_been_requested.times(1)
+  end
 end

@@ -24,4 +24,5 @@ Gem::Specification.new do |gem|
   gem.metadata      = Flipper::METADATA
 
   gem.add_dependency 'flipper', "~> #{Flipper::VERSION}"
+  gem.add_dependency "brow", "~> 0.4.1"
 end
