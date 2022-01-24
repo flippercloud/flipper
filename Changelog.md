@@ -3,6 +3,7 @@
 ### Additions/Changes
 
 * Add Ruby 3.0 and 3.1 to the CI matrix and fix groups block arity check for ruby 3 (https://github.com/jnunemaker/flipper/pull/601)
+* Removed support for Ruby 2.5 (which was end of line 9 months ago)
 
 ## 0.23.1
 
