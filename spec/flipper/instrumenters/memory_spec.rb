@@ -1,4 +1,3 @@
-require 'helper'
 require 'flipper/instrumenters/memory'
 
 RSpec.describe Flipper::Instrumenters::Memory do
@@ -21,6 +20,24 @@ RSpec.describe Flipper::Instrumenters::Memory do
 
       event = described_class::Event.new(name, payload, block_result)
       expect(instrumenter.events).to eq([event])
+    end
+
+    context 'when an error is raised' do
+      subject do
+        instrumenter.instrument(:name) { raise IOError }
+      end
+
+      let(:instrumenter) { described_class.new }
+
+      it 'captures and propagates the error' do
+        expect { subject }.to raise_error(IOError)
+
+        expect(instrumenter.events.count).to be 1
+
+        payload = instrumenter.events[0].payload
+        expect(payload.keys).to include(:exception, :exception_object)
+        expect(payload[:exception_object]).to be_a IOError
+      end
     end
   end
 end

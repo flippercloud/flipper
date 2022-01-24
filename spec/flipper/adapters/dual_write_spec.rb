@@ -1,7 +1,5 @@
-require 'helper'
 require 'flipper/adapters/dual_write'
 require 'flipper/adapters/operation_logger'
-require 'flipper/spec/shared_adapter_specs'
 require 'active_support/notifications'
 
 RSpec.describe Flipper::Adapters::DualWrite do

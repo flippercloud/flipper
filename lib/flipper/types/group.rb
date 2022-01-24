@@ -14,7 +14,7 @@ module Flipper
 
         if block_given?
           @block = block
-          @single_argument = @block.arity.abs == 1
+          @single_argument = call_with_no_context?(@block)
         else
           @block = ->(_thing, _context) { false }
           @single_argument = false
@@ -27,6 +27,13 @@ module Flipper
         else
           @block.call(thing, context)
         end
+      end
+
+      NO_PARAMS_IN_RUBY_3 = [[:req], [:rest]]
+      def call_with_no_context?(block)
+        return true if block.parameters == NO_PARAMS_IN_RUBY_3
+
+        block.arity.abs == 1
       end
     end
   end

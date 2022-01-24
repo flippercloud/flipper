@@ -1,4 +1,4 @@
-require 'climate_control'
+require 'ice_age'
 require 'json'
 require 'rack/test'
 
@@ -31,7 +31,7 @@ module SpecHelpers
   end
 
   def api_error_code_reference_url
-    'https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference'
+    'https://flippercloud.io/docs/api#error-code-reference'
   end
 
   def api_not_found_response
@@ -64,10 +64,6 @@ module SpecHelpers
       'message' => 'The provided expression was not valid.',
       'more_info' => api_error_code_reference_url,
     }
-  end
-
-  def with_modified_env(options, &block)
-    ClimateControl.modify(options, &block)
   end
 
   def silence

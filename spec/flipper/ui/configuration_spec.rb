@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::UI::Configuration do
   let(:configuration) { described_class.new }
 

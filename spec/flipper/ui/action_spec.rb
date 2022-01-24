@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::UI::Action do
   describe 'request methods' do
     let(:action_subclass) do

@@ -8,7 +8,7 @@ module Flipper
           @code = code
           @message = message
           @more_info =
-            'https://github.com/jnunemaker/flipper/tree/master/docs/api#error-code-reference'
+            'https://flippercloud.io/docs/api#error-code-reference'
           @http_status = http_status
         end
 

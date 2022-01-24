@@ -15,8 +15,17 @@ jobs:
           --health-retries 5
     strategy:
       matrix:
-        ruby: ['2.5', '2.6', '2.7']
-        rails: ['5.2', '6.0.0', '6.1.0']
+        ruby: ['2.6', '2.7', '3.0', '3.1']
+        rails: ['5.2', '6.0.0', '6.1.0', '7.0.0']
+        exclude:
+          - ruby: "2.6"
+            rails: "7.0.0"
+          - ruby: "3.0"
+            rails: "5.2"
+          - ruby: "3.1"
+            rails: "5.2"
+          - ruby: "3.1"
+            rails: "6.0.0"
     env:
       SQLITE3_VERSION: 1.4.1
       REDIS_URL: redis://localhost:6379/0
@@ -38,7 +47,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gems-${{ matrix.ruby }}-${{ matrix.rails }}-
       - name: Set up Ruby ${{ matrix.ruby }}
-        uses: actions/setup-ruby@v1
+        uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
       - name: Install libpq-dev

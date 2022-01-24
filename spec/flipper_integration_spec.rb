@@ -1,4 +1,3 @@
-require 'helper'
 require 'flipper/feature'
 
 RSpec.describe Flipper do

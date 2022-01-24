@@ -1,4 +1,3 @@
-require 'helper'
 require 'flipper/cloud'
 
 RSpec.describe Flipper do

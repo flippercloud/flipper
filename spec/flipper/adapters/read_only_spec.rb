@@ -1,4 +1,3 @@
-require 'helper'
 require 'flipper/adapters/read_only'
 
 RSpec.describe Flipper::Adapters::ReadOnly do

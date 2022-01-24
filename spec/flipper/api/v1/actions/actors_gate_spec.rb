@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::Api::V1::Actions::ActorsGate do
   let(:app) { build_api(flipper) }
   let(:actor) { Flipper::Actor.new('1') }

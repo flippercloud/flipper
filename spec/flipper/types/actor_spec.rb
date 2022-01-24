@@ -1,4 +1,3 @@
-require 'helper'
 require 'flipper/types/actor'
 
 RSpec.describe Flipper::Types::Actor do

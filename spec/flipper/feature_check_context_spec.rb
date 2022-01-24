@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::FeatureCheckContext do
   let(:feature_name) { :new_profiles }
   let(:values) { Flipper::GateValues.new({}) }

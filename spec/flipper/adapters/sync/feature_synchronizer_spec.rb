@@ -1,4 +1,3 @@
-require "helper"
 require "flipper/adapters/memory"
 require "flipper/adapters/operation_logger"
 require "flipper/adapters/sync/feature_synchronizer"
