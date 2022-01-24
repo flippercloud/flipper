@@ -1,4 +1,3 @@
-require 'helper'
 require 'sequel'
 
 Sequel::Model.db = Sequel.sqlite(':memory:')
