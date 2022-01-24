@@ -1,4 +1,3 @@
-require 'helper'
 require 'flipper/cloud/configuration'
 require 'flipper/cloud/dsl'
 require 'flipper/adapters/operation_logger'

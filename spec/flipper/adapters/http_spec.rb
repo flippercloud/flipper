@@ -1,7 +1,5 @@
-require 'helper'
 require 'flipper/adapters/http'
 require 'flipper/adapters/pstore'
-require 'flipper/spec/shared_adapter_specs'
 require 'rack/handler/webrick'
 
 FLIPPER_SPEC_API_PORT = ENV.fetch('FLIPPER_SPEC_API_PORT', 9001).to_i
@@ -165,7 +163,44 @@ RSpec.describe Flipper::Adapters::Http do
       thing = gate.wrap(true)
       expect {
         adapter.enable(feature, gate, thing)
+      }.to raise_error(Flipper::Adapters::Http::Error, "Failed with status: 503")
+    end
+
+    it "doesn't raise json error if body cannot be parsed" do
+      stub_request(:post, /app.com/)
+        .to_return(status: 503, body: "barf", headers: {})
+
+      adapter = described_class.new(url: 'http://app.com/flipper')
+      feature = Flipper::Feature.new(:search, adapter)
+      gate = feature.gate(:boolean)
+      thing = gate.wrap(true)
+      expect {
+        adapter.enable(feature, gate, thing)
       }.to raise_error(Flipper::Adapters::Http::Error)
+    end
+
+    it "includes response information if available when raising error" do
+      api_response = {
+        "code" => "error",
+        "message" => "This feature has reached the limit to the number of " +
+                     "actors per feature. Check out groups as a more flexible " +
+                     "way to enable many actors.",
+        "more_info" => "https://www.flippercloud.io/docs",
+      }
+      stub_request(:post, /app.com/)
+        .to_return(status: 503, body: JSON.dump(api_response), headers: {})
+
+      adapter = described_class.new(url: 'http://app.com/flipper')
+      feature = Flipper::Feature.new(:search, adapter)
+      gate = feature.gate(:boolean)
+      thing = gate.wrap(true)
+      error_message = "Failed with status: 503\n\nThis feature has reached the " +
+                      "limit to the number of actors per feature. Check out " +
+                      "groups as a more flexible way to enable many actors.\n" +
+                      "https://www.flippercloud.io/docs"
+      expect {
+        adapter.enable(feature, gate, thing)
+      }.to raise_error(Flipper::Adapters::Http::Error, error_message)
     end
   end
 
@@ -202,7 +237,8 @@ RSpec.describe Flipper::Adapters::Http do
     let(:feature) { flipper[:feature_panel] }
 
     before do
-      stub_request(:get, %r{\Ahttp://app.com*}).to_return(body: fixture_file('feature.json'))
+      stub_request(:get, %r{\Ahttp://app.com*}).
+        to_return(body: fixture_file('feature.json'))
     end
 
     it 'allows client to set request headers' do

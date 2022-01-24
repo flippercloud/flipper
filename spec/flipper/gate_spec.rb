@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::Gate do
   let(:feature_name) { :stats }
 

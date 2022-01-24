@@ -1,4 +1,3 @@
-require 'helper'
 require 'flipper/types/percentage_of_actors'
 
 RSpec.describe Flipper::Types::PercentageOfActors do

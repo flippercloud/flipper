@@ -1,4 +1,3 @@
-require 'helper'
 require 'flipper/types/boolean'
 
 RSpec.describe Flipper::Types::Boolean do

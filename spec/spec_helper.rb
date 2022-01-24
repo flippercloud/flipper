@@ -14,8 +14,9 @@ require 'webmock/rspec'
 WebMock.disable_net_connect!(allow_localhost: true)
 
 require 'flipper'
-require 'flipper/ui'
 require 'flipper/api'
+require 'flipper/spec/shared_adapter_specs'
+require 'flipper/ui'
 
 Dir[FlipperRoot.join('spec/support/**/*.rb')].sort.each { |f| require f }
 

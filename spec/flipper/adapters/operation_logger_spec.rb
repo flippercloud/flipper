@@ -1,6 +1,4 @@
-require 'helper'
 require 'flipper/adapters/operation_logger'
-require 'flipper/spec/shared_adapter_specs'
 
 RSpec.describe Flipper::Adapters::OperationLogger do
   let(:operations) { [] }

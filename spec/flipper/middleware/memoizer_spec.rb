@@ -1,7 +1,5 @@
-require 'helper'
 require 'rack/test'
 require 'active_support/cache'
-require 'active_support/cache/dalli_store'
 require 'flipper/adapters/active_support_cache_store'
 require 'flipper/adapters/operation_logger'
 
@@ -361,7 +359,6 @@ RSpec.describe Flipper::Middleware::Memoizer do
         end
       end.to_app
     end
-
 
     context 'and unless option' do
       before do

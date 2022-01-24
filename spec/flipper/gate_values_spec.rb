@@ -1,4 +1,3 @@
-require 'helper'
 require 'flipper/gate_values'
 
 RSpec.describe Flipper::GateValues do

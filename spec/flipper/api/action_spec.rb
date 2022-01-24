@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::Api::Action do
   let(:action_subclass) do
     Class.new(described_class) do

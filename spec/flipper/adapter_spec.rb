@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::Adapter do
   let(:source_flipper) { build_flipper }
   let(:destination_flipper) { build_flipper }
