@@ -1,3 +1,9 @@
+## Unreleased
+
+### Additions/Changes
+
+* Add Ruby 3.0 and 3.1 to the CI matrix and fix groups block arity check for ruby 3 (https://github.com/jnunemaker/flipper/pull/601)
+
 ## 0.23.1
 
 ### Additions/Changes
