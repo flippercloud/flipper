@@ -16,6 +16,14 @@ module Flipper
       end
     end
 
+    initializer "flipper.properties" do
+      require "flipper/model/active_record"
+
+      ActiveSupport.on_load(:active_record) do
+        ActiveRecord::Base.include Flipper::Model::ActiveRecord
+      end
+    end
+
     initializer "flipper.default", before: :load_config_initializers do |app|
       Flipper.configure do |config|
         config.default do
