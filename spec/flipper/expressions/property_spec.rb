@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::Expressions::Property do
   it "can initialize with string" do
     expect(described_class.new("flipper_id").args).to eq(["flipper_id"])

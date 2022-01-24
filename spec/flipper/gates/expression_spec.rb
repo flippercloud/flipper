@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::Gates::Expression do
   let(:feature_name) { :search }
 

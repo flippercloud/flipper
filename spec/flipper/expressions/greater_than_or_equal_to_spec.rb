@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::Expressions::GreaterThanOrEqualTo do
   describe "#evaluate" do
     it "returns true when equal" do

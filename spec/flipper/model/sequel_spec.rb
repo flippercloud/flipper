@@ -1,4 +1,3 @@
-require 'helper'
 require 'flipper/model/sequel'
 
 RSpec.describe Flipper::Model::Sequel do

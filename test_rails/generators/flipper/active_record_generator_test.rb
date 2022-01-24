@@ -1,4 +1,3 @@
-require 'helper'
 require 'active_record'
 require 'rails/generators/test_case'
 require 'generators/flipper/active_record_generator'

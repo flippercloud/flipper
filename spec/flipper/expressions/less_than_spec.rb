@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::Expressions::LessThan do
   describe "#evaluate" do
     it "returns false when equal" do

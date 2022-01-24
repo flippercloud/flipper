@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::Expressions::Percentage do
   describe "#evaluate" do
     it "returns true when string in percentage enabled" do

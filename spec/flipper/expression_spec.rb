@@ -1,4 +1,4 @@
-require 'helper'
+require 'flipper/expression'
 
 RSpec.describe Flipper::Expression do
   describe "#build" do

@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::Expressions::Value do
   describe "#initialize" do
     it "works with string" do

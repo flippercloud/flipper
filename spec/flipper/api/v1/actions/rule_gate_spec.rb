@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::Api::V1::Actions::ExpressionGate do
   let(:app) { build_api(flipper) }
   let(:actor) {

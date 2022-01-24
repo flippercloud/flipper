@@ -1,4 +1,3 @@
-require 'helper'
 require 'active_record'
 require 'flipper/model/active_record'
 

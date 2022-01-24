@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::Expressions::Equal do
   it "can be built" do
     expression = described_class.build({

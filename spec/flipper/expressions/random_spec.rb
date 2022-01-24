@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::Expressions::Random do
   describe "#initialize" do
     it "works with number" do

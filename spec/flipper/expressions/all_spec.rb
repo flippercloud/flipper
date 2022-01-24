@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::Expressions::All do
   describe "#evaluate" do
     it "returns true if all args evaluate as true" do
