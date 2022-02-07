@@ -148,7 +148,7 @@ refute Flipper.enabled?(:something, admin_user)
 reset
 
 puts "\n\n% of Actors Expression"
-percentage_of_actors = Flipper.property(:flipper_id).percentage(30)
+percentage_of_actors = Flipper.property(:flipper_id).percentage_of_actors(30)
 Flipper.enable :something, percentage_of_actors
 refute Flipper.enabled?(:something, user)
 refute Flipper.enabled?(:something, other_user)
@@ -159,11 +159,11 @@ puts "\n\n% of Actors Per Type Expression"
 percentage_of_actors_per_type = Flipper.any(
   Flipper.all(
     Flipper.property(:type).eq("User"),
-    Flipper.property(:flipper_id).percentage(40),
+    Flipper.property(:flipper_id).percentage_of_actors(40),
   ),
   Flipper.all(
     Flipper.property(:type).eq("Org"),
-    Flipper.property(:flipper_id).percentage(10),
+    Flipper.property(:flipper_id).percentage_of_actors(10),
   )
 )
 Flipper.enable :something, percentage_of_actors_per_type

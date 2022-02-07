@@ -97,8 +97,8 @@ module Flipper
     alias lte less_than_or_equal_to
     alias less_than_or_equal less_than_or_equal_to
 
-    def percentage(object)
-      Expressions::Percentage.new([self, self.class.build(object, convert_to_values: true)])
+    def percentage_of_actors(object)
+      Expressions::PercentageOfActors.new([self, self.class.build(object, convert_to_values: true)])
     end
 
     private

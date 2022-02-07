@@ -2,7 +2,7 @@ require "flipper/expression"
 
 module Flipper
   module Expressions
-    class Percentage < Expression
+    class PercentageOfActors < Expression
       SCALING_FACTOR = 1_000
 
       def evaluate(context = {})

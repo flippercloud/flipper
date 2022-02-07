@@ -1,4 +1,4 @@
-RSpec.describe Flipper::Expressions::Percentage do
+RSpec.describe Flipper::Expressions::PercentageOfActors do
   describe "#evaluate" do
     it "returns true when string in percentage enabled" do
       expression = described_class.new([
@@ -58,7 +58,7 @@ RSpec.describe Flipper::Expressions::Percentage do
       ])
 
       expect(expression.value).to eq({
-        "Percentage" => [
+        "PercentageOfActors" => [
           {"Value" => ["User;1"]},
           {"Value" => [10]},
         ],

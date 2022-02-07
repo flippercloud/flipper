@@ -101,15 +101,15 @@ RSpec.describe Flipper::Expression do
       expect(expression.args).to eq([1])
     end
 
-    it "can build Percentage" do
+    it "can build PercentageOfActors" do
       expression = Flipper::Expression.build({
-        "Percentage" => [
+        "PercentageOfActors" => [
           {"Value" => ["User;1"]},
           {"Value" => [40]},
         ]
       })
 
-      expect(expression).to be_instance_of(Flipper::Expressions::Percentage)
+      expect(expression).to be_instance_of(Flipper::Expressions::PercentageOfActors)
       expect(expression.args).to eq([
         Flipper.value("User;1"),
         Flipper.value(40),
@@ -276,10 +276,10 @@ RSpec.describe Flipper::Expression do
     end
   end
 
-  it "can convert to Percentage" do
+  it "can convert to PercentageOfActors" do
     expression = Flipper.value("User;1")
-    converted = expression.percentage(40)
-    expect(converted).to be_instance_of(Flipper::Expressions::Percentage)
+    converted = expression.percentage_of_actors(40)
+    expect(converted).to be_instance_of(Flipper::Expressions::PercentageOfActors)
     expect(converted.args).to eq([expression, Flipper.value(40)])
   end
 end
