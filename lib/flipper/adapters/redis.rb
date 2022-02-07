@@ -129,14 +129,14 @@ module Flipper
       # Private: Gets a hash of fields => values for the given feature.
       #
       # Returns a Hash of fields => values.
-      def doc_for(feature)
-        @client.hgetall(feature.key)
+      def doc_for(feature, pipeline: @client)
+        pipeline.hgetall(feature.key)
       end
 
       def docs_for(features)
-        @client.pipelined do
+        @client.pipelined do |pipeline|
           features.each do |feature|
-            doc_for(feature)
+            doc_for(feature, pipeline: pipeline)
           end
         end
       end
