@@ -50,7 +50,7 @@ module Flipper
       builder.run app
       klass = self
       builder.define_singleton_method(:inspect) { klass.inspect } # pretty rake routes output
-      builder
+      builder.to_app
     end
 
     # Public: yields configuration instance for customizing UI text
