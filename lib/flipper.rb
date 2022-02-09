@@ -56,15 +56,13 @@ module Flipper
   # Public: All the methods delegated to instance. These should match the
   # interface of Flipper::DSL.
   def_delegators :instance,
-                 :enabled?, :enable, :disable, :bool, :boolean,
+                 :enabled?, :enable, :disable,
                  :enable_expression, :disable_expression,
                  :expression, :add_expression, :remove_expression,
-                 :enable_actor, :disable_actor, :actor,
+                 :enable_actor, :disable_actor,
                  :enable_group, :disable_group,
                  :enable_percentage_of_actors, :disable_percentage_of_actors,
-                 :actors, :percentage_of_actors,
                  :enable_percentage_of_time, :disable_percentage_of_time,
-                 :time, :percentage_of_time,
                  :features, :feature, :[], :preload, :preload_all,
                  :adapter, :add, :exist?, :remove, :import,
                  :memoize=, :memoizing?,
@@ -82,16 +80,20 @@ module Flipper
     Flipper::Expressions::Property.new(name)
   end
 
-  def value(value)
-    Flipper::Expressions::Value.new(value)
+  def string(value)
+    Flipper::Expressions::String.new(value)
+  end
+
+  def number(value)
+    Flipper::Expressions::Number.new(value)
+  end
+
+  def boolean(value)
+    Flipper::Expressions::Boolean.new(value)
   end
 
   def random(name)
     Flipper::Expressions::Random.new(name)
-  end
-
-  def value(value)
-    Flipper::Expressions::Value.new(value)
   end
 
   # Public: Use this to register a group by name.

@@ -44,11 +44,11 @@ RSpec.describe Flipper::Adapters::ReadOnly do
   it 'can get feature' do
     expression = Flipper.property(:plan).eq("basic")
     actor22 = Flipper::Actor.new('22')
-    adapter.enable(feature, boolean_gate, flipper.boolean)
+    adapter.enable(feature, boolean_gate, Flipper::Types::Boolean.new)
     adapter.enable(feature, group_gate, flipper.group(:admins))
-    adapter.enable(feature, actor_gate, flipper.actor(actor22))
-    adapter.enable(feature, actors_gate, flipper.actors(25))
-    adapter.enable(feature, time_gate, flipper.time(45))
+    adapter.enable(feature, actor_gate, Flipper::Types::Actor.new(actor22))
+    adapter.enable(feature, actors_gate, Flipper::Types::PercentageOfActors.new(25))
+    adapter.enable(feature, time_gate, Flipper::Types::PercentageOfTime.new(45))
     adapter.enable(feature, expression_gate, expression)
 
     expect(subject.get(feature)).to eq({
@@ -85,12 +85,12 @@ RSpec.describe Flipper::Adapters::ReadOnly do
   end
 
   it 'raises error on enable' do
-    expect { subject.enable(feature, boolean_gate, flipper.boolean) }
+    expect { subject.enable(feature, boolean_gate, Flipper::Types::Boolean.new) }
       .to raise_error(Flipper::Adapters::ReadOnly::WriteAttempted)
   end
 
   it 'raises error on disable' do
-    expect { subject.disable(feature, boolean_gate, flipper.boolean) }
+    expect { subject.disable(feature, boolean_gate, Flipper::Types::Boolean.new) }
       .to raise_error(Flipper::Adapters::ReadOnly::WriteAttempted)
   end
 end

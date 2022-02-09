@@ -39,12 +39,12 @@ RSpec.shared_examples_for 'a flipper adapter' do
   end
 
   it 'can enable, disable and get value for boolean gate' do
-    expect(subject.enable(feature, boolean_gate, flipper.boolean)).to eq(true)
+    expect(subject.enable(feature, boolean_gate, Flipper::Types::Boolean.new)).to eq(true)
 
     result = subject.get(feature)
     expect(result[:boolean]).to eq('true')
 
-    expect(subject.disable(feature, boolean_gate, flipper.boolean(false))).to eq(true)
+    expect(subject.disable(feature, boolean_gate, Flipper::Types::Boolean.new(false))).to eq(true)
 
     result = subject.get(feature)
     expect(result[:boolean]).to eq(nil)
@@ -52,13 +52,13 @@ RSpec.shared_examples_for 'a flipper adapter' do
 
   it 'fully disables all enabled things when boolean gate disabled' do
     actor22 = Flipper::Actor.new('22')
-    expect(subject.enable(feature, boolean_gate, flipper.boolean)).to eq(true)
+    expect(subject.enable(feature, boolean_gate, Flipper::Types::Boolean.new)).to eq(true)
     expect(subject.enable(feature, group_gate, flipper.group(:admins))).to eq(true)
-    expect(subject.enable(feature, actor_gate, flipper.actor(actor22))).to eq(true)
-    expect(subject.enable(feature, actors_gate, flipper.actors(25))).to eq(true)
-    expect(subject.enable(feature, time_gate, flipper.time(45))).to eq(true)
+    expect(subject.enable(feature, actor_gate, Flipper::Types::Actor.new(actor22))).to eq(true)
+    expect(subject.enable(feature, actors_gate, Flipper::Types::PercentageOfActors.new(25))).to eq(true)
+    expect(subject.enable(feature, time_gate, Flipper::Types::PercentageOfTime.new(45))).to eq(true)
 
-    expect(subject.disable(feature, boolean_gate, flipper.boolean(false))).to eq(true)
+    expect(subject.disable(feature, boolean_gate, Flipper::Types::Boolean.new(false))).to eq(true)
     expect(subject.get(feature)).to eq(subject.default_config)
   end
 
@@ -100,34 +100,34 @@ RSpec.shared_examples_for 'a flipper adapter' do
     actor22 = Flipper::Actor.new('22')
     actor_asdf = Flipper::Actor.new('asdf')
 
-    expect(subject.enable(feature, actor_gate, flipper.actor(actor22))).to eq(true)
-    expect(subject.enable(feature, actor_gate, flipper.actor(actor_asdf))).to eq(true)
+    expect(subject.enable(feature, actor_gate, Flipper::Types::Actor.new(actor22))).to eq(true)
+    expect(subject.enable(feature, actor_gate, Flipper::Types::Actor.new(actor_asdf))).to eq(true)
 
     result = subject.get(feature)
     expect(result[:actors]).to eq(Set['22', 'asdf'])
 
-    expect(subject.disable(feature, actor_gate, flipper.actor(actor22))).to eq(true)
+    expect(subject.disable(feature, actor_gate, Flipper::Types::Actor.new(actor22))).to eq(true)
     result = subject.get(feature)
     expect(result[:actors]).to eq(Set['asdf'])
 
-    expect(subject.disable(feature, actor_gate, flipper.actor(actor_asdf))).to eq(true)
+    expect(subject.disable(feature, actor_gate, Flipper::Types::Actor.new(actor_asdf))).to eq(true)
     result = subject.get(feature)
     expect(result[:actors]).to eq(Set.new)
   end
 
   it 'can enable, disable and get value for percentage of actors gate' do
-    expect(subject.enable(feature, actors_gate, flipper.actors(15))).to eq(true)
+    expect(subject.enable(feature, actors_gate, Flipper::Types::PercentageOfActors.new(15))).to eq(true)
     result = subject.get(feature)
     expect(result[:percentage_of_actors]).to eq('15')
 
-    expect(subject.disable(feature, actors_gate, flipper.actors(0))).to eq(true)
+    expect(subject.disable(feature, actors_gate, Flipper::Types::PercentageOfActors.new(0))).to eq(true)
     result = subject.get(feature)
     expect(result[:percentage_of_actors]).to eq('0')
   end
 
   it 'can enable percentage of actors gate many times and consistently return values' do
     (1..100).each do |percentage|
-      expect(subject.enable(feature, actors_gate, flipper.actors(percentage))).to eq(true)
+      expect(subject.enable(feature, actors_gate, Flipper::Types::PercentageOfActors.new(percentage))).to eq(true)
       result = subject.get(feature)
       expect(result[:percentage_of_actors]).to eq(percentage.to_s)
     end
@@ -135,25 +135,25 @@ RSpec.shared_examples_for 'a flipper adapter' do
 
   it 'can disable percentage of actors gate many times and consistently return values' do
     (1..100).each do |percentage|
-      expect(subject.disable(feature, actors_gate, flipper.actors(percentage))).to eq(true)
+      expect(subject.disable(feature, actors_gate, Flipper::Types::PercentageOfActors.new(percentage))).to eq(true)
       result = subject.get(feature)
       expect(result[:percentage_of_actors]).to eq(percentage.to_s)
     end
   end
 
   it 'can enable, disable and get value for percentage of time gate' do
-    expect(subject.enable(feature, time_gate, flipper.time(10))).to eq(true)
+    expect(subject.enable(feature, time_gate, Flipper::Types::PercentageOfTime.new(10))).to eq(true)
     result = subject.get(feature)
     expect(result[:percentage_of_time]).to eq('10')
 
-    expect(subject.disable(feature, time_gate, flipper.time(0))).to eq(true)
+    expect(subject.disable(feature, time_gate, Flipper::Types::PercentageOfTime.new(0))).to eq(true)
     result = subject.get(feature)
     expect(result[:percentage_of_time]).to eq('0')
   end
 
   it 'can enable percentage of time gate many times and consistently return values' do
     (1..100).each do |percentage|
-      expect(subject.enable(feature, time_gate, flipper.time(percentage))).to eq(true)
+      expect(subject.enable(feature, time_gate, Flipper::Types::PercentageOfTime.new(percentage))).to eq(true)
       result = subject.get(feature)
       expect(result[:percentage_of_time]).to eq(percentage.to_s)
     end
@@ -161,20 +161,20 @@ RSpec.shared_examples_for 'a flipper adapter' do
 
   it 'can disable percentage of time gate many times and consistently return values' do
     (1..100).each do |percentage|
-      expect(subject.disable(feature, time_gate, flipper.time(percentage))).to eq(true)
+      expect(subject.disable(feature, time_gate, Flipper::Types::PercentageOfTime.new(percentage))).to eq(true)
       result = subject.get(feature)
       expect(result[:percentage_of_time]).to eq(percentage.to_s)
     end
   end
 
   it 'converts boolean value to a string' do
-    expect(subject.enable(feature, boolean_gate, flipper.boolean)).to eq(true)
+    expect(subject.enable(feature, boolean_gate, Flipper::Types::Boolean.new)).to eq(true)
     result = subject.get(feature)
     expect(result[:boolean]).to eq('true')
   end
 
   it 'converts the actor value to a string' do
-    expect(subject.enable(feature, actor_gate, flipper.actor(Flipper::Actor.new(22)))).to eq(true)
+    expect(subject.enable(feature, actor_gate, Flipper::Types::Actor.new(Flipper::Actor.new(22)))).to eq(true)
     result = subject.get(feature)
     expect(result[:actors]).to eq(Set['22'])
   end
@@ -186,13 +186,13 @@ RSpec.shared_examples_for 'a flipper adapter' do
   end
 
   it 'converts percentage of time integer value to a string' do
-    expect(subject.enable(feature, time_gate, flipper.time(10))).to eq(true)
+    expect(subject.enable(feature, time_gate, Flipper::Types::PercentageOfTime.new(10))).to eq(true)
     result = subject.get(feature)
     expect(result[:percentage_of_time]).to eq('10')
   end
 
   it 'converts percentage of actors integer value to a string' do
-    expect(subject.enable(feature, actors_gate, flipper.actors(10))).to eq(true)
+    expect(subject.enable(feature, actors_gate, Flipper::Types::PercentageOfActors.new(10))).to eq(true)
     result = subject.get(feature)
     expect(result[:percentage_of_actors]).to eq('10')
   end
@@ -215,11 +215,11 @@ RSpec.shared_examples_for 'a flipper adapter' do
 
   it 'clears all the gate values for the feature on remove' do
     actor22 = Flipper::Actor.new('22')
-    expect(subject.enable(feature, boolean_gate, flipper.boolean)).to eq(true)
+    expect(subject.enable(feature, boolean_gate, Flipper::Types::Boolean.new)).to eq(true)
     expect(subject.enable(feature, group_gate, flipper.group(:admins))).to eq(true)
-    expect(subject.enable(feature, actor_gate, flipper.actor(actor22))).to eq(true)
-    expect(subject.enable(feature, actors_gate, flipper.actors(25))).to eq(true)
-    expect(subject.enable(feature, time_gate, flipper.time(45))).to eq(true)
+    expect(subject.enable(feature, actor_gate, Flipper::Types::Actor.new(actor22))).to eq(true)
+    expect(subject.enable(feature, actors_gate, Flipper::Types::PercentageOfActors.new(25))).to eq(true)
+    expect(subject.enable(feature, time_gate, Flipper::Types::PercentageOfTime.new(45))).to eq(true)
 
     expect(subject.remove(feature)).to eq(true)
 
@@ -231,11 +231,11 @@ RSpec.shared_examples_for 'a flipper adapter' do
     subject.add(feature)
     expect(subject.features).to include(feature.key)
 
-    expect(subject.enable(feature, boolean_gate, flipper.boolean)).to eq(true)
+    expect(subject.enable(feature, boolean_gate, Flipper::Types::Boolean.new)).to eq(true)
     expect(subject.enable(feature, group_gate, flipper.group(:admins))).to eq(true)
-    expect(subject.enable(feature, actor_gate, flipper.actor(actor22))).to eq(true)
-    expect(subject.enable(feature, actors_gate, flipper.actors(25))).to eq(true)
-    expect(subject.enable(feature, time_gate, flipper.time(45))).to eq(true)
+    expect(subject.enable(feature, actor_gate, Flipper::Types::Actor.new(actor22))).to eq(true)
+    expect(subject.enable(feature, actors_gate, Flipper::Types::PercentageOfActors.new(25))).to eq(true)
+    expect(subject.enable(feature, time_gate, Flipper::Types::PercentageOfTime.new(45))).to eq(true)
 
     expect(subject.clear(feature)).to eq(true)
     expect(subject.features).to include(feature.key)
@@ -248,7 +248,7 @@ RSpec.shared_examples_for 'a flipper adapter' do
 
   it 'can get multiple features' do
     expect(subject.add(flipper[:stats])).to eq(true)
-    expect(subject.enable(flipper[:stats], boolean_gate, flipper.boolean)).to eq(true)
+    expect(subject.enable(flipper[:stats], boolean_gate, Flipper::Types::Boolean.new)).to eq(true)
     expect(subject.add(flipper[:search])).to eq(true)
 
     result = subject.get_multi([flipper[:stats], flipper[:search], flipper[:other]])
@@ -264,7 +264,7 @@ RSpec.shared_examples_for 'a flipper adapter' do
 
   it 'can get all features' do
     expect(subject.add(flipper[:stats])).to eq(true)
-    expect(subject.enable(flipper[:stats], boolean_gate, flipper.boolean)).to eq(true)
+    expect(subject.enable(flipper[:stats], boolean_gate, Flipper::Types::Boolean.new)).to eq(true)
     expect(subject.add(flipper[:search])).to eq(true)
 
     result = subject.get_all
@@ -287,8 +287,8 @@ RSpec.shared_examples_for 'a flipper adapter' do
 
   it 'can double enable an actor without error' do
     actor = Flipper::Actor.new('Flipper::Actor;22')
-    expect(subject.enable(feature, actor_gate, flipper.actor(actor))).to eq(true)
-    expect(subject.enable(feature, actor_gate, flipper.actor(actor))).to eq(true)
+    expect(subject.enable(feature, actor_gate, Flipper::Types::Actor.new(actor))).to eq(true)
+    expect(subject.enable(feature, actor_gate, Flipper::Types::Actor.new(actor))).to eq(true)
     expect(subject.get(feature).fetch(:actors)).to eq(Set['Flipper::Actor;22'])
   end
 
@@ -299,13 +299,13 @@ RSpec.shared_examples_for 'a flipper adapter' do
   end
 
   it 'can double enable percentage without error' do
-    expect(subject.enable(feature, actors_gate, flipper.actors(25))).to eq(true)
-    expect(subject.enable(feature, actors_gate, flipper.actors(25))).to eq(true)
+    expect(subject.enable(feature, actors_gate, Flipper::Types::PercentageOfActors.new(25))).to eq(true)
+    expect(subject.enable(feature, actors_gate, Flipper::Types::PercentageOfActors.new(25))).to eq(true)
   end
 
   it 'can double enable without error' do
-    expect(subject.enable(feature, boolean_gate, flipper.boolean)).to eq(true)
-    expect(subject.enable(feature, boolean_gate, flipper.boolean)).to eq(true)
+    expect(subject.enable(feature, boolean_gate, Flipper::Types::Boolean.new)).to eq(true)
+    expect(subject.enable(feature, boolean_gate, Flipper::Types::Boolean.new)).to eq(true)
   end
 
   it 'can get_all features when there are none' do
@@ -315,11 +315,11 @@ RSpec.shared_examples_for 'a flipper adapter' do
 
   it 'clears other gate values on enable' do
     actor = Flipper::Actor.new('Flipper::Actor;22')
-    subject.enable(feature, actors_gate, flipper.actors(25))
-    subject.enable(feature, time_gate, flipper.time(25))
+    subject.enable(feature, actors_gate, Flipper::Types::PercentageOfActors.new(25))
+    subject.enable(feature, time_gate, Flipper::Types::PercentageOfTime.new(25))
     subject.enable(feature, group_gate, flipper.group(:admins))
-    subject.enable(feature, actor_gate, flipper.actor(actor))
-    subject.enable(feature, boolean_gate, flipper.boolean(true))
+    subject.enable(feature, actor_gate, Flipper::Types::Actor.new(actor))
+    subject.enable(feature, boolean_gate, Flipper::Types::Boolean.new(true))
     expect(subject.get(feature)).to eq(subject.default_config.merge(boolean: "true"))
   end
 end

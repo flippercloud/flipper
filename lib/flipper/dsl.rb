@@ -245,22 +245,6 @@ module Flipper
     # Returns an instance of Flipper::Feature.
     alias_method :[], :feature
 
-    # Public: Shortcut for getting a boolean type instance.
-    #
-    # value - The true or false value for the boolean.
-    #
-    # Returns a Flipper::Types::Boolean instance.
-    def boolean(value = true)
-      Types::Boolean.new(value)
-    end
-
-    # Public: Even shorter shortcut for getting a boolean type instance.
-    #
-    # value - The true or false value for the boolean.
-    #
-    # Returns a Flipper::Types::Boolean instance.
-    alias_method :bool, :boolean
-
     # Public: Access a flipper group by name.
     #
     # name - The String or Symbol name of the feature.
@@ -268,16 +252,6 @@ module Flipper
     # Returns an instance of Flipper::Group.
     def group(name)
       Flipper.group(name)
-    end
-
-    # Public: Wraps an object as a flipper actor.
-    #
-    # thing - The object that you would like to wrap.
-    #
-    # Returns an instance of Flipper::Types::Actor.
-    # Raises ArgumentError if thing does not respond to `flipper_id`.
-    def actor(thing)
-      Types::Actor.new(thing)
     end
 
     # Public: Gets the expression for the feature.
@@ -288,26 +262,6 @@ module Flipper
     def expression(name)
       feature(name).expression
     end
-
-    # Public: Shortcut for getting a percentage of time instance.
-    #
-    # number - The percentage of time that should be enabled.
-    #
-    # Returns Flipper::Types::PercentageOfTime.
-    def time(number)
-      Types::PercentageOfTime.new(number)
-    end
-    alias_method :percentage_of_time, :time
-
-    # Public: Shortcut for getting a percentage of actors instance.
-    #
-    # number - The percentage of actors that should be enabled.
-    #
-    # Returns Flipper::Types::PercentageOfActors.
-    def actors(number)
-      Types::PercentageOfActors.new(number)
-    end
-    alias_method :percentage_of_actors, :actors
 
     # Public: Returns a Set of the known features for this adapter.
     #
