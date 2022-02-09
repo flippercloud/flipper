@@ -10,8 +10,6 @@ module Flipper
     class PStore
       include ::Flipper::Adapter
 
-      FeaturesKey = :flipper_features
-
       # Public: The name of the adapter.
       attr_reader :name
 
@@ -23,6 +21,7 @@ module Flipper
         @name = :pstore
         @path = path
         @store = ::PStore.new(path, thread_safe)
+        @features_key = :flipper_features
       end
 
       # Public: The set of known features.
@@ -35,7 +34,7 @@ module Flipper
       # Public: Adds a feature to the set of known features.
       def add(feature)
         @store.transaction do
-          set_add FeaturesKey, feature.key
+          set_add @features_key, feature.key
         end
         true
       end
@@ -44,7 +43,7 @@ module Flipper
       # all the values for the feature.
       def remove(feature)
         @store.transaction do
-          set_delete FeaturesKey, feature.key
+          set_delete @features_key, feature.key
           clear_gates(feature)
         end
         true
@@ -142,7 +141,7 @@ module Flipper
       end
 
       def read_feature_keys
-        set_members FeaturesKey
+        set_members @features_key
       end
 
       def read_many_features(features)

@@ -7,9 +7,6 @@ module Flipper
     class Mongo
       include ::Flipper::Adapter
 
-      # Private: The key that stores the set of known features.
-      FeaturesKey = :flipper_features
-
       # Public: The name of the adapter.
       attr_reader :name
 
@@ -19,6 +16,7 @@ module Flipper
       def initialize(collection)
         @collection = collection
         @name = :mongo
+        @features_key = :flipper_features
       end
 
       # Public: The set of known features.
@@ -28,13 +26,13 @@ module Flipper
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
-        update FeaturesKey, '$addToSet' => { 'features' => feature.key }
+        update @features_key, '$addToSet' => { 'features' => feature.key }
         true
       end
 
       # Public: Removes a feature from the set of known features.
       def remove(feature)
-        update FeaturesKey, '$pull' => { 'features' => feature.key }
+        update @features_key, '$pull' => { 'features' => feature.key }
         clear feature
         true
       end
@@ -128,7 +126,7 @@ module Flipper
       private
 
       def read_feature_keys
-        find(FeaturesKey).fetch('features') { Set.new }.to_set
+        find(@features_key).fetch('features') { Set.new }.to_set
       end
 
       def read_many_features(features)

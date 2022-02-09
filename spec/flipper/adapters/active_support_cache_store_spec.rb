@@ -28,8 +28,8 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
     end
 
     it 'expires feature and deletes the cache' do
-      expect(cache.read(described_class.key_for(feature))).to be_nil
-      expect(cache.exist?(described_class.key_for(feature))).to be(false)
+      expect(cache.read("flipper/v1/feature/#{feature.key}")).to be_nil
+      expect(cache.exist?("flipper/v1/feature/#{feature.key}")).to be(false)
       expect(feature).not_to be_enabled
     end
 
@@ -37,8 +37,8 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
       let(:write_through) { true }
 
       it 'expires feature and writes an empty value to the cache' do
-        expect(cache.read(described_class.key_for(feature))).to eq(adapter.default_config)
-        expect(cache.exist?(described_class.key_for(feature))).to be(true)
+        expect(cache.read("flipper/v1/feature/#{feature.key}")).to eq(adapter.default_config)
+        expect(cache.exist?("flipper/v1/feature/#{feature.key}")).to be(true)
         expect(feature).not_to be_enabled
       end
     end
@@ -52,8 +52,8 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
     end
 
     it 'enables feature and deletes the cache' do
-      expect(cache.read(described_class.key_for(feature))).to be_nil
-      expect(cache.exist?(described_class.key_for(feature))).to be(false)
+      expect(cache.read("flipper/v1/feature/#{feature.key}")).to be_nil
+      expect(cache.exist?("flipper/v1/feature/#{feature.key}")).to be(false)
       expect(feature).to be_enabled
     end
 
@@ -61,8 +61,8 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
       let(:write_through) { true }
 
       it 'expires feature and writes to the cache' do
-        expect(cache.exist?(described_class.key_for(feature))).to be(true)
-        expect(cache.read(described_class.key_for(feature))).to include(boolean: 'true')
+        expect(cache.exist?("flipper/v1/feature/#{feature.key}")).to be(true)
+        expect(cache.read("flipper/v1/feature/#{feature.key}")).to include(boolean: 'true')
         expect(feature).to be_enabled
       end
     end
@@ -76,8 +76,8 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
     end
 
     it 'disables feature and deletes the cache' do
-      expect(cache.read(described_class.key_for(feature))).to be_nil
-      expect(cache.exist?(described_class.key_for(feature))).to be(false)
+      expect(cache.read("flipper/v1/feature/#{feature.key}")).to be_nil
+      expect(cache.exist?("flipper/v1/feature/#{feature.key}")).to be(false)
       expect(feature).not_to be_enabled
     end
 
@@ -85,8 +85,8 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
       let(:write_through) { true }
 
       it 'expires feature and writes to the cache' do
-        expect(cache.exist?(described_class.key_for(feature))).to be(true)
-        expect(cache.read(described_class.key_for(feature))).to include(boolean: nil)
+        expect(cache.exist?("flipper/v1/feature/#{feature.key}")).to be(true)
+        expect(cache.read("flipper/v1/feature/#{feature.key}")).to include(boolean: nil)
         expect(feature).not_to be_enabled
       end
     end
@@ -103,13 +103,13 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
       memory_adapter.reset
 
       adapter.get(stats)
-      expect(cache.read(described_class.key_for(search))).to be(nil)
-      expect(cache.read(described_class.key_for(other))).to be(nil)
+      expect(cache.read("flipper/v1/feature/#{search.key}")).to be(nil)
+      expect(cache.read("flipper/v1/feature/#{other.key}")).to be(nil)
 
       adapter.get_multi([stats, search, other])
 
-      expect(cache.read(described_class.key_for(search))[:boolean]).to eq('true')
-      expect(cache.read(described_class.key_for(other))[:boolean]).to be(nil)
+      expect(cache.read("flipper/v1/feature/#{search.key}")[:boolean]).to eq('true')
+      expect(cache.read("flipper/v1/feature/#{other.key}")[:boolean]).to be(nil)
 
       adapter.get_multi([stats, search, other])
       adapter.get_multi([stats, search, other])
@@ -128,9 +128,9 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
 
     it 'warms all features' do
       adapter.get_all
-      expect(cache.read(described_class.key_for(stats))[:boolean]).to eq('true')
-      expect(cache.read(described_class.key_for(search))[:boolean]).to be(nil)
-      expect(cache.read(described_class::GetAllKey)).to be_within(2).of(Time.now.to_i)
+      expect(cache.read("flipper/v1/feature/#{stats.key}")[:boolean]).to eq('true')
+      expect(cache.read("flipper/v1/feature/#{search.key}")[:boolean]).to be(nil)
+      expect(cache.read("flipper/v1/get_all")).to be_within(2).of(Time.now.to_i)
     end
 
     it 'returns same result when already cached' do

@@ -7,9 +7,6 @@ module Flipper
     class Redis
       include ::Flipper::Adapter
 
-      # Private: The key that stores the set of known features.
-      FeaturesKey = :flipper_features
-
       # Public: The name of the adapter.
       attr_reader :name
 
@@ -19,6 +16,7 @@ module Flipper
       def initialize(client)
         @client = client
         @name = :redis
+        @features_key = :flipper_features
       end
 
       # Public: The set of known features.
@@ -28,13 +26,13 @@ module Flipper
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
-        @client.sadd FeaturesKey, feature.key
+        @client.sadd @features_key, feature.key
         true
       end
 
       # Public: Removes a feature from the set of known features.
       def remove(feature)
-        @client.srem FeaturesKey, feature.key
+        @client.srem @features_key, feature.key
         @client.del feature.key
         true
       end
@@ -123,7 +121,7 @@ module Flipper
       end
 
       def read_feature_keys
-        @client.smembers(FeaturesKey).to_set
+        @client.smembers(@features_key).to_set
       end
 
       # Private: Gets a hash of fields => values for the given feature.
