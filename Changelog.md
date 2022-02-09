@@ -1,5 +1,10 @@
 ## Unreleased
 
+### Breaking Changes
+
+* Removed top level `Flipper.bool`, `Flipper.actors`, `Flipper.time`, `Flipper.actor`,  `Flipper.percentage_of_actors`, `Flipper.time`, and `Flipper.percentage_of_time`. Also removed correlated Flipper::DSL instance metho. They conflict with some new expression stuff and I can't think of when I've ever used them. I haven't seen others use them either.
+
+
 ### Additions/Changes
 
 * Add Ruby 3.0 and 3.1 to the CI matrix and fix groups block arity check for ruby 3 (https://github.com/jnunemaker/flipper/pull/601)
