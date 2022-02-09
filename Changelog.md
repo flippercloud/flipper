@@ -2,7 +2,14 @@
 
 ### Breaking Changes
 
-* Removed top level `Flipper.bool`, `Flipper.actors`, `Flipper.time`, `Flipper.actor`,  `Flipper.percentage_of_actors`, `Flipper.time`, and `Flipper.percentage_of_time`. Also removed correlated Flipper::DSL instance metho. They conflict with some new expression stuff and I can't think of when I've ever used them. I haven't seen others use them either.
+* Removed top level `Flipper.bool`, `Flipper.actors`, `Flipper.time`, `Flipper.actor`,  `Flipper.percentage_of_actors`, `Flipper.time`, and `Flipper.percentage_of_time`. Also removed correlated Flipper::DSL instance metho. They conflict with some new expression stuff and I can't think of when I've ever used them. I haven't seen others use them either. If you are using them, you can migrate via a search and replace like so:
+  * Change Flipper.bool => Flipper::Types::Boolean.new
+  * Change Flipper.boolean => Flipper::Types::Boolean.new
+  * Change Flipper.actor => Flipper::Types::Actor.new
+  * Change Flipper.percentage_of_actors => Flipper::Types::PercentageOfActors.new
+  * Change Flipper.actors => Flipper::Types::PercentageOfActors.new
+  * Change Flipper.percentage_of_time => Flipper::Types::PercentageOfTime.new
+  * Change Flipper.time => Flipper::Types::PercentageOfTime.new
 
 
 ### Additions/Changes
