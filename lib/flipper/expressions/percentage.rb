@@ -8,7 +8,7 @@ module Flipper
       end
 
       def evaluate(context = {})
-        value = evaluate_arg(0, context)
+        value = super
 
         value = 0 if value < 0
         value = 100 if value > 100

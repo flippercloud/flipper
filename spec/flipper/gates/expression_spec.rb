@@ -28,7 +28,7 @@ RSpec.describe Flipper::Gates::Expression do
 
     context "for not empty value" do
       it 'returns true' do
-        expect(subject.enabled?({"Value" => [true]})).to eq(true)
+        expect(subject.enabled?({"Boolean" => [true]})).to eq(true)
       end
     end
   end
@@ -36,14 +36,14 @@ RSpec.describe Flipper::Gates::Expression do
   describe '#open?' do
     context 'for expression that evaluates to true' do
       it 'returns true' do
-        expression = Flipper.value(true).eq(true)
+        expression = Flipper.boolean(true).eq(true)
         expect(subject.open?(context(expression.value))).to be(true)
       end
     end
 
     context 'for expression that evaluates to false' do
       it 'returns false' do
-        expression = Flipper.value(true).eq(false)
+        expression = Flipper.boolean(true).eq(false)
         expect(subject.open?(context(expression.value))).to be(false)
       end
     end
@@ -79,12 +79,12 @@ RSpec.describe Flipper::Gates::Expression do
 
   describe '#protects?' do
     it 'returns true for Flipper::Expression' do
-      expression = Flipper.value(20).eq(20)
+      expression = Flipper.number(20).eq(20)
       expect(subject.protects?(expression)).to be(true)
     end
 
     it 'returns true for Hash' do
-      expression = Flipper.value(20).eq(20)
+      expression = Flipper.number(20).eq(20)
       expect(subject.protects?(expression.value)).to be(true)
     end
 
@@ -95,12 +95,12 @@ RSpec.describe Flipper::Gates::Expression do
 
   describe '#wrap' do
     it 'returns self for Flipper::Expression' do
-      expression = Flipper.value(20).eq(20)
+      expression = Flipper.number(20).eq(20)
       expect(subject.wrap(expression)).to be_instance_of(Flipper::Expressions::Equal)
     end
 
     it 'returns Flipper::Expression for Hash' do
-      expression = Flipper.value(20).eq(20)
+      expression = Flipper.number(20).eq(20)
       expect(subject.wrap(expression.value)).to be_instance_of(Flipper::Expressions::Equal)
     end
   end

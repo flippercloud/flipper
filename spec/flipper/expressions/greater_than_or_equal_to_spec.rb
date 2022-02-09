@@ -7,8 +7,8 @@ RSpec.describe Flipper::Expressions::GreaterThanOrEqualTo do
 
     it "returns true when equal with args that need evaluation" do
       expression = described_class.new([
-        Flipper.value(2),
-        Flipper.value(2),
+        Flipper.number(2),
+        Flipper.number(2),
       ])
 
       expect(expression.evaluate).to be(true)
@@ -38,14 +38,14 @@ RSpec.describe Flipper::Expressions::GreaterThanOrEqualTo do
   describe "#value" do
     it "returns Hash" do
       expression = described_class.new([
-        Flipper.value(20),
-        Flipper.value(10),
+        Flipper.number(20),
+        Flipper.number(10),
       ])
 
       expect(expression.value).to eq({
         "GreaterThanOrEqualTo" => [
-          {"Value" => [20]},
-          {"Value" => [10]},
+          {"Number" => [20]},
+          {"Number" => [10]},
         ],
       })
     end

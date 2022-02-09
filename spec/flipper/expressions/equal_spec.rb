@@ -2,15 +2,15 @@ RSpec.describe Flipper::Expressions::Equal do
   it "can be built" do
     expression = described_class.build({
       "Equal" => [
-        {"Value" => ["basic"]},
-        {"Value" => ["basic"]},
+        {"String" => ["basic"]},
+        {"String" => ["basic"]},
       ]
     })
 
     expect(expression).to be_instance_of(Flipper::Expressions::Equal)
     expect(expression.args).to eq([
-      Flipper.value("basic"),
-      Flipper.value("basic"),
+      Flipper.string("basic"),
+      Flipper.string("basic"),
     ])
   end
 
@@ -26,8 +26,8 @@ RSpec.describe Flipper::Expressions::Equal do
   describe "#evaluate" do
     it "returns true when equal" do
       expression = described_class.new([
-        Flipper.value("basic"),
-        Flipper.value("basic"),
+        Flipper.string("basic"),
+        Flipper.string("basic"),
       ])
 
       expect(expression.evaluate).to be(true)
@@ -48,10 +48,10 @@ RSpec.describe Flipper::Expressions::Equal do
 
     it "works when nested" do
       expression = described_class.new([
-        Flipper.value(true),
+        Flipper.boolean(true),
         Flipper.all(
           Flipper.property(:stinky).eq(true),
-          Flipper.value("admin").eq(Flipper.property(:role)),
+          Flipper.string("admin").eq(Flipper.property(:role)),
         ),
       ])
 
@@ -64,8 +64,8 @@ RSpec.describe Flipper::Expressions::Equal do
 
     it "returns false when not equal" do
       expression = described_class.new([
-        Flipper.value("basic"),
-        Flipper.value("plus"),
+        Flipper.string("basic"),
+        Flipper.string("plus"),
       ])
 
       expect(expression.evaluate).to be(false)
@@ -90,15 +90,15 @@ RSpec.describe Flipper::Expressions::Equal do
     end
 
     it "returns false when one arg" do
-      expression = described_class.new([Flipper.value(10)])
+      expression = described_class.new([Flipper.number(10)])
       expect(expression.evaluate).to be(false)
     end
 
     it "only evaluates first two arguments equality" do
       expression = described_class.new([
-        Flipper.value(20),
-        Flipper.value(20),
-        Flipper.value(30),
+        Flipper.number(20),
+        Flipper.number(20),
+        Flipper.number(30),
       ])
       expect(expression.evaluate).to be(true)
     end
@@ -108,13 +108,13 @@ RSpec.describe Flipper::Expressions::Equal do
     it "returns Hash" do
       expression = described_class.new([
         Flipper::Expressions::Property.new(["plan"]),
-        Flipper.value("basic"),
+        Flipper.string("basic"),
       ])
 
       expect(expression.value).to eq({
         "Equal" => [
           {"Property" => ["plan"]},
-          {"Value" => ["basic"]},
+          {"String" => ["basic"]},
         ],
       })
     end

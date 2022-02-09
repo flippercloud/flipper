@@ -1,13 +1,5 @@
 module Flipper
   class Expression
-    SUPPORTED_TYPE_CLASSES = [
-      String,
-      Numeric,
-      NilClass,
-      TrueClass,
-      FalseClass,
-    ].freeze
-
     def self.build(object, convert_to_values: false)
       return object if object.is_a?(Flipper::Expression)
 
@@ -18,10 +10,14 @@ module Flipper
         type = object.keys.first
         args = object.values.first
         Expressions.const_get(type).new(args)
-      when *SUPPORTED_TYPE_CLASSES
-        convert_to_values ? Expressions::Value.new(object) : object
+      when String
+        convert_to_values ? Expressions::String.new(object.to_s) : object
       when Symbol
-        convert_to_values ? Expressions::Value.new(object.to_s) : object.to_s
+        convert_to_values ? Expressions::String.new(object.to_s) : object.to_s
+      when Numeric
+        convert_to_values ? Expressions::Number.new(object.to_f) : object
+      when TrueClass, FalseClass
+        convert_to_values ? Expressions::Boolean.new(object) : object
       else
         raise ArgumentError, "#{object.inspect} cannot be converted into an expression"
       end

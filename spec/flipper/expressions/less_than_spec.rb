@@ -34,14 +34,14 @@ RSpec.describe Flipper::Expressions::LessThan do
   describe "#value" do
     it "returns Hash" do
       expression = described_class.new([
-        Flipper.value(20),
-        Flipper.value(10),
+        Flipper.number(20),
+        Flipper.number(10),
       ])
 
       expect(expression.value).to eq({
         "LessThan" => [
-          {"Value" => [20]},
-          {"Value" => [10]},
+          {"Number" => [20]},
+          {"Number" => [10]},
         ],
       })
     end

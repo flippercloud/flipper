@@ -5,100 +5,91 @@ RSpec.describe Flipper::Expression do
     it "can build Equal" do
       expression = Flipper::Expression.build({
         "Equal" => [
-          {"Value" => ["basic"]},
-          {"Value" => ["basic"]},
+          {"String" => ["basic"]},
+          {"String" => ["basic"]},
         ]
       })
 
       expect(expression).to be_instance_of(Flipper::Expressions::Equal)
       expect(expression.args).to eq([
-        Flipper.value("basic"),
-        Flipper.value("basic"),
+        Flipper.string("basic"),
+        Flipper.string("basic"),
       ])
     end
 
     it "can build GreaterThanOrEqualTo" do
       expression = Flipper::Expression.build({
         "GreaterThanOrEqualTo" => [
-          {"Value" => [2]},
-          {"Value" => [1]},
+          {"Number" => [2]},
+          {"Number" => [1]},
         ]
       })
 
       expect(expression).to be_instance_of(Flipper::Expressions::GreaterThanOrEqualTo)
       expect(expression.args).to eq([
-        Flipper.value(2),
-        Flipper.value(1),
+        Flipper.number(2),
+        Flipper.number(1),
       ])
     end
 
     it "can build GreaterThan" do
       expression = Flipper::Expression.build({
         "GreaterThan" => [
-          {"Value" => [2]},
-          {"Value" => [1]},
+          {"Number" => [2]},
+          {"Number" => [1]},
         ]
       })
 
       expect(expression).to be_instance_of(Flipper::Expressions::GreaterThan)
       expect(expression.args).to eq([
-        Flipper.value(2),
-        Flipper.value(1),
+        Flipper.number(2),
+        Flipper.number(1),
       ])
     end
 
     it "can build LessThanOrEqualTo" do
       expression = Flipper::Expression.build({
         "LessThanOrEqualTo" => [
-          {"Value" => [2]},
-          {"Value" => [1]},
+          {"Number" => [2]},
+          {"Number" => [1]},
         ]
       })
 
       expect(expression).to be_instance_of(Flipper::Expressions::LessThanOrEqualTo)
       expect(expression.args).to eq([
-        Flipper.value(2),
-        Flipper.value(1),
+        Flipper.number(2),
+        Flipper.number(1),
       ])
     end
 
     it "can build LessThan" do
       expression = Flipper::Expression.build({
         "LessThan" => [
-          {"Value" => [2]},
-          {"Value" => [1]},
+          {"Number" => [2]},
+          {"Number" => [1]},
         ]
       })
 
       expect(expression).to be_instance_of(Flipper::Expressions::LessThan)
       expect(expression.args).to eq([
-        Flipper.value(2),
-        Flipper.value(1),
+        Flipper.number(2),
+        Flipper.number(1),
       ])
     end
 
     it "can build NotEqual" do
       expression = Flipper::Expression.build({
         "NotEqual" => [
-          {"Value" => ["basic"]},
-          {"Value" => ["plus"]},
+          {"String" => ["basic"]},
+          {"String" => ["plus"]},
         ]
       })
 
       expect(expression).to be_instance_of(Flipper::Expressions::NotEqual)
       expect(expression.args).to eq([
-        Flipper.value("basic"),
-        Flipper.value("plus"),
+        Flipper.string("basic"),
+        Flipper.string("plus"),
       ])
-    end
-
-    it "can build Value" do
-      expression = Flipper::Expression.build({
-        "Value" => [1]
-      })
-
-      expect(expression).to be_instance_of(Flipper::Expressions::Value)
-      expect(expression.args).to eq([1])
     end
 
     it "can build Number" do
@@ -122,24 +113,24 @@ RSpec.describe Flipper::Expression do
     it "can build PercentageOfActors" do
       expression = Flipper::Expression.build({
         "PercentageOfActors" => [
-          {"Value" => ["User;1"]},
-          {"Value" => [40]},
+          {"String" => ["User;1"]},
+          {"Number" => [40]},
         ]
       })
 
       expect(expression).to be_instance_of(Flipper::Expressions::PercentageOfActors)
       expect(expression.args).to eq([
-        Flipper.value("User;1"),
-        Flipper.value(40),
+        Flipper.string("User;1"),
+        Flipper.number(40),
       ])
     end
 
-    it "can build Value" do
+    it "can build String" do
       expression = Flipper::Expression.build({
-        "Value" => ["basic"]
+        "String" => ["basic"]
       })
 
-      expect(expression).to be_instance_of(Flipper::Expressions::Value)
+      expect(expression).to be_instance_of(Flipper::Expressions::String)
       expect(expression.args).to eq(["basic"])
     end
 
@@ -214,8 +205,8 @@ RSpec.describe Flipper::Expression do
   describe "#add" do
     it "converts to Any and adds new expressions" do
       expression = described_class.new(["something"])
-      first = Flipper.value(true).eq(true)
-      second = Flipper.value(false).eq(false)
+      first = Flipper.boolean(true).eq(true)
+      second = Flipper.boolean(false).eq(false)
       new_expression = expression.add(first, second)
       expect(new_expression).to be_instance_of(Flipper::Expressions::Any)
       expect(new_expression.args).to eq([
@@ -229,8 +220,8 @@ RSpec.describe Flipper::Expression do
   describe "#remove" do
     it "converts to Any and removes any expressions that match" do
       expression = described_class.new(["something"])
-      first = Flipper.value(true).eq(true)
-      second = Flipper.value(false).eq(false)
+      first = Flipper.boolean(true).eq(true)
+      second = Flipper.boolean(false).eq(false)
       new_expression = expression.remove(described_class.new(["something"]), first, second)
       expect(new_expression).to be_instance_of(Flipper::Expressions::Any)
       expect(new_expression.args).to eq([])
@@ -295,9 +286,9 @@ RSpec.describe Flipper::Expression do
   end
 
   it "can convert to PercentageOfActors" do
-    expression = Flipper.value("User;1")
+    expression = Flipper.string("User;1")
     converted = expression.percentage_of_actors(40)
     expect(converted).to be_instance_of(Flipper::Expressions::PercentageOfActors)
-    expect(converted.args).to eq([expression, Flipper.value(40)])
+    expect(converted.args).to eq([expression, Flipper.number(40)])
   end
 end

@@ -45,14 +45,14 @@ RSpec.describe Flipper::Expressions::NotEqual do
   describe "#value" do
     it "returns Hash" do
       expression = described_class.new([
-        Flipper.value(20),
-        Flipper.value(10),
+        Flipper.number(20),
+        Flipper.number(10),
       ])
 
       expect(expression.value).to eq({
         "NotEqual" => [
-          {"Value" => [20]},
-          {"Value" => [10]},
+          {"Number" => [20]},
+          {"Number" => [10]},
         ],
       })
     end

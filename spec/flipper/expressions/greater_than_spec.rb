@@ -12,8 +12,8 @@ RSpec.describe Flipper::Expressions::GreaterThan do
 
     it "returns true when greater with args that need evaluation" do
       expression = described_class.new([
-        Flipper.value(2),
-        Flipper.value(1),
+        Flipper.number(2),
+        Flipper.number(1),
       ])
       expect(expression.evaluate).to be(true)
     end
@@ -30,7 +30,7 @@ RSpec.describe Flipper::Expressions::GreaterThan do
 
     it "returns false with one argument" do
       expression = described_class.new([
-        Flipper.value(10),
+        Flipper.number(10),
       ])
       expect(expression.evaluate).to be(false)
     end
@@ -39,14 +39,14 @@ RSpec.describe Flipper::Expressions::GreaterThan do
   describe "#value" do
     it "returns Hash" do
       expression = described_class.new([
-        Flipper.value(20),
-        Flipper.value(10),
+        Flipper.number(20),
+        Flipper.number(10),
       ])
 
       expect(expression.value).to eq({
         "GreaterThan" => [
-          {"Value" => [20]},
-          {"Value" => [10]},
+          {"Number" => [20]},
+          {"Number" => [10]},
         ],
       })
     end

@@ -13,7 +13,7 @@ RSpec.describe Flipper::Expressions::Percentage do
     it "returns numeric" do
       expression = described_class.new([10])
       result = expression.evaluate
-      expect(result).to be(10)
+      expect(result).to be(10.0)
     end
 
     it "returns 0 if less than 0" do
