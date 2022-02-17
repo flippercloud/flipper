@@ -6,7 +6,7 @@
 * Removed support for Ruby 2.5 (which was end of line 9 months ago)
 * Add (alpha) client side instrumentation of events to cloud (https://github.com/jnunemaker/flipper/pull/602)
 * Fix deprecated uses of Redis#pipelined (https://github.com/jnunemaker/flipper/pull/603). redis-rb >= 3 now required.
-* Fix Flipper UI Rack application when `Rack::Session::Pool` is used to build it.
+* Fix Flipper UI Rack application when `Rack::Session::Pool` is used to build it (https://github.com/jnunemaker/flipper/pull/606).
 
 ## 0.23.1
 
