@@ -7,17 +7,17 @@ RSpec.describe Flipper::DSL do
 
   describe '#initialize' do
     context 'when using default memoize strategy' do
-      it 'wraps the given adapter into Flipper::Adapters::Memoizable' do
+      it 'wraps the given adapter with Flipper::Adapters::Memoizable' do
         dsl = described_class.new(adapter)
-        expect(dsl.adapter.class).to be Flipper::Adapters::Memoizable
-        expect(dsl.adapter.adapter).to be adapter
+        expect(dsl.adapter.class).to be(Flipper::Adapters::Memoizable)
+        expect(dsl.adapter.adapter).to be(adapter)
       end
     end
 
     context 'when disabling memoization' do
-      it 'uses the given adapter' do
+      it 'uses the given adapter directly' do
         dsl = described_class.new(adapter, memoize: false)
-        expect(dsl.adapter).to be adapter
+        expect(dsl.adapter).to be(adapter)
       end
     end
 

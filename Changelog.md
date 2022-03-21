@@ -1,3 +1,9 @@
+## Unreleased
+
+### Additions/Changes
+
+* Make it possible to disable internal memoization (https://github.com/jnunemaker/flipper/pull/612).
+
 ## 0.24.0
 
 ### Additions/Changes
@@ -7,7 +13,6 @@
 * Add (alpha) client side instrumentation of events to cloud (https://github.com/jnunemaker/flipper/pull/602)
 * Fix deprecated uses of Redis#pipelined (https://github.com/jnunemaker/flipper/pull/603). redis-rb >= 3 now required.
 * Fix Flipper UI Rack application when `Rack::Session::Pool` is used to build it (https://github.com/jnunemaker/flipper/pull/606).
-* Make it possible to disable internal memoization (https://github.com/jnunemaker/flipper/pull/612).
 
 ## 0.23.1
 

@@ -17,7 +17,7 @@ module Flipper
     # adapter - The adapter that this DSL instance should use.
     # options - The Hash of options.
     #           :instrumenter - What should be used to instrument all the things.
-    #           :memoize      - Tell if should use internal memoize.
+    #           :memoize - Should adapter be wrapped by memoize adapter or not.
     def initialize(adapter, options = {})
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
       memoize = options.fetch(:memoize, true)
