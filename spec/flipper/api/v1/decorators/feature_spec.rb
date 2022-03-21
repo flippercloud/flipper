@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::Api::V1::Decorators::Feature do
   describe "#as_json" do
     context "with exclude_gates set to true" do
