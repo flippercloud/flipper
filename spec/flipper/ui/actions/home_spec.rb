@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::UI::Actions::Home do
   describe 'GET /' do
     before do

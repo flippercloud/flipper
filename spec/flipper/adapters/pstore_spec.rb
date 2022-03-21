@@ -1,6 +1,4 @@
-require 'helper'
 require 'flipper/adapters/pstore'
-require 'flipper/spec/shared_adapter_specs'
 
 RSpec.describe Flipper::Adapters::PStore do
   subject do

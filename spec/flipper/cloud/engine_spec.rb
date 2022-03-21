@@ -1,4 +1,3 @@
-require 'helper'
 require 'rails'
 require 'flipper/cloud'
 
@@ -19,6 +18,8 @@ RSpec.describe Flipper::Cloud::Engine do
 
   before do
     Rails.application = nil
+    ActiveSupport::Dependencies.autoload_paths = ActiveSupport::Dependencies.autoload_paths.dup
+    ActiveSupport::Dependencies.autoload_once_paths = ActiveSupport::Dependencies.autoload_once_paths.dup
 
     # Force loading of flipper to configure itself
     load 'flipper/cloud.rb'
@@ -27,12 +28,11 @@ RSpec.describe Flipper::Cloud::Engine do
   it "initializes cloud configuration" do
     stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
 
-    with_modified_env env do
-      application.initialize!
+    ENV.update(env)
+    application.initialize!
 
-      expect(Flipper.instance).to be_a(Flipper::Cloud::DSL)
-      expect(Flipper.instance.instrumenter).to be(ActiveSupport::Notifications)
-    end
+    expect(Flipper.instance).to be_a(Flipper::Cloud::DSL)
+    expect(Flipper.instance.instrumenter).to be(ActiveSupport::Notifications)
   end
 
   context "with CLOUD_SYNC_SECRET" do
@@ -57,42 +57,39 @@ RSpec.describe Flipper::Cloud::Engine do
     }
 
     it "configures webhook app" do
-      with_modified_env env do
-        application.initialize!
+      ENV.update(env)
+      application.initialize!
 
-        stub = stub_request(:get, "https://www.flippercloud.io/adapter/features").with({
-          headers: { "Flipper-Cloud-Token" => ENV["FLIPPER_CLOUD_TOKEN"] },
-        }).to_return(status: 200, body: JSON.generate({ features: {} }), headers: {})
+      stub = stub_request(:get, "https://www.flippercloud.io/adapter/features").with({
+        headers: { "Flipper-Cloud-Token" => ENV["FLIPPER_CLOUD_TOKEN"] },
+      }).to_return(status: 200, body: JSON.generate({ features: {} }), headers: {})
 
-        post "/_flipper", request_body, { "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value }
+      post "/_flipper", request_body, { "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value }
 
-        expect(last_response.status).to eq(200)
-        expect(stub).to have_been_requested
-      end
+      expect(last_response.status).to eq(200)
+      expect(stub).to have_been_requested
     end
   end
 
   context "without CLOUD_SYNC_SECRET" do
     it "does not configure webhook app" do
-      with_modified_env env do
-        application.initialize!
+      ENV.update(env)
+      application.initialize!
 
-        post "/_flipper"
-        expect(last_response.status).to eq(404)
-      end
+      post "/_flipper"
+      expect(last_response.status).to eq(404)
     end
   end
 
   context "without FLIPPER_CLOUD_TOKEN" do
     it "gracefully skips configuring webhook app" do
-      with_modified_env "FLIPPER_CLOUD_TOKEN" => nil do
-        application.initialize!
-        expect(silence { Flipper.instance }).to match(/Missing FLIPPER_CLOUD_TOKEN/)
-        expect(Flipper.instance).to be_a(Flipper::DSL)
+      ENV["FLIPPER_CLOUD_TOKEN"] = nil
+      application.initialize!
+      expect(silence { Flipper.instance }).to match(/Missing FLIPPER_CLOUD_TOKEN/)
+      expect(Flipper.instance).to be_a(Flipper::DSL)
 
-        post "/_flipper"
-        expect(last_response.status).to eq(404)
-      end
+      post "/_flipper"
+      expect(last_response.status).to eq(404)
     end
   end
 end

@@ -1,4 +1,3 @@
-require 'helper'
 require 'flipper/dsl'
 
 RSpec.describe Flipper::DSL do
@@ -7,9 +6,19 @@ RSpec.describe Flipper::DSL do
   let(:adapter) { Flipper::Adapters::Memory.new }
 
   describe '#initialize' do
-    it 'sets adapter' do
-      dsl = described_class.new(adapter)
-      expect(dsl.adapter).not_to be_nil
+    context 'when using default memoize strategy' do
+      it 'wraps the given adapter with Flipper::Adapters::Memoizable' do
+        dsl = described_class.new(adapter)
+        expect(dsl.adapter.class).to be(Flipper::Adapters::Memoizable)
+        expect(dsl.adapter.adapter).to be(adapter)
+      end
+    end
+
+    context 'when disabling memoization' do
+      it 'uses the given adapter directly' do
+        dsl = described_class.new(adapter, memoize: false)
+        expect(dsl.adapter).to be(adapter)
+      end
     end
 
     it 'defaults instrumenter to noop' do

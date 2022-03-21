@@ -1,4 +1,3 @@
-require 'helper'
 require 'flipper/cloud/message_verifier'
 
 RSpec.describe Flipper::Cloud::MessageVerifier do

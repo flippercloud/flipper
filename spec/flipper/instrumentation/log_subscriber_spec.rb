@@ -1,5 +1,4 @@
 require 'logger'
-require 'helper'
 require 'flipper/adapters/instrumented'
 require 'flipper/instrumentation/log_subscriber'
 

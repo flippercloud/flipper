@@ -35,7 +35,7 @@ Or install it yourself with:
 
 ## Subscribe &amp; Ship
 
-[💌 &nbsp;Subscribe](http://flippercloud.io/oss/subscribe) - I'll send you short and sweet emails when we release new versions.
+[💌 &nbsp;Subscribe](https://buttondown.email/flipper) - I'll send you short and sweet emails when we release new versions.
 
 ## Getting Started
 
@@ -105,6 +105,7 @@ Cloud is super simple to integrate with Rails ([demo app](https://github.com/few
 |---|---|---|
 | ![@jnunemaker](https://avatars3.githubusercontent.com/u/235?s=64) | [@jnunemaker](https://github.com/jnunemaker) | most things |
 | ![@bkeepers](https://avatars3.githubusercontent.com/u/173?s=64) | [@bkeepers](https://github.com/bkeepers) | most things |
+| ![@dpep](https://avatars3.githubusercontent.com/u/918804?s=64) | [@dpep](https://github.com/dpep) | tbd |
 | ![@alexwheeler](https://avatars3.githubusercontent.com/u/3260042?s=64) | [@alexwheeler](https://github.com/alexwheeler) | api |
 | ![@thetimbanks](https://avatars1.githubusercontent.com/u/471801?s=64) | [@thetimbanks](https://github.com/thetimbanks) | ui |
 | ![@lazebny](https://avatars1.githubusercontent.com/u/6276766?s=64) | [@lazebny](https://github.com/lazebny) | docker |

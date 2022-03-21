@@ -1,5 +1,4 @@
 require 'securerandom'
-require 'helper'
 require 'flipper/cloud'
 require 'flipper/cloud/middleware'
 require 'flipper/adapters/operation_logger'

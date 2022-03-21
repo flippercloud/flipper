@@ -1,4 +1,3 @@
-require 'helper'
 require 'flipper/cloud/configuration'
 require 'flipper/adapters/instrumented'
 
@@ -13,10 +12,9 @@ RSpec.describe Flipper::Cloud::Configuration do
   end
 
   it "can set token from ENV var" do
-    with_modified_env "FLIPPER_CLOUD_TOKEN" => "from_env" do
-      instance = described_class.new(required_options.reject { |k, v| k == :token })
-      expect(instance.token).to eq("from_env")
-    end
+    ENV["FLIPPER_CLOUD_TOKEN"] = "from_env"
+    instance = described_class.new(required_options.reject { |k, v| k == :token })
+    expect(instance.token).to eq("from_env")
   end
 
   it "can set instrumenter" do
@@ -31,10 +29,9 @@ RSpec.describe Flipper::Cloud::Configuration do
   end
 
   it "can set read_timeout from ENV var" do
-    with_modified_env "FLIPPER_CLOUD_READ_TIMEOUT" => "9" do
-      instance = described_class.new(required_options.reject { |k, v| k == :read_timeout })
-      expect(instance.read_timeout).to eq(9)
-    end
+    ENV["FLIPPER_CLOUD_READ_TIMEOUT"] = "9"
+    instance = described_class.new(required_options.reject { |k, v| k == :read_timeout })
+    expect(instance.read_timeout).to eq(9)
   end
 
   it "can set open_timeout" do
@@ -43,10 +40,9 @@ RSpec.describe Flipper::Cloud::Configuration do
   end
 
   it "can set open_timeout from ENV var" do
-    with_modified_env "FLIPPER_CLOUD_OPEN_TIMEOUT" => "9" do
-      instance = described_class.new(required_options.reject { |k, v| k == :open_timeout })
-      expect(instance.open_timeout).to eq(9)
-    end
+    ENV["FLIPPER_CLOUD_OPEN_TIMEOUT"] = "9"
+    instance = described_class.new(required_options.reject { |k, v| k == :open_timeout })
+    expect(instance.open_timeout).to eq(9)
   end
 
   it "can set write_timeout" do
@@ -55,10 +51,9 @@ RSpec.describe Flipper::Cloud::Configuration do
   end
 
   it "can set write_timeout from ENV var" do
-    with_modified_env "FLIPPER_CLOUD_WRITE_TIMEOUT" => "9" do
-      instance = described_class.new(required_options.reject { |k, v| k == :write_timeout })
-      expect(instance.write_timeout).to eq(9)
-    end
+    ENV["FLIPPER_CLOUD_WRITE_TIMEOUT"] = "9"
+    instance = described_class.new(required_options.reject { |k, v| k == :write_timeout })
+    expect(instance.write_timeout).to eq(9)
   end
 
   it "can set sync_interval" do
@@ -67,10 +62,9 @@ RSpec.describe Flipper::Cloud::Configuration do
   end
 
   it "can set sync_interval from ENV var" do
-    with_modified_env "FLIPPER_CLOUD_SYNC_INTERVAL" => "5" do
-      instance = described_class.new(required_options.reject { |k, v| k == :sync_interval })
-      expect(instance.sync_interval).to eq(5)
-    end
+    ENV["FLIPPER_CLOUD_SYNC_INTERVAL"] = "5"
+    instance = described_class.new(required_options.reject { |k, v| k == :sync_interval })
+    expect(instance.sync_interval).to eq(5)
   end
 
   it "passes sync_interval into sync adapter" do
@@ -121,10 +115,9 @@ RSpec.describe Flipper::Cloud::Configuration do
   end
 
   it "can override URL using ENV var" do
-    with_modified_env "FLIPPER_CLOUD_URL" => "https://example.com" do
-      instance = described_class.new(required_options.reject { |k, v| k == :url })
-      expect(instance.url).to eq("https://example.com")
-    end
+    ENV["FLIPPER_CLOUD_URL"] = "https://example.com"
+    instance = described_class.new(required_options.reject { |k, v| k == :url })
+    expect(instance.url).to eq("https://example.com")
   end
 
   it "defaults sync_method to :poll" do
@@ -143,12 +136,11 @@ RSpec.describe Flipper::Cloud::Configuration do
   end
 
   it "sets sync_method to :webhook if FLIPPER_CLOUD_SYNC_SECRET set" do
-    with_modified_env "FLIPPER_CLOUD_SYNC_SECRET" => "abc" do
-      instance = described_class.new(required_options)
+    ENV["FLIPPER_CLOUD_SYNC_SECRET"] = "abc"
+    instance = described_class.new(required_options)
 
-      expect(instance.sync_method).to eq(:webhook)
-      expect(instance.adapter).to be_instance_of(Flipper::Adapters::DualWrite)
-    end
+    expect(instance.sync_method).to eq(:webhook)
+    expect(instance.adapter).to be_instance_of(Flipper::Adapters::DualWrite)
   end
 
   it "can set sync_secret" do
@@ -157,10 +149,9 @@ RSpec.describe Flipper::Cloud::Configuration do
   end
 
   it "can override sync_secret using ENV var" do
-    with_modified_env "FLIPPER_CLOUD_SYNC_SECRET" => "from_env" do
-      instance = described_class.new(required_options.reject { |k, v| k == :sync_secret })
-      expect(instance.sync_secret).to eq("from_env")
-    end
+    ENV["FLIPPER_CLOUD_SYNC_SECRET"] = "from_env"
+    instance = described_class.new(required_options.reject { |k, v| k == :sync_secret })
+    expect(instance.sync_secret).to eq("from_env")
   end
 
   it "can sync with cloud" do
@@ -248,5 +239,22 @@ RSpec.describe Flipper::Cloud::Configuration do
     expect(all.keys).to eq(["search", "history"])
     expect(all["search"][:boolean]).to eq("true")
     expect(all["history"][:boolean]).to eq(nil)
+  end
+
+  it "can setup brow to report events to cloud" do
+    # skip logging brow
+    Brow.logger = Logger.new(File::NULL)
+    brow = described_class.new(required_options).brow
+
+    stub = stub_request(:post, "https://www.flippercloud.io/adapter/events")
+      .with { |request|
+        data = JSON.parse(request.body)
+        data.keys == ["uuid", "messages"] && data["messages"] == [{"n" => 1}]
+      }
+      .to_return(status: 201, body: "{}", headers: {})
+
+    brow.push({"n" => 1})
+    brow.worker.stop
+    expect(stub).to have_been_requested.times(1)
   end
 end

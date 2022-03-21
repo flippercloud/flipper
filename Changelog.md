@@ -3,9 +3,40 @@
 ### Additions/Changes
 
 * flipper-api: `exclude_gates` parameter to exclude gate data in GETs (https://github.com/jnunemaker/flipper/pull/572).
+* Make it possible to disable internal memoization (https://github.com/jnunemaker/flipper/pull/612).
+
+## 0.24.0
+
+### Additions/Changes
+
+* Add Ruby 3.0 and 3.1 to the CI matrix and fix groups block arity check for ruby 3 (https://github.com/jnunemaker/flipper/pull/601)
+* Removed support for Ruby 2.5 (which was end of line 9 months ago)
+* Add (alpha) client side instrumentation of events to cloud (https://github.com/jnunemaker/flipper/pull/602)
+* Fix deprecated uses of Redis#pipelined (https://github.com/jnunemaker/flipper/pull/603). redis-rb >= 3 now required.
+* Fix Flipper UI Rack application when `Rack::Session::Pool` is used to build it (https://github.com/jnunemaker/flipper/pull/606).
+
+## 0.23.1
+
+### Additions/Changes
+
+* Relax dalli version constraint (https://github.com/jnunemaker/flipper/pull/596)
+
+### Bug Fixes
+
+* Fix railtie initialization to mount middleware after config/intializers/* (https://github.com/jnunemaker/flipper/pull/586)
+
+## 0.23.0
+
+### Additions/Changes
+
 * Allow some HTML in banner and descriptions (https://github.com/jnunemaker/flipper/pull/570).
 * Moved some cloud headers to http client (https://github.com/jnunemaker/flipper/pull/567).
 * Update flipper-ui jquery and bootstrap versions (https://github.com/jnunemaker/flipper/issues/565 and https://github.com/jnunemaker/flipper/pull/566).
+* Moved docs to www.flippercloud.io/docs (https://github.com/jnunemaker/flipper/pull/574).
+* PStore adapter now defaults to thread safe and no longer supports `.thread_safe` (https://github.com/jnunemaker/flipper/commit/4048704fefe41b716015294a19a0b94546637630).
+* Add failover adapter (https://github.com/jnunemaker/flipper/pull/584).
+* Improve http adapter error message (https://github.com/jnunemaker/flipper/pull/587).
+* Rails 7 support (mostly in https://github.com/jnunemaker/flipper/pull/592).
 
 ## 0.22.2
 
@@ -59,7 +90,7 @@ You should be able to upgrade to 0.21 without any breaking changes. However, if 
     - end
     ```
 
-2. `Flipper::Middleware::Memoizer` will be enabled by default.
+2. `Flipper::Middleware::Memoizer` will be enabled by default -- including preloading. **Note**: You may want to disable preloading (see below) if you have > 100 features.
 
     ```diff
     # config/initializers/flipper.rb
@@ -68,6 +99,9 @@ You should be able to upgrade to 0.21 without any breaking changes. However, if 
     + Rails.application.configure do
     +   # Uncomment to configure which features to preload on all requests
     +   # config.flipper.preload = [:stats, :search, :some_feature]
+    +   #
+    +   # Or, you may want to disable preloading entirely:
+    +   # config.flipper.preload = false
     + end
     ```
 

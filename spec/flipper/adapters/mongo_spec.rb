@@ -1,6 +1,4 @@
-require 'helper'
 require 'flipper/adapters/mongo'
-require 'flipper/spec/shared_adapter_specs'
 
 Mongo::Logger.logger.level = Logger::INFO
 

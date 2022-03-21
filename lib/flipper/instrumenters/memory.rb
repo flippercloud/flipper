@@ -17,9 +17,13 @@ module Flipper
         # block rather than the one passed to #instrument.
         payload = payload.dup
 
-        result = (yield payload if block_given?)
+        result = yield payload if block_given?
+      rescue Exception => e
+        payload[:exception] = [e.class.name, e.message]
+        payload[:exception_object] = e
+        raise e
+      ensure
         @events << Event.new(name, payload, result)
-        result
       end
 
       def events_by_name(name)

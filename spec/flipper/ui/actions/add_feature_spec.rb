@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::UI::Actions::AddFeature do
   describe 'GET /features/new with feature_creation_enabled set to true' do
     before do

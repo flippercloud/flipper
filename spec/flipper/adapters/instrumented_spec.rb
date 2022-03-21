@@ -1,7 +1,5 @@
-require 'helper'
 require 'flipper/adapters/instrumented'
 require 'flipper/instrumenters/memory'
-require 'flipper/spec/shared_adapter_specs'
 
 RSpec.describe Flipper::Adapters::Instrumented do
   let(:instrumenter) { Flipper::Instrumenters::Memory.new }

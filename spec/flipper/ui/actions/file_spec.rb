@@ -1,5 +1,3 @@
-require 'helper'
-
 RSpec.describe Flipper::UI::Actions::File do
   describe 'GET /images/logo.png' do
     before do
