@@ -4,6 +4,7 @@
 
 * flipper-api: `exclude_gates` parameter to exclude gate data in GETs (https://github.com/jnunemaker/flipper/pull/572).
 * Make it possible to disable internal memoization (https://github.com/jnunemaker/flipper/pull/612).
+* Add Flipper::Actor#hash so actors can be hash keys (https://github.com/jnunemaker/flipper/pull/616)
 
 ## 0.24.0
 
