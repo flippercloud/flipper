@@ -43,4 +43,14 @@ RSpec.describe Flipper::Actor do
       expect(actor1.==(actor2)).to be(false)
     end
   end
+
+  describe '#hash' do
+    it 'returns a hash-value based on the flipper id' do
+      h = {
+        described_class.new("User;123") => true
+      }
+      expect(h).to have_key(described_class.new("User;123"))
+      expect(h).not_to have_key(described_class.new("User;456"))
+    end
+  end
 end
