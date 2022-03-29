@@ -51,8 +51,9 @@ module Flipper
           boolean: boolean,
           groups: groups,
           actors: actors,
+          denied_actors: Set.new, # Rollout doesn't support this
           percentage_of_actors: percentage_of_actors,
-          percentage_of_time: nil,
+          percentage_of_time: nil, # Rollout doesn't support this
         }
       end
 

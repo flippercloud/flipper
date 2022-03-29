@@ -8,6 +8,7 @@ RSpec.describe Flipper::Adapters::ReadOnly do
   let(:boolean_gate) { feature.gate(:boolean) }
   let(:group_gate)   { feature.gate(:group) }
   let(:actor_gate)   { feature.gate(:actor) }
+  let(:denied_actor_gate)   { feature.gate(:denied_actor) }
   let(:actors_gate)  { feature.gate(:percentage_of_actors) }
   let(:time_gate)    { feature.gate(:percentage_of_time) }
 
@@ -42,15 +43,18 @@ RSpec.describe Flipper::Adapters::ReadOnly do
 
   it 'can get feature' do
     actor22 = Flipper::Actor.new('22')
+    actor23 = Flipper::Actor.new('23')
     adapter.enable(feature, boolean_gate, flipper.boolean)
     adapter.enable(feature, group_gate, flipper.group(:admins))
     adapter.enable(feature, actor_gate, flipper.actor(actor22))
+    adapter.enable(feature, denied_actor_gate, flipper.denied_actor(actor23))
     adapter.enable(feature, actors_gate, flipper.actors(25))
     adapter.enable(feature, time_gate, flipper.time(45))
 
     expect(subject.get(feature)).to eq(boolean: 'true',
                                        groups: Set['admins'],
                                        actors: Set['22'],
+                                       denied_actors: Set['23'],
                                        percentage_of_actors: '25',
                                        percentage_of_time: '45')
   end
