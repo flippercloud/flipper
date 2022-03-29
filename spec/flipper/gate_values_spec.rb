@@ -112,6 +112,11 @@ RSpec.describe Flipper::GateValues do
       expect(described_class.new(actors: Set[1, 2])['actors']).to eq(Set[1, 2])
     end
 
+    it 'can read the denied_actors value' do
+      expect(described_class.new(denied_actors: Set[1, 2])[:denied_actors]).to eq(Set[1, 2])
+      expect(described_class.new(denied_actors: Set[1, 2])['denied_actors']).to eq(Set[1, 2])
+    end
+
     it 'can read the groups value' do
       expect(described_class.new(groups: Set[:admins])[:groups]).to eq(Set[:admins])
       expect(described_class.new(groups: Set[:admins])['groups']).to eq(Set[:admins])

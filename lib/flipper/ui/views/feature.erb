@@ -78,6 +78,58 @@
           </div>
         <% end %>
 
+        <%# Denied Actors Info and Form %>
+        <div class="card-body border-bottom">
+          <div class="row align-items-center js-toggle-container">
+            <div class="col col-mr-auto toggle-block-when-off">
+              <h6 class="m-0">
+                <strong class="<%= "text-muted" if @feature.denied_actors_value.empty? %>">
+                  <% if @feature.denied_actors_value.count > 0 %>
+                    Denied for <%= Util.pluralize @feature.actors_value.count, 'actor', 'actors' %>
+                  <% else %>
+                    No actors denied
+                  <% end %>
+                </strong>
+              </h6>
+            </div>
+            <div class="col col-auto toggle-block-when-off">
+              <button class="btn btn-outline-secondary js-toggle-trigger" data-toggle="collapse" data-target="#deny-actor">Deny an actor</button>
+            </div>
+            <div class="col toggle-block-when-on">
+              <form action="<%= script_name %>/features/<%= @feature.key %>/denied_actors" method="post" class="form-inline">
+                <%== csrf_input_tag %>
+                <input type="hidden" name="operation" value="deny">
+                <input type="text" name="value" placeholder="<%= Flipper::UI.configuration.deny_actor_placeholder %>" class="form-control form-control-sm mr-sm-2 mb-2 mb-sm-0">
+                <input type="submit" value="Deny Actor" class="btn btn-sm btn-light">
+              </form>
+            </div>
+            <div class="col col-auto toggle-block-when-on">
+              <button type="button" class="btn btn-outline-secondary js-toggle-trigger">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <%# Denied Actors list %>
+        <% @feature.denied_actors_value.each do |item| %>
+          <div class="card-body bg-lightest border-bottom py-3">
+            <div class="row align-items-center">
+              <div class="col col-mr-auto pl-md-5">
+                <h6 class="m-0"><%= item %></h6>
+              </div>
+              <div class="col col-auto">
+                <form action="<%= script_name %>/features/<%= @feature.key %>/denied_actors" method="post">
+                  <%== csrf_input_tag %>
+                  <input type="hidden" name="operation" value="reinstate">
+                  <input type="hidden" name="value" value="<%= item %>">
+                  <button type="submit" value="Resinstate" class="btn btn-outline-danger" data-toggle="tooltip" title="Reinstate <%= item %>" data-placement="left">
+                    Reinstate
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
         <%# Groups Info and Form %>
         <div class="card-body border-bottom">
           <div class="row align-items-center js-toggle-container">

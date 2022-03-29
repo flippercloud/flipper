@@ -29,6 +29,11 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
                   'value' => ['10'],
                 },
                 {
+                  'key' => 'denied_actors',
+                  'name' => 'denied_actor',
+                  'value' => [],
+                },
+                {
                   'key' => 'percentage_of_actors',
                   'name' => 'percentage_of_actors',
                   'value' => nil,
@@ -121,6 +126,11 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
             {
               'key' => 'actors',
               'name' => 'actor',
+              'value' => [],
+            },
+            {
+              'key' => 'denied_actors',
+              'name' => 'denied_actor',
               'value' => [],
             },
             {

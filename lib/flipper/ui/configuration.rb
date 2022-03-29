@@ -35,6 +35,11 @@ module Flipper
       # application needs. Defaults to "a flipper id".
       attr_accessor :add_actor_placeholder
 
+      # Public: What should show up in the form to deny actors. This can be
+      # different per application since flipper_id's can be whatever an
+      # application needs. Defaults to "a flipper id".
+      attr_accessor :deny_actor_placeholder
+
       # Public: If you set this, Flipper::UI will fetch descriptions
       # from your external source. Descriptions for `features` will be shown on `feature`
       # page, and optionally the `features` pages. Defaults to empty block.
@@ -71,6 +76,7 @@ module Flipper
         @fun = true
         @cloud_recommendation = true
         @add_actor_placeholder = "a flipper id"
+        @deny_actor_placeholder = "a flipper id"
         @descriptions_source = DEFAULT_DESCRIPTIONS_SOURCE
         @show_feature_description_in_list = false
         @actors_separator = ','

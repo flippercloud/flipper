@@ -1,0 +1,20 @@
+<% if params.key?("error") %>
+  <div class="alert alert-danger">
+    <%= params["error"] %>
+  </div>
+<% end %>
+
+<div class="card">
+  <h4 class="card-header">Deny Actor for <%= @feature.key %></h4>
+  <div class="card-body">
+    <p>
+      Turn off this feature for actors.
+    </p>
+    <form action="<%= script_name %>/features/<%= @feature.key %>/denied_actors" method="post" class="form-inline">
+      <%== csrf_input_tag %>
+      <input type="hidden" name="operation" value="deny">
+      <input type="text" name="value" placeholder="<%= Flipper::UI.configuration.deny_actor_placeholder %>" class="form-control mr-2">
+      <input type="submit" value="Deny Actor" class="btn btn-primary">
+    </form>
+  </div>
+</div>
