@@ -36,6 +36,13 @@ module Flipper
       false
     end
 
+    # Internal: Check if a gate is responsible for denying access for a thing. Implemented in subclass.
+    #
+    # Returns true if gate denies, false if not.
+    def deniable?
+      false
+    end
+
     # Internal: Allows gate to wrap thing using one of the supported flipper
     # types so adapters always get something that responds to value.
     def wrap(thing)
