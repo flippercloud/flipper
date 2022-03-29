@@ -127,10 +127,10 @@ RSpec.describe Flipper::Cloud do
     cloud_flipper = Flipper::Cloud.new(token: "asdf")
 
     get_all = {
-      "logging" => {actors: Set.new, boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: "5"},
-      "search" => {actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
-      "stats" => {actors: Set["jnunemaker"], boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
-      "test" => {actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
+      "logging" => {actors: Set.new, denied_actors: Set.new, boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: "5"},
+      "search" => {actors: Set.new, denied_actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
+      "stats" => {actors: Set["jnunemaker"], denied_actors: Set.new, boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
+      "test" => {actors: Set.new, denied_actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
     }
 
     expect(flipper.adapter.get_all).to eq(get_all)
@@ -153,10 +153,10 @@ RSpec.describe Flipper::Cloud do
     cloud_flipper = Flipper::Cloud.new(token: "asdf")
 
     get_all = {
-      "logging" => {actors: Set.new, boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: "5"},
-      "search" => {actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
-      "stats" => {actors: Set["jnunemaker"], boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
-      "test" => {actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
+      "logging" => {actors: Set.new, denied_actors: Set.new, boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: "5"},
+      "search" => {actors: Set.new, denied_actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
+      "stats" => {actors: Set["jnunemaker"], denied_actors: Set.new, boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
+      "test" => {actors: Set.new, denied_actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
     }
 
     expect(flipper.adapter.get_all).to eq(get_all)
@@ -178,10 +178,10 @@ RSpec.describe Flipper::Cloud do
     cloud_flipper = Flipper::Cloud.new(token: "asdf")
 
     get_all = {
-      "logging" => {actors: Set.new, boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: "5"},
-      "search" => {actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
-      "stats" => {actors: Set["jnunemaker"], boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
-      "test" => {actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
+      "logging" => {actors: Set.new, denied_actors: Set.new, boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: "5"},
+      "search" => {actors: Set.new, denied_actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
+      "stats" => {actors: Set["jnunemaker"], denied_actors: Set.new, boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
+      "test" => {actors: Set.new, denied_actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
     }
 
     expect(flipper.adapter.get_all).to eq(get_all)

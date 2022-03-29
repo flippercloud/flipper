@@ -63,7 +63,32 @@ RSpec.describe Flipper::Feature do
       instance.gates.each do |gate|
         expect(gate).to be_a(Flipper::Gate)
       end
-      expect(instance.gates.size).to be(5)
+
+      expect(instance.gates.size).to be(6)
+    end
+  end
+
+  describe '#forward_gates' do
+    it 'returns array of gates' do
+      instance = described_class.new(:search, adapter)
+      expect(instance.gates).to be_instance_of(Array)
+      instance.forward_gates.each do |gate|
+        expect(gate).to be_a(Flipper::Gate)
+      end
+      
+      expect(instance.forward_gates.size).to be(5)
+    end
+  end
+
+  describe '#deniable_gates' do
+    it 'returns array of gates' do
+      instance = described_class.new(:search, adapter)
+      expect(instance.gates).to be_instance_of(Array)
+      instance.deniable_gates.each do |gate|
+        expect(gate).to be_a(Flipper::Gate)
+      end
+      
+      expect(instance.deniable_gates.size).to be(1)
     end
   end
 
@@ -291,10 +316,12 @@ RSpec.describe Flipper::Feature do
 
     user = Flipper::Actor.new('1')
     actor = Flipper::Types::Actor.new(user)
+    denied_actor = Flipper::Types::DeniedActor.new(user)
     {
       nil => nil,
       user => actor,
       actor => actor,
+      denied_actor => Flipper::Types::Actor.new(denied_actor),
     }.each do |thing, wrapped_thing|
       it "always instruments #{thing.inspect} as #{wrapped_thing.class} for enabled?" do
         subject.enabled?(thing)
@@ -539,6 +566,25 @@ RSpec.describe Flipper::Feature do
     end
   end
 
+  describe '#denied_actors_value' do
+    context 'when no actors are denied' do
+      it 'returns empty set' do
+        expect(subject.denied_actors_value).to eq(Set.new)
+      end
+    end
+
+    context 'when one or more actors are denied' do
+      before do
+        subject.deny Flipper::Types::DeniedActor.new(Flipper::Actor.new('User;5'))
+        subject.deny Flipper::Types::DeniedActor.new(Flipper::Actor.new('User;22'))
+      end
+
+      it 'returns set of actor ids' do
+        expect(subject.denied_actors_value).to eq(Set.new(['User;5', 'User;22']))
+      end
+    end
+  end
+
   describe '#boolean_value' do
     context 'when not enabled or disabled' do
       it 'returns false' do
@@ -634,6 +680,7 @@ RSpec.describe Flipper::Feature do
       before do
         subject.enable Flipper::Types::Boolean.new(true)
         subject.enable Flipper::Types::Actor.new(Flipper::Actor.new(5))
+        subject.deny Flipper::Types::DeniedActor.new(Flipper::Actor.new(6))
         subject.enable Flipper::Types::Group.new(:admins)
         subject.enable Flipper::Types::PercentageOfTime.new(50)
         subject.enable Flipper::Types::PercentageOfActors.new(25)
@@ -641,10 +688,36 @@ RSpec.describe Flipper::Feature do
 
       it 'returns gate values' do
         expect(subject.gate_values).to eq(Flipper::GateValues.new(actors: Set.new(['5']),
+                                                                  denied_actors: Set.new(['6']),
                                                                   groups: Set.new(['admins']),
                                                                   boolean: 'true',
                                                                   percentage_of_time: '50',
                                                                   percentage_of_actors: '25'))
+      end
+    end
+  end
+
+  describe '#deny_actor/reinstate_actor' do
+    context 'with object that responds to flipper_id' do
+      it 'updates the gate values to include the actor' do
+        actor = Flipper::Actor.new(5)
+        expect(subject.gate_values.denied_actors).to be_empty
+        subject.deny_actor(actor)
+        expect(subject.gate_values.denied_actors).to eq(Set['5'])
+        subject.reinstate_actor(actor)
+        expect(subject.gate_values.denied_actors).to be_empty
+      end
+    end
+
+    context 'with actor instance' do
+      it 'updates the gate values to include the actor' do
+        actor = Flipper::Actor.new(5)
+        instance = Flipper::Types::DeniedActor.new(actor)
+        expect(subject.gate_values.denied_actors).to be_empty
+        subject.deny_actor(instance)
+        expect(subject.gate_values.denied_actors).to eq(Set['5'])
+        subject.reinstate_actor(instance)
+        expect(subject.gate_values.denied_actors).to be_empty
       end
     end
   end
@@ -799,12 +872,14 @@ RSpec.describe Flipper::Feature do
     it 'can return disabled gates' do
       expect(subject.disabled_gates.map(&:name).to_set).to eq(Set[
               :actor,
+              :denied_actor,
               :boolean,
               :group,
             ])
 
       expect(subject.disabled_gate_names.to_set).to eq(Set[
               :actor,
+              :denied_actor,
               :boolean,
               :group,
             ])

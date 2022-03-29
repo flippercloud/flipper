@@ -68,6 +68,40 @@ module Flipper
       end
     end
 
+    # Public: Deny this feature for something.
+    #         Works like an enable under the hood.
+    #
+    # Returns the result of Adapter#enable.
+    def deny(thing)
+      instrument(:deny) do |payload|
+        adapter.add self
+
+        gate = deniable_gate_for(thing)
+        wrapped_thing = gate.wrap(thing)
+        payload[:gate_name] = gate.name
+        payload[:thing] = wrapped_thing
+
+        adapter.enable self, gate, wrapped_thing
+      end
+    end
+
+    # Public: Reinstate this disabled feature for something.
+    #         Works like a disable under the hood.
+    #
+    # Returns the result of Adapter#disable.
+    def reinstate(thing)
+      instrument(:reinstate) do |payload|
+        adapter.add self
+
+        gate = deniable_gate_for(thing)
+        wrapped_thing = gate.wrap(thing)
+        payload[:gate_name] = gate.name
+        payload[:thing] = wrapped_thing
+
+        adapter.disable self, gate, wrapped_thing
+      end
+    end
+
     # Public: Adds this feature.
     #
     # Returns the result of Adapter#add.
@@ -110,7 +144,13 @@ module Flipper
           thing: thing
         )
 
-        if open_gate = gates.detect { |gate| gate.open?(context) }
+        # We first check if we have any deniable gate activated here,
+        # because they have preference over the other gates
+        if closed_deny_gate = deniable_gates.detect { |gate| !gate.open?(context) }
+          return false
+        end
+
+        if open_gate = forward_gates.detect { |gate| gate.open?(context) }
           payload[:gate_name] = open_gate.name
           true
         else
@@ -199,6 +239,26 @@ module Flipper
       disable Types::PercentageOfActors.new(0)
     end
 
+    # Public: Denies a feature for an actor.
+    #
+    # actor - a Flipper::Types::Actor instance or an object that responds
+    #         to flipper_id.
+    #
+    # Returns result of deny.
+    def deny_actor(actor)
+      deny Types::DeniedActor.wrap(actor)
+    end
+
+    # Public: Reinstates a denied feature for an actor.
+    #
+    # actor - a Flipper::Types::Actor instance or an object that responds
+    #         to flipper_id.
+    #
+    # Returns result of reinstate.
+    def reinstate_actor(actor)
+      reinstate Types::DeniedActor.wrap(actor)
+    end
+
     # Public: Returns state for feature (:on, :off, or :conditional).
     def state
       values = gate_values
@@ -262,6 +322,13 @@ module Flipper
     # Returns Set of String flipper_id's.
     def actors_value
       gate_values.actors
+    end
+
+    # Public: Get the adapter value for the denied actors gate.
+    #
+    # Returns Set of String flipper_id's.
+    def denied_actors_value
+      gate_values.denied_actors
     end
 
     # Public: Get the adapter value for the boolean gate.
@@ -342,10 +409,25 @@ module Flipper
       @gates ||= [
         Gates::Boolean.new,
         Gates::Actor.new,
+        Gates::DeniedActor.new,
         Gates::PercentageOfActors.new,
         Gates::PercentageOfTime.new,
         Gates::Group.new,
       ]
+    end
+
+    # Public: Get all the non deniable gates used to determine enabled/disabled for the feature.
+    #
+    # Returns an array of gates
+    def forward_gates
+      @forward_gates ||= gates.reject(&:deniable?)
+    end
+
+    # Public: Get all the deniable gates used to determine enabled/disabled for the feature.
+    #
+    # Returns an array of gates
+    def deniable_gates
+      @deniable_gates ||= gates.select(&:deniable?)
     end
 
     # Public: Find a gate by name.
@@ -355,14 +437,24 @@ module Flipper
       gates.detect { |gate| gate.name == name.to_sym }
     end
 
-    # Public: Find the gate that protects a thing.
+    # Public: Find the forward gate that protects a thing.
     #
     # thing - The object for which you would like to find a gate
     #
     # Returns a Flipper::Gate.
     # Raises Flipper::GateNotFound if no gate found for thing
     def gate_for(thing)
-      gates.detect { |gate| gate.protects?(thing) } || raise(GateNotFound, thing)
+      forward_gates.detect { |gate| gate.protects?(thing) } || raise(GateNotFound, thing)
+    end
+
+    # Public: Find the deniable gate that protects a thing.
+    #
+    # thing - The object for which you would like to find a gate
+    #
+    # Returns a Flipper::Gate.
+    # Raises Flipper::GateNotFound if no gate found for thing
+    def deniable_gate_for(thing)
+      deniable_gates.detect { |gate| gate.protects?(thing) } || raise(GateNotFound, thing)
     end
 
     private
