@@ -26,6 +26,11 @@ module Flipper
       values.actors
     end
 
+    # Public: Convenience method for denied actors value value like Feature has.
+    def denied_actors_value
+      values.denied_actors
+    end
+
     # Public: Convenience method for boolean value value like Feature has.
     def boolean_value
       values.boolean

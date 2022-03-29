@@ -245,6 +245,16 @@ module Flipper
       Types::Actor.new(thing)
     end
 
+    # Public: Wraps an object as a flipper denied actor.
+    #
+    # thing - The object that you would like to wrap.
+    #
+    # Returns an instance of Flipper::Types::DeniedActor.
+    # Raises ArgumentError if thing does not respond to `flipper_id`.
+    def denied_actor(thing)
+      Types::DeniedActor.new(thing)
+    end
+
     # Public: Shortcut for getting a percentage of time instance.
     #
     # number - The percentage of time that should be enabled.
