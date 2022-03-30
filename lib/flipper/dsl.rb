@@ -144,6 +144,28 @@ module Flipper
       feature(name).disable_percentage_of_actors
     end
 
+    # Public: Deny a feature for an actor.
+    #
+    # name - The String or Symbol name of the feature.
+    # actor - a Flipper::Types::DeniedActor instance or an object that responds
+    #         to flipper_id.
+    #
+    # Returns result of Feature#deny_actor.
+    def deny_actor(name, actor)
+      feature(name).deny_actor(actor)
+    end
+
+    # Public: Reinstate a feature for an actor.
+    #
+    # name - The String or Symbol name of the feature.
+    # actor - a Flipper::Types::DeniedActor instance or an object that responds
+    #         to flipper_id.
+    #
+    # Returns result of Feature#reinstate_actor.
+    def reinstate_actor(name, actor)
+      feature(name).reinstate_actor(actor)
+    end
+
     # Public: Add a feature.
     #
     # name - The String or Symbol name of the feature.
