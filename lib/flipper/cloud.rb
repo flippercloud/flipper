@@ -40,8 +40,9 @@ module Flipper
       builder.use Flipper::Cloud::Middleware, env_key: env_key
       builder.run app
       klass = self
-      builder.define_singleton_method(:inspect) { klass.inspect } # pretty rake routes output
-      builder
+      app = builder.to_app
+      app.define_singleton_method(:inspect) { klass.inspect } # pretty rake routes output
+      app
     end
 
     # Private: Configure Flipper to use Cloud by default
