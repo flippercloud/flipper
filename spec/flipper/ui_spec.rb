@@ -32,7 +32,7 @@ RSpec.describe Flipper::UI do
 
   describe 'Inspecting the built Rack app' do
     it 'returns a String' do
-      expect(build_app(flipper).inspect).to be_a(String)
+      expect(build_app(flipper).inspect).to eq("Flipper::UI")
     end
   end
 

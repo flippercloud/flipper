@@ -267,7 +267,7 @@ RSpec.describe Flipper::Cloud::Middleware do
 
   describe 'Inspecting the built Rack app' do
     it 'returns a String' do
-      expect(Flipper::Cloud.app(flipper).inspect).to be_a(String)
+      expect(Flipper::Cloud.app(flipper).inspect).to eq("Flipper::Cloud")
     end
   end
 

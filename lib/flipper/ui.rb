@@ -49,8 +49,9 @@ module Flipper
       builder.use Flipper::UI::Middleware, flipper: flipper, env_key: env_key
       builder.run app
       klass = self
-      builder.define_singleton_method(:inspect) { klass.inspect } # pretty rake routes output
-      builder.to_app
+      app = builder.to_app
+      app.define_singleton_method(:inspect) { klass.inspect } # pretty rake routes output
+      app
     end
 
     # Public: yields configuration instance for customizing UI text
