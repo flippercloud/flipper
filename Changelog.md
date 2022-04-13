@@ -7,6 +7,7 @@
 * Add Flipper::Actor#hash so actors can be hash keys (https://github.com/jnunemaker/flipper/pull/616).
 * Pretty Up `rails routes` again and make rack-protection dependency less strict (https://github.com/jnunemaker/flipper/pull/619).
 * Add kwargs for method_missing using ruby 3.0 (https://github.com/jnunemaker/flipper/pull/620).
+* Relax the rack-protection dependency (https://github.com/jnunemaker/flipper/commit/c1cb9cd78140c2b09123687642558101e6e5d37d).
 
 ## 0.24.0
 
