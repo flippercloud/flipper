@@ -3,6 +3,9 @@ require 'flipper/ui/configuration/option'
 module Flipper
   module UI
     class Configuration
+
+      include FeatureNameFromRoute
+
       attr_reader :delete
 
       attr_accessor :banner_text,
