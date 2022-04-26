@@ -73,11 +73,6 @@ module Flipper
           raise ArgumentError, "Flipper::Cloud token is missing. Please set FLIPPER_CLOUD_TOKEN or provide the token (e.g. Flipper::Cloud.new(token: 'token'))."
         end
 
-        if ENV["FLIPPER_CLOUD_SYNC_METHOD"]
-          warn "FLIPPER_CLOUD_SYNC_METHOD is deprecated and has no effect."
-        end
-        self.sync_method = options[:sync_method] if options[:sync_method]
-
         @read_timeout = options.fetch(:read_timeout) { ENV.fetch("FLIPPER_CLOUD_READ_TIMEOUT", 5).to_f }
         @open_timeout = options.fetch(:open_timeout) { ENV.fetch("FLIPPER_CLOUD_OPEN_TIMEOUT", 5).to_f }
         @write_timeout = options.fetch(:write_timeout) { ENV.fetch("FLIPPER_CLOUD_WRITE_TIMEOUT", 5).to_f }
@@ -150,10 +145,6 @@ module Flipper
       # cloud. (default: :poll, will be :webhook if sync_secret is set).
       def sync_method
         sync_secret ? :webhook : :poll
-      end
-
-      def sync_method=(_)
-        warn "Flipper::Cloud: sync_method is deprecated and has no effect."
       end
 
       private

@@ -25,11 +25,6 @@ module Flipper
           raise 'Flipper::Middleware::Memoizer no longer initializes with a flipper instance or block. Read more at: https://git.io/vSo31.'
         end
 
-        if opts[:preload_all]
-          warn "Flipper::Middleware::Memoizer: `preload_all` is deprecated, use `preload: true`"
-          opts[:preload] = true
-        end
-
         @app = app
         @opts = opts
         @env_key = opts.fetch(:env_key, 'flipper')
