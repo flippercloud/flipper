@@ -1,3 +1,9 @@
+## 0.25.0
+
+### Additions/Changes
+
+* Removed previously deprecated options and settings. Those upgrading from `<0.21` should upgrade to `~>0.24` first and fix any deprecation warnings when initializing Flipper. (https://github.com/jnunemaker/flipper/pull/627)
+
 ## 0.24.1
 
 ### Additions/Changes
