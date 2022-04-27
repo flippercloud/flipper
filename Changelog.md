@@ -1,3 +1,9 @@
+## Unreleased
+
+### Additions/Changes
+
+* Added failsafe adapter (https://github.com/jnunemaker/flipper/pull/626)
+
 ## 0.24.1
 
 ### Additions/Changes
