@@ -44,6 +44,7 @@ module Flipper
         @name = options.fetch(:name, :active_record)
         @feature_class = options.fetch(:feature_class) { Feature }
         @gate_class = options.fetch(:gate_class) { Gate }
+        @connection_class = options.fetch(:connection_class) { ::ActiveRecord::Base }
       end
 
       # Public: The set of known features.
@@ -106,7 +107,7 @@ module Flipper
         rows_query = features.join(gates, Arel::Nodes::OuterJoin)
           .on(features[:key].eq(gates[:feature_key]))
           .project(features[:key].as('feature_key'), gates[:key], gates[:value])
-        rows = ::ActiveRecord::Base.connection.select_all rows_query
+        rows = @connection_class.connection.select_all rows_query
         db_gates = rows.map { |row| Gate.new(row) }
         grouped_db_gates = db_gates.group_by(&:feature_key)
         result = Hash.new { |hash, key| hash[key] = default_config }
