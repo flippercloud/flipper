@@ -15,10 +15,9 @@ module Flipper
       # Requiring this loads the application's configuration and classes.
       RAILS_ENVIRONMENT_RB = File.expand_path("config/environment")
 
-      def initialize(**_)
-        super
+      def initialize(**args)
         # Program is always flipper, no matter how it's invoked
-        self.program_name = 'flipper'
+        super program_name: 'flipper', **args
 
         subcommand('enable', Flipper::CLI::Enable)
         subcommand('disable', Flipper::CLI::Disable)
