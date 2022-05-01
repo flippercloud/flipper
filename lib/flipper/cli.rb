@@ -20,10 +20,6 @@ module Flipper
         # Program is always flipper, no matter how it's invoked
         self.program_name = 'flipper'
 
-        on("-e environment", "--environment=e", "The target environment (Default: personal development environment)") do |e|
-          @options[:environment] = e
-        end
-
         subcommand('enable', Flipper::CLI::Enable)
         subcommand('disable', Flipper::CLI::Disable)
         subcommand('help', Flipper::CLI::Help)
