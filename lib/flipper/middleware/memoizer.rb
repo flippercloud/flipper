@@ -74,14 +74,9 @@ module Flipper
         when Array then flipper.preload(@opts[:preload])
         end
 
-        response = @app.call(env)
-        response[2] = Rack::BodyProxy.new(response[2]) do
-          flipper.memoize = false
-        end
-        reset_on_body_close = true
-        response
+        @app.call(env)
       ensure
-        flipper.memoize = false if flipper && !reset_on_body_close
+        flipper.memoize = false if flipper
       end
     end
   end
