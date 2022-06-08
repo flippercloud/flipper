@@ -16,20 +16,6 @@ RSpec.describe Flipper::Feature do
       feature = described_class.new(:search, adapter)
       expect(feature.adapter).to eq(adapter)
     end
-
-    it 'defaults instrumenter' do
-      feature = described_class.new(:search, adapter)
-      expect(feature.instrumenter).to be(Flipper::Instrumenters::Noop)
-    end
-
-    context 'with overriden instrumenter' do
-      let(:instrumenter) { double('Instrumentor', instrument: nil) }
-
-      it 'overrides default instrumenter' do
-        feature = described_class.new(:search, adapter, instrumenter: instrumenter)
-        expect(feature.instrumenter).to be(instrumenter)
-      end
-    end
   end
 
   describe '#to_s' do
@@ -144,7 +130,8 @@ RSpec.describe Flipper::Feature do
     let(:instrumenter) { Flipper::Instrumenters::Memory.new }
 
     subject do
-      described_class.new(:search, adapter, instrumenter: instrumenter)
+      Flipper.instrumenter = instrumenter
+      described_class.new(:search, adapter)
     end
 
     it 'is recorded for enable' do

@@ -29,8 +29,6 @@ module Flipper
           sync_options = {
             raise: false,
           }
-          instrumenter = options[:instrumenter]
-          sync_options[:instrumenter] = instrumenter if instrumenter
           synchronizer = Synchronizer.new(@local, @remote, sync_options)
           IntervalSynchronizer.new(synchronizer, interval: options[:interval])
         end

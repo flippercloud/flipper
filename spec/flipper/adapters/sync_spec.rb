@@ -1,5 +1,6 @@
 require 'flipper/adapters/sync'
 require 'flipper/adapters/operation_logger'
+require 'active_support'
 require 'active_support/notifications'
 
 RSpec.describe Flipper::Adapters::Sync do

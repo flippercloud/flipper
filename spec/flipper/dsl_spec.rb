@@ -20,34 +20,18 @@ RSpec.describe Flipper::DSL do
         expect(dsl.adapter).to be(adapter)
       end
     end
-
-    it 'defaults instrumenter to noop' do
-      dsl = described_class.new(adapter)
-      expect(dsl.instrumenter).to be(Flipper::Instrumenters::Noop)
-    end
-
-    context 'with overriden instrumenter' do
-      let(:instrumenter) { double('Instrumentor', instrument: nil) }
-
-      it 'overrides default instrumenter' do
-        dsl = described_class.new(adapter, instrumenter: instrumenter)
-        expect(dsl.instrumenter).to be(instrumenter)
-      end
-    end
   end
 
   describe '#feature' do
     it_should_behave_like 'a DSL feature' do
       let(:method_name) { :feature }
-      let(:instrumenter) { double('Instrumentor', instrument: nil) }
       let(:feature) { dsl.send(method_name, :stats) }
-      let(:dsl) { described_class.new(adapter, instrumenter: instrumenter) }
+      let(:dsl) { described_class.new(adapter) }
     end
   end
 
   describe '#preload' do
-    let(:instrumenter) { double('Instrumentor', instrument: nil) }
-    let(:dsl) { described_class.new(adapter, instrumenter: instrumenter) }
+    let(:dsl) { described_class.new(adapter) }
     let(:names) { %i(stats shiny) }
     let(:features) { dsl.preload(names) }
 
@@ -65,12 +49,6 @@ RSpec.describe Flipper::DSL do
       end
     end
 
-    it 'sets instrumenter' do
-      features.each do |feature|
-        expect(feature.instrumenter).to eq(dsl.instrumenter)
-      end
-    end
-
     it 'memoizes the feature' do
       features.each do |feature|
         expect(dsl.feature(feature.name)).to equal(feature)
@@ -79,10 +57,9 @@ RSpec.describe Flipper::DSL do
   end
 
   describe '#preload_all' do
-    let(:instrumenter) { double('Instrumentor', instrument: nil) }
     let(:dsl) do
       names.each { |name| adapter.add subject[name] }
-      described_class.new(adapter, instrumenter: instrumenter)
+      described_class.new(adapter)
     end
     let(:names) { %i(stats shiny) }
     let(:features) { dsl.preload_all }
@@ -101,12 +78,6 @@ RSpec.describe Flipper::DSL do
       end
     end
 
-    it 'sets instrumenter' do
-      features.each do |feature|
-        expect(feature.instrumenter).to eq(dsl.instrumenter)
-      end
-    end
-
     it 'memoizes the feature' do
       features.each do |feature|
         expect(dsl.feature(feature.name)).to equal(feature)
@@ -117,9 +88,8 @@ RSpec.describe Flipper::DSL do
   describe '#[]' do
     it_should_behave_like 'a DSL feature' do
       let(:method_name) { :[] }
-      let(:instrumenter) { double('Instrumentor', instrument: nil) }
       let(:feature) { dsl.send(method_name, :stats) }
-      let(:dsl) { described_class.new(adapter, instrumenter: instrumenter) }
+      let(:dsl) { described_class.new(adapter) }
     end
   end
 

@@ -14,18 +14,16 @@ module Flipper
         # remote - The Flipper adapter that is source of truth that the local
         #          adapter should be brought in line with.
         # options - The Hash of options.
-        #           :instrumenter - The instrumenter used to instrument.
         #           :raise - Should errors be raised (default: true).
         def initialize(local, remote, options = {})
           @local = local
           @remote = remote
-          @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
           @raise = options.fetch(:raise, true)
         end
 
         # Public: Forces a sync.
         def call
-          @instrumenter.instrument("synchronizer_call.flipper") { sync }
+          Flipper.instrument("synchronizer_call.flipper") { sync }
         end
 
         private
@@ -54,7 +52,7 @@ module Flipper
 
           nil
         rescue => exception
-          @instrumenter.instrument("synchronizer_exception.flipper", exception: exception)
+          Flipper.instrument("synchronizer_exception.flipper", exception: exception)
           raise if @raise
         end
       end

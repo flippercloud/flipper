@@ -18,21 +18,14 @@ module Flipper
     # Private: The adapter this feature should use.
     attr_reader :adapter
 
-    # Private: What is being used to instrument all the things.
-    attr_reader :instrumenter
-
     # Internal: Initializes a new feature instance.
     #
     # name - The Symbol or String name of the feature.
     # adapter - The adapter that will be used to store details about this feature.
     #
-    # options - The Hash of options.
-    #           :instrumenter - What to use to instrument all the things.
-    #
-    def initialize(name, adapter, options = {})
+    def initialize(name, adapter)
       @name = name
       @key = name.to_s
-      @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
       @adapter = adapter
     end
 
@@ -369,7 +362,7 @@ module Flipper
 
     # Private: Instrument a feature operation.
     def instrument(operation)
-      @instrumenter.instrument(InstrumentationName) do |payload|
+      Flipper.instrument(InstrumentationName) do |payload|
         payload[:feature_name] = name
         payload[:operation] = operation
         payload[:result] = yield(payload) if block_given?

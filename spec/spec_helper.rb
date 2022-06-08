@@ -77,10 +77,6 @@ RSpec.shared_examples_for 'a DSL feature' do
     expect(feature.adapter.name).to eq(dsl.adapter.name)
   end
 
-  it 'sets instrumenter' do
-    expect(feature.instrumenter).to eq(dsl.instrumenter)
-  end
-
   it 'memoizes the feature' do
     expect(dsl.send(method_name, :stats)).to equal(feature)
   end

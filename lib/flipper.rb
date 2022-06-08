@@ -68,6 +68,9 @@ module Flipper
                  :memoize=, :memoizing?,
                  :sync, :sync_secret # For Flipper::Cloud. Will error for OSS Flipper.
 
+  def_delegators :configuration, :instrumenter, :instrumenter=
+  def_delegators :instrumenter, :instrument
+
   # Public: Use this to register a group by name.
   #
   # name - The Symbol name of the group.

@@ -30,4 +30,22 @@ RSpec.describe Flipper::Configuration do
       expect(subject.default).to be(instance)
     end
   end
+
+  describe '#instrumenter' do
+    it 'defaults to noop' do
+      expect(subject.instrumenter).to be(Flipper::Instrumenters::Noop)
+    end
+
+    it 'overrides default instrumenter' do
+      instrumenter = double('Instrumentor', instrument: nil)
+      subject.instrumenter instrumenter
+      expect(subject.instrumenter).to be(instrumenter)
+    end
+
+    it 'overrides instrumenter with =' do
+      instrumenter = double('Instrumentor', instrument: nil)
+      subject.instrumenter = instrumenter
+      expect(subject.instrumenter).to be(instrumenter)
+    end
+  end
 end

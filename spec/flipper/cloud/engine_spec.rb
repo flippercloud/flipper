@@ -32,7 +32,7 @@ RSpec.describe Flipper::Cloud::Engine do
     application.initialize!
 
     expect(Flipper.instance).to be_a(Flipper::Cloud::DSL)
-    expect(Flipper.instance.instrumenter).to be(ActiveSupport::Notifications)
+    expect(Flipper.instrumenter).to be(ActiveSupport::Notifications)
   end
 
   context "with CLOUD_SYNC_SECRET" do

@@ -10,15 +10,15 @@
 #
 
 require 'bundler/setup'
-require "active_support/notifications"
+require 'active_support'
+require 'active_support/notifications'
 require "flipper/api"
 require "flipper/adapters/pstore"
 
-adapter = Flipper::Adapters::Instrumented.new(
-  Flipper::Adapters::PStore.new,
-  instrumenter: ActiveSupport::Notifications,
-)
-flipper = Flipper.new(adapter)
+Flipper.configure do |config|
+  config.instrumenter ActiveSupport::Notifications
+  config.adapter { Flipper::Adapters::Instrumented.new(Flipper::Adapters::PStore.new) }
+end
 
 ActiveSupport::Notifications.subscribe(/.*/, ->(*args) {
   name, start, finish, id, data = args
@@ -31,7 +31,6 @@ ActiveSupport::Notifications.subscribe(/.*/, ->(*args) {
 # You can uncomment this to get some default data:
 # flipper[:logging].enable_percentage_of_time 5
 
-run Flipper::Api.app(flipper) { |builder|
-  builder.use Flipper::Middleware::SetupEnv, flipper
+run Flipper::Api.app { |builder|
   builder.use Flipper::Middleware::Memoizer, preload: true
 }

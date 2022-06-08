@@ -10,16 +10,15 @@
 #
 
 require 'bundler/setup'
+require 'active_support'
 require "active_support/notifications"
 require "flipper/api"
 require "flipper/adapters/pstore"
 
 Flipper.configure do |config|
+  config.instrumenter ActiveSupport::Notifications
   config.adapter {
-    Flipper::Adapters::Instrumented.new(
-      Flipper::Adapters::PStore.new,
-      instrumenter: ActiveSupport::Notifications,
-    )
+    Flipper::Adapters::Instrumented.new(Flipper::Adapters::PStore.new)
   }
 end
 

@@ -4,14 +4,14 @@ require 'flipper/instrumentation/log_subscriber'
 
 RSpec.describe Flipper::Instrumentation::LogSubscriber do
   let(:adapter) do
-    memory = Flipper::Adapters::Memory.new
-    Flipper::Adapters::Instrumented.new(memory, instrumenter: ActiveSupport::Notifications)
+    Flipper::Adapters::Instrumented.new(Flipper::Adapters::Memory.new)
   end
   let(:flipper) do
-    Flipper.new(adapter, instrumenter: ActiveSupport::Notifications)
+    Flipper.new(adapter)
   end
 
   before do
+    Flipper.instrumenter = ActiveSupport::Notifications
     Flipper.register(:admins) do |thing|
       thing.respond_to?(:admin?) && thing.admin?
     end

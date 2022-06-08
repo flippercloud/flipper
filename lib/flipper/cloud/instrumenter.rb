@@ -4,14 +4,13 @@ require "flipper/instrumenters/noop"
 module Flipper
   module Cloud
     class Instrumenter < SimpleDelegator
-      def initialize(options = {})
+      def initialize(instrumenter: Flipper.instrumenter)
         @brow = options.fetch(:brow)
-        @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
-        super @instrumenter
+        super instrumenter
       end
 
       def instrument(name, payload = {}, &block)
-        result = @instrumenter.instrument(name, payload, &block)
+        result = Flipper.instrument(name, payload, &block)
         push name, payload
         result
       end
