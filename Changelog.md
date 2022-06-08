@@ -3,6 +3,7 @@
 ### Additions/Changes
 
 * Added failsafe adapter (https://github.com/jnunemaker/flipper/pull/626)
+* ActiveRecord: base class for internal models (https://github.com/jnunemaker/flipper/pull/629)
 
 ## 0.24.1
 
