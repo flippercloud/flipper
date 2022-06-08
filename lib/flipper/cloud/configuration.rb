@@ -9,6 +9,8 @@ require "brow"
 module Flipper
   module Cloud
     class Configuration
+      include DeprecatedInstrumenter
+
       # The set of valid ways that syncing can happpen.
       VALID_SYNC_METHODS = Set[
         :poll,
@@ -58,6 +60,7 @@ module Flipper
       attr_accessor :sync_secret
 
       def initialize(options = {})
+        deprecated_instrumenter_option options
         @token = options.fetch(:token) { ENV["FLIPPER_CLOUD_TOKEN"] }
 
         if @token.nil?

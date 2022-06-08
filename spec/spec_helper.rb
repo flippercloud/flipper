@@ -27,6 +27,14 @@ RSpec.configure do |config|
     Flipper.configuration = nil
   end
 
+  config.after(:each) do
+    # Remove all subscribers once AS::Notifications is loaded
+    if defined?(ActiveSupport::Notifications)
+      ActiveSupport::Notifications.unsubscribe /\.flipper$/
+    end
+  end
+
+
   config.disable_monkey_patching!
 
   config.filter_run focus: true

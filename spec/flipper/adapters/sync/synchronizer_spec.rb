@@ -32,10 +32,7 @@ RSpec.describe Flipper::Adapters::Sync::Synchronizer do
 
   context "when raise disabled" do
     subject do
-      options = {
-        instrumenter: instrumenter,
-        raise: false,
-      }
+      options = { raise: false }
       described_class.new(local, remote, options)
     end
 

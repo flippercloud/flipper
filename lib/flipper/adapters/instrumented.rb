@@ -6,6 +6,7 @@ module Flipper
     # operations.
     class Instrumented < SimpleDelegator
       include ::Flipper::Adapter
+      include DeprecatedInstrumenter
 
       # Private: The name of instrumentation events.
       InstrumentationName = "adapter_operation.#{InstrumentationNamespace}".freeze
@@ -17,8 +18,9 @@ module Flipper
       #
       # adapter - Vanilla adapter instance to wrap.
       #
-      def initialize(adapter)
+      def initialize(adapter, options = {})
         super(adapter)
+        deprecated_instrumenter_option options
         @adapter = adapter
         @name = :instrumented
       end

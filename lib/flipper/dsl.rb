@@ -3,6 +3,7 @@ require 'forwardable'
 module Flipper
   class DSL
     extend Forwardable
+    include DeprecatedInstrumenter
 
     # Private
     attr_reader :adapter
@@ -15,6 +16,7 @@ module Flipper
     # options - The Hash of options.
     #           :memoize - Should adapter be wrapped by memoize adapter or not.
     def initialize(adapter, options = {})
+      deprecated_instrumenter_option options
       memoize = options.fetch(:memoize, true)
       adapter = Adapters::Memoizable.new(adapter) if memoize
       @adapter = adapter

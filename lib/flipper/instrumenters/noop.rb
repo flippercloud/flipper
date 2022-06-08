@@ -5,7 +5,7 @@ module Flipper
         yield payload if block_given?
       end
 
-      def self.subscribe(_name, _subscriber)
+      def self.subscribe(_name, _callback = nil, &_block)
         # noop
       end
     end

@@ -8,6 +8,8 @@ module Flipper
       # Public: Given a local and remote adapter, it can update the local to
       # match the remote doing only the necessary enable/disable operations.
       class Synchronizer
+        include DeprecatedInstrumenter
+
         # Public: Initializes a new synchronizer.
         #
         # local - The Flipper adapter to get in sync with the remote.
@@ -16,6 +18,7 @@ module Flipper
         # options - The Hash of options.
         #           :raise - Should errors be raised (default: true).
         def initialize(local, remote, options = {})
+          deprecated_instrumenter_option options
           @local = local
           @remote = remote
           @raise = options.fetch(:raise, true)

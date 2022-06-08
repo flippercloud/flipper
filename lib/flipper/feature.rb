@@ -6,6 +6,8 @@ require 'flipper/gate_values'
 
 module Flipper
   class Feature
+    include DeprecatedInstrumenter
+
     # Private: The name of feature instrumentation events.
     InstrumentationName = "feature_operation.#{InstrumentationNamespace}".freeze
 
@@ -23,7 +25,8 @@ module Flipper
     # name - The Symbol or String name of the feature.
     # adapter - The adapter that will be used to store details about this feature.
     #
-    def initialize(name, adapter)
+    def initialize(name, adapter, options = {})
+      deprecated_instrumenter_option options
       @name = name
       @key = name.to_s
       @adapter = adapter

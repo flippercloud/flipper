@@ -1,7 +1,5 @@
 module Flipper
   class Configuration
-    attr_accessor :instrumenter
-
     def initialize(options = {})
       adapter { Flipper::Adapters::Memory.new }
       default { Flipper.new(adapter) }
