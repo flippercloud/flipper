@@ -1,7 +1,9 @@
-## 0.25.0
+## Unreleased
 
 ### Additions/Changes
 
+* Added failsafe adapter (https://github.com/jnunemaker/flipper/pull/626)
+* ActiveRecord: base class for internal models (https://github.com/jnunemaker/flipper/pull/629)
 * Removed previously deprecated options and settings. Those upgrading from `<0.21` should upgrade to `~>0.24` first and fix any deprecation warnings when initializing Flipper. (https://github.com/jnunemaker/flipper/pull/627)
 
 ## 0.24.1
