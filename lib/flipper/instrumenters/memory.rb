@@ -26,6 +26,11 @@ module Flipper
         @events << Event.new(name, payload, result)
       end
 
+      def self.subscribe(_name, _subscriber)
+        # noop
+      end
+
+
       def events_by_name(name)
         @events.select { |event| event.name == name }
       end

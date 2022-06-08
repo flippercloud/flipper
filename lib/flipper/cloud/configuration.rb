@@ -3,7 +3,6 @@ require "flipper/adapters/http"
 require "flipper/adapters/memory"
 require "flipper/adapters/dual_write"
 require "flipper/adapters/sync"
-require "flipper/cloud/instrumenter"
 require "flipper/cloud/registry"
 require "brow"
 
@@ -83,8 +82,12 @@ module Flipper
         # This is alpha. Don't use this unless you are me. And you are not me.
         cloud_instrument = options.fetch(:cloud_instrument) { ENV["FLIPPER_CLOUD_INSTRUMENT"] == "1" }
         if cloud_instrument
-          # FIXME: replace with a subscriber to AS::Notifications
-          Flipper.instrumenter Instrumenter.new(brow: brow, instrumenter: Flipper.instrumenter)
+          require 'flipper/instrumentation/cloud_subscriber'
+
+          Flipper.instrumenter.subscribe(
+            Flipper::Feature::InstrumentationName,
+            Flipper::Instrumentation::CloudSubscriber.new(brow)
+          )
         end
       end
 
