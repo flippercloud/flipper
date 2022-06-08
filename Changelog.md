@@ -3,6 +3,17 @@
 ### Additions/Changes
 
 * Added failsafe adapter (https://github.com/jnunemaker/flipper/pull/626)
+* Deprecate `instrumenter:` option everywhere in favor of global config. If you are manually configuring the instrumenter, you will need to update your configuration:
+    ```diff
+    # config/initializers/flipper.rb
+      Flipper.configure do |config|
+        config.adapter do
+    -     Flipper::Adapters::Instrumented.new(my_adapter, instrumenter: MyInstrumenter)
+    +     Flipper::Adapters::Instrumented.new(my_adapter)
+        end
+    +   config.instrumenter MyInstrumenter
+      end
+    ```
 
 ## 0.24.1
 
