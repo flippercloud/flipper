@@ -68,6 +68,17 @@ module Flipper
                  :memoize=, :memoizing?,
                  :sync, :sync_secret # For Flipper::Cloud. Will error for OSS Flipper.
 
+  # Public: Get or set the configured instrumenter.
+  def_delegators :configuration, :instrumenter, :instrumenter=
+
+  # Public: Instrument a call using the configured instrumenter.
+  #
+  #   Flipper.instrument(name, payload) do |payload|
+  #     payload[:result] = something
+  #   end
+  #
+  def_delegators :instrumenter, :instrument
+
   # Public: Use this to register a group by name.
   #
   # name - The Symbol name of the group.
@@ -140,6 +151,7 @@ module Flipper
   end
 end
 
+require 'flipper/deprecated_instrumenter'
 require 'flipper/actor'
 require 'flipper/adapter'
 require 'flipper/adapters/memoizable'

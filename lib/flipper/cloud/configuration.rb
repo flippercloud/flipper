@@ -3,13 +3,14 @@ require "flipper/adapters/http"
 require "flipper/adapters/memory"
 require "flipper/adapters/dual_write"
 require "flipper/adapters/sync"
-require "flipper/cloud/instrumenter"
 require "flipper/cloud/registry"
 require "brow"
 
 module Flipper
   module Cloud
     class Configuration
+      include DeprecatedInstrumenter
+
       # The set of valid ways that syncing can happpen.
       VALID_SYNC_METHODS = Set[
         :poll,
@@ -41,14 +42,6 @@ module Flipper
       #  configuration.debug_output = STDOUT
       attr_accessor :debug_output
 
-      # Public: Instrumenter to use for the Flipper instance returned by
-      #         Flipper::Cloud.new (default: Flipper::Instrumenters::Noop).
-      #
-      #  # for example, to use active support notifications you could do:
-      #  configuration = Flipper::Cloud::Configuration.new
-      #  configuration.instrumenter = ActiveSupport::Notifications
-      attr_accessor :instrumenter
-
       # Public: Local adapter that all reads should go to in order to ensure
       # latency is low and resiliency is high. This adapter is automatically
       # kept in sync with cloud.
@@ -67,6 +60,7 @@ module Flipper
       attr_accessor :sync_secret
 
       def initialize(options = {})
+        deprecated_instrumenter_option options
         @token = options.fetch(:token) { ENV["FLIPPER_CLOUD_TOKEN"] }
 
         if @token.nil?
@@ -88,14 +82,15 @@ module Flipper
         @adapter_block = ->(adapter) { adapter }
         self.url = options.fetch(:url) { ENV.fetch("FLIPPER_CLOUD_URL", DEFAULT_URL) }
 
-        instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
-
         # This is alpha. Don't use this unless you are me. And you are not me.
         cloud_instrument = options.fetch(:cloud_instrument) { ENV["FLIPPER_CLOUD_INSTRUMENT"] == "1" }
-        @instrumenter = if cloud_instrument
-          Instrumenter.new(brow: brow, instrumenter: instrumenter)
-        else
-          instrumenter
+        if cloud_instrument
+          require 'flipper/instrumentation/cloud_subscriber'
+
+          Flipper.instrumenter.subscribe(
+            Flipper::Feature::InstrumentationName,
+            Flipper::Instrumentation::CloudSubscriber.new(brow)
+          )
         end
       end
 
@@ -123,7 +118,6 @@ module Flipper
 
       def sync
         Flipper::Adapters::Sync::Synchronizer.new(local_adapter, http_adapter, {
-          instrumenter: instrumenter,
           interval: sync_interval,
         }).call
       end
@@ -168,7 +162,6 @@ module Flipper
 
       def sync_adapter
         Flipper::Adapters::Sync.new(local_adapter, http_adapter, {
-          instrumenter: instrumenter,
           interval: sync_interval,
         })
       end

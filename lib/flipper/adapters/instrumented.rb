@@ -6,12 +6,10 @@ module Flipper
     # operations.
     class Instrumented < SimpleDelegator
       include ::Flipper::Adapter
+      include DeprecatedInstrumenter
 
       # Private: The name of instrumentation events.
       InstrumentationName = "adapter_operation.#{InstrumentationNamespace}".freeze
-
-      # Private: What is used to instrument all the things.
-      attr_reader :instrumenter
 
       # Public: The name of the adapter.
       attr_reader :name
@@ -20,14 +18,11 @@ module Flipper
       #
       # adapter - Vanilla adapter instance to wrap.
       #
-      # options - The Hash of options.
-      #           :instrumenter - What to use to instrument all the things.
-      #
       def initialize(adapter, options = {})
         super(adapter)
+        deprecated_instrumenter_option options
         @adapter = adapter
         @name = :instrumented
-        @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
       end
 
       # Public
@@ -37,7 +32,7 @@ module Flipper
           adapter_name: @adapter.name,
         }
 
-        @instrumenter.instrument(InstrumentationName, default_payload) do |payload|
+        Flipper.instrument(InstrumentationName, default_payload) do |payload|
           payload[:result] = @adapter.features
         end
       end
@@ -50,7 +45,7 @@ module Flipper
           feature_name: feature.name,
         }
 
-        @instrumenter.instrument(InstrumentationName, default_payload) do |payload|
+        Flipper.instrument(InstrumentationName, default_payload) do |payload|
           payload[:result] = @adapter.add(feature)
         end
       end
@@ -63,7 +58,7 @@ module Flipper
           feature_name: feature.name,
         }
 
-        @instrumenter.instrument(InstrumentationName, default_payload) do |payload|
+        Flipper.instrument(InstrumentationName, default_payload) do |payload|
           payload[:result] = @adapter.remove(feature)
         end
       end
@@ -76,7 +71,7 @@ module Flipper
           feature_name: feature.name,
         }
 
-        @instrumenter.instrument(InstrumentationName, default_payload) do |payload|
+        Flipper.instrument(InstrumentationName, default_payload) do |payload|
           payload[:result] = @adapter.clear(feature)
         end
       end
@@ -89,7 +84,7 @@ module Flipper
           feature_name: feature.name,
         }
 
-        @instrumenter.instrument(InstrumentationName, default_payload) do |payload|
+        Flipper.instrument(InstrumentationName, default_payload) do |payload|
           payload[:result] = @adapter.get(feature)
         end
       end
@@ -101,7 +96,7 @@ module Flipper
           feature_names: features.map(&:name),
         }
 
-        @instrumenter.instrument(InstrumentationName, default_payload) do |payload|
+        Flipper.instrument(InstrumentationName, default_payload) do |payload|
           payload[:result] = @adapter.get_multi(features)
         end
       end
@@ -112,7 +107,7 @@ module Flipper
           adapter_name: @adapter.name,
         }
 
-        @instrumenter.instrument(InstrumentationName, default_payload) do |payload|
+        Flipper.instrument(InstrumentationName, default_payload) do |payload|
           payload[:result] = @adapter.get_all
         end
       end
@@ -127,7 +122,7 @@ module Flipper
           thing_value: thing.value,
         }
 
-        @instrumenter.instrument(InstrumentationName, default_payload) do |payload|
+        Flipper.instrument(InstrumentationName, default_payload) do |payload|
           payload[:result] = @adapter.enable(feature, gate, thing)
         end
       end
@@ -142,7 +137,7 @@ module Flipper
           thing_value: thing.value,
         }
 
-        @instrumenter.instrument(InstrumentationName, default_payload) do |payload|
+        Flipper.instrument(InstrumentationName, default_payload) do |payload|
           payload[:result] = @adapter.disable(feature, gate, thing)
         end
       end

@@ -41,10 +41,6 @@ RSpec.describe Flipper::Cloud do
       headers = @http_client.instance_variable_get('@headers')
       expect(headers['Flipper-Cloud-Token']).to eq(token)
     end
-
-    it 'uses noop instrumenter' do
-      expect(@instance.instrumenter).to be(Flipper::Instrumenters::Noop)
-    end
   end
 
   context 'initialize with token and options' do
@@ -69,12 +65,6 @@ RSpec.describe Flipper::Cloud do
   it 'can initialize with no token explicitly provided' do
     ENV['FLIPPER_CLOUD_TOKEN'] = 'asdf'
     expect(described_class.new).to be_instance_of(Flipper::Cloud::DSL)
-  end
-
-  it 'can set instrumenter' do
-    instrumenter = Flipper::Instrumenters::Memory.new
-    instance = described_class.new(token: 'asdf', instrumenter: instrumenter)
-    expect(instance.instrumenter).to be(instrumenter)
   end
 
   it 'allows wrapping adapter with another adapter like the instrumenter' do

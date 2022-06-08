@@ -1,8 +1,9 @@
 module Flipper
   class Configuration
     def initialize(options = {})
-      @default = -> { Flipper.new(adapter) }
-      @adapter = -> { Flipper::Adapters::Memory.new }
+      adapter { Flipper::Adapters::Memory.new }
+      default { Flipper.new(adapter) }
+      instrumenter Flipper::Instrumenters::Noop
     end
 
     # The default adapter to use.
@@ -54,5 +55,15 @@ module Flipper
         @default.call
       end
     end
+
+    # Configure or fetch the current instrumenter
+    #
+    #   Flipper.configure do |config|
+    #     config.instrumenter ActiveSupport::Notifications
+    #   end
+    def instrumenter(new_value = @instrumenter)
+      @instrumenter = new_value
+    end
+    alias :instrumenter= :instrumenter
   end
 end

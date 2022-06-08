@@ -1,19 +1,13 @@
-require "delegate"
-require "flipper/instrumenters/noop"
-
 module Flipper
-  module Cloud
-    class Instrumenter < SimpleDelegator
-      def initialize(options = {})
-        @brow = options.fetch(:brow)
-        @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
-        super @instrumenter
+  module Instrumentation
+    # Report the result of feature checks to Flipper Cloud.
+    class CloudSubscriber
+      def initialize(brow)
+        @brow = brow
       end
 
-      def instrument(name, payload = {}, &block)
-        result = @instrumenter.instrument(name, payload, &block)
+      def call(name, start, finish, id, payload)
         push name, payload
-        result
       end
 
       private

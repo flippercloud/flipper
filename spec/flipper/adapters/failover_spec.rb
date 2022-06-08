@@ -84,21 +84,19 @@ RSpec.describe Flipper::Adapters::Failover do
   context 'when primary is instrumented and fails' do
     before do
       allow(memory_adapter).to receive(:get).and_raise(Net::ReadTimeout)
+      Flipper.instrumenter = instrumenter
     end
 
     let(:memory_adapter) { Flipper::Adapters::Memory.new }
     let(:primary) do
-      Flipper::Adapters::Instrumented.new(
-        memory_adapter,
-        instrumenter: instrumenter,
-      )
+      Flipper::Adapters::Instrumented.new(memory_adapter)
     end
     let(:instrumenter) { Flipper::Instrumenters::Memory.new }
 
     it 'logs the raised exception' do
       flipper[:flag].enabled?
 
-      expect(instrumenter.events.count).to be 1
+      expect(instrumenter.events.count).to be(2)
 
       payload = instrumenter.events[0].payload
       expect(payload.keys).to include(:exception, :exception_object)

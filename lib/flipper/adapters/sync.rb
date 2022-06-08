@@ -7,6 +7,7 @@ module Flipper
     # rather than in the main thread only when reads happen.
     class Sync
       include ::Flipper::Adapter
+      include DeprecatedInstrumenter
 
       # Public: The name of the adapter.
       attr_reader :name
@@ -22,6 +23,7 @@ module Flipper
       # interval - The Float or Integer number of seconds between syncs from
       # remote to local. Default value is set in IntervalSynchronizer.
       def initialize(local, remote, options = {})
+        deprecated_instrumenter_option options
         @name = :sync
         @local = local
         @remote = remote
@@ -29,8 +31,6 @@ module Flipper
           sync_options = {
             raise: false,
           }
-          instrumenter = options[:instrumenter]
-          sync_options[:instrumenter] = instrumenter if instrumenter
           synchronizer = Synchronizer.new(@local, @remote, sync_options)
           IntervalSynchronizer.new(synchronizer, interval: options[:interval])
         end

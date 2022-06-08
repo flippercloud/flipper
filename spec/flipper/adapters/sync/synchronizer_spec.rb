@@ -9,7 +9,11 @@ RSpec.describe Flipper::Adapters::Sync::Synchronizer do
   let(:remote_flipper) { Flipper.new(remote) }
   let(:instrumenter) { Flipper::Instrumenters::Memory.new }
 
-  subject { described_class.new(local, remote, instrumenter: instrumenter) }
+  subject { described_class.new(local, remote) }
+
+  before do
+    Flipper.instrumenter = instrumenter
+  end
 
   it "instruments call" do
     subject.call
@@ -28,10 +32,7 @@ RSpec.describe Flipper::Adapters::Sync::Synchronizer do
 
   context "when raise disabled" do
     subject do
-      options = {
-        instrumenter: instrumenter,
-        raise: false,
-      }
+      options = { raise: false }
       described_class.new(local, remote, options)
     end
 

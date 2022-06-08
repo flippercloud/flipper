@@ -17,12 +17,6 @@ RSpec.describe Flipper::Cloud::Configuration do
     expect(instance.token).to eq("from_env")
   end
 
-  it "can set instrumenter" do
-    instrumenter = Object.new
-    instance = described_class.new(required_options.merge(instrumenter: instrumenter))
-    expect(instance.instrumenter).to be(instrumenter)
-  end
-
   it "can set read_timeout" do
     instance = described_class.new(required_options.merge(read_timeout: 5))
     expect(instance.read_timeout).to eq(5)

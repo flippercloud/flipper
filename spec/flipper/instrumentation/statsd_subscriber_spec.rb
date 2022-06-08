@@ -6,16 +6,16 @@ RSpec.describe Flipper::Instrumentation::StatsdSubscriber do
   let(:statsd_client) { Statsd.new }
   let(:socket) { FakeUDPSocket.new }
   let(:adapter) do
-    memory = Flipper::Adapters::Memory.new
-    Flipper::Adapters::Instrumented.new(memory, instrumenter: ActiveSupport::Notifications)
+    Flipper::Adapters::Instrumented.new(Flipper::Adapters::Memory.new)
   end
   let(:flipper) do
-    Flipper.new(adapter, instrumenter: ActiveSupport::Notifications)
+    Flipper.new(adapter)
   end
 
   let(:user) { user = Flipper::Actor.new('1') }
 
   before do
+    Flipper.instrumenter = ActiveSupport::Notifications
     described_class.client = statsd_client
     Thread.current[:statsd_socket] = socket
   end

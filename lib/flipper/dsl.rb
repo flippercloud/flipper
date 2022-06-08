@@ -3,12 +3,10 @@ require 'forwardable'
 module Flipper
   class DSL
     extend Forwardable
+    include DeprecatedInstrumenter
 
     # Private
     attr_reader :adapter
-
-    # Private: What is being used to instrument all the things.
-    attr_reader :instrumenter
 
     def_delegators :@adapter, :memoize=, :memoizing?
 
@@ -16,10 +14,9 @@ module Flipper
     #
     # adapter - The adapter that this DSL instance should use.
     # options - The Hash of options.
-    #           :instrumenter - What should be used to instrument all the things.
     #           :memoize - Should adapter be wrapped by memoize adapter or not.
     def initialize(adapter, options = {})
-      @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
+      deprecated_instrumenter_option options
       memoize = options.fetch(:memoize, true)
       adapter = Adapters::Memoizable.new(adapter) if memoize
       @adapter = adapter
@@ -181,7 +178,7 @@ module Flipper
         raise ArgumentError, "#{name} must be a String or Symbol"
       end
 
-      @memoized_features[name.to_sym] ||= Feature.new(name, @adapter, instrumenter: instrumenter)
+      @memoized_features[name.to_sym] ||= Feature.new(name, @adapter)
     end
 
     # Public: Preload the features with the given names.

@@ -1,6 +1,7 @@
 # Quick example of how to keep track of when a feature was last checked.
 require 'bundler/setup'
 require 'securerandom'
+require 'active_support'
 require 'active_support/notifications'
 require 'flipper'
 
@@ -20,9 +21,7 @@ class FlipperSubscriber
 end
 
 Flipper.configure do |config|
-  config.default {
-    Flipper.new(config.adapter, instrumenter: ActiveSupport::Notifications)
-  }
+  config.instrumenter ActiveSupport::Notifications
 end
 
 Flipper.enabled?(:search)

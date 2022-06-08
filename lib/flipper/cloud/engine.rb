@@ -13,10 +13,7 @@ module Flipper
         Flipper.configure do |config|
           config.default do
             if ENV["FLIPPER_CLOUD_TOKEN"]
-              Flipper::Cloud.new(
-                local_adapter: config.adapter,
-                instrumenter: app.config.flipper.instrumenter
-              )
+              Flipper::Cloud.new(local_adapter: config.adapter)
             else
               warn "Missing FLIPPER_CLOUD_TOKEN environment variable. Disabling Flipper::Cloud."
               Flipper.new(config.adapter)
