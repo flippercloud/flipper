@@ -2,10 +2,10 @@
 
 ### Additions/Changes
 
-* Added failsafe adapter (https://github.com/jnunemaker/flipper/pull/626)
-* ActiveRecord: base class for internal models (https://github.com/jnunemaker/flipper/pull/629)
-* Removed previously deprecated options and settings. Those upgrading from `<0.21` should upgrade to `~>0.24` first and fix any deprecation warnings when initializing Flipper. (https://github.com/jnunemaker/flipper/pull/627)
 * Added a prompt in Flipper UI for the 'Delete' button to prevent accidental delete of features (https://github.com/jnunemaker/flipper/pull/625)
+* Added failsafe adapter (https://github.com/jnunemaker/flipper/pull/626)
+* Removed previously deprecated options and settings. Those upgrading from `<0.21` should upgrade to `~>0.24` first and fix any deprecation warnings when initializing Flipper. (https://github.com/jnunemaker/flipper/pull/627)
+* ActiveRecord: base class for internal models (https://github.com/jnunemaker/flipper/pull/629)
 * Remove use of `Rack::BodyProxy` in the memoizer middleware (https://github.com/jnunemaker/flipper/pull/631)
 
 ## 0.24.1
