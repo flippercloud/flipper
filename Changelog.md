@@ -1,4 +1,4 @@
-## Unreleased
+## 0.25.0
 
 ### Additions/Changes
 
