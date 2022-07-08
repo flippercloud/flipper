@@ -112,7 +112,7 @@ module Flipper
           .on(features[:key].eq(gates[:feature_key]))
           .project(features[:key].as('feature_key'), gates[:key], gates[:value])
         rows = @feature_class.connection.select_all rows_query
-        db_gates = rows.map { |row| Gate.new(row) }
+        db_gates = rows.map { |row| @gate_class.new(row) }
         grouped_db_gates = db_gates.group_by(&:feature_key)
         result = Hash.new { |hash, key| hash[key] = default_config }
         features = grouped_db_gates.keys.map { |key| Flipper::Feature.new(key, self) }
