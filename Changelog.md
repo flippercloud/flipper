@@ -1,3 +1,9 @@
+## 0.25.1
+
+### Bug Fixes
+
+* ActiveRecord: use provided `gate_class` option when calling `#get_all` (https://github.com/jnunemaker/flipper/pull/647)
+
 ## 0.25.0
 
 ### Additions/Changes
