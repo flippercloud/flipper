@@ -40,7 +40,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v2
       - name: Do some action caching
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: vendor/bundle
           key: ${{ runner.os }}-gems-${{ matrix.ruby }}-${{ matrix.rails }}-${{ hashFiles('**/Gemfile.lock') }}
