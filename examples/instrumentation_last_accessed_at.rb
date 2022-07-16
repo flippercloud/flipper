@@ -1,6 +1,7 @@
 # Quick example of how to keep track of when a feature was last checked.
 require 'bundler/setup'
 require 'securerandom'
+require 'active_support/isolated_execution_state'
 require 'active_support/notifications'
 require 'flipper'
 
