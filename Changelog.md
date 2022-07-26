@@ -3,6 +3,7 @@
 ### Additions/Changes
 
 * Relaxed the rack-protection version to support latest (https://github.com/jnunemaker/flipper/commit/f4a41c541ccf14c535a61c6bc6fe7eeabbfc7e71).
+* Configure ActiveRecord adapter immediately upon require of flipper-active_record (https://github.com/jnunemaker/flipper/pull/652)
 
 ## 0.25.1
 
