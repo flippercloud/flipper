@@ -2,14 +2,9 @@
 
 ### Additions/Changes
 
+* ActiveRecord: use provided `gate_class` option when calling `#get_all` (https://github.com/jnunemaker/flipper/pull/647)
 * Relaxed the rack-protection version to support latest (https://github.com/jnunemaker/flipper/commit/f4a41c541ccf14c535a61c6bc6fe7eeabbfc7e71).
 * Configure ActiveRecord adapter immediately upon require of flipper-active_record (https://github.com/jnunemaker/flipper/pull/652)
-
-## 0.25.1
-
-### Bug Fixes
-
-* ActiveRecord: use provided `gate_class` option when calling `#get_all` (https://github.com/jnunemaker/flipper/pull/647)
 
 ## 0.25.0
 
