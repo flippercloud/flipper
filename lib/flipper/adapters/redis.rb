@@ -28,7 +28,7 @@ module Flipper
 
       def self.redis_sadd_returns_boolean?
         return @redis_sadd_returns_boolean if defined?(@redis_sadd_returns_boolean)
-        @redis_sadd_returns_boolean = true
+        @redis_sadd_returns_boolean =
           if ::Redis.respond_to?(:sadd_returns_boolean)
             ::Redis.sadd_returns_boolean
           else
