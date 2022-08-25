@@ -26,19 +26,9 @@ module Flipper
         read_feature_keys
       end
 
-      def self.redis_sadd_returns_boolean?
-        return @redis_sadd_returns_boolean if defined?(@redis_sadd_returns_boolean)
-        @redis_sadd_returns_boolean =
-          if ::Redis.respond_to?(:sadd_returns_boolean)
-            ::Redis.sadd_returns_boolean
-          else
-            false
-          end
-      end
-
       # Public: Adds a feature to the set of known features.
       def add(feature)
-        if self.class.redis_sadd_returns_boolean?
+        if redis_sadd_returns_boolean?
           @client.sadd? FeaturesKey, feature.key
         else
           @client.sadd FeaturesKey, feature.key
@@ -48,7 +38,7 @@ module Flipper
 
       # Public: Removes a feature from the set of known features.
       def remove(feature)
-        if self.class.redis_sadd_returns_boolean?
+        if redis_sadd_returns_boolean?
           @client.srem? FeaturesKey, feature.key
         else
           @client.srem FeaturesKey, feature.key
@@ -126,6 +116,10 @@ module Flipper
       end
 
       private
+
+      def redis_sadd_returns_boolean?
+        ::Redis.respond_to?(:sadd_returns_boolean) && ::Redis.sadd_returns_boolean
+      end
 
       def read_many_features(features)
         docs = docs_for(features)
