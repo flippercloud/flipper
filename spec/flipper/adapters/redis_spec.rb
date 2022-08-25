@@ -6,6 +6,7 @@ RSpec.describe Flipper::Adapters::Redis do
 
     options[:url] = ENV['REDIS_URL'] if ENV['REDIS_URL']
 
+    Redis.raise_deprecations = true
     Redis.new(options)
   end
 

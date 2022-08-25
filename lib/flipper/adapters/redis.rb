@@ -28,13 +28,21 @@ module Flipper
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
-        @client.sadd FeaturesKey, feature.key
+        if redis_sadd_returns_boolean?
+          @client.sadd? FeaturesKey, feature.key
+        else
+          @client.sadd FeaturesKey, feature.key
+        end
         true
       end
 
       # Public: Removes a feature from the set of known features.
       def remove(feature)
-        @client.srem FeaturesKey, feature.key
+        if redis_sadd_returns_boolean?
+          @client.srem? FeaturesKey, feature.key
+        else
+          @client.srem FeaturesKey, feature.key
+        end
         @client.del feature.key
         true
       end
@@ -108,6 +116,10 @@ module Flipper
       end
 
       private
+
+      def redis_sadd_returns_boolean?
+        ::Redis.respond_to?(:sadd_returns_boolean) && ::Redis.sadd_returns_boolean
+      end
 
       def read_many_features(features)
         docs = docs_for(features)

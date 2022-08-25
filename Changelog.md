@@ -1,3 +1,7 @@
+## 0.25.2
+
+* Fix deprecation warnings for Redis >= 4.8.0 (https://github.com/jnunemaker/flipper/pull/660)
+
 ## 0.25.1
 
 ### Additions/Changes
