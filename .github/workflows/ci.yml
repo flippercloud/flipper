@@ -34,7 +34,7 @@ jobs:
       - name: Setup memcached
         uses: KeisukeYamashita/memcached-actions@v1
       - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.7.0
+        uses: supercharge/mongodb-github-action@1.8.0
         with:
           mongodb-version: 4.0
       - name: Check out repository code
