@@ -224,13 +224,23 @@
 
           <div class="row">
             <% unless @feature.boolean_value %>
-             <div class="col">
-                <button type="submit" name="action" value="Enable" id="enable_feature__button" class="btn btn-outline-success btn-block">
-                  <span class="d-block" data-toggle="tooltip" title="Enable for everyone">
-                    Fully Enable
-                  </span>
-                </button>
-              </div>
+              <% if Flipper::UI.configuration.confirm_fully_enable %>
+                <div class="col">
+                  <button type="submit" name="action" value="Enable" id="enable_feature__button" class="btn btn-outline-success btn-block">
+                    <span class="d-block" data-toggle="tooltip" title="Enable for everyone">
+                      Fully Enable
+                    </span>
+                  </button>
+                </div>
+              <% else %>
+                <div class="col">
+                  <button type="submit" name="action" value="Enable" class="btn btn-outline-success btn-block">
+                    <span class="d-block" data-toggle="tooltip" title="Enable for everyone">
+                      Fully Enable
+                    </span>
+                  </button>
+                </div>
+              <% end %>
             <% end %>
 
             <% unless @feature.off? %>

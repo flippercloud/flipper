@@ -49,6 +49,10 @@ module Flipper
       # Default is comma ",".
       attr_accessor :actors_separator
 
+      # Public: if you want to get a confirm pop up box while fully enabling a feature
+      # Default is False
+      attr_accessor :confirm_fully_enable
+
       VALID_BANNER_CLASS_VALUES = %w(
         danger
         dark
@@ -74,6 +78,7 @@ module Flipper
         @descriptions_source = DEFAULT_DESCRIPTIONS_SOURCE
         @show_feature_description_in_list = false
         @actors_separator = ','
+        @confirm_fully_enable = false
       end
 
       def using_descriptions?
