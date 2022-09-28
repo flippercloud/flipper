@@ -1,3 +1,7 @@
+## Unreleased
+
+* Added Confirm Warning for Fully Enable feature (https://github.com/jnunemaker/flipper/pull/665)
+
 ## 0.25.2
 
 * Fix deprecation warnings for Redis >= 4.8.0 (https://github.com/jnunemaker/flipper/pull/660)
