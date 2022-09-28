@@ -26,6 +26,7 @@ Flipper::UI.configure do |config|
   config.feature_creation_enabled = true
   config.feature_removal_enabled = true
   config.cloud_recommendation = true
+  config.confirm_fully_enable = true
   # config.show_feature_description_in_list = true
   config.descriptions_source = lambda do |_keys|
     {
