@@ -50,7 +50,7 @@ module Flipper
       attr_accessor :actors_separator
 
       # Public: if you want to get a confirm pop up box while fully enabling a feature
-      # Default is False
+      # Default is false.
       attr_accessor :confirm_fully_enable
 
       VALID_BANNER_CLASS_VALUES = %w(
