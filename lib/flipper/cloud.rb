@@ -25,7 +25,7 @@ module Flipper
       env_key = options.fetch(:env_key, 'flipper')
       memoizer_options = options.fetch(:memoizer_options, {})
 
-      app = ->(_) { [404, { 'Content-Type'.freeze => 'application/json'.freeze }, ['{}'.freeze]] }
+      app = ->(_) { [404, { 'content-type'.freeze => 'application/json'.freeze }, ['{}'.freeze]] }
       builder = Rack::Builder.new
       yield builder if block_given?
       builder.use Flipper::Middleware::SetupEnv, flipper, env_key: env_key

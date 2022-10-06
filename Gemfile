@@ -7,16 +7,16 @@ Dir['flipper-*.gemspec'].each do |gemspec|
 end
 
 gem 'debug'
-gem 'rake', '~> 12.3.3'
-gem 'shotgun', '~> 0.9'
+gem 'rake'
+gem 'shotgun'
 gem 'statsd-ruby', '~> 1.2.1'
 gem 'rspec', '~> 3.0'
-gem 'rack-test', '~> 0.6.3'
+gem 'rack-test'
 gem 'sqlite3', "~> #{ENV['SQLITE3_VERSION'] || '1.4.1'}"
-gem 'rails', "~> #{ENV['RAILS_VERSION'] || '7.0.0'}"
+gem 'rails', "~> #{ENV['RAILS_VERSION'] || '7.0.4'}"
 gem 'minitest', '~> 5.8'
 gem 'minitest-documentation'
-gem 'webmock', '~> 3.0'
+gem 'webmock'
 gem 'ice_age'
 gem 'redis-namespace'
 gem 'webrick'
