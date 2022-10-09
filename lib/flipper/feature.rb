@@ -119,6 +119,13 @@ module Flipper
       end
     end
 
+    # Public: Check if a feature is disabled for a thing.
+    #
+    # Returns true if disabled, false if not.
+    def disabled?(think = nil)
+      !enabled?(think)
+    end
+
     # Public: Enables a feature for an actor.
     #
     # actor - a Flipper::Types::Actor instance or an object that responds
