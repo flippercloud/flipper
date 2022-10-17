@@ -1,6 +1,7 @@
 ## Unreleased
 
 * Added Confirm Warning for Fully Enable feature (https://github.com/jnunemaker/flipper/pull/665)
+* Update rack protection to < 4 (https://github.com/jnunemaker/flipper/pull/675)
 
 ## 0.25.2
 
