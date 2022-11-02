@@ -118,7 +118,7 @@ module Flipper
       private
 
       def redis_sadd_returns_boolean?
-        ::Redis.respond_to?(:sadd_returns_boolean) && ::Redis.sadd_returns_boolean
+        @client.class.respond_to?(:sadd_returns_boolean) && @client.class.sadd_returns_boolean
       end
 
       def read_many_features(features)
