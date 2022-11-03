@@ -20,7 +20,9 @@ task release: :build do
   sh 'git', 'tag', "v#{Flipper::VERSION}"
   sh 'git push origin master'
   sh "git push origin v#{Flipper::VERSION}"
-  sh 'ls pkg/*.gem | xargs -n 1 gem push'
+  puts "\nWhat OTP code should be used?"
+  otp_code = STDIN.gets.chomp
+  sh "ls pkg/*.gem | xargs -n 1 gem push --otp #{otp_code}"
 end
 
 require 'rspec/core/rake_task'
