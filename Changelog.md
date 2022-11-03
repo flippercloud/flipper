@@ -1,7 +1,8 @@
-## Unreleased
+## 0.25.3
 
-* Added Confirm Warning for Fully Enable feature (https://github.com/jnunemaker/flipper/pull/665)
+* Added configurable confirm warning for fully enabling a feature (https://github.com/jnunemaker/flipper/pull/665)
 * Update rack protection to < 4 (https://github.com/jnunemaker/flipper/pull/675)
+* Check sadd_returns_boolean on the actual client class rather than ::Redis (https://github.com/jnunemaker/flipper/pull/677)
 
 ## 0.25.2
 
