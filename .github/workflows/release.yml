@@ -18,7 +18,7 @@ jobs:
           bump-minor-pre-major: true
           version-file: "lib/flipper/version.rb"
       # Checkout code if release was created
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         if: ${{ steps.release.outputs.release_created }}
       # Setup ruby if a release was created
       - uses: ruby/setup-ruby@v1
