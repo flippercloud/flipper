@@ -1,3 +1,7 @@
+## Unreleased
+
+* Added read_only UI config option (https://github.com/jnunemaker/flipper/pull/679)
+
 ## 0.25.3
 
 * Added configurable confirm warning for fully enabling a feature (https://github.com/jnunemaker/flipper/pull/665)
