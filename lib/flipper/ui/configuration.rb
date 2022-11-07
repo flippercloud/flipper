@@ -102,10 +102,6 @@ module Flipper
         end
         @banner_class = value
       end
-
-      def read_only?
-        !!@read_only
-      end
     end
   end
 end
