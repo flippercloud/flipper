@@ -8,6 +8,8 @@ module Flipper
         route %r{\A/features/new/?\Z}
 
         def get
+          read_only if Flipper::UI.configuration.read_only
+
           unless Flipper::UI.configuration.feature_creation_enabled
             status 403
 
