@@ -271,6 +271,18 @@ module Flipper
         VALID_REQUEST_METHOD_NAMES.include?(request_method_name)
       end
 
+      # Internal: Method to call when the UI is in read only mode and you want
+      # to inform people of that fact.
+      def read_only
+        status 403
+
+        breadcrumb 'Home', '/'
+        breadcrumb 'Features', '/features'
+        breadcrumb 'Noooooope'
+
+        halt view_response(:read_only)
+      end
+
       def bootstrap_css
         SOURCES[:bootstrap_css]
       end
