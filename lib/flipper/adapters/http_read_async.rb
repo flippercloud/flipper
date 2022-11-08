@@ -85,7 +85,6 @@ module Flipper
         def reset
           @pid = Process.pid
           mutex.unlock if mutex.locked?
-          queue.clear
         end
       end
 
