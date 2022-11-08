@@ -19,7 +19,7 @@ Flipper.configure do |config|
       headers: {
         "Flipper-Cloud-Token" => ENV["FLIPPER_CLOUD_TOKEN"],
       },
-      worker: {interval: 5},
+      interval: 1,
       start_with: adapter,
     })
   end
