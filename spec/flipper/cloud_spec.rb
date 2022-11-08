@@ -15,7 +15,7 @@ RSpec.describe Flipper::Cloud do
       memoized_adapter = @instance.adapter
       sync_adapter = memoized_adapter.adapter
       @http_adapter = sync_adapter.instance_variable_get('@remote')
-      @http_client = @http_adapter.instance_variable_get('@client')
+      @http_client = @http_adapter.instance_variable_get('@http_adapter').instance_variable_get('@client')
     end
 
     it 'returns Flipper::DSL instance' do
@@ -27,7 +27,7 @@ RSpec.describe Flipper::Cloud do
     end
 
     it 'configures instance to use http adapter' do
-      expect(@http_adapter).to be_instance_of(Flipper::Adapters::Http)
+      expect(@http_adapter).to be_instance_of(Flipper::Adapters::HttpReadAsync)
     end
 
     it 'sets up correct url' do
@@ -55,7 +55,7 @@ RSpec.describe Flipper::Cloud do
       memoized_adapter = @instance.adapter
       sync_adapter = memoized_adapter.adapter
       @http_adapter = sync_adapter.instance_variable_get('@remote')
-      @http_client = @http_adapter.instance_variable_get('@client')
+      @http_client = @http_adapter.instance_variable_get('@http_adapter').instance_variable_get('@client')
     end
 
     it 'sets correct url' do

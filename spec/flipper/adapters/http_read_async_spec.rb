@@ -57,12 +57,10 @@ RSpec.describe Flipper::Adapters::HttpReadAsync do
       expect(flipper[:search].groups_value).to eq(Set.new)
     end
 
-    fit "works" do
+    it "works" do
       async_http = described_class.new({
         url: "http://localhost:#{FLIPPER_SPEC_API_PORT}",
-        worker: {
-          interval: 1,
-        },
+        interval: 1,
       })
       sync_http = subject.instance_variable_get("@http_adapter")
       expect(sync_http).not_to be(nil)

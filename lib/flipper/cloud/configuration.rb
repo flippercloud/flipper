@@ -1,5 +1,6 @@
 require "socket"
 require "flipper/adapters/http"
+require "flipper/adapters/http_read_async"
 require "flipper/adapters/memory"
 require "flipper/adapters/dual_write"
 require "flipper/adapters/sync"
@@ -137,14 +138,25 @@ module Flipper
       end
 
       def sync_adapter
-        Flipper::Adapters::Sync.new(local_adapter, http_adapter, {
+        Flipper::Adapters::Sync.new(local_adapter, http_read_async_adapter, {
           instrumenter: instrumenter,
           interval: sync_interval,
         })
       end
 
+      def http_read_async_adapter
+        Flipper::Adapters::HttpReadAsync.new(http_options.merge({
+          start_with: local_adapter,
+          interval: sync_interval,
+        }))
+      end
+
       def http_adapter
-        Flipper::Adapters::Http.new({
+        Flipper::Adapters::Http.new(http_options)
+      end
+
+      def http_options
+        {
           url: @url,
           read_timeout: @read_timeout,
           open_timeout: @open_timeout,
@@ -152,7 +164,7 @@ module Flipper
           headers: {
             "Flipper-Cloud-Token" => @token,
           },
-        })
+        }
       end
     end
   end
