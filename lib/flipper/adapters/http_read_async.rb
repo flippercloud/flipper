@@ -90,6 +90,9 @@ module Flipper
 
       def initialize(options = {})
         @memory_adapter = Memory.new
+        if adapter = options[:start_with]
+          @memory_adapter.import(adapter)
+        end
         @http_adapter = Http.new(options)
         @mutex = Mutex.new
         @name = :http_async
