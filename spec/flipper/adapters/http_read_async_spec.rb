@@ -98,54 +98,6 @@ RSpec.describe Flipper::Adapters::HttpReadAsync do
     adapter.get(flipper[:feature_panel])
   end
 
-  describe "#get" do
-    xit "raises error when not successful response" do
-      stub_request(:get, "http://app.com/flipper/features/feature_panel")
-        .to_return(status: 503, body: "", headers: {})
-
-      adapter = described_class.new(url: 'http://app.com/flipper')
-      expect {
-        adapter.get(flipper[:feature_panel])
-      }.to raise_error(Flipper::Adapters::Http::Error)
-    end
-  end
-
-  describe "#get_multi" do
-    xit "raises error when not successful response" do
-      stub_request(:get, "http://app.com/flipper/features?keys=feature_panel")
-        .to_return(status: 503, body: "", headers: {})
-
-      adapter = described_class.new(url: 'http://app.com/flipper')
-      expect {
-        adapter.get_multi([flipper[:feature_panel]])
-      }.to raise_error(Flipper::Adapters::Http::Error)
-    end
-  end
-
-  describe "#get_all" do
-    xit "raises error when not successful response" do
-      stub_request(:get, "http://app.com/flipper/features")
-        .to_return(status: 503, body: "", headers: {})
-
-      adapter = described_class.new(url: 'http://app.com/flipper')
-      expect {
-        adapter.get_all
-      }.to raise_error(Flipper::Adapters::Http::Error)
-    end
-  end
-
-  describe "#features" do
-    xit "raises error when not successful response" do
-      stub_request(:get, "http://app.com/flipper/features")
-        .to_return(status: 503, body: "", headers: {})
-
-      adapter = described_class.new(url: 'http://app.com/flipper')
-      expect {
-        adapter.features
-      }.to raise_error(Flipper::Adapters::Http::Error)
-    end
-  end
-
   describe "#add" do
     it "raises error when not successful" do
       stub_request(:post, /app.com/)
@@ -247,57 +199,5 @@ RSpec.describe Flipper::Adapters::HttpReadAsync do
         adapter.disable(feature, gate, thing)
       }.to raise_error(Flipper::Adapters::Http::Error)
     end
-  end
-
-  describe 'configuration' do
-    let(:debug_output) { object_double($stderr) }
-    let(:options) do
-      {
-        url: 'http://app.com/mount-point',
-        headers: { 'X-Custom-Header' => 'foo' },
-        basic_auth_username: 'username',
-        basic_auth_password: 'password',
-        read_timeout: 100,
-        open_timeout: 40,
-        write_timeout: 40,
-        debug_output: debug_output,
-      }
-    end
-    subject { described_class.new(options) }
-    let(:feature) { flipper[:feature_panel] }
-
-    before do
-      stub_request(:get, %r{\Ahttp://app.com*}).
-        to_return(body: fixture_file('feature.json'))
-    end
-
-    xit 'allows client to set request headers' do
-      subject.get(feature)
-      expect(
-        a_request(:get, 'http://app.com/mount-point/features/feature_panel')
-        .with(headers: { 'X-Custom-Header' => 'foo' })
-      ).to have_been_made.once
-    end
-
-    xit 'allows client to set basic auth' do
-      subject.get(feature)
-      expect(
-        a_request(:get, 'http://app.com/mount-point/features/feature_panel')
-        .with(basic_auth: %w(username password))
-      ).to have_been_made.once
-    end
-
-    xit 'allows client to set debug output' do
-      user_agent = Net::HTTP.new("app.com")
-      allow(Net::HTTP).to receive(:new).and_return(user_agent)
-
-      expect(user_agent).to receive(:set_debug_output).with(debug_output)
-      subject.get(feature)
-    end
-  end
-
-  def fixture_file(name)
-    fixtures_path = File.expand_path('../../../fixtures', __FILE__)
-    File.new(fixtures_path + '/' + name)
   end
 end
