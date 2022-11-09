@@ -22,6 +22,7 @@ module Flipper
           @read_timeout = options[:read_timeout]
           @open_timeout = options[:open_timeout]
           @write_timeout = options[:write_timeout]
+          @max_retries = options.key?(:max_retries) ? options[:max_retries] : 0
           @debug_output = options[:debug_output]
         end
 
@@ -58,7 +59,8 @@ module Flipper
           http = Net::HTTP.new(uri.host, uri.port)
           http.read_timeout = @read_timeout if @read_timeout
           http.open_timeout = @open_timeout if @open_timeout
-          apply_write_timeout(http)
+          http.max_retries = @max_retries if @max_retries
+          http.write_timeout = @write_timeout if @write_timeout
           http.set_debug_output(@debug_output) if @debug_output
 
           if uri.scheme == HTTPS_SCHEME
@@ -90,16 +92,6 @@ module Flipper
           end
 
           request
-        end
-
-        def apply_write_timeout(http)
-          if @write_timeout
-            if RUBY_VERSION >= '2.6.0'
-              http.write_timeout = @write_timeout
-            else
-              Kernel.warn("Warning: option :write_timeout requires Ruby version 2.6.0 or later")
-            end
-          end
         end
       end
     end

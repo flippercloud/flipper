@@ -19,6 +19,8 @@ module Flipper
                              basic_auth_password: options[:basic_auth_password],
                              read_timeout: options[:read_timeout],
                              open_timeout: options[:open_timeout],
+                             write_timeout: options[:write_timeout],
+                             max_retries: options[:max_retries],
                              debug_output: options[:debug_output])
         @name = :http
       end
