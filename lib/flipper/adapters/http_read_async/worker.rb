@@ -33,20 +33,20 @@ module Flipper
         end
 
         def stop
-          logger.info { "#{PREFIX} Stopping worker" }
+          logger.debug { "#{PREFIX} Stopping worker" }
           @thread&.kill
         end
 
         def run
           loop do
-            logger.info { "#{PREFIX} Sleeping for #{interval} seconds" }
+            logger.debug { "#{PREFIX} Sleeping for #{interval} seconds" }
             sleep interval
 
             begin
-              logger.info { "#{PREFIX} Making a checkity checkity" }
+              logger.debug { "#{PREFIX} Making a checkity checkity" }
               @block.call
             rescue => exception
-              logger.info { "#{PREFIX} Exception: #{exception.inspect}" }
+              logger.debug { "#{PREFIX} Exception: #{exception.inspect}" }
             end
           end
         end
