@@ -8,9 +8,7 @@ module Flipper
       class Poller
         PREFIX = "[flipper http async poll adapter]".freeze
 
-        attr_reader :thread, :pid, :mutex, :logger, :interval
-
-        attr_reader :last_synced_at
+        attr_reader :thread, :pid, :mutex, :logger, :interval, :last_synced_at
 
         def self.instances
           @instances ||= Concurrent::Map.new
