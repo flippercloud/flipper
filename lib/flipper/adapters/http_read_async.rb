@@ -3,6 +3,7 @@ require 'flipper/adapters/http'
 require 'flipper/adapters/memory'
 require 'flipper/adapters/http_read_async/worker'
 require 'thread'
+require 'concurrent/atomic/read_write_lock'
 
 module Flipper
   module Adapters
@@ -14,7 +15,7 @@ module Flipper
       def initialize(options = {})
         @name = :http_async
         @memory_adapter = Memory.new
-        @mutex = Mutex.new
+        @lock = Concurrent::ReadWriteLock.new
 
         # let's not start cold since cloud is configured with a local adapter,
         # instead we can initially populate the memory adapter with the
@@ -34,63 +35,63 @@ module Flipper
           adapter = Memory.new
           adapter.import(@http_adapter)
           # lock when updating the memory adapter in the main thread
-          @mutex.synchronize { @memory_adapter.import(adapter) }
+          @lock.with_write_lock { @memory_adapter.import(adapter) }
         }
         @worker.start
       end
 
       def get(feature)
         @worker.start
-        @mutex.synchronize { @memory_adapter.get(feature) }
+        @lock.with_read_lock { @memory_adapter.get(feature) }
       end
 
       def get_multi(features)
         @worker.start
-        @mutex.synchronize { @memory_adapter.get_multi(features) }
+        @lock.with_read_lock { @memory_adapter.get_multi(features) }
       end
 
       def get_all
         @worker.start
-        @mutex.synchronize { @memory_adapter.get_all }
+        @lock.with_read_lock { @memory_adapter.get_all }
       end
 
       def features
         @worker.start
-        @mutex.synchronize { @memory_adapter.features }
+        @lock.with_read_lock { @memory_adapter.features }
       end
 
       def add(feature)
         @worker.start
         @http_adapter.add(feature).tap {
-          @mutex.synchronize { @memory_adapter.add(feature) }
+          @lock.with_write_lock { @memory_adapter.add(feature) }
         }
       end
 
       def remove(feature)
         @worker.start
         @http_adapter.remove(feature).tap {
-          @mutex.synchronize { @memory_adapter.remove(feature) }
+          @lock.with_write_lock { @memory_adapter.remove(feature) }
         }
       end
 
       def enable(feature, gate, thing)
         @worker.start
         @http_adapter.enable(feature, gate, thing).tap {
-          @mutex.synchronize { @memory_adapter.enable(feature, gate, thing) }
+          @lock.with_write_lock { @memory_adapter.enable(feature, gate, thing) }
         }
       end
 
       def disable(feature, gate, thing)
         @worker.start
         @http_adapter.disable(feature, gate, thing).tap {
-          @mutex.synchronize { @memory_adapter.disable(feature, gate, thing) }
+          @lock.with_write_lock { @memory_adapter.disable(feature, gate, thing) }
         }
       end
 
       def clear(feature)
         @worker.start
         @http_adapter.clear(feature).tap {
-          @mutex.synchronize { @memory_adapter.clear(feature) }
+          @lock.with_write_lock { @memory_adapter.clear(feature) }
         }
       end
     end

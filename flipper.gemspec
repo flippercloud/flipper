@@ -35,4 +35,6 @@ Gem::Specification.new do |gem|
   gem.require_paths = ['lib']
   gem.version       = Flipper::VERSION
   gem.metadata      = Flipper::METADATA
+
+  gem.add_dependency 'concurrent-ruby', '< 2'
 end
