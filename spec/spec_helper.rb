@@ -9,7 +9,7 @@ require 'bundler'
 
 Bundler.setup(:default)
 
-require 'pry'
+require 'debug'
 require 'webmock/rspec'
 WebMock.disable_net_connect!(allow_localhost: true)
 
@@ -22,6 +22,7 @@ Dir[FlipperRoot.join('spec/support/**/*.rb')].sort.each { |f| require f }
 
 RSpec.configure do |config|
   config.before(:example) do
+    Flipper::Cloud::Registry.default.clear if defined?(Flipper::Cloud)
     Flipper.unregister_groups
     Flipper.configuration = nil
   end

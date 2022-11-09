@@ -6,6 +6,7 @@ RSpec.describe Flipper::Adapters::Redis do
 
     options[:url] = ENV['REDIS_URL'] if ENV['REDIS_URL']
 
+    Redis.raise_deprecations = true
     Redis.new(options)
   end
 
@@ -25,7 +26,7 @@ RSpec.describe Flipper::Adapters::Redis do
     Flipper.configuration = nil
     Flipper.instance = nil
 
-    load 'flipper/adapters/redis.rb'
+    silence { load 'flipper/adapters/redis.rb' }
 
     expect(Flipper.adapter.adapter).to be_a(Flipper::Adapters::Redis)
   end

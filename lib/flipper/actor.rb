@@ -12,5 +12,9 @@ module Flipper
       self.class.eql?(other.class) && @flipper_id == other.flipper_id
     end
     alias_method :==, :eql?
+
+    def hash
+      flipper_id.hash
+    end
   end
 end

@@ -10,6 +10,7 @@ module Flipper
 
           def get
             keys = params['keys']
+            exclude_gates = params['exclude_gates']&.downcase == "true"
             features = if keys
               names = keys.split(',')
               if names.empty?
@@ -26,7 +27,7 @@ module Flipper
             end
 
             decorated_features = features.map do |feature|
-              Decorators::Feature.new(feature).as_json
+              Decorators::Feature.new(feature).as_json(exclude_gates: exclude_gates)
             end
 
             json_response(features: decorated_features)

@@ -28,13 +28,21 @@ module Flipper
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
-        @client.sadd FeaturesKey, feature.key
+        if redis_sadd_returns_boolean?
+          @client.sadd? FeaturesKey, feature.key
+        else
+          @client.sadd FeaturesKey, feature.key
+        end
         true
       end
 
       # Public: Removes a feature from the set of known features.
       def remove(feature)
-        @client.srem FeaturesKey, feature.key
+        if redis_sadd_returns_boolean?
+          @client.srem? FeaturesKey, feature.key
+        else
+          @client.srem FeaturesKey, feature.key
+        end
         @client.del feature.key
         true
       end
@@ -109,6 +117,10 @@ module Flipper
 
       private
 
+      def redis_sadd_returns_boolean?
+        @client.class.respond_to?(:sadd_returns_boolean) && @client.class.sadd_returns_boolean
+      end
+
       def read_many_features(features)
         docs = docs_for(features)
         result = {}
@@ -125,14 +137,14 @@ module Flipper
       # Private: Gets a hash of fields => values for the given feature.
       #
       # Returns a Hash of fields => values.
-      def doc_for(feature)
-        @client.hgetall(feature.key)
+      def doc_for(feature, pipeline: @client)
+        pipeline.hgetall(feature.key)
       end
 
       def docs_for(features)
-        @client.pipelined do
+        @client.pipelined do |pipeline|
           features.each do |feature|
-            doc_for(feature)
+            doc_for(feature, pipeline: pipeline)
           end
         end
       end

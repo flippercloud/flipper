@@ -1,10 +1,10 @@
 #
 # Usage:
 #   # if you want it to not reload and be really fast
-#   bin/rackup examples/ui/basic.ru -p 9999
+#   bin/rackup examples/ui/read_only.ru -p 9999
 #
 #   # if you want reloading
-#   bin/shotgun examples/ui/basic.ru -p 9999
+#   bin/shotgun examples/ui/read_only.ru -p 9999
 #
 #   http://localhost:9999/
 #
@@ -21,25 +21,9 @@ Flipper.register(:early_access) { |actor|
 }
 
 Flipper::UI.configure do |config|
-  # config.banner_text = 'Production Environment'
-  # config.banner_class = 'danger'
-  config.feature_creation_enabled = true
-  config.feature_removal_enabled = true
-  config.cloud_recommendation = true
-  config.confirm_fully_enable = true
-  # config.show_feature_description_in_list = true
-  config.descriptions_source = lambda do |_keys|
-    {
-      "search_performance_another_long_thing" => "Just to test feature name length.",
-      "gauges_tracking" => "Should we track page views with gaug.es.",
-      "unused" => "Not used.",
-      "suits" => "Are suits necessary in business?",
-      "secrets" => "Secrets are lies.",
-      "logging" => "Log all the things.",
-      "new_cache" => "Like the old cache but newer.",
-      "a/b" => "Why would someone use a slash? I don't know but someone did. Let's make this really long so they regret using slashes. Please don't use slashes.",
-    }
-  end
+  config.banner_text = 'Read only mode.'
+  config.banner_class = 'danger'
+  config.read_only = true
 end
 
 # You can uncomment these to get some default data:

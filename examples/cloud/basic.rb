@@ -1,5 +1,7 @@
 # Usage (from the repo root):
 # env FLIPPER_CLOUD_TOKEN=<token> bundle exec ruby examples/cloud/basic.rb
+
+require_relative "./cloud_setup"
 require 'bundler/setup'
 require 'flipper/cloud'
 

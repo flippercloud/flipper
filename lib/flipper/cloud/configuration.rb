@@ -4,6 +4,9 @@ require "flipper/adapters/http_read_async"
 require "flipper/adapters/memory"
 require "flipper/adapters/dual_write"
 require "flipper/adapters/sync"
+require "flipper/cloud/instrumenter"
+require "flipper/cloud/registry"
+require "brow"
 
 module Flipper
   module Cloud
@@ -71,12 +74,6 @@ module Flipper
           raise ArgumentError, "Flipper::Cloud token is missing. Please set FLIPPER_CLOUD_TOKEN or provide the token (e.g. Flipper::Cloud.new(token: 'token'))."
         end
 
-        if ENV["FLIPPER_CLOUD_SYNC_METHOD"]
-          warn "FLIPPER_CLOUD_SYNC_METHOD is deprecated and has no effect."
-        end
-        self.sync_method = options[:sync_method] if options[:sync_method]
-
-        @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
         @read_timeout = options.fetch(:read_timeout) { ENV.fetch("FLIPPER_CLOUD_READ_TIMEOUT", 5).to_f }
         @open_timeout = options.fetch(:open_timeout) { ENV.fetch("FLIPPER_CLOUD_OPEN_TIMEOUT", 5).to_f }
         @write_timeout = options.fetch(:write_timeout) { ENV.fetch("FLIPPER_CLOUD_WRITE_TIMEOUT", 5).to_f }
@@ -86,6 +83,16 @@ module Flipper
         @debug_output = options[:debug_output]
         @adapter_block = ->(adapter) { adapter }
         self.url = options.fetch(:url) { ENV.fetch("FLIPPER_CLOUD_URL", DEFAULT_URL) }
+
+        instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
+
+        # This is alpha. Don't use this unless you are me. And you are not me.
+        cloud_instrument = options.fetch(:cloud_instrument) { ENV["FLIPPER_CLOUD_INSTRUMENT"] == "1" }
+        @instrumenter = if cloud_instrument
+          Instrumenter.new(brow: brow, instrumenter: instrumenter)
+        else
+          instrumenter
+        end
       end
 
       # Public: Read or customize the http adapter. Calling without a block will
@@ -117,14 +124,28 @@ module Flipper
         }).call
       end
 
+      def brow
+        uri = URI.parse(url)
+        uri.path = "#{uri.path}/events".squeeze("/")
+        events_url = uri.to_s
+
+        Registry.default.fetch(events_url) {
+          Brow::Client.new({
+            url: events_url,
+            headers: {
+              "Accept" => "application/json",
+              "Content-Type" => "application/json",
+              "User-Agent" => "Flipper v#{VERSION} via Brow v#{Brow::VERSION}",
+              "Flipper-Cloud-Token" => @token,
+            }
+          })
+        }
+      end
+
       # Public: The method that will be used to synchronize local adapter with
       # cloud. (default: :poll, will be :webhook if sync_secret is set).
       def sync_method
         sync_secret ? :webhook : :poll
-      end
-
-      def sync_method=(_)
-        warn "Flipper::Cloud: sync_method is deprecated and has no effect."
       end
 
       private
@@ -169,5 +190,3 @@ module Flipper
     end
   end
 end
-
-# "FLIPPER_TIMESTAMP".freeze => Flipper::Timestamp.generate.to_s,

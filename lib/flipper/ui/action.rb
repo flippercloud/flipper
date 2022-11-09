@@ -29,20 +29,20 @@ module Flipper
 
       SOURCES = {
         bootstrap_css: {
-          src: "https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css".freeze,
-          hash: "sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l".freeze
+          src: 'https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css'.freeze,
+          hash: 'sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l'.freeze
         }.freeze,
         jquery_js: {
-          src: "https://code.jquery.com/jquery-3.5.1.slim.min.js".freeze,
-          hash: "sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj".freeze
+          src: 'https://code.jquery.com/jquery-3.6.0.slim.js'.freeze,
+          hash: 'sha256-HwWONEZrpuoh951cQD1ov2HUK5zA5DwJ1DNUXaM6FsY='.freeze
         }.freeze,
         popper_js: {
-          src: "https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js".freeze,
-          hash: "sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q".freeze
+          src: 'https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js'.freeze,
+          hash: 'sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q'.freeze
         }.freeze,
         bootstrap_js: {
-          src: "https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js".freeze,
-          hash: "sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl".freeze
+          src: 'https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js'.freeze,
+          hash: 'sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF'.freeze
         }.freeze
       }.freeze
       SCRIPT_SRCS = SOURCES.values_at(:jquery_js, :popper_js, :bootstrap_js).map { |s| s[:src] }
@@ -239,6 +239,7 @@ module Flipper
       def view(name)
         path = views_path.join("#{name}.erb")
         raise "Template does not exist: #{path}" unless path.exist?
+
         eval(Erubi::Engine.new(path.read, escape: true).src)
       end
 
@@ -268,6 +269,18 @@ module Flipper
 
       def valid_request_method?
         VALID_REQUEST_METHOD_NAMES.include?(request_method_name)
+      end
+
+      # Internal: Method to call when the UI is in read only mode and you want
+      # to inform people of that fact.
+      def read_only
+        status 403
+
+        breadcrumb 'Home', '/'
+        breadcrumb 'Features', '/features'
+        breadcrumb 'Noooooope'
+
+        halt view_response(:read_only)
       end
 
       def bootstrap_css

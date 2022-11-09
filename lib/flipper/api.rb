@@ -17,8 +17,9 @@ module Flipper
       builder.use Flipper::Api::Middleware, env_key: env_key
       builder.run app
       klass = self
-      builder.define_singleton_method(:inspect) { klass.inspect } # pretty rake routes output
-      builder
+      app = builder.to_app
+      app.define_singleton_method(:inspect) { klass.inspect } # pretty rake routes output
+      app
     end
   end
 end

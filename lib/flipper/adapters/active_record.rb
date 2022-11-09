@@ -7,21 +7,26 @@ module Flipper
     class ActiveRecord
       include ::Flipper::Adapter
 
+      # Abstract base class for internal models
+      class Model < ::ActiveRecord::Base
+        self.abstract_class = true
+      end
+
       # Private: Do not use outside of this adapter.
-      class Feature < ::ActiveRecord::Base
+      class Feature < Model
         self.table_name = [
-          ::ActiveRecord::Base.table_name_prefix,
+          Model.table_name_prefix,
           "flipper_features",
-          ::ActiveRecord::Base.table_name_suffix,
+          Model.table_name_suffix,
         ].join
       end
 
       # Private: Do not use outside of this adapter.
-      class Gate < ::ActiveRecord::Base
+      class Gate < Model
         self.table_name = [
-          ::ActiveRecord::Base.table_name_prefix,
+          Model.table_name_prefix,
           "flipper_gates",
-          ::ActiveRecord::Base.table_name_suffix,
+          Model.table_name_suffix,
         ].join
       end
 
@@ -106,8 +111,8 @@ module Flipper
         rows_query = features.join(gates, Arel::Nodes::OuterJoin)
           .on(features[:key].eq(gates[:feature_key]))
           .project(features[:key].as('feature_key'), gates[:key], gates[:value])
-        rows = ::ActiveRecord::Base.connection.select_all rows_query
-        db_gates = rows.map { |row| Gate.new(row) }
+        rows = @feature_class.connection.select_all rows_query
+        db_gates = rows.map { |row| @gate_class.new(row) }
         grouped_db_gates = db_gates.group_by(&:feature_key)
         result = Hash.new { |hash, key| hash[key] = default_config }
         features = grouped_db_gates.keys.map { |key| Flipper::Feature.new(key, self) }

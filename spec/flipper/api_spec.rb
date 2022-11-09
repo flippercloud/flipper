@@ -107,7 +107,7 @@ RSpec.describe Flipper::Api do
 
   describe 'Inspecting the built Rack app' do
     it 'returns a String' do
-      expect(build_api(flipper).inspect).to be_a(String)
+      expect(build_api(flipper).inspect).to eq("Flipper::Api")
     end
   end
 end
