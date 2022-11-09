@@ -5,9 +5,14 @@ require 'rack/handler/webrick'
 FLIPPER_SPEC_API_PORT = ENV.fetch('FLIPPER_SPEC_API_PORT', 9001).to_i
 
 RSpec.describe Flipper::Adapters::HttpReadAsync do
+  let(:default_options) {
+    {
+      worker: {logger: Logger.new("/dev/null")},
+    }
+  }
   context 'adapter' do
     subject do
-      described_class.new(url: "http://localhost:#{FLIPPER_SPEC_API_PORT}")
+      described_class.new(default_options.merge(url: "http://localhost:#{FLIPPER_SPEC_API_PORT}"))
     end
 
     before :all do
@@ -48,20 +53,11 @@ RSpec.describe Flipper::Adapters::HttpReadAsync do
 
     it_should_behave_like 'a flipper adapter'
 
-    it "can enable and disable unregistered group" do
-      flipper = Flipper.new(subject)
-      expect(flipper[:search].enable_group(:some_made_up_group)).to be(true)
-      expect(flipper[:search].groups_value).to eq(Set["some_made_up_group"])
-
-      expect(flipper[:search].disable_group(:some_made_up_group)).to be(true)
-      expect(flipper[:search].groups_value).to eq(Set.new)
-    end
-
     it "works" do
-      async_http = described_class.new({
+      async_http = described_class.new(default_options.merge({
         url: "http://localhost:#{FLIPPER_SPEC_API_PORT}",
         interval: 1,
-      })
+      }))
       sync_http = subject.instance_variable_get("@http_adapter")
       expect(sync_http).not_to be(nil)
       async_flipper = Flipper.new(async_http)
@@ -84,26 +80,12 @@ RSpec.describe Flipper::Adapters::HttpReadAsync do
     end
   end
 
-  it "sends default headers" do
-    headers = {
-      'Accept' => 'application/json',
-      'Content-Type' => 'application/json',
-      'User-Agent' => "Flipper HTTP Adapter v#{Flipper::VERSION}",
-    }
-    stub_request(:get, "http://app.com/flipper/features/feature_panel")
-      .with(headers: headers)
-      .to_return(status: 404, body: "", headers: {})
-
-    adapter = described_class.new(url: 'http://app.com/flipper')
-    adapter.get(flipper[:feature_panel])
-  end
-
   describe "#add" do
     it "raises error when not successful" do
       stub_request(:post, /app.com/)
         .to_return(status: 503, body: "{}", headers: {})
 
-      adapter = described_class.new(url: 'http://app.com/flipper')
+      adapter = described_class.new(default_options.merge(url: 'http://app.com/flipper'))
       expect {
         adapter.add(Flipper::Feature.new(:search, adapter))
       }.to raise_error(Flipper::Adapters::Http::Error)
@@ -115,7 +97,7 @@ RSpec.describe Flipper::Adapters::HttpReadAsync do
       stub_request(:delete, /app.com/)
         .to_return(status: 503, body: "{}", headers: {})
 
-      adapter = described_class.new(url: 'http://app.com/flipper')
+      adapter = described_class.new(default_options.merge(url: 'http://app.com/flipper'))
       expect {
         adapter.remove(Flipper::Feature.new(:search, adapter))
       }.to raise_error(Flipper::Adapters::Http::Error)
@@ -127,7 +109,7 @@ RSpec.describe Flipper::Adapters::HttpReadAsync do
       stub_request(:delete, /app.com/)
         .to_return(status: 503, body: "{}", headers: {})
 
-      adapter = described_class.new(url: 'http://app.com/flipper')
+      adapter = described_class.new(default_options.merge(url: 'http://app.com/flipper'))
       expect {
         adapter.clear(Flipper::Feature.new(:search, adapter))
       }.to raise_error(Flipper::Adapters::Http::Error)
@@ -139,7 +121,7 @@ RSpec.describe Flipper::Adapters::HttpReadAsync do
       stub_request(:post, /app.com/)
         .to_return(status: 503, body: "{}", headers: {})
 
-      adapter = described_class.new(url: 'http://app.com/flipper')
+      adapter = described_class.new(default_options.merge(url: 'http://app.com/flipper'))
       feature = Flipper::Feature.new(:search, adapter)
       gate = feature.gate(:boolean)
       thing = gate.wrap(true)
@@ -152,7 +134,7 @@ RSpec.describe Flipper::Adapters::HttpReadAsync do
       stub_request(:post, /app.com/)
         .to_return(status: 503, body: "barf", headers: {})
 
-      adapter = described_class.new(url: 'http://app.com/flipper')
+      adapter = described_class.new(default_options.merge(url: 'http://app.com/flipper'))
       feature = Flipper::Feature.new(:search, adapter)
       gate = feature.gate(:boolean)
       thing = gate.wrap(true)
@@ -172,7 +154,7 @@ RSpec.describe Flipper::Adapters::HttpReadAsync do
       stub_request(:post, /app.com/)
         .to_return(status: 503, body: JSON.dump(api_response), headers: {})
 
-      adapter = described_class.new(url: 'http://app.com/flipper')
+      adapter = described_class.new(default_options.merge(url: 'http://app.com/flipper'))
       feature = Flipper::Feature.new(:search, adapter)
       gate = feature.gate(:boolean)
       thing = gate.wrap(true)
@@ -191,7 +173,7 @@ RSpec.describe Flipper::Adapters::HttpReadAsync do
       stub_request(:delete, /app.com/)
         .to_return(status: 503, body: "{}", headers: {})
 
-      adapter = described_class.new(url: 'http://app.com/flipper')
+      adapter = described_class.new(default_options.merge(url: 'http://app.com/flipper'))
       feature = Flipper::Feature.new(:search, adapter)
       gate = feature.gate(:boolean)
       thing = gate.wrap(false)

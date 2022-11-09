@@ -166,7 +166,7 @@ module Flipper
       end
 
       def http_read_async_adapter
-        Flipper::Adapters::HttpReadAsync.new(http_options.merge({
+        Flipper::Adapters::HttpReadAsync.get_instance(http_options.merge({
           start_with: local_adapter,
           interval: sync_interval,
         }))

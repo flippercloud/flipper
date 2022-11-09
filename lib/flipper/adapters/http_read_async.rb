@@ -4,11 +4,24 @@ require 'flipper/adapters/memory'
 require 'flipper/adapters/http_read_async/worker'
 require 'thread'
 require 'concurrent/atomic/read_write_lock'
+require 'concurrent/map'
 
 module Flipper
   module Adapters
     class HttpReadAsync
       include Flipper::Adapter
+
+      def self.instances
+        @instances ||= Concurrent::Map.new
+      end
+      private_class_method :instances
+
+      # Public: Get an instance of HttpReadAsync adapter. A single instance is
+      # stored per URL to limit readers on the URL.
+      def self.get_instance(options = {})
+        url = options.fetch(:url).to_s
+        instances.compute_if_absent(url) { new(options) }
+      end
 
       attr_reader :name
 

@@ -12,25 +12,23 @@ Flipper.configure do |config|
     flipper.enable(:stats)
 
     # configure the http read async adapter
-    Flipper::Adapters::HttpReadAsync.new({
+    Flipper::Adapters::HttpReadAsync.get_instance({
       url: "https://www.flippercloud.io/adapter",
+      headers: {"Flipper-Cloud-Token" => ENV["FLIPPER_CLOUD_TOKEN"]},
+      start_with: adapter,
       read_timeout: 2,
       open_timeout: 2,
-      headers: {
-        "Flipper-Cloud-Token" => ENV["FLIPPER_CLOUD_TOKEN"],
-      },
       interval: 1,
-      start_with: adapter,
     })
   end
 end
 
 # Check every second to see if the feature is enabled
 threads = []
-3.times do
+10.times do
   threads << Thread.new do
     loop do
-      sleep 1
+      sleep rand
 
       if Flipper[:stats].enabled?
         puts "#{Time.now.to_i} Enabled!"
