@@ -1,6 +1,7 @@
 require "socket"
 require "flipper/adapters/http"
-require "flipper/adapters/http_async_poll"
+require "flipper/adapters/poll"
+require "flipper/adapters/poll/poller"
 require "flipper/adapters/memory"
 require "flipper/adapters/dual_write"
 require "flipper/adapters/sync"
@@ -151,33 +152,23 @@ module Flipper
       private
 
       def app_adapter
-        sync_method == :webhook ? dual_write_adapter : sync_adapter
+        sync_method == :webhook ? dual_write_adapter : poll_adapter
       end
 
       def dual_write_adapter
         Flipper::Adapters::DualWrite.new(local_adapter, http_adapter)
       end
 
-      def sync_adapter
-        Flipper::Adapters::Sync.new(local_adapter, http_async_poll_adapter, {
-          instrumenter: instrumenter,
-          interval: sync_interval,
-        })
+      def poller
+        Flipper::Adapters::Poll::Poller.get(@url + @token, interval: sync_interval, remote_adapter: http_adapter).tap(&:start)
       end
 
-      def http_async_poll_adapter
-        Flipper::Adapters::HttpAsyncPoll.get_instance(http_options.merge({
-          start_with: local_adapter,
-          interval: sync_interval,
-        }))
+      def poll_adapter
+        Flipper::Adapters::Poll.new(poller, dual_write_adapter)
       end
 
       def http_adapter
-        Flipper::Adapters::Http.new(http_options)
-      end
-
-      def http_options
-        {
+        Flipper::Adapters::Http.new({
           url: @url,
           read_timeout: @read_timeout,
           open_timeout: @open_timeout,
@@ -187,7 +178,7 @@ module Flipper
           headers: {
             "Flipper-Cloud-Token" => @token,
           },
-        }
+        })
       end
     end
   end

@@ -1,28 +1,36 @@
 require 'logger'
+require 'concurrent/atomic/read_write_lock'
+require 'concurrent/map'
 
 module Flipper
   module Adapters
-    class HttpAsyncPoll
-      class Worker
+    class Poll
+      class Poller
         PREFIX = "[flipper http async poll adapter]".freeze
+
+        attr_reader :thread, :pid, :mutex, :logger, :interval
+
+        attr_reader :last_synced_at
 
         def self.instances
           @instances ||= Concurrent::Map.new
         end
         private_class_method :instances
 
-        def self.get(key, options = {}, &block)
-          instances.compute_if_absent(key) { new(options, &block) }
+        def self.get(key, options = {})
+          instances.compute_if_absent(key) { new(options) }
         end
 
-        attr_reader :thread, :pid, :mutex, :logger, :interval
-
-        def initialize(options = {}, &block)
+        def initialize(options = {})
           @thread = nil
           @pid = Process.pid
           @mutex = Mutex.new
+          @adapter = Memory.new
+          @remote_adapter = options.fetch(:remote_adapter)
           @logger = options.fetch(:logger) { Logger.new(STDOUT) }
           @interval = options.fetch(:interval, 10).to_f
+          @lock = Concurrent::ReadWriteLock.new
+          @last_synced_at = Concurrent::AtomicFixnum.new(0)
 
           if @interval < 1
             warn "#{PREFIX} interval must be greater than or equal to 1 but was #{@interval}. Setting @interval to 1."
@@ -30,11 +38,14 @@ module Flipper
           end
 
           @start_automatically = options.fetch(:start_automatically, true)
-          @block = block
 
           if options.fetch(:shutdown_automatically, true)
             at_exit { stop }
           end
+        end
+
+        def adapter
+          @lock.with_read_lock { Memory.new(@adapter.get_all.dup) }
         end
 
         def start
@@ -49,12 +60,19 @@ module Flipper
 
         def run
           loop do
-            logger.debug { "#{PREFIX} Sleeping for #{interval} seconds" }
+            # logger.debug { "#{PREFIX} Sleeping for #{interval} seconds" }
             sleep interval
 
             begin
               logger.debug { "#{PREFIX} Making a checkity checkity" }
-              @block.call
+
+              adapter = Memory.new
+              adapter.import(@remote_adapter)
+
+              @lock.with_write_lock {
+                @adapter.import(adapter)
+                @last_synced_at.update { |time| Time.now.to_f }
+              }
             rescue => exception
               logger.debug { "#{PREFIX} Exception: #{exception.inspect}" }
             end
