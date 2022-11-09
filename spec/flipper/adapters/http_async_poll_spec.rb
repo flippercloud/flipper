@@ -1,10 +1,10 @@
-require 'flipper/adapters/http_read_async'
+require 'flipper/adapters/http_async_poll'
 require 'flipper/adapters/pstore'
 require 'rack/handler/webrick'
 
 FLIPPER_SPEC_API_PORT = ENV.fetch('FLIPPER_SPEC_API_PORT', 9001).to_i
 
-RSpec.describe Flipper::Adapters::HttpReadAsync do
+RSpec.describe Flipper::Adapters::HttpAsyncPoll do
   let(:default_options) {
     {
       worker: {logger: Logger.new("/dev/null")},

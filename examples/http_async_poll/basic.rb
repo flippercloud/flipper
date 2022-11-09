@@ -1,7 +1,7 @@
 # Usage (from the repo root):
-# env FLIPPER_CLOUD_TOKEN=<token> bundle exec ruby examples/http_read_async/basic.rb
+# env FLIPPER_CLOUD_TOKEN=<token> bundle exec ruby examples/http_async_poll/basic.rb
 require 'bundler/setup'
-require 'flipper/adapters/http_read_async'
+require 'flipper/adapters/http_async_poll'
 
 # Configure flipper to use this adapter
 Flipper.configure do |config|
@@ -11,8 +11,8 @@ Flipper.configure do |config|
     flipper = Flipper.new(adapter)
     flipper.enable(:stats)
 
-    # configure the http read async adapter
-    Flipper::Adapters::HttpReadAsync.get_instance({
+    # configure the http async poll adapter
+    Flipper::Adapters::HttpAsyncPoll.get_instance({
       url: "https://www.flippercloud.io/adapter",
       headers: {"Flipper-Cloud-Token" => ENV["FLIPPER_CLOUD_TOKEN"]},
       start_with: adapter,

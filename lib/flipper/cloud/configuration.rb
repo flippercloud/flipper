@@ -1,6 +1,6 @@
 require "socket"
 require "flipper/adapters/http"
-require "flipper/adapters/http_read_async"
+require "flipper/adapters/http_async_poll"
 require "flipper/adapters/memory"
 require "flipper/adapters/dual_write"
 require "flipper/adapters/sync"
@@ -159,14 +159,14 @@ module Flipper
       end
 
       def sync_adapter
-        Flipper::Adapters::Sync.new(local_adapter, http_read_async_adapter, {
+        Flipper::Adapters::Sync.new(local_adapter, http_async_poll_adapter, {
           instrumenter: instrumenter,
           interval: sync_interval,
         })
       end
 
-      def http_read_async_adapter
-        Flipper::Adapters::HttpReadAsync.get_instance(http_options.merge({
+      def http_async_poll_adapter
+        Flipper::Adapters::HttpAsyncPoll.get_instance(http_options.merge({
           start_with: local_adapter,
           interval: sync_interval,
         }))

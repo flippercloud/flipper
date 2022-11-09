@@ -1,14 +1,14 @@
 require 'flipper'
 require 'flipper/adapters/http'
 require 'flipper/adapters/memory'
-require 'flipper/adapters/http_read_async/worker'
+require 'flipper/adapters/http_async_poll/worker'
 require 'thread'
 require 'concurrent/atomic/read_write_lock'
 require 'concurrent/map'
 
 module Flipper
   module Adapters
-    class HttpReadAsync
+    class HttpAsyncPoll
       include Flipper::Adapter
 
       def self.instances
@@ -16,14 +16,14 @@ module Flipper
       end
       private_class_method :instances
 
-      # Public: Get an instance of HttpReadAsync adapter. A single instance is
+      # Public: Get an instance of HttpAsyncPoll adapter. A single instance is
       # stored per URL to limit readers on the URL.
       def self.get_instance(options = {})
         url = options.fetch(:url).to_s
         instances.compute_if_absent(url) { new(options) }
       end
 
-      attr_reader :name
+      attr_reader :name, :interval
 
       def initialize(options = {})
         @name = :http_async
@@ -38,12 +38,10 @@ module Flipper
         end
 
         @http_adapter = Http.new(options)
-        @interval = options.fetch(:interval, 10)
+        @interval = options[:worker]&[:interval] || options[:interval] || 10
 
-        # setup the worker and default interval to top level interval if not
-        # set, setting interval in worker options takes precendence
-        worker_options = options[:worker] || {}
-        worker_options[:interval] ||= @interval
+        worker_options = (options[:worker].dup || {})
+        worker_options[:interval] = @interval
         @worker = Worker.new(worker_options) {
           adapter = Memory.new
           adapter.import(@http_adapter)

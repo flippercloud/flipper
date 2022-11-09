@@ -2,9 +2,9 @@ require 'logger'
 
 module Flipper
   module Adapters
-    class HttpReadAsync
+    class HttpAsyncPoll
       class Worker
-        PREFIX = "[flipper http read async adapter]".freeze
+        PREFIX = "[flipper http async poll adapter]".freeze
 
         attr_reader :thread, :pid, :mutex, :logger, :interval
 
@@ -16,7 +16,8 @@ module Flipper
           @interval = options.fetch(:interval, 10).to_f
 
           if @interval < 1
-            raise ArgumentError, "interval must be greater than or equal to 1 but was #{@interval}"
+            warn "#{PREFIX} interval must be greater than or equal to 1 but was #{@interval}. Setting @interval to 1."
+            @interval = 1
           end
 
           @start_automatically = options.fetch(:start_automatically, true)

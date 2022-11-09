@@ -27,7 +27,7 @@ RSpec.describe Flipper::Cloud do
     end
 
     it 'configures instance to use http adapter' do
-      expect(@http_adapter).to be_instance_of(Flipper::Adapters::HttpReadAsync)
+      expect(@http_adapter).to be_instance_of(Flipper::Adapters::HttpAsyncPoll)
     end
 
     it 'sets up correct url' do
