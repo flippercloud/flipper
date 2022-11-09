@@ -26,12 +26,19 @@ Flipper.configure do |config|
 end
 
 # Check every second to see if the feature is enabled
-loop do
-  sleep 1
+threads = []
+3.times do
+  threads << Thread.new do
+    loop do
+      sleep 1
 
-  if Flipper[:stats].enabled?
-    puts "#{Time.now.to_i} Enabled!"
-  else
-    puts "#{Time.now.to_i} Disabled!"
+      if Flipper[:stats].enabled?
+        puts "#{Time.now.to_i} Enabled!"
+      else
+        puts "#{Time.now.to_i} Disabled!"
+      end
+    end
   end
 end
+
+threads.map(&:join)
