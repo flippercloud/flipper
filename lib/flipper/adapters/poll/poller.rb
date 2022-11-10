@@ -1,5 +1,6 @@
 require 'logger'
 require 'concurrent/atomic/read_write_lock'
+require 'concurrent/utility/monotonic_time'
 require 'concurrent/map'
 
 module Flipper
@@ -58,9 +59,6 @@ module Flipper
 
         def run
           loop do
-            # logger.debug { "#{PREFIX} Sleeping for #{interval} seconds" }
-            sleep interval
-
             begin
               logger.debug { "#{PREFIX} Making a checkity checkity" }
 
@@ -69,11 +67,13 @@ module Flipper
 
               @lock.with_write_lock {
                 @adapter.import(adapter)
-                @last_synced_at.update { |time| Time.now.to_f }
+                @last_synced_at.update { |time| Concurrent.monotonic_time }
               }
             rescue => exception
               logger.debug { "#{PREFIX} Exception: #{exception.inspect}" }
             end
+
+            sleep interval
           end
         end
 
