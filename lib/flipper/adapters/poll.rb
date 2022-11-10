@@ -7,7 +7,7 @@ module Flipper
       include ::Flipper::Adapter
 
       # Public: The name of the adapter.
-      attr_reader :name
+      attr_reader :name, :adapter, :poller
 
       def_delegators :synced_adapter, :features, :get, :get_multi, :get_all, :add, :remove, :clear, :enable, :disable
 
