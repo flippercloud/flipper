@@ -10,7 +10,7 @@ module Flipper
     class Http
       include Flipper::Adapter
 
-      attr_reader :name
+      attr_reader :name, :client
 
       def initialize(options = {})
         @client = Client.new(url: options.fetch(:url),
