@@ -20,6 +20,10 @@ module Flipper
           instances.compute_if_absent(key) { new(options) }
         end
 
+        def self.reset
+          instances.clear
+        end
+
         def initialize(options = {})
           @thread = nil
           @pid = Process.pid
