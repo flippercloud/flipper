@@ -243,6 +243,9 @@
               <div class="col">
                 <button type="submit" name="action" value="Enable" <% if Flipper::UI.configuration.confirm_fully_enable %>id="enable_feature__button"<% end %> class="btn btn-outline-success btn-block" <% if Flipper::UI.configuration.read_only %>disabled<% end %>>
                   <span class="d-block" data-toggle="tooltip"
+                    <% if Flipper::UI.configuration.confirm_fully_enable %>
+                      data-confirmation-text="<%= feature_name %>"
+                    <% end %>
                     <% if Flipper::UI.configuration.read_only %>
                       title="Fully enable is not allowed in read only mode."
                     <% else %>
@@ -289,7 +292,7 @@
             <%== csrf_input_tag %>
             <input type="hidden" id="feature_name" name="_feature" value="<%= feature_name %>">
             <input type="hidden" name="_method" value="DELETE">
-            <button type="submit" name="action" value="Delete" id="delete_feature__button" class="btn btn-outline-danger" data-toggle="tooltip" title="Remove feature from list of features and disable it." data-placement="right">Delete</button>
+            <button type="submit" name="action" value="Delete" id="delete_feature__button" data-confirmation-text="<%= feature_name %>" class="btn btn-outline-danger" data-toggle="tooltip" title="Remove feature from list of features and disable it." data-placement="right">Delete</button>
           </form>
         </div>
       </div>

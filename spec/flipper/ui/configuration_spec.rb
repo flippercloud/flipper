@@ -110,6 +110,17 @@ RSpec.describe Flipper::UI::Configuration do
     end
   end
 
+  describe "#confirm_fully_enable" do
+    it "has default value" do
+      expect(configuration.confirm_fully_enable).to eq(false)
+    end
+
+    it "can be updated" do
+      configuration.confirm_fully_enable = true
+      expect(configuration.confirm_fully_enable).to eq(true)
+    end
+  end
+
   describe "#show_feature_description_in_list" do
     it "has default value" do
       expect(configuration.show_feature_description_in_list).to eq(false)
