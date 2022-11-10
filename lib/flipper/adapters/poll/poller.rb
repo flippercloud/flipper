@@ -59,6 +59,7 @@ module Flipper
 
         def run
           loop do
+            start = Concurrent.monotonic_time
             begin
               logger.debug { "#{PREFIX} Making a checkity checkity" }
 
@@ -73,7 +74,8 @@ module Flipper
               logger.debug { "#{PREFIX} Exception: #{exception.inspect}" }
             end
 
-            sleep interval
+            sleep_interval = interval - (Concurrent.monotonic_time - start)
+            sleep sleep_interval if sleep_interval.positive?
           end
         end
 
