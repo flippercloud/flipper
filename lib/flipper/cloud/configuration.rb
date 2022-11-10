@@ -6,7 +6,6 @@ require "flipper/adapters/memory"
 require "flipper/adapters/dual_write"
 require "flipper/adapters/sync/synchronizer"
 require "flipper/cloud/instrumenter"
-require "flipper/cloud/registry"
 require "brow"
 
 module Flipper
@@ -19,6 +18,12 @@ module Flipper
       ].freeze
 
       DEFAULT_URL = "https://www.flippercloud.io/adapter".freeze
+
+      # Private: Keeps track of brow instances so they can be shared across
+      # threads.
+      def self.brow_instances
+        @brow_instances ||= Concurrent::Map.new
+      end
 
       # Public: The token corresponding to an environment on flippercloud.io.
       attr_accessor :token
@@ -126,13 +131,12 @@ module Flipper
       end
 
       def brow
-        uri = URI.parse(url)
-        uri.path = "#{uri.path}/events".squeeze("/")
-        events_url = uri.to_s
+        self.class.brow_instances.compute_if_absent(url + token) do
+          uri = URI.parse(url)
+          uri.path = "#{uri.path}/events".squeeze("/")
 
-        Registry.default.fetch(events_url) {
           Brow::Client.new({
-            url: events_url,
+            url: uri.to_s,
             headers: {
               "Accept" => "application/json",
               "Content-Type" => "application/json",
@@ -140,7 +144,7 @@ module Flipper
               "Flipper-Cloud-Token" => @token,
             }
           })
-        }
+        end
       end
 
       # Public: The method that will be used to synchronize local adapter with
