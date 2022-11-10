@@ -2,10 +2,10 @@ module Flipper
   class Railtie < Rails::Railtie
     config.before_configuration do
       config.flipper = ActiveSupport::OrderedOptions.new.update(
-        env_key: "flipper",
+        env_key: ENV.fetch('FLIPPER_ENV_KEY', 'flipper'),
         memoize: ENV.fetch('FLIPPER_MEMOIZE', 'true') == 'true',      
         preload: ENV.fetch('FLIPPER_PRELOAD', 'true') == 'true',
-        instrumenter: ActiveSupport::Notifications,
+        instrumenter: ENV.fetch('FLIPPER_INSTRUMENTER', 'ActiveSupport::Notifications').constantize,
         log: ENV.fetch('FLIPPER_LOG', 'true') == 'true'
       )
     end
