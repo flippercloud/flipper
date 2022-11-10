@@ -59,6 +59,7 @@ module Flipper
 
         def run
           loop do
+            sleep jitter
             start = Concurrent.monotonic_time
             begin
               logger.debug { "#{PREFIX} Making a checkity checkity" }
@@ -66,10 +67,8 @@ module Flipper
               adapter = Memory.new
               adapter.import(@remote_adapter)
 
-              @lock.with_write_lock {
-                @adapter.import(adapter)
-                @last_synced_at.update { |time| Concurrent.monotonic_time }
-              }
+              @lock.with_write_lock { @adapter.import(adapter) }
+              @last_synced_at.update { |time| Concurrent.monotonic_time }
             rescue => exception
               logger.debug { "#{PREFIX} Exception: #{exception.inspect}" }
             end
@@ -80,6 +79,10 @@ module Flipper
         end
 
         private
+
+        def jitter
+          rand
+        end
 
         def forked?
           pid != Process.pid
