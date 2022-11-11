@@ -1,4 +1,8 @@
-## unreleased
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## 0.26.0.rc1
 
 * Cloud Background Polling (https://github.com/jnunemaker/flipper/pull/682)
 
