@@ -40,7 +40,7 @@ RSpec.describe Flipper::Railtie do
     end
 
     it 'can set instrumenter from ENV' do
-      stub_const('My::Cool::Instrumenter')
+      stub_const('My::Cool::Instrumenter', Class.new(ActiveSupport::Notifications))
       ENV['FLIPPER_INSTRUMENTER'] = 'My::Cool::Instrumenter'
 
       subject
