@@ -18,6 +18,26 @@ RSpec.describe Flipper::Railtie do
   subject { application.initialize! }
 
   describe 'initializers' do
+    context 'when environment variables are set' do
+      before do
+        allow(ENV).to receive(:fetch).with('FLIPPER_ENV_KEY', 'flipper').and_return('flopper')
+        allow(ENV).to receive(:fetch).with('FLIPPER_MEMOIZE', 'true').and_return('false')
+        allow(ENV).to receive(:fetch).with('FLIPPER_PRELOAD', 'true').and_return('false')
+        stub_const('My::Cool::Instrumenter')
+        allow(ENV).to receive(:fetch).with('FLIPPER_INSTRUMENTER', 'ActiveSupport::Notifications').and_return('My::Cool::Instrumenter')
+        allow(ENV).to receive(:fetch).with('FLIPPER_LOG', 'true').and_return('false')
+      end
+
+      it 'respects env' do
+        subject # initialize
+        expect(config.env_key).to eq('flopper')
+        expect(config.memoize).to be(false)
+        expect(config.preload).to be(false)
+        expect(config.instrumenter).to be(My::Cool::Instrumenter)
+        expect(config.log).to be(false)
+      end
+    end
+
     it 'sets defaults' do
       subject # initialize
       expect(config.env_key).to eq("flipper")
