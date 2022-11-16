@@ -39,13 +39,13 @@ RSpec.describe Flipper::Railtie do
       expect(config.preload).to eq(false)
     end
 
-    it 'can set instrumenter from ENV' do
-      stub_const('My::Cool::Instrumenter')
-      ENV['FLIPPER_INSTRUMENTER'] = 'My::Cool::Instrumenter'
+    # it 'can set instrumenter from ENV' do
+    #   stub_const('My::Cool::Instrumenter')
+    #   ENV['FLIPPER_INSTRUMENTER'] = 'My::Cool::Instrumenter'
 
-      subject
-      expect(config.instrumenter).to eq(My::Cool::Instrumenter)
-    end
+    #   subject
+    #   expect(config.instrumenter).to eq(My::Cool::Instrumenter)
+    # end
 
     it 'can set log from ENV' do
       ENV['FLIPPER_LOG'] = 'false'
