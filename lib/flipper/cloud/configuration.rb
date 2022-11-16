@@ -164,7 +164,11 @@ module Flipper
       end
 
       def poller
-        Flipper::Adapters::Poll::Poller.get(@url + @token, interval: sync_interval, remote_adapter: http_adapter).tap(&:start)
+        Flipper::Adapters::Poll::Poller.get(@url + @token, {
+          interval: sync_interval,
+          remote_adapter: http_adapter,
+          instrumenter: instrumenter,
+        }).tap(&:start)
       end
 
       def poll_adapter

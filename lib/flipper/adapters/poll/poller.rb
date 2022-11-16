@@ -7,9 +7,7 @@ module Flipper
   module Adapters
     class Poll
       class Poller
-        PREFIX = "[flipper http async poll adapter]".freeze
-
-        attr_reader :thread, :pid, :mutex, :logger, :interval, :last_synced_at
+        attr_reader :thread, :pid, :mutex, :interval, :last_synced_at
 
         def self.instances
           @instances ||= Concurrent::Map.new
@@ -29,14 +27,14 @@ module Flipper
           @pid = Process.pid
           @mutex = Mutex.new
           @adapter = Memory.new
+          @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
           @remote_adapter = options.fetch(:remote_adapter)
-          @logger = options.fetch(:logger) { Logger.new(STDOUT) }
           @interval = options.fetch(:interval, 10).to_f
           @lock = Concurrent::ReadWriteLock.new
           @last_synced_at = Concurrent::AtomicFixnum.new(0)
 
           if @interval < 1
-            warn "#{PREFIX} interval must be greater than or equal to 1 but was #{@interval}. Setting @interval to 1."
+            warn "Flipper::Cloud poll interval must be greater than or equal to 1 but was #{@interval}. Setting @interval to 1."
             @interval = 1
           end
 
@@ -57,7 +55,9 @@ module Flipper
         end
 
         def stop
-          logger.debug { "#{PREFIX} Stopping worker" }
+          @instrumenter.instrument("poller.#{InstrumentationNamespace}", {
+            operation: :stop,
+          })
           @thread&.kill
         end
 
@@ -66,15 +66,15 @@ module Flipper
             sleep jitter
             start = Concurrent.monotonic_time
             begin
-              logger.debug { "#{PREFIX} Making a checkity checkity" }
+              @instrumenter.instrument("poller.#{InstrumentationNamespace}", operation: :poll) do
+                adapter = Memory.new
+                adapter.import(@remote_adapter)
 
-              adapter = Memory.new
-              adapter.import(@remote_adapter)
-
-              @lock.with_write_lock { @adapter.import(adapter) }
-              @last_synced_at.update { |time| Concurrent.monotonic_time }
+                @lock.with_write_lock { @adapter.import(adapter) }
+                @last_synced_at.update { |time| Concurrent.monotonic_time }
+              end
             rescue => exception
-              logger.debug { "#{PREFIX} Exception: #{exception.inspect}" }
+              # you can instrument these using poller.flipper
             end
 
             sleep_interval = interval - (Concurrent.monotonic_time - start)
@@ -103,7 +103,9 @@ module Flipper
           begin
             return if thread_alive?
             @thread = Thread.new { run }
-            logger.debug { "#{PREFIX} Worker thread [#{@thread.object_id}] started" }
+            @instrumenter.instrument("poller.#{InstrumentationNamespace}", {
+              operation: :thread_start,
+            })
           ensure
             mutex.unlock
           end
