@@ -18,24 +18,40 @@ RSpec.describe Flipper::Railtie do
   subject { application.initialize! }
 
   describe 'initializers' do
-    context 'when environment variables are set' do
-      before do
-        allow(ENV).to receive(:fetch).with('FLIPPER_ENV_KEY', 'flipper').and_return('flopper')
-        allow(ENV).to receive(:fetch).with('FLIPPER_MEMOIZE', 'true').and_return('false')
-        allow(ENV).to receive(:fetch).with('FLIPPER_PRELOAD', 'true').and_return('false')
-        stub_const('My::Cool::Instrumenter')
-        allow(ENV).to receive(:fetch).with('FLIPPER_INSTRUMENTER', 'ActiveSupport::Notifications').and_return('My::Cool::Instrumenter')
-        allow(ENV).to receive(:fetch).with('FLIPPER_LOG', 'true').and_return('false')
-      end
+    it 'can set env_key from ENV' do
+      ENV['FLIPPER_ENV_KEY'] = 'flopper'
 
-      it 'respects env' do
-        subject # initialize
-        expect(config.env_key).to eq('flopper')
-        expect(config.memoize).to be(false)
-        expect(config.preload).to be(false)
-        expect(config.instrumenter).to be(My::Cool::Instrumenter)
-        expect(config.log).to be(false)
-      end
+      subject
+      expect(config.env_key).to eq('flopper')
+    end
+
+    it 'can set memoize from ENV' do
+      ENV['FLIPPER_MEMOIZE'] = 'false'
+
+      subject
+      expect(config.memoize).to eq(false)
+    end
+
+    it 'can set preload from ENV' do
+      ENV['FLIPPER_PRELOAD'] = 'false'
+
+      subject
+      expect(config.preload).to eq(false)
+    end
+
+    it 'can set instrumenter from ENV' do
+      stub_const('My::Cool::Instrumenter')
+      ENV['FLIPPER_INSTRUMENTER'] = 'My::Cool::Instrumenter'
+
+      subject
+      expect(config.instrumenter).to eq(My::Cool::Instrumenter)
+    end
+
+    it 'can set log from ENV' do
+      ENV['FLIPPER_LOG'] = 'false'
+
+      subject
+      expect(config.log).to eq(false)
     end
 
     it 'sets defaults' do
