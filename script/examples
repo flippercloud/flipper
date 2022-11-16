@@ -5,9 +5,13 @@ set -e
 
 # Run all examples individually
 for example in examples/**/*.rb; do
-  # Skip examples with a loop for now
-  if ! grep -q "loop do" "$example"; then
-    echo $example
-    ruby $example
+  # Skip examples that have setup in name
+  if ! grep -q "setup" <<< "$example"; then
+    # Skip examples with a loop for now
+    if ! grep -q "loop do" "$example"; then
+      echo "\n\n>>> START: $example"
+      ruby $example
+      echo ">>> FINISH: $example"
+    fi
   fi
 done
