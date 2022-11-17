@@ -3,10 +3,10 @@ module Flipper
     config.before_configuration do
       config.flipper = ActiveSupport::OrderedOptions.new.update(
         env_key: ENV.fetch('FLIPPER_ENV_KEY', 'flipper'),
-        memoize: ENV.fetch('FLIPPER_MEMOIZE', 'true') == 'true',      
-        preload: ENV.fetch('FLIPPER_PRELOAD', 'true') == 'true',
+        memoize: ENV.fetch('FLIPPER_MEMOIZE', 'true').casecmp('true').zero?,
+        preload: ENV.fetch('FLIPPER_PRELOAD', 'true').casecmp('true').zero?,
         instrumenter: ENV.fetch('FLIPPER_INSTRUMENTER', 'ActiveSupport::Notifications').constantize,
-        log: ENV.fetch('FLIPPER_LOG', 'true') == 'true'
+        log: ENV.fetch('FLIPPER_LOG', 'true').casecmp('true').zero?
       )
     end
 
