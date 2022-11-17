@@ -18,7 +18,7 @@ end
 desc 'Tags version, pushes to remote, and pushes gem'
 task release: :build do
   sh 'git', 'tag', "v#{Flipper::VERSION}"
-  sh 'git push origin master'
+  sh 'git push origin main'
   sh "git push origin v#{Flipper::VERSION}"
   puts "\nWhat OTP code should be used?"
   otp_code = STDIN.gets.chomp
