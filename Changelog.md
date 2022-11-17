@@ -2,9 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## 0.26.0.rc1
+
+## unreleased
 
 * Cloud Background Polling (https://github.com/jnunemaker/flipper/pull/682)
+* Changed default branch from master to main
 
 ## 0.25.4
 
