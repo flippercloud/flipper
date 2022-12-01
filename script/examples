@@ -6,12 +6,14 @@ set -e
 # Run all examples individually
 for example in examples/**/*.rb; do
   # Skip examples that have setup in name
-  if echo $example | grep -vq "setup"; then
-    # Skip examples with a loop for now
-    if ! grep -q "loop do" "$example"; then
-      echo "\n\n>>> START: $example"
-      ruby $example
-      echo ">>> FINISH: $example"
-    fi
+  echo $example | grep -q "setup" && continue;
+  # Skip examples that have cloud in name
+  echo $example | grep -q "cloud" && continue;
+
+  # Skip examples with a loop for now
+  if ! grep -q "loop do" "$example"; then
+    echo "\n\n>>> START: $example"
+    ruby $example
+    echo ">>> FINISH: $example"
   fi
 done
