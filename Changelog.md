@@ -7,6 +7,9 @@ All notable changes to this project will be documented in this file.
 
 * Cloud Background Polling (https://github.com/jnunemaker/flipper/pull/682)
 * Changed default branch from master to main
+* Allow configuring railtie via ENV vars (https://github.com/jnunemaker/flipper/pull/681)
+* flipper-ui: Fix issue preventing feature flags being enabled when confirm_fully_enable is on and feature_removal_enabled is off (https://github.com/jnunemaker/flipper/pull/680)
+
 
 ## 0.25.4
 
