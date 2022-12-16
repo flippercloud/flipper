@@ -19,38 +19,52 @@ Control your software &mdash; don't let it control you.
 
 Add this line to your application's Gemfile:
 
-    gem 'flipper'
+```ruby
+gem 'flipper'
+```
 
-You'll also want to pick a storage [adapter](https://flippercloud.io/docs/adapters), for example:
+Optionally, you can pick a [storage adapter](https://flippercloud.io/docs/adapters). This is where the feature flag will be stored. By default, it's stored on memory and the flags you've set will get erased each time your application restarts.
 
-    gem 'flipper-active_record'
+If you choose `active record` as the storage adapter then Flipper will store your feature flag in the database, allowing persistency between restarts. Add this line to your Gemfile:
 
-And then execute:
+```ruby
+gem 'flipper-active_record'
+```
 
-    $ bundle
+`flipper-active_record` comes with a generator for creating the database migrations. From your terminal, you can do:
 
-Or install it yourself with:
+```shell
+rails g flipper:active_record
+rails db:migrate
+```
 
-    $ gem install flipper
+And then bundle:
 
-## Subscribe &amp; Ship
+```shell
+bundle install
+```
 
-[💌 &nbsp;Subscribe](https://buttondown.email/flipper) - I'll send you short and sweet emails when we release new versions.
+## Email me when there's a new release
+
+When new versions of Flipper are released, we’ll send you a short email.
+
+We promise to never spam you.
+
+[Click here to subscribe!](https://buttondown.email/flipper)
 
 ## Getting Started
 
-Use `Flipper#enabled?` in your app to check if a feature is enabled.
+To check if a feature flag has been enabled, call `Flipper.enabled?`
 
 ```ruby
-# check if search is enabled
-if Flipper.enabled? :search, current_user
-  puts 'Search away!'
+if Flipper.enabled?(:search)
+  # Run search code with Flipper!
 else
-  puts 'No search for you!'
+  # Run alternative code
 end
 ```
 
-All features are disabled by default, so you'll need to explicitly enable them.
+Flags are disabled by default. To enable a feature flag, you can do the following:
 
 ```ruby
 # Enable a feature for everyone
@@ -66,7 +80,37 @@ Flipper.enable_group :search, :admin
 Flipper.enable_percentage_of_actors :search, 2
 ```
 
+If you choose to enable an actor or group, checking for a feature flag should look something like this:
+
+```ruby
+if Flipper.enabled?(:search, current_user)
+  # Run search code for the current user
+else
+  # Run alternative code
+end
+```
+
+To disable a feature flag, replace enable with disable:
+
+```ruby
+# Disable a feature for everyone
+Flipper.disable :search
+
+# Disable a feature for a specific actor
+Flipper.disable_actor :search, current_user
+
+# Disable a feature for a group of actors
+Flipper.disable_group :search, :admin
+
+# Disable a feature for a percentage of actors
+Flipper.disable_percentage_of_actors :search, 2
+```
+
 Read more about [getting started with Flipper](https://flippercloud.io/docs) and [enabling features](https://flippercloud.io/docs/features).
+
+Still having trouble following through?
+
+Here's a [quick video](https://replayable.io/replay/639cbee282a4150067a23c82/?share=2j3GpPaEBivYlL3G8SijvA) demonstrating whether a feature flag is enabled or not.
 
 ## Flipper Cloud
 
