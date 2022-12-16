@@ -44,11 +44,9 @@ And then bundle:
 bundle install
 ```
 
-## Email me when there's a new release
+## Notify me of New Releases
 
-When new versions of Flipper are released, we’ll send you a short email.
-
-We promise to never spam you.
+When new versions of Flipper are released, we’ll send you a short email. We promise to never spam you.
 
 [Click here to subscribe!](https://buttondown.email/flipper)
 
@@ -108,9 +106,7 @@ Flipper.disable_percentage_of_actors :search, 2
 
 Read more about [getting started with Flipper](https://flippercloud.io/docs) and [enabling features](https://flippercloud.io/docs/features).
 
-Still having trouble following through?
-
-Here's a [quick video](https://replayable.io/replay/639cbee282a4150067a23c82/?share=2j3GpPaEBivYlL3G8SijvA) demonstrating whether a feature flag is enabled or not.
+Still having trouble following through? Here's a [quick video](https://replayable.io/replay/639cbee282a4150067a23c82/?share=2j3GpPaEBivYlL3G8SijvA) demonstrating whether a feature flag is enabled or not.
 
 ## Flipper Cloud
 
