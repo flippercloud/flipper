@@ -43,5 +43,11 @@ module Flipper
         }
       end
     end
+
+    initializer "flipper.instrumentation" do |app|
+      return unless app.config.flipper.instrumenter == ActiveSupport::Notifications
+
+      require "flipper/instrumentation/bugsnag" if defined?(Bugsnag)
+    end
   end
 end
