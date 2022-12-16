@@ -1,8 +1,8 @@
 module Flipper
   module Instrumentation
     class Bugsnag
-      def call(event)
-        operation, feature_name, result = event.payload.values_at(:operation, :feature_name, :result)
+      def call(name, start, finish, id, payload)
+        operation, feature_name, result = payload.values_at(:operation, :feature_name, :result)
         return unless operation == :enabled?
 
         if result
