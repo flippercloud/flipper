@@ -241,7 +241,7 @@ module Flipper
       # Check if value column is text instead of string
       # See https://github.com/jnunemaker/flipper/pull/692
       def value_not_text?
-        @gate_class.db_schema[:value][:db_type] != "text"
+        "text".casecmp(@gate_class.db_schema[:value][:db_type]) != 0
       end
     end
   end
