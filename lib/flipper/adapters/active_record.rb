@@ -244,7 +244,7 @@ module Flipper
       end
 
       # Check if value column is text instead of string
-      # See TODO:link/to/PR
+      # See https://github.com/jnunemaker/flipper/pull/692
       def value_not_text?
         @gate_class.column_for_attribute(:value).type != :text
       end
