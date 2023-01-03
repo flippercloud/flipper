@@ -25,11 +25,6 @@ module Flipper
           raise 'Flipper::Middleware::Memoizer no longer initializes with a flipper instance or block. Read more at: https://git.io/vSo31.'
         end
 
-        if opts[:preload_all]
-          warn "Flipper::Middleware::Memoizer: `preload_all` is deprecated, use `preload: true`"
-          opts[:preload] = true
-        end
-
         @app = app
         @opts = opts
         @env_key = opts.fetch(:env_key, 'flipper')
@@ -74,14 +69,9 @@ module Flipper
         when Array then flipper.preload(@opts[:preload])
         end
 
-        response = @app.call(env)
-        response[2] = Rack::BodyProxy.new(response[2]) do
-          flipper.memoize = false
-        end
-        reset_on_body_close = true
-        response
+        @app.call(env)
       ensure
-        flipper.memoize = false if flipper && !reset_on_body_close
+        flipper.memoize = false if flipper
       end
     end
   end

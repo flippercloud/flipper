@@ -12,10 +12,6 @@ RSpec.describe Flipper::Cloud do
 
     before do
       @instance = described_class.new(token: token)
-      memoized_adapter = @instance.adapter
-      sync_adapter = memoized_adapter.adapter
-      @http_adapter = sync_adapter.instance_variable_get('@remote')
-      @http_client = @http_adapter.instance_variable_get('@client')
     end
 
     it 'returns Flipper::DSL instance' do
@@ -26,40 +22,29 @@ RSpec.describe Flipper::Cloud do
       expect(@instance.cloud_configuration).to be_instance_of(Flipper::Cloud::Configuration)
     end
 
-    it 'configures instance to use http adapter' do
-      expect(@http_adapter).to be_instance_of(Flipper::Adapters::Http)
-    end
+    it 'configures the correct adapter' do
+      # pardon the nesting...
+      memoized_adapter = @instance.adapter
+      poll_adapter = memoized_adapter.adapter
+      dual_write_adapter = poll_adapter.adapter
 
-    it 'sets up correct url' do
-      uri = @http_client.instance_variable_get('@uri')
-      expect(uri.scheme).to eq('https')
-      expect(uri.host).to eq('www.flippercloud.io')
-      expect(uri.path).to eq('/adapter')
-    end
+      expect(poll_adapter).to be_instance_of(Flipper::Adapters::Poll)
+      expect(dual_write_adapter).to be_instance_of(Flipper::Adapters::DualWrite)
 
-    it 'sets correct token header' do
-      headers = @http_client.instance_variable_get('@headers')
-      expect(headers['Flipper-Cloud-Token']).to eq(token)
-    end
-
-    it 'uses noop instrumenter' do
+      http_adapter = dual_write_adapter.remote
+      client = http_adapter.client
+      expect(client.uri.scheme).to eq('https')
+      expect(client.uri.host).to eq('www.flippercloud.io')
+      expect(client.uri.path).to eq('/adapter')
+      expect(client.headers['Flipper-Cloud-Token']).to eq(token)
       expect(@instance.instrumenter).to be(Flipper::Instrumenters::Noop)
     end
   end
 
   context 'initialize with token and options' do
-    before do
-      stub_request(:get, /fakeflipper\.com/).to_return(status: 200, body: "{}")
-
-      @instance = described_class.new(token: 'asdf', url: 'https://www.fakeflipper.com/sadpanda')
-      memoized_adapter = @instance.adapter
-      sync_adapter = memoized_adapter.adapter
-      @http_adapter = sync_adapter.instance_variable_get('@remote')
-      @http_client = @http_adapter.instance_variable_get('@client')
-    end
-
     it 'sets correct url' do
-      uri = @http_client.instance_variable_get('@uri')
+      @instance = described_class.new(token: 'asdf', url: 'https://www.fakeflipper.com/sadpanda')
+      uri = @instance.adapter.adapter.adapter.remote.client.uri
       expect(uri.scheme).to eq('https')
       expect(uri.host).to eq('www.fakeflipper.com')
       expect(uri.path).to eq('/sadpanda')
@@ -89,26 +74,26 @@ RSpec.describe Flipper::Cloud do
 
   it 'can set debug_output' do
     expect(Flipper::Adapters::Http::Client).to receive(:new)
-      .with(hash_including(debug_output: STDOUT))
+      .with(hash_including(debug_output: STDOUT)).at_least(:once)
     described_class.new(token: 'asdf', debug_output: STDOUT)
   end
 
   it 'can set read_timeout' do
     expect(Flipper::Adapters::Http::Client).to receive(:new)
-      .with(hash_including(read_timeout: 1))
+      .with(hash_including(read_timeout: 1)).at_least(:once)
     described_class.new(token: 'asdf', read_timeout: 1)
   end
 
   it 'can set open_timeout' do
     expect(Flipper::Adapters::Http::Client).to receive(:new)
-      .with(hash_including(open_timeout: 1))
+      .with(hash_including(open_timeout: 1)).at_least(:once)
     described_class.new(token: 'asdf', open_timeout: 1)
   end
 
   if RUBY_VERSION >= '2.6.0'
     it 'can set write_timeout' do
       expect(Flipper::Adapters::Http::Client).to receive(:new)
-        .with(hash_including(open_timeout: 1))
+        .with(hash_including(open_timeout: 1)).at_least(:once)
       described_class.new(token: 'asdf', open_timeout: 1)
     end
   end

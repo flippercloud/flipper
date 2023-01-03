@@ -72,7 +72,8 @@ RSpec.describe Flipper::Cloud::Configuration do
     stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
 
     instance = described_class.new(required_options.merge(sync_interval: 1))
-    expect(instance.adapter.synchronizer.interval).to be(1)
+    poller = instance.send(:poller)
+    expect(poller.interval).to eq(1)
   end
 
   it "can set debug_output" do
@@ -85,7 +86,7 @@ RSpec.describe Flipper::Cloud::Configuration do
     stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
 
     instance = described_class.new(required_options)
-    expect(instance.adapter).to be_instance_of(Flipper::Adapters::Sync)
+    expect(instance.adapter).to be_instance_of(Flipper::Adapters::Poll)
   end
 
   it "can override adapter block" do
@@ -234,7 +235,7 @@ RSpec.describe Flipper::Cloud::Configuration do
     expect(stub).to have_been_requested
 
     # Check that local adapter really did sync.
-    local_adapter = instance.adapter.instance_variable_get("@local")
+    local_adapter = instance.local_adapter
     all = local_adapter.get_all
     expect(all.keys).to eq(["search", "history"])
     expect(all["search"][:boolean]).to eq("true")

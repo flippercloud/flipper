@@ -10,7 +10,7 @@ module Flipper
     class Http
       include Flipper::Adapter
 
-      attr_reader :name
+      attr_reader :name, :client
 
       def initialize(options = {})
         @client = Client.new(url: options.fetch(:url),
@@ -19,6 +19,8 @@ module Flipper
                              basic_auth_password: options[:basic_auth_password],
                              read_timeout: options[:read_timeout],
                              open_timeout: options[:open_timeout],
+                             write_timeout: options[:write_timeout],
+                             max_retries: options[:max_retries],
                              debug_output: options[:debug_output])
         @name = :http
       end

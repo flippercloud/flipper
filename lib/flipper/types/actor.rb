@@ -23,8 +23,14 @@ module Flipper
         super || @thing.respond_to?(*args)
       end
 
-      def method_missing(name, *args, &block)
-        @thing.send name, *args, &block
+      if RUBY_VERSION >= '3.0'
+        def method_missing(name, *args, **kwargs, &block)
+          @thing.send name, *args, **kwargs, &block
+        end
+      else
+        def method_missing(name, *args, &block)
+          @thing.send name, *args, &block
+        end
       end
     end
   end

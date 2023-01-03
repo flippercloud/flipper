@@ -14,24 +14,6 @@ require 'flipper/ui/configuration'
 
 module Flipper
   module UI
-    class << self
-      # These three configuration options have been moved to Flipper::UI::Configuration
-      deprecated_configuration_options = %w(application_breadcrumb_href
-                                            feature_creation_enabled
-                                            feature_removal_enabled)
-      deprecated_configuration_options.each do |attribute_name|
-        send(:define_method, "#{attribute_name}=".to_sym) do
-          raise ConfigurationDeprecated, "The UI configuration for #{attribute_name} has " \
-            "deprecated. This configuration option has moved to Flipper::UI::Configuration"
-        end
-
-        send(:define_method, attribute_name.to_sym) do
-          raise ConfigurationDeprecated, "The UI configuration for #{attribute_name} has " \
-            "deprecated. This configuration option has moved to Flipper::UI::Configuration"
-        end
-      end
-    end
-
     def self.root
       @root ||= Pathname(__FILE__).dirname.expand_path.join('ui')
     end
@@ -49,8 +31,9 @@ module Flipper
       builder.use Flipper::UI::Middleware, flipper: flipper, env_key: env_key
       builder.run app
       klass = self
-      builder.define_singleton_method(:inspect) { klass.inspect } # pretty rake routes output
-      builder
+      app = builder.to_app
+      app.define_singleton_method(:inspect) { klass.inspect } # pretty rake routes output
+      app
     end
 
     # Public: yields configuration instance for customizing UI text

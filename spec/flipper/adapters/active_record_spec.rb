@@ -61,7 +61,7 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
       Flipper.configuration = nil
       Flipper.instance = nil
 
-      silence_warnings { load 'flipper/adapters/active_record.rb' }
+      Kernel.silence_warnings { load 'flipper/adapters/active_record.rb' }
     end
 
     it 'configures itself' do

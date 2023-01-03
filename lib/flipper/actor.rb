@@ -15,5 +15,9 @@ module Flipper
         @flipper_properties == other.flipper_properties
     end
     alias_method :==, :eql?
+
+    def hash
+      flipper_id.hash
+    end
   end
 end

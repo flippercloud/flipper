@@ -1,4 +1,58 @@
-## Unreleased
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## 0.26.0
+
+* Cloud Background Polling (https://github.com/jnunemaker/flipper/pull/682)
+* Changed default branch from master to main
+* Allow configuring railtie via ENV vars (https://github.com/jnunemaker/flipper/pull/681)
+* flipper-ui: Fix issue preventing feature flags being enabled when confirm_fully_enable is on and feature_removal_enabled is off (https://github.com/jnunemaker/flipper/pull/680)
+
+## 0.25.4
+
+* Added read_only UI config option (https://github.com/jnunemaker/flipper/pull/679)
+
+## 0.25.3
+
+* Added configurable confirm warning for fully enabling a feature (https://github.com/jnunemaker/flipper/pull/665)
+* Update rack protection to < 4 (https://github.com/jnunemaker/flipper/pull/675)
+* Check sadd_returns_boolean on the actual client class rather than ::Redis (https://github.com/jnunemaker/flipper/pull/677)
+
+## 0.25.2
+
+* Fix deprecation warnings for Redis >= 4.8.0 (https://github.com/jnunemaker/flipper/pull/660)
+
+## 0.25.1
+
+### Additions/Changes
+
+* ActiveRecord: use provided `gate_class` option when calling `#get_all` (https://github.com/jnunemaker/flipper/pull/647)
+* Relaxed the rack-protection version to support latest (https://github.com/jnunemaker/flipper/commit/f4a41c541ccf14c535a61c6bc6fe7eeabbfc7e71).
+* Configure ActiveRecord adapter immediately upon require of flipper-active_record (https://github.com/jnunemaker/flipper/pull/652)
+
+## 0.25.0
+
+### Additions/Changes
+
+* Added a prompt in Flipper UI for the 'Delete' button to prevent accidental delete of features (https://github.com/jnunemaker/flipper/pull/625)
+* Added failsafe adapter (https://github.com/jnunemaker/flipper/pull/626)
+* Removed previously deprecated options and settings. Those upgrading from `<0.21` should upgrade to `~>0.24` first and fix any deprecation warnings when initializing Flipper. (https://github.com/jnunemaker/flipper/pull/627)
+* ActiveRecord: base class for internal models (https://github.com/jnunemaker/flipper/pull/629)
+* Remove use of `Rack::BodyProxy` in the memoizer middleware (https://github.com/jnunemaker/flipper/pull/631)
+
+## 0.24.1
+
+### Additions/Changes
+
+* flipper-api: `exclude_gates` parameter to exclude gate data in GETs (https://github.com/jnunemaker/flipper/pull/572).
+* Make it possible to disable internal memoization (https://github.com/jnunemaker/flipper/pull/612).
+* Add Flipper::Actor#hash so actors can be hash keys (https://github.com/jnunemaker/flipper/pull/616).
+* Pretty Up `rails routes` again and make rack-protection dependency less strict (https://github.com/jnunemaker/flipper/pull/619).
+* Add kwargs for method_missing using ruby 3.0 (https://github.com/jnunemaker/flipper/pull/620).
+* Relax the rack-protection dependency (https://github.com/jnunemaker/flipper/commit/c1cb9cd78140c2b09123687642558101e6e5d37d).
+
+## 0.24.0
 
 ### Breaking Changes
 
@@ -18,6 +72,7 @@
 * Removed support for Ruby 2.5 (which was end of line 9 months ago)
 * Add (alpha) client side instrumentation of events to cloud (https://github.com/jnunemaker/flipper/pull/602)
 * Fix deprecated uses of Redis#pipelined (https://github.com/jnunemaker/flipper/pull/603). redis-rb >= 3 now required.
+* Fix Flipper UI Rack application when `Rack::Session::Pool` is used to build it (https://github.com/jnunemaker/flipper/pull/606).
 
 ## 0.23.1
 

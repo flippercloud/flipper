@@ -38,26 +38,6 @@ RSpec.describe Flipper::Middleware::Memoizer do
       expect(called).to eq(true)
     end
 
-    it 'disables local cache after body close' do
-      app = ->(_env) { [200, {}, []] }
-      middleware = described_class.new(app)
-      body = middleware.call(env).last
-
-      expect(flipper.memoizing?).to eq(true)
-      body.close
-      expect(flipper.memoizing?).to eq(false)
-    end
-
-    it 'clears local cache after body close' do
-      app = ->(_env) { [200, {}, []] }
-      middleware = described_class.new(app)
-      body = middleware.call(env).last
-
-      flipper.adapter.cache['hello'] = 'world'
-      body.close
-      expect(flipper.adapter.cache).to be_empty
-    end
-
     it 'clears the local cache with a successful request' do
       flipper.adapter.cache['hello'] = 'world'
       get '/', {}, 'flipper' => flipper

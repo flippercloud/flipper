@@ -8,6 +8,11 @@ module Flipper
       attr_accessor :banner_text,
                     :banner_class
 
+      # Public: Is the UI in read only mode or not. Default is false. This
+      # supersedes all other write-related options such as
+      # (feature_creation_enabled and feature_removal_enabled).
+      attr_accessor :read_only
+
       # Public: If you set this, the UI will always have a first breadcrumb that
       # says "App" which points to this href. The href can be a path (ie: "/")
       # or full url ("https://app.example.com/").
@@ -49,6 +54,10 @@ module Flipper
       # Default is comma ",".
       attr_accessor :actors_separator
 
+      # Public: if you want to get a confirm pop up box while fully enabling a feature
+      # Default is false.
+      attr_accessor :confirm_fully_enable
+
       VALID_BANNER_CLASS_VALUES = %w(
         danger
         dark
@@ -74,6 +83,8 @@ module Flipper
         @descriptions_source = DEFAULT_DESCRIPTIONS_SOURCE
         @show_feature_description_in_list = false
         @actors_separator = ','
+        @confirm_fully_enable = false
+        @read_only = false
       end
 
       def using_descriptions?
