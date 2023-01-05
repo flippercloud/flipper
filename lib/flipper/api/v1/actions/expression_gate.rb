@@ -18,7 +18,7 @@ module Flipper
               feature.enable_expression expression
               decorated_feature = Decorators::Feature.new(feature)
               json_response(decorated_feature.as_json, 200)
-            rescue NameError => exception
+            rescue NameError, ArgumentError => exception
               json_error_response(:expression_invalid)
             end
           end

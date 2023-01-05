@@ -9,6 +9,9 @@ module Flipper
       when Hash
         type = object.keys.first
         args = object.values.first
+        unless type
+          raise ArgumentError, "#{object.inspect} cannot be converted into an expression"
+        end
         Expressions.const_get(type).new(args)
       when String
         convert_to_values ? Expressions::String.new(object.to_s) : object
