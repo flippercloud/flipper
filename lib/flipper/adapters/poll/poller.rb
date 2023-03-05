@@ -1,7 +1,7 @@
 require 'logger'
-require 'concurrent/atomic/read_write_lock'
 require 'concurrent/utility/monotonic_time'
 require 'concurrent/map'
+require 'concurrent/atomic/atomic_fixnum'
 require 'concurrent/hash'
 
 module Flipper
@@ -30,7 +30,6 @@ module Flipper
           @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
           @remote_adapter = options.fetch(:remote_adapter)
           @interval = options.fetch(:interval, 10).to_f
-          @lock = Concurrent::ReadWriteLock.new
           @last_synced_at = Concurrent::AtomicFixnum.new(0)
           @data = Concurrent::Hash.new
           @adapter = Memory.new(@data)

@@ -13,6 +13,12 @@ RSpec.describe Flipper::Adapters::Poll::Poller do
     )
   end
 
+  before do
+    allow(subject).to receive(:loop).and_yield # Make loop just call once
+    allow(subject).to receive(:sleep)          # Disable sleep
+    allow(Thread).to receive(:new).and_yield   # Disable separate thread
+  end
+
   describe "#adapter" do
     it "always returns same memory adapter instance" do
       expect(subject.adapter).to be_a(Flipper::Adapters::Memory)
@@ -28,6 +34,15 @@ RSpec.describe Flipper::Adapters::Poll::Poller do
       expect(local.enabled?(:polling)).to be(false)
       subject.sync
       expect(local.enabled?(:polling)).to be(true)
+    end
+  end
+
+  describe "#start" do
+    it "starts the poller thread" do
+      expect(Thread).to receive(:new).and_yield
+      expect(subject).to receive(:loop).and_yield
+      expect(subject).to receive(:sync)
+      subject.start
     end
   end
 end
