@@ -26,12 +26,13 @@ module Flipper
           @thread = nil
           @pid = Process.pid
           @mutex = Mutex.new
-          @adapter = Memory.new
           @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
           @remote_adapter = options.fetch(:remote_adapter)
           @interval = options.fetch(:interval, 10).to_f
           @lock = Concurrent::ReadWriteLock.new
           @last_synced_at = Concurrent::AtomicFixnum.new(0)
+          @data = Concurrent::Hash.new
+          @adapter = Memory.new(@data)
 
           if @interval < 1
             warn "Flipper::Cloud poll interval must be greater than or equal to 1 but was #{@interval}. Setting @interval to 1."
@@ -43,10 +44,6 @@ module Flipper
           if options.fetch(:shutdown_automatically, true)
             at_exit { stop }
           end
-        end
-
-        def adapter
-          @lock.with_read_lock { @adapter }
         end
 
         def start
@@ -67,14 +64,8 @@ module Flipper
             start = Concurrent.monotonic_time
             begin
               @instrumenter.instrument("poller.#{InstrumentationNamespace}", operation: :poll) do
-                # Create a temporary memory adapter to store the remote adapter's features.
-                # This is performed out of a write lock to prevent blocking other threads.
-                adapter = Memory.new(@remote_adapter.get_all)
-
-                # Import the tempory memory adapter into the poller's adapter in a write lock to
-                # ensure other threads don't read from the adapter while it's being updated.
-                @lock.with_write_lock { @adapter.import(adapter) }
-
+                # Mutate threadsafe hash with remote adapter's data
+                @data.update @remote_adapter.get_all
                 @last_synced_at.update { |time| Concurrent.monotonic_time }
               end
             rescue => exception
