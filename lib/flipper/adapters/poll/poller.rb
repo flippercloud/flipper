@@ -2,6 +2,7 @@ require 'logger'
 require 'concurrent/atomic/read_write_lock'
 require 'concurrent/utility/monotonic_time'
 require 'concurrent/map'
+require 'concurrent/hash'
 
 module Flipper
   module Adapters
@@ -63,17 +64,21 @@ module Flipper
             sleep jitter
             start = Concurrent.monotonic_time
             begin
-              @instrumenter.instrument("poller.#{InstrumentationNamespace}", operation: :poll) do
-                # Mutate threadsafe hash with remote adapter's data
-                @data.update @remote_adapter.get_all
-                @last_synced_at.update { |time| Concurrent.monotonic_time }
-              end
+              sync
             rescue => exception
               # you can instrument these using poller.flipper
             end
 
             sleep_interval = interval - (Concurrent.monotonic_time - start)
             sleep sleep_interval if sleep_interval.positive?
+          end
+        end
+
+        def sync
+          @instrumenter.instrument("poller.#{InstrumentationNamespace}", operation: :poll) do
+            # Mutate threadsafe hash with remote adapter's data
+            @data.update @remote_adapter.get_all
+            @last_synced_at.update { |time| Concurrent.monotonic_time }
           end
         end
 
