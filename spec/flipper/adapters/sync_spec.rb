@@ -56,7 +56,7 @@ RSpec.describe Flipper::Adapters::Sync do
     remote.disable(:search)
     local.disable(:search)
     remote.enable(:search)
-    subject # initialize forces sync
+    expect(sync[:search].boolean_value).to be(true)
     expect(local[:search].boolean_value).to be(true)
   end
 
@@ -64,14 +64,14 @@ RSpec.describe Flipper::Adapters::Sync do
     remote.enable(:search)
     local.enable(:search)
     remote.disable(:search)
-    subject # initialize forces sync
+    expect(sync[:search].boolean_value).to be(false)
     expect(local[:search].boolean_value).to be(false)
   end
 
   it 'adds local actor when remote actor is added' do
     actor = Flipper::Actor.new("User;235")
     remote.enable_actor(:search, actor)
-    subject # initialize forces sync
+    expect(sync[:search].actors_value).to eq(Set[actor.flipper_id])
     expect(local[:search].actors_value).to eq(Set[actor.flipper_id])
   end
 
@@ -80,14 +80,14 @@ RSpec.describe Flipper::Adapters::Sync do
     remote.enable_actor(:search, actor)
     local.enable_actor(:search, actor)
     remote.disable(:search, actor)
-    subject # initialize forces sync
+    expect(sync[:search].actors_value).to eq(Set.new)
     expect(local[:search].actors_value).to eq(Set.new)
   end
 
   it 'adds local group when remote group is added' do
     group = Flipper::Types::Group.new(:staff)
     remote.enable_group(:search, group)
-    subject # initialize forces sync
+    expect(sync[:search].groups_value).to eq(Set["staff"])
     expect(local[:search].groups_value).to eq(Set["staff"])
   end
 
@@ -96,7 +96,7 @@ RSpec.describe Flipper::Adapters::Sync do
     remote.enable_group(:search, group)
     local.enable_group(:search, group)
     remote.disable(:search, group)
-    subject # initialize forces sync
+    expect(sync[:search].groups_value).to eq(Set.new)
     expect(local[:search].groups_value).to eq(Set.new)
   end
 
@@ -104,7 +104,7 @@ RSpec.describe Flipper::Adapters::Sync do
     remote.enable_percentage_of_actors(:search, 10)
     local.enable_percentage_of_actors(:search, 10)
     remote.enable_percentage_of_actors(:search, 15)
-    subject # initialize forces sync
+    expect(sync[:search].percentage_of_actors_value).to eq(15)
     expect(local[:search].percentage_of_actors_value).to eq(15)
   end
 
@@ -112,7 +112,7 @@ RSpec.describe Flipper::Adapters::Sync do
     remote.enable_percentage_of_time(:search, 10)
     local.enable_percentage_of_time(:search, 10)
     remote.enable_percentage_of_time(:search, 15)
-    subject # initialize forces sync
+    expect(sync[:search].percentage_of_time_value).to eq(15)
     expect(local[:search].percentage_of_time_value).to eq(15)
   end
 
@@ -121,7 +121,7 @@ RSpec.describe Flipper::Adapters::Sync do
       local.enable(:search)
       remote.enable(:search)
       local_adapter.reset
-      subject # initialize forces sync
+      subject.features # force sync
       expect(local_adapter.count(:enable)).to be(0)
     end
 
@@ -129,7 +129,7 @@ RSpec.describe Flipper::Adapters::Sync do
       local.disable(:search)
       remote.disable(:search)
       local_adapter.reset
-      subject # initialize forces sync
+      subject.features # force sync
       expect(local_adapter.count(:disable)).to be(0)
     end
 
@@ -138,7 +138,7 @@ RSpec.describe Flipper::Adapters::Sync do
       local.enable_actor(:search, actor)
       remote.enable_actor(:search, actor)
       local_adapter.reset
-      subject # initialize forces sync
+      subject.features # force sync
       expect(local_adapter.count(:enable)).to be(0)
       expect(local_adapter.count(:disable)).to be(0)
     end
@@ -148,7 +148,7 @@ RSpec.describe Flipper::Adapters::Sync do
       local.enable_group(:search, group)
       remote.enable_group(:search, group)
       local_adapter.reset
-      subject # initialize forces sync
+      subject.features # force sync
       expect(local_adapter.count(:enable)).to be(0)
       expect(local_adapter.count(:disable)).to be(0)
     end
@@ -157,7 +157,7 @@ RSpec.describe Flipper::Adapters::Sync do
       local.enable_percentage_of_actors(:search, 10)
       remote.enable_percentage_of_actors(:search, 10)
       local_adapter.reset
-      subject # initialize forces sync
+      subject.features # force sync
       expect(local_adapter.count(:enable)).to be(0)
       expect(local_adapter.count(:disable)).to be(0)
     end
@@ -166,7 +166,7 @@ RSpec.describe Flipper::Adapters::Sync do
       local.enable_percentage_of_time(:search, 10)
       remote.enable_percentage_of_time(:search, 10)
       local_adapter.reset
-      subject # initialize forces sync
+      subject.features # force sync
       expect(local_adapter.count(:enable)).to be(0)
       expect(local_adapter.count(:disable)).to be(0)
     end

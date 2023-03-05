@@ -39,8 +39,6 @@ module Flipper
           synchronizer = Synchronizer.new(local, remote, sync_options)
           IntervalSynchronizer.new(synchronizer, interval: options[:interval])
         end
-
-        @synchronizer.call
       end
 
       private
