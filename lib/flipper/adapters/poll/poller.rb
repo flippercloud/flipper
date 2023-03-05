@@ -7,7 +7,7 @@ module Flipper
   module Adapters
     class Poll
       class Poller
-        attr_reader :thread, :pid, :mutex, :interval, :last_synced_at
+        attr_reader :adapter, :thread, :pid, :mutex, :interval, :last_synced_at
 
         def self.instances
           @instances ||= Concurrent::Map.new
@@ -46,7 +46,7 @@ module Flipper
         end
 
         def adapter
-          @lock.with_read_lock { Memory.new(@adapter.get_all.dup) }
+          @lock.with_read_lock { @adapter }
         end
 
         def start
@@ -67,10 +67,14 @@ module Flipper
             start = Concurrent.monotonic_time
             begin
               @instrumenter.instrument("poller.#{InstrumentationNamespace}", operation: :poll) do
-                adapter = Memory.new
-                adapter.import(@remote_adapter)
+                # Create a temporary memory adapter to store the remote adapter's features.
+                # This is performed out of a write lock to prevent blocking other threads.
+                adapter = Memory.new(@remote_adapter.get_all)
 
+                # Import the tempory memory adapter into the poller's adapter in a write lock to
+                # ensure other threads don't read from the adapter while it's being updated.
                 @lock.with_write_lock { @adapter.import(adapter) }
+
                 @last_synced_at.update { |time| Concurrent.monotonic_time }
               end
             rescue => exception
