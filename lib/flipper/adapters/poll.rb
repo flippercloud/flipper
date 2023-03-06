@@ -1,38 +1,32 @@
-require 'flipper/adapters/sync/synchronizer'
+require 'flipper/adapters/sync'
 require 'flipper/poller'
 
 module Flipper
   module Adapters
-    class Poll
-      extend Forwardable
-      include ::Flipper::Adapter
+    class Poll < Adapters::Sync
+      # Private: Synchronizer that only runs when the poller has synced.
+      class Synchronizer < Sync::Synchronizer
+        def initialize(poller, local_adapter, options = {})
+          super(local_adapter, poller.adapter, options)
+          @poller = poller
+          @last_synced_at = nil
+        end
 
-      # Deprecated
-      Poller = ::Flipper::Poller
+        def call
+          poller_last_synced_at = @poller.last_synced_at.value
+          return unless poller_last_synced_at != @last_synced_at
+          super
+          @last_synced_at = poller_last_synced_at
+        end
+      end
 
       # Public: The name of the adapter.
       attr_reader :name, :adapter, :poller
 
-      def_delegators :synced_adapter, :features, :get, :get_multi, :get_all, :add, :remove, :clear, :enable, :disable
-
-      def initialize(poller, adapter)
+      def initialize(poller, local_adapter, options = {})
+        synchronizer = Synchronizer.new(poller, local_adapter, options.merge(raise: false))
+        super(local_adapter, poller.adapter, synchronizer: synchronizer)
         @name = :poll
-        @adapter = adapter
-        @poller = poller
-        @last_synced_at = 0
-        @poller.start
-      end
-
-      private
-
-      def synced_adapter
-        @poller.start
-        poller_last_synced_at = @poller.last_synced_at.value
-        if poller_last_synced_at > @last_synced_at
-          Flipper::Adapters::Sync::Synchronizer.new(@adapter, @poller.adapter).call
-          @last_synced_at = poller_last_synced_at
-        end
-        @adapter
       end
     end
   end
