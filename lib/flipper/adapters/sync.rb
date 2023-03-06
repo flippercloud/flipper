@@ -4,8 +4,11 @@ require "flipper/adapters/sync/interval_synchronizer"
 
 module Flipper
   module Adapters
-    # TODO: Syncing should happen in a background thread on a regular interval
-    # rather than in the main thread only when reads happen.
+    # Adapter that periodically keeps a local and remote adapter in sync.
+    #
+    # Synchronization is performed on an interval in the current thread whenever
+    # the adapter is accessed. Use `Flipper::Adapters::Poll` if you want to
+    # perform synchronization in a background thread.
     class Sync
       extend Forwardable
       include ::Flipper::Adapter
@@ -27,9 +30,7 @@ module Flipper
       # remote to local. Default value is set in IntervalSynchronizer.
       def initialize(local, remote, options = {})
         @name = :sync
-
         @adapter = DualWrite.new(local, remote)
-
         @synchronizer = options.fetch(:synchronizer) do
           sync_options = {
             raise: false,
@@ -47,7 +48,6 @@ module Flipper
         @synchronizer.call
         @adapter
       end
-
     end
   end
 end

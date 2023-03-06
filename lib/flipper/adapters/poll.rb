@@ -3,6 +3,16 @@ require 'flipper/poller'
 
 module Flipper
   module Adapters
+    # Adapter that keeps a local and remote adapter in sync via a background poller.
+    #
+    # Synchronization is performed whenever the adapter is access if the background
+    # poller has been synced.
+    #
+    #   remote_adapter = Flipper::Adapters::Http.new(url: 'http://example.com/flipper')
+    #   local_adapter = Flipper::Adapters::Memory.new
+    #   poller = Flipper::Poller.get('my_poller', remote_adapter: remote_adapter, interval: 5)
+    #   adapter = Flipper::Adapters::Poll.new(poller, local_adapter)
+    #
     class Poll < Adapters::Sync
       # Private: Synchronizer that only runs when the poller has synced.
       class Synchronizer < Sync::Synchronizer
