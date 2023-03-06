@@ -5,8 +5,8 @@ module Flipper
   module Adapters
     # Adapter that keeps a local and remote adapter in sync via a background poller.
     #
-    # Synchronization is performed whenever the adapter is access if the background
-    # poller has been synced.
+    # Synchronization is performed when the adapter is accessed if the background
+    # poller has synced.
     #
     #   remote_adapter = Flipper::Adapters::Http.new(url: 'http://example.com/flipper')
     #   local_adapter = Flipper::Adapters::Memory.new
