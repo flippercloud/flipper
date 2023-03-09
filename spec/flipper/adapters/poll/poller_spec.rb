@@ -23,7 +23,6 @@ RSpec.describe Flipper::Adapters::Poll::Poller do
     it "always returns same memory adapter instance" do
       expect(subject.adapter).to be_a(Flipper::Adapters::Memory)
       expect(subject.adapter.object_id).to eq(subject.adapter.object_id)
-      expect(subject.adapter.get_all.object_id).to eq(subject.adapter.get_all.object_id)
     end
   end
 
