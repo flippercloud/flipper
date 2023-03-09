@@ -2,7 +2,6 @@ require 'logger'
 require 'concurrent/utility/monotonic_time'
 require 'concurrent/map'
 require 'concurrent/atomic/atomic_fixnum'
-require 'concurrent/hash'
 
 module Flipper
   class Poller
@@ -29,8 +28,7 @@ module Flipper
       @remote_adapter = options.fetch(:remote_adapter)
       @interval = options.fetch(:interval, 10).to_f
       @last_synced_at = Concurrent::AtomicFixnum.new(0)
-      @data = Concurrent::Hash.new
-      @adapter = Adapters::Memory.new(@data)
+      @adapter = Adapters::Memory.new
 
       if @interval < 1
         warn "Flipper::Cloud poll interval must be greater than or equal to 1 but was #{@interval}. Setting @interval to 1."
@@ -73,8 +71,7 @@ module Flipper
 
     def sync
       @instrumenter.instrument("poller.#{InstrumentationNamespace}", operation: :poll) do
-        # Mutate threadsafe hash with remote adapter's data
-        @data.update @remote_adapter.get_all
+        @adapter.import @remote_adapter
         @last_synced_at.update { |time| Concurrent.monotonic_time }
       end
     end
