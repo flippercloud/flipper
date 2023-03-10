@@ -1,3 +1,5 @@
+require 'concurrent/atomic/read_write_lock'
+
 module Flipper
   module Adapters
     # Public: Adapter for storing everything in memory.
@@ -14,40 +16,40 @@ module Flipper
       def initialize(source = nil)
         @source = Hash.new.update(source || {})
         @name = :memory
-        @mutex = Mutex.new
+        @lock = Concurrent::ReadWriteLock.new
       end
 
       # Public: The set of known features.
       def features
-        @source.keys.to_set
+        @lock.with_read_lock { @source.keys }.to_set
       end
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
-        synchronize { @source[feature.key] ||= default_config }
+        @lock.with_write_lock { @source[feature.key] ||= default_config }
         true
       end
 
       # Public: Removes a feature from the set of known features and clears
       # all the values for the feature.
       def remove(feature)
-        synchronize { @source.delete(feature.key) }
+        @lock.with_write_lock { @source.delete(feature.key) }
         true
       end
 
       # Public: Clears all the gate values for a feature.
       def clear(feature)
-        synchronize { @source[feature.key] = default_config }
+        @lock.with_write_lock { @source[feature.key] = default_config }
         true
       end
 
       # Public
       def get(feature)
-        @source[feature.key] || default_config
+        @lock.with_read_lock { @source[feature.key] } || default_config
       end
 
       def get_multi(features)
-        synchronize do
+        @lock.with_read_lock do
           result = {}
           features.each do |feature|
             result[feature.key] = @source[feature.key] || default_config
@@ -57,12 +59,12 @@ module Flipper
       end
 
       def get_all
-        @source.to_h
+        @lock.with_read_lock { @source.to_h }
       end
 
       # Public
       def enable(feature, gate, thing)
-        synchronize do
+        @lock.with_write_lock do
           @source[feature.key] ||= default_config
 
           case gate.data_type
@@ -83,7 +85,7 @@ module Flipper
 
       # Public
       def disable(feature, gate, thing)
-        synchronize do
+        @lock.with_write_lock do
           @source[feature.key] ||= default_config
 
           case gate.data_type
@@ -113,13 +115,7 @@ module Flipper
       # Public: a more efficient implementation of import for this adapter
       def import(source_adapter)
         get_all = source_adapter.get_all
-        synchronize { @source.replace(get_all) }
-      end
-
-      private
-
-      def synchronize(&block)
-        @mutex.synchronize(&block)
+        @lock.with_write_lock { @source.replace(get_all) }
       end
     end
   end
