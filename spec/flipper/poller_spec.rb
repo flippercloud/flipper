@@ -1,6 +1,6 @@
-require "flipper/adapters/poll/poller"
+require "flipper/poller"
 
-RSpec.describe Flipper::Adapters::Poll::Poller do
+RSpec.describe Flipper::Poller do
   let(:remote_adapter) { Flipper::Adapters::Memory.new }
   let(:remote) { Flipper.new(remote_adapter) }
   let(:local) { Flipper.new(subject.adapter) }
