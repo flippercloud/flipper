@@ -26,12 +26,10 @@ RSpec.describe Flipper::Cloud do
       # pardon the nesting...
       memoized_adapter = @instance.adapter
       poll_adapter = memoized_adapter.adapter
-      dual_write_adapter = poll_adapter.adapter
 
       expect(poll_adapter).to be_instance_of(Flipper::Adapters::Poll)
-      expect(dual_write_adapter).to be_instance_of(Flipper::Adapters::DualWrite)
 
-      http_adapter = dual_write_adapter.remote
+      http_adapter = poll_adapter.remote
       client = http_adapter.client
       expect(client.uri.scheme).to eq('https')
       expect(client.uri.host).to eq('www.flippercloud.io')
@@ -44,7 +42,7 @@ RSpec.describe Flipper::Cloud do
   context 'initialize with token and options' do
     it 'sets correct url' do
       @instance = described_class.new(token: 'asdf', url: 'https://www.fakeflipper.com/sadpanda')
-      uri = @instance.adapter.adapter.adapter.remote.client.uri
+      uri = @instance.adapter.adapter.remote.client.uri
       expect(uri.scheme).to eq('https')
       expect(uri.host).to eq('www.fakeflipper.com')
       expect(uri.path).to eq('/sadpanda')

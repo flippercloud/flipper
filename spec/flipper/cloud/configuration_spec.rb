@@ -72,7 +72,7 @@ RSpec.describe Flipper::Cloud::Configuration do
     stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
 
     instance = described_class.new(required_options.merge(sync_interval: 1))
-    poller = instance.send(:poller)
+    poller = instance.send(:poll_adapter).poller
     expect(poller.interval).to eq(1)
   end
 
