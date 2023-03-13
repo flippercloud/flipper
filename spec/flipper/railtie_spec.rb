@@ -71,6 +71,11 @@ RSpec.describe Flipper::Railtie do
       expect(subject.middleware).to include(Flipper::Middleware::Memoizer)
     end
 
+    it 'uses Sync middleware if config.memoize = :poll' do
+      initializer { config.memoize = :poll }
+      expect(subject.middleware).to include(Flipper::Middleware::Sync)
+    end
+
     it 'does not use Memoizer middleware if config.memoize = false' do
       initializer { config.memoize = false }
       expect(subject.middleware).not_to include(Flipper::Middleware::Memoizer)
