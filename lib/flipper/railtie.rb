@@ -19,7 +19,10 @@ module Flipper
     initializer "flipper.default", before: :load_config_initializers do |app|
       Flipper.configure do |config|
         config.default do
-          Flipper.new(config.adapter, instrumenter: app.config.flipper.instrumenter)
+          Flipper.new(config.adapter, {
+            instrumenter: app.config.flipper.instrumenter,
+            memoize: app.config.flipper.memoize,
+          })
         end
       end
     end
@@ -35,7 +38,9 @@ module Flipper
     initializer "flipper.memoizer", after: :load_config_initializers do |app|
       flipper = app.config.flipper
 
-      if flipper.memoize
+      if flipper.memoize == :poll
+        app.middleware.use Flipper::Middleware::Sync
+      elsif flipper.memoize
         app.middleware.use Flipper::Middleware::Memoizer, {
           env_key: flipper.env_key,
           preload: flipper.preload,
