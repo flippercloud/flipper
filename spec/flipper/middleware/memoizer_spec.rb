@@ -1,5 +1,6 @@
 require 'rack/test'
 require 'active_support/cache'
+require 'active_support/notifications'
 require 'flipper/adapters/active_support_cache_store'
 require 'flipper/adapters/operation_logger'
 
@@ -413,6 +414,17 @@ RSpec.describe Flipper::Middleware::Memoizer do
       get '/', {}, 'flipper' => flipper
       expect(logged_cached.count(:get_all)).to be(3)
       expect(logged_memory.count(:get_all)).to be(1)
+    end
+  end
+
+  context 'with memoize:false' do
+    let(:flipper) { Flipper.new(adapter, memoize: false) }
+
+    it 'delegates to the app' do
+      app = lambda { |_env| [200, {}, nil] }
+      expect(app).to receive(:call).once.and_call_original
+      middleware = described_class.new(app)
+      middleware.call(env)
     end
   end
 end
