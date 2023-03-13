@@ -163,11 +163,11 @@ module Flipper
       end
 
       def poll_adapter
-        Flipper::Adapters::Poll.new(local_adapter, http_adapter, {
+        Flipper::Adapters::Poll.new(local_adapter, http_adapter,
           key: @url + @token,
           interval: sync_interval,
           instrumenter: instrumenter,
-        })
+        )
       end
 
       def http_adapter

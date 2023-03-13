@@ -22,7 +22,11 @@ module Flipper
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
       memoize = options.fetch(:memoize, true)
       @adapter = if memoize == :poll
-        Adapters::Poll.new(Adapters::Memory.new, adapter, key: 'memoizer', interval: 5).tap do |poll|
+        Adapters::Poll.new(Adapters::Memory.new, adapter,
+          key: 'memoizer',
+          interval: 5,
+          instrumenter: @instrumenter
+        ).tap do |poll|
           # Force poller to sync in current thread now
           poll.poller.sync
         end

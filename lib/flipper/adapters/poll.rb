@@ -30,6 +30,13 @@ module Flipper
       end
 
       # Public: Synchronizes the local adapter with the current state of the remote adapter.
+      # If given a block, the adapter will be synced once and then not synced again for the
+      # duration of the block.
+      #
+      #   poll = Flipper::Adapters::Poll.new(local, remote)
+      #   poll.sync do
+      #     # Long running operation that doesn't need to be synced
+      #   end
       def sync
         if @sync_automatically
           poller_last_synced_at = @poller.last_synced_at.value
