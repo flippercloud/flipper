@@ -79,4 +79,27 @@ RSpec.describe Flipper::Cloud::DSL do
       expect(enable_stub).to have_been_requested
     end
   end
+
+  context "when memoize = :poll" do
+    let(:local_adapter) do
+      Flipper::Adapters::OperationLogger.new Flipper::Adapters::Memory.new
+    end
+
+    let(:cloud_configuration) do
+      cloud_configuration = Flipper::Cloud::Configuration.new({
+        token: "asdf",
+        sync_secret: "tasty",
+        local_adapter: local_adapter,
+        memoize: :poll
+      })
+    end
+
+    subject do
+      described_class.new(cloud_configuration)
+    end
+
+    it "uses a poll adaptor" do
+      expect(subject.adapter).to be_a(Flipper::Adapters::Poll)
+    end
+  end
 end

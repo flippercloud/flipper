@@ -15,7 +15,8 @@ module Flipper
             if ENV["FLIPPER_CLOUD_TOKEN"]
               Flipper::Cloud.new(
                 local_adapter: config.adapter,
-                instrumenter: app.config.flipper.instrumenter
+                instrumenter: app.config.flipper.instrumenter,
+                memoize: app.config.flipper.memoize
               )
             else
               warn "Missing FLIPPER_CLOUD_TOKEN environment variable. Disabling Flipper::Cloud."

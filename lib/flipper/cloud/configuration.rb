@@ -40,6 +40,9 @@ module Flipper
       # Public: net/http write timeout for all http requests (default: 5).
       attr_accessor :write_timeout
 
+      # Public: Memoize adapter operations. Defaults to true.
+      attr_accessor :memoize
+
       # Public: IO stream to send debug output too. Off by default.
       #
       #  # for example, this would send all http request information to STDOUT
@@ -85,6 +88,7 @@ module Flipper
         @sync_interval = options.fetch(:sync_interval) { ENV.fetch("FLIPPER_CLOUD_SYNC_INTERVAL", 10).to_f }
         @sync_secret = options.fetch(:sync_secret) { ENV["FLIPPER_CLOUD_SYNC_SECRET"] }
         @local_adapter = options.fetch(:local_adapter) { Adapters::Memory.new }
+        @memoize = options.fetch(:memoize, true)
         @debug_output = options[:debug_output]
         @adapter_block = ->(adapter) { adapter }
         self.url = options.fetch(:url) { ENV.fetch("FLIPPER_CLOUD_URL", DEFAULT_URL) }
