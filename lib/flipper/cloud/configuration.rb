@@ -1,7 +1,7 @@
 require "socket"
 require "flipper/adapters/http"
 require "flipper/adapters/poll"
-require "flipper/adapters/poll/poller"
+require "flipper/poller"
 require "flipper/adapters/memory"
 require "flipper/adapters/dual_write"
 require "flipper/adapters/sync/synchronizer"
@@ -164,7 +164,7 @@ module Flipper
       end
 
       def poller
-        Flipper::Adapters::Poll::Poller.get(@url + @token, {
+        Flipper::Poller.get(@url + @token, {
           interval: sync_interval,
           remote_adapter: http_adapter,
           instrumenter: instrumenter,

@@ -14,7 +14,9 @@ RSpec.describe Flipper::Adapters::Memory do
     flipper.enable_actor :following, Flipper::Actor.new('3')
     flipper.enable_group :following, Flipper::Types::Group.new(:staff)
 
-    expect(source).to eq({
+    dup = described_class.new(subject.get_all)
+
+    expect(dup.get_all).to eq({
       "subscriptions" => subject.default_config.merge(boolean: "true"),
       "search" => subject.default_config,
       "logging" => subject.default_config.merge(:percentage_of_time => "30"),
