@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.26.2
+
+* Improve Active Record Adapter get/get_multi/get_all performance by 5-10x when dealing with thousands of gate values (https://github.com/jnunemaker/flipper/pull/707).
+
 ## 0.26.1
 
 * Improve `Flipper#enabled?` performance by ~37%-55% (https://github.com/jnunemaker/flipper/pull/706)
