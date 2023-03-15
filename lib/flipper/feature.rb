@@ -340,20 +340,24 @@ module Flipper
     #
     # Returns an array of gates
     def gates
-      @gates ||= [
-        Gates::Boolean.new,
-        Gates::Actor.new,
-        Gates::PercentageOfActors.new,
-        Gates::PercentageOfTime.new,
-        Gates::Group.new,
-      ]
+      @gates ||= gates_hash.values.freeze
+    end
+
+    def gates_hash
+      @gates_hash ||= {
+        boolean: Gates::Boolean.new,
+        actor: Gates::Actor.new,
+        percentage_of_actors: Gates::PercentageOfActors.new,
+        percentage_of_time: Gates::PercentageOfTime.new,
+        group: Gates::Group.new,
+      }.freeze
     end
 
     # Public: Find a gate by name.
     #
     # Returns a Flipper::Gate if found, nil if not.
     def gate(name)
-      gates.detect { |gate| gate.name == name.to_sym }
+      gates_hash[name.to_sym]
     end
 
     # Public: Find the gate that protects a thing.
