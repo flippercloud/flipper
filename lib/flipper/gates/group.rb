@@ -23,14 +23,10 @@ module Flipper
       #
       # Returns true if gate open for thing, false if not.
       def open?(context)
-        value = context.values.send(key)
-        if context.thing.nil?
-          false
-        else
-          value.any? do |name|
-            group = Flipper.group(name)
-            group.match?(context.thing, context)
-          end
+        return false if context.thing.nil?
+
+        context.values.groups.any? do |name|
+          Flipper.group(name).match?(context.thing, context)
         end
       end
 
