@@ -95,17 +95,22 @@ module Flipper
       #
       # Returns a Hash of Flipper::Gate#key => value.
       def get(feature)
-        db_gates = with_connection(@gate_class) { @gate_class.where(feature_key: feature.key) }
-        result_for_feature(feature, db_gates)
+        gates = with_connection(@gate_class) { @gate_class.where(feature_key: feature.key).pluck(:key, :value) }
+        result_for_gates(feature, gates)
       end
 
       def get_multi(features)
         with_connection(@gate_class) do
-          db_gates = @gate_class.where(feature_key: features.map(&:key))
-          grouped_db_gates = db_gates.group_by(&:feature_key)
+          gates = @gate_class.where(feature_key: features.map(&:key)).pluck(:feature_key, :key, :value)
+          grouped_gates = gates.inject({}) do |hash, (feature_key, key, value)|
+            hash[feature_key] ||= []
+            hash[feature_key] << [key, value]
+            hash
+          end
+
           result = {}
           features.each do |feature|
-            result[feature.key] = result_for_feature(feature, grouped_db_gates[feature.key])
+            result[feature.key] = result_for_gates(feature, grouped_gates[feature.key])
           end
           result
         end
@@ -113,18 +118,26 @@ module Flipper
 
       def get_all
         with_connection(@feature_class) do
+          # query the gates from the db in a single query
           features = ::Arel::Table.new(@feature_class.table_name.to_sym)
           gates = ::Arel::Table.new(@gate_class.table_name.to_sym)
-          rows_query = features.join(gates, Arel::Nodes::OuterJoin)
+          rows_query = features.join(gates, ::Arel::Nodes::OuterJoin)
             .on(features[:key].eq(gates[:feature_key]))
             .project(features[:key].as('feature_key'), gates[:key], gates[:value])
-          rows = @feature_class.connection.select_all rows_query
-          db_gates = rows.map { |row| @gate_class.new(row) }
-          grouped_db_gates = db_gates.group_by(&:feature_key)
+          gates = @feature_class.connection.select_rows(rows_query)
+
+          # group the gates by feature key
+          grouped_gates = gates.inject({}) do |hash, (feature_key, key, value)|
+            hash[feature_key] ||= []
+            hash[feature_key] << [key, value]
+            hash
+          end
+
+          # build up the result hash
           result = Hash.new { |hash, key| hash[key] = default_config }
-          features = grouped_db_gates.keys.map { |key| Flipper::Feature.new(key, self) }
+          features = grouped_gates.keys.map { |key| Flipper::Feature.new(key, self) }
           features.each do |feature|
-            result[feature.key] = result_for_feature(feature, grouped_db_gates[feature.key])
+            result[feature.key] = result_for_gates(feature, grouped_gates[feature.key])
           end
           result
         end
@@ -217,6 +230,29 @@ module Flipper
         nil
       rescue ::ActiveRecord::RecordNotUnique
         # already added so no need move on with life
+      end
+
+      def result_for_gates(feature, gates)
+        result = {}
+        gates ||= []
+        feature.gates.each do |gate|
+          result[gate.key] =
+            case gate.data_type
+            when :boolean
+              if row = gates.detect { |key, value| next if key.nil?; key.to_sym == gate.key }
+                row.last
+              end
+            when :integer
+              if row = gates.detect { |key, value| next if key.nil?; key.to_sym == gate.key }
+                row.last
+              end
+            when :set
+              gates.select { |key, value| next if key.nil?; key.to_sym == gate.key }.map(&:last).to_set
+            else
+              unsupported_data_type gate.data_type
+            end
+        end
+        result
       end
 
       def result_for_feature(feature, db_gates)
