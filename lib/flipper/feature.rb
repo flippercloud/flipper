@@ -207,7 +207,7 @@ module Flipper
 
       if values.boolean || values.percentage_of_time == 100
         :on
-      elsif non_boolean_gates.detect { |gate| gate.enabled?(values[gate.key]) }
+      elsif non_boolean_gates.detect { |gate| gate.enabled?(values.send(gate.key)) }
         :conditional
       else
         :off
@@ -290,7 +290,7 @@ module Flipper
     # Returns an Array of Flipper::Gate instances.
     def enabled_gates
       values = gate_values
-      gates.select { |gate| gate.enabled?(values[gate.key]) }
+      gates.select { |gate| gate.enabled?(values.send(gate.key)) }
     end
 
     # Public: Get the names of the enabled gates.
