@@ -20,6 +20,10 @@ gem 'webmock', '~> 3.0'
 gem 'ice_age'
 gem 'redis-namespace'
 gem 'webrick'
+gem 'stackprof'
+gem 'benchmark-ips'
+gem 'stackprof-webnav'
+gem 'flamegraph'
 
 group(:guard) do
   gem 'guard', '~> 2.15'
