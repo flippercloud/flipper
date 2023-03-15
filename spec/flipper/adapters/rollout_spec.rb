@@ -117,7 +117,7 @@ RSpec.describe Flipper::Adapters::Rollout do
     expect(feature.boolean_value).to eq(false)
     expect(feature.actors_value).to eq(Set.new)
     expect(feature.groups_value).to eq(Set.new)
-    expect(feature.percentage_of_actors_value).to be(25.0)
+    expect(feature.percentage_of_actors_value).to be(25)
 
     feature = destination_flipper[:verbose_logging]
     expect(feature.boolean_value).to eq(false)
