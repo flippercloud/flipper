@@ -4,11 +4,12 @@ require 'stackprof'
 require 'benchmark/ips'
 
 flipper = Flipper.new(Flipper::Adapters::Memory.new)
+feature = flipper.feature(:foo)
 actor = Flipper::Actor.new("User;1")
 
-profile = StackProf.run(mode: :cpu, interval: 100) do
-  1_000_000.times do
-    flipper.enabled?(:foo, actor)
+profile = StackProf.run(mode: :wall, interval: 1_000) do
+  2_000_000.times do
+    feature.enabled?(actor)
   end
 end
 
@@ -16,11 +17,4 @@ result = StackProf::Report.new(profile)
 puts
 result.print_text
 puts "\n\n\n"
-result.print_method(/Class#new/)
-puts "\n\n\n"
-result.print_method(/gate_values/)
-puts "\n\n\n"
-result.print_method(/enabled?/)
-puts "\n\n\n"
-result.print_method(/GateValues/)
-puts "\n\n\n"
+result.print_method(/Flipper::Feature#enabled?/)
