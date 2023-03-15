@@ -23,7 +23,7 @@ module Flipper
       #
       # Returns true if gate open for thing, false if not.
       def open?(context)
-        value = context.values[key]
+        value = context.values.send(key)
         rand < (value / 100.0)
       end
 

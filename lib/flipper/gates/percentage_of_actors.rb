@@ -25,7 +25,7 @@ module Flipper
       #
       # Returns true if gate open for thing, false if not.
       def open?(context)
-        percentage = context.values[key]
+        percentage = context.values.send(key)
 
         if Types::Actor.wrappable?(context.thing)
           actor = Types::Actor.wrap(context.thing)
