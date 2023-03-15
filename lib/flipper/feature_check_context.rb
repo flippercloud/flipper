@@ -10,10 +10,10 @@ module Flipper
     # Public: The thing we want to know if a feature is enabled for.
     attr_reader :thing
 
-    def initialize(options = {})
-      @feature_name = options.fetch(:feature_name)
-      @values = options.fetch(:values)
-      @thing = options.fetch(:thing)
+    def initialize(feature_name:, values:, thing:)
+      @feature_name = feature_name
+      @values = values
+      @thing = thing
     end
 
     # Public: Convenience method for groups value like Feature has.
