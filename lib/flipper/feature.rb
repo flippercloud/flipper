@@ -100,13 +100,12 @@ module Flipper
     #
     # Returns true if enabled, false if not.
     def enabled?(thing = nil)
-      instrument(:enabled?) do |payload|
-        values = gate_values
-        thing = Types::Actor.wrap(thing) unless thing.nil?
-        payload[:thing] = thing
+      thing = Types::Actor.wrap(thing) unless thing.nil?
+
+      instrument(:enabled?, thing: thing) do |payload|
         context = FeatureCheckContext.new(
           feature_name: @name,
-          values: values,
+          values: gate_values,
           thing: thing
         )
 
@@ -373,8 +372,8 @@ module Flipper
     private
 
     # Private: Instrument a feature operation.
-    def instrument(operation)
-      @instrumenter.instrument(InstrumentationName) do |payload|
+    def instrument(operation, initial_payload = {})
+      @instrumenter.instrument(InstrumentationName, initial_payload) do |payload|
         payload[:feature_name] = name
         payload[:operation] = operation
         payload[:result] = yield(payload) if block_given?
