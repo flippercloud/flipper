@@ -102,7 +102,7 @@ module Flipper
     def enabled?(thing = nil)
       instrument(:enabled?) do |payload|
         values = gate_values
-        thing = gate(:actor).wrap(thing) unless thing.nil?
+        thing = Types::Actor.wrap(thing) unless thing.nil?
         payload[:thing] = thing
         context = FeatureCheckContext.new(
           feature_name: @name,
