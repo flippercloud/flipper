@@ -232,7 +232,8 @@ module Flipper
 
     # Public: Returns the raw gate values stored by the adapter.
     def gate_values
-      GateValues.new(adapter.get(self))
+      adapter_values = adapter.get(self)
+      GateValues.new(adapter_values)
     end
 
     # Public: Get groups enabled for this feature.
