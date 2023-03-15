@@ -239,38 +239,15 @@ module Flipper
           result[gate.key] =
             case gate.data_type
             when :boolean
-              if row = gates.detect { |key, value| next if key.nil?; key.to_sym == gate.key }
+              if row = gates.detect { |key, value| !key.nil? && key.to_sym == gate.key }
                 row.last
               end
             when :integer
-              if row = gates.detect { |key, value| next if key.nil?; key.to_sym == gate.key }
+              if row = gates.detect { |key, value| !key.nil? && key.to_sym == gate.key }
                 row.last
               end
             when :set
-              gates.select { |key, value| next if key.nil?; key.to_sym == gate.key }.map(&:last).to_set
-            else
-              unsupported_data_type gate.data_type
-            end
-        end
-        result
-      end
-
-      def result_for_feature(feature, db_gates)
-        db_gates ||= []
-        result = {}
-        feature.gates.each do |gate|
-          result[gate.key] =
-            case gate.data_type
-            when :boolean
-              if detected_db_gate = db_gates.detect { |db_gate| db_gate.key == gate.key.to_s }
-                detected_db_gate.value
-              end
-            when :integer
-              if detected_db_gate = db_gates.detect { |db_gate| db_gate.key == gate.key.to_s }
-                detected_db_gate.value
-              end
-            when :set
-              db_gates.select { |db_gate| db_gate.key == gate.key.to_s }.map(&:value).to_set
+              gates.select { |key, value| !key.nil? && key.to_sym == gate.key }.map(&:last).to_set
             else
               unsupported_data_type gate.data_type
             end
