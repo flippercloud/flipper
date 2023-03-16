@@ -14,10 +14,8 @@ RSpec.describe Flipper::Adapters::Dalli do
 
   before do
     Dalli.logger = Logger.new('/dev/null')
-    begin
+    skip_on_error(Dalli::NetworkError, 'Memcached not available') do
       cache.flush
-    rescue Dalli::NetworkError
-      ENV['CI'] ? raise : skip('Memcached not available')
     end
   end
 
