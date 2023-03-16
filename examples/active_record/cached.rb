@@ -3,7 +3,6 @@ require_relative "./ar_setup"
 # Requires the flipper-active_record gem to be installed.
 require 'flipper/adapters/active_record'
 require 'flipper/adapters/active_support_cache_store'
-# require "active_support/cache/memory_store"
 
 Flipper.configure do |config|
   config.adapter do
