@@ -23,18 +23,8 @@ module Flipper
       #
       # Returns true if gate open for thing, false if not.
       def open?(context)
-        value = context.values[key]
-        if context.thing.nil?
-          false
-        else
-          if protects?(context.thing)
-            actor = wrap(context.thing)
-            enabled_actor_ids = value
-            enabled_actor_ids.include?(actor.value)
-          else
-            false
-          end
-        end
+        return false if context.thing.nil?
+        context.values.actors.include?(context.thing.value)
       end
 
       def wrap(thing)

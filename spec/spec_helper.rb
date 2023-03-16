@@ -22,7 +22,7 @@ Dir[FlipperRoot.join('spec/support/**/*.rb')].sort.each { |f| require f }
 
 RSpec.configure do |config|
   config.before(:example) do
-    Flipper::Adapters::Poll::Poller.reset if defined?(Flipper::Adapters::Poll::Poller)
+    Flipper::Poller.reset if defined?(Flipper::Poller)
     Flipper.unregister_groups
     Flipper.configuration = nil
   end

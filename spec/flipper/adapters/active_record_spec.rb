@@ -1,4 +1,5 @@
 require 'flipper/adapters/active_record'
+require 'active_support/core_ext/kernel'
 
 # Turn off migration logging for specs
 ActiveRecord::Migration.verbose = false
@@ -61,11 +62,133 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
       Flipper.configuration = nil
       Flipper.instance = nil
 
-      Kernel.silence_warnings { load 'flipper/adapters/active_record.rb' }
+      silence_warnings { load 'flipper/adapters/active_record.rb' }
     end
 
     it 'configures itself' do
       expect(Flipper.adapter.adapter).to be_a(Flipper::Adapters::ActiveRecord)
+    end
+  end
+
+  context "ActiveRecord connection_pool" do
+    before do
+      ActiveRecord::Base.clear_active_connections!
+    end
+
+    context "#features" do
+      it "does not hold onto connections" do
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+        subject.features
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+      end
+
+      it "does not release previously held connection" do
+        ActiveRecord::Base.connection # establish a new connection
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+        subject.features
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+      end
+    end
+
+    context "#get_all" do
+      it "does not hold onto connections" do
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+        subject.get_all
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+      end
+
+      it "does not release previously held connection" do
+        ActiveRecord::Base.connection # establish a new connection
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+        subject.get_all
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+      end
+    end
+
+    context "#add / #remove / #clear" do
+      let(:feature) { Flipper::Feature.new(:search, subject) }
+
+      it "does not hold onto connections" do
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+        subject.add(feature)
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+        subject.remove(feature)
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+        subject.clear(feature)
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+      end
+
+      it "does not release previously held connection" do
+        ActiveRecord::Base.connection # establish a new connection
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+        subject.add(feature)
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+        subject.remove(feature)
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+        subject.clear(feature)
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+      end
+    end
+
+    context "#get_multi" do
+      let(:feature) { Flipper::Feature.new(:search, subject) }
+
+      it "does not hold onto connections" do
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+        subject.get_multi([feature])
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+      end
+
+      it "does not release previously held connection" do
+        ActiveRecord::Base.connection # establish a new connection
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+        subject.get_multi([feature])
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+      end
+    end
+
+    context "#enable/#disable boolean" do
+      let(:feature) { Flipper::Feature.new(:search, subject) }
+      let(:gate) { feature.gate(:boolean)}
+
+      it "does not hold onto connections" do
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+        subject.enable(feature, gate, gate.wrap(true))
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+        subject.disable(feature, gate, gate.wrap(false))
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+      end
+
+      it "does not release previously held connection" do
+        ActiveRecord::Base.connection # establish a new connection
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+        subject.enable(feature, gate, gate.wrap(true))
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+        subject.disable(feature, gate, gate.wrap(false))
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+      end
+    end
+
+    context "#enable/#disable set" do
+      let(:feature) { Flipper::Feature.new(:search, subject) }
+      let(:gate) { feature.gate(:group) }
+
+      it "does not hold onto connections" do
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+        subject.enable(feature, gate, gate.wrap(:admin))
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+        subject.disable(feature, gate, gate.wrap(:admin))
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+      end
+
+      it "does not release previously held connection" do
+        ActiveRecord::Base.connection # establish a new connection
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+        subject.enable(feature, gate, gate.wrap(:admin))
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+        subject.disable(feature, gate, gate.wrap(:admin))
+        expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+      end
     end
   end
 end

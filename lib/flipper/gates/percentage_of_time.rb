@@ -23,8 +23,7 @@ module Flipper
       #
       # Returns true if gate open for thing, false if not.
       def open?(context)
-        value = context.values[key]
-        rand < (value / 100.0)
+        rand < (context.values.percentage_of_time / 100.0)
       end
 
       def protects?(thing)

@@ -9,7 +9,7 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
     Flipper::FeatureCheckContext.new(
       feature_name: feature,
       values: Flipper::GateValues.new(percentage_of_actors: percentage_of_actors_value),
-      thing: thing || Flipper::Types::Actor.new(Flipper::Actor.new(1))
+      thing: Flipper::Types::Actor.new(thing || Flipper::Actor.new(1))
     )
   end
 

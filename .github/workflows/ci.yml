@@ -36,11 +36,12 @@ jobs:
       SQLITE3_VERSION: 1.4.1
       REDIS_URL: redis://localhost:6379/0
       CI: true
+      RAILS_VERSION: ${{ matrix.rails }}
     steps:
       - name: Setup memcached
         uses: KeisukeYamashita/memcached-actions@v1
       - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.8.0
+        uses: supercharge/mongodb-github-action@1.9.0
         with:
           mongodb-version: 4.0
       - name: Check out repository code
@@ -52,17 +53,12 @@ jobs:
           key: ${{ runner.os }}-gems-${{ matrix.ruby }}-${{ matrix.rails }}-${{ hashFiles('**/Gemfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-gems-${{ matrix.ruby }}-${{ matrix.rails }}-
+      - name: Install libpq-dev
+        run: sudo apt-get -yqq install libpq-dev
       - name: Set up Ruby ${{ matrix.ruby }}
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
-      - name: Install libpq-dev
-        run: sudo apt-get -yqq install libpq-dev
-      - name: Install bundler
-        run: gem install bundler
+          bundler-cache: true # 'bundle install' and cache gems
       - name: Run Rake with Rails ${{ matrix.rails }}
-        env:
-          RAILS_VERSION: ${{ matrix.rails }}
-        run: |
-          bundle install --jobs 4 --retry 3
-          bundle exec rake
+        run: bundle exec rake

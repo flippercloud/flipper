@@ -1,10 +1,14 @@
 require 'flipper/adapters/sync/synchronizer'
+require 'flipper/poller'
 
 module Flipper
   module Adapters
     class Poll
       extend Forwardable
       include ::Flipper::Adapter
+
+      # Deprecated
+      Poller = ::Flipper::Poller
 
       # Public: The name of the adapter.
       attr_reader :name, :adapter, :poller

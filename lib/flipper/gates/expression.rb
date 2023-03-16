@@ -25,7 +25,7 @@ module Flipper
       #
       # Returns true if gate open for thing, false if not.
       def open?(context)
-        data = context.values[key]
+        data = context.values.expression
         return false if data.nil? || data.empty?
         expression = Flipper::Expression.build(data)
         result = expression.evaluate(

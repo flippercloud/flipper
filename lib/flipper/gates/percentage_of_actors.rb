@@ -21,21 +21,19 @@ module Flipper
         value > 0
       end
 
+      # Private: this constant is used to support up to 3 decimal places
+      # in percentages.
+      SCALING_FACTOR = 1_000
+      private_constant :SCALING_FACTOR
+
       # Internal: Checks if the gate is open for a thing.
       #
       # Returns true if gate open for thing, false if not.
       def open?(context)
-        percentage = context.values[key]
+        return false if context.thing.nil?
 
-        if Types::Actor.wrappable?(context.thing)
-          actor = Types::Actor.wrap(context.thing)
-          id = "#{context.feature_name}#{actor.value}"
-          # this is to support up to 3 decimal places in percentages
-          scaling_factor = 1_000
-          Zlib.crc32(id) % (100 * scaling_factor) < percentage * scaling_factor
-        else
-          false
-        end
+        id = "#{context.feature_name}#{context.thing.value}"
+        Zlib.crc32(id) % (100 * SCALING_FACTOR) < context.values.percentage_of_actors * SCALING_FACTOR
       end
 
       def protects?(thing)

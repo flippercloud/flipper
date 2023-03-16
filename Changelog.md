@@ -15,6 +15,18 @@ All notable changes to this project will be documented in this file.
   * Change Flipper.percentage_of_time => Flipper::Types::PercentageOfTime.new
   * Change Flipper.time => Flipper::Types::PercentageOfTime.new
 
+## 0.26.2
+
+* Improve Active Record Adapter get/get_multi/get_all performance by 5-10x when dealing with thousands of gate values (https://github.com/jnunemaker/flipper/pull/707).
+
+## 0.26.1
+
+* Improve `Flipper#enabled?` performance by ~37%-55% (https://github.com/jnunemaker/flipper/pull/706)
+* Make Memory adapter threadsafe (https://github.com/jnunemaker/flipper/pull/702 and https://github.com/jnunemaker/flipper/pull/703)
+* ActiveRecord adapter: wrap all reads/writes in `with_connection` (https://github.com/jnunemaker/flipper/pull/705)
+* Improve performance of background polling (https://github.com/jnunemaker/flipper/pull/699)
+* Remove executables directive from gem (https://github.com/jnunemaker/flipper/pull/693)
+
 ## 0.26.0
 
 * Cloud Background Polling (https://github.com/jnunemaker/flipper/pull/682)
