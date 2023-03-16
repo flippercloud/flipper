@@ -15,11 +15,11 @@ RSpec.describe Flipper::Adapters::Mongo do
   let(:collection) { client['testing'] }
 
   before do
-    begin
-      collection.drop
-    rescue Mongo::Error::NoServerAvailable
-      ENV['CI'] ? raise : skip('Mongo not available')
-    rescue Mongo::Error::OperationFailure
+    skip_on_error(Mongo::Error::NoServerAvailable, 'Mongo not available') do
+      begin
+        collection.drop
+      rescue Mongo::Error::OperationFailure
+      end
     end
     collection.create
   end
