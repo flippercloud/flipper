@@ -127,6 +127,14 @@ module Flipper
         @adapter.disable(feature, gate, thing).tap { expire_feature(feature) }
       end
 
+      def import(source)
+        @adapter.import(source).tap { cache.clear if memoizing? }
+      end
+
+      def export(format: :json, version: 1)
+        @adapter.export(format: format, version: version)
+      end
+
       # Internal: Turns local caching on/off.
       #
       # value - The Boolean that decides if local caching is on.
@@ -138,6 +146,16 @@ module Flipper
       # Internal: Returns true for using local cache, false for not.
       def memoizing?
         !!@memoize
+      end
+
+      if RUBY_VERSION >= '3.0'
+        def method_missing(name, *args, **kwargs, &block)
+          @adapter.send name, *args, **kwargs, &block
+        end
+      else
+        def method_missing(name, *args, &block)
+          @adapter.send name, *args, &block
+        end
       end
 
       private

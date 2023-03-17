@@ -239,6 +239,36 @@ RSpec.describe Flipper::Adapters::Memoizable do
     end
   end
 
+  describe "#import" do
+    context "with memoization enabled" do
+      before do
+        subject.memoize = true
+      end
+
+      it "unmemoizes features" do
+        cache[:foo] = "bar"
+        flipper[:stats].enable
+        flipper[:search].disable
+        subject.import(Flipper::Adapters::Memory.new)
+        expect(cache).to be_empty
+      end
+    end
+
+    context "with memoization disabled" do
+      before do
+        subject.memoize = false
+      end
+
+      it "does not unmemoize features" do
+        cache[:foo] = "bar"
+        flipper[:stats].enable
+        flipper[:search].disable
+        subject.import(Flipper::Adapters::Memory.new)
+        expect(cache).not_to be_empty
+      end
+    end
+  end
+
   describe '#features' do
     context 'with memoization enabled' do
       before do
