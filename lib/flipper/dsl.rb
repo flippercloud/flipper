@@ -10,7 +10,7 @@ module Flipper
     # Private: What is being used to instrument all the things.
     attr_reader :instrumenter
 
-    def_delegators :@adapter, :memoize=, :memoizing?, :export
+    def_delegators :@adapter, :memoize=, :memoizing?, :import, :export
 
     # Public: Returns a new instance of the DSL.
     #
@@ -270,15 +270,6 @@ module Flipper
     # Returns Set of Flipper::Feature instances.
     def features
       adapter.features.map { |name| feature(name) }.to_set
-    end
-
-    # Public: Imports another flipper instance into this one making them identical.
-    #
-    # flipper - The Flipper instance to import.
-    #
-    # Returns result of Adapter#import.
-    def import(flipper)
-      adapter.import(flipper.adapter)
     end
 
     # Cloud DSL method that does nothing for open source version.
