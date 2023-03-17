@@ -9,6 +9,7 @@
 #   http://localhost:9999/
 #
 require 'bundler/setup'
+require 'rack/reloader'
 require "flipper/ui"
 require "flipper/adapters/pstore"
 
@@ -53,6 +54,8 @@ end
 # Flipper.enable_percentage_of_time(:logging, 5)
 # Flipper.enable_percentage_of_actors(:new_cache, 15)
 # Flipper.add("a/b")
+
+use Rack::Reloader
 
 run Flipper::UI.app { |builder|
   builder.use Rack::Session::Cookie, secret: "_super_secret"

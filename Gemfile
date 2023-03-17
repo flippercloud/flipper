@@ -8,7 +8,6 @@ end
 
 gem 'debug'
 gem 'rake', '~> 12.3.3'
-gem 'shotgun', '~> 0.9'
 gem 'statsd-ruby', '~> 1.2.1'
 gem 'rspec', '~> 3.0'
 gem 'rack-test', '~> 0.6.3'
