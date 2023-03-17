@@ -5,8 +5,8 @@ RSpec.describe Flipper::Exporters::Json::V1 do
 
   it "has a version number" do
     adapter = Flipper::Adapters::Memory.new
-    result = subject.call(adapter)
-    data = JSON.parse(result)
+    export = subject.call(adapter)
+    data = JSON.parse(export.input)
     expect(data["version"]).to eq(1)
   end
 
@@ -22,9 +22,9 @@ RSpec.describe Flipper::Exporters::Json::V1 do
     flipper.enable :plausible
     flipper.disable :google_analytics
 
-    result = subject.call(adapter)
+    export = subject.call(adapter)
 
-    data = JSON.parse(result)
+    data = JSON.parse(export.input)
     expect(data["features"]).to eq({
       "google_analytics" => {"actors"=>[], "boolean"=>nil, "groups"=>[], "percentage_of_actors"=>nil, "percentage_of_time"=>nil},
       "plausible" => {"actors" => [], "boolean" => "true", "groups" => [], "percentage_of_actors" => nil, "percentage_of_time" => nil},

@@ -1,4 +1,5 @@
 require "json"
+require "flipper/export"
 
 module Flipper
   module Exporters
@@ -18,10 +19,12 @@ module Flipper
             end
           end
 
-          JSON.dump({
+          json = JSON.dump({
             version: VERSION,
             features: features,
           })
+
+          Export.new(input: json, format: :json, version: VERSION)
         end
       end
     end

@@ -119,15 +119,15 @@ RSpec.describe Flipper::Adapter do
   describe "#export" do
     it "exports features" do
       source_flipper.enable(:search)
-      result = source_flipper.export
-      data = JSON.parse(result)
+      export = source_flipper.export
+      data = JSON.parse(export.input)
       expect(data.dig("features", "search", "boolean")).to eq("true")
     end
 
     it "exports with arguments" do
       source_flipper.enable(:search)
-      result = source_flipper.export(format: :json, version: 1)
-      data = JSON.parse(result)
+      export = source_flipper.export(format: :json, version: 1)
+      data = JSON.parse(export.input)
       expect(data.dig("features", "search", "boolean")).to eq("true")
     end
   end
