@@ -114,6 +114,19 @@ RSpec.describe Flipper::Adapter do
       destination_flipper.import(source_flipper)
       expect(destination_flipper.features.map(&:key)).to eq([])
     end
+
+    it 'can import an export' do
+      source_flipper.enable(:search)
+      source_flipper.enable(:google_analytics, Flipper::Actor.new("User;1"))
+
+      destination_flipper.import(source_flipper.export)
+
+      feature = destination_flipper[:search]
+      expect(feature.boolean_value).to be(true)
+
+      feature = destination_flipper[:google_analytics]
+      expect(feature.actors_value).to eq(Set["User;1"])
+    end
   end
 
   describe "#export" do

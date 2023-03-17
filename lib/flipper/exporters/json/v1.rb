@@ -1,5 +1,5 @@
 require "json"
-require "flipper/export"
+require "flipper/exporters/json/export"
 
 module Flipper
   module Exporters
@@ -10,6 +10,7 @@ module Flipper
         def call(adapter)
           features = adapter.get_all
 
+          # Convert sets to arrays for json
           features.each do |feature_key, gates|
             gates.each do |key, value|
               case value
@@ -24,7 +25,7 @@ module Flipper
             features: features,
           })
 
-          Export.new(input: json, format: :json, version: VERSION)
+          Json::Export.new(input: json, version: VERSION)
         end
       end
     end

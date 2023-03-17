@@ -1,3 +1,4 @@
+require "flipper/adapter"
 require 'concurrent/atomic/read_write_lock'
 
 module Flipper

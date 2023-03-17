@@ -1,8 +1,3 @@
-require "set"
-require "flipper/feature"
-require "flipper/exporter"
-require "flipper/adapters/sync/synchronizer"
-
 module Flipper
   # Adding a module include so we have some hooks for stuff down the road
   module Adapter
@@ -51,7 +46,7 @@ module Flipper
       case source
       when Flipper::Adapter
         Adapters::Sync::Synchronizer.new(self, source, raise: true).call
-      when Flipper::DSL
+      else
         Adapters::Sync::Synchronizer.new(self, source.adapter, raise: true).call
       end
     end
@@ -69,3 +64,8 @@ module Flipper
     end
   end
 end
+
+require "set"
+require "flipper/exporter"
+require "flipper/feature"
+require "flipper/adapters/sync/synchronizer"

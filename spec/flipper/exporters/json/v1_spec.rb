@@ -24,11 +24,10 @@ RSpec.describe Flipper::Exporters::Json::V1 do
 
     export = subject.call(adapter)
 
-    data = JSON.parse(export.input)
-    expect(data["features"]).to eq({
-      "google_analytics" => {"actors"=>[], "boolean"=>nil, "groups"=>[], "percentage_of_actors"=>nil, "percentage_of_time"=>nil},
-      "plausible" => {"actors" => [], "boolean" => "true", "groups" => [], "percentage_of_actors" => nil, "percentage_of_time" => nil},
-      "search" => {"actors" => ["User;1", "User;100"], "boolean" => nil, "groups" => ["admins", "employees"], "percentage_of_actors" => "10", "percentage_of_time" => "15"},
+    expect(export.features).to eq({
+      "google_analytics" => {actors: [], boolean: nil, groups: [], percentage_of_actors: nil, percentage_of_time: nil},
+      "plausible" => {actors: [], boolean: "true", groups: [], percentage_of_actors: nil, percentage_of_time: nil},
+      "search" => {actors: ["User;1", "User;100"], boolean: nil, groups: ["admins", "employees"], percentage_of_actors: "10", percentage_of_time: "15"},
     })
   end
 end
