@@ -1,10 +1,11 @@
 <div class="card">
   <div class="card-header">
-    <h4 class="m-0">Backup</h4>
+    <h4 class="m-0">Export</h4>
   </div>
   <div class="card-body">
-    <form action="<%= script_name %>/backup" method="post" class="form-inline">
+    <form action="<%= script_name %>/settings/export" method="post">
       <%== csrf_input_tag %>
+      <p>Download all your feature data in a single file.</p>
       <input type="submit" value="Download" class="btn btn-sm btn-light">
     </form>
   </div>

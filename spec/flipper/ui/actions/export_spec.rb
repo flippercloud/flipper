@@ -11,23 +11,7 @@ RSpec.describe Flipper::UI::Actions::Features do
     { :csrf => token, 'csrf' => token, '_csrf_token' => token }
   end
 
-  describe 'GET /backup' do
-    before do
-      flipper[:stats].enable
-      flipper[:search].enable
-      get '/backup'
-    end
-
-    it 'responds with success' do
-      expect(last_response.status).to be(200)
-    end
-
-    it 'renders template' do
-      expect(last_response.body).to include('Download')
-    end
-  end
-
-  describe "POST /backup" do
+  describe "POST /settings/export" do
     before do
       flipper.enable_percentage_of_actors :search, 10
       flipper.enable_percentage_of_time :search, 15
@@ -38,7 +22,7 @@ RSpec.describe Flipper::UI::Actions::Features do
       flipper.enable :plausible
       flipper.disable :google_analytics
 
-      post '/backup',
+      post '/settings/export',
         {'authenticity_token' => token},
         'rack.session' => session
     end

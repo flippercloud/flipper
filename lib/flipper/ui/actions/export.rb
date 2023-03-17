@@ -4,17 +4,8 @@ require 'flipper/ui/util'
 module Flipper
   module UI
     module Actions
-      class Backup < UI::Action
-        route %r{\A/backup/?\Z}
-
-        def get
-          @page_title = 'Backup'
-
-          breadcrumb 'Home', '/'
-          breadcrumb 'Backup'
-
-          view_response :backup
-        end
+      class Export < UI::Action
+        route %r{\A/settings\/export/?\Z}
 
         def post
           header 'Content-Disposition', "Attachment;filename=flipper_#{flipper.adapter.adapter.name}_#{Time.now.to_i}.json"
