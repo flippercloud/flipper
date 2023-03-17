@@ -202,6 +202,12 @@ RSpec.describe Flipper do
       expect(described_class.enabled?(:search)).to be(true)
     end
 
+    it 'delegates export to instance' do
+      described_class.enable(:search)
+      expect(described_class.export).to eq(described_class.adapter.export)
+      expect(described_class.export(format: :json)).to eq(described_class.adapter.export(format: :json))
+    end
+
     it 'delegates adapter to instance' do
       expect(described_class.adapter).to eq(described_class.instance.adapter)
     end

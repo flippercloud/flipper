@@ -349,6 +349,13 @@ RSpec.describe Flipper::DSL do
     end
   end
 
+  describe "#export" do
+    it 'delegates to adapter' do
+      expect(subject.export).to eq(subject.adapter.export)
+      expect(subject.export(format: :json)).to eq(subject.adapter.export(format: :json))
+    end
+  end
+
   describe '#memoize=' do
     it 'delegates to adapter' do
       expect(subject.adapter).not_to be_memoizing

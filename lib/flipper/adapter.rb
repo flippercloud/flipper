@@ -1,5 +1,6 @@
 require "set"
 require "flipper/feature"
+require "flipper/exporter"
 require "flipper/adapters/sync/synchronizer"
 
 module Flipper
@@ -46,6 +47,10 @@ module Flipper
     # Returns result of Synchronizer#call.
     def import(source_adapter)
       Adapters::Sync::Synchronizer.new(self, source_adapter, raise: true).call
+    end
+
+    def export(format: :json, version: 1)
+      Flipper::Exporter.build(format: format, version: version).call(self)
     end
 
     # Public: Default config for a feature's gate values.

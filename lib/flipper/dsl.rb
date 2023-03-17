@@ -10,7 +10,7 @@ module Flipper
     # Private: What is being used to instrument all the things.
     attr_reader :instrumenter
 
-    def_delegators :@adapter, :memoize=, :memoizing?
+    def_delegators :@adapter, :memoize=, :memoizing?, :export
 
     # Public: Returns a new instance of the DSL.
     #
