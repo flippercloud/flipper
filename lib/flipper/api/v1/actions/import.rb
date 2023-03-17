@@ -12,10 +12,10 @@ module Flipper
           def post
             body = request.body.read
             request.body.rewind
-            export = Flipper::Exporters::Json::Export.new(input: body)
+            export = Flipper::Exporters::Json::Export.new(contents: body)
             flipper.import(export)
-            json_response({}, 200)
-          rescue JSON::ParserError
+            json_response({}, 204)
+          rescue Flipper::Exporters::Json::InvalidError
             json_error_response(:import_invalid)
           end
         end

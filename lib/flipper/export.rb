@@ -2,10 +2,10 @@ require "flipper/adapters/memory"
 
 module Flipper
   class Export
-    attr_reader :input, :format, :version
+    attr_reader :contents, :format, :version
 
-    def initialize(input:, format: :json, version: 1)
-      @input = input
+    def initialize(contents:, format: :json, version: 1)
+      @contents = contents
       @format = format
       @version = version
     end
@@ -19,7 +19,7 @@ module Flipper
     end
 
     def eql?(other)
-      self.class.eql?(other.class) && @input == other.input && @format == other.format && @version == other.version
+      self.class.eql?(other.class) && @contents == other.contents && @format == other.format && @version == other.version
     end
     alias_method :==, :eql?
   end

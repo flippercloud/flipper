@@ -52,6 +52,28 @@ RSpec.describe Flipper::Adapters::Http do
       expect(flipper[:search].disable_group(:some_made_up_group)).to be(true)
       expect(flipper[:search].groups_value).to eq(Set.new)
     end
+
+    it "can import" do
+      adapter = Flipper::Adapters::Memory.new
+      source_flipper = Flipper.new(adapter)
+      source_flipper.enable_percentage_of_actors :search, 10
+      source_flipper.enable_percentage_of_time :search, 15
+      source_flipper.enable_actor :search, Flipper::Actor.new('User;1')
+      source_flipper.enable_actor :search, Flipper::Actor.new('User;100')
+      source_flipper.enable_group :search, :admins
+      source_flipper.enable_group :search, :employees
+      source_flipper.enable :plausible
+      source_flipper.disable :google_analytics
+
+      flipper = Flipper.new(subject)
+      flipper.import(source_flipper)
+      expect(flipper[:search].percentage_of_actors_value).to be(10)
+      expect(flipper[:search].percentage_of_time_value).to be(15)
+      expect(flipper[:search].actors_value).to eq(Set["User;1", "User;100"])
+      expect(flipper[:search].groups_value).to eq(Set["admins", "employees"])
+      expect(flipper[:plausible].boolean_value).to be(true)
+      expect(flipper[:google_analytics].boolean_value).to be(false)
+    end
   end
 
   it "sends default headers" do

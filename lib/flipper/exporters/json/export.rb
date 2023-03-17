@@ -1,29 +1,29 @@
 require "flipper/export"
+require "flipper/typecast"
 
 module Flipper
   module Exporters
     module Json
+      # Raised when the contents of the export are not valid.
+      class InvalidError < StandardError; end
+      class JsonError < InvalidError; end
+
       # Internal: JSON export class that knows how to build features hash
-      # from input.
+      # from data.
       class Export < ::Flipper::Export
-        def initialize(input:, version: 1)
-          super input: input, version: version, format: :json
+        def initialize(contents:, version: 1)
+          super contents: contents, version: version, format: :json
         end
 
         # Public: The features hash identical to calling get_all on adapter.
         def features
           @features ||= begin
-            features = JSON.parse(input).fetch("features")
-
-            result = {}
-            features.each do |feature_key, gates|
-              result[feature_key] = {}
-              gates.each do |gate_key, value|
-                result[feature_key][gate_key.to_sym] = value
-              end
-            end
-
-            result
+            features = JSON.parse(contents).fetch("features")
+            Typecast.to_get_all(features)
+          rescue JSON::ParserError
+            raise JsonError
+          rescue
+            raise InvalidError
           end
         end
       end

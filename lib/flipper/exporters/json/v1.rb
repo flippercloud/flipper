@@ -25,7 +25,7 @@ module Flipper
             features: features,
           })
 
-          Json::Export.new(input: json, version: VERSION)
+          Json::Export.new(contents: json, version: VERSION)
         end
       end
     end

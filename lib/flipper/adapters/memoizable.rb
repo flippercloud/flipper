@@ -5,7 +5,7 @@ module Flipper
     # Internal: Adapter that wraps another adapter with the ability to memoize
     # adapter calls in memory. Used by flipper dsl and the memoizer middleware
     # to make it possible to memoize adapter calls for the duration of a request.
-    class Memoizable < SimpleDelegator
+    class Memoizable
       include ::Flipper::Adapter
 
       FeaturesKey = :flipper_features
@@ -27,7 +27,6 @@ module Flipper
 
       # Public
       def initialize(adapter, cache = nil)
-        super(adapter)
         @adapter = adapter
         @name = :memoizable
         @cache = cache || {}

@@ -123,6 +123,14 @@ module Flipper
         true
       end
 
+      def import(source)
+        adapter = self.class.from(source)
+        export = adapter.export(format: :json, version: 1)
+        response = @client.post("/import", export.contents)
+        raise Error, response unless response.is_a?(Net::HTTPNoContent)
+        true
+      end
+
       private
 
       def request_body_for_gate(gate, value)

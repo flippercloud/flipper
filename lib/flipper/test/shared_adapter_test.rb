@@ -34,7 +34,15 @@ module Flipper
         assert_includes @adapter.class.ancestors, Flipper::Adapter
       end
 
+      def test_knows_how_to_get_adapter_from_source
+        adapter = Flipper::Adapters::Memory.new
+        flipper = Flipper.new(adapter)
+        assert_equal adapter, @adapter.class.from(adapter)
+        assert_equal adapter, @adapter.class.from(flipper)
+      end
+
       def test_returns_correct_default_values_for_gates_if_none_are_enabled
+        assert_equal @adapter.class.default_config, @adapter.get(@feature)
         assert_equal @adapter.default_config, @adapter.get(@feature)
       end
 
@@ -299,6 +307,21 @@ module Flipper
         assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor))
         assert_equal true, @adapter.enable(@feature, @boolean_gate, @flipper.boolean(true))
         assert_equal @adapter.default_config.merge(boolean: "true"), @adapter.get(@feature)
+      end
+
+      def test_can_import_and_export
+        adapter = Flipper::Adapters::Memory.new
+        source_flipper = Flipper.new(adapter)
+        source_flipper.enable(:stats)
+        export = adapter.export
+
+        # some adapters cannot import so if they return false lets assert it
+        # didn't happen
+        if @adapter.import(export)
+          assert @flipper[:stats].enabled?
+        else
+          refute @flipper[:stats].enabled?
+        end
       end
     end
   end

@@ -16,6 +16,11 @@ module Flipper
           percentage_of_time: nil,
         }
       end
+
+      def from(source)
+        return source if source.is_a?(Flipper::Adapter)
+        source.adapter
+      end
     end
 
     # Public: Get all features and gate values in one call. Defaults to one call
@@ -41,14 +46,10 @@ module Flipper
     #
     # source - The source dsl, adapter or export to import.
     #
-    # Returns result of Synchronizer#call.
+    # Returns true if successful.
     def import(source)
-      case source
-      when Flipper::Adapter
-        Adapters::Sync::Synchronizer.new(self, source, raise: true).call
-      else
-        Adapters::Sync::Synchronizer.new(self, source.adapter, raise: true).call
-      end
+      Adapters::Sync::Synchronizer.new(self, self.class.from(source), raise: true).call
+      true
     end
 
     # Public: Exports the adapter in a given format for a given format version.

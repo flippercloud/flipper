@@ -1,6 +1,7 @@
 require 'logger'
 require 'flipper/adapters/instrumented'
 require 'flipper/instrumentation/log_subscriber'
+require 'active_support/isolated_execution_state'
 
 RSpec.describe Flipper::Instrumentation::LogSubscriber do
   let(:adapter) do
@@ -24,6 +25,10 @@ RSpec.describe Flipper::Instrumentation::LogSubscriber do
 
   after do
     described_class.logger = nil
+  end
+
+  after(:all) do
+    ActiveSupport::Notifications.unsubscribe("flipper")
   end
 
   let(:log) { @io.string }

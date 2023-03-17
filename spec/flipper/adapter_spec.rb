@@ -30,9 +30,9 @@ RSpec.describe Flipper::Adapter do
   end
 
   describe '#import' do
-    it 'returns nothing' do
+    it 'returns true' do
       result = destination_flipper.import(source_flipper)
-      expect(result).to be(nil)
+      expect(result).to be(true)
     end
 
     it 'can import from one adapter to another' do
@@ -133,15 +133,13 @@ RSpec.describe Flipper::Adapter do
     it "exports features" do
       source_flipper.enable(:search)
       export = source_flipper.export
-      data = JSON.parse(export.input)
-      expect(data.dig("features", "search", "boolean")).to eq("true")
+      expect(export.features.dig("search", :boolean)).to eq("true")
     end
 
     it "exports with arguments" do
       source_flipper.enable(:search)
       export = source_flipper.export(format: :json, version: 1)
-      data = JSON.parse(export.input)
-      expect(data.dig("features", "search", "boolean")).to eq("true")
+      expect(export.features.dig("search", :boolean)).to eq("true")
     end
   end
 end

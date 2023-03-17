@@ -13,11 +13,11 @@ RSpec.describe Flipper::Api::V1::Actions::Import do
 
         export = source_flipper.export
 
-        post '/import', export.input, 'CONTENT_TYPE' => 'application/json'
+        post '/import', export.contents, 'CONTENT_TYPE' => 'application/json'
       end
 
-      it 'responds 200 ' do
-        expect(last_response.status).to eq(200)
+      it 'responds 204 ' do
+        expect(last_response.status).to eq(204)
       end
 
       it 'imports features' do
@@ -35,11 +35,11 @@ RSpec.describe Flipper::Api::V1::Actions::Import do
         source_flipper = build_flipper
         export = source_flipper.export
 
-        post '/import', export.input, 'CONTENT_TYPE' => 'application/json'
+        post '/import', export.contents, 'CONTENT_TYPE' => 'application/json'
       end
 
-      it 'responds 200 ' do
-        expect(last_response.status).to eq(200)
+      it 'responds 204' do
+        expect(last_response.status).to eq(204)
       end
 
       it 'removes all features' do

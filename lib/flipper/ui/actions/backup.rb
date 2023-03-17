@@ -20,7 +20,7 @@ module Flipper
           header 'Content-Disposition', "Attachment;filename=flipper_#{flipper.adapter.adapter.name}_#{Time.now.to_i}.json"
 
           export = flipper.export(format: :json, version: 1)
-          json_response export.input
+          json_response export.contents
         end
       end
     end
