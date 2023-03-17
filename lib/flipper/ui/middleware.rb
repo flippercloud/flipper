@@ -25,6 +25,7 @@ module Flipper
         @action_collection.add UI::Actions::PercentageOfActorsGate
         @action_collection.add UI::Actions::Feature
         @action_collection.add UI::Actions::Features
+        @action_collection.add UI::Actions::Backup
 
         # Static Assets/Files
         @action_collection.add UI::Actions::File

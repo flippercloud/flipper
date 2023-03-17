@@ -1,0 +1,11 @@
+<div class="card">
+  <div class="card-header">
+    <h4 class="m-0">Backup</h4>
+  </div>
+  <div class="card-body">
+    <form action="<%= script_name %>/backup" method="post" class="form-inline">
+      <%== csrf_input_tag %>
+      <input type="submit" value="Download" class="btn btn-sm btn-light">
+    </form>
+  </div>
+</div>
