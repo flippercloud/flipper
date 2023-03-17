@@ -47,8 +47,13 @@ RSpec.describe Flipper::UI::Actions::Features do
       expect(last_response.status).to be(200)
     end
 
+    it 'sets content disposition' do
+      expect(last_response.headers['Content-Disposition']).to match(/Attachment;filename=flipper_memory_[0-9]*\.json/)
+    end
+
     it 'renders json' do
       data = JSON.parse(last_response.body)
+      expect(last_response.headers['Content-Type']).to eq('application/json')
       expect(data['version']).to eq(1)
       expect(data['features']).to eq({
         "search"=> {"boolean"=>nil, "groups"=>["admins", "employees"], "actors"=>["User;1", "User;100"], "percentage_of_actors"=>"10", "percentage_of_time"=>"15"},
