@@ -174,7 +174,12 @@ module Flipper
       # Returns a response.
       def json_response(object)
         header 'Content-Type', 'application/json'
-        body = JSON.dump(object)
+        body = case object
+        when String
+          object
+        else
+          JSON.dump(object)
+        end
         halt [@code, @headers, [body]]
       end
 

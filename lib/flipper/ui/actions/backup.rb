@@ -17,23 +17,9 @@ module Flipper
         end
 
         def post
-          features = flipper.adapter.get_all
-
-          features.each do |feature_key, gates|
-            gates.each do |key, value|
-              case value
-              when Set
-                features[feature_key][key] = value.to_a
-              end
-            end
-          end
-
           header 'Content-Disposition', "Attachment;filename=flipper_#{flipper.adapter.adapter.name}_#{Time.now.to_i}.json"
 
-          json_response({
-            version: 1,
-            features: features,
-          })
+          json_response flipper.export(format: :json, version: 1)
         end
       end
     end
