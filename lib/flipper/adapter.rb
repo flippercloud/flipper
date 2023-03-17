@@ -44,9 +44,11 @@ module Flipper
 
     # Public: Ensure that adapter is in sync with source adapter provided.
     #
+    # source - The source adapter or export to import.
+    #
     # Returns result of Synchronizer#call.
-    def import(source_adapter)
-      Adapters::Sync::Synchronizer.new(self, source_adapter, raise: true).call
+    def import(source)
+      Adapters::Sync::Synchronizer.new(self, source, raise: true).call
     end
 
     def export(format: :json, version: 1)

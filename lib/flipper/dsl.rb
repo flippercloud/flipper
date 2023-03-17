@@ -272,6 +272,11 @@ module Flipper
       adapter.features.map { |name| feature(name) }.to_set
     end
 
+    # Public: Imports another flipper instance into this one making them identical.
+    #
+    # flipper - The Flipper instance to import.
+    #
+    # Returns result of Adapter#import.
     def import(flipper)
       adapter.import(flipper.adapter)
     end
