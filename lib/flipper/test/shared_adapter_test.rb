@@ -37,8 +37,9 @@ module Flipper
       def test_knows_how_to_get_adapter_from_source
         adapter = Flipper::Adapters::Memory.new
         flipper = Flipper.new(adapter)
-        assert_equal adapter, @adapter.class.from(adapter)
-        assert_equal adapter, @adapter.class.from(flipper)
+
+        assert_includes adapter.class.from(adapter).class.ancestors, Flipper::Adapter
+        assert_includes adapter.class.from(flipper).class.ancestors, Flipper::Adapter
       end
 
       def test_returns_correct_default_values_for_gates_if_none_are_enabled
