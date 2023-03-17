@@ -20,26 +20,15 @@ RSpec.describe Flipper::Exporters::Json::V1 do
     flipper.enable_group :search, :admins
     flipper.enable_group :search, :employees
     flipper.enable :plausible
-    Flipper.disable :google_analytics
+    flipper.disable :google_analytics
 
     result = subject.call(adapter)
 
     data = JSON.parse(result)
     expect(data["features"]).to eq({
-      "plausible" => {
-        "actors" => [],
-        "boolean" => "true",
-        "groups" => [],
-        "percentage_of_actors" => nil,
-        "percentage_of_time" => nil
-      },
-      "search" => {
-        "actors" => ["User;1", "User;100"],
-        "boolean" => nil,
-        "groups" => ["admins", "employees"],
-        "percentage_of_actors" => "10",
-        "percentage_of_time" => "15"
-      },
+      "google_analytics" => {"actors"=>[], "boolean"=>nil, "groups"=>[], "percentage_of_actors"=>nil, "percentage_of_time"=>nil},
+      "plausible" => {"actors" => [], "boolean" => "true", "groups" => [], "percentage_of_actors" => nil, "percentage_of_time" => nil},
+      "search" => {"actors" => ["User;1", "User;100"], "boolean" => nil, "groups" => ["admins", "employees"], "percentage_of_actors" => "10", "percentage_of_time" => "15"},
     })
   end
 end
