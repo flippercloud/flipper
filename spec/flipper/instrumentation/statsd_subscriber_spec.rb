@@ -1,5 +1,6 @@
 require 'flipper/adapters/instrumented'
 require 'flipper/instrumentation/statsd'
+require 'active_support/isolated_execution_state'
 require 'statsd'
 
 RSpec.describe Flipper::Instrumentation::StatsdSubscriber do
@@ -23,6 +24,10 @@ RSpec.describe Flipper::Instrumentation::StatsdSubscriber do
   after do
     described_class.client = nil
     Thread.current[:statsd_socket] = nil
+  end
+
+  after(:all) do
+    ActiveSupport::Notifications.unsubscribe("flipper")
   end
 
   def assert_timer(metric)
