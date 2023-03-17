@@ -228,7 +228,7 @@ RSpec.describe Flipper do
     end
 
     it 'delegates sync stuff to instance for Flipper::Cloud' do
-      stub = stub_request(:get, "https://www.flippercloud.io/adapter/features").
+      stub = stub_request(:get, "https://www.flippercloud.io/adapter/features?exclude_gate_names=true").
         with({
           headers: {
             'Flipper-Cloud-Token'=>'asdf',

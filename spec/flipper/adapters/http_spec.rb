@@ -104,7 +104,7 @@ RSpec.describe Flipper::Adapters::Http do
 
   describe "#get_multi" do
     it "raises error when not successful response" do
-      stub_request(:get, "http://app.com/flipper/features?keys=feature_panel")
+      stub_request(:get, "http://app.com/flipper/features?keys=feature_panel&exclude_gate_names=true")
         .to_return(status: 503, body: "", headers: {})
 
       adapter = described_class.new(url: 'http://app.com/flipper')
@@ -116,7 +116,7 @@ RSpec.describe Flipper::Adapters::Http do
 
   describe "#get_all" do
     it "raises error when not successful response" do
-      stub_request(:get, "http://app.com/flipper/features")
+      stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
         .to_return(status: 503, body: "", headers: {})
 
       adapter = described_class.new(url: 'http://app.com/flipper')
@@ -128,7 +128,7 @@ RSpec.describe Flipper::Adapters::Http do
 
   describe "#features" do
     it "raises error when not successful response" do
-      stub_request(:get, "http://app.com/flipper/features")
+      stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
         .to_return(status: 503, body: "", headers: {})
 
       adapter = described_class.new(url: 'http://app.com/flipper')

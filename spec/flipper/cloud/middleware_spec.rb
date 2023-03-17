@@ -274,7 +274,7 @@ RSpec.describe Flipper::Cloud::Middleware do
   private
 
   def stub_request_for_token(token, status: 200)
-    stub = stub_request(:get, "https://www.flippercloud.io/adapter/features").
+    stub = stub_request(:get, "https://www.flippercloud.io/adapter/features?exclude_gate_names=true").
       with({
         headers: {
           'Flipper-Cloud-Token' => token,

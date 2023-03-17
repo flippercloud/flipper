@@ -39,7 +39,7 @@ module Flipper
 
       def get_multi(features)
         csv_keys = features.map(&:key).join(',')
-        response = @client.get("/features?keys=#{csv_keys}")
+        response = @client.get("/features?keys=#{csv_keys}&exclude_gate_names=true")
         raise Error, response unless response.is_a?(Net::HTTPOK)
 
         parsed_response = JSON.parse(response.body)
@@ -57,7 +57,7 @@ module Flipper
       end
 
       def get_all
-        response = @client.get("/features")
+        response = @client.get("/features?exclude_gate_names=true")
         raise Error, response unless response.is_a?(Net::HTTPOK)
 
         parsed_response = JSON.parse(response.body)
@@ -76,7 +76,7 @@ module Flipper
       end
 
       def features
-        response = @client.get('/features')
+        response = @client.get('/features?exclude_gate_names=true')
         raise Error, response unless response.is_a?(Net::HTTPOK)
 
         parsed_response = JSON.parse(response.body)
