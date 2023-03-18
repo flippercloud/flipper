@@ -16,7 +16,7 @@ RSpec.describe Flipper::Api::V1::Actions::Import do
         post '/import', export.contents, 'CONTENT_TYPE' => 'application/json'
       end
 
-      it 'responds 204 ' do
+      it 'responds 204' do
         expect(last_response.status).to eq(204)
       end
 

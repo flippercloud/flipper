@@ -126,7 +126,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
         post '/features', name: 'my_feature'
       end
 
-      it 'responds 200 ' do
+      it 'responds 200' do
         expect(last_response.status).to eq(200)
       end
 
