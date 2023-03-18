@@ -63,7 +63,7 @@ module Flipper
       end
     end
 
-    def self.to_get_all(source)
+    def self.features_hash(source)
       normalized_source = {}
       (source || {}).each do |feature_key, gates|
         normalized_source[feature_key] ||= {}

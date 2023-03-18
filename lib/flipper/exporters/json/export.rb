@@ -19,7 +19,7 @@ module Flipper
         def features
           @features ||= begin
             features = JSON.parse(contents).fetch("features")
-            Typecast.to_get_all(features)
+            Typecast.features_hash(features)
           rescue JSON::ParserError
             raise JsonError
           rescue

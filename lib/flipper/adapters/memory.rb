@@ -16,7 +16,7 @@ module Flipper
 
       # Public
       def initialize(source = nil)
-        @source = Typecast.to_get_all(source)
+        @source = Typecast.features_hash(source)
         @name = :memory
         @lock = Concurrent::ReadWriteLock.new
       end
@@ -61,7 +61,7 @@ module Flipper
       end
 
       def get_all
-        @lock.with_read_lock { Typecast.to_get_all(@source) }
+        @lock.with_read_lock { Typecast.features_hash(@source) }
       end
 
       # Public
@@ -117,7 +117,7 @@ module Flipper
       # Public: a more efficient implementation of import for this adapter
       def import(source)
         adapter = self.class.from(source)
-        get_all = Typecast.to_get_all(adapter.get_all)
+        get_all = Typecast.features_hash(adapter.get_all)
         @lock.with_write_lock { @source.replace(get_all) }
         true
       end
