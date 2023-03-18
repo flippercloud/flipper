@@ -21,6 +21,7 @@ RSpec.describe Flipper::UI::Actions::Features do
       flipper.enable_group :search, :employees
       flipper.enable :plausible
       flipper.disable :google_analytics
+      flipper.enable :analytics, Flipper.property(:plan).eq("basic")
 
       post '/settings/export',
         {'authenticity_token' => token},
@@ -40,6 +41,7 @@ RSpec.describe Flipper::UI::Actions::Features do
       expect(last_response.headers['Content-Type']).to eq('application/json')
       expect(data['version']).to eq(1)
       expect(data['features']).to eq({
+        "analytics" => {"boolean"=>nil, "expression"=>"{\"Equal\"=>[{\"Property\"=>[\"plan\"]}, {\"String\"=>[\"basic\"]}]}", "groups"=>[], "actors"=>[], "percentage_of_actors"=>nil, "percentage_of_time"=>nil},
         "search"=> {"boolean"=>nil, "expression"=>nil, "groups"=>["admins", "employees"], "actors"=>["User;1", "User;100"], "percentage_of_actors"=>"10", "percentage_of_time"=>"15"},
         "plausible"=> {"boolean"=>"true", "expression"=>nil, "groups"=>[], "actors"=>[], "percentage_of_actors"=>nil, "percentage_of_time"=>nil},
         "google_analytics"=> {"boolean"=>nil, "expression"=>nil, "groups"=>[], "actors"=>[], "percentage_of_actors"=>nil, "percentage_of_time"=>nil},
