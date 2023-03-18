@@ -1,7 +1,12 @@
 require 'logger'
 require 'flipper/adapters/instrumented'
 require 'flipper/instrumentation/log_subscriber'
-require 'active_support/isolated_execution_state'
+
+begin
+  require 'active_support/isolated_execution_state'
+rescue LoadError
+  # ActiveSupport::IsolatedExecutionState is only available in Rails 5.2+
+end
 
 RSpec.describe Flipper::Instrumentation::LogSubscriber do
   let(:adapter) do
