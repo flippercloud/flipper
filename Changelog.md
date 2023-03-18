@@ -15,6 +15,10 @@ All notable changes to this project will be documented in this file.
   * Change Flipper.percentage_of_time => Flipper::Types::PercentageOfTime.new
   * Change Flipper.time => Flipper::Types::PercentageOfTime.new
 
+## 0.27.0
+
+* Easy Import/Export (https://github.com/jnunemaker/flipper/pull/709). This has some breaking changes but only if you are using flipper internals. If you are just using Flipper.* methods, you'll be fine.
+
 ## 0.26.2
 
 * Improve Active Record Adapter get/get_multi/get_all performance by 5-10x when dealing with thousands of gate values (https://github.com/jnunemaker/flipper/pull/707).

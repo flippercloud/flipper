@@ -32,7 +32,7 @@ module Flipper
         return default_config if rollout_feature.nil?
 
         boolean = nil
-        groups = Set.new(rollout_feature.groups)
+        groups = Set.new(rollout_feature.groups.map(&:to_s))
         actors = Set.new(rollout_feature.users)
 
         percentage_of_actors = case rollout_feature.percentage

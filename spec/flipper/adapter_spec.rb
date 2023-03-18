@@ -31,9 +31,9 @@ RSpec.describe Flipper::Adapter do
   end
 
   describe '#import' do
-    it 'returns nothing' do
+    it 'returns true' do
       result = destination_flipper.import(source_flipper)
-      expect(result).to be(nil)
+      expect(result).to be(true)
     end
 
     it 'can import from one adapter to another' do
@@ -114,6 +114,33 @@ RSpec.describe Flipper::Adapter do
       destination_flipper.add(:stats)
       destination_flipper.import(source_flipper)
       expect(destination_flipper.features.map(&:key)).to eq([])
+    end
+
+    it 'can import an export' do
+      source_flipper.enable(:search)
+      source_flipper.enable(:google_analytics, Flipper::Actor.new("User;1"))
+
+      destination_flipper.import(source_flipper.export)
+
+      feature = destination_flipper[:search]
+      expect(feature.boolean_value).to be(true)
+
+      feature = destination_flipper[:google_analytics]
+      expect(feature.actors_value).to eq(Set["User;1"])
+    end
+  end
+
+  describe "#export" do
+    it "exports features" do
+      source_flipper.enable(:search)
+      export = source_flipper.export
+      expect(export.features.dig("search", :boolean)).to eq("true")
+    end
+
+    it "exports with arguments" do
+      source_flipper.enable(:search)
+      export = source_flipper.export(format: :json, version: 1)
+      expect(export.features.dig("search", :boolean)).to eq("true")
     end
   end
 end

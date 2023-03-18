@@ -34,7 +34,15 @@ RSpec.shared_examples_for 'a flipper adapter' do
     expect(subject.class.ancestors).to include(Flipper::Adapter)
   end
 
+  it 'knows how to get adapter from source' do
+    adapter = Flipper::Adapters::Memory.new
+    flipper = Flipper.new(adapter)
+    expect(subject.class.from(adapter).class.ancestors).to include(Flipper::Adapter)
+    expect(subject.class.from(flipper).class.ancestors).to include(Flipper::Adapter)
+  end
+
   it 'returns correct default values for the gates if none are enabled' do
+    expect(subject.get(feature)).to eq(subject.class.default_config)
     expect(subject.get(feature)).to eq(subject.default_config)
   end
 
@@ -321,5 +329,20 @@ RSpec.shared_examples_for 'a flipper adapter' do
     subject.enable(feature, actor_gate, Flipper::Types::Actor.new(actor))
     subject.enable(feature, boolean_gate, Flipper::Types::Boolean.new(true))
     expect(subject.get(feature)).to eq(subject.default_config.merge(boolean: "true"))
+  end
+
+  it 'can import and export' do
+    adapter = Flipper::Adapters::Memory.new
+    source_flipper = Flipper.new(adapter)
+    source_flipper.enable(:stats)
+    export = adapter.export
+
+    # some adapters cannot import so if they return false lets assert it
+    # didn't happen
+    if subject.import(export)
+      expect(flipper[:stats]).to be_enabled
+    else
+      expect(flipper[:stats]).not_to be_enabled
+    end
   end
 end

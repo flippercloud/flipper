@@ -24,6 +24,7 @@ module Flipper
         @action_collection.add Api::V1::Actions::Actors
         @action_collection.add Api::V1::Actions::Feature
         @action_collection.add Api::V1::Actions::Features
+        @action_collection.add Api::V1::Actions::Import
       end
 
       def call(env)

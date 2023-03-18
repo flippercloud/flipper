@@ -2,6 +2,12 @@ require 'logger'
 require 'flipper/adapters/instrumented'
 require 'flipper/instrumentation/log_subscriber'
 
+begin
+  require 'active_support/isolated_execution_state'
+rescue LoadError
+  # ActiveSupport::IsolatedExecutionState is only available in Rails 5.2+
+end
+
 RSpec.describe Flipper::Instrumentation::LogSubscriber do
   let(:adapter) do
     memory = Flipper::Adapters::Memory.new
@@ -24,6 +30,10 @@ RSpec.describe Flipper::Instrumentation::LogSubscriber do
 
   after do
     described_class.logger = nil
+  end
+
+  after(:all) do
+    ActiveSupport::Notifications.unsubscribe("flipper")
   end
 
   let(:log) { @io.string }

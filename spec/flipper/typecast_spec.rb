@@ -114,4 +114,83 @@ RSpec.describe Flipper::Typecast do
       described_class.to_set('asdf')
     end.to raise_error(ArgumentError, %("asdf" cannot be converted to a set))
   end
+
+  describe "#features_hash" do
+    it "returns new hash" do
+      hash = {
+        "search" => {
+          boolean: nil,
+        }
+      }
+      result = described_class.features_hash(hash)
+      expect(result).not_to be(hash)
+      expect(result["search"]).not_to be(hash["search"])
+    end
+
+    it "converts gate value arrays to sets" do
+      hash = {
+        "search" => {
+          boolean: nil,
+          groups: ['a', 'b'],
+          actors: ['User;1'],
+          percentage_of_actors: nil,
+          percentage_of_time: nil,
+        },
+      }
+      result = described_class.features_hash(hash)
+      expect(result).to eq({
+        "search" => {
+          boolean: nil,
+          groups: Set['a', 'b'],
+          actors: Set['User;1'],
+          percentage_of_actors: nil,
+          percentage_of_time: nil,
+        },
+      })
+    end
+
+    it "converts gate value boolean and integers to strings" do
+      hash = {
+        "search" => {
+          boolean: true,
+          groups: Set.new,
+          actors: Set.new,
+          percentage_of_actors: 10,
+          percentage_of_time: 15,
+        },
+      }
+      result = described_class.features_hash(hash)
+      expect(result).to eq({
+        "search" => {
+          boolean: "true",
+          groups: Set.new,
+          actors: Set.new,
+          percentage_of_actors: "10",
+          percentage_of_time: "15",
+        },
+      })
+    end
+
+    it "converts string gate keys to symbols" do
+      hash = {
+        "search" => {
+          "boolean" => nil,
+          "groups" => Set.new,
+          "actors" => Set.new,
+          "percentage_of_actors" => nil,
+          "percentage_of_time" => nil,
+        },
+      }
+      result = described_class.features_hash(hash)
+      expect(result).to eq({
+        "search" => {
+          boolean: nil,
+          groups: Set.new,
+          actors: Set.new,
+          percentage_of_actors: nil,
+          percentage_of_time: nil,
+        },
+      })
+    end
+  end
 end

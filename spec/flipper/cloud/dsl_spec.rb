@@ -15,7 +15,7 @@ RSpec.describe Flipper::Cloud::DSL do
   end
 
   it 'delegates sync to cloud configuration' do
-    stub = stub_request(:get, "https://www.flippercloud.io/adapter/features").
+    stub = stub_request(:get, "https://www.flippercloud.io/adapter/features?exclude_gate_names=true").
       with({
         headers: {
           'Flipper-Cloud-Token'=>'asdf',
