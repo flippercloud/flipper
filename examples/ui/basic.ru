@@ -9,6 +9,7 @@
 #   http://localhost:9999/
 #
 require 'bundler/setup'
+require 'rack/reloader'
 require "flipper/ui"
 require "flipper/adapters/pstore"
 
@@ -26,7 +27,7 @@ Flipper::UI.configure do |config|
   config.feature_creation_enabled = true
   config.feature_removal_enabled = true
   config.cloud_recommendation = true
-  config.confirm_fully_enable = true
+  config.confirm_fully_enable = false
   # config.show_feature_description_in_list = true
   config.descriptions_source = lambda do |_keys|
     {
@@ -53,6 +54,8 @@ end
 # Flipper.enable_percentage_of_time(:logging, 5)
 # Flipper.enable_percentage_of_actors(:new_cache, 15)
 # Flipper.add("a/b")
+
+use Rack::Reloader
 
 run Flipper::UI.app { |builder|
   builder.use Rack::Session::Cookie, secret: "_super_secret"

@@ -2,6 +2,12 @@ require 'flipper/adapters/instrumented'
 require 'flipper/instrumentation/statsd'
 require 'statsd'
 
+begin
+  require 'active_support/isolated_execution_state'
+rescue LoadError
+  # ActiveSupport::IsolatedExecutionState is only available in Rails 5.2+
+end
+
 RSpec.describe Flipper::Instrumentation::StatsdSubscriber do
   let(:statsd_client) { Statsd.new }
   let(:socket) { FakeUDPSocket.new }
@@ -23,6 +29,10 @@ RSpec.describe Flipper::Instrumentation::StatsdSubscriber do
   after do
     described_class.client = nil
     Thread.current[:statsd_socket] = nil
+  end
+
+  after(:all) do
+    ActiveSupport::Notifications.unsubscribe("flipper")
   end
 
   def assert_timer(metric)

@@ -60,7 +60,7 @@ RSpec.describe Flipper::Cloud::Engine do
       ENV.update(env)
       application.initialize!
 
-      stub = stub_request(:get, "https://www.flippercloud.io/adapter/features").with({
+      stub = stub_request(:get, "https://www.flippercloud.io/adapter/features?exclude_gate_names=true").with({
         headers: { "Flipper-Cloud-Token" => ENV["FLIPPER_CLOUD_TOKEN"] },
       }).to_return(status: 200, body: JSON.generate({ features: {} }), headers: {})
 

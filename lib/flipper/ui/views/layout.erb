@@ -17,6 +17,12 @@
         </div>
       <%- end -%>
 
+      <div class="container text-muted small mb-3">
+        <a href="https://www.flippercloud.io/docs/ui?utm_source=oss&utm_medium=ui&utm_campaign=docs">Docs</a> &bull;
+        <a href="<%= script_name %>/settings">Settings</a> &bull;
+        Version: <%= Flipper::VERSION %>
+      </div>
+
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb bg-white border align-items-center mb-4">
           <% @breadcrumbs.each do |breadcrumb| %>

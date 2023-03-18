@@ -72,6 +72,14 @@ module Flipper
         update_timer "flipper.adapter.#{adapter_name}.#{operation}"
       end
 
+      def update_poller_metrics
+        # noop
+      end
+
+      def update_synchronizer_call_metrics
+        # noop
+      end
+
       QUESTION_MARK = '?'.freeze
 
       # Private

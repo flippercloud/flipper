@@ -19,7 +19,7 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
     end
 
     it 'returns decorated feature with group enabled' do
-      group_gate = json_response['gates'].find { |m| m['name'] == 'group' }
+      group_gate = json_response['gates'].find { |m| m['key'] == 'groups' }
       expect(group_gate['value']).to eq(['admins'])
     end
   end
@@ -42,7 +42,7 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
     end
 
     it 'returns decorated feature with group enabled' do
-      group_gate = json_response['gates'].find { |m| m['name'] == 'group' }
+      group_gate = json_response['gates'].find { |m| m['key'] == 'groups' }
       expect(group_gate['value']).to eq(['admins'])
     end
   end
@@ -89,7 +89,7 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
     end
 
     it 'returns decorated feature with group disabled' do
-      group_gate = json_response['gates'].find { |m| m['name'] == 'group' }
+      group_gate = json_response['gates'].find { |m| m['key'] == 'groups' }
       expect(group_gate['value']).to eq([])
     end
   end
@@ -111,7 +111,7 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
     end
 
     it 'returns decorated feature with group disabled' do
-      group_gate = json_response['gates'].find { |m| m['name'] == 'group' }
+      group_gate = json_response['gates'].find { |m| m['key'] == 'groups' }
       expect(group_gate['value']).to eq([])
     end
   end
@@ -145,7 +145,7 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
     end
 
     it 'returns decorated feature with group in groups set' do
-      group_gate = json_response['gates'].find { |m| m['name'] == 'group' }
+      group_gate = json_response['gates'].find { |m| m['key'] == 'groups' }
       expect(group_gate['value']).to eq(['admins'])
     end
 
@@ -167,7 +167,7 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
     end
 
     it 'returns decorated feature with group not in groups set' do
-      group_gate = json_response['gates'].find { |m| m['name'] == 'group' }
+      group_gate = json_response['gates'].find { |m| m['key'] == 'groups' }
       expect(group_gate['value']).to eq([])
     end
 
