@@ -65,6 +65,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
               'state' => 'on',
               'gates' => [
                 { 'key' => 'boolean', 'value' => 'true'},
+                {"key" => "expression", "value" => nil},
                 { 'key' => 'actors', 'value' => ['10']},
                 {'key' => 'percentage_of_actors', 'value' => nil},
                 { 'key' => 'percentage_of_time', 'value' => nil},

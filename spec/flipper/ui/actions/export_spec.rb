@@ -40,9 +40,9 @@ RSpec.describe Flipper::UI::Actions::Features do
       expect(last_response.headers['Content-Type']).to eq('application/json')
       expect(data['version']).to eq(1)
       expect(data['features']).to eq({
-        "search"=> {"boolean"=>nil, "groups"=>["admins", "employees"], "actors"=>["User;1", "User;100"], "percentage_of_actors"=>"10", "percentage_of_time"=>"15"},
-        "plausible"=> {"boolean"=>"true", "groups"=>[], "actors"=>[], "percentage_of_actors"=>nil, "percentage_of_time"=>nil},
-        "google_analytics"=> {"boolean"=>nil, "groups"=>[], "actors"=>[], "percentage_of_actors"=>nil, "percentage_of_time"=>nil},
+        "search"=> {"boolean"=>nil, "expression"=>nil, "groups"=>["admins", "employees"], "actors"=>["User;1", "User;100"], "percentage_of_actors"=>"10", "percentage_of_time"=>"15"},
+        "plausible"=> {"boolean"=>"true", "expression"=>nil, "groups"=>[], "actors"=>[], "percentage_of_actors"=>nil, "percentage_of_time"=>nil},
+        "google_analytics"=> {"boolean"=>nil, "expression"=>nil, "groups"=>[], "actors"=>[], "percentage_of_actors"=>nil, "percentage_of_time"=>nil},
       })
     end
   end

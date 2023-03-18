@@ -25,9 +25,9 @@ RSpec.describe Flipper::Exporters::Json::V1 do
     export = subject.call(adapter)
 
     expect(export.features).to eq({
-      "google_analytics" => {actors: Set.new, boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
-      "plausible" => {actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
-      "search" => {actors: Set["User;1", "User;100"], boolean: nil, groups: Set["admins", "employees"], percentage_of_actors: "10", percentage_of_time: "15"},
+      "google_analytics" => {actors: Set.new, boolean: nil, expression: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
+      "plausible" => {actors: Set.new, boolean: "true", expression: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
+      "search" => {actors: Set["User;1", "User;100"], boolean: nil, expression: nil, groups: Set["admins", "employees"], percentage_of_actors: "10", percentage_of_time: "15"},
     })
   end
 end
