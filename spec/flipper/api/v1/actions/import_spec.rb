@@ -24,7 +24,7 @@ RSpec.describe Flipper::Api::V1::Actions::Import do
       it 'imports features' do
         expect(flipper[:search].boolean_value).to be(false)
         expect(flipper[:google_analytics].actors_value).to eq(Set["User;1"])
-        expect(flipper[:analytics].expression_value).to eq("{\"Equal\"=>[{\"Property\"=>[\"plan\"]}, {\"String\"=>[\"basic\"]}]}")
+        expect(flipper[:analytics].expression_value).to eq({"Equal"=>[{"Property"=>["plan"]}, {"String"=>["basic"]}]})
         expect(flipper.features.map(&:key)).to eq(["search", "google_analytics", "analytics"])
       end
     end

@@ -71,6 +71,8 @@ module Flipper
           normalized_value = case value
           when Array, Set
             value.to_set
+          when Hash
+            value
           else
             value ? value.to_s : value
           end

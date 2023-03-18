@@ -127,6 +127,30 @@ RSpec.describe Flipper::Typecast do
       expect(result["search"]).not_to be(hash["search"])
     end
 
+    it "converts does not convert expressions" do
+      hash = {
+        "search" => {
+          boolean: nil,
+          expression: {"Equal"=>[{"Property"=>["plan"]}, {"String"=>["basic"]}]},
+          groups: ['a', 'b'],
+          actors: ['User;1'],
+          percentage_of_actors: nil,
+          percentage_of_time: nil,
+        },
+      }
+      result = described_class.features_hash(hash)
+      expect(result).to eq({
+        "search" => {
+          boolean: nil,
+          expression: {"Equal"=>[{"Property"=>["plan"]}, {"String"=>["basic"]}]},
+          groups: Set['a', 'b'],
+          actors: Set['User;1'],
+          percentage_of_actors: nil,
+          percentage_of_time: nil,
+        },
+      })
+    end
+
     it "converts gate value arrays to sets" do
       hash = {
         "search" => {

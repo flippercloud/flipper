@@ -271,14 +271,14 @@ module Flipper
         assert @adapter.add(@flipper[:stats])
         assert @adapter.enable(@flipper[:stats], @boolean_gate, Flipper::Types::Boolean.new)
         assert @adapter.add(@flipper[:search])
+        @flipper.enable :analytics, Flipper.property(:plan).eq("pro")
 
         result = @adapter.get_all
-        assert_instance_of Hash, result
 
-        stats = result["stats"]
-        search = result["search"]
-        assert_equal @adapter.default_config.merge(boolean: 'true'), stats
-        assert_equal @adapter.default_config, search
+        assert_instance_of Hash, result
+        assert_equal @adapter.default_config.merge(boolean: 'true'), result["stats"]
+        assert_equal @adapter.default_config, result["search"]
+        assert_equal @adapter.default_config.merge(expression: {"Equal"=>[{"Property"=>["plan"]}, {"String"=>["pro"]}]}), result["analytics"]
       end
 
       def test_includes_explicitly_disabled_features_when_getting_all_features

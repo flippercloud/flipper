@@ -274,14 +274,14 @@ RSpec.shared_examples_for 'a flipper adapter' do
     expect(subject.add(flipper[:stats])).to eq(true)
     expect(subject.enable(flipper[:stats], boolean_gate, Flipper::Types::Boolean.new)).to eq(true)
     expect(subject.add(flipper[:search])).to eq(true)
+    flipper.enable :analytics, Flipper.property(:plan).eq("pro")
 
     result = subject.get_all
-    expect(result).to be_instance_of(Hash)
 
-    stats = result["stats"]
-    search = result["search"]
-    expect(stats).to eq(subject.default_config.merge(boolean: 'true'))
-    expect(search).to eq(subject.default_config)
+    expect(result).to be_instance_of(Hash)
+    expect(result["stats"]).to eq(subject.default_config.merge(boolean: 'true'))
+    expect(result["search"]).to eq(subject.default_config)
+    expect(result["analytics"]).to eq(subject.default_config.merge(expression: {"Equal"=>[{"Property"=>["plan"]}, {"String"=>["pro"]}]}))
   end
 
   it 'includes explicitly disabled features when getting all features' do
