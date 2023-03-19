@@ -23,8 +23,11 @@ module Flipper
       #
       # Returns true if gate open for thing, false if not.
       def open?(context)
-        return false if context.thing.nil?
-        context.values.actors.include?(context.thing.value)
+        return false unless context.actors?
+
+        context.actors.any? do |actor|
+          context.values.actors.include?(actor.value)
+        end
       end
 
       def wrap(thing)

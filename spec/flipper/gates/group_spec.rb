@@ -9,18 +9,17 @@ RSpec.describe Flipper::Gates::Group do
     Flipper::FeatureCheckContext.new(
       feature_name: feature_name,
       values: Flipper::GateValues.new(groups: set),
-      thing: Flipper::Types::Actor.new(Flipper::Actor.new('5'))
+      actors: [Flipper::Types::Actor.new(Flipper::Actor.new('5'))]
     )
   end
 
   describe '#open?' do
     context 'with a group in adapter, but not registered' do
       before do
-        Flipper.register(:staff) { |_thing| true }
+        Flipper.register(:staff) { |actor| true }
       end
 
       it 'ignores group' do
-        thing = Flipper::Actor.new('5')
         expect(subject.open?(context(Set[:newbs, :staff]))).to be(true)
       end
     end

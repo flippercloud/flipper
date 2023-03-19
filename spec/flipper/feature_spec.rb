@@ -32,6 +32,47 @@ RSpec.describe Flipper::Feature do
     end
   end
 
+  describe "#enabled?" do
+    context "for an actor" do
+      let(:actor) { Flipper::Actor.new("User;1") }
+
+      it 'returns true if feature is enabled' do
+        subject.enable
+        expect(subject.enabled?(actor)).to be(true)
+      end
+
+      it 'returns false if feature is disabled' do
+        subject.disable
+        expect(subject.enabled?(actor)).to be(false)
+      end
+    end
+
+    context "for multiple actors" do
+      let(:actors) {
+        [
+          Flipper::Actor.new("User;1"),
+          Flipper::Actor.new("User;2"),
+          Flipper::Actor.new("User;3"),
+        ]
+      }
+
+      it 'returns true if feature is enabled' do
+        subject.enable
+        expect(subject.enabled?(actors)).to be(true)
+      end
+
+      it 'returns true if feature is enabled for any actor' do
+        subject.enable_actor actors.first
+        expect(subject.enabled?(actors)).to be(true)
+      end
+
+      it 'returns false if feature is disabled for all actors' do
+        subject.disable
+        expect(subject.enabled?(actors)).to be(false)
+      end
+    end
+  end
+
   describe '#to_s' do
     it 'returns name as string' do
       feature = described_class.new(:search, adapter)
@@ -148,29 +189,29 @@ RSpec.describe Flipper::Feature do
     end
 
     it 'is recorded for enable' do
-      thing = Flipper::Types::Actor.new(Flipper::Actor.new('1'))
-      gate = subject.gate_for(thing)
+      actor = Flipper::Types::Actor.new(Flipper::Actor.new('1'))
+      gate = subject.gate_for(actor)
 
-      subject.enable(thing)
+      subject.enable(actor)
 
       event = instrumenter.events.last
       expect(event).not_to be_nil
       expect(event.name).to eq('feature_operation.flipper')
       expect(event.payload[:feature_name]).to eq(:search)
       expect(event.payload[:operation]).to eq(:enable)
-      expect(event.payload[:thing]).to eq(thing)
+      expect(event.payload[:thing]).to eq(actor)
       expect(event.payload[:result]).not_to be_nil
     end
 
     it 'always instruments flipper type instance for enable' do
-      thing = Flipper::Actor.new('1')
-      gate = subject.gate_for(thing)
+      actor = Flipper::Actor.new('1')
+      gate = subject.gate_for(actor)
 
-      subject.enable(thing)
+      subject.enable(actor)
 
       event = instrumenter.events.last
       expect(event).not_to be_nil
-      expect(event.payload[:thing]).to eq(Flipper::Types::Actor.new(thing))
+      expect(event.payload[:thing]).to eq(Flipper::Types::Actor.new(actor))
     end
 
     it 'is recorded for disable' do
@@ -219,15 +260,15 @@ RSpec.describe Flipper::Feature do
     end
 
     it 'always instruments flipper type instance for disable' do
-      thing = Flipper::Actor.new('1')
-      gate = subject.gate_for(thing)
+      actor = Flipper::Actor.new('1')
+      gate = subject.gate_for(actor)
 
-      subject.disable(thing)
+      subject.disable(actor)
 
       event = instrumenter.events.last
       expect(event).not_to be_nil
       expect(event.payload[:operation]).to eq(:disable)
-      expect(event.payload[:thing]).to eq(Flipper::Types::Actor.new(thing))
+      expect(event.payload[:thing]).to eq(Flipper::Types::Actor.new(actor))
     end
 
     it 'is recorded for add' do
@@ -275,17 +316,15 @@ RSpec.describe Flipper::Feature do
     end
 
     it 'is recorded for enabled?' do
-      thing = Flipper::Types::Actor.new(Flipper::Actor.new('1'))
-      gate = subject.gate_for(thing)
-
-      subject.enabled?(thing)
+      actor = Flipper::Types::Actor.new(Flipper::Actor.new('1'))
+      subject.enabled?(actor)
 
       event = instrumenter.events.last
       expect(event).not_to be_nil
       expect(event.name).to eq('feature_operation.flipper')
       expect(event.payload[:feature_name]).to eq(:search)
       expect(event.payload[:operation]).to eq(:enabled?)
-      expect(event.payload[:thing]).to eq(thing)
+      expect(event.payload[:actors]).to eq([actor])
       expect(event.payload[:result]).to eq(false)
     end
 
@@ -293,8 +332,8 @@ RSpec.describe Flipper::Feature do
     actor = Flipper::Types::Actor.new(user)
     {
       nil => nil,
-      user => actor,
-      actor => actor,
+      user => [actor],
+      actor => [actor],
     }.each do |thing, wrapped_thing|
       it "always instruments #{thing.inspect} as #{wrapped_thing.class} for enabled?" do
         subject.enabled?(thing)
@@ -302,7 +341,7 @@ RSpec.describe Flipper::Feature do
         event = instrumenter.events.last
         expect(event).not_to be_nil
         expect(event.payload[:operation]).to eq(:enabled?)
-        expect(event.payload[:thing]).to eq(wrapped_thing)
+        expect(event.payload[:actors]).to eq(wrapped_thing)
       end
     end
   end
@@ -428,10 +467,10 @@ RSpec.describe Flipper::Feature do
 
     context 'when one or more groups enabled' do
       before do
-        @staff = Flipper.register(:staff) { |_thing| true }
-        @preview_features = Flipper.register(:preview_features) { |_thing| true }
-        @not_enabled = Flipper.register(:not_enabled) { |_thing| true }
-        @disabled = Flipper.register(:disabled) { |_thing| true }
+        @staff = Flipper.register(:staff) { |actor| true }
+        @preview_features = Flipper.register(:preview_features) { |actor| true }
+        @not_enabled = Flipper.register(:not_enabled) { |actor| true }
+        @disabled = Flipper.register(:disabled) { |actor| true }
         subject.enable @staff
         subject.enable @preview_features
         subject.disable @disabled
@@ -467,10 +506,10 @@ RSpec.describe Flipper::Feature do
 
     context 'when one or more groups enabled' do
       before do
-        @staff = Flipper.register(:staff) { |_thing| true }
-        @preview_features = Flipper.register(:preview_features) { |_thing| true }
-        @not_enabled = Flipper.register(:not_enabled) { |_thing| true }
-        @disabled = Flipper.register(:disabled) { |_thing| true }
+        @staff = Flipper.register(:staff) { |actor| true }
+        @preview_features = Flipper.register(:preview_features) { |actor| true }
+        @not_enabled = Flipper.register(:not_enabled) { |actor| true }
+        @disabled = Flipper.register(:disabled) { |actor| true }
         subject.enable @staff
         subject.enable @preview_features
         subject.disable @disabled
@@ -494,10 +533,10 @@ RSpec.describe Flipper::Feature do
 
     context 'when one or more groups enabled' do
       before do
-        @staff = Flipper.register(:staff) { |_thing| true }
-        @preview_features = Flipper.register(:preview_features) { |_thing| true }
-        @not_enabled = Flipper.register(:not_enabled) { |_thing| true }
-        @disabled = Flipper.register(:disabled) { |_thing| true }
+        @staff = Flipper.register(:staff) { |actor| true }
+        @preview_features = Flipper.register(:preview_features) { |actor| true }
+        @not_enabled = Flipper.register(:not_enabled) { |actor| true }
+        @disabled = Flipper.register(:disabled) { |actor| true }
         subject.enable @staff
         subject.enable @preview_features
         subject.disable @disabled

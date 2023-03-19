@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+### Additions/Changes
+
+* Allow multiple actors for Flipper.enabled?. Improves performance of feature flags for multiple actors and simplifies code for users of flipper.
+
+### Deprecations
+
+* :thing in enabled? instrumentation payload. Use :actors instead.
+
 ## 0.27.0
 
 * Easy Import/Export (https://github.com/jnunemaker/flipper/pull/709). This has some breaking changes but only if you are using flipper internals. If you are just using Flipper.* methods, you'll be fine.

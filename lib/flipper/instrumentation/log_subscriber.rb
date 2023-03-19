@@ -10,7 +10,7 @@ module Flipper
       # Example Output
       #
       #   flipper[:search].enabled?(user)
-      #   # Flipper feature(search) enabled? false (1.2ms)  [ thing=... ]
+      #   # Flipper feature(search) enabled? false (1.2ms)  [ actors=... ]
       #
       # Returns nothing.
       def feature_operation(event)
@@ -20,10 +20,16 @@ module Flipper
         gate_name = event.payload[:gate_name]
         operation = event.payload[:operation]
         result = event.payload[:result]
-        thing = event.payload[:thing]
 
         description = "Flipper feature(#{feature_name}) #{operation} #{result.inspect}"
-        details = "thing=#{thing.inspect}"
+
+        details = if event.payload.key?(:actors)
+          "actors=#{event.payload[:actors].inspect}"
+        elsif event.payload.key?(:thing)
+          "thing=#{event.payload[:thing].inspect}"
+        else
+          ""
+        end
 
         details += " gate_name=#{gate_name}" unless gate_name.nil?
 

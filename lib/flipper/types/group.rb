@@ -16,16 +16,16 @@ module Flipper
           @block = block
           @single_argument = call_with_no_context?(@block)
         else
-          @block = ->(_thing, _context) { false }
+          @block = ->(actor, context) { false }
           @single_argument = false
         end
       end
 
-      def match?(thing, context)
+      def match?(actor, context)
         if @single_argument
-          @block.call(thing)
+          @block.call(actor)
         else
-          @block.call(thing, context)
+          @block.call(actor, context)
         end
       end
 

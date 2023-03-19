@@ -26,14 +26,16 @@ module Flipper
       SCALING_FACTOR = 1_000
       private_constant :SCALING_FACTOR
 
-      # Internal: Checks if the gate is open for a thing.
+      # Internal: Checks if the gate is open for one or more actors.
       #
-      # Returns true if gate open for thing, false if not.
+      # Returns true if gate open for any actors, false if not.
       def open?(context)
-        return false if context.thing.nil?
+        return false unless context.actors?
 
-        id = "#{context.feature_name}#{context.thing.value}"
-        Zlib.crc32(id) % (100 * SCALING_FACTOR) < context.values.percentage_of_actors * SCALING_FACTOR
+        context.actors.any? do |actor|
+          id = "#{context.feature_name}#{actor.value}"
+          Zlib.crc32(id) % (100 * SCALING_FACTOR) < context.values.percentage_of_actors * SCALING_FACTOR
+        end
       end
 
       def protects?(thing)

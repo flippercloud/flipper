@@ -5,11 +5,11 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
     described_class.new
   end
 
-  def context(percentage_of_actors_value, feature = feature_name, thing = nil)
+  def context(percentage_of_actors_value, feature = feature_name, actors = nil)
     Flipper::FeatureCheckContext.new(
       feature_name: feature,
       values: Flipper::GateValues.new(percentage_of_actors: percentage_of_actors_value),
-      thing: Flipper::Types::Actor.new(thing || Flipper::Actor.new(1))
+      actors: Array(actors) || [Flipper::Types::Actor.new(Flipper::Actor.new(1))]
     )
   end
 
@@ -20,7 +20,7 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
       let(:number_of_actors) { 10_000 }
 
       let(:actors) do
-        (1..number_of_actors).map { |n| Flipper::Actor.new(n) }
+        (1..number_of_actors).map { |n| Flipper::Types::Actor.new(Flipper::Actor.new(n)) }
       end
 
       let(:feature_one_enabled_actors) do
@@ -54,7 +54,7 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
       let(:number_of_actors) { 10_000 }
 
       let(:actors) do
-        (1..number_of_actors).map { |n| Flipper::Actor.new(n) }
+        (1..number_of_actors).map { |n| Flipper::Types::Actor.new(Flipper::Actor.new(n)) }
       end
 
       subject { described_class.new }
@@ -64,7 +64,7 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
         expected_open_count = number_of_actors * decimal
 
         open_count = actors.select do |actor|
-          context = context(percentage, :feature, actor)
+          context = context(percentage, :feature, [actor])
           subject.open?(context)
         end.size
 
