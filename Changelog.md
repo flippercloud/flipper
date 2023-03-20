@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+### Additions/Changes
+
+* Allow multiple actors for Flipper.enabled?. Improves performance of feature flags for multiple actors and simplifies code for users of flipper.
+
+### Deprecations
+
+* `:thing` in `enabled?` instrumentation payload. Use `:actors` instead.
+    ```diff
+    ActiveSupport::Notifications.subscribe('enabled?.feature_operation.flipper') do |name, start, finish, id, payload|
+    -   payload[:thing]
+    +   payload[:actors]
+    end
+    ```
+
 ## 0.27.1
 
 * Quick fix for missing require of "flipper/version" that was causing issues with some flipper-ui people.

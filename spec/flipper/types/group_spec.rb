@@ -90,7 +90,7 @@ RSpec.describe Flipper::Types::Group do
       context = Flipper::FeatureCheckContext.new(
         feature_name: :my_feature,
         values: Flipper::GateValues.new({}),
-        thing: Flipper::Types::Actor.new(Flipper::Actor.new(1))
+        actors: [Flipper::Types::Actor.new(Flipper::Actor.new('1'))]
       )
       group = Flipper.register(:group_with_context) { |actor| actor }
       yielded_actor = group.match?(admin_actor, context)
@@ -101,7 +101,7 @@ RSpec.describe Flipper::Types::Group do
       context = Flipper::FeatureCheckContext.new(
         feature_name: :my_feature,
         values: Flipper::GateValues.new({}),
-        thing: Flipper::Types::Actor.new(Flipper::Actor.new(1))
+        actors: [Flipper::Types::Actor.new(Flipper::Actor.new('1'))]
       )
       group = Flipper.register(:group_with_context) { |actor, context| [actor, context] }
       yielded_actor, yielded_context = group.match?(admin_actor, context)

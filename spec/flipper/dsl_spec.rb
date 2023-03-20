@@ -149,12 +149,12 @@ RSpec.describe Flipper::DSL do
   end
 
   describe '#actor' do
-    context 'for a thing' do
+    context 'for an actor' do
       it 'returns actor instance' do
-        thing = Flipper::Actor.new(33)
-        actor = subject.actor(thing)
-        expect(actor).to be_instance_of(Flipper::Types::Actor)
-        expect(actor.value).to eq('33')
+        actor = Flipper::Actor.new(33)
+        flipper_actor = subject.actor(actor)
+        expect(flipper_actor).to be_instance_of(Flipper::Types::Actor)
+        expect(flipper_actor.value).to eq('33')
       end
     end
 

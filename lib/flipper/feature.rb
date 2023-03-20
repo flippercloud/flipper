@@ -96,17 +96,19 @@ module Flipper
       instrument(:clear) { adapter.clear(self) }
     end
 
-    # Public: Check if a feature is enabled for a thing.
+    # Public: Check if a feature is enabled for zero or more actors.
     #
     # Returns true if enabled, false if not.
-    def enabled?(thing = nil)
-      thing = Types::Actor.wrap(thing) unless thing.nil?
+    def enabled?(*actors)
+      actors = actors.flatten.compact.map { |actor| Types::Actor.wrap(actor) }
+      actors = nil if actors.empty?
 
-      instrument(:enabled?, thing: thing) do |payload|
+      # thing is left for backwards compatibility
+      instrument(:enabled?, thing: actors&.first, actors: actors) do |payload|
         context = FeatureCheckContext.new(
           feature_name: @name,
           values: gate_values,
-          thing: thing
+          actors: actors
         )
 
         if open_gate = gates.detect { |gate| gate.open?(context) }
@@ -359,14 +361,14 @@ module Flipper
       gates_hash[name.to_sym]
     end
 
-    # Public: Find the gate that protects a thing.
+    # Public: Find the gate that protects an actor.
     #
-    # thing - The object for which you would like to find a gate
+    # actor - The object for which you would like to find a gate
     #
     # Returns a Flipper::Gate.
-    # Raises Flipper::GateNotFound if no gate found for thing
-    def gate_for(thing)
-      gates.detect { |gate| gate.protects?(thing) } || raise(GateNotFound, thing)
+    # Raises Flipper::GateNotFound if no gate found for actor
+    def gate_for(actor)
+      gates.detect { |gate| gate.protects?(actor) } || raise(GateNotFound, actor)
     end
 
     private
