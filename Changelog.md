@@ -15,6 +15,10 @@ All notable changes to this project will be documented in this file.
   * Change Flipper.percentage_of_time => Flipper::Types::PercentageOfTime.new
   * Change Flipper.time => Flipper::Types::PercentageOfTime.new
 
+## 0.27.1
+
+* Quick fix for missing require of "flipper/version" that was causing issues with some flipper-ui people.
+
 ## 0.27.0
 
 * Easy Import/Export (https://github.com/jnunemaker/flipper/pull/709). This has some breaking changes but only if you are using flipper internals. If you are just using Flipper.* methods, you'll be fine.
