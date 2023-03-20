@@ -99,8 +99,9 @@ module Flipper
     # Public: Check if a feature is enabled for zero or more actors.
     #
     # Returns true if enabled, false if not.
-    def enabled?(actors = nil)
-      actors = Array(actors).map { |actor| Types::Actor.wrap(actor) } unless actors.nil?
+    def enabled?(*actors)
+      actors = actors.flatten.compact.map { |actor| Types::Actor.wrap(actor) }
+      actors = nil if actors.empty?
 
       # thing is left for backwards compatibility
       instrument(:enabled?, thing: actors&.first, actors: actors) do |payload|
@@ -360,7 +361,7 @@ module Flipper
       gates_hash[name.to_sym]
     end
 
-    # Public: Find the gate that protects a actor.
+    # Public: Find the gate that protects an actor.
     #
     # actor - The object for which you would like to find a gate
     #
