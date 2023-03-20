@@ -9,7 +9,7 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
     Flipper::FeatureCheckContext.new(
       feature_name: feature,
       values: Flipper::GateValues.new(percentage_of_actors: percentage_of_actors_value),
-      actors: Array(actors) || [Flipper::Types::Actor.new(Flipper::Actor.new(1))]
+      actors: Array(actors) || [Flipper::Types::Actor.new(Flipper::Actor.new('1'))]
     )
   end
 
@@ -20,7 +20,7 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
       let(:number_of_actors) { 10_000 }
 
       let(:actors) do
-        (1..number_of_actors).map { |n| Flipper::Types::Actor.new(Flipper::Actor.new(n)) }
+        (1..number_of_actors).map { |n| Flipper::Types::Actor.new(Flipper::Actor.new(n.to_s)) }
       end
 
       let(:feature_one_enabled_actors) do
@@ -110,7 +110,7 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
       let(:number_of_actors) { 10_000 }
 
       let(:actors) do
-        (1..number_of_actors).map { |n| Flipper::Types::Actor.new(Flipper::Actor.new(n)) }
+        (1..number_of_actors).map { |n| Flipper::Types::Actor.new(Flipper::Actor.new(n.to_s)) }
       end
 
       subject { described_class.new }

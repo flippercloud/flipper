@@ -9,7 +9,7 @@ RSpec.describe Flipper::Gates::PercentageOfTime do
     Flipper::FeatureCheckContext.new(
       feature_name: feature,
       values: Flipper::GateValues.new(percentage_of_time: percentage_of_time_value),
-      actors: Array(actors) || [Flipper::Types::Actor.new(Flipper::Actor.new(1))]
+      actors: Array(actors) || [Flipper::Types::Actor.new(Flipper::Actor.new('1'))]
     )
   end
 
