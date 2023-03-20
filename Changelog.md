@@ -2,11 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## 0.28.0
 
 ### Additions/Changes
 
-* Allow multiple actors for Flipper.enabled?. Improves performance of feature flags for multiple actors and simplifies code for users of flipper.
+* Allow multiple actors for Flipper.enabled?. Improves performance of feature flags for multiple actors and simplifies code for users of flipper. This likely breaks things for anyone using Flipper internal classes related to actors, but that isn't likely you so you should be fine.
+  ```diff
+  - [user, user.team, user.org].any? { |actor| Flipper.enabled?(:my_feature, actor) }
+  + Flipper.enabled?(:my_feature, user, user.team, user.org)
+  ```
 
 ### Deprecations
 
