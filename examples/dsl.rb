@@ -1,7 +1,7 @@
 require 'bundler/setup'
 require 'flipper'
 
-# create a thing with an identifier
+# create an actor with an identifier
 class Person < Struct.new(:id)
   include Flipper::Identifier
 end
@@ -58,8 +58,8 @@ responds_to_flipper_id = Struct.new(:flipper_id).new(10)
 puts Flipper.actor(responds_to_flipper_id).inspect
 
 # get an instance of an actor using an object
-thing = Struct.new(:flipper_id).new(22)
-puts Flipper.actor(thing).inspect
+actor = Struct.new(:flipper_id).new(22)
+puts Flipper.actor(actor).inspect
 
 # register a top level group
 admins = Flipper.register(:admins) { |actor|

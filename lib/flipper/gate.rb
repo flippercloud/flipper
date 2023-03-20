@@ -30,7 +30,7 @@ module Flipper
       false
     end
 
-    # Internal: Check if a gate is protects a actor. Implemented in subclass.
+    # Internal: Check if a gate is protects an actor. Implemented in subclass.
     #
     # Returns true if gate protects actor, false if not.
     def protects?(actor)

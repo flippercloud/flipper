@@ -237,12 +237,12 @@ module Flipper
 
     # Public: Wraps an object as a flipper actor.
     #
-    # thing - The object that you would like to wrap.
+    # actor - The object that you would like to wrap.
     #
     # Returns an instance of Flipper::Types::Actor.
-    # Raises ArgumentError if thing does not respond to `flipper_id`.
-    def actor(thing)
-      Types::Actor.new(thing)
+    # Raises ArgumentError if actor does not respond to `flipper_id`.
+    def actor(actor)
+      Types::Actor.new(actor)
     end
 
     # Public: Shortcut for getting a percentage of time instance.
