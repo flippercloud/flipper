@@ -380,6 +380,10 @@ RSpec.describe Flipper do
       it 'returns true for truthy block values' do
         expect(feature.enabled?(flipper.actor(admin_truthy_actor))).to eq(true)
       end
+
+      it 'returns true if any actor is in enabled group' do
+        expect(feature.enabled?(dev_actor, admin_actor)).to be(true)
+      end
     end
 
     context 'for actor in disabled group' do
@@ -406,6 +410,10 @@ RSpec.describe Flipper do
     context 'for not enabled actor' do
       it 'returns false' do
         expect(feature.enabled?(clooney)).to eq(false)
+      end
+
+      it 'returns false if all actors are disabled' do
+        expect(feature.enabled?(clooney, pitt)).to be(false)
       end
 
       it 'returns true if boolean enabled' do
@@ -511,6 +519,10 @@ RSpec.describe Flipper do
 
       it 'returns false if not in enabled group' do
         expect(feature.enabled?(dev_actor)).to eq(false)
+      end
+
+      it 'retruns true if any actor is true' do
+        expect(feature.enabled?(admin_actor, dev_actor)).to eq(true)
       end
 
       it 'returns true if boolean enabled' do
