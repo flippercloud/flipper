@@ -26,34 +26,25 @@ module Flipper
           "feature" => payload[:feature_name].to_s,
           "result" => payload[:result].to_s,
         }
-        if (thing = payload[:thing])
-          dimensions["flipper_id"] = thing.value.to_s
 
+        # enabled? event shows up as actors
+        now = Time.now.utc
+        if (actors = payload[:actors])
+          dimensions["flipper_id"] = actors.first.value.to_s
+          dimensions["flipper_ids"] = actors.map { |actor| actor.value.to_s }
           event = {
             type: "enabled",
             dimensions: dimensions,
             measures: {},
-            ts: Time.now.utc,
+            ts: now,
           }
           @brow.push event
-        elsif (actors = payload[:actors])
-          now = Time.now.utc
-          actors.each do |actor|
-            dimensions["flipper_id"] = actor.value.to_s
-            event = {
-              type: "enabled",
-              dimensions: dimensions,
-              measures: {},
-              ts: now,
-            }
-            @brow.push event
-          end
         else
           event = {
             type: "enabled",
             dimensions: dimensions,
             measures: {},
-            ts: Time.now.utc,
+            ts: now,
           }
           @brow.push event
         end
