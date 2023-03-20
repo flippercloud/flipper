@@ -25,10 +25,8 @@ module Flipper
 
         details = if event.payload.key?(:actors)
           "actors=#{event.payload[:actors].inspect}"
-        elsif event.payload.key?(:thing)
-          "thing=#{event.payload[:thing].inspect}"
         else
-          ""
+          "thing=#{event.payload[:thing].inspect}"
         end
 
         details += " gate_name=#{gate_name}" unless gate_name.nil?
