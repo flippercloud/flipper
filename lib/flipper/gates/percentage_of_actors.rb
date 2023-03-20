@@ -31,11 +31,8 @@ module Flipper
       # Returns true if gate open for any actors, false if not.
       def open?(context)
         return false unless context.actors?
-
-        context.actors.any? do |actor|
-          id = "#{context.feature_name}#{actor.value}"
-          Zlib.crc32(id) % (100 * SCALING_FACTOR) < context.values.percentage_of_actors * SCALING_FACTOR
-        end
+        id = "#{context.feature_name}#{context.actors.map(&:value).sort.join}"
+        Zlib.crc32(id) % (100 * SCALING_FACTOR) < context.values.percentage_of_actors * SCALING_FACTOR
       end
 
       def protects?(thing)
