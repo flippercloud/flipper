@@ -8,28 +8,24 @@ RSpec.describe Flipper do
   let(:dev_group)   { flipper.group(:devs) }
 
   let(:admin_actor) do
-    double 'Non Flipper Thing', flipper_id: 1,  admin?: true, dev?: false
+    double 'Non Flipper Thing', flipper_id: 1,  admin?: true, dev?: false, flipper_properties: {"admin" => true, "dev" => false}
   end
   let(:dev_actor) do
-    double 'Non Flipper Thing', flipper_id: 10, admin?: false, dev?: true
+    double 'Non Flipper Thing', flipper_id: 10, admin?: false, dev?: true, flipper_properties: {"admin" => false, "dev" => true}
   end
 
   let(:admin_truthy_actor) do
-    double 'Non Flipper Thing', flipper_id: 1,  admin?: 'true-ish', dev?: false
+    double 'Non Flipper Thing', flipper_id: 1,  admin?: 'true-ish', dev?: false, flipper_properties: {"admin" => "true-ish", "dev" => false}
   end
   let(:admin_falsey_actor) do
-    double 'Non Flipper Thing', flipper_id: 1,  admin?: nil, dev?: false
+    double 'Non Flipper Thing', flipper_id: 1,  admin?: nil, dev?: false, flipper_properties: {"admin" => nil, "dev" => false}
   end
 
   let(:basic_plan_actor) do
-    double 'Non Flipper Thing', flipper_id: 1, flipper_properties: {
-      "plan" => "basic",
-    }
+    double 'Non Flipper Thing', flipper_id: 1, flipper_properties: {"plan" => "basic"}
   end
   let(:premium_plan_actor) do
-    double 'Non Flipper Thing', flipper_id: 10, flipper_properties: {
-      "plan" => "premium",
-    }
+    double 'Non Flipper Thing', flipper_id: 10, flipper_properties: {"plan" => "premium"}
   end
 
   let(:pitt)        { Flipper::Actor.new(1) }
