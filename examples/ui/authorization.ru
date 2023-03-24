@@ -1,7 +1,6 @@
 #
 # Usage:
 #   bundle exec rackup examples/ui/authorization.ru -p 9999
-#   bundle exec shotgun examples/ui/authorization.ru -p 9999
 #   http://localhost:9999/
 #
 require 'bundler/setup'

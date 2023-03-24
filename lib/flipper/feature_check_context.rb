@@ -7,13 +7,17 @@ module Flipper
     # gates for the feature.
     attr_reader :values
 
-    # Public: The thing we want to know if a feature is enabled for.
-    attr_reader :thing
+    # Public: The actors we want to know if a feature is enabled for.
+    attr_reader :actors
 
-    def initialize(feature_name:, values:, thing:)
+    def initialize(feature_name:, values:, actors:)
       @feature_name = feature_name
       @values = values
-      @thing = thing
+      @actors = actors
+    end
+
+    def actors?
+      !@actors.nil? && !@actors.empty?
     end
 
     # Public: Convenience method for groups value like Feature has.

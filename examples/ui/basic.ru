@@ -1,10 +1,7 @@
 #
 # Usage:
 #   # if you want it to not reload and be really fast
-#   bin/rackup examples/ui/basic.ru -p 9999
-#
-#   # if you want reloading
-#   bin/shotgun examples/ui/basic.ru -p 9999
+#   bundle exec rackup examples/ui/basic.ru -p 9999
 #
 #   http://localhost:9999/
 #

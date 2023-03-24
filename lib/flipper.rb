@@ -100,12 +100,12 @@ module Flipper
   #
   # name - The Symbol name of the group.
   # block - The block that should be used to determine if the group matches a
-  #         given thing.
+  #         given actor.
   #
   # Examples
   #
-  #   Flipper.register(:admins) { |thing|
-  #     thing.respond_to?(:admin?) && thing.admin?
+  #   Flipper.register(:admins) { |actor|
+  #     actor.respond_to?(:admin?) && actor.admin?
   #   }
   #
   # Returns a Flipper::Group.

@@ -9,7 +9,7 @@ RSpec.describe Flipper::Gates::Expression do
     Flipper::FeatureCheckContext.new(
       feature_name: feature_name,
       values: Flipper::GateValues.new(expression: expression),
-      thing: Flipper::Types::Actor.new(Flipper::Actor.new(1, properties))
+      actors: [Flipper::Types::Actor.new(Flipper::Actor.new(1, properties))]
     )
   end
 

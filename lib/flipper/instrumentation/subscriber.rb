@@ -45,7 +45,6 @@ module Flipper
         gate_name = @payload[:gate_name]
         operation = strip_trailing_question_mark(@payload[:operation])
         result = @payload[:result]
-        thing = @payload[:thing]
 
         update_timer "flipper.feature_operation.#{operation}"
 

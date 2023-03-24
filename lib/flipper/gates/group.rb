@@ -23,10 +23,12 @@ module Flipper
       #
       # Returns true if gate open for thing, false if not.
       def open?(context)
-        return false if context.thing.nil?
+        return false unless context.actors?
 
         context.values.groups.any? do |name|
-          Flipper.group(name).match?(context.thing, context)
+          context.actors.any? do |actor|
+            Flipper.group(name).match?(actor, context)
+          end
         end
       end
 

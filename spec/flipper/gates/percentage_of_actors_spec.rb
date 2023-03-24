@@ -5,11 +5,11 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
     described_class.new
   end
 
-  def context(percentage_of_actors_value, feature = feature_name, thing = nil)
+  def context(percentage_of_actors_value, feature = feature_name, actors = nil)
     Flipper::FeatureCheckContext.new(
       feature_name: feature,
       values: Flipper::GateValues.new(percentage_of_actors: percentage_of_actors_value),
-      thing: Flipper::Types::Actor.new(thing || Flipper::Actor.new(1))
+      actors: Array(actors) || [Flipper::Types::Actor.new(Flipper::Actor.new('1'))]
     )
   end
 
@@ -20,7 +20,7 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
       let(:number_of_actors) { 10_000 }
 
       let(:actors) do
-        (1..number_of_actors).map { |n| Flipper::Actor.new(n) }
+        (1..number_of_actors).map { |n| Flipper::Types::Actor.new(Flipper::Actor.new(n.to_s)) }
       end
 
       let(:feature_one_enabled_actors) do
@@ -48,13 +48,69 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
       end
     end
 
+    context "with an array of actors" do
+      let(:percentage) { 0.05 }
+      let(:percentage_as_integer) { percentage * 100 }
+      let(:number_of_actors) { 3_000 }
+
+      let(:user_actors) do
+        (1..number_of_actors).map { |n| Flipper::Types::Actor.new(Flipper::Actor.new("User;#{n}")) }
+      end
+
+      let(:team_actors) do
+        (1..number_of_actors).map { |n| Flipper::Types::Actor.new(Flipper::Actor.new("Team;#{n}")) }
+      end
+
+      let(:org_actors) do
+        (1..number_of_actors).map { |n| Flipper::Types::Actor.new(Flipper::Actor.new("Org;#{n}")) }
+      end
+
+      let(:actors) { user_actors + team_actors + org_actors }
+
+      let(:feature_one_enabled_actors) do
+        actors.each_slice(3).select do |group|
+          context = context(percentage_as_integer, :name_one, group)
+          subject.open?(context)
+        end.flatten
+      end
+
+      let(:feature_two_enabled_actors) do
+        actors.each_slice(3).select do |group|
+          context = context(percentage_as_integer, :name_two, group)
+          subject.open?(context)
+        end.flatten
+      end
+
+      it 'does not enable both features for same set of actors' do
+        expect(feature_one_enabled_actors).not_to eq(feature_two_enabled_actors)
+      end
+
+      it 'enables feature for accurate number of actors for each feature' do
+        margin_of_error = 0.02 * actors.size # 2 percent margin of error
+        expected_enabled_size = actors.size * percentage
+
+        [
+          feature_one_enabled_actors.size,
+          feature_two_enabled_actors.size,
+        ].each do |size|
+          expect(size).to be_within(margin_of_error).of(expected_enabled_size)
+        end
+      end
+
+      it "is consistent regardless of order of actors" do
+        actors = user_actors.first(10)
+        results = 100.times.map { |n| subject.open?(context(75, :some_feature, actors.shuffle)) }
+        expect(results.uniq).to eq([true])
+      end
+    end
+
     context 'for fractional percentage' do
       let(:decimal) { 0.001 }
       let(:percentage) { decimal * 100 }
       let(:number_of_actors) { 10_000 }
 
       let(:actors) do
-        (1..number_of_actors).map { |n| Flipper::Actor.new(n) }
+        (1..number_of_actors).map { |n| Flipper::Types::Actor.new(Flipper::Actor.new(n.to_s)) }
       end
 
       subject { described_class.new }
@@ -64,7 +120,7 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
         expected_open_count = number_of_actors * decimal
 
         open_count = actors.select do |actor|
-          context = context(percentage, :feature, actor)
+          context = context(percentage, :feature, [actor])
           subject.open?(context)
         end.size
 

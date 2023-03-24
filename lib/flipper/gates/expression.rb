@@ -28,11 +28,14 @@ module Flipper
         data = context.values.expression
         return false if data.nil? || data.empty?
         expression = Flipper::Expression.build(data)
-        result = expression.evaluate(
-          feature_name: context.feature_name,
-          properties: properties(context.thing)
-        )
-        !!result
+
+        context.actors.any? do |actor|
+          result = expression.evaluate(
+            feature_name: context.feature_name,
+            properties: properties(actor)
+          )
+          !!result
+        end
       end
 
       def protects?(thing)
