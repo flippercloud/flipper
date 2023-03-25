@@ -14,10 +14,10 @@ module Flipper
       attr_reader :name
 
       # Public
-      def initialize(source = nil)
+      def initialize(source = nil, threadsafe: true)
         @source = Typecast.features_hash(source)
         @name = :memory
-        @lock = Mutex.new
+        @lock = Mutex.new if threadsafe
         reset
       end
 
@@ -126,7 +126,7 @@ module Flipper
 
       def reset
         @pid = Process.pid
-        @lock.unlock if @lock.locked?
+        @lock&.unlock if @lock&.locked?
       end
 
       def forked?
@@ -134,8 +134,12 @@ module Flipper
       end
 
       def synchronize(&block)
-        reset if forked?
-        @lock.synchronize(&block)
+        if @lock
+          reset if forked?
+          @lock.synchronize(&block)
+        else
+          block.call
+        end
       end
     end
   end
