@@ -573,6 +573,11 @@ RSpec.describe Flipper do
       expect(feature.enabled?(admin_actor)).to be(false)
     end
 
+    it "works for true expression with no actor" do
+      feature.enable Flipper.boolean(true)
+      expect(feature.enabled?).to be(true)
+    end
+
     it "works for multiple actors" do
       feature.enable Flipper.property(:plan).eq("basic")
 
