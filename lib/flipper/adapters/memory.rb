@@ -1,6 +1,5 @@
 require "flipper/adapter"
 require "flipper/typecast"
-require 'concurrent/atomic/read_write_lock'
 
 module Flipper
   module Adapters
@@ -18,40 +17,41 @@ module Flipper
       def initialize(source = nil)
         @source = Typecast.features_hash(source)
         @name = :memory
-        @lock = Concurrent::ReadWriteLock.new
+        @lock = Mutex.new
+        reset
       end
 
       # Public: The set of known features.
       def features
-        @lock.with_read_lock { @source.keys }.to_set
+        synchronize { @source.keys }.to_set
       end
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
-        @lock.with_write_lock { @source[feature.key] ||= default_config }
+        synchronize { @source[feature.key] ||= default_config }
         true
       end
 
       # Public: Removes a feature from the set of known features and clears
       # all the values for the feature.
       def remove(feature)
-        @lock.with_write_lock { @source.delete(feature.key) }
+        synchronize { @source.delete(feature.key) }
         true
       end
 
       # Public: Clears all the gate values for a feature.
       def clear(feature)
-        @lock.with_write_lock { @source[feature.key] = default_config }
+        synchronize { @source[feature.key] = default_config }
         true
       end
 
       # Public
       def get(feature)
-        @lock.with_read_lock { @source[feature.key] } || default_config
+        synchronize { @source[feature.key] } || default_config
       end
 
       def get_multi(features)
-        @lock.with_read_lock do
+        synchronize do
           result = {}
           features.each do |feature|
             result[feature.key] = @source[feature.key] || default_config
@@ -61,12 +61,12 @@ module Flipper
       end
 
       def get_all
-        @lock.with_read_lock { Typecast.features_hash(@source) }
+        synchronize { Typecast.features_hash(@source) }
       end
 
       # Public
       def enable(feature, gate, thing)
-        @lock.with_write_lock do
+        synchronize do
           @source[feature.key] ||= default_config
 
           case gate.data_type
@@ -87,7 +87,7 @@ module Flipper
 
       # Public
       def disable(feature, gate, thing)
-        @lock.with_write_lock do
+        synchronize do
           @source[feature.key] ||= default_config
 
           case gate.data_type
@@ -118,8 +118,24 @@ module Flipper
       def import(source)
         adapter = self.class.from(source)
         get_all = Typecast.features_hash(adapter.get_all)
-        @lock.with_write_lock { @source.replace(get_all) }
+        synchronize { @source.replace(get_all) }
         true
+      end
+
+      private
+
+      def reset
+        @pid = Process.pid
+        @lock.unlock if @lock.locked?
+      end
+
+      def forked?
+        @pid != Process.pid
+      end
+
+      def synchronize(&block)
+        reset if forked?
+        @lock.synchronize(&block)
       end
     end
   end
