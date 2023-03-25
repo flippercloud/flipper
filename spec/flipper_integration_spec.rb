@@ -567,6 +567,7 @@ RSpec.describe Flipper do
     it "works" do
       feature.enable Flipper.property(:plan).eq("basic")
 
+      expect(feature.enabled?).to be(false)
       expect(feature.enabled?(basic_plan_actor)).to be(true)
       expect(feature.enabled?(premium_plan_actor)).to be(false)
       expect(feature.enabled?(admin_actor)).to be(false)

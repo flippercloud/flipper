@@ -29,6 +29,8 @@ module Flipper
         return false if data.nil? || data.empty?
         expression = Flipper::Expression.build(data)
 
+        return false if context.actors.nil?
+
         context.actors.any? do |actor|
           result = expression.evaluate(
             feature_name: context.feature_name,
