@@ -3,12 +3,8 @@ require "flipper/expression"
 module Flipper
   module Expressions
     class Time < Expression
-      def initialize(args)
-        super [args].flatten.map(&:to_s)
-      end
-
-      def evaluate(context = {})
-        ::Time.parse(evaluate_arg(0, context))
+      def call(value)
+        ::Time.parse(value)
       end
     end
   end

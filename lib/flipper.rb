@@ -81,15 +81,15 @@ module Flipper
   end
 
   def string(value)
-    Flipper::Expressions::String.new(value)
+    Flipper::Expressions::Constant.new(value)
   end
 
   def number(value)
-    Flipper::Expressions::Number.new(value)
+    Flipper::Expressions::Constant.new(value)
   end
 
   def boolean(value)
-    Flipper::Expressions::Boolean.new(value)
+    Flipper::Expressions::Constant.new(value)
   end
 
   def random(name)

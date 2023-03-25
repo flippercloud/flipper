@@ -24,14 +24,17 @@ RSpec.describe Flipper::Expressions::GreaterThanOrEqualTo do
       expect(expression.evaluate).to be(false)
     end
 
-    it "returns false with no arguments" do
-      expression = described_class.new([])
-      expect(expression.evaluate).to be(false)
+    it "returns false when value evaluates to nil" do
+      expect(described_class.new([Flipper.number(nil), 1]).evaluate).to be(false)
+      expect(described_class.new([1, Flipper.number(nil)]).evaluate).to be(false)
     end
 
-    it "returns false with one argument" do
-      expression = described_class.new([10])
-      expect(expression.evaluate).to be(false)
+    it "raises ArgumentError with no arguments" do
+      expect { described_class.new([]).evaluate }.to raise_error(ArgumentError)
+    end
+
+    it "raises ArgumentError with one argument" do
+      expect { described_class.new([10]).evaluate }.to raise_error(ArgumentError)
     end
   end
 
@@ -43,10 +46,7 @@ RSpec.describe Flipper::Expressions::GreaterThanOrEqualTo do
       ])
 
       expect(expression.value).to eq({
-        "GreaterThanOrEqualTo" => [
-          {"Number" => [20]},
-          {"Number" => [10]},
-        ],
+        "GreaterThanOrEqualTo" => [20, 10]
       })
     end
   end

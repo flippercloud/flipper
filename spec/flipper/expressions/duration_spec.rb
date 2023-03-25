@@ -1,14 +1,4 @@
 RSpec.describe Flipper::Expressions::Duration do
-  describe "#initialize" do
-    it 'initializes with scalar and unit' do
-      expect(described_class.new([10, 'second']).args).to eq([10, 'second'])
-    end
-
-    it 'defaults unit to seconds' do
-      expect(described_class.new([1]).args).to eq([1, 'second'])
-    end
-  end
-
   describe "#evaluate" do
     it "raises error with invalid value" do
       expect { described_class.new([false, 'minute']).evaluate }.to raise_error(ArgumentError)
@@ -16,6 +6,10 @@ RSpec.describe Flipper::Expressions::Duration do
 
     it "raises error with invalid unit" do
       expect { described_class.new([4, 'score']).evaluate }.to raise_error(ArgumentError)
+    end
+
+    it 'defaults unit to seconds' do
+      expect(described_class.new(10).evaluate).to eq(10)
     end
 
     it "evaluates seconds" do

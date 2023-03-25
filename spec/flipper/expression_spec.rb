@@ -5,8 +5,8 @@ RSpec.describe Flipper::Expression do
     it "can build Equal" do
       expression = Flipper::Expression.build({
         "Equal" => [
-          {"String" => ["basic"]},
-          {"String" => ["basic"]},
+          "basic",
+          "basic",
         ]
       })
 
@@ -20,8 +20,8 @@ RSpec.describe Flipper::Expression do
     it "can build GreaterThanOrEqualTo" do
       expression = Flipper::Expression.build({
         "GreaterThanOrEqualTo" => [
-          {"Number" => [2]},
-          {"Number" => [1]},
+          2,
+          1,
         ]
       })
 
@@ -35,8 +35,8 @@ RSpec.describe Flipper::Expression do
     it "can build GreaterThan" do
       expression = Flipper::Expression.build({
         "GreaterThan" => [
-          {"Number" => [2]},
-          {"Number" => [1]},
+          2,
+          1,
         ]
       })
 
@@ -50,8 +50,8 @@ RSpec.describe Flipper::Expression do
     it "can build LessThanOrEqualTo" do
       expression = Flipper::Expression.build({
         "LessThanOrEqualTo" => [
-          {"Number" => [2]},
-          {"Number" => [1]},
+          2,
+          1,
         ]
       })
 
@@ -64,10 +64,7 @@ RSpec.describe Flipper::Expression do
 
     it "can build LessThan" do
       expression = Flipper::Expression.build({
-        "LessThan" => [
-          {"Number" => [2]},
-          {"Number" => [1]},
-        ]
+        "LessThan" => [2, 1]
       })
 
       expect(expression).to be_instance_of(Flipper::Expressions::LessThan)
@@ -80,8 +77,8 @@ RSpec.describe Flipper::Expression do
     it "can build NotEqual" do
       expression = Flipper::Expression.build({
         "NotEqual" => [
-          {"String" => ["basic"]},
-          {"String" => ["plus"]},
+          "basic",
+          "plus",
         ]
       })
 
@@ -93,12 +90,10 @@ RSpec.describe Flipper::Expression do
     end
 
     it "can build Number" do
-      expression = Flipper::Expression.build({
-        "Number" => [1]
-      })
+      expression = Flipper::Expression.build(1)
 
-      expect(expression).to be_instance_of(Flipper::Expressions::Number)
-      expect(expression.args).to eq([1])
+      expect(expression).to be_instance_of(Flipper::Expressions::Constant)
+      expect(expression.value).to eq(1)
     end
 
     it "can build Percentage" do
@@ -107,14 +102,14 @@ RSpec.describe Flipper::Expression do
       })
 
       expect(expression).to be_instance_of(Flipper::Expressions::Percentage)
-      expect(expression.args).to eq([1])
+      expect(expression.args).to eq([Flipper.number(1)])
     end
 
     it "can build PercentageOfActors" do
       expression = Flipper::Expression.build({
         "PercentageOfActors" => [
-          {"String" => ["User;1"]},
-          {"Number" => [40]},
+          "User;1",
+          40,
         ]
       })
 
@@ -126,11 +121,9 @@ RSpec.describe Flipper::Expression do
     end
 
     it "can build String" do
-      expression = Flipper::Expression.build({
-        "String" => ["basic"]
-      })
+      expression = Flipper::Expression.build("basic")
 
-      expect(expression).to be_instance_of(Flipper::Expressions::String)
+      expect(expression).to be_instance_of(Flipper::Expressions::Constant)
       expect(expression.args).to eq(["basic"])
     end
 
@@ -140,24 +133,22 @@ RSpec.describe Flipper::Expression do
       })
 
       expect(expression).to be_instance_of(Flipper::Expressions::Property)
-      expect(expression.args).to eq(["flipper_id"])
+      expect(expression.args).to eq([Flipper.string("flipper_id")])
     end
   end
 
   describe "#initialize" do
     it "works with Array" do
-      expect(described_class.new([1]).args).to eq([1])
+      expect(described_class.new([1]).args).to eq([Flipper.number(1)])
     end
 
-    it "raises ArgumentError if not Array" do
+    it "casts single argument to array" do
       [
         "asdf",
         1,
-        {"foo" => "bar"},
+        {"Property" => "bar"},
       ].each do |value|
-        expect {
-          described_class.new(value)
-        }.to raise_error(ArgumentError, /args must be an Array but was #{value.inspect}/)
+        expect(described_class.new(value).args).to eq([Flipper::Expression.build(value)])
       end
     end
   end

@@ -364,9 +364,9 @@ RSpec.describe Flipper do
   end
 
   describe ".boolean" do
-    it "returns Flipper::Expressions::Boolean instance" do
-      expect(described_class.boolean(true)).to eq(Flipper::Expressions::Boolean.new(true))
-      expect(described_class.boolean(false)).to eq(Flipper::Expressions::Boolean.new(false))
+    it "returns Flipper::Expressions::Constant instance" do
+      expect(described_class.boolean(true)).to eq(Flipper::Expressions::Constant.new(true))
+      expect(described_class.boolean(false)).to eq(Flipper::Expressions::Constant.new(false))
     end
   end
 

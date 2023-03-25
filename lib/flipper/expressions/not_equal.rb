@@ -2,14 +2,9 @@ require "flipper/expression"
 
 module Flipper
   module Expressions
-    class NotEqual < Expression
-      def evaluate(context = {})
-        return false unless args[0] && args[1]
-
-        left = evaluate_arg(0, context)
-        right = evaluate_arg(1, context)
-
-        left != right
+    class NotEqual < Comparable
+      def operator
+        :!=
       end
     end
   end

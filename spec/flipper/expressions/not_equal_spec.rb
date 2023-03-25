@@ -36,9 +36,8 @@ RSpec.describe Flipper::Expressions::NotEqual do
       expect(expression.evaluate(properties: properties)).to be(false)
     end
 
-    it "only evaluates first two arguments equality" do
-      expression = described_class.new([20, 10, 20])
-      expect(expression.evaluate).to be(true)
+    it "raises ArgumentError for more arguments" do
+      expect { described_class.new([20, 10, 20]).evaluate }.to raise_error(ArgumentError)
     end
   end
 
@@ -50,10 +49,7 @@ RSpec.describe Flipper::Expressions::NotEqual do
       ])
 
       expect(expression.value).to eq({
-        "NotEqual" => [
-          {"Number" => [20]},
-          {"Number" => [10]},
-        ],
+        "NotEqual" => [20, 10]
       })
     end
   end

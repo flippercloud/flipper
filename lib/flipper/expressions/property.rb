@@ -3,15 +3,9 @@ require "flipper/expression"
 module Flipper
   module Expressions
     class Property < Expression
-      def initialize(args)
-        super Array(args)
-      end
-
-      def evaluate(context = {})
-        key = evaluate_arg(0, context)
-
+      def call(key, context:)
         if properties = context[:properties]
-          properties[key]
+          properties[key.to_s]
         else
           nil
         end

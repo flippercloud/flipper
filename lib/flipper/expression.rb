@@ -1,6 +1,6 @@
 module Flipper
   class Expression
-    def self.build(object, convert_to_values: false)
+    def self.build(object)
       return object if object.is_a?(Flipper::Expression)
 
       case object
@@ -13,14 +13,10 @@ module Flipper
           raise ArgumentError, "#{object.inspect} cannot be converted into an expression"
         end
         Expressions.const_get(type).new(args)
-      when String
-        convert_to_values ? Expressions::String.new(object.to_s) : object
+      when String, Numeric, FalseClass, TrueClass
+        Expressions::Constant.new(object)
       when Symbol
-        convert_to_values ? Expressions::String.new(object.to_s) : object.to_s
-      when Numeric
-        convert_to_values ? Expressions::Number.new(object.to_f) : object
-      when TrueClass, FalseClass
-        convert_to_values ? Expressions::Boolean.new(object) : object
+        Expressions::Constant.new(object.to_s)
       else
         raise ArgumentError, "#{object.inspect} cannot be converted into an expression"
       end
@@ -28,11 +24,17 @@ module Flipper
 
     attr_reader :args
 
-    def initialize(args)
-      unless args.is_a?(Array)
-        raise ArgumentError, "args must be an Array but was #{args.inspect}"
-      end
+    def initialize(args = [])
+      args = [args] unless args.is_a?(Array)
       @args = self.class.build(args)
+    end
+
+    def evaluate(context = {})
+      if call_with_context?
+        call(*args.map { |arg| arg.evaluate(context) }, context: context)
+      else
+        call(*args.map { |arg| arg.evaluate(context) })
+      end
     end
 
     def eql?(other)
@@ -42,9 +44,7 @@ module Flipper
 
     def value
       {
-        self.class.name.split("::").last => args.map { |arg|
-          arg.is_a?(Expression) ? arg.value : arg
-        }
+        self.class.name.split("::").last => args.map(&:value)
       }
     end
 
@@ -65,50 +65,50 @@ module Flipper
     end
 
     def equal(object)
-      Expressions::Equal.new([self, self.class.build(object, convert_to_values: true)])
+      Expressions::Equal.new([self, self.class.build(object)])
     end
     alias eq equal
 
     def not_equal(object)
-      Expressions::NotEqual.new([self, self.class.build(object, convert_to_values: true)])
+      Expressions::NotEqual.new([self, self.class.build(object)])
     end
     alias neq not_equal
 
     def greater_than(object)
-      Expressions::GreaterThan.new([self, self.class.build(object, convert_to_values: true)])
+      Expressions::GreaterThan.new([self, self.class.build(object)])
     end
     alias gt greater_than
 
     def greater_than_or_equal_to(object)
-      Expressions::GreaterThanOrEqualTo.new([self, self.class.build(object, convert_to_values: true)])
+      Expressions::GreaterThanOrEqualTo.new([self, self.class.build(object)])
     end
     alias gte greater_than_or_equal_to
     alias greater_than_or_equal greater_than_or_equal_to
 
     def less_than(object)
-      Expressions::LessThan.new([self, self.class.build(object, convert_to_values: true)])
+      Expressions::LessThan.new([self, self.class.build(object)])
     end
     alias lt less_than
 
     def less_than_or_equal_to(object)
-      Expressions::LessThanOrEqualTo.new([self, self.class.build(object, convert_to_values: true)])
+      Expressions::LessThanOrEqualTo.new([self, self.class.build(object)])
     end
     alias lte less_than_or_equal_to
     alias less_than_or_equal less_than_or_equal_to
 
     def percentage_of_actors(object)
-      Expressions::PercentageOfActors.new([self, self.class.build(object, convert_to_values: true)])
+      Expressions::PercentageOfActors.new([self, self.class.build(object)])
     end
 
     private
 
     def evaluate_arg(index, context = {})
-      object = args[index]
+      object = args[index].evaluate(context)
+    end
 
-      if object.is_a?(Flipper::Expression)
-        object.evaluate(context)
-      else
-        object
+    def call_with_context?
+      method(:call).parameters.any? do |type, name|
+        name == :context && [:key, :keyreq].include?(type)
       end
     end
   end

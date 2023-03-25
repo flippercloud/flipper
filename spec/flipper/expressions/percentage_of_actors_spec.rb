@@ -59,8 +59,8 @@ RSpec.describe Flipper::Expressions::PercentageOfActors do
 
       expect(expression.value).to eq({
         "PercentageOfActors" => [
-          {"String" => ["User;1"]},
-          {"Number" => [10]},
+          "User;1",
+          10
         ],
       })
     end

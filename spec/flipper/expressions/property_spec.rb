@@ -1,20 +1,4 @@
 RSpec.describe Flipper::Expressions::Property do
-  it "can initialize with string" do
-    expect(described_class.new("flipper_id").args).to eq(["flipper_id"])
-  end
-
-  it "can initialize with symbol" do
-    expect(described_class.new(:flipper_id).args).to eq(["flipper_id"])
-  end
-
-  it "can initialize with array of string" do
-    expect(described_class.new(["flipper_id"]).args).to eq(["flipper_id"])
-  end
-
-  it "can initialize with array of symbol" do
-    expect(described_class.new([:flipper_id]).args).to eq(["flipper_id"])
-  end
-
   describe "#evaluate" do
     it "returns value for property key" do
       expression = described_class.new("flipper_id")

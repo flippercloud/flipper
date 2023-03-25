@@ -13,14 +13,7 @@ module Flipper
         "year" => 31_556_952 # length of a gregorian year (365.2425 days)
       }.freeze
 
-      def initialize(args)
-        scalar, unit = args
-        super [scalar, unit || 'second']
-      end
-
-      def evaluate(context = {})
-        scalar = evaluate_arg(0, context)
-        unit = evaluate_arg(1, context) || 'second'
+      def call(scalar, unit = 'second', context = {})
         unit = unit.to_s.downcase.chomp("s")
 
         unless scalar.is_a?(Numeric)
