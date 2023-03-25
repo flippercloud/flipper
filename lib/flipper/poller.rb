@@ -28,7 +28,7 @@ module Flipper
       @remote_adapter = options.fetch(:remote_adapter)
       @interval = options.fetch(:interval, 10).to_f
       @last_synced_at = Concurrent::AtomicFixnum.new(0)
-      @adapter = Adapters::Memory.new
+      @adapter = Adapters::Memory.new(nil, threadsafe: true)
 
       if @interval < 1
         warn "Flipper::Cloud poll interval must be greater than or equal to 1 but was #{@interval}. Setting @interval to 1."
