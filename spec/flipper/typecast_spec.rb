@@ -131,7 +131,7 @@ RSpec.describe Flipper::Typecast do
       hash = {
         "search" => {
           boolean: nil,
-          expression: {"Equal"=>[{"Property"=>["plan"]}, {"String"=>["basic"]}]},
+          expression: {"Equal"=>[{"Property"=>["plan"]}, "basic"]},
           groups: ['a', 'b'],
           actors: ['User;1'],
           percentage_of_actors: nil,
@@ -142,7 +142,7 @@ RSpec.describe Flipper::Typecast do
       expect(result).to eq({
         "search" => {
           boolean: nil,
-          expression: {"Equal"=>[{"Property"=>["plan"]}, {"String"=>["basic"]}]},
+          expression: {"Equal"=>[{"Property"=>["plan"]}, "basic"]},
           groups: Set['a', 'b'],
           actors: Set['User;1'],
           percentage_of_actors: nil,

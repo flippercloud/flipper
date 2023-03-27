@@ -278,7 +278,7 @@ module Flipper
         assert_instance_of Hash, result
         assert_equal @adapter.default_config.merge(boolean: 'true'), result["stats"]
         assert_equal @adapter.default_config, result["search"]
-        assert_equal @adapter.default_config.merge(expression: {"Equal"=>[{"Property"=>["plan"]}, {"String"=>["pro"]}]}), result["analytics"]
+        assert_equal @adapter.default_config.merge(expression: {"Equal"=>[{"Property"=>["plan"]}, "pro"]}), result["analytics"]
       end
 
       def test_includes_explicitly_disabled_features_when_getting_all_features
