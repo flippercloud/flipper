@@ -1,5 +1,3 @@
-require "flipper/expression"
-
 module Flipper
   module Expressions
     class Percentage
