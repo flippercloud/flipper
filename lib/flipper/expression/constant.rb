@@ -13,7 +13,7 @@ module Flipper
         @value = value
       end
 
-      def evaluate(context = {})
+      def evaluate(_ = nil)
         value
       end
 
