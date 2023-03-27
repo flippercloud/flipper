@@ -359,20 +359,20 @@ RSpec.describe Flipper do
 
   describe ".property" do
     it "returns Flipper::Expressions::Property instance" do
-      expect(Flipper.property("name")).to eq(Flipper::Expressions::Property.new("name"))
+      expect(Flipper.property("name")).to eq(Flipper::Expression.build(Property: "name"))
     end
   end
 
   describe ".boolean" do
-    it "returns Flipper::Expressions::Constant instance" do
-      expect(described_class.boolean(true)).to eq(Flipper::Expressions::Constant.new(true))
-      expect(described_class.boolean(false)).to eq(Flipper::Expressions::Constant.new(false))
+    it "returns Flipper::Expression::Constant instance" do
+      expect(described_class.boolean(true)).to eq(Flipper::Expression::Constant.new(true))
+      expect(described_class.boolean(false)).to eq(Flipper::Expression::Constant.new(false))
     end
   end
 
   describe ".random" do
     it "returns Flipper::Expressions::Random instance" do
-      expect(Flipper.random(100)).to eq(Flipper::Expressions::Random.new(100))
+      expect(Flipper.random(100)).to eq(Flipper::Expression.build(Random: 100))
     end
   end
 
@@ -382,7 +382,7 @@ RSpec.describe Flipper do
 
     it "returns Flipper::Expressions::Any instance" do
       expect(Flipper.any(age_expression, plan_expression)).to eq(
-        Flipper::Expressions::Any.new([age_expression, plan_expression])
+        Flipper::Expression.build({Any: [age_expression, plan_expression]})
       )
     end
   end
@@ -393,7 +393,7 @@ RSpec.describe Flipper do
 
     it "returns Flipper::Expressions::All instance" do
       expect(Flipper.all(age_expression, plan_expression)).to eq(
-        Flipper::Expressions::All.new([age_expression, plan_expression])
+        Flipper::Expression.build({All: [age_expression, plan_expression]})
       )
     end
   end

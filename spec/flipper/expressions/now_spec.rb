@@ -1,7 +1,7 @@
 RSpec.describe Flipper::Expressions::Now do
-  describe "#evaluate" do
+  describe "#call" do
     it "returns current time" do
-      expect(described_class.new.evaluate.round).to eq(Time.now.round)
+      expect(described_class.call.round).to eq(Time.now.round)
     end
   end
 end

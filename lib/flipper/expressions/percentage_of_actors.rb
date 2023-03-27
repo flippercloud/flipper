@@ -2,10 +2,10 @@ require "flipper/expression"
 
 module Flipper
   module Expressions
-    class PercentageOfActors < Expression
+    class PercentageOfActors
       SCALING_FACTOR = 1_000
 
-      def call(text, percentage, context: {})
+      def self.call(text, percentage, context: {})
         prefix = context[:feature_name] || ""
         Zlib.crc32("#{prefix}#{text}") % (100 * SCALING_FACTOR) < percentage * SCALING_FACTOR
       end

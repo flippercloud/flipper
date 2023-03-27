@@ -3,7 +3,7 @@ require "flipper/expression"
 module Flipper
   module Expressions
     class LessThanOrEqualTo < Comparable
-      def operator
+      def self.operator
         :<=
       end
     end

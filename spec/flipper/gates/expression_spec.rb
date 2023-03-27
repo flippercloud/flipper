@@ -96,12 +96,13 @@ RSpec.describe Flipper::Gates::Expression do
   describe '#wrap' do
     it 'returns self for Flipper::Expression' do
       expression = Flipper.number(20).eq(20)
-      expect(subject.wrap(expression)).to be_instance_of(Flipper::Expressions::Equal)
+      expect(subject.wrap(expression)).to be(expression)
     end
 
     it 'returns Flipper::Expression for Hash' do
       expression = Flipper.number(20).eq(20)
-      expect(subject.wrap(expression.value)).to be_instance_of(Flipper::Expressions::Equal)
+      expect(subject.wrap(expression.value)).to be_instance_of(Flipper::Expression)
+      expect(subject.wrap(expression.value)).to eq(expression)
     end
   end
 end

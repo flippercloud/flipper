@@ -2,7 +2,7 @@ require "flipper/expression"
 
 module Flipper
   module Expressions
-    class Duration < Expression
+    class Duration
       SECONDS_PER = {
         "second" => 1,
         "minute" => 60,
@@ -13,7 +13,7 @@ module Flipper
         "year" => 31_556_952 # length of a gregorian year (365.2425 days)
       }.freeze
 
-      def call(scalar, unit = 'second')
+      def self.call(scalar, unit = 'second')
         unit = unit.to_s.downcase.chomp("s")
 
         unless scalar.is_a?(Numeric)

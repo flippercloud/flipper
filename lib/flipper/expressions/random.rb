@@ -2,8 +2,8 @@ require "flipper/expression"
 
 module Flipper
   module Expressions
-    class Random < Expression
-      def call(max = 0)
+    class Random
+      def self.call(max = 0)
         rand max
       end
     end

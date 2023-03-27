@@ -1,10 +1,8 @@
-require "flipper/expression"
-
 module Flipper
   module Expressions
-    class Time
+    class Boolean
       def self.call(value)
-        ::Time.parse(value)
+        Flipper::Typecast.to_boolean(value)
       end
     end
   end

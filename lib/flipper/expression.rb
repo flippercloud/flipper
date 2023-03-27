@@ -1,109 +1,62 @@
+require "flipper/expression/builder"
+require "flipper/expression/constant"
+
 module Flipper
   class Expression
+    include Builder
+
     def self.build(object)
-      return object if object.is_a?(Flipper::Expression)
+      return object if object.is_a?(self) || object.is_a?(Constant)
 
       case object
-      when Array
-        object.map { |o| build(o) }
       when Hash
-        type = object.keys.first
+        name = object.keys.first
         args = object.values.first
-        unless type
+        unless name
           raise ArgumentError, "#{object.inspect} cannot be converted into an expression"
         end
-        Expressions.const_get(type).new(args)
+
+        new(name, Array(args).map { |o| build(o) })
       when String, Numeric, FalseClass, TrueClass
-        Expressions::Constant.new(object)
+        Expression::Constant.new(object)
       when Symbol
-        Expressions::Constant.new(object.to_s)
+        Expression::Constant.new(object.to_s)
       else
         raise ArgumentError, "#{object.inspect} cannot be converted into an expression"
       end
     end
 
-    attr_reader :args
+    # Use #build
+    private_class_method :new
 
-    def initialize(args = [])
-      args = [args] unless args.is_a?(Array)
-      @args = self.class.build(args)
+    attr_reader :name, :function, :args
+
+    def initialize(name, args = [])
+      @name = name.to_s
+      @function = Expressions.const_get(name)
+      @args = args
     end
 
     def evaluate(context = {})
-      if call_with_context?
-        call(*args.map { |arg| arg.evaluate(context) }, context: context)
-      else
-        call(*args.map { |arg| arg.evaluate(context) })
-      end
+      kwargs = { context: (context if call_with_context?) }.compact
+      function.call(*args.map {|arg| arg.evaluate(context) }, **kwargs)
     end
 
     def eql?(other)
-      self.class.eql?(other.class) && @args == other.args
+      other.is_a?(self.class) && @function == other.function && @args == other.args
     end
     alias_method :==, :eql?
 
     def value
       {
-        self.class.name.split("::").last => args.map(&:value)
+        name => args.map(&:value)
       }
-    end
-
-    def add(*expressions)
-      any.add(*expressions)
-    end
-
-    def remove(*expressions)
-      any.remove(*expressions)
-    end
-
-    def any
-      Expressions::Any.new([self])
-    end
-
-    def all
-      Expressions::All.new([self])
-    end
-
-    def equal(object)
-      Expressions::Equal.new([self, self.class.build(object)])
-    end
-    alias eq equal
-
-    def not_equal(object)
-      Expressions::NotEqual.new([self, self.class.build(object)])
-    end
-    alias neq not_equal
-
-    def greater_than(object)
-      Expressions::GreaterThan.new([self, self.class.build(object)])
-    end
-    alias gt greater_than
-
-    def greater_than_or_equal_to(object)
-      Expressions::GreaterThanOrEqualTo.new([self, self.class.build(object)])
-    end
-    alias gte greater_than_or_equal_to
-    alias greater_than_or_equal greater_than_or_equal_to
-
-    def less_than(object)
-      Expressions::LessThan.new([self, self.class.build(object)])
-    end
-    alias lt less_than
-
-    def less_than_or_equal_to(object)
-      Expressions::LessThanOrEqualTo.new([self, self.class.build(object)])
-    end
-    alias lte less_than_or_equal_to
-    alias less_than_or_equal less_than_or_equal_to
-
-    def percentage_of_actors(object)
-      Expressions::PercentageOfActors.new([self, self.class.build(object)])
     end
 
     private
 
     def call_with_context?
-      method(:call).parameters.any? do |type, name|
+      function.method(:call).parameters.any? do |type, name|
         name == :context && [:key, :keyreq].include?(type)
       end
     end
