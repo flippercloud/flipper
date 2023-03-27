@@ -76,20 +76,24 @@ module Flipper
     Expression.build({ All: args.flatten })
   end
 
+  def constant(value)
+    Expression.build(value)
+  end
+
   def property(name)
     Expression.build({ Property: name })
   end
 
   def string(value)
-    Expression.build(value)
+    Expression.build({ String: value })
   end
 
   def number(value)
-    Expression.build(value)
+    Expression.build({ Number: value })
   end
 
   def boolean(value)
-    Expression.build(value)
+    Expression.build({ Boolean: value })
   end
 
   def random(max)

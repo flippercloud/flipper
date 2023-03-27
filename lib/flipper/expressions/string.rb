@@ -1,8 +1,8 @@
 module Flipper
   module Expressions
-    class Number
+    class String
       def self.call(value)
-        Flipper::Typecast.to_number(value)
+        value.to_s
       end
     end
   end

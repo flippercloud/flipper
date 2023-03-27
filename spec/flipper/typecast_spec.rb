@@ -56,7 +56,7 @@ RSpec.describe Flipper::Typecast do
     nil => 0,
     '' => 0,
     0 => 0,
-    0.0 => 0,
+    0.0 => 0.0,
     1 => 1,
     1.1 => 1.1,
     '0.01' => 0.01,
@@ -65,9 +65,9 @@ RSpec.describe Flipper::Typecast do
     '99' => 99,
     '99.9' => 99.9,
   }.each do |value, expected|
-    context "#to_percentage for #{value.inspect}" do
+    context "#to_number for #{value.inspect}" do
       it "returns #{expected}" do
-        expect(described_class.to_percentage(value)).to be(expected)
+        expect(described_class.to_number(value)).to be(expected)
       end
     end
   end
@@ -99,14 +99,14 @@ RSpec.describe Flipper::Typecast do
 
   it 'raises argument error for bad integer percentage' do
     expect do
-      described_class.to_percentage(['asdf'])
-    end.to raise_error(ArgumentError, %(["asdf"] cannot be converted to a percentage))
+      described_class.to_number(['asdf'])
+    end.to raise_error(ArgumentError, %(["asdf"] cannot be converted to a number))
   end
 
   it 'raises argument error for bad float percentage' do
     expect do
-      described_class.to_percentage(['asdf.0'])
-    end.to raise_error(ArgumentError, %(["asdf.0"] cannot be converted to a percentage))
+      described_class.to_number(['asdf.0'])
+    end.to raise_error(ArgumentError, %(["asdf.0"] cannot be converted to a number))
   end
 
   it 'raises argument error for set value that cannot be converted to a set' do

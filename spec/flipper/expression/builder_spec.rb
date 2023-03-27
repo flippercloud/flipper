@@ -156,7 +156,7 @@ RSpec.describe Flipper::Expression::Builder do
   end
 
   it "can convert to PercentageOfActors" do
-    expression = Flipper.string("User;1").percentage_of_actors(40)
+    expression = Flipper.constant("User;1").percentage_of_actors(40)
     expect(expression).to eq(build({ PercentageOfActors: [ "User;1", 40 ] }))
   end
 

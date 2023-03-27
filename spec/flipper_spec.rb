@@ -357,21 +357,28 @@ RSpec.describe Flipper do
     end
   end
 
+  describe ".constant" do
+    it "returns Flipper::Expression::Constant instance" do
+      expect(described_class.constant(false)).to eq(Flipper::Expression::Constant.new(false))
+      expect(described_class.constant("string")).to eq(Flipper::Expression::Constant.new("string"))
+    end
+  end
+
   describe ".property" do
-    it "returns Flipper::Expressions::Property instance" do
+    it "returns Flipper::Expressions::Property expression" do
       expect(Flipper.property("name")).to eq(Flipper::Expression.build(Property: "name"))
     end
   end
 
   describe ".boolean" do
-    it "returns Flipper::Expression::Constant instance" do
-      expect(described_class.boolean(true)).to eq(Flipper::Expression::Constant.new(true))
-      expect(described_class.boolean(false)).to eq(Flipper::Expression::Constant.new(false))
+    it "returns Flipper::Expressions::Boolean expression" do
+      expect(described_class.boolean(true)).to eq(Flipper::Expression.build(Boolean: true))
+      expect(described_class.boolean(false)).to eq(Flipper::Expression.build(Boolean: false))
     end
   end
 
   describe ".random" do
-    it "returns Flipper::Expressions::Random instance" do
+    it "returns Flipper::Expressions::Random expression" do
       expect(Flipper.random(100)).to eq(Flipper::Expression.build(Random: 100))
     end
   end

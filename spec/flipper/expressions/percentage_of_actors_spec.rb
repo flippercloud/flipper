@@ -1,5 +1,5 @@
 RSpec.describe Flipper::Expressions::PercentageOfActors do
-  describe "#evaluate" do
+  describe "#call" do
     it "returns true when string in percentage enabled" do
       expect(described_class.call("User;1", 42)).to be(true)
     end

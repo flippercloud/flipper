@@ -1,5 +1,5 @@
 RSpec.describe Flipper::Expressions::GreaterThan do
-  describe "#evaluate" do
+  describe "#call" do
     it "returns false when equal" do
       expect(described_class.call(2, 2)).to be(false)
     end

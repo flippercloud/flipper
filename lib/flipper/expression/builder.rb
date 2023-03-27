@@ -14,7 +14,7 @@ module Flipper
       end
 
       def any
-         any? ? self : Expression.build({ Any: [self] })
+        any? ? self : Expression.build({ Any: [self] })
       end
 
       def all

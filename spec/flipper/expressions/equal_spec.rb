@@ -1,5 +1,5 @@
 RSpec.describe Flipper::Expressions::Equal do
-  describe "#evaluate" do
+  describe "#call" do
     it "returns true when equal" do
       expect(described_class.call("basic", "basic")).to be(true)
     end
