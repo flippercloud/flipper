@@ -7,7 +7,7 @@ module Flipper
         "hour" => 3600,
         "day" => 86400,
         "week" => 604_800,
-        "month" => 26_29_746,  # 1/12 of a gregorian year
+        "month" => 2_629_746,  # 1/12 of a gregorian year
         "year" => 31_556_952 # length of a gregorian year (365.2425 days)
       }.freeze
 
