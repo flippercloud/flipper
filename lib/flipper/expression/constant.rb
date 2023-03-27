@@ -8,7 +8,6 @@ module Flipper
 
       attr_reader :value
 
-      # Override initialize to avoid trying to build args
       def initialize(value)
         @value = value
       end
