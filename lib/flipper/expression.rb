@@ -102,10 +102,6 @@ module Flipper
 
     private
 
-    def evaluate_arg(index, context = {})
-      object = args[index].evaluate(context)
-    end
-
     def call_with_context?
       method(:call).parameters.any? do |type, name|
         name == :context && [:key, :keyreq].include?(type)
