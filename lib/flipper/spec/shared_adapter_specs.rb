@@ -281,7 +281,7 @@ RSpec.shared_examples_for 'a flipper adapter' do
     expect(result).to be_instance_of(Hash)
     expect(result["stats"]).to eq(subject.default_config.merge(boolean: 'true'))
     expect(result["search"]).to eq(subject.default_config)
-    expect(result["analytics"]).to eq(subject.default_config.merge(expression: {"Equal"=>[{"Property"=>["plan"]}, {"String"=>["pro"]}]}))
+    expect(result["analytics"]).to eq(subject.default_config.merge(expression: {"Equal"=>[{"Property"=>["plan"]}, "pro"]}))
   end
 
   it 'includes explicitly disabled features when getting all features' do
