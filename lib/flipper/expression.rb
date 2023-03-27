@@ -38,8 +38,11 @@ module Flipper
     end
 
     def evaluate(context = {})
-      kwargs = { context: (context if call_with_context?) }.compact
-      function.call(*args.map {|arg| arg.evaluate(context) }, **kwargs)
+      if call_with_context?
+        function.call(*args.map {|arg| arg.evaluate(context) }, context: context)
+      else
+        function.call(*args.map {|arg| arg.evaluate(context) })
+      end
     end
 
     def eql?(other)
