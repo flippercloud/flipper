@@ -306,10 +306,27 @@ RSpec.describe Flipper::DSL do
   end
 
   describe '#import' do
+    context "with flipper instance" do
+      it 'delegates to adapter' do
+        destination_flipper = build_flipper
+        expect(subject.adapter).to receive(:import).with(destination_flipper)
+        subject.import(destination_flipper)
+      end
+    end
+
+    context "with flipper adapter" do
+      it 'delegates to adapter' do
+        destination_flipper = build_flipper
+        expect(subject.adapter).to receive(:import).with(destination_flipper.adapter)
+        subject.import(destination_flipper.adapter)
+      end
+    end
+  end
+
+  describe "#export" do
     it 'delegates to adapter' do
-      destination_flipper = build_flipper
-      expect(subject.adapter).to receive(:import).with(destination_flipper.adapter)
-      subject.import(destination_flipper)
+      expect(subject.export).to eq(subject.adapter.export)
+      expect(subject.export(format: :json)).to eq(subject.adapter.export(format: :json))
     end
   end
 

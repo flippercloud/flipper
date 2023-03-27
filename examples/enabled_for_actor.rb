@@ -31,5 +31,7 @@ Flipper.enable_percentage_of_actors :pro_stats, 50
 Flipper.enable_group :tweets, :admins
 Flipper.enable_actor :posts, user2
 
-pp Flipper.features.select { |feature| feature.enabled?(user1) }.map(&:name)
-pp Flipper.features.select { |feature| feature.enabled?(user2) }.map(&:name)
+pp Flipper.features.select { |feature| feature.enabled?(user1) }.map(&:name).sort
+pp Flipper.features.select { |feature| feature.enabled?(user2) }.map(&:name).sort
+pp Flipper.features.select { |feature| feature.enabled?(user1, user2) }.map(&:name).sort
+pp Flipper.features.select { |feature| feature.enabled?([user2, user1]) }.map(&:name).sort

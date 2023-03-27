@@ -35,7 +35,16 @@ module Flipper
         assert_includes @adapter.class.ancestors, Flipper::Adapter
       end
 
+      def test_knows_how_to_get_adapter_from_source
+        adapter = Flipper::Adapters::Memory.new
+        flipper = Flipper.new(adapter)
+
+        assert_includes adapter.class.from(adapter).class.ancestors, Flipper::Adapter
+        assert_includes adapter.class.from(flipper).class.ancestors, Flipper::Adapter
+      end
+
       def test_returns_correct_default_values_for_gates_if_none_are_enabled
+        assert_equal @adapter.class.default_config, @adapter.get(@feature)
         assert_equal @adapter.default_config, @adapter.get(@feature)
       end
 
@@ -262,14 +271,14 @@ module Flipper
         assert @adapter.add(@flipper[:stats])
         assert @adapter.enable(@flipper[:stats], @boolean_gate, Flipper::Types::Boolean.new)
         assert @adapter.add(@flipper[:search])
+        @flipper.enable :analytics, Flipper.property(:plan).eq("pro")
 
         result = @adapter.get_all
-        assert_instance_of Hash, result
 
-        stats = result["stats"]
-        search = result["search"]
-        assert_equal @adapter.default_config.merge(boolean: 'true'), stats
-        assert_equal @adapter.default_config, search
+        assert_instance_of Hash, result
+        assert_equal @adapter.default_config.merge(boolean: 'true'), result["stats"]
+        assert_equal @adapter.default_config, result["search"]
+        assert_equal @adapter.default_config.merge(expression: {"Equal"=>[{"Property"=>["plan"]}, {"String"=>["pro"]}]}), result["analytics"]
       end
 
       def test_includes_explicitly_disabled_features_when_getting_all_features
@@ -318,6 +327,21 @@ module Flipper
         assert_equal true, @adapter.enable(@feature, @actor_gate, Flipper::Types::Actor.new(actor))
         assert_equal true, @adapter.enable(@feature, @boolean_gate, Flipper::Types::Boolean.new(true))
         assert_equal @adapter.default_config.merge(boolean: "true"), @adapter.get(@feature)
+      end
+
+      def test_can_import_and_export
+        adapter = Flipper::Adapters::Memory.new
+        source_flipper = Flipper.new(adapter)
+        source_flipper.enable(:stats)
+        export = adapter.export
+
+        # some adapters cannot import so if they return false lets assert it
+        # didn't happen
+        if @adapter.import(export)
+          assert @flipper[:stats].enabled?
+        else
+          refute @flipper[:stats].enabled?
+        end
       end
     end
   end

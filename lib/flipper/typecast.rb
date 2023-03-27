@@ -70,5 +70,24 @@ module Flipper
         raise ArgumentError, "#{value.inspect} cannot be converted to a set"
       end
     end
+
+    def self.features_hash(source)
+      normalized_source = {}
+      (source || {}).each do |feature_key, gates|
+        normalized_source[feature_key] ||= {}
+        gates.each do |gate_key, value|
+          normalized_value = case value
+          when Array, Set
+            value.to_set
+          when Hash
+            value
+          else
+            value ? value.to_s : value
+          end
+          normalized_source[feature_key][gate_key.to_sym] = normalized_value
+        end
+      end
+      normalized_source
+    end
   end
 end

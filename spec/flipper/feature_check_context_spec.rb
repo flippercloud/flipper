@@ -1,12 +1,12 @@
 RSpec.describe Flipper::FeatureCheckContext do
   let(:feature_name) { :new_profiles }
   let(:values) { Flipper::GateValues.new({}) }
-  let(:thing) { Flipper::Actor.new('5') }
+  let(:actor) { Flipper::Actor.new('5') }
   let(:options) do
     {
       feature_name: feature_name,
       values: values,
-      thing: thing,
+      actors: [actor],
     }
   end
 
@@ -14,7 +14,7 @@ RSpec.describe Flipper::FeatureCheckContext do
     instance = described_class.new(**options)
     expect(instance.feature_name).to eq(feature_name)
     expect(instance.values).to eq(values)
-    expect(instance.thing).to eq(thing)
+    expect(instance.actors).to eq([actor])
   end
 
   it 'requires feature_name' do
@@ -31,8 +31,8 @@ RSpec.describe Flipper::FeatureCheckContext do
     end.to raise_error(ArgumentError)
   end
 
-  it 'requires thing' do
-    options.delete(:thing)
+  it 'requires actors' do
+    options.delete(:actors)
     expect do
       described_class.new(**options)
     end.to raise_error(ArgumentError)

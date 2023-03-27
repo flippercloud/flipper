@@ -1,4 +1,5 @@
 require 'flipper'
+require 'active_support/notifications'
 
 module Flipper
   module Adapters

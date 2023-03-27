@@ -31,7 +31,7 @@ RSpec.describe Flipper::Adapters::Rollout do
       feature = source_flipper[:chat]
       expected = {
         boolean: nil,
-        groups: Set.new([:admins]),
+        groups: Set.new(["admins"]),
         actors: Set.new(["1"]),
         expression: nil,
         percentage_of_actors: 20.0,

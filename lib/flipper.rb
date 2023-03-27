@@ -64,7 +64,7 @@ module Flipper
                  :enable_percentage_of_actors, :disable_percentage_of_actors,
                  :enable_percentage_of_time, :disable_percentage_of_time,
                  :features, :feature, :[], :preload, :preload_all,
-                 :adapter, :add, :exist?, :remove, :import,
+                 :adapter, :add, :exist?, :remove, :import, :export,
                  :memoize=, :memoizing?,
                  :sync, :sync_secret # For Flipper::Cloud. Will error for OSS Flipper.
 
@@ -104,12 +104,12 @@ module Flipper
   #
   # name - The Symbol name of the group.
   # block - The block that should be used to determine if the group matches a
-  #         given thing.
+  #         given actor.
   #
   # Examples
   #
-  #   Flipper.register(:admins) { |thing|
-  #     thing.respond_to?(:admin?) && thing.admin?
+  #   Flipper.register(:admins) { |actor|
+  #     actor.respond_to?(:admin?) && actor.admin?
   #   }
   #
   # Returns a Flipper::Group.
@@ -198,5 +198,6 @@ require 'flipper/types/percentage'
 require 'flipper/types/percentage_of_actors'
 require 'flipper/types/percentage_of_time'
 require 'flipper/typecast'
+require 'flipper/version'
 
 require "flipper/railtie" if defined?(Rails::Railtie)

@@ -60,7 +60,7 @@ module SpecHelpers
 
   def api_expression_invalid_response
     {
-      'code' => 6,
+      'code' => 7,
       'message' => 'The provided expression was not valid.',
       'more_info' => api_error_code_reference_url,
     }
