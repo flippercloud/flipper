@@ -13,8 +13,8 @@ RSpec.describe Flipper::Expression do
       expect(expression).to be_instance_of(Flipper::Expression)
       expect(expression.function).to be(Flipper::Expressions::Equal)
       expect(expression.args).to eq([
-        Flipper::Expression::Constant.new("basic"),
-        Flipper::Expression::Constant.new("basic"),
+        Flipper.constant("basic"),
+        Flipper.constant("basic"),
       ])
     end
 
@@ -29,8 +29,8 @@ RSpec.describe Flipper::Expression do
       expect(expression).to be_instance_of(Flipper::Expression)
       expect(expression.function).to be(Flipper::Expressions::GreaterThanOrEqualTo)
       expect(expression.args).to eq([
-        Flipper::Expression::Constant.new(2),
-        Flipper::Expression::Constant.new(1),
+        Flipper.constant(2),
+        Flipper.constant(1),
       ])
     end
 
@@ -45,8 +45,8 @@ RSpec.describe Flipper::Expression do
       expect(expression).to be_instance_of(Flipper::Expression)
       expect(expression.function).to be(Flipper::Expressions::GreaterThan)
       expect(expression.args).to eq([
-        Flipper::Expression::Constant.new(2),
-        Flipper::Expression::Constant.new(1),
+        Flipper.constant(2),
+        Flipper.constant(1),
       ])
     end
 
@@ -61,8 +61,8 @@ RSpec.describe Flipper::Expression do
       expect(expression).to be_instance_of(Flipper::Expression)
       expect(expression.function).to be(Flipper::Expressions::LessThanOrEqualTo)
       expect(expression.args).to eq([
-        Flipper::Expression::Constant.new(2),
-        Flipper::Expression::Constant.new(1),
+        Flipper.constant(2),
+        Flipper.constant(1),
       ])
     end
 
@@ -74,8 +74,8 @@ RSpec.describe Flipper::Expression do
       expect(expression).to be_instance_of(Flipper::Expression)
       expect(expression.function).to be(Flipper::Expressions::LessThan)
       expect(expression.args).to eq([
-        Flipper::Expression::Constant.new(2),
-        Flipper::Expression::Constant.new(1),
+        Flipper.constant(2),
+        Flipper.constant(1),
       ])
     end
 
@@ -90,8 +90,8 @@ RSpec.describe Flipper::Expression do
       expect(expression).to be_instance_of(Flipper::Expression)
       expect(expression.function).to be(Flipper::Expressions::NotEqual)
       expect(expression.args).to eq([
-        Flipper::Expression::Constant.new("basic"),
-        Flipper::Expression::Constant.new("plus"),
+        Flipper.constant("basic"),
+        Flipper.constant("plus"),
       ])
     end
 
@@ -109,7 +109,7 @@ RSpec.describe Flipper::Expression do
 
       expect(expression).to be_instance_of(Flipper::Expression)
       expect(expression.function).to be(Flipper::Expressions::Percentage)
-      expect(expression.args).to eq([Flipper::Expression::Constant.new(1)])
+      expect(expression.args).to eq([Flipper.constant(1)])
     end
 
     it "can build PercentageOfActors" do
@@ -123,8 +123,8 @@ RSpec.describe Flipper::Expression do
       expect(expression).to be_instance_of(Flipper::Expression)
       expect(expression.function).to be(Flipper::Expressions::PercentageOfActors)
       expect(expression.args).to eq([
-        Flipper::Expression::Constant.new("User;1"),
-        Flipper::Expression::Constant.new(40),
+        Flipper.constant("User;1"),
+        Flipper.constant(40),
       ])
     end
 
@@ -142,7 +142,7 @@ RSpec.describe Flipper::Expression do
 
       expect(expression).to be_instance_of(Flipper::Expression)
       expect(expression.function).to be(Flipper::Expressions::Property)
-      expect(expression.args).to eq([Flipper::Expression::Constant.new("flipper_id")])
+      expect(expression.args).to eq([Flipper.constant("flipper_id")])
     end
   end
 
