@@ -1,122 +1,24 @@
 RSpec.describe Flipper::Expressions::Equal do
-  it "can be built" do
-    expression = described_class.build({
-      "Equal" => [
-        {"String" => ["basic"]},
-        {"String" => ["basic"]},
-      ]
-    })
-
-    expect(expression).to be_instance_of(Flipper::Expressions::Equal)
-    expect(expression.args).to eq([
-      Flipper.string("basic"),
-      Flipper.string("basic"),
-    ])
-  end
-
-  it "can be built with primitives" do
-    expression = described_class.build({
-      "Equal" => ["basic", "basic"],
-    })
-
-    expect(expression).to be_instance_of(Flipper::Expressions::Equal)
-    expect(expression.args).to eq(["basic", "basic"])
-  end
-
-  describe "#evaluate" do
+  describe "#call" do
     it "returns true when equal" do
-      expression = described_class.new([
-        Flipper.string("basic"),
-        Flipper.string("basic"),
-      ])
-
-      expect(expression.evaluate).to be(true)
-    end
-
-    it "returns true when properties equal" do
-      expression = described_class.new([
-        Flipper.property(:first),
-        Flipper.property(:second),
-      ])
-
-      properties = {
-        "first" => "foo",
-        "second" => "foo",
-      }
-      expect(expression.evaluate(properties: properties)).to be(true)
-    end
-
-    it "works when nested" do
-      expression = described_class.new([
-        Flipper.boolean(true),
-        Flipper.all(
-          Flipper.property(:stinky).eq(true),
-          Flipper.string("admin").eq(Flipper.property(:role)),
-        ),
-      ])
-
-      properties = {
-        "stinky" => true,
-        "role" => "admin",
-      }
-      expect(expression.evaluate(properties: properties)).to be(true)
+      expect(described_class.call("basic", "basic")).to be(true)
     end
 
     it "returns false when not equal" do
-      expression = described_class.new([
-        Flipper.string("basic"),
-        Flipper.string("plus"),
-      ])
-
-      expect(expression.evaluate).to be(false)
+      expect(described_class.call("basic", "plus")).to be(false)
     end
 
-    it "returns false when properties not equal" do
-      expression = described_class.new([
-        Flipper.property(:first),
-        Flipper.property(:second),
-      ])
-
-      properties = {
-        "first" => "foo",
-        "second" => "bar",
-      }
-      expect(expression.evaluate(properties: properties)).to be(false)
+    it "returns false when value evaluates to nil" do
+      expect(described_class.call(nil, 1)).to be(false)
+      expect(described_class.call(1, nil)).to be(false)
     end
 
-    it "returns false when no args" do
-      expression = described_class.new([])
-      expect(expression.evaluate).to be(false)
+    it "raises ArgumentError with no arguments" do
+      expect { described_class.call }.to raise_error(ArgumentError)
     end
 
-    it "returns false when one arg" do
-      expression = described_class.new([Flipper.number(10)])
-      expect(expression.evaluate).to be(false)
-    end
-
-    it "only evaluates first two arguments equality" do
-      expression = described_class.new([
-        Flipper.number(20),
-        Flipper.number(20),
-        Flipper.number(30),
-      ])
-      expect(expression.evaluate).to be(true)
-    end
-  end
-
-  describe "#value" do
-    it "returns Hash" do
-      expression = described_class.new([
-        Flipper::Expressions::Property.new(["plan"]),
-        Flipper.string("basic"),
-      ])
-
-      expect(expression.value).to eq({
-        "Equal" => [
-          {"Property" => ["plan"]},
-          {"String" => ["basic"]},
-        ],
-      })
+    it "raises ArgumentError with one argument" do
+      expect { described_class.call(10) }.to raise_error(ArgumentError)
     end
   end
 end

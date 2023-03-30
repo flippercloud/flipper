@@ -2,6 +2,8 @@ RSpec.describe Flipper::Api::V1::Actions::Import do
   let(:app) { build_api(flipper) }
 
   describe 'post' do
+    let(:expression) { Flipper.property(:plan).eq("basic") }
+
     context 'succesful request' do
       before do
         flipper.enable(:search)
@@ -10,7 +12,7 @@ RSpec.describe Flipper::Api::V1::Actions::Import do
         source_flipper = build_flipper
         source_flipper.disable(:search)
         source_flipper.enable_actor(:google_analytics, Flipper::Actor.new("User;1"))
-        source_flipper.enable(:analytics, Flipper.property(:plan).eq("basic"))
+        source_flipper.enable(:analytics, expression)
 
         export = source_flipper.export
 
@@ -24,7 +26,7 @@ RSpec.describe Flipper::Api::V1::Actions::Import do
       it 'imports features' do
         expect(flipper[:search].boolean_value).to be(false)
         expect(flipper[:google_analytics].actors_value).to eq(Set["User;1"])
-        expect(flipper[:analytics].expression_value).to eq({"Equal"=>[{"Property"=>["plan"]}, {"String"=>["basic"]}]})
+        expect(flipper[:analytics].expression_value).to eq(expression.value)
         expect(flipper.features.map(&:key)).to eq(["search", "google_analytics", "analytics"])
       end
     end

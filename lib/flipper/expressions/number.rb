@@ -1,14 +1,8 @@
-require "flipper/expression"
-
 module Flipper
   module Expressions
-    class Number < Expression
-      def initialize(args)
-        super Array(args)
-      end
-
-      def evaluate(context = {})
-        evaluate_arg(0, context).to_f
+    class Number
+      def self.call(value)
+        Flipper::Typecast.to_number(value)
       end
     end
   end

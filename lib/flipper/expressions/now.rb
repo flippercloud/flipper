@@ -1,14 +1,8 @@
-require "flipper/expression"
-
 module Flipper
   module Expressions
-    class Now < Expression
-      def initialize(_ = nil)
-        super []
-      end
-
-      def evaluate(context = {})
-        ::Time.now
+    class Now
+      def self.call
+        ::Time.now.utc
       end
     end
   end

@@ -1,49 +1,43 @@
 RSpec.describe Flipper::Expressions::Duration do
-  describe "#initialize" do
-    it 'initializes with scalar and unit' do
-      expect(described_class.new([10, 'second']).args).to eq([10, 'second'])
-    end
-
-    it 'defaults unit to seconds' do
-      expect(described_class.new([1]).args).to eq([1, 'second'])
-    end
-  end
-
-  describe "#evaluate" do
+  describe "#call" do
     it "raises error with invalid value" do
-      expect { described_class.new([false, 'minute']).evaluate }.to raise_error(ArgumentError)
+      expect { described_class.call(false, 'minute') }.to raise_error(ArgumentError)
     end
 
     it "raises error with invalid unit" do
-      expect { described_class.new([4, 'score']).evaluate }.to raise_error(ArgumentError)
+      expect { described_class.call(4, 'score') }.to raise_error(ArgumentError)
+    end
+
+    it 'defaults unit to seconds' do
+      expect(described_class.call(10)).to eq(10)
     end
 
     it "evaluates seconds" do
-      expect(described_class.new([10, 'seconds']).evaluate).to eq(10)
+      expect(described_class.call(10, 'seconds')).to eq(10)
     end
 
     it "evaluates minutes" do
-      expect(described_class.new([2, 'minutes']).evaluate).to eq(120)
+      expect(described_class.call(2, 'minutes')).to eq(120)
     end
 
     it "evaluates hours" do
-      expect(described_class.new([2, 'hours']).evaluate).to eq(7200)
+      expect(described_class.call(2, 'hours')).to eq(7200)
     end
 
     it "evaluates days" do
-      expect(described_class.new([2, 'days']).evaluate).to eq(172_800)
+      expect(described_class.call(2, 'days')).to eq(172_800)
     end
 
     it "evaluates weeks" do
-      expect(described_class.new([2, 'weeks']).evaluate).to eq(1_209_600)
+      expect(described_class.call(2, 'weeks')).to eq(1_209_600)
     end
 
     it "evaluates months" do
-      expect(described_class.new([2, 'months']).evaluate).to eq(5_259_492)
+      expect(described_class.call(2, 'months')).to eq(5_259_492)
     end
 
     it "evaluates years" do
-      expect(described_class.new([2, 'years']).evaluate).to eq(63_113_904)
+      expect(described_class.call(2, 'years')).to eq(63_113_904)
     end
   end
 end

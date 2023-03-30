@@ -737,7 +737,7 @@ RSpec.describe Flipper::Feature do
         it "sets expression to Expression" do
           expression = Flipper.property(:plan).eq("basic")
           subject.add_expression(expression)
-          expect(subject.expression).to be_instance_of(Flipper::Expressions::Equal)
+          expect(subject.expression).to be_instance_of(Flipper::Expression)
           expect(subject.expression).to eq(expression)
         end
       end
@@ -746,7 +746,7 @@ RSpec.describe Flipper::Feature do
         it "sets expression to Any" do
           expression = Flipper.any(Flipper.property(:plan).eq("basic"))
           subject.add_expression(expression)
-          expect(subject.expression).to be_instance_of(Flipper::Expressions::Any)
+          expect(subject.expression).to be_instance_of(Flipper::Expression)
           expect(subject.expression).to eq(expression)
         end
       end
@@ -755,7 +755,7 @@ RSpec.describe Flipper::Feature do
         it "sets expression to All" do
           expression = Flipper.all(Flipper.property(:plan).eq("basic"))
           subject.add_expression(expression)
-          expect(subject.expression).to be_instance_of(Flipper::Expressions::All)
+          expect(subject.expression).to be_instance_of(Flipper::Expression)
           expect(subject.expression).to eq(expression)
         end
       end
@@ -772,7 +772,7 @@ RSpec.describe Flipper::Feature do
         it "changes expression to Any and adds new Expression" do
           new_expression = Flipper.property(:age).gte(21)
           subject.add_expression(new_expression)
-          expect(subject.expression).to be_instance_of(Flipper::Expressions::Any)
+          expect(subject.expression).to be_instance_of(Flipper::Expression)
           expect(subject.expression.args).to include(expression)
           expect(subject.expression.args).to include(new_expression)
         end
@@ -782,7 +782,7 @@ RSpec.describe Flipper::Feature do
         it "changes expression to Any and adds new Any" do
           new_expression = Flipper.any(Flipper.property(:age).eq(21))
           subject.add_expression new_expression
-          expect(subject.expression).to be_instance_of(Flipper::Expressions::Any)
+          expect(subject.expression).to be_instance_of(Flipper::Expression)
           expect(subject.expression.args).to include(expression)
           expect(subject.expression.args).to include(new_expression)
         end
@@ -792,7 +792,7 @@ RSpec.describe Flipper::Feature do
         it "changes expression to Any and adds new All" do
           new_expression = Flipper.all(Flipper.property(:plan).eq("basic"))
           subject.add_expression new_expression
-          expect(subject.expression).to be_instance_of(Flipper::Expressions::Any)
+          expect(subject.expression).to be_instance_of(Flipper::Expression)
           expect(subject.expression.args).to include(expression)
           expect(subject.expression.args).to include(new_expression)
         end
@@ -811,7 +811,7 @@ RSpec.describe Flipper::Feature do
         it "adds Expression to Any" do
           new_expression = Flipper.property(:age).gte(21)
           subject.add_expression(new_expression)
-          expect(subject.expression).to be_instance_of(Flipper::Expressions::Any)
+          expect(subject.expression).to be_instance_of(Flipper::Expression)
           expect(subject.expression.args).to include(condition)
           expect(subject.expression.args).to include(new_expression)
         end
@@ -821,7 +821,7 @@ RSpec.describe Flipper::Feature do
         it "adds Any to Any" do
           new_expression = Flipper.any(Flipper.property(:age).gte(21))
           subject.add_expression(new_expression)
-          expect(subject.expression).to be_instance_of(Flipper::Expressions::Any)
+          expect(subject.expression).to be_instance_of(Flipper::Expression)
           expect(subject.expression.args).to include(condition)
           expect(subject.expression.args).to include(new_expression)
         end
@@ -831,7 +831,7 @@ RSpec.describe Flipper::Feature do
         it "adds All to Any" do
           new_expression = Flipper.all(Flipper.property(:age).gte(21))
           subject.add_expression(new_expression)
-          expect(subject.expression).to be_instance_of(Flipper::Expressions::Any)
+          expect(subject.expression).to be_instance_of(Flipper::Expression)
           expect(subject.expression.args).to include(condition)
           expect(subject.expression.args).to include(new_expression)
         end
@@ -850,7 +850,7 @@ RSpec.describe Flipper::Feature do
         it "adds Expression to All" do
           new_expression = Flipper.property(:age).gte(21)
           subject.add_expression(new_expression)
-          expect(subject.expression).to be_instance_of(Flipper::Expressions::All)
+          expect(subject.expression).to be_instance_of(Flipper::Expression)
           expect(subject.expression.args).to include(condition)
           expect(subject.expression.args).to include(new_expression)
         end
@@ -860,7 +860,7 @@ RSpec.describe Flipper::Feature do
         it "adds Any to All" do
           new_expression = Flipper.any(Flipper.property(:age).gte(21))
           subject.add_expression(new_expression)
-          expect(subject.expression).to be_instance_of(Flipper::Expressions::All)
+          expect(subject.expression).to be_instance_of(Flipper::Expression)
           expect(subject.expression.args).to include(condition)
           expect(subject.expression.args).to include(new_expression)
         end
@@ -870,7 +870,7 @@ RSpec.describe Flipper::Feature do
         it "adds All to All" do
           new_expression = Flipper.all(Flipper.property(:age).gte(21))
           subject.add_expression(new_expression)
-          expect(subject.expression).to be_instance_of(Flipper::Expressions::All)
+          expect(subject.expression).to be_instance_of(Flipper::Expression)
           expect(subject.expression.args).to include(condition)
           expect(subject.expression.args).to include(new_expression)
         end

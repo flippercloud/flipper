@@ -15,8 +15,8 @@ module Flipper
       @actors = Typecast.to_set(adapter_values[:actors])
       @groups = Typecast.to_set(adapter_values[:groups])
       @expression = adapter_values[:expression]
-      @percentage_of_actors = Typecast.to_percentage(adapter_values[:percentage_of_actors])
-      @percentage_of_time = Typecast.to_percentage(adapter_values[:percentage_of_time])
+      @percentage_of_actors = Typecast.to_number(adapter_values[:percentage_of_actors])
+      @percentage_of_time = Typecast.to_number(adapter_values[:percentage_of_time])
     end
 
     def eql?(other)

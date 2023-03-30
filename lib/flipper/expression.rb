@@ -1,114 +1,66 @@
+require "flipper/expression/builder"
+require "flipper/expression/constant"
+
 module Flipper
   class Expression
-    def self.build(object, convert_to_values: false)
-      return object if object.is_a?(Flipper::Expression)
+    include Builder
+
+    def self.build(object)
+      return object if object.is_a?(self) || object.is_a?(Constant)
 
       case object
-      when Array
-        object.map { |o| build(o) }
       when Hash
-        type = object.keys.first
+        name = object.keys.first
         args = object.values.first
-        unless type
+        unless name
           raise ArgumentError, "#{object.inspect} cannot be converted into an expression"
         end
-        Expressions.const_get(type).new(args)
-      when String
-        convert_to_values ? Expressions::String.new(object.to_s) : object
+
+        new(name, Array(args).map { |o| build(o) })
+      when String, Numeric, FalseClass, TrueClass
+        Expression::Constant.new(object)
       when Symbol
-        convert_to_values ? Expressions::String.new(object.to_s) : object.to_s
-      when Numeric
-        convert_to_values ? Expressions::Number.new(object.to_f) : object
-      when TrueClass, FalseClass
-        convert_to_values ? Expressions::Boolean.new(object) : object
+        Expression::Constant.new(object.to_s)
       else
         raise ArgumentError, "#{object.inspect} cannot be converted into an expression"
       end
     end
 
-    attr_reader :args
+    # Use #build
+    private_class_method :new
 
-    def initialize(args)
-      unless args.is_a?(Array)
-        raise ArgumentError, "args must be an Array but was #{args.inspect}"
+    attr_reader :name, :function, :args
+
+    def initialize(name, args = [])
+      @name = name.to_s
+      @function = Expressions.const_get(name)
+      @args = args
+    end
+
+    def evaluate(context = {})
+      if call_with_context?
+        function.call(*args.map {|arg| arg.evaluate(context) }, context: context)
+      else
+        function.call(*args.map {|arg| arg.evaluate(context) })
       end
-      @args = self.class.build(args)
     end
 
     def eql?(other)
-      self.class.eql?(other.class) && @args == other.args
+      other.is_a?(self.class) && @function == other.function && @args == other.args
     end
     alias_method :==, :eql?
 
     def value
       {
-        self.class.name.split("::").last => args.map { |arg|
-          arg.is_a?(Expression) ? arg.value : arg
-        }
+        name => args.map(&:value)
       }
-    end
-
-    def add(*expressions)
-      any.add(*expressions)
-    end
-
-    def remove(*expressions)
-      any.remove(*expressions)
-    end
-
-    def any
-      Expressions::Any.new([self])
-    end
-
-    def all
-      Expressions::All.new([self])
-    end
-
-    def equal(object)
-      Expressions::Equal.new([self, self.class.build(object, convert_to_values: true)])
-    end
-    alias eq equal
-
-    def not_equal(object)
-      Expressions::NotEqual.new([self, self.class.build(object, convert_to_values: true)])
-    end
-    alias neq not_equal
-
-    def greater_than(object)
-      Expressions::GreaterThan.new([self, self.class.build(object, convert_to_values: true)])
-    end
-    alias gt greater_than
-
-    def greater_than_or_equal_to(object)
-      Expressions::GreaterThanOrEqualTo.new([self, self.class.build(object, convert_to_values: true)])
-    end
-    alias gte greater_than_or_equal_to
-    alias greater_than_or_equal greater_than_or_equal_to
-
-    def less_than(object)
-      Expressions::LessThan.new([self, self.class.build(object, convert_to_values: true)])
-    end
-    alias lt less_than
-
-    def less_than_or_equal_to(object)
-      Expressions::LessThanOrEqualTo.new([self, self.class.build(object, convert_to_values: true)])
-    end
-    alias lte less_than_or_equal_to
-    alias less_than_or_equal less_than_or_equal_to
-
-    def percentage_of_actors(object)
-      Expressions::PercentageOfActors.new([self, self.class.build(object, convert_to_values: true)])
     end
 
     private
 
-    def evaluate_arg(index, context = {})
-      object = args[index]
-
-      if object.is_a?(Flipper::Expression)
-        object.evaluate(context)
-      else
-        object
+    def call_with_context?
+      function.method(:call).parameters.any? do |type, name|
+        name == :context && [:key, :keyreq].include?(type)
       end
     end
   end

@@ -1,26 +1,17 @@
-require "flipper/expression"
-
 module Flipper
   module Expressions
-    class Duration < Expression
+    class Duration
       SECONDS_PER = {
         "second" => 1,
         "minute" => 60,
         "hour" => 3600,
         "day" => 86400,
         "week" => 604_800,
-        "month" => 26_29_746,  # 1/12 of a gregorian year
+        "month" => 2_629_746,  # 1/12 of a gregorian year
         "year" => 31_556_952 # length of a gregorian year (365.2425 days)
       }.freeze
 
-      def initialize(args)
-        scalar, unit = args
-        super [scalar, unit || 'second']
-      end
-
-      def evaluate(context = {})
-        scalar = evaluate_arg(0, context)
-        unit = evaluate_arg(1, context) || 'second'
+      def self.call(scalar, unit = 'second')
         unit = unit.to_s.downcase.chomp("s")
 
         unless scalar.is_a?(Numeric)

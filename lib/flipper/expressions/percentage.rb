@@ -1,19 +1,8 @@
-require "flipper/expression"
-
 module Flipper
   module Expressions
-    class Percentage < Number
-      def initialize(args)
-        super Array(args)
-      end
-
-      def evaluate(context = {})
-        value = super
-
-        value = 0 if value < 0
-        value = 100 if value > 100
-
-        value
+    class Percentage
+      def self.call(value)
+        value.to_f.clamp(0, 100)
       end
     end
   end

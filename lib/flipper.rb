@@ -69,31 +69,35 @@ module Flipper
                  :sync, :sync_secret # For Flipper::Cloud. Will error for OSS Flipper.
 
   def any(*args)
-    Flipper::Expressions::Any.new(args)
+    Expression.build({ Any: args.flatten })
   end
 
   def all(*args)
-    Flipper::Expressions::All.new(args)
+    Expression.build({ All: args.flatten })
+  end
+
+  def constant(value)
+    Expression.build(value)
   end
 
   def property(name)
-    Flipper::Expressions::Property.new(name)
+    Expression.build({ Property: name })
   end
 
   def string(value)
-    Flipper::Expressions::String.new(value)
+    Expression.build({ String: value })
   end
 
   def number(value)
-    Flipper::Expressions::Number.new(value)
+    Expression.build({ Number: value })
   end
 
   def boolean(value)
-    Flipper::Expressions::Boolean.new(value)
+    Expression.build({ Boolean: value })
   end
 
-  def random(name)
-    Flipper::Expressions::Random.new(name)
+  def random(max)
+    Expression.build({ Random: max })
   end
 
   # Public: Use this to register a group by name.
