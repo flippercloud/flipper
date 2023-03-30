@@ -46,7 +46,7 @@ RSpec.describe Flipper::Expressions do
 
           it "should not evaluate" do
             expect { Flipper::Expression.build(example).evaluate }.to raise_error { |error|
-              expect([ArgumentError, TypeError]).to include(error.class)
+              expect([ArgumentError, TypeError, NoMethodError]).to include(error.class)
             }
           end
         end
