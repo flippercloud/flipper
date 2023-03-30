@@ -22,6 +22,9 @@ guard 'rspec', rspec_options do
   watch(/shared_adapter_specs\.rb$/) { 'spec' }
   watch('spec/helper.rb') { 'spec' }
 
+  watch(%r{lib/flipper/expressions}) { 'spec/flipper/expressions_schema_spec.rb' }
+  watch(%r{node_modules/@flippercloud.io/expressions}) { 'spec/flipper/expressions_schema_spec.rb' }
+
   # To run all specs on every change... (useful with focus and fit)
   # watch(%r{.*}) { 'spec' }
 end

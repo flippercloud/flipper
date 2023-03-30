@@ -23,6 +23,7 @@ gem 'stackprof'
 gem 'benchmark-ips'
 gem 'stackprof-webnav'
 gem 'flamegraph'
+gem "json_schemer", "~> 0.2.24"
 
 group(:guard) do
   gem 'guard', '~> 2.15'

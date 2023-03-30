@@ -10,13 +10,15 @@ module Flipper
 
       case object
       when Hash
-        name = object.keys.first
-        args = object.values.first
-        unless name
+        if(object.keys.size != 1)
           raise ArgumentError, "#{object.inspect} cannot be converted into an expression"
         end
 
-        new(name, Array(args).map { |o| build(o) })
+        name = object.keys.first
+        args = object.values.first
+        args = [args] unless args.is_a?(Array)
+
+        new(name, args.map { |o| build(o) })
       when String, Numeric, FalseClass, TrueClass
         Expression::Constant.new(object)
       when Symbol

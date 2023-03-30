@@ -1,0 +1,5 @@
+{
+  "devDependencies": {
+    "@flippercloud.io/expressions": "https://github.com/fewerandfaster/expressions.js"
+  }
+}
