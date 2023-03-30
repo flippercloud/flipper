@@ -1,7 +1,7 @@
 require 'json_schemer'
 
 RSpec.describe Flipper::Expressions do
-  EXPRESSION_JS_PATH = File.expand_path('../../node_modules/@flippercloud.io/expressions', __dir__)
+  EXPRESSION_JS_PATH = File.expand_path('../../packages/expressions', __dir__)
 
   SCHEMAS = Hash[Dir.glob(File.join(EXPRESSION_JS_PATH, 'schemas/*.json')).map do |path|
     [File.basename(path), JSON.parse(File.read(path))]

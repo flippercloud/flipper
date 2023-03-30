@@ -1,0 +1,7 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://www.flippercloud.io/expressions/GreaterThan.schema.json",
+  "title": "GreaterThan",
+  "description": "Compare if the first argument is > the second argument.",
+  "$ref": "schema.json#/$defs/comparison"
+}

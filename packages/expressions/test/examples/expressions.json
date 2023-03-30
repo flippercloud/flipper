@@ -1,0 +1,29 @@
+{
+  "valid": [
+    {
+      "expression": "string",
+      "result": { "enum": ["string"] }
+    },
+    {
+      "expression": true,
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": false,
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": 1,
+      "result": { "enum": [1] }
+    },
+    {
+      "expression": 1.1,
+      "result": { "enum": [1.1] }
+    }
+  ],
+  "invalid": [
+    null,
+    {},
+    []
+  ]
+}

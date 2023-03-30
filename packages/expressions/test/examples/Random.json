@@ -1,0 +1,25 @@
+{
+  "valid": [
+    {
+      "expression":  { "Random": [] },
+      "result": { "type": "float", "minimum": 0, "maximum": 1 }
+    },
+    {
+      "expression":  { "Random": 2 },
+      "result": { "type": "integer", "minimum": 0, "maximum": 1 }
+    },
+    {
+      "expression":  { "Random": [100] },
+      "result": { "type": "integer", "minimum": 0, "maximum": 99 }
+    },
+    {
+      "expression":  { "Random": [{ "Property": "max_rand" }] },
+      "context": { "properties": { "max_rand": 50 }},
+      "result": { "type": "integer", "minimum": 0, "maximum": 49 }
+    }
+  ],
+  "invalid": [
+    { "Random": null },
+    { "Random": [1, 2] }
+  ]
+}

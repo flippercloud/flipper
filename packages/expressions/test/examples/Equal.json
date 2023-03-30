@@ -1,0 +1,36 @@
+{
+  "valid": [
+    {
+      "expression": { "Equal": [1, 1] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "Equal": ["a", "a"] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "Equal": [1, 2] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "Equal": ["a", "b"] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "Equal": [true, false] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "Equal": [{ "Property": "age" }, 21] },
+      "context": { "properties": { "age": 21 }},
+      "result": { "enum": [true] }
+    }
+  ],
+  "invalid": [
+    { "Equal": [1, 2, 3] },
+    { "Equal": [1] },
+    { "Equal": 1 },
+    { "Equal": null },
+    { "Equal": [1, 2], "Any": [] }
+  ]
+}

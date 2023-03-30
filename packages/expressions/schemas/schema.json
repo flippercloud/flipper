@@ -1,0 +1,69 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://www.flippercloud.io/expressions/schema.json",
+  "title": "Flipper Expressions",
+  "description": "TODO",
+  "$ref": "#/$defs/expression",
+  "$defs": {
+    "expression": {
+      "oneOf": [
+        { "$ref": "#/$defs/function" },
+        { "type": "string" },
+        { "type": "boolean" },
+        { "type": "number" }
+      ]
+    },
+    "string": {
+      "oneOf": [
+        { "$ref": "#/$defs/function" },
+        { "type": "string" }
+      ]
+    },
+    "number": {
+      "oneOf": [
+        { "$ref": "#/$defs/function" },
+        { "type": "number" }
+      ]
+    },
+    "argument": {
+      "$comment": "Allow a single expression or an array with a single expression",
+      "oneOf": [
+        { "$ref": "#/$defs/expression" },
+        { "type": "array", "items": { "$ref": "#/$defs/expression" }, "maxItems": 1 }
+      ]
+    },
+    "comparison": {
+      "$comment": "An array with exactly two expressions",
+      "type": "array",
+      "items": { "$ref": "#/$defs/expression" },
+      "maxItems": 2,
+      "minItems": 2
+    },
+    "function": {
+      "type": "object",
+      "maxProperties": 1,
+      "minProperties": 1,
+      "properties": {
+        "All": { "$ref": "All.schema.json" },
+        "Any": { "$ref": "Any.schema.json" },
+        "Boolean": { "$ref": "Boolean.schema.json" },
+        "Duration": { "$ref": "Duration.schema.json" },
+        "Equal": { "$ref": "Equal.schema.json" },
+        "GreaterThan": { "$ref": "GreaterThan.schema.json" },
+        "GreaterThanOrEqualTo": { "$ref": "GreaterThanOrEqualTo.schema.json" },
+        "LessThan": { "$ref": "LessThan.schema.json" },
+        "LessThanOrEqualTo": { "$ref": "LessThanOrEqualTo.schema.json" },
+        "NotEqual": { "$ref": "NotEqual.schema.json" },
+        "Now": { "$ref": "Now.schema.json" },
+        "Number": { "$ref": "Number.schema.json" },
+        "Percentage": { "$ref": "Percentage.schema.json" },
+        "PercentageOfActors": { "$ref": "PercentageOfActors.schema.json" },
+        "Property": { "$ref": "Property.schema.json" },
+        "Random": { "$ref": "Random.schema.json" },
+        "String": { "$ref": "String.schema.json" },
+        "Time": { "$ref": "Time.schema.json" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

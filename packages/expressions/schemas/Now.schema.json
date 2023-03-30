@@ -1,0 +1,8 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://www.flippercloud.io/expressions/Now.schema.json",
+  "title": "Now",
+  "description": "The current time in UTC",
+  "type": "array",
+  "maxItems": 0
+}

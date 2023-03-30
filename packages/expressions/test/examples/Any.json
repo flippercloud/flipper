@@ -1,0 +1,41 @@
+{
+  "valid": [
+    {
+      "expression": { "Any": [] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "Any": [true] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "Any": [true, false] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "Any": [false, false] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "Any": [1, true, "string"] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "Any": true },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "Any": false },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "Any": [{ "Boolean": false }, { "Property": "admin" }] },
+      "context": { "properties": { "admin": true } },
+      "result": { "enum": [true] }
+    }
+  ],
+  "invalid": [
+    { "Any": null },
+    { "Any": [], "All": [] }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "valid": [
+    {
+      "expression": { "LessThanOrEqualTo": [1, 1] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "LessThanOrEqualTo": [2, 1] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "LessThanOrEqualTo": ["a", "b"] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "LessThanOrEqualTo": ["b", "b"] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "LessThanOrEqualTo": [1, 2] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "LessThanOrEqualTo": ["b", "a"] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "LessThanOrEqualTo": [{ "Property": "age" }, 21] },
+      "context": { "properties": { "age": 21 }},
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "LessThanOrEqualTo": [{ "Property": "age" }, 18] },
+      "context": { "properties": { "age": 21 }},
+      "result": { "enum": [false] }
+    }
+  ],
+  "invalid": [
+    { "LessThanOrEqualTo": [1, 2, 3] },
+    { "LessThanOrEqualTo": [1] },
+    { "LessThanOrEqualTo": 1 },
+    { "LessThanOrEqualTo": null },
+    { "LessThanOrEqualTo": [1, 2], "Any": [] }
+  ]
+}

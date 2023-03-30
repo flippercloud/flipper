@@ -1,0 +1,7 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://www.flippercloud.io/expressions/Boolean.schema.json",
+  "title": "Boolean",
+  "description": "Cast a value to a boolean.",
+  "$ref": "schema.json#/$defs/argument"
+}

@@ -1,0 +1,45 @@
+{
+  "valid": [
+    {
+      "expression": { "LessThan": [1, 1] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "LessThan": ["a", "a"] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "LessThan": [2, 1] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "LessThan": [1, 2] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "LessThan": ["b", "a"] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "LessThan": ["a", "b"] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "LessThan": [{ "Property": "age" }, 18] },
+      "context": { "properties": { "age": 17 }},
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "LessThan": [{ "Property": "age" }, 18] },
+      "context": { "properties": { "age": 21 }},
+      "result": { "enum": [false] }
+    }
+  ],
+  "invalid": [
+    { "LessThan": [1, 2, 3] },
+    { "LessThan": [1] },
+    { "LessThan": 1 },
+    { "LessThan": null },
+    { "LessThan": [1, 2], "Any": [] }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "valid": [
+    {
+      "expression": { "GreaterThanOrEqualTo": [1, 1] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "GreaterThanOrEqualTo": [2, 1] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "GreaterThanOrEqualTo": ["a", "b"] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "GreaterThanOrEqualTo": ["b", "b"] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "GreaterThanOrEqualTo": [1, 2] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "GreaterThanOrEqualTo": ["b", "a"] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "GreaterThanOrEqualTo": ["a", "b"] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "GreaterThanOrEqualTo": [true, false] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "GreaterThanOrEqualTo": [{ "Property": "age" }, 18] },
+      "context": { "properties": { "age": 21 }},
+      "result": { "enum": [true] }
+    }
+  ],
+  "invalid": [
+    { "GreaterThanOrEqualTo": [1, 2, 3] },
+    { "GreaterThanOrEqualTo": [1] },
+    { "GreaterThanOrEqualTo": 1 },
+    { "GreaterThanOrEqualTo": null },
+    { "GreaterThanOrEqualTo": [1, 2], "Any": [] }
+  ]
+}

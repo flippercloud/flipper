@@ -1,0 +1,34 @@
+{
+  "valid": [
+    {
+      "expression": { "Percentage": [0] },
+      "result": { "enum": [0] }
+    },
+    {
+      "expression": { "Percentage": [99.999] },
+      "result": { "enum": [99.999] }
+    },
+    {
+      "expression": { "Percentage": [100] },
+      "result": { "enum": [100] }
+    },
+    {
+      "expression": { "Percentage": [{ "Property": ["nines"] }] },
+      "context": { "properties": { "nines": 99.99 } },
+      "result": { "enum": [99.99] }
+    },
+    {
+      "expression": { "Percentage": [-1] },
+      "result": { "enum": [0] }
+    },
+    {
+      "expression": { "Percentage": [101] },
+      "result": { "enum": [100] }
+    }
+  ],
+  "invalid": [
+    { "Percentage": [1, 2] },
+    { "Percentage": [null] },
+    { "Percentage": null }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "valid": [
+    {
+      "expression": { "Duration": [2, "seconds"] },
+      "result": { "enum": [2] }
+    },
+    {
+      "expression": { "Duration": [2, "minutes"] },
+      "result": { "enum": [120] }
+    },
+    {
+      "expression": { "Duration": [2, "hours"] },
+      "result": { "enum": [7200] }
+    },
+    {
+      "expression": { "Duration": [2, "days"] },
+      "result": { "enum": [172800] }
+    },
+    {
+      "expression": { "Duration": [2, "weeks"] },
+      "result": { "enum": [1209600] }
+    },
+    {
+      "expression": { "Duration": [2, "months"] },
+      "result": { "enum": [5259492] }
+    },
+    {
+      "expression": { "Duration": [2, "years"] },
+      "result": { "enum": [63113904] }
+    }
+  ],
+  "invalid": [
+    { "Duration": 2 },
+    { "Duration": [2] },
+    { "Duration": [4, "score"] }
+  ]
+}
