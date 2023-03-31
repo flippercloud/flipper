@@ -1,0 +1,32 @@
+{
+  "valid": [
+    {
+      "expression": { "Max": [] },
+      "result": { "enum": [null] }
+    },
+    {
+      "expression": { "Max": [3, 2, 1] },
+      "result": { "enum": [3] }
+    },
+    {
+      "expression": { "Max": [0.1, 0.2] },
+      "result": { "enum": [0.2] }
+    },
+    {
+      "expression": { "Max": ["a", "b"] },
+      "result": { "enum": ["b"] }
+    },
+    {
+      "expression": { "Max": 100 },
+      "result": { "enum": [100] }
+    },
+    {
+      "expression": { "Max": [{ "Number": "2" }, { "Number": "1" }] },
+      "result": { "enum": [2] }
+    }
+  ],
+  "invalid": [
+    { "Max": null },
+    { "Max": [], "Any": [] }
+  ]
+}

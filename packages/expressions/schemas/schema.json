@@ -29,6 +29,8 @@
         "GreaterThanOrEqualTo": { "$ref": "GreaterThanOrEqualTo.schema.json" },
         "LessThan": { "$ref": "LessThan.schema.json" },
         "LessThanOrEqualTo": { "$ref": "LessThanOrEqualTo.schema.json" },
+        "Max": { "$ref": "Max.schema.json" },
+        "Min": { "$ref": "Min.schema.json" },
         "NotEqual": { "$ref": "NotEqual.schema.json" },
         "Now": { "$ref": "Now.schema.json" },
         "Number": { "$ref": "Number.schema.json" },

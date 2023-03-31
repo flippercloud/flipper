@@ -1,0 +1,32 @@
+{
+  "valid": [
+    {
+      "expression": { "Min": [] },
+      "result": { "enum": [null] }
+    },
+    {
+      "expression": { "Min": [3, 2, 1] },
+      "result": { "enum": [1] }
+    },
+    {
+      "expression": { "Min": [0.1, 0.2] },
+      "result": { "enum": [0.1] }
+    },
+    {
+      "expression": { "Min": ["a", "b"] },
+      "result": { "enum": ["a"] }
+    },
+    {
+      "expression": { "Min": 100 },
+      "result": { "enum": [100] }
+    },
+    {
+      "expression": { "Min": [{ "Number": "2" }, { "Number": "1" }] },
+      "result": { "enum": [1] }
+    }
+  ],
+  "invalid": [
+    { "Min": null },
+    { "Min": [], "Any": [] }
+  ]
+}
