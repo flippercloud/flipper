@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest'
 import { validator } from '../lib'
-import examples from './examples'
+import examples from '../examples'
 
 const expressionsValidator = validator()
 

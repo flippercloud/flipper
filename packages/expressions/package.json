@@ -5,7 +5,8 @@
   "type": "module",
   "files": [
     "dist",
-    "schemas"
+    "schemas",
+    "examples"
   ],
   "main": "./dist/expressions.umd.cjs",
   "module": "./dist/expressions.js",

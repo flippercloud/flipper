@@ -1,13 +1,11 @@
 require 'json_schemer'
 
 RSpec.describe Flipper::Expressions do
-  EXPRESSION_JS_PATH = File.expand_path('../../packages/expressions', __dir__)
+  PATH = Pathname.new(File.expand_path('../../packages/expressions', __dir__))
 
-  SCHEMAS = Hash[Dir.glob(File.join(EXPRESSION_JS_PATH, 'schemas/*.json')).map do |path|
+  SCHEMAS = Hash[PATH.glob('schemas/*.json').map do |path|
     [File.basename(path), JSON.parse(File.read(path))]
   end]
-
-  EXAMPLES = Dir.glob(File.join(EXPRESSION_JS_PATH, 'test/examples/*.json'))
 
   let(:schema) do
     JSONSchemer.schema(SCHEMAS["schema.json"], ref_resolver: lambda {|url|
@@ -15,7 +13,7 @@ RSpec.describe Flipper::Expressions do
     })
   end
 
-  EXAMPLES.each do |path|
+  PATH.glob('examples/*.json').each do |path|
     describe(File.basename(path, '.json')) do
       examples = JSON.parse(File.read(path))
       examples["valid"].each do |example|
