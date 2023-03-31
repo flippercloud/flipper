@@ -1,7 +1,7 @@
 name: CI
 on: [push, pull_request]
 jobs:
-  test:
+  ruby:
     name: Test on ruby ${{ matrix.ruby }} and rails ${{ matrix.rails }}
     runs-on: ubuntu-latest
     services:
@@ -62,3 +62,18 @@ jobs:
           bundler-cache: true # 'bundle install' and cache gems
       - name: Run Rake with Rails ${{ matrix.rails }}
         run: bundle exec rake
+  js:
+    name: JS
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          cache: 'yarn'
+          cache-dependency-path: packages/expressions/yarn.lock
+      - name: Run yarn lint + test
+        run: |
+          cd packages/expressions
+          yarn install
+          yarn lint
+          yarn test
