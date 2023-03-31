@@ -2,7 +2,7 @@
 
 > A schema for Flipper Expressions
 
-The structure for flipper Expressions is defined in `[`schemas/schema.json`](./schemas/schema.json) using [JSON Schema](https://json-schema.org) ([draft-07](https://json-schema.org/specification-links.html#draft-7)).
+The structure for flipper Expressions is defined in [`schemas/schema.json`](./schemas/schema.json) using [JSON Schema](https://json-schema.org) ([draft-07](https://json-schema.org/specification-links.html#draft-7)).
 
 To learn more about JSON Schema, read [Understanding JSON Schema](https://json-schema.org/understanding-json-schema/) or the [Ajv JSON schema validator docs](https://ajv.js.org/json-schema.html).
 
