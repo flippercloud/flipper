@@ -6,6 +6,7 @@
   "$ref": "#/$defs/expression",
   "$defs": {
     "expression": {
+      "description": "An expression can be a function or a constant (string, boolean, or number)",
       "oneOf": [
         { "$ref": "#/$defs/function" },
         { "type": "string" },
@@ -13,33 +14,8 @@
         { "type": "number" }
       ]
     },
-    "string": {
-      "oneOf": [
-        { "$ref": "#/$defs/function" },
-        { "type": "string" }
-      ]
-    },
-    "number": {
-      "oneOf": [
-        { "$ref": "#/$defs/function" },
-        { "type": "number" }
-      ]
-    },
-    "argument": {
-      "$comment": "Allow a single expression or an array with a single expression",
-      "oneOf": [
-        { "$ref": "#/$defs/expression" },
-        { "type": "array", "items": { "$ref": "#/$defs/expression" }, "maxItems": 1 }
-      ]
-    },
-    "comparison": {
-      "$comment": "An array with exactly two expressions",
-      "type": "array",
-      "items": { "$ref": "#/$defs/expression" },
-      "maxItems": 2,
-      "minItems": 2
-    },
     "function": {
+      "description": "A function is an object with a single property that is the name of the function and the value is the arguments to the function",
       "type": "object",
       "maxProperties": 1,
       "minProperties": 1,
@@ -64,6 +40,41 @@
         "Time": { "$ref": "Time.schema.json" }
       },
       "additionalProperties": false
+    },
+    "string": {
+      "description": "A constant string value or a function that returns a string",
+      "oneOf": [
+        { "$ref": "#/$defs/function" },
+        { "type": "string" }
+      ]
+    },
+    "number": {
+      "description": "A constant numeric value or a function that returns a number",
+      "oneOf": [
+        { "$ref": "#/$defs/function" },
+        { "type": "number" }
+      ]
+    },
+    "arguments(n)": {
+      "description": "A single expression or an array of expressions",
+      "oneOf": [
+        { "$ref": "#/$defs/expression" },
+        { "type": "array", "items": { "$ref": "#/$defs/expression" } }
+      ]
+    },
+    "argument": {
+      "description": "A single expression or an array with at most one expression",
+      "oneOf": [
+        { "$ref": "#/$defs/expression" },
+        { "type": "array", "items": { "$ref": "#/$defs/expression" }, "maxItems": 1 }
+      ]
+    },
+    "arguments(<=>)": {
+      "description": "An array with exactly two expressions",
+      "type": "array",
+      "items": { "$ref": "#/$defs/expression" },
+      "maxItems": 2,
+      "minItems": 2
     }
   }
 }

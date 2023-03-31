@@ -2,8 +2,5 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://www.flippercloud.io/expressions/Any.schema.json",
   "title": "Any",
-  "oneOf": [
-    { "$ref": "schema.json#/$defs/expression" },
-    { "type": "array", "items": { "$ref": "schema.json#/$defs/expression" } }
-  ]
+  "$ref": "schema.json#/$defs/arguments(n)"
 }
