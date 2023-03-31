@@ -3,5 +3,5 @@
   "$id": "https://www.flippercloud.io/expressions/LessThan.schema.json",
   "title": "LessThan",
   "description": "Compare if the first argument is < the second argument.",
-  "$ref": "schema.json#/$defs/arguments(<=>)"
+  "$ref": "schema.json#/$defs/arguments-two"
 }

@@ -57,12 +57,19 @@
         { "type": "number" }
       ]
     },
-    "arguments(n)": {
+    "arguments-n": {
       "description": "A single expression or an array of expressions",
       "oneOf": [
         { "$ref": "#/$defs/expression" },
         { "type": "array", "items": { "$ref": "#/$defs/expression" } }
       ]
+    },
+    "arguments-two": {
+      "description": "An array with exactly two expressions",
+      "type": "array",
+      "items": { "$ref": "#/$defs/expression" },
+      "maxItems": 2,
+      "minItems": 2
     },
     "argument": {
       "description": "A single expression or an array with at most one expression",
@@ -70,13 +77,6 @@
         { "$ref": "#/$defs/expression" },
         { "type": "array", "items": { "$ref": "#/$defs/expression" }, "maxItems": 1 }
       ]
-    },
-    "arguments(<=>)": {
-      "description": "An array with exactly two expressions",
-      "type": "array",
-      "items": { "$ref": "#/$defs/expression" },
-      "maxItems": 2,
-      "minItems": 2
     }
   }
 }

@@ -1,5 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://www.flippercloud.io/expressions/String.schema.json",
+  "title": "String",
+  "description": "Cast a value to a string.",
   "$ref": "schema.json#/$defs/argument"
 }

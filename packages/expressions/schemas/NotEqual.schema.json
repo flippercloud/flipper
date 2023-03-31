@@ -3,5 +3,5 @@
   "$id": "https://www.flippercloud.io/expressions/NotEqual.schema.json",
   "title": "NotEqual",
   "description": "Compare two values for equality",
-  "$ref": "schema.json#/$defs/arguments(<=>)"
+  "$ref": "schema.json#/$defs/arguments-two"
 }
