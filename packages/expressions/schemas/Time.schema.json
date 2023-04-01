@@ -3,15 +3,15 @@
   "$id": "https://www.flippercloud.io/expressions/Time.schema.json",
   "title": "Time",
   "description": "A time in ISO8601 format",
-  "oneOf": [
-    { "$ref": "#/$defs/argument" },
-    { "type": "array", "minItems": 1, "maxItems": 1, "items": { "$ref": "#/$defs/argument" } }
-  ],
+  "type": "array",
+  "minItems": 1,
+  "maxItems": 1,
+  "items": { "$ref": "#/$defs/argument" },
   "$defs": {
     "argument": {
-      "oneOf": [
-        { "$ref": "schema.json#/$defs/function" },
-        { "type": "string", "format": "date-time" }
+      "anyOf": [
+        { "type": "string", "format": "date-time" },
+        { "$ref": "schema.json#/$defs/function" }
       ]
     }
   }

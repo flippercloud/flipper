@@ -5,12 +5,15 @@
       "result": { "format": "date-time" }
     },
     {
+      "expression": { "Now": null },
+      "result": { "format": "date-time" }
+    },
+    {
       "expression": { "String": {"Now": []} },
       "result": { "pattern": "UTC$" }
     }
   ],
   "invalid": [
-    { "Now": null },
     { "Now": [1] },
     { "Now": 1 }
   ]

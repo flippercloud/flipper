@@ -3,8 +3,7 @@
   "$id": "https://www.flippercloud.io/expressions/Random.schema.json",
   "title": "Random",
   "description": "Return a random number",
-  "oneOf": [
-    { "$ref": "schema.json#/$defs/number" },
-    { "type": "array", "items": { "$ref": "schema.json#/$defs/number" }, "maxItems": 1 }
-  ]
+  "type": "array",
+  "items": { "$ref": "schema.json#/$defs/number" },
+  "maxItems": 1
 }

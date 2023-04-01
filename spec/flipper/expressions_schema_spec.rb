@@ -1,39 +1,26 @@
-require 'json_schemer'
+require "json_schemer"
 
 RSpec.describe Flipper::Expressions do
-  PATH = Pathname.new(File.expand_path('../../packages/expressions', __dir__))
+  let(:schema) { Flipper::Expression::Schema.new }
 
-  SCHEMAS = Hash[PATH.glob('schemas/*.json').map do |path|
-    [File.basename(path), JSON.parse(File.read(path))]
-  end]
-
-  let(:schema) do
-    JSONSchemer.schema(SCHEMAS["schema.json"], ref_resolver: lambda {|url|
-      SCHEMAS[File.basename(url.path)]
-    })
-  end
-
-  PATH.glob('examples/*.json').each do |path|
-    describe(File.basename(path, '.json')) do
-      examples = JSON.parse(File.read(path))
+  Flipper::Expression::Schema.examples.each do |name, examples|
+    describe(name) do
       examples["valid"].each do |example|
-        expression, context, result  = example.values_at("expression", "context", "result")
+        expression, context, result = example.values_at("expression", "context", "result")
         context&.transform_keys!(&:to_sym)
 
         describe expression.inspect do
           it "is valid" do
-            expect(schema.validate(expression).to_a).to eq([])
+            errors = Flipper::Expression.build(expression).validate
+            expect(errors.to_a).to eq([])
           end
 
-          it "evaluates to #{result.inspect}#{ " with context " + context.inspect if context}" do
-            evaluated_result = Flipper::Expression.build(expression).evaluate(context || {}   )
-            expected_schema = JSONSchemer.schema(result, before_property_validation: lambda {|data, property, property_schema, _parent|
-              puts "BEFORE: #{[data, property, property_schema, _parent].inspect}"
-            })
+          it "evaluates to #{result.inspect}#{" with context " + context.inspect if context}" do
+            evaluated_result = Flipper::Expression.build(expression).evaluate(context || {})
+            expected_schema = JSONSchemer.schema(result)
             expect(expected_schema.validate(evaluated_result).to_a).to eq([])
           end
         end
-
       end
 
       examples["invalid"].each do |example|

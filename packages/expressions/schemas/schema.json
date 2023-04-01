@@ -6,12 +6,13 @@
   "$ref": "#/$defs/expression",
   "$defs": {
     "expression": {
+      "title": "Expression",
       "description": "An expression can be a function or a constant (string, boolean, or number)",
-      "oneOf": [
+      "anyOf": [
         { "$ref": "#/$defs/function" },
         { "type": "string" },
-        { "type": "boolean" },
-        { "type": "number" }
+        { "type": "number" },
+        { "type": "boolean" }
       ]
     },
     "function": {
@@ -45,38 +46,36 @@
     },
     "string": {
       "description": "A constant string value or a function that returns a string",
-      "oneOf": [
-        { "$ref": "#/$defs/function" },
-        { "type": "string" }
+      "anyOf": [
+        { "type": "string" },
+        { "$ref": "#/$defs/function" }
       ]
     },
     "number": {
       "description": "A constant numeric value or a function that returns a number",
-      "oneOf": [
-        { "$ref": "#/$defs/function" },
-        { "type": "number" }
+      "anyOf": [
+        { "type": "number" },
+        { "$ref": "#/$defs/function" }
       ]
     },
     "arguments-n": {
       "description": "A single expression or an array of expressions",
-      "oneOf": [
-        { "$ref": "#/$defs/expression" },
-        { "type": "array", "items": { "$ref": "#/$defs/expression" } }
-      ]
+      "type": "array",
+      "items": { "$ref": "#/$defs/expression" }
     },
     "arguments-two": {
       "description": "An array with exactly two expressions",
       "type": "array",
       "items": { "$ref": "#/$defs/expression" },
-      "maxItems": 2,
-      "minItems": 2
+      "minItems": 2,
+      "maxItems": 2
     },
     "argument": {
       "description": "A single expression or an array with at most one expression",
-      "oneOf": [
-        { "$ref": "#/$defs/expression" },
-        { "type": "array", "items": { "$ref": "#/$defs/expression" }, "maxItems": 1 }
-      ]
+      "type": "array",
+      "items": { "$ref": "#/$defs/expression" },
+      "minItems": 1,
+      "maxItems": 1
     }
   }
 }

@@ -32,10 +32,13 @@
       "expression": { "Any": [{ "Boolean": false }, { "Property": "admin" }] },
       "context": { "properties": { "admin": true } },
       "result": { "enum": [true] }
+    },
+    {
+      "expression": { "Any": null },
+      "result": { "enum": [false] }
     }
   ],
   "invalid": [
-    { "Any": null },
     { "Any": [], "All": [] }
   ]
 }

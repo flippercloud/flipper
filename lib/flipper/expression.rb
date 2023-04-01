@@ -1,5 +1,6 @@
 require "flipper/expression/builder"
 require "flipper/expression/constant"
+require "flipper/expression/schema"
 
 module Flipper
   class Expression
@@ -16,7 +17,9 @@ module Flipper
 
         name = object.keys.first
         args = object.values.first
-        args = [args] unless args.is_a?(Array)
+
+        # Ensure args are an array, but we can't just use Array(args) because it will convert a Hash to Array
+        args = args.is_a?(Hash) ? [args] : Array(args)
 
         new(name, args.map { |o| build(o) })
       when String, Numeric, FalseClass, TrueClass
@@ -56,6 +59,10 @@ module Flipper
       {
         name => args.map(&:value)
       }
+    end
+
+    def validate
+      Schema.new.validate(value)
     end
 
     private

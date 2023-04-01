@@ -1,14 +1,13 @@
 import { describe, test, expect } from 'vitest'
-import { validator } from '../lib'
+import { validate } from '../lib'
 import examples from '../examples'
 
-const expressionsValidator = validator()
-
 expect.extend({
-  toBeValid (received, validate = expressionsValidator) {
+  toBeValid (received) {
+    const { valid, errors } = validate(received)
     return {
-      pass: validate(received),
-      message: () => JSON.stringify(validate.errors, null, 2)
+      pass: valid,
+      message: () => JSON.stringify(errors, null, 2)
     }
   }
 })

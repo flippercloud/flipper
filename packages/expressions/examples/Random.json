@@ -5,6 +5,10 @@
       "result": { "type": "float", "minimum": 0, "maximum": 1 }
     },
     {
+      "expression":  { "Random": null },
+      "result": { "type": "float", "minimum": 0, "maximum": 1 }
+    },
+    {
       "expression":  { "Random": 2 },
       "result": { "type": "integer", "minimum": 0, "maximum": 1 }
     },
@@ -19,7 +23,6 @@
     }
   ],
   "invalid": [
-    { "Random": null },
     { "Random": [1, 2] }
   ]
 }

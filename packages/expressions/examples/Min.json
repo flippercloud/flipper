@@ -5,6 +5,10 @@
       "result": { "enum": [null] }
     },
     {
+      "expression": { "Min": null },
+      "result": { "enum": [null] }
+    },
+    {
       "expression": { "Min": [3, 2, 1] },
       "result": { "enum": [1] }
     },
@@ -26,7 +30,6 @@
     }
   ],
   "invalid": [
-    { "Min": null },
     { "Min": [], "Any": [] }
   ]
 }

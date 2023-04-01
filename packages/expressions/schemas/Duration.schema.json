@@ -7,13 +7,14 @@
   "items": [
     { "$ref": "schema.json#/$defs/number" },
     {
-      "oneOf": [
-        { "$ref": "schema.json#/$defs/function" },
-        { "$ref": "#/$defs/unit" }
-      ]
+      "anyOf": [
+        { "$ref": "#/$defs/unit" },
+        { "$ref": "schema.json#/$defs/function" }
+      ],
+      "default": "seconds"
     }
   ],
-  "minItems": 2,
+  "minItems": 1,
   "maxItems": 2,
   "$defs": {
     "unit": {

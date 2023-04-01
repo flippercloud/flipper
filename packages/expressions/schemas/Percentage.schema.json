@@ -3,8 +3,8 @@
   "$id": "https://www.flippercloud.io/expressions/Percentage.schema.json",
   "title": "Percentage",
   "description": "Cast a value to a percentage between 0 and 100.",
-  "oneOf": [
-    { "$ref": "schema.json#/$defs/number" },
-    { "type": "array", "items": { "$ref": "schema.json#/$defs/number" }, "minItems": 1, "maxItems": 1 }
-  ]
+  "type": "array",
+  "items": { "$ref": "schema.json#/$defs/number" },
+  "minItems": 1,
+  "maxItems": 1
 }

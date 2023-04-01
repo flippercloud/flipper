@@ -27,11 +27,17 @@
     {
       "expression": { "Duration": [2, "years"] },
       "result": { "enum": [63113904] }
+    },
+    {
+      "expression": { "Duration": 2 },
+      "result": { "enum": [2] }
+    },
+    {
+      "expression": { "Duration": [2] },
+      "result": { "enum": [2] }
     }
   ],
   "invalid": [
-    { "Duration": 2 },
-    { "Duration": [2] },
     { "Duration": [4, "score"] }
   ]
 }

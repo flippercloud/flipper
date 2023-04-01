@@ -28,10 +28,13 @@
       "expression": { "All": [{ "Boolean": true }, { "Property": "admin" }] },
       "context": { "properties": { "admin": true } },
       "result": { "enum": [true] }
+    },
+    {
+      "expression": { "All": null },
+      "result": { "enum": [true] }
     }
   ],
   "invalid": [
-    { "All": null },
     { "All": [], "Any": [] }
   ]
 }
