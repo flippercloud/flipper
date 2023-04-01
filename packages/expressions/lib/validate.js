@@ -10,12 +10,12 @@ const ajv = new Ajv({
 addFormats(ajv)
 const validator = ajv.getSchema(schemas.default.$id)
 
-function coerceArgsToArray(object) {
+function coerceArgsToArray (object) {
   if (object && typeof object === 'object') {
     return Object.fromEntries(Object.entries(object).map(([key, value]) => {
-      if(value === null) {
+      if (value === null) {
         value = []
-      } else if(!Array.isArray(value)){
+      } else if (!Array.isArray(value)) {
         value = [value]
       }
 
