@@ -10,11 +10,10 @@
       "anyOf": [
         { "$ref": "#/$defs/unit" },
         { "$ref": "schema.json#/$defs/function" }
-      ],
-      "default": "seconds"
+      ]
     }
   ],
-  "minItems": 1,
+  "minItems": 2,
   "maxItems": 2,
   "$defs": {
     "unit": {

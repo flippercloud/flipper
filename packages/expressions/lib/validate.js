@@ -5,7 +5,8 @@ import schemas from '../schemas'
 const ajv = new Ajv({
   schemas: Object.values(schemas),
   useDefaults: true,
-  allErrors: true
+  allErrors: true,
+  strict: true
 })
 addFormats(ajv)
 const validator = ajv.getSchema(schemas.default.$id)
