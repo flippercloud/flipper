@@ -3,19 +3,27 @@
   "$id": "https://www.flippercloud.io/expressions/schema.json",
   "title": "Flipper Expressions",
   "description": "TODO",
-  "$ref": "#/$defs/expression",
-  "$defs": {
+  "$ref": "#/definitions/expression",
+  "definitions": {
     "expression": {
       "title": "Expression",
-      "description": "An expression can be a function or a constant (string, boolean, or number)",
+      "description": "An expression can be a Function or a Constant",
       "anyOf": [
-        { "$ref": "#/$defs/function" },
+        { "$ref": "#/definitions/constant" },
+        { "$ref": "#/definitions/function" }
+      ]
+    },
+    "constant": {
+      "title": "Constant",
+      "description": "A constant value can be a string, number or boolean",
+      "anyOf": [
         { "type": "string" },
         { "type": "number" },
         { "type": "boolean" }
       ]
     },
     "function": {
+      "title": "Function",
       "description": "A function is an object with a single property that is the name of the function and the value is the arguments to the function",
       "type": "object",
       "maxProperties": 1,
@@ -48,32 +56,33 @@
       "description": "A constant string value or a function that returns a string",
       "anyOf": [
         { "type": "string" },
-        { "$ref": "#/$defs/function" }
+        { "$ref": "#/definitions/function" }
       ]
     },
     "number": {
       "description": "A constant numeric value or a function that returns a number",
       "anyOf": [
         { "type": "number" },
-        { "$ref": "#/$defs/function" }
+        { "$ref": "#/definitions/function" }
       ]
     },
     "arguments-n": {
-      "description": "A single expression or an array of expressions",
+      "description": "An array of expressions",
       "type": "array",
-      "items": { "$ref": "#/$defs/expression" }
+      "items": { "$ref": "#/definitions/expression" },
+      "minItems": 0
     },
     "arguments-two": {
       "description": "An array with exactly two expressions",
       "type": "array",
-      "items": { "$ref": "#/$defs/expression" },
+      "items": { "$ref": "#/definitions/expression" },
       "minItems": 2,
       "maxItems": 2
     },
     "argument": {
-      "description": "A single expression or an array with at most one expression",
+      "description": "An array with exactly one expression",
       "type": "array",
-      "items": { "$ref": "#/$defs/expression" },
+      "items": { "$ref": "#/definitions/expression" },
       "minItems": 1,
       "maxItems": 1
     }

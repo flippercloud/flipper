@@ -3,5 +3,5 @@
   "$id": "https://www.flippercloud.io/expressions/Number.schema.json",
   "title": "Number",
   "description": "Cast a value to a number.",
-  "$ref": "schema.json#/$defs/argument"
+  "$ref": "schema.json#/definitions/argument"
 }

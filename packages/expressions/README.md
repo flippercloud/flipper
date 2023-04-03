@@ -9,7 +9,7 @@ To learn more about JSON Schema, read [Understanding JSON Schema](https://json-s
 ## Adding a new expression
 
 1. Describe arguments by creating a new file in [`schemas/`](schemas/) named `NewName.schema.json`. You can copy an existing function that has similar semantics to get started.
-2. Add the new function in [`schemas/schema.json`](schemas/schema.json) to `$defs/function`.
+2. Add the new function in [`schemas/schema.json`](schemas/schema.json) to `definitions/function`.
 3. Create a new file in [`examples/`](./examples) named `NewName.json` with valid and invalid examples for the new function. See other examples for inspiration.
 4. Run `yarn test` in `packages/expressions` and ensure tests pass.
 5. Implement the function in [`lib/flipper/expressions/`](../../lib/flipper/expressions/).

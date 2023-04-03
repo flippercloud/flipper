@@ -4,14 +4,14 @@
   "title": "Time",
   "description": "A time in ISO8601 format",
   "type": "array",
+  "items": { "$ref": "#/definitions/argument" },
   "minItems": 1,
   "maxItems": 1,
-  "items": { "$ref": "#/$defs/argument" },
-  "$defs": {
+  "definitions": {
     "argument": {
       "anyOf": [
         { "type": "string", "format": "date-time" },
-        { "$ref": "schema.json#/$defs/function" }
+        { "$ref": "schema.json#/definitions/function" }
       ]
     }
   }

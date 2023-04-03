@@ -5,17 +5,17 @@
   "description": "A period of time expressed as a number of seconds, minutes, hours, days, weeks, months, or years.",
   "type": "array",
   "items": [
-    { "$ref": "schema.json#/$defs/number" },
+    { "$ref": "schema.json#/definitions/number" },
     {
       "anyOf": [
-        { "$ref": "#/$defs/unit" },
-        { "$ref": "schema.json#/$defs/function" }
+        { "$ref": "#/definitions/unit" },
+        { "$ref": "schema.json#/definitions/function" }
       ]
     }
   ],
   "minItems": 2,
   "maxItems": 2,
-  "$defs": {
+  "definitions": {
     "unit": {
       "type": "string",
       "enum": ["seconds", "minutes", "hours", "days", "weeks", "months", "years"],

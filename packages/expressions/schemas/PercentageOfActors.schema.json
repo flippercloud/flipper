@@ -5,8 +5,8 @@
   "description": "",
   "type": "array",
   "items": [
-    { "$ref": "schema.json#/$defs/string" },
-    { "$ref": "schema.json#/$defs/number" }
+    { "$ref": "schema.json#/definitions/string" },
+    { "$ref": "schema.json#/definitions/number" }
   ],
   "minItems": 2,
   "maxItems": 2

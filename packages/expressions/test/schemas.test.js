@@ -1,6 +1,5 @@
 import { describe, test, expect } from 'vitest'
-import { validate } from '../lib'
-import examples from '../examples'
+import { validate, examples } from '../lib'
 
 expect.extend({
   toBeValid (received) {

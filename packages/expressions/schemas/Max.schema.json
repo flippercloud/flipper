@@ -3,5 +3,5 @@
   "$id": "https://www.flippercloud.io/expressions/Max.schema.json",
   "title": "Max",
   "description": "Returns the maximum value in a list.",
-  "$ref": "schema.json#/$defs/arguments-n"
+  "$ref": "schema.json#/definitions/arguments-n"
 }

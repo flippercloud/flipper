@@ -4,7 +4,7 @@
   "title": "Property",
   "description": "Extract a property from context[properties].",
   "type": "array",
-  "items": { "$ref": "schema.json#/$defs/string" },
+  "items": { "$ref": "schema.json#/definitions/string" },
   "minItems": 1,
   "maxItems": 1
 }

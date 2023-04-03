@@ -3,5 +3,5 @@
   "$id": "https://www.flippercloud.io/expressions/GreaterThan.schema.json",
   "title": "GreaterThan",
   "description": "Compare if the first argument is > the second argument.",
-  "$ref": "schema.json#/$defs/arguments-two"
+  "$ref": "schema.json#/definitions/arguments-two"
 }

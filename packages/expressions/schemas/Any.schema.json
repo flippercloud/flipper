@@ -3,5 +3,5 @@
   "$id": "https://www.flippercloud.io/expressions/Any.schema.json",
   "title": "Any",
   "description": "Returns true if any of the expressions return true.",
-  "$ref": "schema.json#/$defs/arguments-n"
+  "$ref": "schema.json#/definitions/arguments-n"
 }

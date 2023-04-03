@@ -4,6 +4,6 @@
   "title": "Random",
   "description": "Return a random number",
   "type": "array",
-  "items": { "$ref": "schema.json#/$defs/number" },
+  "items": { "$ref": "schema.json#/definitions/number" },
   "maxItems": 1
 }
