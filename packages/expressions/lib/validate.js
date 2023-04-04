@@ -1,6 +1,6 @@
 import Ajv from 'ajv'
 import addFormats from 'ajv-formats'
-import schemas from '../schemas'
+import schemas, { BaseURI } from '../schemas'
 
 const ajv = new Ajv({
   schemas: Object.values(schemas),
@@ -9,7 +9,7 @@ const ajv = new Ajv({
   strict: true
 })
 addFormats(ajv)
-const validator = ajv.getSchema(schemas.default.$id)
+const validator = ajv.getSchema(BaseURI)
 
 function coerceArgsToArray (object) {
   if (object && typeof object === 'object') {

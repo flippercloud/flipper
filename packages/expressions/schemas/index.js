@@ -1,7 +1,7 @@
 const modules = import.meta.glob('./*.json', { eager: true, import: 'default' })
-const schemas = Object.fromEntries(Object.entries(modules).map(([path, module]) => {
-  const name = path.split('/').pop().split('.').shift()
-  return [name === 'schema' ? 'default' : name, module]
+const schemas = Object.fromEntries(Object.values(modules).map(module => {
+  return [module.$id, module]
 }))
 
+export const BaseURI = modules['./schema.json'].$id
 export default schemas
