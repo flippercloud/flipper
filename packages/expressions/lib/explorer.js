@@ -1,3 +1,4 @@
+import schemas, { BaseURI } from '../schemas'
 import pointer from 'json-pointer'
 
 export class Explorer {
@@ -40,3 +41,5 @@ export class Explorer {
     return this.get('#/definitions/function/properties')
   }
 }
+
+export default new Explorer(schemas, BaseURI)
