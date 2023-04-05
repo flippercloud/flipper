@@ -17,9 +17,18 @@
       "title": "Constant",
       "description": "A constant value can be a string, number or boolean",
       "anyOf": [
-        { "type": "string" },
-        { "type": "number" },
-        { "type": "boolean" }
+        {
+          "title": "String",
+          "type": "string"
+        },
+        {
+          "title": "Number",
+          "type": "number"
+        },
+        {
+          "title": "Boolean",
+          "type": "boolean"
+        }
       ]
     },
     "function": {
@@ -73,6 +82,7 @@
       "minItems": 0
     },
     "arguments-two": {
+      "title": "Comparison",
       "description": "An array with exactly two expressions",
       "type": "array",
       "items": { "$ref": "#/definitions/expression" },

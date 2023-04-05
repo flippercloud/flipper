@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid'
 import { Constant } from './constant'
 import explorer from './explorer'
+import { useValidator } from './validate'
 
 // Simple model to transform this: `{ All: [{ Boolean: [true] }]`
 // into this: `{ id: uuidv4(), name: 'All', args: [{ id: uuidv4(), name: 'Boolean', args: [true] }] }`
@@ -33,5 +34,18 @@ export class Expression {
 
   get schema () {
     return explorer.functions[this.name]
+  }
+
+  validate(schema = this.schema) {
+    const validator = useValidator()
+    const data = this.value
+    const valid = validator.validate(schema, data)
+    const errors = validator.errors
+    return { valid, errors, data }
+  }
+
+  matches(schema) {
+    const { valid } = this.validate(schema)
+    return valid
   }
 }

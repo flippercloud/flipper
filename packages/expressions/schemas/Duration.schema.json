@@ -8,18 +8,15 @@
     { "$ref": "schema.json#/definitions/number" },
     {
       "anyOf": [
-        { "$ref": "#/definitions/unit" },
+        {
+          "type": "string",
+          "enum": ["seconds", "minutes", "hours", "days", "weeks", "months", "years"],
+          "default": "seconds"
+        },
         { "$ref": "schema.json#/definitions/function" }
       ]
     }
   ],
   "minItems": 2,
-  "maxItems": 2,
-  "definitions": {
-    "unit": {
-      "type": "string",
-      "enum": ["seconds", "minutes", "hours", "days", "weeks", "months", "years"],
-      "default": "seconds"
-    }
-  }
+  "maxItems": 2
 }

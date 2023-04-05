@@ -2,14 +2,16 @@ import Ajv from 'ajv'
 import addFormats from 'ajv-formats'
 import schemas, { BaseURI } from '../schemas'
 
-const ajv = new Ajv({
-  schemas: Object.values(schemas),
-  useDefaults: true,
-  allErrors: true,
-  strict: true
-})
-addFormats(ajv)
-const validator = ajv.getSchema(BaseURI)
+export function useValidator(schemas = []) {
+  const ajv = new Ajv({
+    schemas,
+    useDefaults: true,
+    allErrors: true,
+    strict: true
+  })
+  addFormats(ajv)
+  return ajv
+}
 
 function coerceArgsToArray (object) {
   if (object && typeof object === 'object') {
@@ -27,9 +29,11 @@ function coerceArgsToArray (object) {
   }
 }
 
-export default (input) => {
-  const result = coerceArgsToArray(input)
-  const valid = validator(result)
-  const errors = validator.errors
-  return { valid, errors, result }
+export const validator = useValidator(schemas)
+
+export default (input, validate = validator.getSchema(BaseURI)) => {
+  const data = coerceArgsToArray(input)
+  const valid = validate(data)
+  const errors = validate.errors
+  return { valid, errors, data }
 }
