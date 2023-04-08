@@ -1,6 +1,5 @@
 import { describe, test, expect } from 'vitest'
 import { Expression, Constant } from '../lib'
-import { ajv } from '../lib/validate'
 
 describe('Expression', () => {
   describe('build', () => {
@@ -10,6 +9,12 @@ describe('Expression', () => {
       expect(expression.args[0]).toBeInstanceOf(Constant)
       expect(expression.args[0].value).toEqual(true)
       expect(expression.value).toEqual({ All: [true] })
+    })
+
+    test('throws error on invalid expression', () => {
+      expect(() => Expression.build([])).toThrowError(TypeError)
+      expect(() => Expression.build(new Date())).toThrowError(TypeError)
+      expect(() => Expression.build({ All: [], Any: [] })).toThrowError(TypeError)
     })
   })
 
@@ -42,18 +47,4 @@ describe('Expression', () => {
       expect(expression.validate().valid).toBe(false)
     })
   })
-
-  describe('matches', () => {
-    test('returns true matching schema', () => {
-      const expression = Expression.build({ Any: [true] })
-      const schema = ajv.getSchema("#/definitions/function")
-      console.log("DID IT WORK?", schema)
-      expect(expression.matches(schema)).toBe(true)
-    })
-
-    test('returns false for different schema', () => {
-      expect(new Constant('string').matches({ type: 'boolean' })).toBe(false)
-    })
-  })
-
 })

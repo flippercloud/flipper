@@ -1,7 +1,16 @@
 import { v4 as uuidv4 } from 'uuid'
 import { Constant } from './constant'
-import explorer from './explorer'
-import { useValidator } from './validate'
+import { schema } from './schemas'
+
+function toArray (arg) {
+  if (Array.isArray(arg)) {
+    return arg
+  } else if (arg === null) {
+    return []
+  } else {
+    return [arg]
+  }
+}
 
 // Simple model to transform this: `{ All: [{ Boolean: [true] }]`
 // into this: `{ id: uuidv4(), name: 'All', args: [{ id: uuidv4(), name: 'Boolean', args: [true] }] }`
@@ -12,11 +21,17 @@ export class Expression {
     }
 
     if (typeof expression === 'object') {
+      if (Object.keys(expression).length !== 1) {
+        throw new TypeError(`Invalid expression: ${JSON.stringify(expression)}`)
+      }
       const name = Object.keys(expression)[0]
-      const args = expression[name].map(Expression.build)
+      const args = toArray(expression[name]).map(Expression.build)
+
       return new Expression({ name, args })
-    } else {
+    } else if (['number', 'string', 'boolean'].includes(typeof expression)) {
       return new Constant(expression)
+    } else {
+      throw new TypeError(`Invalid expression: ${JSON.stringify(expression)}`)
     }
   }
 
@@ -32,20 +47,15 @@ export class Expression {
     return { [this.name]: this.args.map(arg => arg.value) }
   }
 
-  get schema () {
-    return explorer.functions[this.name]
+  get validator () {
+    return schema.get('#')
   }
 
-  validate(schema = this.schema) {
-    const validator = useValidator()
-    const data = this.value
-    const valid = validator.validate(schema, data)
-    const errors = validator.errors
-    return { valid, errors, data }
+  validate (validator = this.validator) {
+    return schema.validate(this.value, validator)
   }
 
-  matches(schema) {
-    const { valid } = this.validate(schema)
-    return valid
+  matches (localSchema) {
+    return this.validate(localSchema).valid
   }
 }

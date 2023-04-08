@@ -1,18 +1,13 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://www.flippercloud.io/expressions/schema.json",
-  "title": "Flipper Expressions",
-  "description": "TODO",
-  "$ref": "#/definitions/expression",
+  "title": "Expression",
+  "description": "An expression can be a Constant or a Function",
+  "anyOf": [
+    { "$ref": "#/definitions/constant" },
+    { "$ref": "#/definitions/function" }
+  ],
   "definitions": {
-    "expression": {
-      "title": "Expression",
-      "description": "An expression can be a Function or a Constant",
-      "anyOf": [
-        { "$ref": "#/definitions/constant" },
-        { "$ref": "#/definitions/function" }
-      ]
-    },
     "constant": {
       "title": "Constant",
       "description": "A constant value can be a string, number or boolean",
@@ -78,21 +73,21 @@
     "arguments-n": {
       "description": "An array of expressions",
       "type": "array",
-      "items": { "$ref": "#/definitions/expression" },
+      "items": { "$ref": "#" },
       "minItems": 0
     },
     "arguments-two": {
       "title": "Comparison",
       "description": "An array with exactly two expressions",
       "type": "array",
-      "items": { "$ref": "#/definitions/expression" },
+      "items": { "$ref": "#" },
       "minItems": 2,
       "maxItems": 2
     },
     "argument": {
       "description": "An array with exactly one expression",
       "type": "array",
-      "items": { "$ref": "#/definitions/expression" },
+      "items": { "$ref": "#" },
       "minItems": 1,
       "maxItems": 1
     }

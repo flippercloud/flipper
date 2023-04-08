@@ -1,4 +1,4 @@
-import { useValidator } from './validate'
+import { schema } from './schemas'
 
 // Public: A constant value like a "string", number (1, 3.5), or boolean (true, false).
 //
@@ -12,20 +12,15 @@ export class Constant {
     return [this.value]
   }
 
-  get schema () {
-    return { type: typeof this.value }
+  get validator () {
+    return schema.get('#/definitions/constant')
   }
 
-  validate(schema = this.schema) {
-    const validator = useValidator()
-    const data = this.value
-    const valid = validator.validate(schema, data)
-    const errors = validator.errors
-    return { valid, errors, data }
+  validate (validator = this.validator) {
+    return schema.validate(this.value, validator)
   }
 
-  matches(schema) {
-    const { valid } = this.validate(schema)
-    return valid
+  matches (localSchema) {
+    return this.validate(localSchema).valid
   }
 }
