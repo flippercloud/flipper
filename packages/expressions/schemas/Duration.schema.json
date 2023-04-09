@@ -7,6 +7,7 @@
   "items": [
     { "$ref": "schema.json#/definitions/number" },
     {
+      "title": "Unit",
       "anyOf": [
         {
           "type": "string",

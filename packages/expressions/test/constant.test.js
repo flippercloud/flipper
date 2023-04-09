@@ -2,9 +2,9 @@ import { describe, test, expect } from 'vitest'
 import { Constant, schema } from '../lib'
 
 describe('Constant', () => {
-  describe('validator', () => {
-    test('returns Constant validator', () => {
-      expect(new Constant('string').validator.schema.title).toEqual('Constant')
+  describe('schema', () => {
+    test('returns Constant schema', () => {
+      expect(new Constant('string').schema.title).toEqual('Constant')
     })
   })
 
@@ -20,12 +20,12 @@ describe('Constant', () => {
 
   describe('matches', () => {
     test('returns true for matching validator', () => {
-      const validator = schema.get('#/definitions/constant/anyOf/0')
+      const validator = schema.resolve('#/definitions/constant/anyOf/0')
       expect(new Constant('string').matches(validator)).toBe(true)
     })
 
     test('returns false for different schema', () => {
-      const validator = schema.get('#/definitions/constant/anyOf/0')
+      const validator = schema.resolve('#/definitions/constant/anyOf/0')
       expect(new Constant(true).matches(validator)).toBe(false)
     })
   })

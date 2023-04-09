@@ -34,15 +34,43 @@ describe('schema.json', () => {
     })
   }
 
-  describe('get', () => {
-    test('returns a validator', () => {
-      const ref = schema.get('#')
-      expect(ref.schema.title).toEqual('Expression')
+  describe('resolve', () => {
+    test('returns a schema', () => {
+      const ref = schema.resolve('#/definitions/constant')
+      expect(ref.title).toEqual('Constant')
+      expect(ref.validate(true)).toEqual({ valid: true, errors: null })
     })
 
     test('resolves refs', () => {
-      const ref = schema.get('#/definitions/function/properties/Any')
-      expect(ref.schema.title).toEqual('Any')
+      expect(schema.resolve('#/definitions/function/properties/Any').title).toEqual('Any')
+      expect(schema.definitions.function.properties.Any.title).toEqual('Any')
+    })
+  })
+
+  describe('resolveAnyOf', () => {
+    test('returns nested anyOf', () => {
+      expect(schema.resolveAnyOf()).toHaveLength(4)
+    })
+
+    test('returns array of schemas', () => {
+      const ref = schema.resolve('#/definitions/constant')
+      expect(ref.resolveAnyOf()).toHaveLength(3)
+      expect(ref.resolveAnyOf()).toEqual(ref.anyOf)
+    })
+  })
+
+  describe('arrayItem', () => {
+    test('returns schema for repeated array item', () => {
+      const any = schema.resolve("Any.schema.json")
+      expect(any.arrayItem(0).title).toEqual('Expression')
+      expect(any.arrayItem(99).title).toEqual('Expression')
+    })
+
+    test('returns schema for tuple', () => {
+      const duration = schema.resolve("Duration.schema.json")
+      expect(duration.arrayItem(0).title).toEqual('Number')
+      expect(duration.arrayItem(1).title).toEqual('Unit')
+      expect(duration.arrayItem(2)).toBe(undefined)
     })
   })
 })

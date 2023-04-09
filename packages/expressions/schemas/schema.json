@@ -57,6 +57,7 @@
       "additionalProperties": false
     },
     "string": {
+      "title": "String",
       "description": "A constant string value or a function that returns a string",
       "anyOf": [
         { "type": "string" },
@@ -64,6 +65,7 @@
       ]
     },
     "number": {
+      "title": "Number",
       "description": "A constant numeric value or a function that returns a number",
       "anyOf": [
         { "type": "number" },

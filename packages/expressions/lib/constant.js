@@ -12,15 +12,15 @@ export class Constant {
     return [this.value]
   }
 
-  get validator () {
-    return schema.get('#/definitions/constant')
+  get schema () {
+    return schema.resolve('#/definitions/constant')
   }
 
-  validate (validator = this.validator) {
-    return schema.validate(this.value, validator)
+  validate (schema = this.schema) {
+    return schema.validate(this.value)
   }
 
-  matches (localSchema) {
-    return this.validate(localSchema).valid
+  matches (schema = this.schema) {
+    return schema.validate(this.value).valid
   }
 }

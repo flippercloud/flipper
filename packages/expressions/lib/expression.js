@@ -47,15 +47,15 @@ export class Expression {
     return { [this.name]: this.args.map(arg => arg.value) }
   }
 
-  get validator () {
-    return schema.get('#')
+  get schema () {
+    return schema.resolve('#')
   }
 
-  validate (validator = this.validator) {
-    return schema.validate(this.value, validator)
+  validate (schema = this.schema) {
+    return schema.validate(this.value)
   }
 
   matches (localSchema) {
-    return this.validate(localSchema).valid
+    return localSchema.validate(this.value).valid
   }
 }
