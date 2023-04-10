@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest'
-import { Constant, schema } from '../lib'
+import { Constant, Schema } from '../lib'
 
 describe('Constant', () => {
   describe('schema', () => {
@@ -20,13 +20,13 @@ describe('Constant', () => {
 
   describe('matches', () => {
     test('returns true for matching validator', () => {
-      const validator = schema.resolve('#/definitions/constant/anyOf/0')
-      expect(new Constant('string').matches(validator)).toBe(true)
+      const schema = Schema.resolve('#/definitions/constant/anyOf/0')
+      expect(new Constant('string').matches(schema)).toBe(true)
     })
 
     test('returns false for different schema', () => {
-      const validator = schema.resolve('#/definitions/constant/anyOf/0')
-      expect(new Constant(true).matches(validator)).toBe(false)
+      const schema = Schema.resolve('#/definitions/constant/anyOf/0')
+      expect(new Constant(true).matches(schema)).toBe(false)
     })
   })
 })

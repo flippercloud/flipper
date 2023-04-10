@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid'
 import { Constant } from './constant'
-import { schema } from './schemas'
+import { Schema } from './schemas'
 
 function toArray (arg) {
   if (Array.isArray(arg)) {
@@ -48,7 +48,7 @@ export class Expression {
   }
 
   get schema () {
-    return schema.resolve('#')
+    return Schema.resolve('#')
   }
 
   validate (schema = this.schema) {

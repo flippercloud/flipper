@@ -1,11 +1,17 @@
-import { schema } from './schemas'
+import { v4 as uuidv4 } from 'uuid'
+import { Schema } from './schemas'
 
 // Public: A constant value like a "string", number (1, 3.5), or boolean (true, false).
 //
 // Implements the same interface as Expression
 export class Constant {
-  constructor (value) {
+  constructor (value, id = uuidv4()) {
     this.value = value
+    this.id = id
+  }
+
+  clone (value, id = this.id) {
+    return new Constant(value, id)
   }
 
   get args () {
@@ -13,7 +19,7 @@ export class Constant {
   }
 
   get schema () {
-    return schema.resolve('#/definitions/constant')
+    return Schema.resolve('#/definitions/constant')
   }
 
   validate (schema = this.schema) {
