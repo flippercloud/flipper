@@ -1,0 +1,24 @@
+{
+  "valid": [
+    {
+      "expression": { "Divide": [6, 2] },
+      "result": { "enum": [3] }
+    },
+    {
+      "expression": { "Divide": [3, 1.5] },
+      "result": { "enum": [2.0] }
+    },
+    {
+      "expression": { "Divide": [{ "Property": "age" }, 3] },
+      "context": { "properties": { "age": 18 }},
+      "result": { "enum": [6] }
+    }
+  ],
+  "invalid": [
+    { "Divide": [1, 2, 3] },
+    { "Divide": [1] },
+    { "Divide": 1 },
+    { "Divide": null },
+    { "Divide": [1, 2], "Any": [] }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://www.flippercloud.io/expressions/Multiply.schema.json",
+  "title": "Multiply",
+  "description": "Multiply two values",
+  "$ref": "schema.json#/definitions/arguments-two"
+}

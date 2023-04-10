@@ -33,9 +33,11 @@
       "maxProperties": 1,
       "minProperties": 1,
       "properties": {
+        "Add": { "$ref": "Add.schema.json" },
         "All": { "$ref": "All.schema.json" },
         "Any": { "$ref": "Any.schema.json" },
         "Boolean": { "$ref": "Boolean.schema.json" },
+        "Divide": { "$ref": "Divide.schema.json" },
         "Duration": { "$ref": "Duration.schema.json" },
         "Equal": { "$ref": "Equal.schema.json" },
         "GreaterThan": { "$ref": "GreaterThan.schema.json" },
@@ -44,6 +46,7 @@
         "LessThanOrEqualTo": { "$ref": "LessThanOrEqualTo.schema.json" },
         "Max": { "$ref": "Max.schema.json" },
         "Min": { "$ref": "Min.schema.json" },
+        "Multiply": { "$ref": "Multiply.schema.json" },
         "NotEqual": { "$ref": "NotEqual.schema.json" },
         "Now": { "$ref": "Now.schema.json" },
         "Number": { "$ref": "Number.schema.json" },
@@ -52,6 +55,7 @@
         "Property": { "$ref": "Property.schema.json" },
         "Random": { "$ref": "Random.schema.json" },
         "String": { "$ref": "String.schema.json" },
+        "Subtract": { "$ref": "Subtract.schema.json" },
         "Time": { "$ref": "Time.schema.json" }
       },
       "additionalProperties": false

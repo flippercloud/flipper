@@ -1,0 +1,20 @@
+{
+  "valid": [
+    {
+      "expression": { "Subtract": [3, 2] },
+      "result": { "enum": [1] }
+    },
+    {
+      "expression": { "Subtract": [{ "Property": "age" }, 3] },
+      "context": { "properties": { "age": 18 }},
+      "result": { "enum": [15] }
+    }
+  ],
+  "invalid": [
+    { "Subtract": [1, 2, 3] },
+    { "Subtract": [1] },
+    { "Subtract": 1 },
+    { "Subtract": null },
+    { "Subtract": [1, 2], "Any": [] }
+  ]
+}
