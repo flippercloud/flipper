@@ -22,7 +22,10 @@ const Dereference = {
 
     if (Array.isArray(value)) {
       // Schema definition returns an array for this property, return the array with all refs resolved
-      return value.map((item, i) => Schema.proxy(this.join(target.$id, `${property}/${i}`), item))
+      return value.map((item, i) => {
+        const $ref = item.$ref || this.join(target.$id, `${property}/${i}`)
+        return Schema.resolve($ref, target.$id)
+      })
     } else if (value !== null && typeof value === 'object') {
       // Schema definition returns an object for this property, return the subschema and proxy it
       return Schema.proxy(this.join(target.$id, property), value)
@@ -54,10 +57,15 @@ const DelegateToDefinition = {
 }
 
 // Class to browse schemas, resolve refs, and validate data
-class Schema {
-  static resolve ($ref, $id = undefined) {
+export class Schema {
+  static resolve ($ref, $id = BaseURI) {
     const { href } = new URL($ref, $id)
-    return this.proxy(href, ajv.getSchema(href).schema)
+    const validator = ajv.getSchema(href)
+
+    if (!validator) throw new TypeError('Schema not found: ' + href)
+    if (!validator.proxy) validator.proxy = Schema.proxy(href, validator.schema)
+
+    return validator.proxy
   }
 
   static proxy ($id, definition) {
@@ -89,4 +97,4 @@ class Schema {
   }
 }
 
-export const schema = Schema.resolve(BaseURI)
+export const schema = Schema.resolve('#')
