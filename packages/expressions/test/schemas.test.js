@@ -45,6 +45,11 @@ describe('schema.json', () => {
       expect(Schema.resolve('#/definitions/function/properties/Any').title).toEqual('Any')
       expect(Schema.resolve('#').definitions.function.properties.Any.title).toEqual('Any')
     })
+
+    test('returns array values', () => {
+      const expected = ['seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years']
+      expect(Schema.resolve('Duration.schema.json#/items/1/anyOf/0').enum).toEqual(expected)
+    })
   })
 
   describe('resolveAnyOf', () => {
@@ -69,8 +74,8 @@ describe('schema.json', () => {
 
     test('returns schema for tuple', () => {
       const duration = Schema.resolve('Duration.schema.json')
-      expect(duration.arrayItem(0).title).toEqual('Number')
-      expect(duration.arrayItem(1).title).toEqual('Unit')
+      expect(duration.arrayItem(0).$id).toMatch('schema.json#/definitions/number')
+      expect(duration.arrayItem(1).$id).toMatch('Duration.schema.json#/items/1')
       expect(duration.arrayItem(2)).toBe(undefined)
     })
   })

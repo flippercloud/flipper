@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest'
-import { Expression, Constant } from '../lib'
+import { Expression, Constant, Schema } from '../lib'
 
 describe('Expression', () => {
   describe('build', () => {
@@ -15,6 +15,21 @@ describe('Expression', () => {
       expect(() => Expression.build([])).toThrowError(TypeError)
       expect(() => Expression.build(new Date())).toThrowError(TypeError)
       expect(() => Expression.build({ All: [], Any: [] })).toThrowError(TypeError)
+    })
+
+    test('sets schema for constant args', () => {
+      const expression = Expression.build({ Duration: [5, 'minutes'] })
+      const schema = Schema.resolve('Duration.schema.json')
+      expect(expression.schema).toEqual(schema)
+      expect(expression.args[0].schema).toEqual(schema.items[0])
+      expect(expression.args[1].schema).toEqual(schema.items[1])
+    })
+
+    test('each subexpression uses its own schema', () => {
+      const expression = Expression.build({ GreaterThan: [ { Now: [] }, { Property: ['released_at'] } ] })
+      expect(expression.schema).toEqual(Schema.resolve('GreaterThan.schema.json'))
+      expect(expression.args[0].schema).toEqual(Schema.resolve('Now.schema.json'))
+      expect(expression.args[1].schema).toEqual(Schema.resolve('Property.schema.json'))
     })
   })
 

@@ -5,21 +5,18 @@ import { Schema } from './schemas'
 //
 // Implements the same interface as Expression
 export class Constant {
-  constructor (value, id = uuidv4()) {
+  constructor (value, { id = uuidv4(), schema = Schema.resolve('#/definitions/constant') } = {}) {
     this.value = value
     this.id = id
+    this.schema = schema
   }
 
-  clone (value, id = this.id) {
-    return new Constant(value, id)
+  clone (value, { id = this.id, schema = this.schema } = {}) {
+    return new Constant(value, { id, schema })
   }
 
   get args () {
     return [this.value]
-  }
-
-  get schema () {
-    return Schema.resolve('#/definitions/constant')
   }
 
   validate (schema = this.schema) {

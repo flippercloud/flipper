@@ -3,8 +3,15 @@ import { Constant, Schema } from '../lib'
 
 describe('Constant', () => {
   describe('schema', () => {
-    test('returns Constant schema', () => {
+    test('defaults to Constant schema', () => {
       expect(new Constant('string').schema.title).toEqual('Constant')
+    })
+
+    test('uses provided schema', () => {
+      const schema = Schema.resolve('#/definitions/number')
+      const number = new Constant(42, { schema })
+      expect(number.schema).toEqual(schema)
+      expect(number.clone(99).schema).toEqual(schema)
     })
   })
 
@@ -15,6 +22,20 @@ describe('Constant', () => {
       expect(new Constant('string').validate().valid).toBe(true)
       expect(new Constant(42).validate().valid).toBe(true)
       expect(new Constant(3.14).validate().valid).toBe(true)
+    })
+
+    test('returns false for invalid value', () => {
+      expect(new Constant(['array']).validate().valid).toBe(false)
+      expect(new Constant({Now: []}).validate().valid).toBe(false)
+    })
+
+    test('uses provided schema', () => {
+      const schema = Schema.resolve('#/definitions/number')
+      expect(new Constant(42, { schema }).validate().valid).toBe(true)
+      expect(new Constant(42).validate(schema).valid).toBe(true)
+
+      expect(new Constant('nope', { schema }).validate().valid).toBe(false)
+      expect(new Constant('nope').validate(schema).valid).toBe(false)
     })
   })
 
