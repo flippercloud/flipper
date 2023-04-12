@@ -3,5 +3,6 @@
   "$id": "https://www.flippercloud.io/expressions/Equal.schema.json",
   "title": "Equal",
   "description": "Compare two values for equality",
-  "$ref": "schema.json#/definitions/arguments-two"
+  "operator": "==",
+  "$ref": "schema.json#/definitions/operation"
 }

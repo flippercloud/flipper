@@ -14,7 +14,7 @@ const ajv = new Ajv({
   strict: true
 })
 addFormats(ajv)
-
+ajv.addKeyword('operator')
 
 // Delegate property access to the schema definition
 const DelegateToDefinition = {

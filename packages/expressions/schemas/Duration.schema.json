@@ -7,12 +7,11 @@
   "items": [
     { "$ref": "schema.json#/definitions/number" },
     {
-      "title": "Unit",
       "anyOf": [
         {
+          "title": "Unit",
           "type": "string",
-          "enum": ["seconds", "minutes", "hours", "days", "weeks", "months", "years"],
-          "default": "seconds"
+          "enum": ["seconds", "minutes", "hours", "days", "weeks", "months", "years"]
         },
         { "$ref": "schema.json#/definitions/function" }
       ]

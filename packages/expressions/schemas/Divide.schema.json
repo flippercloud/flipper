@@ -3,5 +3,6 @@
   "$id": "https://www.flippercloud.io/expressions/Divide.schema.json",
   "title": "Divide",
   "description": "Divide two values",
-  "$ref": "schema.json#/definitions/arguments-two"
+  "operator": "/",
+  "$ref": "schema.json#/definitions/operation"
 }

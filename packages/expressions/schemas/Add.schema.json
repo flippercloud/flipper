@@ -3,5 +3,6 @@
   "$id": "https://www.flippercloud.io/expressions/Add.schema.json",
   "title": "Add",
   "description": "Add two values",
-  "$ref": "schema.json#/definitions/arguments-two"
+  "operator": "+",
+  "$ref": "schema.json#/definitions/operation"
 }

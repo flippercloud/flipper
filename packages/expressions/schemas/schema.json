@@ -22,7 +22,8 @@
         },
         {
           "title": "Boolean",
-          "type": "boolean"
+          "type": "boolean",
+          "enum": [true, false]
         }
       ]
     },
@@ -82,8 +83,8 @@
       "items": { "$ref": "#" },
       "minItems": 0
     },
-    "arguments-two": {
-      "title": "Comparison",
+    "operation": {
+      "title": "Operation",
       "description": "An array with exactly two expressions",
       "type": "array",
       "items": { "$ref": "#" },

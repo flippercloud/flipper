@@ -3,5 +3,6 @@
   "$id": "https://www.flippercloud.io/expressions/LessThanOrEqualTo.schema.json",
   "title": "LessThanOrEqualTo",
   "description": "Compare if the first argument is < the second argument.",
-  "$ref": "schema.json#/definitions/arguments-two"
+  "operator": "<=",
+  "$ref": "schema.json#/definitions/operation"
 }
