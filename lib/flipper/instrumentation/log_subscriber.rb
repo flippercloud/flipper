@@ -32,7 +32,7 @@ module Flipper
         details += " gate_name=#{gate_name}" unless gate_name.nil?
 
         name = '%s (%.1fms)' % [description, event.duration]
-        debug "  #{color(name, CYAN, true)}  [ #{details} ]"
+        debug "  #{color(name, CYAN, bold: true)}  [ #{details} ]"
       end
 
       # Logs an adapter operation. If operation is for a feature, then that
@@ -64,7 +64,7 @@ module Flipper
         details = "result=#{result.inspect}"
 
         name = '%s (%.1fms)' % [description, event.duration]
-        debug "  #{color(name, CYAN, true)}  [ #{details} ]"
+        debug "  #{color(name, CYAN, bold: true)}  [ #{details} ]"
       end
 
       def logger
