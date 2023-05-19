@@ -45,16 +45,14 @@ module Flipper
           hash: 'sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF'.freeze
         }.freeze
       }.freeze
-      SCRIPT_SRCS = SOURCES.values_at(:jquery_js, :popper_js, :bootstrap_js).map { |s| s[:src] }
-      STYLE_SRCS = SOURCES.values_at(:bootstrap_css).map { |s| s[:src] }
       CONTENT_SECURITY_POLICY = <<-CSP.delete("\n")
         default-src 'none';
         img-src 'self';
         font-src 'self';
-        script-src 'report-sample' 'self' #{SCRIPT_SRCS.join(' ')};
-        style-src 'self' 'unsafe-inline' #{STYLE_SRCS.join(' ')};
+        script-src 'report-sample' 'self';
+        style-src 'self' 'unsafe-inline';
         style-src-attr 'unsafe-inline' ;
-        style-src-elem 'self' #{STYLE_SRCS.join(' ')};
+        style-src-elem 'self';
       CSP
 
       # Public: Call this in subclasses so the action knows its route.
