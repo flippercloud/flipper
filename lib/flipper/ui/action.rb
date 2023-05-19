@@ -29,19 +29,19 @@ module Flipper
 
       SOURCES = {
         bootstrap_css: {
-          src: 'https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css'.freeze,
+          src: '/css/bootstrap-4.6.0.min.css'.freeze,
           hash: 'sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l'.freeze
         }.freeze,
         jquery_js: {
-          src: 'https://code.jquery.com/jquery-3.6.0.slim.js'.freeze,
+          src: '/js/jquery-3.6.0.slim.js'.freeze,
           hash: 'sha256-HwWONEZrpuoh951cQD1ov2HUK5zA5DwJ1DNUXaM6FsY='.freeze
         }.freeze,
         popper_js: {
-          src: 'https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js'.freeze,
+          src: '/js/popper-1.12.9.min.js'.freeze,
           hash: 'sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q'.freeze
         }.freeze,
         bootstrap_js: {
-          src: 'https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js'.freeze,
+          src: '/js/bootstrap-4.6.0.min.js'.freeze,
           hash: 'sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF'.freeze
         }.freeze
       }.freeze
