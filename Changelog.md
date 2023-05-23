@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+### Additions/Changes
+
+* Use new method of making logs bold for rails (https://github.com/jnunemaker/flipper/pull/726)
+
 ## 0.28.0
 
 ### Additions/Changes
