@@ -64,7 +64,13 @@
           <div class="card-body bg-lightest border-bottom py-3">
             <div class="row align-items-center">
               <div class="col col-mr-auto pl-md-5">
-                <h6 class="m-0"><%= item %></h6>
+                <h6 class="m-0">
+                  <% if Flipper::UI::Util.present?(@feature.actor_names[item]) %>
+                    <%= "#{@feature.actor_names[item]} (#{item})" %>
+                  <% else %>
+                    <%= item %>
+                  <% end %>
+                </h6>
               </div>
               <div class="col col-auto">
                 <% unless Flipper::UI.configuration.read_only %>
