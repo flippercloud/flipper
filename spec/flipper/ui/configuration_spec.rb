@@ -110,6 +110,12 @@ RSpec.describe Flipper::UI::Configuration do
     end
   end
 
+  describe "#actor_names_source" do
+    it "has default value" do
+      expect(configuration.actor_names_source.call(%w[foo bar])).to eq({})
+    end
+  end
+
   describe "#confirm_fully_enable" do
     it "has default value" do
       expect(configuration.confirm_fully_enable).to eq(false)
