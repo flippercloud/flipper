@@ -114,6 +114,20 @@ RSpec.describe Flipper::UI::Configuration do
     it "has default value" do
       expect(configuration.actor_names_source.call(%w[foo bar])).to eq({})
     end
+
+    context "actor names source is provided" do
+      it "can be updated" do
+        configuration.actor_names_source = lambda do |_keys|
+          YAML.load_file(FlipperRoot.join('spec/support/actor_names.yml'))
+        end
+        keys = %w[actor_1 foo]
+        result = configuration.actor_names_source.call(keys)
+        expected = {
+          "actor_name_1" => "Actor #1",
+        }
+        expect(result).to eq(expected)
+      end
+    end
   end
 
   describe "#confirm_fully_enable" do
