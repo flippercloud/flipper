@@ -7,17 +7,18 @@ All notable changes to this project will be documented in this file.
 ### Additions/Changes
 
 * Use new method of making logs bold for rails (https://github.com/jnunemaker/flipper/pull/726)
+* Bundle bootstrap, jquery and poppler with the library. (https://github.com/jnunemaker/flipper/pull/731)
 
 ## 0.28.0
 
 ### Additions/Changes
 
-* Allow multiple actors for Flipper.enabled?. Improves performance of feature flags for multiple actors and simplifies code for users of flipper. This likely breaks things for anyone using Flipper internal classes related to actors, but that isn't likely you so you should be fine. 
+* Allow multiple actors for Flipper.enabled?. Improves performance of feature flags for multiple actors and simplifies code for users of flipper. This likely breaks things for anyone using Flipper internal classes related to actors, but that isn't likely you so you should be fine.
   ```diff
   - [user, user.team, user.org].any? { |actor| Flipper.enabled?(:my_feature, actor) }
   + Flipper.enabled?(:my_feature, user, user.team, user.org)
   ```
-* If you currently use `actor.thing` in a group, you'll need to change it to `actor.actor`. 
+* If you currently use `actor.thing` in a group, you'll need to change it to `actor.actor`.
   ```diff
   - Flipper.register(:our_group) do |actor|
   -   actor.thing.is_a?(OurClassName)
