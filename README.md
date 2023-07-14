@@ -17,13 +17,33 @@ Control your software &mdash; don't let it control you.
 
 ## Installation
 
+### Rails
+
+Add this line to your Rails application's Gemfile:
+
+    gem 'flipper-rails'
+
+And then execute:
+
+    $ bundle
+
+And generate the migrations:
+
+    $ bin/rails generate flipper:active_record
+    $ bin/rails db:migrate
+
+<details>
+  <summary>Advanced Ruby Setup</summary>
+
+If you are not using Rails or want more control over how Flipper is setup, you can use the `flipper` gem directly and pick a different storage [adapter](https://flippercloud.io/docs/adapters).
+
 Add this line to your application's Gemfile:
 
     gem 'flipper'
 
-You'll also want to pick a storage [adapter](https://flippercloud.io/docs/adapters), for example:
+Add a storage [adapter](https://flippercloud.io/docs/adapters), for example:
 
-    gem 'flipper-active_record'
+    gem 'flipper-redis'
 
 And then execute:
 
@@ -32,6 +52,7 @@ And then execute:
 Or install it yourself with:
 
     $ gem install flipper
+</details>
 
 ## Subscribe &amp; Ship
 
