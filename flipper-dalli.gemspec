@@ -8,10 +8,10 @@ end
 
 Gem::Specification.new do |gem|
   gem.authors       = ['John Nunemaker']
-  gem.email         = ['nunemaker@gmail.com']
+  gem.email         = 'support@flippercloud.io'
   gem.summary       = 'Dalli adapter for Flipper'
   gem.license       = 'MIT'
-  gem.homepage      = 'https://github.com/jnunemaker/flipper'
+  gem.homepage      = 'https://www.flippercloud.io'
 
   gem.files         = `git ls-files`.split("\n").select(&flipper_dalli_files) + ['lib/flipper/version.rb']
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n").select(&flipper_dalli_files)
