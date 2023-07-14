@@ -6,6 +6,13 @@ All notable changes to this project will be documented in this file.
 
 ### Additions/Changes
 
+* New `flipper-rails` gem that includes most common dependencies (`flipper`, `flipper-active_record`, `flipper-cloud`)
+   ```diff
+   + gem 'flipper-rails'
+   - gem 'flipper'
+   - gem 'flipper-active_record'
+   - gem 'flipper-cloud'
+   ```
 * Use new method of making logs bold for rails (https://github.com/jnunemaker/flipper/pull/726)
 * Bundle bootstrap, jquery and poppler with the library. (https://github.com/jnunemaker/flipper/pull/731)
 
