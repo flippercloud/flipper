@@ -8,10 +8,10 @@ end
 
 Gem::Specification.new do |gem|
   gem.authors       = ['John Nunemaker']
-  gem.email         = ['nunemaker@gmail.com']
+  gem.email         = 'support@flippercloud.io'
   gem.summary       = 'FlipperCloud.io adapter for Flipper'
   gem.license       = 'MIT'
-  gem.homepage      = 'https://github.com/jnunemaker/flipper'
+  gem.homepage      = 'https://www.flippercloud.io'
 
   extra_files = [
     'lib/flipper/version.rb',

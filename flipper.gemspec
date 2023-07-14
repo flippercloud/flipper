@@ -22,9 +22,9 @@ ignored_test_files.flatten!.uniq!
 
 Gem::Specification.new do |gem|
   gem.authors       = ['John Nunemaker']
-  gem.email         = ['nunemaker@gmail.com']
+  gem.email         = 'support@flippercloud.io'
   gem.summary       = 'Feature flipper for ANYTHING'
-  gem.homepage      = 'https://github.com/jnunemaker/flipper'
+  gem.homepage      = 'https://www.flippercloud.io'
   gem.license       = 'MIT'
 
   gem.files         = `git ls-files`.split("\n") - ignored_files + ['lib/flipper/version.rb']
