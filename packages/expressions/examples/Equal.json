@@ -9,6 +9,14 @@
       "result": { "enum": [true] }
     },
     {
+      "expression": { "Equal": [null, null] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "Equal": [null, false] },
+      "result": { "enum": [false] }
+    },
+    {
       "expression": { "Equal": [1, 2] },
       "result": { "enum": [false] }
     },

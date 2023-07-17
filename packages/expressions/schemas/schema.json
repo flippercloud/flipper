@@ -24,6 +24,9 @@
           "title": "Boolean",
           "type": "boolean",
           "enum": [true, false]
+        },
+        {
+          "type": "null"
         }
       ]
     },

@@ -55,12 +55,12 @@ describe('schema.json', () => {
   describe('resolveAnyOf', () => {
     test('returns nested anyOf', () => {
       const ref = Schema.resolve('#')
-      expect(ref.resolveAnyOf()).toHaveLength(4)
+      expect(ref.resolveAnyOf()).toHaveLength(5)
     })
 
     test('returns array of schemas', () => {
       const ref = Schema.resolve('#/definitions/constant')
-      expect(ref.resolveAnyOf()).toHaveLength(3)
+      expect(ref.resolveAnyOf()).toHaveLength(4)
       expect(ref.resolveAnyOf()).toEqual(ref.anyOf)
     })
   })

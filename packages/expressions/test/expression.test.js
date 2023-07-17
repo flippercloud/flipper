@@ -11,6 +11,24 @@ describe('Expression', () => {
       expect(expression.value).toEqual({ All: [true] })
     })
 
+    test('builds an expression from a boolean constant', () => {
+      const expression = Expression.build(true)
+      expect(expression).toBeInstanceOf(Constant)
+      expect(expression.value).toEqual(true)
+    })
+
+    test('builds an expression from a string constant', () => {
+      const expression = Expression.build('hello')
+      expect(expression).toBeInstanceOf(Constant)
+      expect(expression.value).toEqual('hello')
+    })
+
+    test('builds an expression from a null constant', () => {
+      const expression = Expression.build(null)
+      expect(expression).toBeInstanceOf(Constant)
+      expect(expression.value).toEqual(null)
+    })
+
     test('throws error on invalid expression', () => {
       expect(() => Expression.build([])).toThrowError(TypeError)
       expect(() => Expression.build(new Date())).toThrowError(TypeError)
@@ -25,8 +43,13 @@ describe('Expression', () => {
       expect(expression.args[1].schema).toEqual(schema.items[1])
     })
 
+    test('sets schema for constant', () => {
+      const expression = Expression.build(false)
+      expect(expression.schema.$id).toEqual(Schema.resolve('#').$id)
+    })
+
     test('each subexpression uses its own schema', () => {
-      const expression = Expression.build({ GreaterThan: [ { Now: [] }, { Property: ['released_at'] } ] })
+      const expression = Expression.build({ GreaterThan: [{ Now: [] }, { Property: ['released_at'] }] })
       expect(expression.schema).toEqual(Schema.resolve('GreaterThan.schema.json'))
       expect(expression.args[0].schema).toEqual(Schema.resolve('Now.schema.json'))
       expect(expression.args[1].schema).toEqual(Schema.resolve('Property.schema.json'))

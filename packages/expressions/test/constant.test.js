@@ -3,8 +3,8 @@ import { Constant, Schema } from '../lib'
 
 describe('Constant', () => {
   describe('schema', () => {
-    test('defaults to Constant schema', () => {
-      expect(new Constant('string').schema.title).toEqual('Constant')
+    test('defaults to expression schema', () => {
+      expect(new Constant('string').schema.title).toEqual('Expression')
     })
 
     test('uses provided schema', () => {
@@ -26,7 +26,6 @@ describe('Constant', () => {
 
     test('returns false for invalid value', () => {
       expect(new Constant(['array']).validate().valid).toBe(false)
-      expect(new Constant({Now: []}).validate().valid).toBe(false)
     })
 
     test('uses provided schema', () => {

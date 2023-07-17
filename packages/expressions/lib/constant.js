@@ -5,7 +5,7 @@ import { Schema } from './schemas'
 //
 // Implements the same interface as Expression
 export class Constant {
-  constructor (value, { id = uuidv4(), schema = Schema.resolve('#/definitions/constant') } = {}) {
+  constructor (value, { id = uuidv4(), schema = Schema.resolve('#') } = {}) {
     this.value = value
     this.id = id
     this.schema = schema

@@ -22,7 +22,7 @@ module Flipper
         args = args.is_a?(Hash) ? [args] : Array(args)
 
         new(name, args.map { |o| build(o) })
-      when String, Numeric, FalseClass, TrueClass
+      when String, Numeric, FalseClass, TrueClass, nil
         Expression::Constant.new(object)
       when Symbol
         Expression::Constant.new(object.to_s)

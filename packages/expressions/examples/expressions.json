@@ -19,10 +19,13 @@
     {
       "expression": 1.1,
       "result": { "enum": [1.1] }
+    },
+    {
+      "expression": null,
+      "result": { "enum": [null] }
     }
   ],
   "invalid": [
-    null,
     {},
     []
   ]

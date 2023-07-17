@@ -3,13 +3,9 @@ import { Constant } from './constant'
 import { Schema } from './schemas'
 
 function toArray (arg) {
-  if (Array.isArray(arg)) {
-    return arg
-  } else if (arg === null) {
-    return []
-  } else {
-    return [arg]
-  }
+  if (Array.isArray(arg)) return arg
+  if (arg === null) return []
+  return [arg]
 }
 
 // Simple model to transform this: `{ All: [{ Boolean: [true] }]`
@@ -20,14 +16,14 @@ export class Expression {
       return expression
     }
 
-    if (typeof expression === 'object') {
+    if (['number', 'string', 'boolean'].includes(typeof expression) || expression === null) {
+      return new Constant(expression, { schema })
+    } else if (typeof expression === 'object') {
       if (Object.keys(expression).length !== 1) {
         throw new TypeError(`Invalid expression: ${JSON.stringify(expression)}`)
       }
       const name = Object.keys(expression)[0]
       return new Expression({ name, args: expression[name] })
-    } else if (['number', 'string', 'boolean'].includes(typeof expression)) {
-      return new Constant(expression, { schema })
     } else {
       throw new TypeError(`Invalid expression: ${JSON.stringify(expression)}`)
     }
