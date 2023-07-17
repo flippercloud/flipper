@@ -2,12 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## 0.28.1
+## Unreleased
 
 ### Additions/Changes
 
-* Use new method of making logs bold for rails (https://github.com/jnunemaker/flipper/pull/726)
-* Bundle bootstrap, jquery and poppler with the library. (https://github.com/jnunemaker/flipper/pull/731)
+* Expressions are now available and considered "alpha". They are not yet documented, but you can see examples in [examples/expressions.rb](examples/expressions.rb). (https://github.com/jnunemaker/flipper/pull/692)
 
 ### Breaking Changes
 
@@ -19,6 +18,13 @@ All notable changes to this project will be documented in this file.
   * Change Flipper.actors => Flipper::Types::PercentageOfActors.new
   * Change Flipper.percentage_of_time => Flipper::Types::PercentageOfTime.new
   * Change Flipper.time => Flipper::Types::PercentageOfTime.new
+
+## 0.28.1
+
+### Additions/Changes
+
+* Use new method of making logs bold for rails (https://github.com/jnunemaker/flipper/pull/726)
+* Bundle bootstrap, jquery and poppler with the library. (https://github.com/jnunemaker/flipper/pull/731)
 
 ## 0.28.0
 
