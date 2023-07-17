@@ -25,6 +25,11 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
                   'value' => 'true',
                 },
                 {
+                  'key' => 'expression',
+                  'name' => 'expression',
+                  'value' => nil,
+                },
+                {
                   'key' => 'actors',
                   'name' => 'actor',
                   'value' => ['10'],
@@ -60,6 +65,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
               'state' => 'on',
               'gates' => [
                 { 'key' => 'boolean', 'value' => 'true'},
+                {"key" => "expression", "value" => nil},
                 { 'key' => 'actors', 'value' => ['10']},
                 {'key' => 'percentage_of_actors', 'value' => nil},
                 { 'key' => 'percentage_of_time', 'value' => nil},
@@ -138,6 +144,11 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
             {
               'key' => 'boolean',
               'name' => 'boolean',
+              'value' => nil,
+            },
+            {
+              'key' => 'expression',
+              'name' => 'expression',
               'value' => nil,
             },
             {

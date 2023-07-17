@@ -56,17 +56,49 @@ module Flipper
   # Public: All the methods delegated to instance. These should match the
   # interface of Flipper::DSL.
   def_delegators :instance,
-                 :enabled?, :enable, :disable, :bool, :boolean,
-                 :enable_actor, :disable_actor, :actor,
+                 :enabled?, :enable, :disable,
+                 :enable_expression, :disable_expression,
+                 :expression, :add_expression, :remove_expression,
+                 :enable_actor, :disable_actor,
                  :enable_group, :disable_group,
                  :enable_percentage_of_actors, :disable_percentage_of_actors,
-                 :actors, :percentage_of_actors,
                  :enable_percentage_of_time, :disable_percentage_of_time,
-                 :time, :percentage_of_time,
                  :features, :feature, :[], :preload, :preload_all,
                  :adapter, :add, :exist?, :remove, :import, :export,
                  :memoize=, :memoizing?,
                  :sync, :sync_secret # For Flipper::Cloud. Will error for OSS Flipper.
+
+  def any(*args)
+    Expression.build({ Any: args.flatten })
+  end
+
+  def all(*args)
+    Expression.build({ All: args.flatten })
+  end
+
+  def constant(value)
+    Expression.build(value)
+  end
+
+  def property(name)
+    Expression.build({ Property: name })
+  end
+
+  def string(value)
+    Expression.build({ String: value })
+  end
+
+  def number(value)
+    Expression.build({ Number: value })
+  end
+
+  def boolean(value)
+    Expression.build({ Boolean: value })
+  end
+
+  def random(max)
+    Expression.build({ Random: max })
+  end
 
   # Public: Use this to register a group by name.
   #
@@ -157,6 +189,7 @@ require 'flipper/middleware/memoizer'
 require 'flipper/middleware/setup_env'
 require 'flipper/poller'
 require 'flipper/registry'
+require 'flipper/expression'
 require 'flipper/type'
 require 'flipper/types/actor'
 require 'flipper/types/boolean'

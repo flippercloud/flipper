@@ -8,24 +8,31 @@ RSpec.describe Flipper do
   let(:dev_group)   { flipper.group(:devs) }
 
   let(:admin_actor) do
-    double 'Non Flipper Thing', flipper_id: 1,  admin?: true, dev?: false
+    double 'Non Flipper Thing', flipper_id: 1,  admin?: true, dev?: false, flipper_properties: {"admin" => true, "dev" => false}
   end
   let(:dev_actor) do
-    double 'Non Flipper Thing', flipper_id: 10, admin?: false, dev?: true
+    double 'Non Flipper Thing', flipper_id: 10, admin?: false, dev?: true, flipper_properties: {"admin" => false, "dev" => true}
   end
 
   let(:admin_truthy_actor) do
-    double 'Non Flipper Thing', flipper_id: 1,  admin?: 'true-ish', dev?: false
+    double 'Non Flipper Thing', flipper_id: 1,  admin?: 'true-ish', dev?: false, flipper_properties: {"admin" => "true-ish", "dev" => false}
   end
   let(:admin_falsey_actor) do
-    double 'Non Flipper Thing', flipper_id: 1,  admin?: nil, dev?: false
+    double 'Non Flipper Thing', flipper_id: 1,  admin?: nil, dev?: false, flipper_properties: {"admin" => nil, "dev" => false}
+  end
+
+  let(:basic_plan_actor) do
+    double 'Non Flipper Thing', flipper_id: 1, flipper_properties: {"plan" => "basic"}
+  end
+  let(:premium_plan_actor) do
+    double 'Non Flipper Thing', flipper_id: 10, flipper_properties: {"plan" => "premium"}
   end
 
   let(:pitt)        { Flipper::Actor.new(1) }
   let(:clooney)     { Flipper::Actor.new(10) }
 
-  let(:five_percent_of_actors) { flipper.actors(5) }
-  let(:five_percent_of_time) { flipper.time(5) }
+  let(:five_percent_of_actors) { Flipper::Types::PercentageOfActors.new(5) }
+  let(:five_percent_of_time) { Flipper::Types::PercentageOfTime.new(5) }
 
   before do
     described_class.register(:admins, &:admin?)
@@ -69,11 +76,13 @@ RSpec.describe Flipper do
       end
 
       it 'enables feature for flipper actor in group' do
-        expect(feature.enabled?(flipper.actor(admin_actor))).to eq(true)
+        expect(feature.enabled?(Flipper::Types::Actor.new(admin_actor))).to eq(true)
+        expect(feature.enabled?(admin_actor)).to eq(true)
       end
 
       it 'does not enable for flipper actor not in group' do
-        expect(feature.enabled?(flipper.actor(dev_actor))).to eq(false)
+        expect(feature.enabled?(Flipper::Types::Actor.new(dev_actor))).to eq(false)
+        expect(feature.enabled?(dev_actor)).to eq(false)
       end
 
       it 'does not enable feature for all' do
@@ -256,11 +265,13 @@ RSpec.describe Flipper do
       end
 
       it 'disables feature for flipper actor in group' do
-        expect(feature.enabled?(flipper.actor(admin_actor))).to eq(false)
+        expect(feature.enabled?(Flipper::Types::Actor.new(admin_actor))).to eq(false)
+        expect(feature.enabled?(admin_actor)).to eq(false)
       end
 
       it 'does not disable feature for flipper actor in other groups' do
-        expect(feature.enabled?(flipper.actor(dev_actor))).to eq(true)
+        expect(feature.enabled?(Flipper::Types::Actor.new(dev_actor))).to eq(true)
+        expect(feature.enabled?(dev_actor)).to eq(true)
       end
 
       it 'adds feature to set of features' do
@@ -294,7 +305,7 @@ RSpec.describe Flipper do
 
     context 'with a percentage of actors' do
       before do
-        @result = feature.disable(flipper.actors(0))
+        @result = feature.disable(Flipper::Types::PercentageOfActors.new(0))
       end
 
       it 'returns true' do
@@ -318,7 +329,7 @@ RSpec.describe Flipper do
     context 'with a percentage of time' do
       before do
         @gate = feature.gate(:percentage_of_time)
-        @result = feature.disable(flipper.time(0))
+        @result = feature.disable(Flipper::Types::PercentageOfTime.new(0))
       end
 
       it 'returns true' do
@@ -373,12 +384,13 @@ RSpec.describe Flipper do
       end
 
       it 'returns true' do
-        expect(feature.enabled?(flipper.actor(admin_actor))).to eq(true)
+        expect(feature.enabled?(Flipper::Types::Actor.new(admin_actor))).to eq(true)
         expect(feature.enabled?(admin_actor)).to eq(true)
       end
 
       it 'returns true for truthy block values' do
-        expect(feature.enabled?(flipper.actor(admin_truthy_actor))).to eq(true)
+        expect(feature.enabled?(Flipper::Types::Actor.new(admin_truthy_actor))).to eq(true)
+        expect(feature.enabled?(admin_truthy_actor)).to eq(true)
       end
 
       it 'returns true if any actor is in enabled group' do
@@ -388,12 +400,13 @@ RSpec.describe Flipper do
 
     context 'for actor in disabled group' do
       it 'returns false' do
-        expect(feature.enabled?(flipper.actor(dev_actor))).to eq(false)
+        expect(feature.enabled?(Flipper::Types::Actor.new(dev_actor))).to eq(false)
         expect(feature.enabled?(dev_actor)).to eq(false)
       end
 
       it 'returns false for falsey block values' do
-        expect(feature.enabled?(flipper.actor(admin_falsey_actor))).to eq(false)
+        expect(feature.enabled?(Flipper::Types::Actor.new(admin_falsey_actor))).to eq(false)
+        expect(feature.enabled?(admin_falsey_actor)).to eq(false)
       end
     end
 
@@ -547,6 +560,91 @@ RSpec.describe Flipper do
 
     it 'does not enable feature for object in not enabled group' do
       expect(feature.enabled?(dev_actor)).to eq(false)
+    end
+  end
+
+  context "for expression" do
+    it "works" do
+      feature.enable Flipper.property(:plan).eq("basic")
+
+      expect(feature.enabled?).to be(false)
+      expect(feature.enabled?(basic_plan_actor)).to be(true)
+      expect(feature.enabled?(premium_plan_actor)).to be(false)
+      expect(feature.enabled?(admin_actor)).to be(false)
+    end
+
+    it "works for true expression with no actor" do
+      feature.enable Flipper.boolean(true)
+      expect(feature.enabled?).to be(true)
+    end
+
+    it "works for multiple actors" do
+      feature.enable Flipper.property(:plan).eq("basic")
+
+      expect(feature.enabled?(basic_plan_actor, premium_plan_actor)).to be(true)
+      expect(feature.enabled?(premium_plan_actor, basic_plan_actor)).to be(true)
+      expect(feature.enabled?(premium_plan_actor, admin_actor)).to be(false)
+    end
+  end
+
+  context "for Any" do
+    it "works" do
+      expression = Flipper.any(
+        Flipper.property(:plan).eq("basic"),
+        Flipper.property(:plan).eq("plus"),
+      )
+      feature.enable expression
+
+      expect(feature.enabled?(basic_plan_actor)).to be(true)
+      expect(feature.enabled?(premium_plan_actor)).to be(false)
+    end
+  end
+
+  context "for All" do
+    it "works" do
+      true_actor = Flipper::Actor.new("User;1", {
+        "plan" => "basic",
+        "age" => 21,
+      })
+      false_actor = Flipper::Actor.new("User;1", {
+        "plan" => "basic",
+        "age" => 20,
+      })
+      expression = Flipper.all(
+        Flipper.property(:plan).eq("basic"),
+        Flipper.property(:age).eq(21)
+      )
+      feature.enable expression
+
+      expect(feature.enabled?(true_actor)).to be(true)
+      expect(feature.enabled?(false_actor)).to be(false)
+    end
+
+    it "works when nested" do
+      admin_actor = Flipper::Actor.new("User;1", {
+        "admin" => true,
+      })
+      true_actor = Flipper::Actor.new("User;1", {
+        "plan" => "basic",
+        "age" => 21,
+      })
+      false_actor = Flipper::Actor.new("User;1", {
+        "plan" => "basic",
+        "age" => 20,
+      })
+      expression = Flipper.any(
+        Flipper.property(:admin).eq(true),
+        Flipper.all(
+          Flipper.property(:plan).eq("basic"),
+          Flipper.property(:age).eq(21)
+        )
+      )
+
+      feature.enable expression
+
+      expect(feature.enabled?(admin_actor)).to be(true)
+      expect(feature.enabled?(true_actor)).to be(true)
+      expect(feature.enabled?(false_actor)).to be(false)
     end
   end
 end

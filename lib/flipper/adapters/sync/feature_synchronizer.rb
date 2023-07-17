@@ -9,6 +9,7 @@ module Flipper
       class FeatureSynchronizer
         extend Forwardable
 
+        def_delegator :@local_gate_values, :expression, :local_expression
         def_delegator :@local_gate_values, :boolean, :local_boolean
         def_delegator :@local_gate_values, :actors, :local_actors
         def_delegator :@local_gate_values, :groups, :local_groups
@@ -17,6 +18,7 @@ module Flipper
         def_delegator :@local_gate_values, :percentage_of_time,
                       :local_percentage_of_time
 
+        def_delegator :@remote_gate_values, :expression, :remote_expression
         def_delegator :@remote_gate_values, :boolean, :remote_boolean
         def_delegator :@remote_gate_values, :actors, :remote_actors
         def_delegator :@remote_gate_values, :groups, :remote_groups
@@ -40,14 +42,21 @@ module Flipper
             @feature.enable
           else
             @feature.disable if local_boolean_enabled?
-            sync_actors
             sync_groups
+            sync_actors
+            sync_expression
             sync_percentage_of_actors
             sync_percentage_of_time
           end
         end
 
         private
+
+        def sync_expression
+          return if local_expression == remote_expression
+
+          @feature.enable_expression remote_expression
+        end
 
         def sync_actors
           remote_actors_added = remote_actors - local_actors

@@ -9,16 +9,6 @@ module Flipper
     class ActiveSupportCacheStore
       include ::Flipper::Adapter
 
-      Version = 'v1'.freeze
-      Namespace = "flipper/#{Version}".freeze
-      FeaturesKey = "#{Namespace}/features".freeze
-      GetAllKey = "#{Namespace}/get_all".freeze
-
-      # Private
-      def self.key_for(key)
-        "#{Namespace}/feature/#{key}"
-      end
-
       # Internal
       attr_reader :cache
 
@@ -33,6 +23,11 @@ module Flipper
         @write_options = {}
         @write_options[:expires_in] = expires_in if expires_in
         @write_through = write_through
+
+        @cache_version = 'v1'.freeze
+        @namespace = "flipper/#{@cache_version}".freeze
+        @features_key = "#{@namespace}/features".freeze
+        @get_all_key = "#{@namespace}/get_all".freeze
       end
 
       # Public
@@ -43,14 +38,14 @@ module Flipper
       # Public
       def add(feature)
         result = @adapter.add(feature)
-        @cache.delete(FeaturesKey)
+        @cache.delete(@features_key)
         result
       end
 
       ## Public
       def remove(feature)
         result = @adapter.remove(feature)
-        @cache.delete(FeaturesKey)
+        @cache.delete(@features_key)
 
         if @write_through
           @cache.write(key_for(feature.key), default_config, @write_options)
@@ -80,12 +75,12 @@ module Flipper
       end
 
       def get_all
-        if @cache.write(GetAllKey, Time.now.to_i, @write_options.merge(unless_exist: true))
+        if @cache.write(@get_all_key, Time.now.to_i, @write_options.merge(unless_exist: true))
           response = @adapter.get_all
           response.each do |key, value|
             @cache.write(key_for(key), value, @write_options)
           end
-          @cache.write(FeaturesKey, response.keys.to_set, @write_options)
+          @cache.write(@features_key, response.keys.to_set, @write_options)
           response
         else
           features = read_feature_keys.map { |key| Flipper::Feature.new(key, self) }
@@ -122,12 +117,12 @@ module Flipper
       private
 
       def key_for(key)
-        self.class.key_for(key)
+        "#{@namespace}/feature/#{key}"
       end
 
       # Internal: Returns an array of the known feature keys.
       def read_feature_keys
-        @cache.fetch(FeaturesKey, @write_options) { @adapter.features }
+        @cache.fetch(@features_key, @write_options) { @adapter.features }
       end
 
       # Internal: Given an array of features, attempts to read through cache in

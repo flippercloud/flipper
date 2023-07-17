@@ -11,11 +11,18 @@ RSpec.describe Flipper::Types::Actor do
       attr_reader :flipper_id
 
       def initialize(flipper_id)
-        @flipper_id = flipper_id
+        @flipper_id = flipper_id.to_s
       end
 
       def admin?
         true
+      end
+
+      def flipper_properties
+        {
+          "flipper_id" => flipper_id,
+          "admin" => admin?,
+        }
       end
     end
   end
@@ -87,6 +94,15 @@ RSpec.describe Flipper::Types::Actor do
     expect(actor.admin?).to eq(true)
   end
 
+  it 'proxies flipper_properties to actor' do
+    actor = actor_class.new(10)
+    actor = described_class.new(actor)
+    expect(actor.flipper_properties).to eq({
+      "flipper_id" => "10",
+      "admin" => true,
+    })
+  end
+
   it 'exposes actor' do
     actor = actor_class.new(10)
     actor_type_instance = described_class.new(actor)
@@ -104,6 +120,7 @@ RSpec.describe Flipper::Types::Actor do
       actor = actor_class.new(10)
       actor_type_instance = described_class.new(actor)
       expect(actor_type_instance.respond_to?(:admin?)).to eq(true)
+      expect(actor_type_instance.respond_to?(:flipper_properties)).to eq(true)
     end
 
     it 'returns false if does not respond to method and actor does not respond to method' do

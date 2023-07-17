@@ -7,11 +7,11 @@ RSpec.describe Flipper::Api::V1::Actions::ClearFeature do
       actor22 = Flipper::Actor.new('22')
 
       feature = flipper[:my_feature]
-      feature.enable flipper.boolean
+      feature.enable Flipper::Types::Boolean.new
       feature.enable flipper.group(:admins)
-      feature.enable flipper.actor(actor22)
-      feature.enable flipper.actors(25)
-      feature.enable flipper.time(45)
+      feature.enable Flipper::Types::Actor.new(actor22)
+      feature.enable Flipper::Types::PercentageOfActors.new(25)
+      feature.enable Flipper::Types::PercentageOfTime.new(45)
 
       delete '/features/my_feature/clear'
     end
@@ -28,11 +28,11 @@ RSpec.describe Flipper::Api::V1::Actions::ClearFeature do
       actor22 = Flipper::Actor.new('22')
 
       feature = flipper["my/feature"]
-      feature.enable flipper.boolean
+      feature.enable Flipper::Types::Boolean.new
       feature.enable flipper.group(:admins)
-      feature.enable flipper.actor(actor22)
-      feature.enable flipper.actors(25)
-      feature.enable flipper.time(45)
+      feature.enable Flipper::Types::Actor.new(actor22)
+      feature.enable Flipper::Types::PercentageOfActors.new(25)
+      feature.enable Flipper::Types::PercentageOfTime.new(45)
 
       delete '/features/my/feature/clear'
     end

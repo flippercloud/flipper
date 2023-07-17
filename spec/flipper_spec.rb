@@ -64,7 +64,12 @@ RSpec.describe Flipper do
 
   describe "delegation to instance" do
     let(:group) { Flipper::Types::Group.new(:admins) }
-    let(:actor) { Flipper::Actor.new("1") }
+    let(:actor) {
+      Flipper::Actor.new("1", {
+        "plan" => "basic",
+      })
+    }
+    let(:expression) { Flipper.property(:plan).eq("basic") }
 
     before do
       described_class.configure do |config|
@@ -88,12 +93,35 @@ RSpec.describe Flipper do
       expect(described_class.instance.enabled?(:search)).to be(false)
     end
 
-    it 'delegates bool to instance' do
-      expect(described_class.bool).to eq(described_class.instance.bool)
+    it 'delegates expression to instance' do
+      expect(described_class.expression(:search)).to be(nil)
+
+      expression = Flipper.property(:plan).eq("basic")
+      Flipper.instance.enable_expression :search, expression
+
+      expect(described_class.expression(:search)).to eq(expression)
     end
 
-    it 'delegates boolean to instance' do
-      expect(described_class.boolean).to eq(described_class.instance.boolean)
+    it 'delegates enable_expression to instance' do
+      described_class.enable_expression(:search, expression)
+      expect(described_class.instance.enabled?(:search, actor)).to be(true)
+    end
+
+    it 'delegates disable_expression to instance' do
+      described_class.disable_expression(:search)
+      expect(described_class.instance.enabled?(:search, actor)).to be(false)
+    end
+
+    it 'delegates add_expression to instance' do
+      described_class.add_expression(:search, expression)
+      expect(described_class.instance.enabled?(:search, actor)).to be(true)
+    end
+
+    it 'delegates remove_expression to instance' do
+      described_class.enable_expression(:search, Flipper.any(expression))
+      expect(described_class.instance.enabled?(:search, actor)).to be(true)
+      described_class.remove_expression(:search, expression)
+      expect(described_class.instance.enabled?(:search, actor)).to be(false)
     end
 
     it 'delegates enable_actor to instance' do
@@ -104,10 +132,6 @@ RSpec.describe Flipper do
     it 'delegates disable_actor to instance' do
       described_class.disable_actor(:search, actor)
       expect(described_class.instance.enabled?(:search, actor)).to be(false)
-    end
-
-    it 'delegates actor to instance' do
-      expect(described_class.actor(actor)).to eq(described_class.instance.actor(actor))
     end
 
     it 'delegates enable_group to instance' do
@@ -130,15 +154,6 @@ RSpec.describe Flipper do
       expect(described_class.instance[:search].percentage_of_actors_value).to be(0)
     end
 
-    it 'delegates actors to instance' do
-      expect(described_class.actors(5)).to eq(described_class.instance.actors(5))
-    end
-
-    it 'delegates percentage_of_actors to instance' do
-      expected = described_class.instance.percentage_of_actors(5)
-      expect(described_class.percentage_of_actors(5)).to eq(expected)
-    end
-
     it 'delegates enable_percentage_of_time to instance' do
       described_class.enable_percentage_of_time(:search, 5)
       expect(described_class.instance[:search].percentage_of_time_value).to be(5)
@@ -147,15 +162,6 @@ RSpec.describe Flipper do
     it 'delegates disable_percentage_of_time to instance' do
       described_class.disable_percentage_of_time(:search)
       expect(described_class.instance[:search].percentage_of_time_value).to be(0)
-    end
-
-    it 'delegates time to instance' do
-      expect(described_class.time(56)).to eq(described_class.instance.time(56))
-    end
-
-    it 'delegates percentage_of_time to instance' do
-      expected = described_class.instance.percentage_of_time(56)
-      expect(described_class.percentage_of_time(56)).to eq(expected)
     end
 
     it 'delegates features to instance' do
@@ -354,6 +360,54 @@ RSpec.describe Flipper do
       registry = Flipper::Registry.new
       described_class.groups_registry = registry
       expect(described_class.instance_variable_get('@groups_registry')).to eq(registry)
+    end
+  end
+
+  describe ".constant" do
+    it "returns Flipper::Expression::Constant instance" do
+      expect(described_class.constant(false)).to eq(Flipper::Expression::Constant.new(false))
+      expect(described_class.constant("string")).to eq(Flipper::Expression::Constant.new("string"))
+    end
+  end
+
+  describe ".property" do
+    it "returns Flipper::Expressions::Property expression" do
+      expect(Flipper.property("name")).to eq(Flipper::Expression.build(Property: "name"))
+    end
+  end
+
+  describe ".boolean" do
+    it "returns Flipper::Expressions::Boolean expression" do
+      expect(described_class.boolean(true)).to eq(Flipper::Expression.build(Boolean: true))
+      expect(described_class.boolean(false)).to eq(Flipper::Expression.build(Boolean: false))
+    end
+  end
+
+  describe ".random" do
+    it "returns Flipper::Expressions::Random expression" do
+      expect(Flipper.random(100)).to eq(Flipper::Expression.build(Random: 100))
+    end
+  end
+
+  describe ".any" do
+    let(:age_expression) { Flipper.property(:age).gte(21) }
+    let(:plan_expression) { Flipper.property(:plan).eq("basic") }
+
+    it "returns Flipper::Expressions::Any instance" do
+      expect(Flipper.any(age_expression, plan_expression)).to eq(
+        Flipper::Expression.build({Any: [age_expression, plan_expression]})
+      )
+    end
+  end
+
+  describe ".all" do
+    let(:age_expression) { Flipper.property(:age).gte(21) }
+    let(:plan_expression) { Flipper.property(:plan).eq("basic") }
+
+    it "returns Flipper::Expressions::All instance" do
+      expect(Flipper.all(age_expression, plan_expression)).to eq(
+        Flipper::Expression.build({All: [age_expression, plan_expression]})
+      )
     end
   end
 end

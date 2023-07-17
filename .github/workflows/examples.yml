@@ -3,7 +3,7 @@ on: [push, pull_request]
 jobs:
   test:
     if: github.repository_owner == 'jnunemaker'
-    name: Test on ruby ${{ matrix.ruby }} and rails ${{ matrix.rails }}
+    name: Example on ruby ${{ matrix.ruby }} and rails ${{ matrix.rails }}
     runs-on: ubuntu-latest
     services:
       redis:
@@ -59,4 +59,17 @@ jobs:
       - name: Run Examples with Rails ${{ matrix.rails }}
         env:
           FLIPPER_CLOUD_TOKEN: ${{ secrets.FLIPPER_CLOUD_TOKEN }}
+          FLIPPER_CLOUD_TOKEN_26_52: ${{ secrets.FLIPPER_CLOUD_TOKEN_26_52 }}
+          FLIPPER_CLOUD_TOKEN_26_60: ${{ secrets.FLIPPER_CLOUD_TOKEN_26_60 }}
+          FLIPPER_CLOUD_TOKEN_26_61: ${{ secrets.FLIPPER_CLOUD_TOKEN_26_61 }}
+          FLIPPER_CLOUD_TOKEN_27_52: ${{ secrets.FLIPPER_CLOUD_TOKEN_27_52 }}
+          FLIPPER_CLOUD_TOKEN_27_60: ${{ secrets.FLIPPER_CLOUD_TOKEN_27_60 }}
+          FLIPPER_CLOUD_TOKEN_27_61: ${{ secrets.FLIPPER_CLOUD_TOKEN_27_61 }}
+          FLIPPER_CLOUD_TOKEN_27_70: ${{ secrets.FLIPPER_CLOUD_TOKEN_27_70 }}
+          FLIPPER_CLOUD_TOKEN_30_60: ${{ secrets.FLIPPER_CLOUD_TOKEN_30_60 }}
+          FLIPPER_CLOUD_TOKEN_30_61: ${{ secrets.FLIPPER_CLOUD_TOKEN_30_61 }}
+          FLIPPER_CLOUD_TOKEN_30_70: ${{ secrets.FLIPPER_CLOUD_TOKEN_30_70 }}
+          FLIPPER_CLOUD_TOKEN_31_61: ${{ secrets.FLIPPER_CLOUD_TOKEN_31_61 }}
+          FLIPPER_CLOUD_TOKEN_31_70: ${{ secrets.FLIPPER_CLOUD_TOKEN_31_70 }}
+          RAILS_VERSION: ${{ matrix.rails }}
         run: script/examples

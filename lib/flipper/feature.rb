@@ -120,6 +120,28 @@ module Flipper
       end
     end
 
+    # Public: Enables an expression_to_add for a feature.
+    #
+    # expression - an Expression or Hash that can be converted to an expression.
+    #
+    # Returns result of enable.
+    def enable_expression(expression)
+      enable Expression.build(expression)
+    end
+
+    # Public: Add an expression for a feature.
+    #
+    # expression_to_add - an expression or Hash that can be converted to an expression.
+    #
+    # Returns result of enable.
+    def add_expression(expression_to_add)
+      if (current_expression = expression)
+        enable current_expression.add(expression_to_add)
+      else
+        enable expression_to_add
+      end
+    end
+
     # Public: Enables a feature for an actor.
     #
     # actor - a Flipper::Types::Actor instance or an object that responds
@@ -158,6 +180,27 @@ module Flipper
     # Returns result of enable.
     def enable_percentage_of_actors(percentage)
       enable Types::PercentageOfActors.wrap(percentage)
+    end
+
+    # Public: Disables an expression for a feature.
+    #
+    # expression - an expression or Hash that can be converted to an expression.
+    #
+    # Returns result of disable.
+    def disable_expression
+      disable Flipper.all # just need an expression to clear
+    end
+
+    # Public: Remove an expression from a feature. Does nothing if no expression is
+    # currently enabled.
+    #
+    # expression - an Expression or Hash that can be converted to an expression.
+    #
+    # Returns result of enable or nil (if no expression enabled).
+    def remove_expression(expression_to_remove)
+      if (current_expression = expression)
+        enable current_expression.remove(expression_to_remove)
+      end
     end
 
     # Public: Disables a feature for an actor.
@@ -252,11 +295,22 @@ module Flipper
       Flipper.groups - enabled_groups
     end
 
+    def expression
+      Flipper::Expression.build(expression_value) if expression_value
+    end
+
     # Public: Get the adapter value for the groups gate.
     #
     # Returns Set of String group names.
     def groups_value
       gate_values.groups
+    end
+
+    # Public: Get the adapter value for the expression gate.
+    #
+    # Returns expression.
+    def expression_value
+      gate_values.expression
     end
 
     # Public: Get the adapter value for the actors gate.
@@ -347,6 +401,7 @@ module Flipper
     def gates_hash
       @gates_hash ||= {
         boolean: Gates::Boolean.new,
+        expression: Gates::Expression.new,
         actor: Gates::Actor.new,
         percentage_of_actors: Gates::PercentageOfActors.new,
         percentage_of_time: Gates::PercentageOfTime.new,

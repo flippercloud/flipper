@@ -8,16 +8,6 @@ module Flipper
     class RedisCache
       include ::Flipper::Adapter
 
-      Version = 'v1'.freeze
-      Namespace = "flipper/#{Version}".freeze
-      FeaturesKey = "#{Namespace}/features".freeze
-      GetAllKey = "#{Namespace}/get_all".freeze
-
-      # Private
-      def self.key_for(key)
-        "#{Namespace}/feature/#{key}"
-      end
-
       # Internal
       attr_reader :cache
 
@@ -30,6 +20,11 @@ module Flipper
         @name = :redis_cache
         @cache = cache
         @ttl = ttl
+
+        @version = 'v1'.freeze
+        @namespace = "flipper/#{@version}".freeze
+        @features_key = "#{@namespace}/features".freeze
+        @get_all_key = "#{@namespace}/get_all".freeze
       end
 
       # Public
@@ -40,14 +35,14 @@ module Flipper
       # Public
       def add(feature)
         result = @adapter.add(feature)
-        @cache.del(FeaturesKey)
+        @cache.del(@features_key)
         result
       end
 
       # Public
       def remove(feature)
         result = @adapter.remove(feature)
-        @cache.del(FeaturesKey)
+        @cache.del(@features_key)
         @cache.del(key_for(feature.key))
         result
       end
@@ -71,13 +66,13 @@ module Flipper
       end
 
       def get_all
-        if @cache.setnx(GetAllKey, Time.now.to_i)
-          @cache.expire(GetAllKey, @ttl)
+        if @cache.setnx(@get_all_key, Time.now.to_i)
+          @cache.expire(@get_all_key, @ttl)
           response = @adapter.get_all
           response.each do |key, value|
             set_with_ttl key_for(key), value
           end
-          set_with_ttl FeaturesKey, response.keys.to_set
+          set_with_ttl @features_key, response.keys.to_set
           response
         else
           features = read_feature_keys.map { |key| Flipper::Feature.new(key, self) }
@@ -102,11 +97,11 @@ module Flipper
       private
 
       def key_for(key)
-        self.class.key_for(key)
+        "#{@namespace}/feature/#{key}"
       end
 
       def read_feature_keys
-        fetch(FeaturesKey) { @adapter.features }
+        fetch(@features_key) { @adapter.features }
       end
 
       def read_many_features(features)

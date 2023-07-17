@@ -80,13 +80,13 @@ RSpec.describe Flipper::GateValues do
   it 'raises argument error for percentage of time value that cannot be converted to an integer' do
     expect do
       described_class.new(percentage_of_time: ['asdf'])
-    end.to raise_error(ArgumentError, %(["asdf"] cannot be converted to a percentage))
+    end.to raise_error(ArgumentError, %(["asdf"] cannot be converted to a number))
   end
 
   it 'raises argument error for percentage of actors value that cannot be converted to an int' do
     expect do
       described_class.new(percentage_of_actors: ['asdf'])
-    end.to raise_error(ArgumentError, %(["asdf"] cannot be converted to a percentage))
+    end.to raise_error(ArgumentError, %(["asdf"] cannot be converted to a number))
   end
 
   it 'raises argument error for actors value that cannot be converted to a set' do

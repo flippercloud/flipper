@@ -8,7 +8,7 @@ RSpec.describe Flipper::Adapters::Instrumented do
 
   let(:feature) { flipper[:stats] }
   let(:gate) { feature.gate(:percentage_of_actors) }
-  let(:thing) { flipper.actors(22) }
+  let(:thing) { Flipper::Types::PercentageOfActors.new(22) }
 
   subject do
     described_class.new(adapter, instrumenter: instrumenter)

@@ -42,5 +42,9 @@ RSpec.describe Flipper::Adapters::Sequel do
     it "defines #flipper_id on Sequel::Model" do
       expect(Sequel::Model.ancestors).to include(Flipper::Identifier)
     end
+
+    it "defines #flipper_properties on Sequel::Model" do
+      expect(Sequel::Model.ancestors).to include(Flipper::Model::Sequel)
+    end
   end
 end
