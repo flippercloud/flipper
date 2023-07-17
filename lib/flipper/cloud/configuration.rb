@@ -156,11 +156,8 @@ module Flipper
       private
 
       def app_adapter
-        sync_method == :webhook ? dual_write_adapter : poll_adapter
-      end
-
-      def dual_write_adapter
-        Flipper::Adapters::DualWrite.new(local_adapter, http_adapter)
+        read_adapter = sync_method == :webhook ? local_adapter : poll_adapter
+        Flipper::Adapters::DualWrite.new(read_adapter, http_adapter)
       end
 
       def poller
@@ -172,7 +169,7 @@ module Flipper
       end
 
       def poll_adapter
-        Flipper::Adapters::Poll.new(poller, dual_write_adapter)
+        Flipper::Adapters::Poll.new(poller, local_adapter)
       end
 
       def http_adapter

@@ -86,7 +86,7 @@ RSpec.describe Flipper::Cloud::Configuration do
     stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
 
     instance = described_class.new(required_options)
-    expect(instance.adapter).to be_instance_of(Flipper::Adapters::Poll)
+    expect(instance.adapter).to be_instance_of(Flipper::Adapters::DualWrite)
   end
 
   it "can override adapter block" do
