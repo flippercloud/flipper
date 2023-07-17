@@ -126,7 +126,6 @@ module Flipper
       def sync
         Flipper::Adapters::Sync::Synchronizer.new(local_adapter, http_adapter, {
           instrumenter: instrumenter,
-          interval: sync_interval,
         }).call
       end
 
