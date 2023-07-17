@@ -9,7 +9,7 @@ class CreateFlipperTablesSequel < Sequel::Migration
     create_table :flipper_gates do |_t|
       String :feature_key, null: false
       String :key, null: false
-      String :value
+      String :value, text: true
       DateTime :created_at, null: false
       DateTime :updated_at, null: false
       primary_key [:feature_key, :key, :value]

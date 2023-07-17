@@ -46,6 +46,25 @@ module Flipper
       feature(name).enable(*args)
     end
 
+    # Public: Enable a feature for an expression.
+    #
+    # name - The String or Symbol name of the feature.
+    # expression - a Flipper::Expression instance or a Hash.
+    #
+    # Returns result of Feature#enable.
+    def enable_expression(name, expression)
+      feature(name).enable_expression(expression)
+    end
+
+    # Public: Add an expression to a feature.
+    #
+    # expression - an expression or Hash that can be converted to an expression.
+    #
+    # Returns result of enable.
+    def add_expression(name, expression)
+      feature(name).add_expression(expression)
+    end
+
     # Public: Enable a feature for an actor.
     #
     # name - The String or Symbol name of the feature.
@@ -98,6 +117,24 @@ module Flipper
     # Returns the result of the feature instance disable call.
     def disable(name, *args)
       feature(name).disable(*args)
+    end
+
+    # Public: Disable expression for feature.
+    #
+    # name - The String or Symbol name of the feature.
+    #
+    # Returns result of Feature#disable.
+    def disable_expression(name)
+      feature(name).disable_expression
+    end
+
+    # Public: Remove an expression from a feature.
+    #
+    # expression - an Expression or Hash that can be converted to an expression.
+    #
+    # Returns result of enable.
+    def remove_expression(name, expression)
+      feature(name).remove_expression(expression)
     end
 
     # Public: Disable a feature for an actor.
@@ -210,22 +247,6 @@ module Flipper
     # Returns an instance of Flipper::Feature.
     alias_method :[], :feature
 
-    # Public: Shortcut for getting a boolean type instance.
-    #
-    # value - The true or false value for the boolean.
-    #
-    # Returns a Flipper::Types::Boolean instance.
-    def boolean(value = true)
-      Types::Boolean.new(value)
-    end
-
-    # Public: Even shorter shortcut for getting a boolean type instance.
-    #
-    # value - The true or false value for the boolean.
-    #
-    # Returns a Flipper::Types::Boolean instance.
-    alias_method :bool, :boolean
-
     # Public: Access a flipper group by name.
     #
     # name - The String or Symbol name of the feature.
@@ -235,35 +256,14 @@ module Flipper
       Flipper.group(name)
     end
 
-    # Public: Wraps an object as a flipper actor.
+    # Public: Gets the expression for the feature.
     #
-    # actor - The object that you would like to wrap.
+    # name - The String or Symbol name of the feature.
     #
-    # Returns an instance of Flipper::Types::Actor.
-    # Raises ArgumentError if actor does not respond to `flipper_id`.
-    def actor(actor)
-      Types::Actor.new(actor)
+    # Returns an instance of Flipper::Expression.
+    def expression(name)
+      feature(name).expression
     end
-
-    # Public: Shortcut for getting a percentage of time instance.
-    #
-    # number - The percentage of time that should be enabled.
-    #
-    # Returns Flipper::Types::PercentageOfTime.
-    def time(number)
-      Types::PercentageOfTime.new(number)
-    end
-    alias_method :percentage_of_time, :time
-
-    # Public: Shortcut for getting a percentage of actors instance.
-    #
-    # number - The percentage of actors that should be enabled.
-    #
-    # Returns Flipper::Types::PercentageOfActors.
-    def actors(number)
-      Types::PercentageOfActors.new(number)
-    end
-    alias_method :percentage_of_actors, :actors
 
     # Public: Returns a Set of the known features for this adapter.
     #

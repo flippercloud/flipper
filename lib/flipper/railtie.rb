@@ -10,9 +10,11 @@ module Flipper
       )
     end
 
-    initializer "flipper.identifier" do
+    initializer "flipper.properties" do
+      require "flipper/model/active_record"
+
       ActiveSupport.on_load(:active_record) do
-        ActiveRecord::Base.include Flipper::Identifier
+        ActiveRecord::Base.include Flipper::Model::ActiveRecord
       end
     end
 

@@ -21,6 +21,11 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
               'value' => 'true',
             },
             {
+              'key' => 'expression',
+              'name' => 'expression',
+              'value' => nil,
+            },
+            {
               'key' => 'actors',
               'name' => 'actor',
               'value' => [],
@@ -62,6 +67,11 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
             {
               'key' => 'boolean',
               'name' => 'boolean',
+              'value' => nil,
+            },
+            {
+              'key' => 'expression',
+              'name' => 'expression',
               'value' => nil,
             },
             {
@@ -125,6 +135,11 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
               'value' => 'true',
             },
             {
+              'key' => 'expression',
+              'name' => 'expression',
+              'value' => nil,
+            },
+            {
               'key' => 'actors',
               'name' => 'actor',
               'value' => [],
@@ -167,6 +182,11 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
               'key' => 'boolean',
               'name' => 'boolean',
               'value' => 'true',
+            },
+            {
+              'key' => 'expression',
+              'name' => 'expression',
+              'value' => nil,
             },
             {
               'key' => 'actors',

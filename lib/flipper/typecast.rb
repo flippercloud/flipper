@@ -36,17 +36,25 @@ module Flipper
       raise ArgumentError, "#{value.inspect} cannot be converted to a float"
     end
 
-    # Internal: Convert value to a percentage.
+    # Internal: Convert value to a number.
     #
     # Returns a Integer or Float representation of the value.
     # Raises ArgumentError if conversion is not possible.
-    def self.to_percentage(value)
-      result_to_f = value.to_f
-      result_to_i = result_to_f.to_i
-      result_to_f == result_to_i ? result_to_i : result_to_f
+    def self.to_number(value)
+      case value
+      when Numeric
+        value
+      when String
+        value.include?('.') ? to_float(value) : to_integer(value)
+      when NilClass
+        0
+      else
+        value.to_f
+      end
     rescue NoMethodError
-      raise ArgumentError, "#{value.inspect} cannot be converted to a percentage"
+      raise ArgumentError, "#{value.inspect} cannot be converted to a number"
     end
+    singleton_class.send(:alias_method, :to_percentage, :to_number)
 
     # Internal: Convert value to a set.
     #
@@ -71,6 +79,8 @@ module Flipper
           normalized_value = case value
           when Array, Set
             value.to_set
+          when Hash
+            value
           else
             value ? value.to_s : value
           end

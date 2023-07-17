@@ -6,6 +6,23 @@ All notable changes to this project will be documented in this file.
 
 ### Additions/Changes
 
+* Expressions are now available and considered "alpha". They are not yet documented, but you can see examples in [examples/expressions.rb](examples/expressions.rb). (https://github.com/jnunemaker/flipper/pull/692)
+
+### Breaking Changes
+
+* Removed top level `Flipper.bool`, `Flipper.actors`, `Flipper.time`, `Flipper.actor`,  `Flipper.percentage_of_actors`, `Flipper.time`, and `Flipper.percentage_of_time`. Also removed correlated Flipper::DSL instance method. They conflict with some new expression stuff and are rarely if ever used. If you are using them, you can migrate via a search and replace like so:
+  * Change Flipper.bool => Flipper::Types::Boolean.new
+  * Change Flipper.boolean => Flipper::Types::Boolean.new
+  * Change Flipper.actor => Flipper::Types::Actor.new
+  * Change Flipper.percentage_of_actors => Flipper::Types::PercentageOfActors.new
+  * Change Flipper.actors => Flipper::Types::PercentageOfActors.new
+  * Change Flipper.percentage_of_time => Flipper::Types::PercentageOfTime.new
+  * Change Flipper.time => Flipper::Types::PercentageOfTime.new
+
+## 0.28.1
+
+### Additions/Changes
+
 * Use new method of making logs bold for rails (https://github.com/jnunemaker/flipper/pull/726)
 * Bundle bootstrap, jquery and poppler with the library. (https://github.com/jnunemaker/flipper/pull/731)
 

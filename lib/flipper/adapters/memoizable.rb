@@ -8,9 +8,6 @@ module Flipper
     class Memoizable
       include ::Flipper::Adapter
 
-      FeaturesKey = :flipper_features
-      GetAllKey = :all_memoized
-
       # Internal
       attr_reader :cache
 
@@ -20,23 +17,20 @@ module Flipper
       # Internal: The adapter this adapter is wrapping.
       attr_reader :adapter
 
-      # Private
-      def self.key_for(key)
-        "feature/#{key}"
-      end
-
       # Public
       def initialize(adapter, cache = nil)
         @adapter = adapter
         @name = :memoizable
         @cache = cache || {}
         @memoize = false
+        @features_key = :flipper_features
+        @get_all_key = :all_memoized
       end
 
       # Public
       def features
         if memoizing?
-          cache.fetch(FeaturesKey) { cache[FeaturesKey] = @adapter.features }
+          cache.fetch(@features_key) { cache[@features_key] = @adapter.features }
         else
           @adapter.features
         end
@@ -94,9 +88,9 @@ module Flipper
       def get_all
         if memoizing?
           response = nil
-          if cache[GetAllKey]
+          if cache[@get_all_key]
             response = {}
-            cache[FeaturesKey].each do |key|
+            cache[@features_key].each do |key|
               response[key] = cache[key_for(key)]
             end
           else
@@ -104,8 +98,8 @@ module Flipper
             response.each do |key, value|
               cache[key_for(key)] = value
             end
-            cache[FeaturesKey] = response.keys.to_set
-            cache[GetAllKey] = true
+            cache[@features_key] = response.keys.to_set
+            cache[@get_all_key] = true
           end
 
           # Ensures that looking up other features that do not exist doesn't
@@ -161,7 +155,7 @@ module Flipper
       private
 
       def key_for(key)
-        self.class.key_for(key)
+        "feature/#{key}"
       end
 
       def expire_feature(feature)
@@ -169,7 +163,7 @@ module Flipper
       end
 
       def expire_features_set
-        cache.delete(FeaturesKey) if memoizing?
+        cache.delete(@features_key) if memoizing?
       end
     end
   end

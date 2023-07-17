@@ -42,6 +42,14 @@ module SpecHelpers
     }
   end
 
+  def api_positive_percentage_error_response
+    {
+      'code' => 3,
+      'message' => 'Percentage must be a positive number less than or equal to 100.',
+      'more_info' => api_error_code_reference_url,
+    }
+  end
+
   def api_flipper_id_is_missing_response
     {
       'code' => 4,
@@ -50,10 +58,10 @@ module SpecHelpers
     }
   end
 
-  def api_positive_percentage_error_response
+  def api_expression_invalid_response
     {
-      'code' => 3,
-      'message' => 'Percentage must be a positive number less than or equal to 100.',
+      'code' => 7,
+      'message' => 'The provided expression was not valid.',
       'more_info' => api_error_code_reference_url,
     }
   end

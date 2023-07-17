@@ -97,6 +97,8 @@ module Flipper
           @client.hset feature_key, gate.key, thing.value.to_s
         when :set
           @client.hset feature_key, to_field(gate, thing), 1
+        when :json
+          @client.hset feature_key, gate.key, JSON.dump(thing.value)
         else
           unsupported_data_type gate.data_type
         end
@@ -120,6 +122,8 @@ module Flipper
           @client.hset feature_key, gate.key, thing.value.to_s
         when :set
           @client.hdel feature_key, to_field(gate, thing)
+        when :json
+          @client.hdel feature_key, gate.key
         else
           unsupported_data_type gate.data_type
         end
@@ -172,6 +176,9 @@ module Flipper
               doc[gate.key.to_s]
             when :set
               fields_to_gate_value fields, gate
+            when :json
+              value = doc[gate.key.to_s]
+              JSON.parse(value) if value
             else
               unsupported_data_type gate.data_type
             end

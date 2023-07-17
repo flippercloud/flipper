@@ -37,7 +37,7 @@ RSpec.describe Flipper::Adapters::OperationLogger do
     before do
       @feature = flipper[:stats]
       @gate = @feature.gate(:boolean)
-      @thing = flipper.bool
+      @thing = Flipper::Types::Boolean.new
       @result = subject.enable(@feature, @gate, @thing)
     end
 
@@ -54,7 +54,7 @@ RSpec.describe Flipper::Adapters::OperationLogger do
     before do
       @feature = flipper[:stats]
       @gate = @feature.gate(:boolean)
-      @thing = flipper.bool
+      @thing = Flipper::Types::Boolean.new
       @result = subject.disable(@feature, @gate, @thing)
     end
 

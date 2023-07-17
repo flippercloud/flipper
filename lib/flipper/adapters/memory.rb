@@ -8,8 +8,6 @@ module Flipper
     class Memory
       include ::Flipper::Adapter
 
-      FeaturesKey = :features
-
       # Public: The name of the adapter.
       attr_reader :name
 
@@ -77,6 +75,8 @@ module Flipper
             @source[feature.key][gate.key] = thing.value.to_s
           when :set
             @source[feature.key][gate.key] << thing.value.to_s
+          when :json
+            @source[feature.key][gate.key] = thing.value
           else
             raise "#{gate} is not supported by this adapter yet"
           end
@@ -97,6 +97,8 @@ module Flipper
             @source[feature.key][gate.key] = thing.value.to_s
           when :set
             @source[feature.key][gate.key].delete thing.value.to_s
+          when :json
+            @source[feature.key].delete(gate.key)
           else
             raise "#{gate} is not supported by this adapter yet"
           end

@@ -12,6 +12,7 @@ module Flipper
           boolean: nil,
           groups: Set.new,
           actors: Set.new,
+          expression: nil,
           percentage_of_actors: nil,
           percentage_of_time: nil,
         }
