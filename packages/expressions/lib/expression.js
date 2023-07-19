@@ -51,4 +51,12 @@ export class Expression {
   matches (schema) {
     return this.validate(schema).valid
   }
+
+  add (expression) {
+    if (this.schema.maxItems) {
+      return Expression.build({ All: [this, expression] })
+    } else {
+      return this.clone({ args: [...this.args, expression] })
+    }
+  }
 }

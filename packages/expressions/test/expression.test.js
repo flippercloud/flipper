@@ -85,4 +85,21 @@ describe('Expression', () => {
       expect(expression.validate().valid).toBe(false)
     })
   })
+
+  describe('add', () => {
+    test('Any returns new expression with added arg', () => {
+      const expression = Expression.build({ Any: [] }).add(true)
+      expect(expression.value).toEqual({ Any: [true] })
+    })
+
+    test('Max returns new expression with added arg', () => {
+      const expression = Expression.build({ Max: [1] }).add(2)
+      expect(expression.value).toEqual({ Max: [1, 2] })
+    })
+
+    test('Equal returns new expression wrapped in All', () => {
+      const expression = Expression.build({ Equal: [1, 1] }).add(false)
+      expect(expression.value).toEqual({ All: [{ Equal: [1, 1] }, false] })
+    })
+  })
 })
