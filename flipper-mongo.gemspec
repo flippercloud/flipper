@@ -11,7 +11,7 @@ Gem::Specification.new do |gem|
   gem.email         = 'support@flippercloud.io'
   gem.summary       = 'Mongo adapter for Flipper'
   gem.license       = 'MIT'
-  gem.homepage      = 'https://www.flippercloud.io'
+  gem.homepage      = 'https://www.flippercloud.io/docs/adapters/mongo'
 
   gem.files         = `git ls-files`.split("\n").select(&flipper_mongo_files) + ['lib/flipper/version.rb']
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n").select(&flipper_mongo_files)

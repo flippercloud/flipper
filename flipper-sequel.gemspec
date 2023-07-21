@@ -9,7 +9,7 @@ Gem::Specification.new do |gem|
   gem.email         = 'support@flippercloud.io'
   gem.summary       = 'Sequel adapter for Flipper'
   gem.license       = 'MIT'
-  gem.homepage      = 'https://www.flippercloud.io'
+  gem.homepage      = 'https://www.flippercloud.io/docs/adapters/sequel'
 
   extra_files = [
     'lib/flipper/version.rb',

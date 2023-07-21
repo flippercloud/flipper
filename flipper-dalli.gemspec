@@ -11,7 +11,7 @@ Gem::Specification.new do |gem|
   gem.email         = 'support@flippercloud.io'
   gem.summary       = 'Dalli adapter for Flipper'
   gem.license       = 'MIT'
-  gem.homepage      = 'https://www.flippercloud.io'
+  gem.homepage      = 'https://www.flippercloud.io/docs/adapters'
 
   gem.files         = `git ls-files`.split("\n").select(&flipper_dalli_files) + ['lib/flipper/version.rb']
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n").select(&flipper_dalli_files)
