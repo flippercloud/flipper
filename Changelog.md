@@ -19,6 +19,10 @@ All notable changes to this project will be documented in this file.
   * Change Flipper.percentage_of_time => Flipper::Types::PercentageOfTime.new
   * Change Flipper.time => Flipper::Types::PercentageOfTime.new
 
+## 0.28.2
+
+* UI: fix path to bundled assets when mounted in another Rack app (https://github.com/jnunemaker/flipper/pull/742)
+
 ## 0.28.1
 
 ### Additions/Changes
