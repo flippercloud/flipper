@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Additions/Changes
 
 * Expressions are now available and considered "alpha". They are not yet documented, but you can see examples in [examples/expressions.rb](examples/expressions.rb). (https://github.com/jnunemaker/flipper/pull/692)
+* Updated cloud config to ensure that poll adapter ONLY syncs from cloud to local adapter (and never back to cloud). Shouldn't affect anyone other than making things more safe if an incorrect response is received from the cloud poll endpoint. (https://github.com/jnunemaker/flipper/pull/740)
 
 ### Breaking Changes
 
