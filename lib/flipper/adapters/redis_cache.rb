@@ -11,6 +11,9 @@ module Flipper
       # Internal
       attr_reader :cache
 
+      # Public: The adapter being cached.
+      attr_reader :adapter
+
       # Public: The name of the adapter.
       attr_reader :name
 
