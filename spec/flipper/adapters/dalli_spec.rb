@@ -21,6 +21,33 @@ RSpec.describe Flipper::Adapters::Dalli do
 
   it_should_behave_like 'a flipper adapter'
 
+  context "when using a prefix" do
+    let(:adapter) { described_class.new(memory_adapter, cache, 0, prefix: "foo/") }
+    it_should_behave_like 'a flipper adapter'
+
+    it "uses the prefix for all keys" do
+      # check individual feature get cached with prefix
+      adapter.get(flipper[:stats])
+      expect(cache.get("foo/flipper/v1/feature/stats")).not_to be(nil)
+
+      # check individual feature expired with prefix
+      adapter.remove(flipper[:stats])
+      expect(cache.get("foo/flipper/v1/feature/stats")).to be(nil)
+
+      # enable some stuff
+      flipper.enable_percentage_of_actors(:search, 10)
+      flipper.enable(:stats)
+
+      # populate the cache
+      adapter.get_all
+
+      # verify cached with prefix
+      expect(cache.get("foo/flipper/v1/get_all")).not_to be(nil)
+      expect(cache.get("foo/flipper/v1/feature/search")[:percentage_of_actors]).to eq("10")
+      expect(cache.get("foo/flipper/v1/feature/stats")[:boolean]).to eq("true")
+    end
+  end
+
   describe '#remove' do
     it 'expires feature' do
       feature = flipper[:stats]

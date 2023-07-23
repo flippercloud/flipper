@@ -17,17 +17,22 @@ module Flipper
       # Public: The ttl for all cached data.
       attr_reader :ttl
 
+      # Public: The prefix for all keys written to memcached.
+      attr_reader :prefix
+
       # Public
-      def initialize(adapter, cache, ttl = 0)
+      def initialize(adapter, cache, ttl = 0, prefix: nil)
         @adapter = adapter
         @name = :dalli
         @cache = cache
         @ttl = ttl
+        @prefix = prefix
 
         @cache_version = 'v1'.freeze
-        @namespace = "flipper/#{@cache_version}".freeze
-        @features_key = "#{@namespace}/features".freeze
-        @get_all_key = "#{@namespace}/get_all".freeze
+        @namespace = "flipper/#{@cache_version}"
+        @namespace = @namespace.prepend(@prefix) if @prefix
+        @features_key = "#{@namespace}/features"
+        @get_all_key = "#{@namespace}/get_all"
       end
 
       # Public
@@ -72,7 +77,8 @@ module Flipper
         if @cache.add(@get_all_key, Time.now.to_i, @ttl)
           response = @adapter.get_all
           response.each do |key, value|
-            @cache.set(key_for(key), value, @ttl)
+            key = key_for(key)
+            @cache.set(key, value, @ttl)
           end
           @cache.set(@features_key, response.keys.to_set, @ttl)
           response
