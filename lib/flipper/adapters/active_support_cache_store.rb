@@ -16,18 +16,20 @@ module Flipper
       attr_reader :name
 
       # Public
-      def initialize(adapter, cache, expires_in: nil, write_through: false)
+      def initialize(adapter, cache, expires_in: nil, write_through: false, prefix: nil)
         @adapter = adapter
         @name = :active_support_cache_store
         @cache = cache
         @write_options = {}
         @write_options[:expires_in] = expires_in if expires_in
         @write_through = write_through
+        @prefix = prefix
 
         @cache_version = 'v1'.freeze
-        @namespace = "flipper/#{@cache_version}".freeze
-        @features_key = "#{@namespace}/features".freeze
-        @get_all_key = "#{@namespace}/get_all".freeze
+        @namespace = "flipper/#{@cache_version}"
+        @namespace = @namespace.prepend(@prefix) if @prefix
+        @features_key = "#{@namespace}/features"
+        @get_all_key = "#{@namespace}/get_all"
       end
 
       # Public
