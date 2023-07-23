@@ -15,16 +15,18 @@ module Flipper
       attr_reader :name
 
       # Public
-      def initialize(adapter, cache, ttl = 3600)
+      def initialize(adapter, cache, ttl = 3600, prefix: nil)
         @adapter = adapter
         @name = :redis_cache
         @cache = cache
         @ttl = ttl
+        @prefix = prefix
 
         @version = 'v1'.freeze
-        @namespace = "flipper/#{@version}".freeze
-        @features_key = "#{@namespace}/features".freeze
-        @get_all_key = "#{@namespace}/get_all".freeze
+        @namespace = "flipper/#{@version}"
+        @namespace = @namespace.prepend(@prefix) if @prefix
+        @features_key = "#{@namespace}/features"
+        @get_all_key = "#{@namespace}/get_all"
       end
 
       # Public
