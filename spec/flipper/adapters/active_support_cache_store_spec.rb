@@ -19,13 +19,41 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
 
   it_should_behave_like 'a flipper adapter'
 
-  it "aliases expires_in to ttl" do
-    expect(adapter.ttl).to eq(adapter.expires_in)
+  it "knows ttl" do
+    expect(adapter.ttl).to eq(10.seconds)
+  end
+
+  it "can expire features cache" do
+    # cache the features
+    adapter.features
+    expect(cache.read("flipper/v1/features")).not_to be(nil)
+
+    # expire cache
+    adapter.expire_features_cache
+    expect(cache.read("flipper/v1/features")).to be(nil)
+  end
+
+  it "can expire feature cache" do
+    # cache the features
+    adapter.get(flipper[:stats])
+    expect(cache.read("flipper/v1/feature/stats")).not_to be(nil)
+
+    # expire cache
+    adapter.expire_feature_cache("stats")
+    expect(cache.read("flipper/v1/feature/stats")).to be(nil)
+  end
+
+  it "can generate feature cache key" do
+    expect(adapter.feature_cache_key("stats")).to eq("flipper/v1/feature/stats")
   end
 
   context "when using a prefix" do
     let(:adapter) { described_class.new(memory_adapter, cache, expires_in: 10.seconds, prefix: "foo/") }
     it_should_behave_like 'a flipper adapter'
+
+    it "can generate feature cache key" do
+      expect(adapter.feature_cache_key("stats")).to eq("foo/flipper/v1/feature/stats")
+    end
 
     it "uses the prefix for all keys" do
       # check individual feature get cached with prefix

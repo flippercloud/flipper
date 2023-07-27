@@ -7,7 +7,7 @@ RSpec.describe Flipper::Adapters::Dalli do
     Flipper::Adapters::OperationLogger.new(Flipper::Adapters::Memory.new)
   end
   let(:cache)   { Dalli::Client.new(ENV['MEMCACHED_URL']) }
-  let(:adapter) { described_class.new(memory_adapter, cache) }
+  let(:adapter) { described_class.new(memory_adapter, cache, 10) }
   let(:flipper) { Flipper.new(adapter) }
 
   subject { adapter }
@@ -21,13 +21,41 @@ RSpec.describe Flipper::Adapters::Dalli do
 
   it_should_behave_like 'a flipper adapter'
 
-  it "aliases ttl to expires_in" do
-    expect(adapter.expires_in).to eq(adapter.ttl)
+  it "knows ttl" do
+    expect(adapter.ttl).to eq(10)
+  end
+
+  it "can expire features cache" do
+    # cache the features
+    adapter.features
+    expect(cache.get("flipper/v1/features")).not_to be(nil)
+
+    # expire cache
+    adapter.expire_features_cache
+    expect(cache.get("flipper/v1/features")).to be(nil)
+  end
+
+  it "can expire feature cache" do
+    # cache the features
+    adapter.get(flipper[:stats])
+    expect(cache.get("flipper/v1/feature/stats")).not_to be(nil)
+
+    # expire cache
+    adapter.expire_feature_cache("stats")
+    expect(cache.get("flipper/v1/feature/stats")).to be(nil)
+  end
+
+  it "can generate feature cache key" do
+    expect(adapter.feature_cache_key("stats")).to eq("flipper/v1/feature/stats")
   end
 
   context "when using a prefix" do
     let(:adapter) { described_class.new(memory_adapter, cache, 0, prefix: "foo/") }
     it_should_behave_like 'a flipper adapter'
+
+    it "can generate feature cache key" do
+      expect(adapter.feature_cache_key("stats")).to eq("foo/flipper/v1/feature/stats")
+    end
 
     it "uses the prefix for all keys" do
       # check individual feature get cached with prefix
