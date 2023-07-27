@@ -4,12 +4,9 @@ require 'flipper'
 module Flipper
   module Adapters
     # Public: Adapter that wraps another adapter with the ability to cache
-    # adapter calls in Redis
+    # adapter calls in Redis.
     class RedisCache
       include ::Flipper::Adapter
-
-      # Internal
-      attr_reader :cache
 
       # Public: The adapter being cached.
       attr_reader :adapter
@@ -17,19 +14,25 @@ module Flipper
       # Public: The name of the adapter.
       attr_reader :name
 
+      # Public: The Redis instance to cache with.
+      attr_reader :cache
+
+      # Public: The ttl for all cached data.
+      attr_reader :ttl
+
+      alias_method :expires_in, :ttl
+
       # Public
       def initialize(adapter, cache, ttl = 3600, prefix: nil)
         @adapter = adapter
         @name = :redis_cache
         @cache = cache
         @ttl = ttl
-        @prefix = prefix
 
         @version = 'v1'.freeze
         @namespace = "flipper/#{@version}"
-        @namespace = @namespace.prepend(@prefix) if @prefix
-        @features_key = "#{@namespace}/features"
-        @get_all_key = "#{@namespace}/get_all"
+        @namespace = @namespace.prepend(prefix) if prefix
+        @features_cache_key = "#{@namespace}/features"
       end
 
       # Public
@@ -40,28 +43,28 @@ module Flipper
       # Public
       def add(feature)
         result = @adapter.add(feature)
-        @cache.del(@features_key)
+        expire_features_cache
         result
       end
 
       # Public
       def remove(feature)
         result = @adapter.remove(feature)
-        @cache.del(@features_key)
-        @cache.del(key_for(feature.key))
+        expire_features_cache
+        expire_feature_cache(feature.key)
         result
       end
 
       # Public
       def clear(feature)
         result = @adapter.clear(feature)
-        @cache.del(key_for(feature.key))
+        expire_feature_cache(feature.key)
         result
       end
 
       # Public
       def get(feature)
-        fetch(key_for(feature.key)) do
+        fetch(feature_cache_key(feature.key)) do
           @adapter.get(feature)
         end
       end
@@ -71,42 +74,45 @@ module Flipper
       end
 
       def get_all
-        if @cache.setnx(@get_all_key, Time.now.to_i)
-          @cache.expire(@get_all_key, @ttl)
-          response = @adapter.get_all
-          response.each do |key, value|
-            set_with_ttl key_for(key), value
-          end
-          set_with_ttl @features_key, response.keys.to_set
-          response
-        else
-          features = read_feature_keys.map { |key| Flipper::Feature.new(key, self) }
-          read_many_features(features)
-        end
+        features = read_feature_keys.map { |key| Flipper::Feature.new(key, self) }
+        read_many_features(features)
       end
 
       # Public
       def enable(feature, gate, thing)
         result = @adapter.enable(feature, gate, thing)
-        @cache.del(key_for(feature.key))
+        expire_feature_cache(feature.key)
         result
       end
 
       # Public
       def disable(feature, gate, thing)
         result = @adapter.disable(feature, gate, thing)
-        @cache.del(key_for(feature.key))
+        expire_feature_cache(feature.key)
         result
+      end
+
+      # Public: Generate the cache key for a given feature.
+      #
+      # key - The String or Symbol feature key.
+      def feature_cache_key(key)
+        "#{@namespace}/feature/#{key}"
+      end
+
+      # Public: Expire the cache for the set of known feature names.
+      def expire_features_cache
+        @cache.del(@features_cache_key)
+      end
+
+      # Public: Expire the cache for a given feature.
+      def expire_feature_cache(key)
+        @cache.del(feature_cache_key(key))
       end
 
       private
 
-      def key_for(key)
-        "#{@namespace}/feature/#{key}"
-      end
-
       def read_feature_keys
-        fetch(@features_key) { @adapter.features }
+        fetch(@features_cache_key) { @adapter.features }
       end
 
       def read_many_features(features)
@@ -117,7 +123,7 @@ module Flipper
         if uncached_features.any?
           response = @adapter.get_multi(uncached_features)
           response.each do |key, value|
-            set_with_ttl(key_for(key), value)
+            set_with_ttl(feature_cache_key(key), value)
             cache_result[key] = value
           end
         end
@@ -147,7 +153,7 @@ module Flipper
       def multi_cache_get(keys)
         return [] if keys.empty?
 
-        cache_keys = keys.map { |key| key_for(key) }
+        cache_keys = keys.map { |key| feature_cache_key(key) }
         @cache.mget(*cache_keys).map do |value|
           value ? Marshal.load(value) : nil
         end

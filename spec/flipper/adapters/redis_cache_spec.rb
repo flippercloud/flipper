@@ -24,6 +24,10 @@ RSpec.describe Flipper::Adapters::RedisCache do
 
   it_should_behave_like 'a flipper adapter'
 
+  it "aliases ttl to expires_in" do
+    expect(adapter.expires_in).to eq(adapter.ttl)
+  end
+
   context "when using a prefix" do
     let(:adapter) { described_class.new(memory_adapter, client, 3600, prefix: "foo/") }
     it_should_behave_like 'a flipper adapter'
@@ -45,7 +49,7 @@ RSpec.describe Flipper::Adapters::RedisCache do
       adapter.get_all
 
       # verify cached with prefix
-      expect(client.get("foo/flipper/v1/get_all")).not_to be(nil)
+      expect(Marshal.load(client.get("foo/flipper/v1/features"))).to eq(Set["stats", "search"])
       expect(Marshal.load(client.get("foo/flipper/v1/feature/search"))[:percentage_of_actors]).to eq("10")
       expect(Marshal.load(client.get("foo/flipper/v1/feature/stats"))[:boolean]).to eq("true")
     end
@@ -109,17 +113,19 @@ RSpec.describe Flipper::Adapters::RedisCache do
       adapter.get_all
       expect(Marshal.load(client.get("flipper/v1/feature/#{stats.key}"))[:boolean]).to eq('true')
       expect(Marshal.load(client.get("flipper/v1/feature/#{search.key}"))[:boolean]).to be(nil)
-      expect(client.get("flipper/v1/get_all").to_i).to be_within(2).of(Time.now.to_i)
+      expect(Marshal.load(client.get("flipper/v1/features"))).to eq(Set["stats", "search"])
     end
 
     it 'returns same result when already cached' do
       expect(adapter.get_all).to eq(adapter.get_all)
     end
 
-    it 'only invokes one call to wrapped adapter' do
+    it 'only invokes two calls to wrapped adapter (for features set and gate data for each feature in set)' do
       memory_adapter.reset
       5.times { adapter.get_all }
-      expect(memory_adapter.count(:get_all)).to eq(1)
+      expect(memory_adapter.count(:features)).to eq(1)
+      expect(memory_adapter.count(:get_multi)).to eq(1)
+      expect(memory_adapter.count).to eq(2)
     end
   end
 

@@ -112,8 +112,12 @@ module Flipper
       end
 
       # Public: Count the number of times a certain operation happened.
-      def count(type)
-        type(type).size
+      def count(type = nil)
+        if type
+          type(type).size
+        else
+          @operations.size
+        end
       end
 
       # Public: Get all operations of a certain type.
