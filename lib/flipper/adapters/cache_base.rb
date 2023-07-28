@@ -15,6 +15,9 @@ module Flipper
       # Public: The ttl for all cached data.
       attr_reader :ttl
 
+      # Public: The cache key where the set of known features is cached.
+      attr_reader :features_cache_key
+
       def initialize(adapter, cache, ttl = 300, prefix: nil)
         @adapter = adapter
         @cache = cache

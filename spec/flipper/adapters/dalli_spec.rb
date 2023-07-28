@@ -25,6 +25,10 @@ RSpec.describe Flipper::Adapters::Dalli do
     expect(adapter.ttl).to eq(10)
   end
 
+  it "knows features_cache_key" do
+    expect(adapter.features_cache_key).to eq("flipper/v1/features")
+  end
+
   it "can expire features cache" do
     # cache the features
     adapter.features
@@ -52,6 +56,10 @@ RSpec.describe Flipper::Adapters::Dalli do
   context "when using a prefix" do
     let(:adapter) { described_class.new(memory_adapter, cache, 0, prefix: "foo/") }
     it_should_behave_like 'a flipper adapter'
+
+    it "knows features_cache_key" do
+      expect(adapter.features_cache_key).to eq("foo/flipper/v1/features")
+    end
 
     it "can generate feature cache key" do
       expect(adapter.feature_cache_key("stats")).to eq("foo/flipper/v1/feature/stats")
