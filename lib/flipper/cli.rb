@@ -3,6 +3,7 @@ require 'flipper/cli/command'
 require 'flipper/cli/enable'
 require 'flipper/cli/disable'
 require 'flipper/cli/list'
+require 'flipper/cli/show'
 require 'flipper/cli/help'
 
 module Flipper
@@ -19,6 +20,7 @@ module Flipper
         subcommand 'enable', Flipper::CLI::Enable
         subcommand 'disable', Flipper::CLI::Disable
         subcommand 'list', Flipper::CLI::List
+        subcommand 'show', Flipper::CLI::Show
         subcommand 'help', Flipper::CLI::Help
       end
     end

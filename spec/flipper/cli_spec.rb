@@ -60,12 +60,17 @@ RSpec.describe Flipper::CLI do
   end
 
   describe "help enable" do
-
-      it { should have_attributes(status: 0, stdout: /Usage: flipper enable \[options\] <feature>/) }
+    it { should have_attributes(status: 0, stdout: /Usage: flipper enable \[options\] <feature>/) }
   end
 
   describe "nope" do
     it { should have_attributes(status: 1, stderr: /Unknown command: nope/) }
+  end
+
+  describe "show foo" do
+    before { Flipper.enable :foo }
+
+      it { should have_attributes(status: 0, stdout: /foo.*fully enabled/) }
   end
 
   def run(argv)
