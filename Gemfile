@@ -24,6 +24,7 @@ gem 'stackprof'
 gem 'benchmark-ips'
 gem 'stackprof-webnav'
 gem 'flamegraph'
+gem 'climate_control'
 
 group(:guard) do
   gem 'guard', '~> 2.15'

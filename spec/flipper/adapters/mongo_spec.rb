@@ -32,7 +32,8 @@ RSpec.describe Flipper::Adapters::Mongo do
 
     load 'flipper/adapters/mongo.rb'
 
-    ENV["MONGO_URL"] ||= "mongodb://127.0.0.1:27017/testing"
-    expect(Flipper.adapter.adapter).to be_a(Flipper::Adapters::Mongo)
+    with_env "MONGO_URL" => ENV.fetch("MONGO_URL", "mongodb://127.0.0.1:27017/testing") do
+      expect(Flipper.adapter.adapter).to be_a(Flipper::Adapters::Mongo)
+    end
   end
 end

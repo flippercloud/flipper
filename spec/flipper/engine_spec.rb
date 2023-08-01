@@ -21,39 +21,39 @@ RSpec.describe Flipper::Engine do
 
   context 'cloudless' do
     it 'can set env_key from ENV' do
-      ENV['FLIPPER_ENV_KEY'] = 'flopper'
-
-      subject
-      expect(config.env_key).to eq('flopper')
+      with_env 'FLIPPER_ENV_KEY' => 'flopper' do
+        subject
+        expect(config.env_key).to eq('flopper')
+      end
     end
 
     it 'can set memoize from ENV' do
-      ENV['FLIPPER_MEMOIZE'] = 'false'
-
-      subject
-      expect(config.memoize).to eq(false)
+      with_env 'FLIPPER_MEMOIZE' => 'false' do
+        subject
+        expect(config.memoize).to eq(false)
+      end
     end
 
     it 'can set preload from ENV' do
-      ENV['FLIPPER_PRELOAD'] = 'false'
-
-      subject
-      expect(config.preload).to eq(false)
+      with_env 'FLIPPER_PRELOAD' => 'false' do
+        subject
+        expect(config.preload).to eq(false)
+      end
     end
 
     it 'can set instrumenter from ENV' do
       stub_const('My::Cool::Instrumenter', Class.new)
-      ENV['FLIPPER_INSTRUMENTER'] = 'My::Cool::Instrumenter'
-
-      subject
-      expect(config.instrumenter).to eq(My::Cool::Instrumenter)
+      with_env 'FLIPPER_INSTRUMENTER' => 'My::Cool::Instrumenter' do
+        subject
+        expect(config.instrumenter).to eq(My::Cool::Instrumenter)
+      end
     end
 
     it 'can set log from ENV' do
-      ENV['FLIPPER_LOG'] = 'false'
-
-      subject
-      expect(config.log).to eq(false)
+      with_env 'FLIPPER_LOG' => 'false' do
+        subject
+        expect(config.log).to eq(false)
+      end
     end
 
     it 'sets defaults' do
@@ -103,8 +103,10 @@ RSpec.describe Flipper::Engine do
   end
 
   context 'with cloud' do
-    let(:env) do
-      { "FLIPPER_CLOUD_TOKEN" => "test-token" }
+    around do |example|
+      with_env "FLIPPER_CLOUD_TOKEN" => "test-token" do
+        example.run
+      end
     end
 
     # App for Rack::Test
@@ -113,7 +115,6 @@ RSpec.describe Flipper::Engine do
     it "initializes cloud configuration" do
       stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
 
-      ENV.update(env)
       application.initialize!
 
       expect(Flipper.instance).to be_a(Flipper::Cloud::DSL)
@@ -121,8 +122,10 @@ RSpec.describe Flipper::Engine do
     end
 
     context "with CLOUD_SYNC_SECRET" do
-      before do
-        env.update "FLIPPER_CLOUD_SYNC_SECRET" => "test-secret"
+      around do |example|
+        with_env "FLIPPER_CLOUD_SYNC_SECRET" => "test-secret" do
+          example.run
+        end
       end
 
       let(:request_body) do
@@ -134,15 +137,15 @@ RSpec.describe Flipper::Engine do
         })
       end
       let(:timestamp) { Time.now }
+
       let(:signature) {
-        Flipper::Cloud::MessageVerifier.new(secret: env["FLIPPER_CLOUD_SYNC_SECRET"]).generate(request_body, timestamp)
+        Flipper::Cloud::MessageVerifier.new(secret: ENV["FLIPPER_CLOUD_SYNC_SECRET"]).generate(request_body, timestamp)
       }
       let(:signature_header_value) {
         Flipper::Cloud::MessageVerifier.new(secret: "").header(signature, timestamp)
       }
 
       it "configures webhook app" do
-        ENV.update(env)
         application.initialize!
 
         stub = stub_request(:get, "https://www.flippercloud.io/adapter/features?exclude_gate_names=true").with({
@@ -158,7 +161,6 @@ RSpec.describe Flipper::Engine do
 
     context "without CLOUD_SYNC_SECRET" do
       it "does not configure webhook app" do
-        ENV.update(env)
         application.initialize!
 
         post "/_flipper"
@@ -168,9 +170,10 @@ RSpec.describe Flipper::Engine do
 
     context "without FLIPPER_CLOUD_TOKEN" do
       it "gracefully skips configuring webhook app" do
-        ENV["FLIPPER_CLOUD_TOKEN"] = nil
-        application.initialize!
-        expect(Flipper.instance).to be_a(Flipper::DSL)
+        with_env "FLIPPER_CLOUD_TOKEN" => nil do
+          application.initialize!
+          expect(Flipper.instance).to be_a(Flipper::DSL)
+        end
 
         post "/_flipper"
         expect(last_response.status).to eq(404)
