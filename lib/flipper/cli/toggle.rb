@@ -4,6 +4,8 @@ module Flipper
       def initialize(**args)
         super
 
+        self.banner = "Usage: #{program_name} [options] <feature>"
+
         @values = []
 
         on('-a id', '--actor=id', "#{action} for an actor") do |id|
@@ -24,44 +26,18 @@ module Flipper
         raise NotImplementedError
       end
 
-      def call(feature_name)
-        feature = Flipper.feature(feature_name)
+      def call(feature)
+        load_environment!
+
+        f = Flipper.feature(feature)
 
         if @values.empty?
-          feature.send(action)
+          f.send(action)
         else
-          @values.each { |value| feature.send(action, value) }
+          @values.each { |value| f.send(action, value) }
         end
 
-        puts feature_summary(feature)
-      end
-
-      def feature_summary(feature)
-        summary = case feature.state
-        when :on
-          "fully enabled"
-        when :off
-          "disabled"
-        else
-          "enabled for " + feature.enabled_gates.map do |gate|
-            case gate.name
-            when :actor
-              pluralize feature.actors_value.size, 'actor', 'actors'
-            when :group
-              pluralize feature.groups_value.size, 'group', 'groups'
-            when :percentage_of_actors
-              "#{feature.percentage_of_actors_value}% of actors"
-            when :percentage_of_time
-              "#{feature.percentage_of_time_value}% of actors"
-            end
-          end.join(', ')
-        end
-
-        "#{feature.name.to_s.inspect} is #{summary}"
-      end
-
-      def pluralize(count, singular, plural)
-        "#{count} #{count == 1 ? singular : plural}"
+        puts feature_summary(f)
       end
     end
   end

@@ -1,8 +1,18 @@
-require 'flipper/cli'
+require "flipper/cli"
 
 RSpec.describe Flipper::CLI do
-  subject(:argv) { self.class.parent_groups.map {|g| g.metadata[:description_args] }.reverse.flatten.drop(1) }
+  # Infer the command from the description
+  subject(:argv) do
+    descriptions = self.class.parent_groups.map {|g| g.metadata[:description_args] }.reverse.flatten.drop(1)
+    descriptions.map { |arg| arg.split }.flatten
+  end
+
   subject { run argv }
+
+  before do
+    ENV["FLIPPER_REQUIRE"] = "./spec/fixtures/environment"
+  end
+
 
   describe "enable" do
     describe "feature" do
@@ -12,10 +22,10 @@ RSpec.describe Flipper::CLI do
       end
     end
 
-    describe %w(-a User;1 feature) do
+    describe "-a User;1 feature" do
       it do
         expect(subject).to have_attributes(status: 0, stdout: /"feature" is enabled for 1 actor/)
-        expect(Flipper).to be_enabled(:feature, Flipper::Actor.new('User;1'))
+        expect(Flipper).to be_enabled(:feature, Flipper::Actor.new("User;1"))
       end
     end
   end
@@ -31,13 +41,30 @@ RSpec.describe Flipper::CLI do
     end
   end
 
-  ['-h', '--help', 'help'].each do |arg|
+  describe "list" do
+    before do
+      Flipper.enable :foo
+      Flipper.disable :bar
+    end
+
+    it "lists features" do
+      expect(subject).to have_attributes(status: 0, stdout: /foo.*fully enabled/)
+      expect(subject).to have_attributes(status: 0, stdout: /bar.*disabled/)
+    end
+  end
+
+  ["-h", "--help", "help"].each do |arg|
     describe arg do
       it { should have_attributes(status: 0, stdout: /Usage: flipper/) }
     end
   end
 
-  describe 'nope' do
+  describe "help enable" do
+
+      it { should have_attributes(status: 0, stdout: /Usage: flipper enable \[options\] <feature>/) }
+  end
+
+  describe "nope" do
     it { should have_attributes(status: 1, stderr: /Unknown command: nope/) }
   end
 
