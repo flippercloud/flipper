@@ -13,7 +13,6 @@ end
 
 ignored_files = plugin_files
 ignored_files << Dir['script/*']
-ignored_files << '.travis.yml'
 ignored_files << '.gitignore'
 ignored_files << 'Guardfile'
 ignored_files.flatten!.uniq!
@@ -23,9 +22,9 @@ ignored_test_files.flatten!.uniq!
 
 Gem::Specification.new do |gem|
   gem.authors       = ['John Nunemaker']
-  gem.email         = ['nunemaker@gmail.com']
+  gem.email         = 'support@flippercloud.io'
   gem.summary       = 'Feature flipper for ANYTHING'
-  gem.homepage      = 'https://github.com/jnunemaker/flipper'
+  gem.homepage      = 'https://www.flippercloud.io/docs'
   gem.license       = 'MIT'
 
   gem.executables   = `git ls-files -- exe/*`.split("\n").map { |f| File.basename(f) }
@@ -35,4 +34,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ['lib']
   gem.version       = Flipper::VERSION
   gem.metadata      = Flipper::METADATA
+
+  gem.add_dependency 'concurrent-ruby', '< 2'
+  gem.add_dependency 'brow', '~> 0.4.1'
 end

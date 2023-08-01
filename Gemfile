@@ -6,20 +6,25 @@ Dir['flipper-*.gemspec'].each do |gemspec|
   gemspec(name: "flipper-#{plugin}", development_group: plugin)
 end
 
-gem 'pry'
-gem 'rake', '~> 12.3.3'
-gem 'shotgun', '~> 0.9'
+gem 'debug'
+gem 'rake'
 gem 'statsd-ruby', '~> 1.2.1'
 gem 'rspec', '~> 3.0'
-gem 'rack-test', '~> 0.6.3'
+gem 'rack-test'
+gem 'rackup'
 gem 'sqlite3', "~> #{ENV['SQLITE3_VERSION'] || '1.4.1'}"
-gem 'rails', "~> #{ENV['RAILS_VERSION'] || '7.0.0'}"
-gem 'minitest', '~> 5.8'
+gem 'rails', "~> #{ENV['RAILS_VERSION'] || '7.0.4'}"
+gem 'minitest', '~> 5.18'
 gem 'minitest-documentation'
-gem 'webmock', '~> 3.0'
+gem 'webmock'
 gem 'ice_age'
 gem 'redis-namespace'
 gem 'webrick'
+gem 'stackprof'
+gem 'benchmark-ips'
+gem 'stackprof-webnav'
+gem 'flamegraph'
+gem 'climate_control'
 
 group(:guard) do
   gem 'guard', '~> 2.15'

@@ -7,18 +7,28 @@ module Flipper
     class Redis
       include ::Flipper::Adapter
 
-      # Private: The key that stores the set of known features.
-      FeaturesKey = :flipper_features
-
       # Public: The name of the adapter.
       attr_reader :name
 
+      attr_reader :key_prefix
+
+      def features_key
+        "#{key_prefix}flipper_features"
+      end
+
+      def key_for(feature_name)
+        "#{key_prefix}#{feature_name}"
+      end
+
       # Public: Initializes a Redis flipper adapter.
       #
-      # client - The Redis client to use. Feel free to namespace it.
-      def initialize(client)
+      # client - The Redis client to use.
+      # key_prefix - an optional prefix with which to namespace
+      #              flipper's Redis keys
+      def initialize(client, key_prefix: nil)
         @client = client
         @name = :redis
+        @key_prefix = key_prefix
       end
 
       # Public: The set of known features.
@@ -28,20 +38,28 @@ module Flipper
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
-        @client.sadd FeaturesKey, feature.key
+        if redis_sadd_returns_boolean?
+          @client.sadd? features_key, feature.key
+        else
+          @client.sadd features_key, feature.key
+        end
         true
       end
 
       # Public: Removes a feature from the set of known features.
       def remove(feature)
-        @client.srem FeaturesKey, feature.key
-        @client.del feature.key
+        if redis_sadd_returns_boolean?
+          @client.srem? features_key, feature.key
+        else
+          @client.srem features_key, feature.key
+        end
+        @client.del key_for(feature.key)
         true
       end
 
       # Public: Clears the gate values for a feature.
       def clear(feature)
-        @client.del feature.key
+        @client.del key_for(feature.key)
         true
       end
 
@@ -70,14 +88,15 @@ module Flipper
       #
       # Returns true.
       def enable(feature, gate, thing)
+        feature_key = key_for(feature.key)
         case gate.data_type
         when :boolean
           clear(feature)
-          @client.hset feature.key, gate.key, thing.value.to_s
+          @client.hset feature_key, gate.key, thing.value.to_s
         when :integer
-          @client.hset feature.key, gate.key, thing.value.to_s
+          @client.hset feature_key, gate.key, thing.value.to_s
         when :set
-          @client.hset feature.key, to_field(gate, thing), 1
+          @client.hset feature_key, to_field(gate, thing), 1
         else
           unsupported_data_type gate.data_type
         end
@@ -93,13 +112,14 @@ module Flipper
       #
       # Returns true.
       def disable(feature, gate, thing)
+        feature_key = key_for(feature.key)
         case gate.data_type
         when :boolean
-          @client.del feature.key
+          @client.del feature_key
         when :integer
-          @client.hset feature.key, gate.key, thing.value.to_s
+          @client.hset feature_key, gate.key, thing.value.to_s
         when :set
-          @client.hdel feature.key, to_field(gate, thing)
+          @client.hdel feature_key, to_field(gate, thing)
         else
           unsupported_data_type gate.data_type
         end
@@ -108,6 +128,10 @@ module Flipper
       end
 
       private
+
+      def redis_sadd_returns_boolean?
+        @client.class.respond_to?(:sadd_returns_boolean) && @client.class.sadd_returns_boolean
+      end
 
       def read_many_features(features)
         docs = docs_for(features)
@@ -119,14 +143,14 @@ module Flipper
       end
 
       def read_feature_keys
-        @client.smembers(FeaturesKey).to_set
+        @client.smembers(features_key).to_set
       end
 
       # Private: Gets a hash of fields => values for the given feature.
       #
       # Returns a Hash of fields => values.
       def doc_for(feature, pipeline: @client)
-        pipeline.hgetall(feature.key)
+        pipeline.hgetall(key_for(feature.key))
       end
 
       def docs_for(features)

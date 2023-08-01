@@ -26,8 +26,13 @@ module Flipper
           "feature" => payload[:feature_name].to_s,
           "result" => payload[:result].to_s,
         }
+
         if (thing = payload[:thing])
           dimensions["flipper_id"] = thing.value.to_s
+        end
+
+        if (actors = payload[:actors])
+          dimensions["flipper_ids"] = actors.map { |actor| actor.value.to_s }
         end
 
         event = {

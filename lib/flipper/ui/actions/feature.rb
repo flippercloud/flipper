@@ -25,6 +25,8 @@ module Flipper
         end
 
         def delete
+          read_only if Flipper::UI.configuration.read_only
+
           unless Flipper::UI.configuration.feature_removal_enabled
             status 403
 

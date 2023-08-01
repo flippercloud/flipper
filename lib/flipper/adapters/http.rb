@@ -10,7 +10,7 @@ module Flipper
     class Http
       include Flipper::Adapter
 
-      attr_reader :name
+      attr_reader :name, :client
 
       def initialize(options = {})
         @client = Client.new(url: options.fetch(:url),
@@ -19,6 +19,8 @@ module Flipper
                              basic_auth_password: options[:basic_auth_password],
                              read_timeout: options[:read_timeout],
                              open_timeout: options[:open_timeout],
+                             write_timeout: options[:write_timeout],
+                             max_retries: options[:max_retries],
                              debug_output: options[:debug_output])
         @name = :http
       end
@@ -37,7 +39,7 @@ module Flipper
 
       def get_multi(features)
         csv_keys = features.map(&:key).join(',')
-        response = @client.get("/features?keys=#{csv_keys}")
+        response = @client.get("/features?keys=#{csv_keys}&exclude_gate_names=true")
         raise Error, response unless response.is_a?(Net::HTTPOK)
 
         parsed_response = JSON.parse(response.body)
@@ -55,7 +57,7 @@ module Flipper
       end
 
       def get_all
-        response = @client.get("/features")
+        response = @client.get("/features?exclude_gate_names=true")
         raise Error, response unless response.is_a?(Net::HTTPOK)
 
         parsed_response = JSON.parse(response.body)
@@ -74,7 +76,7 @@ module Flipper
       end
 
       def features
-        response = @client.get('/features')
+        response = @client.get('/features?exclude_gate_names=true')
         raise Error, response unless response.is_a?(Net::HTTPOK)
 
         parsed_response = JSON.parse(response.body)
@@ -117,6 +119,14 @@ module Flipper
 
       def clear(feature)
         response = @client.delete("/features/#{feature.key}/clear")
+        raise Error, response unless response.is_a?(Net::HTTPNoContent)
+        true
+      end
+
+      def import(source)
+        adapter = self.class.from(source)
+        export = adapter.export(format: :json, version: 1)
+        response = @client.post("/import", export.contents)
         raise Error, response unless response.is_a?(Net::HTTPNoContent)
         true
       end

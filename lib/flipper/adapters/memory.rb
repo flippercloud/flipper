@@ -1,4 +1,5 @@
-require 'set'
+require "flipper/adapter"
+require "flipper/typecast"
 
 module Flipper
   module Adapters
@@ -13,87 +14,95 @@ module Flipper
       attr_reader :name
 
       # Public
-      def initialize(source = nil)
-        @source = source || {}
+      def initialize(source = nil, threadsafe: true)
+        @source = Typecast.features_hash(source)
         @name = :memory
+        @lock = Mutex.new if threadsafe
+        reset
       end
 
       # Public: The set of known features.
       def features
-        @source.keys.to_set
+        synchronize { @source.keys }.to_set
       end
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
-        @source[feature.key] ||= default_config
+        synchronize { @source[feature.key] ||= default_config }
         true
       end
 
       # Public: Removes a feature from the set of known features and clears
       # all the values for the feature.
       def remove(feature)
-        @source.delete(feature.key)
+        synchronize { @source.delete(feature.key) }
         true
       end
 
       # Public: Clears all the gate values for a feature.
       def clear(feature)
-        @source[feature.key] = default_config
+        synchronize { @source[feature.key] = default_config }
         true
       end
 
       # Public
       def get(feature)
-        @source[feature.key] || default_config
+        synchronize { @source[feature.key] } || default_config
       end
 
       def get_multi(features)
-        result = {}
-        features.each do |feature|
-          result[feature.key] = @source[feature.key] || default_config
+        synchronize do
+          result = {}
+          features.each do |feature|
+            result[feature.key] = @source[feature.key] || default_config
+          end
+          result
         end
-        result
       end
 
       def get_all
-        @source
+        synchronize { Typecast.features_hash(@source) }
       end
 
       # Public
       def enable(feature, gate, thing)
-        @source[feature.key] ||= default_config
+        synchronize do
+          @source[feature.key] ||= default_config
 
-        case gate.data_type
-        when :boolean
-          clear(feature)
-          @source[feature.key][gate.key] = thing.value.to_s
-        when :integer
-          @source[feature.key][gate.key] = thing.value.to_s
-        when :set
-          @source[feature.key][gate.key] << thing.value.to_s
-        else
-          raise "#{gate} is not supported by this adapter yet"
+          case gate.data_type
+          when :boolean
+            @source[feature.key] = default_config
+            @source[feature.key][gate.key] = thing.value.to_s
+          when :integer
+            @source[feature.key][gate.key] = thing.value.to_s
+          when :set
+            @source[feature.key][gate.key] << thing.value.to_s
+          else
+            raise "#{gate} is not supported by this adapter yet"
+          end
+
+          true
         end
-
-        true
       end
 
       # Public
       def disable(feature, gate, thing)
-        @source[feature.key] ||= default_config
+        synchronize do
+          @source[feature.key] ||= default_config
 
-        case gate.data_type
-        when :boolean
-          clear(feature)
-        when :integer
-          @source[feature.key][gate.key] = thing.value.to_s
-        when :set
-          @source[feature.key][gate.key].delete thing.value.to_s
-        else
-          raise "#{gate} is not supported by this adapter yet"
+          case gate.data_type
+          when :boolean
+            @source[feature.key] = default_config
+          when :integer
+            @source[feature.key][gate.key] = thing.value.to_s
+          when :set
+            @source[feature.key][gate.key].delete thing.value.to_s
+          else
+            raise "#{gate} is not supported by this adapter yet"
+          end
+
+          true
         end
-
-        true
       end
 
       # Public
@@ -103,6 +112,34 @@ module Flipper
           "source=#{@source.inspect}",
         ]
         "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
+      end
+
+      # Public: a more efficient implementation of import for this adapter
+      def import(source)
+        adapter = self.class.from(source)
+        get_all = Typecast.features_hash(adapter.get_all)
+        synchronize { @source.replace(get_all) }
+        true
+      end
+
+      private
+
+      def reset
+        @pid = Process.pid
+        @lock&.unlock if @lock&.locked?
+      end
+
+      def forked?
+        @pid != Process.pid
+      end
+
+      def synchronize(&block)
+        if @lock
+          reset if forked?
+          @lock.synchronize(&block)
+        else
+          block.call
+        end
       end
     end
   end

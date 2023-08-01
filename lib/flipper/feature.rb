@@ -96,18 +96,19 @@ module Flipper
       instrument(:clear) { adapter.clear(self) }
     end
 
-    # Public: Check if a feature is enabled for a thing.
+    # Public: Check if a feature is enabled for zero or more actors.
     #
     # Returns true if enabled, false if not.
-    def enabled?(thing = nil)
-      instrument(:enabled?) do |payload|
-        values = gate_values
-        thing = gate(:actor).wrap(thing) unless thing.nil?
-        payload[:thing] = thing
+    def enabled?(*actors)
+      actors = actors.flatten.compact.map { |actor| Types::Actor.wrap(actor) }
+      actors = nil if actors.empty?
+
+      # thing is left for backwards compatibility
+      instrument(:enabled?, thing: actors&.first, actors: actors) do |payload|
         context = FeatureCheckContext.new(
           feature_name: @name,
-          values: values,
-          thing: thing
+          values: gate_values,
+          actors: actors
         )
 
         if open_gate = gates.detect { |gate| gate.open?(context) }
@@ -207,7 +208,7 @@ module Flipper
 
       if values.boolean || values.percentage_of_time == 100
         :on
-      elsif non_boolean_gates.detect { |gate| gate.enabled?(values[gate.key]) }
+      elsif non_boolean_gates.detect { |gate| gate.enabled?(values.send(gate.key)) }
         :conditional
       else
         :off
@@ -232,7 +233,8 @@ module Flipper
 
     # Public: Returns the raw gate values stored by the adapter.
     def gate_values
-      GateValues.new(adapter.get(self))
+      adapter_values = adapter.get(self)
+      GateValues.new(adapter_values)
     end
 
     # Public: Get groups enabled for this feature.
@@ -290,7 +292,7 @@ module Flipper
     # Returns an Array of Flipper::Gate instances.
     def enabled_gates
       values = gate_values
-      gates.select { |gate| gate.enabled?(values[gate.key]) }
+      gates.select { |gate| gate.enabled?(values.send(gate.key)) }
     end
 
     # Public: Get the names of the enabled gates.
@@ -339,37 +341,41 @@ module Flipper
     #
     # Returns an array of gates
     def gates
-      @gates ||= [
-        Gates::Boolean.new,
-        Gates::Actor.new,
-        Gates::PercentageOfActors.new,
-        Gates::PercentageOfTime.new,
-        Gates::Group.new,
-      ]
+      @gates ||= gates_hash.values.freeze
+    end
+
+    def gates_hash
+      @gates_hash ||= {
+        boolean: Gates::Boolean.new,
+        actor: Gates::Actor.new,
+        percentage_of_actors: Gates::PercentageOfActors.new,
+        percentage_of_time: Gates::PercentageOfTime.new,
+        group: Gates::Group.new,
+      }.freeze
     end
 
     # Public: Find a gate by name.
     #
     # Returns a Flipper::Gate if found, nil if not.
     def gate(name)
-      gates.detect { |gate| gate.name == name.to_sym }
+      gates_hash[name.to_sym]
     end
 
-    # Public: Find the gate that protects a thing.
+    # Public: Find the gate that protects an actor.
     #
-    # thing - The object for which you would like to find a gate
+    # actor - The object for which you would like to find a gate
     #
     # Returns a Flipper::Gate.
-    # Raises Flipper::GateNotFound if no gate found for thing
-    def gate_for(thing)
-      gates.detect { |gate| gate.protects?(thing) } || raise(GateNotFound, thing)
+    # Raises Flipper::GateNotFound if no gate found for actor
+    def gate_for(actor)
+      gates.detect { |gate| gate.protects?(actor) } || raise(GateNotFound, actor)
     end
 
     private
 
     # Private: Instrument a feature operation.
-    def instrument(operation)
-      @instrumenter.instrument(InstrumentationName) do |payload|
+    def instrument(operation, initial_payload = {})
+      @instrumenter.instrument(InstrumentationName, initial_payload) do |payload|
         payload[:feature_name] = name
         payload[:operation] = operation
         payload[:result] = yield(payload) if block_given?

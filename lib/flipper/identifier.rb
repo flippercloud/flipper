@@ -6,8 +6,8 @@ module Flipper
   #   end
   #
   #   user = User.new(99)
-  #   Flipper.enable :thing, user
-  #   Flipper.enabled? :thing, user #=> true
+  #   Flipper.enable :some_feature, user
+  #   Flipper.enabled? :some_feature, user #=> true
   #
   module Identifier
     def flipper_id

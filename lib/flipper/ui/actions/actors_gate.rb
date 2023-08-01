@@ -23,6 +23,8 @@ module Flipper
         end
 
         def post
+          read_only if Flipper::UI.configuration.read_only
+
           feature = flipper[feature_name]
           value = params['value'].to_s.strip
           values = value.split(UI.configuration.actors_separator).map(&:strip).uniq

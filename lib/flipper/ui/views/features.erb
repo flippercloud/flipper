@@ -3,18 +3,15 @@
     <% if Flipper::UI.configuration.fun %>
       <h4>But I've got a blank space baby...</h4>
       <p>And I'll flip your features.</p>
-      <%- if Flipper::UI.configuration.feature_creation_enabled -%>
+      <%- if !Flipper::UI.configuration.read_only && Flipper::UI.configuration.feature_creation_enabled -%>
         <p>
           <a class="btn btn-primary btn-sm" href="<%= script_name %>/features/new">Add Feature</a>
         </p>
       <%- end -%>
-      <div class="embed-responsive embed-responsive-16by9">
-        <iframe class="embed-responsive-item" width="560" height="315" src="https://www.youtube.com/embed/e-ORhEE9VVg" frameborder="0" allowfullscreen></iframe>
-      </div>
     <% else %>
       <h4>Getting Started</h4>
       <p class="mb-1">You have not added any features to configure yet.</p>
-      <%- if Flipper::UI.configuration.feature_creation_enabled -%>
+      <%- if !Flipper::UI.configuration.read_only && Flipper::UI.configuration.feature_creation_enabled -%>
         <p class="mt-2">
           <a class="btn btn-primary btn-sm" href="<%= script_name %>/features/new">Add Feature</a>
         </p>
@@ -29,7 +26,7 @@
 <% else %>
   <div class="card">
     <div class="card-header">
-      <%- if Flipper::UI.configuration.feature_creation_enabled -%>
+      <%- if !Flipper::UI.configuration.read_only && Flipper::UI.configuration.feature_creation_enabled -%>
         <div class="float-right">
           <a class="btn btn-primary btn-sm" href="<%= script_name %>/features/new">Add Feature</a>
         </div>

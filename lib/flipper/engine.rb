@@ -1,12 +1,15 @@
 module Flipper
-  class Railtie < Rails::Railtie
+  class Engine < Rails::Engine
+    paths["config/routes.rb"] = ["lib/flipper/cloud/routes.rb"]
+
     config.before_configuration do
       config.flipper = ActiveSupport::OrderedOptions.new.update(
-        env_key: "flipper",
-        memoize: true,
-        preload: true,
-        instrumenter: ActiveSupport::Notifications,
-        log: true
+        env_key: ENV.fetch('FLIPPER_ENV_KEY', 'flipper'),
+        memoize: ENV.fetch('FLIPPER_MEMOIZE', 'true').casecmp('true').zero?,
+        preload: ENV.fetch('FLIPPER_PRELOAD', 'true').casecmp('true').zero?,
+        instrumenter: ENV.fetch('FLIPPER_INSTRUMENTER', 'ActiveSupport::Notifications').constantize,
+        log: ENV.fetch('FLIPPER_LOG', 'true').casecmp('true').zero?,
+        cloud_path: "_flipper"
       )
     end
 
@@ -17,9 +20,18 @@ module Flipper
     end
 
     initializer "flipper.default", before: :load_config_initializers do |app|
+      require 'flipper/cloud' if cloud?
+
       Flipper.configure do |config|
         config.default do
-          Flipper.new(config.adapter, instrumenter: app.config.flipper.instrumenter)
+          if cloud?
+            Flipper::Cloud.new(
+              local_adapter: config.adapter,
+              instrumenter: app.config.flipper.instrumenter
+            )
+          else
+            Flipper.new(config.adapter, instrumenter: app.config.flipper.instrumenter)
+          end
         end
       end
     end
@@ -42,6 +54,10 @@ module Flipper
           if: flipper.memoize.respond_to?(:call) ? flipper.memoize : nil
         }
       end
+    end
+
+    def cloud?
+      !!ENV["FLIPPER_CLOUD_TOKEN"]
     end
   end
 end
