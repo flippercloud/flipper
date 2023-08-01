@@ -48,20 +48,20 @@ module Flipper
       end
 
       def test_can_enable_disable_and_get_value_for_boolean_gate
-        assert_equal true, @adapter.enable(@feature, @boolean_gate, @flipper.boolean)
+        assert_equal true, @adapter.enable(@feature, @boolean_gate, Flipper::Types::Boolean.new)
         assert_equal 'true', @adapter.get(@feature)[:boolean]
-        assert_equal true, @adapter.disable(@feature, @boolean_gate, @flipper.boolean(false))
+        assert_equal true, @adapter.disable(@feature, @boolean_gate, Flipper::Types::Boolean.new(false))
         assert_nil @adapter.get(@feature)[:boolean]
       end
 
       def test_fully_disables_all_enabled_things_when_boolean_gate_disabled
         actor22 = Flipper::Actor.new('22')
-        assert_equal true, @adapter.enable(@feature, @boolean_gate, @flipper.boolean)
+        assert_equal true, @adapter.enable(@feature, @boolean_gate, Flipper::Types::Boolean.new)
         assert_equal true, @adapter.enable(@feature, @group_gate, @flipper.group(:admins))
-        assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor22))
-        assert_equal true, @adapter.enable(@feature, @actors_gate, @flipper.actors(25))
-        assert_equal true, @adapter.enable(@feature, @time_gate, @flipper.time(45))
-        assert_equal true, @adapter.disable(@feature, @boolean_gate, @flipper.boolean(false))
+        assert_equal true, @adapter.enable(@feature, @actor_gate, Flipper::Types::Actor.new(actor22))
+        assert_equal true, @adapter.enable(@feature, @actors_gate, Flipper::Types::PercentageOfActors.new(25))
+        assert_equal true, @adapter.enable(@feature, @time_gate, Flipper::Types::PercentageOfTime.new(45))
+        assert_equal true, @adapter.disable(@feature, @boolean_gate, Flipper::Types::Boolean.new(false))
         assert_equal @adapter.default_config, @adapter.get(@feature)
       end
 
@@ -85,34 +85,34 @@ module Flipper
         actor22 = Flipper::Actor.new('22')
         actor_asdf = Flipper::Actor.new('asdf')
 
-        assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor22))
-        assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor_asdf))
+        assert_equal true, @adapter.enable(@feature, @actor_gate, Flipper::Types::Actor.new(actor22))
+        assert_equal true, @adapter.enable(@feature, @actor_gate, Flipper::Types::Actor.new(actor_asdf))
 
         result = @adapter.get(@feature)
         assert_equal Set['22', 'asdf'], result[:actors]
 
-        assert true, @adapter.disable(@feature, @actor_gate, @flipper.actor(actor22))
+        assert true, @adapter.disable(@feature, @actor_gate, Flipper::Types::Actor.new(actor22))
         result = @adapter.get(@feature)
         assert_equal Set['asdf'], result[:actors]
 
-        assert_equal true, @adapter.disable(@feature, @actor_gate, @flipper.actor(actor_asdf))
+        assert_equal true, @adapter.disable(@feature, @actor_gate, Flipper::Types::Actor.new(actor_asdf))
         result = @adapter.get(@feature)
         assert_equal Set.new, result[:actors]
       end
 
       def test_can_enable_disable_get_value_for_percentage_of_actors_gate
-        assert_equal true, @adapter.enable(@feature, @actors_gate, @flipper.actors(15))
+        assert_equal true, @adapter.enable(@feature, @actors_gate, Flipper::Types::PercentageOfActors.new(15))
         result = @adapter.get(@feature)
         assert_equal '15', result[:percentage_of_actors]
 
-        assert_equal true, @adapter.disable(@feature, @actors_gate, @flipper.actors(0))
+        assert_equal true, @adapter.disable(@feature, @actors_gate, Flipper::Types::PercentageOfActors.new(0))
         result = @adapter.get(@feature)
         assert_equal '0', result[:percentage_of_actors]
       end
 
       def test_can_enable_percentage_of_actors_gate_many_times_and_consistently_return_values
         (1..100).each do |percentage|
-          assert_equal true, @adapter.enable(@feature, @actors_gate, @flipper.actors(percentage))
+          assert_equal true, @adapter.enable(@feature, @actors_gate, Flipper::Types::PercentageOfActors.new(percentage))
           result = @adapter.get(@feature)
           assert_equal percentage.to_s, result[:percentage_of_actors]
         end
@@ -120,25 +120,25 @@ module Flipper
 
       def test_can_disable_percentage_of_actors_gate_many_times_and_consistently_return_values
         (1..100).each do |percentage|
-          assert_equal true, @adapter.disable(@feature, @actors_gate, @flipper.actors(percentage))
+          assert_equal true, @adapter.disable(@feature, @actors_gate, Flipper::Types::PercentageOfActors.new(percentage))
           result = @adapter.get(@feature)
           assert_equal percentage.to_s, result[:percentage_of_actors]
         end
       end
 
       def test_can_enable_disable_and_get_value_for_percentage_of_time_gate
-        assert_equal true, @adapter.enable(@feature, @time_gate, @flipper.time(10))
+        assert_equal true, @adapter.enable(@feature, @time_gate, Flipper::Types::PercentageOfTime.new(10))
         result = @adapter.get(@feature)
         assert_equal '10', result[:percentage_of_time]
 
-        assert_equal true, @adapter.disable(@feature, @time_gate, @flipper.time(0))
+        assert_equal true, @adapter.disable(@feature, @time_gate, Flipper::Types::PercentageOfTime.new(0))
         result = @adapter.get(@feature)
         assert_equal '0', result[:percentage_of_time]
       end
 
       def test_can_enable_percentage_of_time_gate_many_times_and_consistently_return_values
         (1..100).each do |percentage|
-          assert_equal true, @adapter.enable(@feature, @time_gate, @flipper.time(percentage))
+          assert_equal true, @adapter.enable(@feature, @time_gate, Flipper::Types::PercentageOfTime.new(percentage))
           result = @adapter.get(@feature)
           assert_equal percentage.to_s, result[:percentage_of_time]
         end
@@ -146,21 +146,21 @@ module Flipper
 
       def test_can_disable_percentage_of_time_gate_many_times_and_consistently_return_values
         (1..100).each do |percentage|
-          assert_equal true, @adapter.disable(@feature, @time_gate, @flipper.time(percentage))
+          assert_equal true, @adapter.disable(@feature, @time_gate, Flipper::Types::PercentageOfTime.new(percentage))
           result = @adapter.get(@feature)
           assert_equal percentage.to_s, result[:percentage_of_time]
         end
       end
 
       def test_converts_boolean_value_to_a_string
-        assert_equal true, @adapter.enable(@feature, @boolean_gate, @flipper.boolean)
+        assert_equal true, @adapter.enable(@feature, @boolean_gate, Flipper::Types::Boolean.new)
         result = @adapter.get(@feature)
         assert_equal 'true', result[:boolean]
       end
 
       def test_converts_the_actor_value_to_a_string
         assert_equal true,
-                     @adapter.enable(@feature, @actor_gate, @flipper.actor(Flipper::Actor.new(22)))
+                     @adapter.enable(@feature, @actor_gate, Flipper::Types::Actor.new(Flipper::Actor.new(22)))
         result = @adapter.get(@feature)
         assert_equal Set['22'], result[:actors]
       end
@@ -172,13 +172,13 @@ module Flipper
       end
 
       def test_converts_percentage_of_time_integer_value_to_a_string
-        assert_equal true, @adapter.enable(@feature, @time_gate, @flipper.time(10))
+        assert_equal true, @adapter.enable(@feature, @time_gate, Flipper::Types::PercentageOfTime.new(10))
         result = @adapter.get(@feature)
         assert_equal '10', result[:percentage_of_time]
       end
 
       def test_converts_percentage_of_actors_integer_value_to_a_string
-        assert_equal true, @adapter.enable(@feature, @actors_gate, @flipper.actors(10))
+        assert_equal true, @adapter.enable(@feature, @actors_gate, Flipper::Types::PercentageOfActors.new(10))
         result = @adapter.get(@feature)
         assert_equal '10', result[:percentage_of_actors]
       end
@@ -201,11 +201,11 @@ module Flipper
 
       def test_clears_all_the_gate_values_for_the_feature_on_remove
         actor22 = Flipper::Actor.new('22')
-        assert_equal true, @adapter.enable(@feature, @boolean_gate, @flipper.boolean)
+        assert_equal true, @adapter.enable(@feature, @boolean_gate, Flipper::Types::Boolean.new)
         assert_equal true, @adapter.enable(@feature, @group_gate, @flipper.group(:admins))
-        assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor22))
-        assert_equal true, @adapter.enable(@feature, @actors_gate, @flipper.actors(25))
-        assert_equal true, @adapter.enable(@feature, @time_gate, @flipper.time(45))
+        assert_equal true, @adapter.enable(@feature, @actor_gate, Flipper::Types::Actor.new(actor22))
+        assert_equal true, @adapter.enable(@feature, @actors_gate, Flipper::Types::PercentageOfActors.new(25))
+        assert_equal true, @adapter.enable(@feature, @time_gate, Flipper::Types::PercentageOfTime.new(45))
 
         assert_equal true, @adapter.remove(@feature)
 
@@ -217,11 +217,11 @@ module Flipper
         @adapter.add(@feature)
         assert_includes @adapter.features, @feature.key
 
-        assert_equal true, @adapter.enable(@feature, @boolean_gate, @flipper.boolean)
+        assert_equal true, @adapter.enable(@feature, @boolean_gate, Flipper::Types::Boolean.new)
         assert_equal true, @adapter.enable(@feature, @group_gate, @flipper.group(:admins))
-        assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor22))
-        assert_equal true, @adapter.enable(@feature, @actors_gate, @flipper.actors(25))
-        assert_equal true, @adapter.enable(@feature, @time_gate, @flipper.time(45))
+        assert_equal true, @adapter.enable(@feature, @actor_gate, Flipper::Types::Actor.new(actor22))
+        assert_equal true, @adapter.enable(@feature, @actors_gate, Flipper::Types::PercentageOfActors.new(25))
+        assert_equal true, @adapter.enable(@feature, @time_gate, Flipper::Types::PercentageOfTime.new(45))
 
         assert_equal true, @adapter.clear(@feature)
         assert_includes @adapter.features, @feature.key
@@ -234,7 +234,7 @@ module Flipper
 
       def test_can_get_multiple_features
         assert @adapter.add(@flipper[:stats])
-        assert @adapter.enable(@flipper[:stats], @boolean_gate, @flipper.boolean)
+        assert @adapter.enable(@flipper[:stats], @boolean_gate, Flipper::Types::Boolean.new)
         assert @adapter.add(@flipper[:search])
 
         result = @adapter.get_multi([@flipper[:stats], @flipper[:search], @flipper[:other]])
@@ -250,7 +250,7 @@ module Flipper
 
       def test_can_get_all_features
         assert @adapter.add(@flipper[:stats])
-        assert @adapter.enable(@flipper[:stats], @boolean_gate, @flipper.boolean)
+        assert @adapter.enable(@flipper[:stats], @boolean_gate, Flipper::Types::Boolean.new)
         assert @adapter.add(@flipper[:search])
 
         result = @adapter.get_all
@@ -273,8 +273,8 @@ module Flipper
 
       def test_can_double_enable_an_actor_without_error
         actor = Flipper::Actor.new('Flipper::Actor;22')
-        assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor))
-        assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor))
+        assert_equal true, @adapter.enable(@feature, @actor_gate, Flipper::Types::Actor.new(actor))
+        assert_equal true, @adapter.enable(@feature, @actor_gate, Flipper::Types::Actor.new(actor))
         assert_equal Set['Flipper::Actor;22'], @adapter.get(@feature).fetch(:actors)
       end
 
@@ -285,13 +285,13 @@ module Flipper
       end
 
       def test_can_double_enable_percentage_without_error
-        assert_equal true, @adapter.enable(@feature, @actors_gate, @flipper.actors(25))
-        assert_equal true, @adapter.enable(@feature, @actors_gate, @flipper.actors(25))
+        assert_equal true, @adapter.enable(@feature, @actors_gate, Flipper::Types::PercentageOfActors.new(25))
+        assert_equal true, @adapter.enable(@feature, @actors_gate, Flipper::Types::PercentageOfActors.new(25))
       end
 
       def test_can_double_enable_without_error
-        assert_equal true, @adapter.enable(@feature, @boolean_gate, @flipper.boolean)
-        assert_equal true, @adapter.enable(@feature, @boolean_gate, @flipper.boolean)
+        assert_equal true, @adapter.enable(@feature, @boolean_gate, Flipper::Types::Boolean.new)
+        assert_equal true, @adapter.enable(@feature, @boolean_gate, Flipper::Types::Boolean.new)
       end
 
       def test_can_get_all_features_when_there_are_none
@@ -302,11 +302,11 @@ module Flipper
 
       def test_clears_other_gate_values_on_enable
         actor = Flipper::Actor.new('Flipper::Actor;22')
-        assert_equal true, @adapter.enable(@feature, @actors_gate, @flipper.actors(25))
-        assert_equal true, @adapter.enable(@feature, @time_gate, @flipper.time(25))
+        assert_equal true, @adapter.enable(@feature, @actors_gate, Flipper::Types::PercentageOfActors.new(25))
+        assert_equal true, @adapter.enable(@feature, @time_gate, Flipper::Types::PercentageOfTime.new(25))
         assert_equal true, @adapter.enable(@feature, @group_gate, @flipper.group(:admins))
-        assert_equal true, @adapter.enable(@feature, @actor_gate, @flipper.actor(actor))
-        assert_equal true, @adapter.enable(@feature, @boolean_gate, @flipper.boolean(true))
+        assert_equal true, @adapter.enable(@feature, @actor_gate, Flipper::Types::Actor.new(actor))
+        assert_equal true, @adapter.enable(@feature, @boolean_gate, Flipper::Types::Boolean.new(true))
         assert_equal @adapter.default_config.merge(boolean: "true"), @adapter.get(@feature)
       end
 

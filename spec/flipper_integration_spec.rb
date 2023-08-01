@@ -24,8 +24,8 @@ RSpec.describe Flipper do
   let(:pitt)        { Flipper::Actor.new(1) }
   let(:clooney)     { Flipper::Actor.new(10) }
 
-  let(:five_percent_of_actors) { flipper.actors(5) }
-  let(:five_percent_of_time) { flipper.time(5) }
+  let(:five_percent_of_actors) { Flipper::Types::PercentageOfActors.new(5) }
+  let(:five_percent_of_time) { Flipper::Types::PercentageOfTime.new(5) }
 
   before do
     described_class.register(:admins, &:admin?)
@@ -69,11 +69,11 @@ RSpec.describe Flipper do
       end
 
       it 'enables feature for flipper actor in group' do
-        expect(feature.enabled?(flipper.actor(admin_actor))).to eq(true)
+        expect(feature.enabled?(Flipper::Types::Actor.new(admin_actor))).to eq(true)
       end
 
       it 'does not enable for flipper actor not in group' do
-        expect(feature.enabled?(flipper.actor(dev_actor))).to eq(false)
+        expect(feature.enabled?(Flipper::Types::Actor.new(dev_actor))).to eq(false)
       end
 
       it 'does not enable feature for all' do
@@ -256,11 +256,11 @@ RSpec.describe Flipper do
       end
 
       it 'disables feature for flipper actor in group' do
-        expect(feature.enabled?(flipper.actor(admin_actor))).to eq(false)
+        expect(feature.enabled?(Flipper::Types::Actor.new(admin_actor))).to eq(false)
       end
 
       it 'does not disable feature for flipper actor in other groups' do
-        expect(feature.enabled?(flipper.actor(dev_actor))).to eq(true)
+        expect(feature.enabled?(Flipper::Types::Actor.new(dev_actor))).to eq(true)
       end
 
       it 'adds feature to set of features' do
@@ -294,7 +294,7 @@ RSpec.describe Flipper do
 
     context 'with a percentage of actors' do
       before do
-        @result = feature.disable(flipper.actors(0))
+        @result = feature.disable(Flipper::Types::PercentageOfActors.new(0))
       end
 
       it 'returns true' do
@@ -318,7 +318,7 @@ RSpec.describe Flipper do
     context 'with a percentage of time' do
       before do
         @gate = feature.gate(:percentage_of_time)
-        @result = feature.disable(flipper.time(0))
+        @result = feature.disable(Flipper::Types::PercentageOfTime.new(0))
       end
 
       it 'returns true' do
@@ -373,12 +373,12 @@ RSpec.describe Flipper do
       end
 
       it 'returns true' do
-        expect(feature.enabled?(flipper.actor(admin_actor))).to eq(true)
+        expect(feature.enabled?(Flipper::Types::Actor.new(admin_actor))).to eq(true)
         expect(feature.enabled?(admin_actor)).to eq(true)
       end
 
       it 'returns true for truthy block values' do
-        expect(feature.enabled?(flipper.actor(admin_truthy_actor))).to eq(true)
+        expect(feature.enabled?(Flipper::Types::Actor.new(admin_truthy_actor))).to eq(true)
       end
 
       it 'returns true if any actor is in enabled group' do
@@ -388,12 +388,12 @@ RSpec.describe Flipper do
 
     context 'for actor in disabled group' do
       it 'returns false' do
-        expect(feature.enabled?(flipper.actor(dev_actor))).to eq(false)
+        expect(feature.enabled?(Flipper::Types::Actor.new(dev_actor))).to eq(false)
         expect(feature.enabled?(dev_actor)).to eq(false)
       end
 
       it 'returns false for falsey block values' do
-        expect(feature.enabled?(flipper.actor(admin_falsey_actor))).to eq(false)
+        expect(feature.enabled?(Flipper::Types::Actor.new(admin_falsey_actor))).to eq(false)
       end
     end
 

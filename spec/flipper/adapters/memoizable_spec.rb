@@ -189,7 +189,7 @@ RSpec.describe Flipper::Adapters::Memoizable do
         feature = flipper[:stats]
         gate = feature.gate(:boolean)
         cache[described_class.key_for(feature.key)] = { some: 'thing' }
-        subject.enable(feature, gate, flipper.bool)
+        subject.enable(feature, gate, Flipper::Types::Boolean.new)
         expect(cache[described_class.key_for(feature.key)]).to be_nil
       end
     end
@@ -202,8 +202,8 @@ RSpec.describe Flipper::Adapters::Memoizable do
       it 'returns result' do
         feature = flipper[:stats]
         gate = feature.gate(:boolean)
-        result = subject.enable(feature, gate, flipper.bool)
-        adapter_result = adapter.enable(feature, gate, flipper.bool)
+        result = subject.enable(feature, gate, Flipper::Types::Boolean.new)
+        adapter_result = adapter.enable(feature, gate, Flipper::Types::Boolean.new)
         expect(result).to eq(adapter_result)
       end
     end
@@ -219,7 +219,7 @@ RSpec.describe Flipper::Adapters::Memoizable do
         feature = flipper[:stats]
         gate = feature.gate(:boolean)
         cache[described_class.key_for(feature.key)] = { some: 'thing' }
-        subject.disable(feature, gate, flipper.bool)
+        subject.disable(feature, gate, Flipper::Types::Boolean.new)
         expect(cache[described_class.key_for(feature.key)]).to be_nil
       end
     end
@@ -232,8 +232,8 @@ RSpec.describe Flipper::Adapters::Memoizable do
       it 'returns result' do
         feature = flipper[:stats]
         gate = feature.gate(:boolean)
-        result = subject.disable(feature, gate, flipper.bool)
-        adapter_result = adapter.disable(feature, gate, flipper.bool)
+        result = subject.disable(feature, gate, Flipper::Types::Boolean.new)
+        adapter_result = adapter.disable(feature, gate, Flipper::Types::Boolean.new)
         expect(result).to eq(adapter_result)
       end
     end

@@ -88,14 +88,6 @@ RSpec.describe Flipper do
       expect(described_class.instance.enabled?(:search)).to be(false)
     end
 
-    it 'delegates bool to instance' do
-      expect(described_class.bool).to eq(described_class.instance.bool)
-    end
-
-    it 'delegates boolean to instance' do
-      expect(described_class.boolean).to eq(described_class.instance.boolean)
-    end
-
     it 'delegates enable_actor to instance' do
       described_class.enable_actor(:search, actor)
       expect(described_class.instance.enabled?(:search, actor)).to be(true)
@@ -104,10 +96,6 @@ RSpec.describe Flipper do
     it 'delegates disable_actor to instance' do
       described_class.disable_actor(:search, actor)
       expect(described_class.instance.enabled?(:search, actor)).to be(false)
-    end
-
-    it 'delegates actor to instance' do
-      expect(described_class.actor(actor)).to eq(described_class.instance.actor(actor))
     end
 
     it 'delegates enable_group to instance' do
@@ -130,15 +118,6 @@ RSpec.describe Flipper do
       expect(described_class.instance[:search].percentage_of_actors_value).to be(0)
     end
 
-    it 'delegates actors to instance' do
-      expect(described_class.actors(5)).to eq(described_class.instance.actors(5))
-    end
-
-    it 'delegates percentage_of_actors to instance' do
-      expected = described_class.instance.percentage_of_actors(5)
-      expect(described_class.percentage_of_actors(5)).to eq(expected)
-    end
-
     it 'delegates enable_percentage_of_time to instance' do
       described_class.enable_percentage_of_time(:search, 5)
       expect(described_class.instance[:search].percentage_of_time_value).to be(5)
@@ -147,15 +126,6 @@ RSpec.describe Flipper do
     it 'delegates disable_percentage_of_time to instance' do
       described_class.disable_percentage_of_time(:search)
       expect(described_class.instance[:search].percentage_of_time_value).to be(0)
-    end
-
-    it 'delegates time to instance' do
-      expect(described_class.time(56)).to eq(described_class.instance.time(56))
-    end
-
-    it 'delegates percentage_of_time to instance' do
-      expected = described_class.instance.percentage_of_time(56)
-      expect(described_class.percentage_of_time(56)).to eq(expected)
     end
 
     it 'delegates features to instance' do
