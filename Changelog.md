@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased changes
+
+* ui, api: Allow Rack 3 (https://github.com/jnunemaker/flipper/pull/670/files)
+
 ## 0.28.3
 
 * Updated cloud config to ensure that poll adapter ONLY syncs from cloud to local adapter (and never back to cloud). Shouldn't affect anyone other than making things more safe if an incorrect response is received from the cloud poll endpoint. (https://github.com/jnunemaker/flipper/pull/740)
