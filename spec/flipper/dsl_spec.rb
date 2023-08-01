@@ -123,18 +123,6 @@ RSpec.describe Flipper::DSL do
     end
   end
 
-  describe '#boolean' do
-    it_should_behave_like 'a DSL boolean method' do
-      let(:method_name) { :boolean }
-    end
-  end
-
-  describe '#bool' do
-    it_should_behave_like 'a DSL boolean method' do
-      let(:method_name) { :bool }
-    end
-  end
-
   describe '#group' do
     context 'for registered group' do
       before do
@@ -145,69 +133,6 @@ RSpec.describe Flipper::DSL do
         expect(Flipper).to receive(:group).with(:admins).and_return(@group)
         expect(subject.group(:admins)).to be(@group)
       end
-    end
-  end
-
-  describe '#actor' do
-    context 'for an actor' do
-      it 'returns actor instance' do
-        actor = Flipper::Actor.new(33)
-        flipper_actor = subject.actor(actor)
-        expect(flipper_actor).to be_instance_of(Flipper::Types::Actor)
-        expect(flipper_actor.value).to eq('33')
-      end
-    end
-
-    context 'for nil' do
-      it 'raises argument error' do
-        expect do
-          subject.actor(nil)
-        end.to raise_error(ArgumentError)
-      end
-    end
-
-    context 'for something that is not actor wrappable' do
-      it 'raises argument error' do
-        expect do
-          subject.actor(Object.new)
-        end.to raise_error(ArgumentError)
-      end
-    end
-  end
-
-  describe '#time' do
-    before do
-      @result = subject.time(5)
-    end
-
-    it 'returns percentage of time' do
-      expect(@result).to be_instance_of(Flipper::Types::PercentageOfTime)
-    end
-
-    it 'sets value' do
-      expect(@result.value).to eq(5)
-    end
-
-    it 'is aliased to percentage_of_time' do
-      expect(@result).to eq(subject.percentage_of_time(@result.value))
-    end
-  end
-
-  describe '#actors' do
-    before do
-      @result = subject.actors(17)
-    end
-
-    it 'returns percentage of actors' do
-      expect(@result).to be_instance_of(Flipper::Types::PercentageOfActors)
-    end
-
-    it 'sets value' do
-      expect(@result.value).to eq(17)
-    end
-
-    it 'is aliased to percentage_of_actors' do
-      expect(@result).to eq(subject.percentage_of_actors(@result.value))
     end
   end
 
