@@ -4,7 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased changes
 
-* ui, api: Allow Rack 3 (https://github.com/jnunemaker/flipper/pull/670/files)
+* ui, api: Allow Rack 3 (https://github.com/jnunemaker/flipper/pull/670)
+* cloud: The `flipper-cloud` gem has been merged into the `flipper` and no longer needs to be added separately. Configure cloud by setting the `FLIPPER_CLOUD_TOKEN` environment variable. (https://github.com/jnunemaker/flipper/pull/743)
+    ```diff
+      # Gemfile
+      gem 'flipper'
+    - gem 'flipper-cloud'
+    ```
 
 ## 0.28.3
 

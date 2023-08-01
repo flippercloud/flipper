@@ -167,4 +167,4 @@ require 'flipper/types/percentage_of_time'
 require 'flipper/typecast'
 require 'flipper/version'
 
-require "flipper/railtie" if defined?(Rails::Railtie)
+require "flipper/engine" if defined?(Rails)
