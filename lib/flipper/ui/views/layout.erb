@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" href="<%= bootstrap_css[:src] %>" integrity="<%= bootstrap_css[:hash] %>" crossorigin="anonymous">
+    <link rel="stylesheet" href="<%= script_name + bootstrap_css[:src] %>" integrity="<%= bootstrap_css[:hash] %>" crossorigin="anonymous">
     <link rel="stylesheet" href="<%= script_name %>/css/application.css">
   </head>
   <body class="py-4">
@@ -16,6 +16,12 @@
           <%== Sanitize.fragment(Flipper::UI.configuration.banner_text, Sanitize::Config::BASIC) %>
         </div>
       <%- end -%>
+
+      <div class="container text-muted small mb-3">
+        <a href="https://www.flippercloud.io/docs/ui?utm_source=oss&utm_medium=ui&utm_campaign=docs">Docs</a> &bull;
+        <a href="<%= script_name %>/settings">Settings</a> &bull;
+        Version: <%= Flipper::VERSION %>
+      </div>
 
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb bg-white border align-items-center mb-4">
@@ -51,9 +57,9 @@
       <% end %>
     </div>
 
-    <script src="<%= jquery_js[:src] %>" integrity="<%= jquery_js[:hash] %>" crossorigin="anonymous"></script>
-    <script src="<%= popper_js[:src] %>" integrity="<%= popper_js[:hash] %>" crossorigin="anonymous"></script>
-    <script src="<%= bootstrap_js[:src] %>" integrity="<%= bootstrap_js[:hash] %>" crossorigin="anonymous"></script>
+    <script src="<%= script_name + jquery_js[:src] %>" integrity="<%= jquery_js[:hash] %>" crossorigin="anonymous"></script>
+    <script src="<%= script_name + popper_js[:src] %>" integrity="<%= popper_js[:hash] %>" crossorigin="anonymous"></script>
+    <script src="<%= script_name + bootstrap_js[:src] %>" integrity="<%= bootstrap_js[:hash] %>" crossorigin="anonymous"></script>
     <script src="<%= script_name %>/js/application.js"></script>
   </body>
 </html>

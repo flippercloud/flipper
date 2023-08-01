@@ -4,8 +4,8 @@ require_relative "./ar_setup"
 require 'flipper/adapters/active_record'
 
 # Register a few groups.
-Flipper.register(:admins) { |thing| thing.admin? }
-Flipper.register(:early_access) { |thing| thing.early_access? }
+Flipper.register(:admins) { |actor| actor.admin? }
+Flipper.register(:early_access) { |actor| actor.early_access? }
 
 # Create a user class that has flipper_id instance method.
 User = Struct.new(:flipper_id)

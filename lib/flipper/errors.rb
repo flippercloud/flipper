@@ -2,10 +2,10 @@ module Flipper
   # Top level error that all other errors inherit from.
   class Error < StandardError; end
 
-  # Raised when gate can not be found for a thing.
+  # Raised when gate can not be found for an actor.
   class GateNotFound < Error
-    def initialize(thing)
-      super "Could not find gate for #{thing.inspect}"
+    def initialize(actor)
+      super "Could not find gate for #{actor.inspect}"
     end
   end
 

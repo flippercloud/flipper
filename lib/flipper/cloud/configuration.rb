@@ -1,10 +1,11 @@
 require "socket"
 require "flipper/adapters/http"
+require "flipper/adapters/poll"
+require "flipper/poller"
 require "flipper/adapters/memory"
 require "flipper/adapters/dual_write"
-require "flipper/adapters/sync"
+require "flipper/adapters/sync/synchronizer"
 require "flipper/cloud/instrumenter"
-require "flipper/cloud/registry"
 require "brow"
 
 module Flipper
@@ -17,6 +18,12 @@ module Flipper
       ].freeze
 
       DEFAULT_URL = "https://www.flippercloud.io/adapter".freeze
+
+      # Private: Keeps track of brow instances so they can be shared across
+      # threads.
+      def self.brow_instances
+        @brow_instances ||= Concurrent::Map.new
+      end
 
       # Public: The token corresponding to an environment on flippercloud.io.
       attr_accessor :token
@@ -119,18 +126,16 @@ module Flipper
       def sync
         Flipper::Adapters::Sync::Synchronizer.new(local_adapter, http_adapter, {
           instrumenter: instrumenter,
-          interval: sync_interval,
         }).call
       end
 
       def brow
-        uri = URI.parse(url)
-        uri.path = "#{uri.path}/events".squeeze("/")
-        events_url = uri.to_s
+        self.class.brow_instances.compute_if_absent(url + token) do
+          uri = URI.parse(url)
+          uri.path = "#{uri.path}/events".squeeze("/")
 
-        Registry.default.fetch(events_url) {
           Brow::Client.new({
-            url: events_url,
+            url: uri.to_s,
             headers: {
               "Accept" => "application/json",
               "Content-Type" => "application/json",
@@ -138,7 +143,7 @@ module Flipper
               "Flipper-Cloud-Token" => @token,
             }
           })
-        }
+        end
       end
 
       # Public: The method that will be used to synchronize local adapter with
@@ -150,18 +155,20 @@ module Flipper
       private
 
       def app_adapter
-        sync_method == :webhook ? dual_write_adapter : sync_adapter
+        read_adapter = sync_method == :webhook ? local_adapter : poll_adapter
+        Flipper::Adapters::DualWrite.new(read_adapter, http_adapter)
       end
 
-      def dual_write_adapter
-        Flipper::Adapters::DualWrite.new(local_adapter, http_adapter)
-      end
-
-      def sync_adapter
-        Flipper::Adapters::Sync.new(local_adapter, http_adapter, {
-          instrumenter: instrumenter,
+      def poller
+        Flipper::Poller.get(@url + @token, {
           interval: sync_interval,
-        })
+          remote_adapter: http_adapter,
+          instrumenter: instrumenter,
+        }).tap(&:start)
+      end
+
+      def poll_adapter
+        Flipper::Adapters::Poll.new(poller, local_adapter)
       end
 
       def http_adapter
@@ -169,6 +176,8 @@ module Flipper
           url: @url,
           read_timeout: @read_timeout,
           open_timeout: @open_timeout,
+          write_timeout: @write_timeout,
+          max_retries: 0, # we'll handle retries ourselves
           debug_output: @debug_output,
           headers: {
             "Flipper-Cloud-Token" => @token,

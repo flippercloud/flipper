@@ -4,7 +4,7 @@ module Flipper
       include ::Flipper::Adapter
 
       # Public: The name of the adapter.
-      attr_reader :name
+      attr_reader :name, :local, :remote
 
       # Public: Build a new sync instance.
       #

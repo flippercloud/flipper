@@ -7,17 +7,17 @@ RSpec.describe Flipper do
   let(:admin_group) { flipper.group(:admins) }
   let(:dev_group)   { flipper.group(:devs) }
 
-  let(:admin_thing) do
+  let(:admin_actor) do
     double 'Non Flipper Thing', flipper_id: 1,  admin?: true, dev?: false
   end
-  let(:dev_thing) do
+  let(:dev_actor) do
     double 'Non Flipper Thing', flipper_id: 10, admin?: false, dev?: true
   end
 
-  let(:admin_truthy_thing) do
+  let(:admin_truthy_actor) do
     double 'Non Flipper Thing', flipper_id: 1,  admin?: 'true-ish', dev?: false
   end
-  let(:admin_falsey_thing) do
+  let(:admin_falsey_actor) do
     double 'Non Flipper Thing', flipper_id: 1,  admin?: nil, dev?: false
   end
 
@@ -60,20 +60,20 @@ RSpec.describe Flipper do
         expect(@result).to eq(true)
       end
 
-      it 'enables feature for non flipper thing in group' do
-        expect(feature.enabled?(admin_thing)).to eq(true)
+      it 'enables feature for non flipper actor in group' do
+        expect(feature.enabled?(admin_actor)).to eq(true)
       end
 
-      it 'does not enable feature for non flipper thing in other group' do
-        expect(feature.enabled?(dev_thing)).to eq(false)
+      it 'does not enable feature for non flipper actor in other group' do
+        expect(feature.enabled?(dev_actor)).to eq(false)
       end
 
       it 'enables feature for flipper actor in group' do
-        expect(feature.enabled?(flipper.actor(admin_thing))).to eq(true)
+        expect(feature.enabled?(flipper.actor(admin_actor))).to eq(true)
       end
 
       it 'does not enable for flipper actor not in group' do
-        expect(feature.enabled?(flipper.actor(dev_thing))).to eq(false)
+        expect(feature.enabled?(flipper.actor(dev_actor))).to eq(false)
       end
 
       it 'does not enable feature for all' do
@@ -118,8 +118,8 @@ RSpec.describe Flipper do
 
       it 'enables feature for actor within percentage' do
         enabled = (1..100).select do |i|
-          thing = Flipper::Actor.new(i)
-          feature.enabled?(thing)
+          actor = Flipper::Actor.new(i)
+          feature.enabled?(actor)
         end.size
 
         expect(enabled).to be_within(2).of(5)
@@ -141,8 +141,8 @@ RSpec.describe Flipper do
 
       it 'enables feature for actor within percentage' do
         enabled = (1..100).select do |i|
-          thing = Flipper::Actor.new(i)
-          feature.enabled?(thing)
+          actor = Flipper::Actor.new(i)
+          feature.enabled?(actor)
         end.size
 
         expect(enabled).to be_within(2).of(5)
@@ -180,10 +180,10 @@ RSpec.describe Flipper do
 
     context 'with argument that has no gate' do
       it 'raises error' do
-        thing = Object.new
+        actor = Object.new
         expect do
-          feature.enable(thing)
-        end.to raise_error(Flipper::GateNotFound, "Could not find gate for #{thing.inspect}")
+          feature.enable(actor)
+        end.to raise_error(Flipper::GateNotFound, "Could not find gate for #{actor.inspect}")
       end
     end
   end
@@ -215,13 +215,13 @@ RSpec.describe Flipper do
       end
 
       it 'disables actor in group' do
-        expect(feature.enabled?(admin_thing)).to eq(false)
+        expect(feature.enabled?(admin_actor)).to eq(false)
       end
 
       it 'disables actor in percentage of actors' do
         enabled = (1..100).select do |i|
-          thing = Flipper::Actor.new(i)
-          feature.enabled?(thing)
+          actor = Flipper::Actor.new(i)
+          feature.enabled?(actor)
         end.size
 
         expect(enabled).to be(0)
@@ -247,20 +247,20 @@ RSpec.describe Flipper do
         expect(@result).to eq(true)
       end
 
-      it 'disables the feature for non flipper thing in the group' do
-        expect(feature.enabled?(admin_thing)).to eq(false)
+      it 'disables the feature for non flipper actor in the group' do
+        expect(feature.enabled?(admin_actor)).to eq(false)
       end
 
-      it 'does not disable feature for non flipper thing in other groups' do
-        expect(feature.enabled?(dev_thing)).to eq(true)
+      it 'does not disable feature for non flipper actor in other groups' do
+        expect(feature.enabled?(dev_actor)).to eq(true)
       end
 
       it 'disables feature for flipper actor in group' do
-        expect(feature.enabled?(flipper.actor(admin_thing))).to eq(false)
+        expect(feature.enabled?(flipper.actor(admin_actor))).to eq(false)
       end
 
       it 'does not disable feature for flipper actor in other groups' do
-        expect(feature.enabled?(flipper.actor(dev_thing))).to eq(true)
+        expect(feature.enabled?(flipper.actor(dev_actor))).to eq(true)
       end
 
       it 'adds feature to set of features' do
@@ -303,8 +303,8 @@ RSpec.describe Flipper do
 
       it 'disables feature' do
         enabled = (1..100).select do |i|
-          thing = Flipper::Actor.new(i)
-          feature.enabled?(thing)
+          actor = Flipper::Actor.new(i)
+          feature.enabled?(actor)
         end.size
 
         expect(enabled).to be(0)
@@ -342,10 +342,10 @@ RSpec.describe Flipper do
 
     context 'with argument that has no gate' do
       it 'raises error' do
-        thing = Object.new
+        actor = Object.new
         expect do
-          feature.disable(thing)
-        end.to raise_error(Flipper::GateNotFound, "Could not find gate for #{thing.inspect}")
+          feature.disable(actor)
+        end.to raise_error(Flipper::GateNotFound, "Could not find gate for #{actor.inspect}")
       end
     end
   end
@@ -373,23 +373,27 @@ RSpec.describe Flipper do
       end
 
       it 'returns true' do
-        expect(feature.enabled?(flipper.actor(admin_thing))).to eq(true)
-        expect(feature.enabled?(admin_thing)).to eq(true)
+        expect(feature.enabled?(flipper.actor(admin_actor))).to eq(true)
+        expect(feature.enabled?(admin_actor)).to eq(true)
       end
 
       it 'returns true for truthy block values' do
-        expect(feature.enabled?(flipper.actor(admin_truthy_thing))).to eq(true)
+        expect(feature.enabled?(flipper.actor(admin_truthy_actor))).to eq(true)
+      end
+
+      it 'returns true if any actor is in enabled group' do
+        expect(feature.enabled?(dev_actor, admin_actor)).to be(true)
       end
     end
 
     context 'for actor in disabled group' do
       it 'returns false' do
-        expect(feature.enabled?(flipper.actor(dev_thing))).to eq(false)
-        expect(feature.enabled?(dev_thing)).to eq(false)
+        expect(feature.enabled?(flipper.actor(dev_actor))).to eq(false)
+        expect(feature.enabled?(dev_actor)).to eq(false)
       end
 
       it 'returns false for falsey block values' do
-        expect(feature.enabled?(flipper.actor(admin_falsey_thing))).to eq(false)
+        expect(feature.enabled?(flipper.actor(admin_falsey_actor))).to eq(false)
       end
     end
 
@@ -406,6 +410,10 @@ RSpec.describe Flipper do
     context 'for not enabled actor' do
       it 'returns false' do
         expect(feature.enabled?(clooney)).to eq(false)
+      end
+
+      it 'returns false if all actors are disabled' do
+        expect(feature.enabled?(clooney, pitt)).to be(false)
       end
 
       it 'returns true if boolean enabled' do
@@ -428,7 +436,7 @@ RSpec.describe Flipper do
         expect(feature.enabled?).to eq(true)
         expect(feature.enabled?(nil)).to eq(true)
         expect(feature.enabled?(pitt)).to eq(true)
-        expect(feature.enabled?(admin_thing)).to eq(true)
+        expect(feature.enabled?(admin_actor)).to eq(true)
       end
     end
 
@@ -446,7 +454,7 @@ RSpec.describe Flipper do
         expect(feature.enabled?).to eq(true)
         expect(feature.enabled?(nil)).to eq(true)
         expect(feature.enabled?(pitt)).to eq(true)
-        expect(feature.enabled?(admin_thing)).to eq(true)
+        expect(feature.enabled?(admin_actor)).to eq(true)
       end
     end
 
@@ -463,7 +471,7 @@ RSpec.describe Flipper do
         expect(feature.enabled?).to eq(false)
         expect(feature.enabled?(nil)).to eq(false)
         expect(feature.enabled?(pitt)).to eq(false)
-        expect(feature.enabled?(admin_thing)).to eq(false)
+        expect(feature.enabled?(admin_actor)).to eq(false)
       end
 
       it 'returns true if boolean enabled' do
@@ -471,7 +479,7 @@ RSpec.describe Flipper do
         expect(feature.enabled?).to eq(true)
         expect(feature.enabled?(nil)).to eq(true)
         expect(feature.enabled?(pitt)).to eq(true)
-        expect(feature.enabled?(admin_thing)).to eq(true)
+        expect(feature.enabled?(admin_actor)).to eq(true)
       end
     end
 
@@ -488,7 +496,7 @@ RSpec.describe Flipper do
         expect(feature.enabled?).to eq(false)
         expect(feature.enabled?(nil)).to eq(false)
         expect(feature.enabled?(pitt)).to eq(false)
-        expect(feature.enabled?(admin_thing)).to eq(false)
+        expect(feature.enabled?(admin_actor)).to eq(false)
       end
 
       it 'returns true if boolean enabled' do
@@ -496,27 +504,31 @@ RSpec.describe Flipper do
         expect(feature.enabled?).to eq(true)
         expect(feature.enabled?(nil)).to eq(true)
         expect(feature.enabled?(pitt)).to eq(true)
-        expect(feature.enabled?(admin_thing)).to eq(true)
+        expect(feature.enabled?(admin_actor)).to eq(true)
       end
     end
 
-    context 'for a non flipper thing' do
+    context 'for a non flipper actor' do
       before do
         feature.enable admin_group
       end
 
       it 'returns true if in enabled group' do
-        expect(feature.enabled?(admin_thing)).to eq(true)
+        expect(feature.enabled?(admin_actor)).to eq(true)
       end
 
       it 'returns false if not in enabled group' do
-        expect(feature.enabled?(dev_thing)).to eq(false)
+        expect(feature.enabled?(dev_actor)).to eq(false)
+      end
+
+      it 'retruns true if any actor is true' do
+        expect(feature.enabled?(admin_actor, dev_actor)).to eq(true)
       end
 
       it 'returns true if boolean enabled' do
         feature.enable
-        expect(feature.enabled?(admin_thing)).to eq(true)
-        expect(feature.enabled?(dev_thing)).to eq(true)
+        expect(feature.enabled?(admin_actor)).to eq(true)
+        expect(feature.enabled?(dev_actor)).to eq(true)
       end
     end
   end
@@ -530,11 +542,11 @@ RSpec.describe Flipper do
     end
 
     it 'enables feature for object in enabled group' do
-      expect(feature.enabled?(admin_thing)).to eq(true)
+      expect(feature.enabled?(admin_actor)).to eq(true)
     end
 
     it 'does not enable feature for object in not enabled group' do
-      expect(feature.enabled?(dev_thing)).to eq(false)
+      expect(feature.enabled?(dev_actor)).to eq(false)
     end
   end
 end

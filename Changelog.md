@@ -1,6 +1,96 @@
-## Unreleased
+# Changelog
 
-* Added Confirm Warning for Fully Enable feature (https://github.com/jnunemaker/flipper/pull/665)
+All notable changes to this project will be documented in this file.
+
+## 0.28.3
+
+* Updated cloud config to ensure that poll adapter ONLY syncs from cloud to local adapter (and never back to cloud). Shouldn't affect anyone other than making things more safe if an incorrect response is received from the cloud poll endpoint. (https://github.com/jnunemaker/flipper/pull/740)
+
+## 0.28.2
+
+* UI: fix path to bundled assets when mounted in another Rack app (https://github.com/jnunemaker/flipper/pull/742)
+
+## 0.28.1
+
+### Additions/Changes
+
+* Use new method of making logs bold for rails (https://github.com/jnunemaker/flipper/pull/726)
+* Bundle bootstrap, jquery and poppler with the library. (https://github.com/jnunemaker/flipper/pull/731)
+
+## 0.28.0
+
+### Additions/Changes
+
+* Allow multiple actors for Flipper.enabled?. Improves performance of feature flags for multiple actors and simplifies code for users of flipper. This likely breaks things for anyone using Flipper internal classes related to actors, but that isn't likely you so you should be fine.
+  ```diff
+  - [user, user.team, user.org].any? { |actor| Flipper.enabled?(:my_feature, actor) }
+  + Flipper.enabled?(:my_feature, user, user.team, user.org)
+  ```
+* If you currently use `actor.thing` in a group, you'll need to change it to `actor.actor`.
+  ```diff
+  - Flipper.register(:our_group) do |actor|
+  -   actor.thing.is_a?(OurClassName)
+  - end
+  + Flipper.register(:our_group) do |actor|
+  +   actor.actor.is_a?(OurClassName)
+  + end
+  ```
+* If you currently use `context.thing` in a group or elsewhere, you'll need to change it to `context.actors`.
+  ```diff
+  - Flipper.register(:our_group) do |actor, context|
+  -   context.thing.is_a?(OurClassName)
+  - end
+  + Flipper.register(:our_group) do |actor, context|
+  +   context.actors.any? { |actor| actor.is_a?(OurClassName) }
+  + end
+  ```
+
+### Deprecations
+
+* `:thing` in `enabled?` instrumentation payload. Use `:actors` instead.
+    ```diff
+    ActiveSupport::Notifications.subscribe('enabled?.feature_operation.flipper') do |name, start, finish, id, payload|
+    -   payload[:thing]
+    +   payload[:actors]
+    end
+    ```
+
+## 0.27.1
+
+* Quick fix for missing require of "flipper/version" that was causing issues with some flipper-ui people.
+
+## 0.27.0
+
+* Easy Import/Export (https://github.com/jnunemaker/flipper/pull/709). This has some breaking changes but only if you are using flipper internals. If you are just using Flipper.* methods, you'll be fine.
+
+## 0.26.2
+
+* Improve Active Record Adapter get/get_multi/get_all performance by 5-10x when dealing with thousands of gate values (https://github.com/jnunemaker/flipper/pull/707).
+
+## 0.26.1
+
+* Improve `Flipper#enabled?` performance by ~37%-55% (https://github.com/jnunemaker/flipper/pull/706)
+* Make Memory adapter threadsafe (https://github.com/jnunemaker/flipper/pull/702 and https://github.com/jnunemaker/flipper/pull/703)
+* ActiveRecord adapter: wrap all reads/writes in `with_connection` (https://github.com/jnunemaker/flipper/pull/705)
+* Improve performance of background polling (https://github.com/jnunemaker/flipper/pull/699)
+* Remove executables directive from gem (https://github.com/jnunemaker/flipper/pull/693)
+
+## 0.26.0
+
+* Cloud Background Polling (https://github.com/jnunemaker/flipper/pull/682)
+* Changed default branch from master to main
+* Allow configuring railtie via ENV vars (https://github.com/jnunemaker/flipper/pull/681)
+* flipper-ui: Fix issue preventing feature flags being enabled when confirm_fully_enable is on and feature_removal_enabled is off (https://github.com/jnunemaker/flipper/pull/680)
+
+## 0.25.4
+
+* Added read_only UI config option (https://github.com/jnunemaker/flipper/pull/679)
+
+## 0.25.3
+
+* Added configurable confirm warning for fully enabling a feature (https://github.com/jnunemaker/flipper/pull/665)
+* Update rack protection to < 4 (https://github.com/jnunemaker/flipper/pull/675)
+* Check sadd_returns_boolean on the actual client class rather than ::Redis (https://github.com/jnunemaker/flipper/pull/677)
 
 ## 0.25.2
 

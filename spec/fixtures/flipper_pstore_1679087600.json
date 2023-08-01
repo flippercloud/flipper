@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "features": {
+    "search": {
+      "boolean": null,
+      "actors": [
+        "john",
+        "another",
+        "testing"
+      ],
+      "percentage_of_actors": null,
+      "percentage_of_time": null,
+      "groups": [
+        "admins"
+      ]
+    },
+    "new_pricing": {
+      "boolean": "true",
+      "actors": [],
+      "percentage_of_actors": null,
+      "percentage_of_time": null,
+      "groups": []
+    },
+    "google_analytics_tag": {
+      "boolean": null,
+      "actors": [],
+      "percentage_of_actors": "100",
+      "percentage_of_time": null,
+      "groups": []
+    },
+    "help_scout_tag": {
+      "boolean": null,
+      "actors": [],
+      "percentage_of_actors": null,
+      "percentage_of_time": "50",
+      "groups": []
+    },
+    "nope": {
+      "boolean": null,
+      "actors": [],
+      "percentage_of_actors": null,
+      "percentage_of_time": null,
+      "groups": []
+    }
+  }
+}

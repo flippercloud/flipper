@@ -8,19 +8,22 @@ end
 
 gem 'debug'
 gem 'rake'
-gem 'shotgun'
 gem 'statsd-ruby', '~> 1.2.1'
 gem 'rspec', '~> 3.0'
 gem 'rack-test'
 gem 'rackup'
 gem 'sqlite3', "~> #{ENV['SQLITE3_VERSION'] || '1.4.1'}"
 gem 'rails', "~> #{ENV['RAILS_VERSION'] || '7.0.4'}"
-gem 'minitest', '~> 5.8'
+gem 'minitest', '~> 5.18'
 gem 'minitest-documentation'
 gem 'webmock'
 gem 'ice_age'
 gem 'redis-namespace'
 gem 'webrick'
+gem 'stackprof'
+gem 'benchmark-ips'
+gem 'stackprof-webnav'
+gem 'flamegraph'
 
 group(:guard) do
   gem 'guard', '~> 2.15'

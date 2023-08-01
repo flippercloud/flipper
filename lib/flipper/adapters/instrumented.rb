@@ -4,7 +4,7 @@ module Flipper
   module Adapters
     # Internal: Adapter that wraps another adapter and instruments all adapter
     # operations.
-    class Instrumented < SimpleDelegator
+    class Instrumented
       include ::Flipper::Adapter
 
       # Private: The name of instrumentation events.
@@ -24,7 +24,6 @@ module Flipper
       #           :instrumenter - What to use to instrument all the things.
       #
       def initialize(adapter, options = {})
-        super(adapter)
         @adapter = adapter
         @name = :instrumented
         @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
@@ -144,6 +143,30 @@ module Flipper
 
         @instrumenter.instrument(InstrumentationName, default_payload) do |payload|
           payload[:result] = @adapter.disable(feature, gate, thing)
+        end
+      end
+
+      def import(source)
+        default_payload = {
+          operation: :import,
+          adapter_name: @adapter.name,
+        }
+
+        @instrumenter.instrument(InstrumentationName, default_payload) do |payload|
+          payload[:result] = @adapter.import(source)
+        end
+      end
+
+      def export(format: :json, version: 1)
+        default_payload = {
+          operation: :export,
+          adapter_name: @adapter.name,
+          format: format,
+          version: version,
+        }
+
+        @instrumenter.instrument(InstrumentationName, default_payload) do |payload|
+          payload[:result] = @adapter.export(format: format, version: version)
         end
       end
     end

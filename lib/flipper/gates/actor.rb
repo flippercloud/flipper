@@ -19,30 +19,23 @@ module Flipper
         !value.empty?
       end
 
-      # Internal: Checks if the gate is open for a thing.
+      # Internal: Checks if the gate is open for an actor.
       #
-      # Returns true if gate open for thing, false if not.
+      # Returns true if gate open for actor, false if not.
       def open?(context)
-        value = context.values[key]
-        if context.thing.nil?
-          false
-        else
-          if protects?(context.thing)
-            actor = wrap(context.thing)
-            enabled_actor_ids = value
-            enabled_actor_ids.include?(actor.value)
-          else
-            false
-          end
+        return false unless context.actors?
+
+        context.actors.any? do |actor|
+          context.values.actors.include?(actor.value)
         end
       end
 
-      def wrap(thing)
-        Types::Actor.wrap(thing)
+      def wrap(actor)
+        Types::Actor.wrap(actor)
       end
 
-      def protects?(thing)
-        Types::Actor.wrappable?(thing)
+      def protects?(actor)
+        Types::Actor.wrappable?(actor)
       end
     end
   end

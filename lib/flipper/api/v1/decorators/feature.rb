@@ -10,7 +10,7 @@ module Flipper
           alias_method :feature, :__getobj__
 
           # Public: Returns instance as hash that is ready to be json dumped.
-          def as_json(exclude_gates: false)
+          def as_json(exclude_gates: false, exclude_gate_names: false)
             result = {
               'key' => key,
               'state' => state.to_s,
@@ -19,7 +19,7 @@ module Flipper
             unless exclude_gates
               gate_values = feature.adapter.get(self)
               result['gates'] = gates.map do |gate|
-                Decorators::Gate.new(gate, gate_values[gate.key]).as_json
+                Decorators::Gate.new(gate, gate_values[gate.key]).as_json(exclude_name: exclude_gate_names)
               end
             end
 

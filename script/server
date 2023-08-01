@@ -16,4 +16,4 @@ cd $(dirname "$0")/..
     exit 0
 }
 
-script/bootstrap && bundle exec shotgun examples/ui/basic.ru -p 9999
+script/bootstrap && bundle exec rackup examples/ui/basic.ru -p 9999

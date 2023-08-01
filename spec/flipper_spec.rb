@@ -202,6 +202,12 @@ RSpec.describe Flipper do
       expect(described_class.enabled?(:search)).to be(true)
     end
 
+    it 'delegates export to instance' do
+      described_class.enable(:search)
+      expect(described_class.export).to eq(described_class.adapter.export)
+      expect(described_class.export(format: :json)).to eq(described_class.adapter.export(format: :json))
+    end
+
     it 'delegates adapter to instance' do
       expect(described_class.adapter).to eq(described_class.instance.adapter)
     end
@@ -222,7 +228,7 @@ RSpec.describe Flipper do
     end
 
     it 'delegates sync stuff to instance for Flipper::Cloud' do
-      stub = stub_request(:get, "https://www.flippercloud.io/adapter/features").
+      stub = stub_request(:get, "https://www.flippercloud.io/adapter/features?exclude_gate_names=true").
         with({
           headers: {
             'Flipper-Cloud-Token'=>'asdf',
