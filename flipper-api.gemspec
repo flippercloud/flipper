@@ -19,6 +19,6 @@ Gem::Specification.new do |gem|
   gem.version       = Flipper::VERSION
   gem.metadata      = Flipper::METADATA
 
-  gem.add_dependency 'rack', '>= 1.4', '< 3'
+  gem.add_dependency 'rack', '>= 1.4', '< 4'
   gem.add_dependency 'flipper', "~> #{Flipper::VERSION}"
 end
