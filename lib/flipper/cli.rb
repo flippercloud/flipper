@@ -22,6 +22,18 @@ module Flipper
         subcommand 'list', Flipper::CLI::List
         subcommand 'show', Flipper::CLI::Show
         subcommand 'help', Flipper::CLI::Help
+
+        self.banner = "Usage: #{program_name} [options] <command>"
+        separator ""
+        separator "Commands:"
+
+        pad = subcommands.keys.map(&:length).max + 2
+        subcommands.each do |name, command|
+          separator "  #{name.ljust(pad, " ")} #{command.description}" if command.description
+        end
+
+        separator ""
+        separator "Options:"
       end
     end
   end

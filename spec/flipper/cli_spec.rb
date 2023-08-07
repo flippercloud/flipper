@@ -56,6 +56,12 @@ RSpec.describe Flipper::CLI do
   ["-h", "--help", "help"].each do |arg|
     describe arg do
       it { should have_attributes(status: 0, stdout: /Usage: flipper/) }
+
+      it "should list subcommands" do
+        %w(enable disable list).each do |subcommand|
+          expect(subject.stdout).to match(/#{subcommand}/)
+        end
+      end
     end
   end
 

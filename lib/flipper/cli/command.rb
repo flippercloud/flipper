@@ -7,6 +7,7 @@ module Flipper
       DEFAULT_REQUIRE = "./config/environment"
 
       attr_reader :options, :subcommands, :parent
+      attr_accessor :description
 
       def initialize(parent: nil, options: parent&.options || {}, program_name: nil)
         super()
@@ -49,7 +50,13 @@ module Flipper
 
       # Helper method to define a new subcommand
       def subcommand(name, command)
-        @subcommands[name] = command
+        @subcommands[name] = command.new(
+          parent: self,
+          program_name: "#{program_name} #{name}"
+        )
+
+        # self.separator
+
       end
 
       def load_environment!
@@ -61,10 +68,7 @@ module Flipper
 
       # Internal: Initialize a subcommand with state from the current command
       def spawn(subcommand)
-        subcommands.fetch(subcommand).new(
-          parent: self,
-          program_name: "#{program_name} #{subcommand}"
-        )
+        subcommands.fetch(subcommand)
       end
 
       private

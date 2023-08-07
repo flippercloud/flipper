@@ -5,6 +5,7 @@ module Flipper
         super
 
         self.banner = "Usage: #{program_name} [options] <feature>"
+        self.description = "#{action.to_s.capitalize} a feature"
 
         @values = []
 
