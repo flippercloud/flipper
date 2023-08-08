@@ -11,7 +11,7 @@ Gem::Specification.new do |gem|
   gem.email         = ['nunemaker@gmail.com']
   gem.summary       = 'API for the Flipper gem'
   gem.license       = 'MIT'
-  gem.homepage      = 'https://github.com/jnunemaker/flipper'
+  gem.homepage      = 'https://github.com/flippercloud/flipper'
   gem.files         = `git ls-files`.split("\n").select(&flipper_api_files) + ['lib/flipper/version.rb']
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n").select(&flipper_api_files)
   gem.name          = 'flipper-api'

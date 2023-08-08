@@ -11,7 +11,7 @@ Gem::Specification.new do |gem|
   gem.email         = ['nunemaker@gmail.com']
   gem.summary       = 'ActiveRecord adapter for Flipper'
   gem.license       = 'MIT'
-  gem.homepage      = 'https://github.com/jnunemaker/flipper'
+  gem.homepage      = 'https://github.com/flippercloud/flipper'
 
   extra_files = [
     'lib/generators/flipper/templates/migration.erb',

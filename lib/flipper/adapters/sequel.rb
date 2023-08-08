@@ -31,7 +31,7 @@ module Flipper
 
       VALUE_TO_TEXT_WARNING = <<-EOS
         Your database needs migrated to use the latest Flipper features.
-        See https://github.com/jnunemaker/flipper/issues/557
+        See https://github.com/flippercloud/flipper/issues/557
       EOS
 
       # Public: The name of the adapter.
@@ -239,7 +239,7 @@ module Flipper
       end
 
       # Check if value column is text instead of string
-      # See https://github.com/jnunemaker/flipper/pull/692
+      # See https://github.com/flippercloud/flipper/pull/692
       def value_not_text?
         "text".casecmp(@gate_class.db_schema[:value][:db_type]) != 0
       end

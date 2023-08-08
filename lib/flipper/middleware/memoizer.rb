@@ -58,7 +58,7 @@ module Flipper
 
         # Already memoizing. This instance does not need to do anything.
         if flipper.memoizing?
-          warn "Flipper::Middleware::Memoizer appears to be running twice. Read how to resolve this at https://github.com/jnunemaker/flipper/pull/523"
+          warn "Flipper::Middleware::Memoizer appears to be running twice. Read how to resolve this at https://github.com/flippercloud/flipper/pull/523"
           return @app.call(env)
         end
 
