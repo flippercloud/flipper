@@ -34,7 +34,7 @@ module Flipper
 
       VALUE_TO_TEXT_WARNING = <<-EOS
         Your database needs migrated to use the latest Flipper features.
-        See https://github.com/jnunemaker/flipper/issues/557
+        See https://github.com/flippercloud/flipper/issues/557
       EOS
 
       # Public: The name of the adapter.
@@ -228,7 +228,7 @@ module Flipper
               end
             rescue ::ActiveRecord::RecordNotUnique
               # assume this happened concurrently with the same thing and its fine
-              # see https://github.com/jnunemaker/flipper/issues/544
+              # see https://github.com/flippercloud/flipper/issues/544
             end
           end
         end
@@ -278,7 +278,7 @@ module Flipper
       end
 
       # Check if value column is text instead of string
-      # See https://github.com/jnunemaker/flipper/pull/692
+      # See https://github.com/flippercloud/flipper/pull/692
       def value_not_text?
         @gate_class.column_for_attribute(:value).type != :text
       end
