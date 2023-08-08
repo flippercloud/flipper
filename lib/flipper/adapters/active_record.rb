@@ -210,7 +210,7 @@ module Flipper
               end
             rescue ::ActiveRecord::RecordNotUnique
               # assume this happened concurrently with the same thing and its fine
-              # see https://github.com/jnunemaker/flipper/issues/544
+              # see https://github.com/flippercloud/flipper/issues/544
             end
           end
         end
