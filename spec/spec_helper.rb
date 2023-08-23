@@ -91,15 +91,3 @@ RSpec.shared_examples_for 'a DSL feature' do
     end.to raise_error(ArgumentError, /must be a String or Symbol/)
   end
 end
-
-RSpec.shared_examples_for 'a DSL boolean method' do
-  it 'returns boolean with value set' do
-    result = subject.send(method_name, true)
-    expect(result).to be_instance_of(Flipper::Types::Boolean)
-    expect(result.value).to be(true)
-
-    result = subject.send(method_name, false)
-    expect(result).to be_instance_of(Flipper::Types::Boolean)
-    expect(result.value).to be(false)
-  end
-end

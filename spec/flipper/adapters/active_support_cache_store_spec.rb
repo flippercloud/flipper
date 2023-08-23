@@ -48,7 +48,7 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
     let(:feature) { flipper[:stats] }
 
     before do
-      adapter.enable(feature, feature.gate(:boolean), Flipper::Types::Boolean.new)
+      adapter.enable(feature, feature.gate(:boolean), Flipper::Types::Boolean.new(true))
     end
 
     it 'enables feature and deletes the cache' do

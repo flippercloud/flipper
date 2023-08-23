@@ -8,10 +8,10 @@ end
 
 Gem::Specification.new do |gem|
   gem.authors       = ['John Nunemaker']
-  gem.email         = ['nunemaker@gmail.com']
+  gem.email         = 'support@flippercloud.io'
   gem.summary       = 'API for the Flipper gem'
   gem.license       = 'MIT'
-  gem.homepage      = 'https://github.com/flippercloud/flipper'
+  gem.homepage      = 'https://www.flippercloud.io/docs/api'
   gem.files         = `git ls-files`.split("\n").select(&flipper_api_files) + ['lib/flipper/version.rb']
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n").select(&flipper_api_files)
   gem.name          = 'flipper-api'
@@ -19,6 +19,6 @@ Gem::Specification.new do |gem|
   gem.version       = Flipper::VERSION
   gem.metadata      = Flipper::METADATA
 
-  gem.add_dependency 'rack', '>= 1.4', '< 3'
+  gem.add_dependency 'rack', '>= 1.4', '< 4'
   gem.add_dependency 'flipper', "~> #{Flipper::VERSION}"
 end

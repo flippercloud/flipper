@@ -19,6 +19,29 @@ All notable changes to this project will be documented in this file.
   * Change Flipper.percentage_of_time => Flipper::Types::PercentageOfTime.new
   * Change Flipper.time => Flipper::Types::PercentageOfTime.new
 
+## 1.0.0
+
+### Additions/Changes
+
+* ui, api: Allow Rack 3 (https://github.com/flippercloud/flipper/pull/670)
+* cloud: The `flipper-cloud` gem has been merged into the `flipper` and no longer needs to be added separately. Configure cloud by setting the `FLIPPER_CLOUD_TOKEN` environment variable. (https://github.com/flippercloud/flipper/pull/743)
+    ```diff
+      # Gemfile
+      gem 'flipper'
+    - gem 'flipper-cloud'
+    ```
+
+### Breaking Changes
+
+* Removed `bool`, `actors`, `time`, `actor`, `percentage_of_actors`, and `percentage_of_time` methods on `Flipper` and `Flipper::DSL`. They are rarely if ever used and conflict with some upcoming features. If you are using them, you can migrate via a search and replace like so:
+  * Change `Flipper.bool` => `Flipper::Types::Boolean.new`
+  * Change `Flipper.boolean` => `Flipper::Types::Boolean.new`
+  * Change `Flipper.actor` => `Flipper::Types::Actor.new`
+  * Change `Flipper.percentage_of_actors` => `Flipper::Types::PercentageOfActors.new`
+  * Change `Flipper.actors` => `Flipper::Types::PercentageOfActors.new`
+  * Change `Flipper.percentage_of_time` => `Flipper::Types::PercentageOfTime.new`
+  * Change `Flipper.time` => `Flipper::Types::PercentageOfTime.new`
+
 ## 0.28.3
 
 * Updated cloud config to ensure that poll adapter ONLY syncs from cloud to local adapter (and never back to cloud). Shouldn't affect anyone other than making things more safe if an incorrect response is received from the cloud poll endpoint. (https://github.com/flippercloud/flipper/pull/740)

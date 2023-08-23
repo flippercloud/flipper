@@ -8,10 +8,10 @@ end
 
 Gem::Specification.new do |gem|
   gem.authors       = ['John Nunemaker']
-  gem.email         = ['nunemaker@gmail.com']
+  gem.email         = 'support@flippercloud.io'
   gem.summary       = 'ActiveRecord adapter for Flipper'
   gem.license       = 'MIT'
-  gem.homepage      = 'https://github.com/flippercloud/flipper'
+  gem.homepage      = 'https://www.flippercloud.io/docs/adapters/active-record'
 
   extra_files = [
     'lib/generators/flipper/templates/migration.erb',

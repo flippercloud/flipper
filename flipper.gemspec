@@ -22,9 +22,9 @@ ignored_test_files.flatten!.uniq!
 
 Gem::Specification.new do |gem|
   gem.authors       = ['John Nunemaker']
-  gem.email         = ['nunemaker@gmail.com']
+  gem.email         = 'support@flippercloud.io'
   gem.summary       = 'Feature flipper for ANYTHING'
-  gem.homepage      = 'https://github.com/flippercloud/flipper'
+  gem.homepage      = 'https://www.flippercloud.io/docs'
   gem.license       = 'MIT'
 
   gem.files         = `git ls-files`.split("\n") - ignored_files + ['lib/flipper/version.rb']
@@ -35,4 +35,5 @@ Gem::Specification.new do |gem|
   gem.metadata      = Flipper::METADATA
 
   gem.add_dependency 'concurrent-ruby', '< 2'
+  gem.add_dependency 'brow', '~> 0.4.1'
 end

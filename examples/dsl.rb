@@ -47,20 +47,6 @@ puts "stats.enabled?: #{stats.enabled?}"
 puts "stats.enabled? person: #{stats.enabled? person}"
 puts
 
-# get an instance of the percentage of time type set to 5
-puts Flipper.time(5).inspect
-
-# get an instance of the percentage of actors type set to 15
-puts Flipper.actors(15).inspect
-
-# get an instance of an actor using an object that responds to flipper_id
-responds_to_flipper_id = Struct.new(:flipper_id).new(10)
-puts Flipper.actor(responds_to_flipper_id).inspect
-
-# get an instance of an actor using an object
-actor = Struct.new(:flipper_id).new(22)
-puts Flipper.actor(actor).inspect
-
 # register a top level group
 admins = Flipper.register(:admins) { |actor|
   actor.respond_to?(:admin?) && actor.admin?
