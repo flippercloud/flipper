@@ -46,33 +46,32 @@ RSpec.describe Flipper::Model::ActiveRecord do
     end
   end
 
-  describe "enabled?" do
+  describe "flipper_enabled?" do
     subject { User.create!(name: "Test") }
 
-    module Friendable
-      attr_accessor :friends
-
-      def flipper_actors
-        [self] + Array(friends)
-      end
-    end
-
-    it "returns false if feature is disabled" do
-      expect(subject.enabled?(:stats)).to be(false)
-    end
-
-    it "returns true if feature is enabled for actor" do
+    it "delegates to Flipper.enabled?" do
+      expect(subject.flipper_enabled?(:stats)).to be(false)
       Flipper.enable :stats, subject
-      expect(subject.enabled?(:stats)).to be(true)
+      expect(subject.flipper_enabled?(:stats)).to be(true)
     end
 
     it "returns true if feature is enabled for associated actor" do
       friend = User.create!(name: "Friend")
-      subject.extend Friendable
+
+      # Add a flipper_actors method to this instanc
+      subject.extend Module.new {
+        attr_accessor :friends
+
+        def flipper_actors
+          [self] + Array(friends)
+        end
+      }
+
       subject.friends = [friend]
 
+      expect(subject.flipper_enabled?(:stats)).to be(false)
       Flipper.enable :stats, friend
-      expect(subject.enabled?(:stats)).to be(true)
+      expect(subject.flipper_enabled?(:stats)).to be(true)
     end
   end
 end

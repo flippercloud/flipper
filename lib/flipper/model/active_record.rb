@@ -10,7 +10,7 @@ module Flipper
 
       # Check if a feature is enabled for this record or any associated actors
       # returned by `#flipper_actors`
-      def enabled?(feature_name)
+      def flipper_enabled?(feature_name)
         Flipper.enabled?(feature_name, *flipper_actors)
       end
 
