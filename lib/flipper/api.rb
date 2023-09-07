@@ -12,6 +12,7 @@ module Flipper
       app = ->(_) { [404, { 'content-type'.freeze => CONTENT_TYPE }, ['{}'.freeze]] }
       builder = Rack::Builder.new
       yield builder if block_given?
+      builder.use Rack::Head
       builder.use Flipper::Api::JsonParams
       builder.use Flipper::Middleware::SetupEnv, flipper, env_key: env_key
       builder.use Flipper::Api::Middleware, env_key: env_key
