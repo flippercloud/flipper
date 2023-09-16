@@ -18,12 +18,10 @@ module Flipper
         noop: ->(_) { },
       }
 
-      DEFAULT_NOT_FOUND =
+      def_delegators :@adapter, :features, :get_all, :add, :remove, :clear, :enable, :disable
 
-      def_delegators :@adapter, :features, :get, :get_multi, :get_all, :add, :remove, :clear, :enable, :disable
-
-      def initialize(adapter, name: :strict, handler: :raise)
-        @name = name
+      def initialize(adapter, handler: :raise)
+        @name = :strict
         @adapter = adapter
         @handler = handler.is_a?(Symbol) ? HANDLERS.fetch(handler) : handler
       end
@@ -31,6 +29,11 @@ module Flipper
       def get(feature)
         assert_feature_exists(feature)
         @adapter.get(feature)
+      end
+
+      def get_multi(features)
+        features.each { |feature| assert_feature_exists(feature) }
+        @adapter.get_multi(features)
       end
 
       private

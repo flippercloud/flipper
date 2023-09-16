@@ -14,6 +14,12 @@ RSpec.describe Flipper::Adapters::Strict do
         expect { subject.get(feature) }.to raise_error(Flipper::Adapters::Strict::NotFound)
       end
     end
+
+    context "#get_multi" do
+      it "raises an error for unknown feature" do
+        expect { subject.get_multi([feature]) }.to raise_error(Flipper::Adapters::Strict::NotFound)
+      end
+    end
   end
 
   context "handler: :warn" do
@@ -22,6 +28,12 @@ RSpec.describe Flipper::Adapters::Strict do
     context "#get" do
       it "raises an error for unknown feature" do
         expect(silence { subject.get(feature) }).to match(/Could not find feature "unknown"/)
+      end
+    end
+
+    context "#get_multi" do
+      it "raises an error for unknown feature" do
+        expect(silence { subject.get_multi([feature]) }).to match(/Could not find feature "unknown"/)
       end
     end
   end
