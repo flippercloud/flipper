@@ -31,8 +31,8 @@ module Flipper
     end
 
     # An adapter to use to augment the primary storage adapter. See `AdapterBuilder#use`
-    def use(klass, *args)
-      @builder.use(klass, *args)
+    def use(klass, *args, **kwargs)
+      @builder.use(klass, *args, **kwargs)
     end
 
     # Controls the default instance for flipper. When used with a block it

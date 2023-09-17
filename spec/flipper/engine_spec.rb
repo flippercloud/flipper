@@ -15,6 +15,16 @@ RSpec.describe Flipper::Engine do
     ActiveSupport::Dependencies.autoload_once_paths = ActiveSupport::Dependencies.autoload_once_paths.dup
   end
 
+  # Reset Rails.env around each example
+  around do |example|
+    begin
+      env = Rails.env.to_s
+      example.run
+    ensure
+      Rails.env = env
+    end
+  end
+
   let(:config) { application.config.flipper }
 
   subject { application.initialize! }
@@ -53,6 +63,44 @@ RSpec.describe Flipper::Engine do
       with_env 'FLIPPER_LOG' => 'false' do
         subject
         expect(config.log).to eq(false)
+      end
+    end
+
+    describe 'config.strict' do
+      it 'can set strict=true from ENV' do
+        with_env 'FLIPPER_STRICT' => 'true' do
+          subject
+          expect(config.strict).to eq(:raise)
+          expect(Flipper.adapter.adapter).to be_instance_of(Flipper::Adapters::Strict)
+        end
+      end
+
+      it 'can set strict=warn from ENV' do
+        with_env 'FLIPPER_STRICT' => 'warn' do
+          subject
+          expect(config.strict).to eq(:warn)
+          expect(Flipper.adapter.adapter).to be_instance_of(Flipper::Adapters::Strict)
+          expect(Flipper.adapter.adapter.handler).to be(Flipper::Adapters::Strict::HANDLERS.fetch(:warn))
+        end
+      end
+
+      it 'can set strict=false from ENV' do
+        with_env 'FLIPPER_STRICT' => 'false' do
+          subject
+          expect(config.strict).to eq(false)
+          expect(Flipper.adapter.adapter).to be_instance_of(Flipper::Adapters::Memory)
+        end
+      end
+
+      %w(development test production).each do |env|
+        it "defaults to strict=warn in RAILS_ENV=#{env}" do
+          Rails.env = env
+          expect(Rails.env).to eq(env)
+          subject
+          expect(config.strict).to eq(:warn)
+          expect(Flipper.adapter.adapter).to be_instance_of(Flipper::Adapters::Strict)
+          expect(Flipper.adapter.adapter.handler).to be(Flipper::Adapters::Strict::HANDLERS.fetch(:warn))
+        end
       end
     end
 

@@ -9,7 +9,8 @@ module Flipper
         preload: ENV.fetch('FLIPPER_PRELOAD', 'true').casecmp('true').zero?,
         instrumenter: ENV.fetch('FLIPPER_INSTRUMENTER', 'ActiveSupport::Notifications').constantize,
         log: ENV.fetch('FLIPPER_LOG', 'true').casecmp('true').zero?,
-        cloud_path: "_flipper"
+        cloud_path: "_flipper",
+        strict: default_strict_value
       )
     end
 
@@ -25,6 +26,10 @@ module Flipper
       require 'flipper/cloud' if cloud?
 
       Flipper.configure do |config|
+        if app.config.flipper.strict
+          config.use Flipper::Adapters::Strict, handler: app.config.flipper.strict
+        end
+
         config.default do
           if cloud?
             Flipper::Cloud.new(
@@ -60,6 +65,18 @@ module Flipper
 
     def cloud?
       !!ENV["FLIPPER_CLOUD_TOKEN"]
+    end
+
+    def default_strict_value
+      value = ENV["FLIPPER_STRICT"]
+      if value.in?(["warn", "raise", "noop"])
+        value.to_sym
+      elsif value
+        Typecast.to_boolean(value) ? :raise : false
+      else
+        # Warn for now. Future versions will default to :raise in development and test
+        :warn
+      end
     end
   end
 end
