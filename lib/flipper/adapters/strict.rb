@@ -4,7 +4,7 @@ module Flipper
     class Strict
       extend Forwardable
       include ::Flipper::Adapter
-      attr_reader :name, :adapter
+      attr_reader :name, :adapter, :handler
 
       class NotFound < ::Flipper::Error
         def initialize(name)
