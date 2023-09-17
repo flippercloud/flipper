@@ -1,8 +1,8 @@
 module Flipper
   class Configuration
     def initialize(options = {})
-      @default = -> { Flipper.new(adapter) }
-      @adapter = -> { Flipper::Adapters::Memory.new }
+      @builder = AdapterBuilder.new(Flipper::Adapters::Memory)
+      @default = -> { Flipper.new(@builder.to_adapter) }
     end
 
     # The default adapter to use.
@@ -24,10 +24,15 @@ module Flipper
     #
     def adapter(&block)
       if block_given?
-        @adapter = block
+        @builder.store(block)
       else
-        @adapter.call
+        @builder.to_adapter
       end
+    end
+
+    # An adapter to use to augment the primary storage adapter. See `AdapterBuilder#use`
+    def use(klass, *args)
+      @builder.use(klass, *args)
     end
 
     # Controls the default instance for flipper. When used with a block it
