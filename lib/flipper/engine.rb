@@ -1,5 +1,5 @@
 module Flipper
-  class Engine < Rails::Engine
+  class Engine < ::Rails::Engine
     paths["config/routes.rb"] = ["lib/flipper/cloud/routes.rb"]
 
     config.before_configuration do

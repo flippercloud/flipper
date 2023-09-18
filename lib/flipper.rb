@@ -200,4 +200,4 @@ require 'flipper/types/percentage_of_time'
 require 'flipper/typecast'
 require 'flipper/version'
 
-require "flipper/engine" if defined?(Rails)
+require "flipper/engine" if defined?(::Rails)

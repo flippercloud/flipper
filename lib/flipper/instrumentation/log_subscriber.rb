@@ -75,7 +75,7 @@ module Flipper
 
       # Rails 7.1 changed the signature of this function.
       # Checking if > 7.0.99 rather than >= 7.1 so that 7.1 pre-release versions are included.
-      COLOR_OPTIONS = if Rails.gem_version > Gem::Version.new('7.0.99')
+      COLOR_OPTIONS = if ::Rails.gem_version > Gem::Version.new('7.0.99')
         { bold: true }.freeze
       else
         true
