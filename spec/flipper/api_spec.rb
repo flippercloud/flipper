@@ -14,6 +14,20 @@ RSpec.describe Flipper::Api do
     end
   end
 
+  describe "Head requests" do
+    let(:app) { build_api(flipper) }
+
+    it "are allowed but perform get and return no body" do
+      flipper.enable :a
+      flipper.disable :b
+
+      head '/features'
+
+      expect(last_response.status).to be(200)
+      expect(last_response.body).to be_empty
+    end
+  end
+
   describe 'Initializing middleware lazily with a block' do
     let(:app) { build_api(-> { flipper }) }
 

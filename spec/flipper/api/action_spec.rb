@@ -9,6 +9,10 @@ RSpec.describe Flipper::Api::Action do
         [200, {}, 'get']
       end
 
+      def head
+        [200, {}, 'head']
+      end
+
       def post
         [200, {}, 'post']
       end
@@ -34,6 +38,12 @@ RSpec.describe Flipper::Api::Action do
 
     it 'will run get' do
       fake_request = Struct.new(:request_method, :env, :session).new('GET', {}, {})
+      action = action_subclass.new(flipper, fake_request)
+      expect(action.run).to eq([200, {}, 'get'])
+    end
+
+    it 'will run head' do
+      fake_request = Struct.new(:request_method, :env, :session).new('HEAD', {}, {})
       action = action_subclass.new(flipper, fake_request)
       expect(action.run).to eq([200, {}, 'get'])
     end
