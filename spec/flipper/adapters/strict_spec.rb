@@ -3,11 +3,11 @@ RSpec.describe Flipper::Adapters::Strict do
   let(:feature) { flipper[:unknown] }
 
   it_should_behave_like 'a flipper adapter' do
-    subject { described_class.new(Flipper::Adapters::Memory.new, handler: :noop) }
+    subject { described_class.new(Flipper::Adapters::Memory.new, :noop) }
   end
 
-  context "handler: :raise" do
-    subject { described_class.new(Flipper::Adapters::Memory.new, handler: :raise) }
+  context "handler = :raise" do
+    subject { described_class.new(Flipper::Adapters::Memory.new, :raise) }
 
     context "#get" do
       it "raises an error for unknown feature" do
@@ -22,8 +22,8 @@ RSpec.describe Flipper::Adapters::Strict do
     end
   end
 
-  context "handler: :warn" do
-    subject { described_class.new(Flipper::Adapters::Memory.new, handler: :warn) }
+  context "handler = :warn" do
+    subject { described_class.new(Flipper::Adapters::Memory.new, :warn) }
 
     context "#get" do
       it "raises an error for unknown feature" do
@@ -38,10 +38,10 @@ RSpec.describe Flipper::Adapters::Strict do
     end
   end
 
-  context "handler: Proc" do
+  context "handler = Block" do
     let(:unknown_features) { [] }
     subject do
-      described_class.new(Flipper::Adapters::Memory.new, handler: ->(feature) { unknown_features << feature.key})
+      described_class.new(Flipper::Adapters::Memory.new) { |feature| unknown_features << feature.key}
     end
 
 
