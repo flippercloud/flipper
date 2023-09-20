@@ -55,6 +55,8 @@ module Flipper
       flipper = app.config.flipper
 
       if flipper.memoize
+        Flipper.configure { |config| config.use Flipper::Adapters::Memoizable }
+
         app.middleware.use Flipper::Middleware::Memoizer, {
           env_key: flipper.env_key,
           preload: flipper.preload,

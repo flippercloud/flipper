@@ -23,9 +23,7 @@ RSpec.describe Flipper::Cloud do
     end
 
     it 'configures the correct adapter' do
-      # pardon the nesting...
-      memoized_adapter = @instance.adapter
-      dual_write_adapter = memoized_adapter.adapter
+      dual_write_adapter = @instance.adapter
       expect(dual_write_adapter).to be_instance_of(Flipper::Adapters::DualWrite)
       poll_adapter = dual_write_adapter.local
       expect(poll_adapter).to be_instance_of(Flipper::Adapters::Poll)
@@ -44,8 +42,7 @@ RSpec.describe Flipper::Cloud do
     it 'sets correct url' do
       instance = described_class.new(token: 'asdf', url: 'https://www.fakeflipper.com/sadpanda')
       # pardon the nesting...
-      memoized = instance.adapter
-      dual_write = memoized.adapter
+      dual_write = instance.adapter
       remote = dual_write.remote
       uri = remote.client.uri
       expect(uri.scheme).to eq('https')
@@ -73,7 +70,7 @@ RSpec.describe Flipper::Cloud do
       end
     end
     # instance.adapter is memoizable adapter instance
-    expect(instance.adapter.adapter).to be_instance_of(Flipper::Adapters::Instrumented)
+    expect(instance.adapter).to be_instance_of(Flipper::Adapters::Instrumented)
   end
 
   it 'can set debug_output' do

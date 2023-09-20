@@ -8,7 +8,7 @@ module Flipper
         route %r{\A/settings\/export/?\Z}
 
         def post
-          header 'Content-Disposition', "Attachment;filename=flipper_#{flipper.adapter.adapter.name}_#{Time.now.to_i}.json"
+          header 'Content-Disposition', "Attachment;filename=flipper_#{flipper.adapter.name}_#{Time.now.to_i}.json"
 
           export = flipper.export(format: :json, version: 1)
           json_response export.contents

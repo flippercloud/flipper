@@ -20,8 +20,14 @@ module Flipper
     #           :memoize - Should adapter be wrapped by memoize adapter or not.
     def initialize(adapter, options = {})
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
-      memoize = options.fetch(:memoize, true)
-      adapter = Adapters::Memoizable.new(adapter) if memoize
+      if options.key?(:memoize)
+        warn <<~EOS
+          Passing :memoize to Flipper::DSL.new is deprecated and will be removed in 2.0.
+          See https://github.com/flippercloud/flipper/pull/TODO for more details.
+          #{caller[0]}
+        EOS
+        adapter = Adapters::Memoizable.new(adapter) if options[:memoize]
+      end
       @adapter = adapter
       @memoized_features = {}
     end
