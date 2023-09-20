@@ -94,12 +94,6 @@ RSpec.describe Flipper::Engine do
         if: nil
       })
     end
-
-    it "defines #flipper_id on AR::Base" do
-      subject
-      require 'active_record'
-      expect(ActiveRecord::Base.ancestors).to include(Flipper::Identifier)
-    end
   end
 
   context 'with cloud' do
@@ -181,7 +175,7 @@ RSpec.describe Flipper::Engine do
     end
   end
 
-  it "defines #flipper_properties on AR::Base" do
+  it "includes model methods" do
     subject
     require 'active_record'
     expect(ActiveRecord::Base.ancestors).to include(Flipper::Model::ActiveRecord)
