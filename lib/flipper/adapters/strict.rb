@@ -20,10 +20,10 @@ module Flipper
 
       def_delegators :@adapter, :features, :get_all, :add, :remove, :clear, :enable, :disable
 
-      def initialize(adapter, handler: :raise)
+      def initialize(adapter, handler = nil, &block)
         @name = :strict
         @adapter = adapter
-        @handler = handler.is_a?(Symbol) ? HANDLERS.fetch(handler) : handler
+        @handler = block || HANDLERS.fetch(handler)
       end
 
       def get(feature)
