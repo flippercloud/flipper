@@ -7,9 +7,6 @@ module Flipper
     class Redis
       include ::Flipper::Adapter
 
-      # Public: The name of the adapter.
-      attr_reader :name
-
       attr_reader :key_prefix
 
       def features_key
@@ -27,7 +24,6 @@ module Flipper
       #              flipper's Redis keys
       def initialize(client, key_prefix: nil)
         @client = client
-        @name = :redis
         @key_prefix = key_prefix
       end
 

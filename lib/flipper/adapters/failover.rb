@@ -3,9 +3,6 @@ module Flipper
     class Failover
       include ::Flipper::Adapter
 
-      # Public: The name of the adapter.
-      attr_reader :name
-
       # Public: Build a new failover instance.
       #
       # primary   - The primary flipper adapter.
@@ -17,7 +14,6 @@ module Flipper
       #             :errors - Array of exception types for which to failover
 
       def initialize(primary, secondary, options = {})
-        @name = :failover
         @primary = primary
         @secondary = secondary
 

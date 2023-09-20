@@ -34,12 +34,9 @@ module Flipper
         See https://github.com/flippercloud/flipper/issues/557
       EOS
 
-      # Public: The name of the adapter.
-      attr_reader :name
-
       # Public: Initialize a new Sequel adapter instance.
       #
-      # name - The Symbol name for this adapter. Optional (default :active_record)
+      # name - The Symbol name for this adapter. Optional (default :sequel)
       # feature_class - The AR class responsible for the features table.
       # gate_class - The AR class responsible for the gates table.
       #

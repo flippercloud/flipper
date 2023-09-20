@@ -37,9 +37,6 @@ module Flipper
         See https://github.com/flippercloud/flipper/issues/557
       EOS
 
-      # Public: The name of the adapter.
-      attr_reader :name
-
       # Public: Initialize a new ActiveRecord adapter instance.
       #
       # name - The Symbol name for this adapter. Optional (default :active_record)
