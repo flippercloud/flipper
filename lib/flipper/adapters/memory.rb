@@ -8,13 +8,9 @@ module Flipper
     class Memory
       include ::Flipper::Adapter
 
-      # Public: The name of the adapter.
-      attr_reader :name
-
       # Public
       def initialize(source = nil, threadsafe: true)
         @source = Typecast.features_hash(source)
-        @name = :memory
         @lock = Mutex.new if threadsafe
         reset
       end

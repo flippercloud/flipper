@@ -3,8 +3,7 @@ module Flipper
     class DualWrite
       include ::Flipper::Adapter
 
-      # Public: The name of the adapter.
-      attr_reader :name, :local, :remote
+      attr_reader :local, :remote
 
       # Public: Build a new sync instance.
       #
@@ -12,7 +11,6 @@ module Flipper
       # remote - The remote flipper adapter that writes should go to first (in
       #          addition to the local adapter).
       def initialize(local, remote, options = {})
-        @name = :dual_write
         @local = local
         @remote = remote
       end

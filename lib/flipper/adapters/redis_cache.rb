@@ -11,13 +11,9 @@ module Flipper
       # Internal
       attr_reader :cache
 
-      # Public: The name of the adapter.
-      attr_reader :name
-
       # Public
       def initialize(adapter, cache, ttl = 3600)
         @adapter = adapter
-        @name = :redis_cache
         @cache = cache
         @ttl = ttl
 

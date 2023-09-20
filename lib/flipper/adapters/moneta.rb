@@ -7,13 +7,9 @@ module Flipper
 
       FEATURES_KEY = :flipper_features
 
-      # Public: The name of the adapter.
-      attr_reader :name
-
       # Public
       def initialize(moneta)
         @moneta = moneta
-        @name = :moneta
       end
 
       # Public:  The set of known features

@@ -64,6 +64,11 @@ module Flipper
     def default_config
       self.class.default_config
     end
+
+    # Public: default name of the adapter
+    def name
+      @name ||= self.class.name.split('::').last.split(/(?=[A-Z])/).join('_').downcase.to_sym
+    end
   end
 end
 
