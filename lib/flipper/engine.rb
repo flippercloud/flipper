@@ -27,7 +27,7 @@ module Flipper
 
       Flipper.configure do |config|
         if app.config.flipper.strict
-          config.use Flipper::Adapters::Strict, handler: app.config.flipper.strict
+          config.use Flipper::Adapters::Strict, app.config.flipper.strict
         end
 
         config.default do
