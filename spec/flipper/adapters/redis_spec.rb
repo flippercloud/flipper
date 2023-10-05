@@ -20,6 +20,12 @@ RSpec.describe Flipper::Adapters::Redis do
 
   it_should_behave_like 'a flipper adapter'
 
+  it 'correctly identifies if a with feature with the given name exists' do
+    expect {
+      subject.add(Flipper::Feature.new(:foo, subject))
+    }.to change { subject.exist?(:foo) }.from(false).to(true)
+  end
+
   it 'configures itself on load' do
     Flipper.configuration = nil
     Flipper.instance = nil

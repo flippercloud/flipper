@@ -43,6 +43,13 @@ module Flipper
       result
     end
 
+    # Public: Does a feature with this key exist.
+    #
+    # Returns true if a feature exists with this key, else false.
+    def exist?(key)
+      features.include?(key)
+    end
+
     # Public: Ensure that adapter is in sync with source adapter provided.
     #
     # source - The source dsl, adapter or export to import.

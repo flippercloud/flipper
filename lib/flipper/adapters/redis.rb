@@ -32,6 +32,11 @@ module Flipper
         read_feature_keys
       end
 
+      # Public: Does a feature with this key exist.
+      def exist?(key)
+        @client.sismember(features_key, key)
+      end
+
       # Public: Adds a feature to the set of known features.
       def add(feature)
         if redis_sadd_returns_boolean?
