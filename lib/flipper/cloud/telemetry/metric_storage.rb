@@ -20,6 +20,10 @@ module Flipper
           end
           metrics.freeze
         end
+
+        def empty?
+          @storage.empty?
+        end
       end
     end
   end

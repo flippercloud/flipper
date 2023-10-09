@@ -42,4 +42,17 @@ RSpec.describe Flipper::Cloud::Telemetry::MetricStorage do
       expect(storage.keys).to eq([])
     end
   end
+
+  describe "#empty?" do
+    it "returns true if empty" do
+      metric_storage = described_class.new
+      expect(metric_storage).to be_empty
+    end
+
+    it "returns false if not empty" do
+      metric_storage = described_class.new
+      metric_storage.increment Flipper::Cloud::Telemetry::Metric.new(:search, true, 1696793160)
+      expect(metric_storage).not_to be_empty
+    end
+  end
 end
