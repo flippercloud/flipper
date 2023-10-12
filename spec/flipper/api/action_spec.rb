@@ -9,6 +9,10 @@ RSpec.describe Flipper::Api::Action do
         [200, {}, 'get']
       end
 
+      def head
+        [200, {}, 'head']
+      end
+
       def post
         [200, {}, 'post']
       end
@@ -34,6 +38,12 @@ RSpec.describe Flipper::Api::Action do
 
     it 'will run get' do
       fake_request = Struct.new(:request_method, :env, :session).new('GET', {}, {})
+      action = action_subclass.new(flipper, fake_request)
+      expect(action.run).to eq([200, {}, 'get'])
+    end
+
+    it 'will run head' do
+      fake_request = Struct.new(:request_method, :env, :session).new('HEAD', {}, {})
       action = action_subclass.new(flipper, fake_request)
       expect(action.run).to eq([200, {}, 'get'])
     end
@@ -67,7 +77,7 @@ RSpec.describe Flipper::Api::Action do
         status, headers, body = response
         parsed_body = JSON.parse(body[0])
 
-        expect(headers['Content-Type']).to eq('application/json')
+        expect(headers['content-type']).to eq('application/json')
         expect(parsed_body).to eql(api_not_found_response)
       end
     end
@@ -81,7 +91,7 @@ RSpec.describe Flipper::Api::Action do
         status, headers, body = response
         parsed_body = JSON.parse(body[0])
 
-        expect(headers['Content-Type']).to eq('application/json')
+        expect(headers['content-type']).to eq('application/json')
         expect(parsed_body['code']).to eq(2)
         expect(parsed_body['message']).to eq('Group not registered.')
         expect(parsed_body['more_info']).to eq(api_error_code_reference_url)

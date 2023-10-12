@@ -12,13 +12,9 @@ module Flipper
       # Internal
       attr_reader :cache
 
-      # Public: The name of the adapter.
-      attr_reader :name
-
       # Public
       def initialize(adapter, cache, expires_in: nil, write_through: false)
         @adapter = adapter
-        @name = :active_support_cache_store
         @cache = cache
         @write_options = {}
         @write_options[:expires_in] = expires_in if expires_in

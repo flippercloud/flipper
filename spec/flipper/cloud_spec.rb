@@ -25,11 +25,10 @@ RSpec.describe Flipper::Cloud do
     it 'configures the correct adapter' do
       # pardon the nesting...
       memoized_adapter = @instance.adapter
-      poll_adapter = memoized_adapter.adapter
-      dual_write_adapter = poll_adapter.adapter
-
-      expect(poll_adapter).to be_instance_of(Flipper::Adapters::Poll)
+      dual_write_adapter = memoized_adapter.adapter
       expect(dual_write_adapter).to be_instance_of(Flipper::Adapters::DualWrite)
+      poll_adapter = dual_write_adapter.local
+      expect(poll_adapter).to be_instance_of(Flipper::Adapters::Poll)
 
       http_adapter = dual_write_adapter.remote
       client = http_adapter.client
@@ -43,8 +42,12 @@ RSpec.describe Flipper::Cloud do
 
   context 'initialize with token and options' do
     it 'sets correct url' do
-      @instance = described_class.new(token: 'asdf', url: 'https://www.fakeflipper.com/sadpanda')
-      uri = @instance.adapter.adapter.adapter.remote.client.uri
+      instance = described_class.new(token: 'asdf', url: 'https://www.fakeflipper.com/sadpanda')
+      # pardon the nesting...
+      memoized = instance.adapter
+      dual_write = memoized.adapter
+      remote = dual_write.remote
+      uri = remote.client.uri
       expect(uri.scheme).to eq('https')
       expect(uri.host).to eq('www.fakeflipper.com')
       expect(uri.path).to eq('/sadpanda')
@@ -52,8 +55,9 @@ RSpec.describe Flipper::Cloud do
   end
 
   it 'can initialize with no token explicitly provided' do
-    ENV['FLIPPER_CLOUD_TOKEN'] = 'asdf'
-    expect(described_class.new).to be_instance_of(Flipper::Cloud::DSL)
+    with_env 'FLIPPER_CLOUD_TOKEN' => 'asdf' do
+      expect(described_class.new).to be_instance_of(Flipper::Cloud::DSL)
+    end
   end
 
   it 'can set instrumenter' do

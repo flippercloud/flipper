@@ -176,6 +176,7 @@ require 'flipper/actor'
 require 'flipper/adapter'
 require 'flipper/adapters/memoizable'
 require 'flipper/adapters/memory'
+require 'flipper/adapters/strict'
 require 'flipper/adapters/instrumented'
 require 'flipper/configuration'
 require 'flipper/dsl'
@@ -200,4 +201,4 @@ require 'flipper/types/percentage_of_time'
 require 'flipper/typecast'
 require 'flipper/version'
 
-require "flipper/railtie" if defined?(Rails::Railtie)
+require "flipper/engine" if defined?(Rails)

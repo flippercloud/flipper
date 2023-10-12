@@ -10,13 +10,11 @@ module Flipper
       # Deprecated
       Poller = ::Flipper::Poller
 
-      # Public: The name of the adapter.
-      attr_reader :name, :adapter, :poller
+      attr_reader :adapter, :poller
 
       def_delegators :synced_adapter, :features, :get, :get_multi, :get_all, :add, :remove, :clear, :enable, :disable
 
       def initialize(poller, adapter)
-        @name = :poll
         @adapter = adapter
         @poller = poller
         @last_synced_at = 0

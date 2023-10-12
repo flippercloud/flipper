@@ -2,7 +2,7 @@ name: Examples
 on: [push, pull_request]
 jobs:
   test:
-    if: github.repository_owner == 'jnunemaker'
+    if: github.repository_owner == 'flippercloud'
     name: Example on ruby ${{ matrix.ruby }} and rails ${{ matrix.rails }}
     runs-on: ubuntu-latest
     services:
@@ -37,11 +37,11 @@ jobs:
       - name: Setup memcached
         uses: KeisukeYamashita/memcached-actions@v1
       - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.9.0
+        uses: supercharge/mongodb-github-action@v1.10.0
         with:
           mongodb-version: 4.0
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Do some action caching
         uses: actions/cache@v3
         with:

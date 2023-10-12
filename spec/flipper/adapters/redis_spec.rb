@@ -28,4 +28,28 @@ RSpec.describe Flipper::Adapters::Redis do
 
     expect(Flipper.adapter.adapter).to be_a(Flipper::Adapters::Redis)
   end
+
+  describe 'with a key_prefix' do
+    let(:subject) { described_class.new(client, key_prefix: "lockbox:") }
+    let(:feature) { Flipper::Feature.new(:search, subject) }
+
+    it_should_behave_like 'a flipper adapter'
+
+    it 'namespaces feature-keys' do
+      subject.add(feature)
+
+      expect(client.smembers("flipper_features")).to eq([])
+      expect(client.exists?("search")).to eq(false)
+      expect(client.smembers("lockbox:flipper_features")).to eq(["search"])
+      expect(client.hgetall("lockbox:search")).not_to eq(nil)
+    end
+
+    it "can remove namespaced keys" do
+      subject.add(feature)
+      expect(client.smembers("lockbox:flipper_features")).to eq(["search"])
+
+      subject.remove(feature)
+      expect(client.smembers("lockbox:flipper_features")).to be_empty
+    end
+  end
 end

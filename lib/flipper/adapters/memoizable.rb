@@ -11,16 +11,12 @@ module Flipper
       # Internal
       attr_reader :cache
 
-      # Public: The name of the adapter.
-      attr_reader :name
-
       # Internal: The adapter this adapter is wrapping.
       attr_reader :adapter
 
       # Public
       def initialize(adapter, cache = nil)
         @adapter = adapter
-        @name = :memoizable
         @cache = cache || {}
         @memoize = false
         @features_key = :flipper_features

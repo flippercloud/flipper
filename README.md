@@ -35,7 +35,7 @@ Or install it yourself with:
 
 ## Subscribe &amp; Ship
 
-[💌 &nbsp;Subscribe](https://buttondown.email/flipper) - I'll send you short and sweet emails when we release new versions.
+[💌 &nbsp;Subscribe](https://blog.flippercloud.io/#/portal/signup) - we'll send you short and sweet emails when we release new versions.
 
 ## Getting Started
 

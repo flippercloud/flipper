@@ -11,16 +11,12 @@ module Flipper
       # Internal
       attr_reader :cache
 
-      # Public: The name of the adapter.
-      attr_reader :name
-
       # Public: The ttl for all cached data.
       attr_reader :ttl
 
       # Public
       def initialize(adapter, cache, ttl = 0)
         @adapter = adapter
-        @name = :dalli
         @cache = cache
         @ttl = ttl
 

@@ -32,7 +32,7 @@ module Flipper
         details += " gate_name=#{gate_name}" unless gate_name.nil?
 
         name = '%s (%.1fms)' % [description, event.duration]
-        debug "  #{color(name, CYAN, true)}  [ #{details} ]"
+        debug "  #{color_name(name)}  [ #{details} ]"
       end
 
       # Logs an adapter operation. If operation is for a feature, then that
@@ -64,11 +64,26 @@ module Flipper
         details = "result=#{result.inspect}"
 
         name = '%s (%.1fms)' % [description, event.duration]
-        debug "  #{color(name, CYAN, true)}  [ #{details} ]"
+        debug "  #{color_name(name)}  [ #{details} ]"
       end
 
       def logger
         self.class.logger
+      end
+
+      private
+
+      # Rails 7.1 changed the signature of this function.
+      # Checking if > 7.0.99 rather than >= 7.1 so that 7.1 pre-release versions are included.
+      COLOR_OPTIONS = if Rails.gem_version > Gem::Version.new('7.0.99')
+        { bold: true }.freeze
+      else
+        true
+      end
+      private_constant :COLOR_OPTIONS
+
+      def color_name(name)
+        color(name, CYAN, COLOR_OPTIONS)
       end
     end
   end
