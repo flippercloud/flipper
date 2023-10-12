@@ -81,6 +81,21 @@ RSpec.describe Flipper::Cloud::Configuration do
     expect(poller.interval).to eq(1)
   end
 
+  it "can set telemetry_interval" do
+    instance = described_class.new(required_options.merge(telemetry_interval: 10))
+    expect(instance.telemetry_interval).to eq(10)
+  end
+
+  it "defaults telemetry_interval" do
+    instance = described_class.new(required_options)
+    expect(instance.telemetry_interval).to eq(60)
+  end
+
+  it "cannot set telemetry_interval to lower than 10" do
+    instance = described_class.new(required_options.merge(telemetry_interval: 9))
+    expect(instance.telemetry_interval).to eq(10)
+  end
+
   it "can set debug_output" do
     instance = described_class.new(required_options.merge(debug_output: STDOUT))
     expect(instance.debug_output).to eq(STDOUT)
@@ -248,22 +263,5 @@ RSpec.describe Flipper::Cloud::Configuration do
     expect(all.keys).to eq(["search", "history"])
     expect(all["search"][:boolean]).to eq("true")
     expect(all["history"][:boolean]).to eq(nil)
-  end
-
-  it "can setup brow to report events to cloud" do
-    # skip logging brow
-    Brow.logger = Logger.new(File::NULL)
-    brow = described_class.new(required_options).brow
-
-    stub = stub_request(:post, "https://www.flippercloud.io/adapter/events")
-      .with { |request|
-        data = JSON.parse(request.body)
-        data.keys == ["uuid", "messages"] && data["messages"] == [{"n" => 1}]
-      }
-      .to_return(status: 201, body: "{}", headers: {})
-
-    brow.push({"n" => 1})
-    brow.worker.stop
-    expect(stub).to have_been_requested.times(1)
   end
 end

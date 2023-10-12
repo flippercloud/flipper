@@ -4,23 +4,21 @@
 require_relative "./cloud_setup"
 require 'bundler/setup'
 require 'flipper/cloud'
-require "active_support/notifications"
-require "active_support/isolated_execution_state"
 
-ActiveSupport::Notifications.subscribe(/poller\.flipper/) do |*args|
-  p args: args
-end
+puts Process.pid
 
 Flipper.configure do |config|
   config.default {
-    Flipper::Cloud.new(local_adapter: config.adapter, instrumenter: ActiveSupport::Notifications)
+    Flipper::Cloud.new(
+      local_adapter: config.adapter,
+      debug_output: STDOUT,
+    )
   }
 end
 
 # Check every second to see if the feature is enabled
-threads = []
-10.times do
-  threads << Thread.new do
+5.times.map { |i|
+  Thread.new {
     loop do
       sleep rand
 
@@ -30,7 +28,5 @@ threads = []
         puts "#{Time.now.to_i} Disabled!"
       end
     end
-  end
-end
-
-threads.map(&:join)
+  }
+}.each(&:join)

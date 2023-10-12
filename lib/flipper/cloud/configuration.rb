@@ -6,7 +6,7 @@ require "flipper/adapters/memory"
 require "flipper/adapters/dual_write"
 require "flipper/adapters/sync/synchronizer"
 require "flipper/cloud/instrumenter"
-require "brow"
+require "flipper/cloud/telemetry"
 
 module Flipper
   module Cloud
@@ -19,11 +19,7 @@ module Flipper
 
       DEFAULT_URL = "https://www.flippercloud.io/adapter".freeze
 
-      # Private: Keeps track of brow instances so they can be shared across
-      # threads.
-      def self.brow_instances
-        @brow_instances ||= Concurrent::Map.new
-      end
+      MIN_TELEMETRY_INTERVAL = 10
 
       # Public: The token corresponding to an environment on flippercloud.io.
       attr_accessor :token
@@ -73,6 +69,17 @@ module Flipper
       # occur or not.
       attr_accessor :sync_secret
 
+      # Public: The telemetry instance to use for tracking feature usage.
+      attr_accessor :telemetry
+
+      # Public: The Integer for Float number of seconds between submission of
+      # telemetry to Cloud.
+      attr_accessor :telemetry_interval
+
+      # Public: The Integer or Float number of seconds to wait for telemetry
+      # to shutdown.
+      attr_accessor :telemetry_shutdown_timeout
+
       def initialize(options = {})
         @token = options.fetch(:token) { ENV["FLIPPER_CLOUD_TOKEN"] }
 
@@ -83,8 +90,10 @@ module Flipper
         @read_timeout = options.fetch(:read_timeout) { ENV.fetch("FLIPPER_CLOUD_READ_TIMEOUT", 5).to_f }
         @open_timeout = options.fetch(:open_timeout) { ENV.fetch("FLIPPER_CLOUD_OPEN_TIMEOUT", 5).to_f }
         @write_timeout = options.fetch(:write_timeout) { ENV.fetch("FLIPPER_CLOUD_WRITE_TIMEOUT", 5).to_f }
+
         @sync_interval = options.fetch(:sync_interval) { ENV.fetch("FLIPPER_CLOUD_SYNC_INTERVAL", 10).to_f }
         @sync_secret = options.fetch(:sync_secret) { ENV["FLIPPER_CLOUD_SYNC_SECRET"] }
+
         @local_adapter = options.fetch(:local_adapter) { Adapters::Memory.new }
         @debug_output = options[:debug_output]
         @adapter_block = ->(adapter) { adapter }
@@ -92,10 +101,18 @@ module Flipper
 
         instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
 
+        @telemetry_interval = options.fetch(:telemetry_interval) { ENV.fetch("FLIPPER_CLOUD_TELEMETRY_INTERVAL", 60).to_f }
+        if @telemetry_interval < MIN_TELEMETRY_INTERVAL
+          @telemetry_interval = MIN_TELEMETRY_INTERVAL
+        end
+        @telemetry_shutdown_timeout = options.fetch(:telemetry_shutdown_timeout) { ENV.fetch("FLIPPER_CLOUD_TELEMETRY_SHUTDOWN_TIMEOUT", 5).to_f }
+        # Needs to be after url and other telemetry config assignments.
+        @telemetry = options.fetch(:telemetry) { Telemetry.instance_for(self) }
+
         # This is alpha. Don't use this unless you are me. And you are not me.
         cloud_instrument = options.fetch(:cloud_instrument) { ENV["FLIPPER_CLOUD_INSTRUMENT"] == "1" }
         @instrumenter = if cloud_instrument
-          Instrumenter.new(brow: brow, instrumenter: instrumenter)
+          Instrumenter.new(telemetry: telemetry, instrumenter: instrumenter)
         else
           instrumenter
         end
@@ -129,27 +146,16 @@ module Flipper
         }).call
       end
 
-      def brow
-        self.class.brow_instances.compute_if_absent(url + token) do
-          uri = URI.parse(url)
-          uri.path = "#{uri.path}/events".squeeze("/")
-
-          Brow::Client.new({
-            url: uri.to_s,
-            headers: {
-              "Accept" => "application/json",
-              "Content-Type" => "application/json",
-              "User-Agent" => "Flipper v#{VERSION} via Brow v#{Brow::VERSION}",
-              "Flipper-Cloud-Token" => @token,
-            }
-          })
-        end
-      end
-
       # Public: The method that will be used to synchronize local adapter with
       # cloud. (default: :poll, will be :webhook if sync_secret is set).
       def sync_method
         sync_secret ? :webhook : :poll
+      end
+
+      # Internal: The http client used by the http adapter. Exposed so we can
+      # use the same client for posting telemetry.
+      def http_client
+        http_adapter.client
       end
 
       private
