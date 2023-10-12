@@ -20,10 +20,10 @@ jobs:
         exclude:
           - ruby: "2.6"
             rails: "7.1.0"
-          - ruby: "2.7"
-            rails: "7.1.0"
           - ruby: "2.6"
             rails: "7.0.0"
+          - ruby: "2.7"
+            rails: "7.1.0"
           - ruby: "3.0"
             rails: "5.2"
           - ruby: "3.1"
