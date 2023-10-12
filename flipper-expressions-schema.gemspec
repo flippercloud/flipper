@@ -5,7 +5,8 @@ require File.expand_path('../lib/flipper/metadata', __FILE__)
 Gem::Specification.new do |gem|
   SCHEMAS_DIR = File.expand_path("node_modules/@flippercloud.io/expressions/schemas", __dir__)
 
-  # Ensure schemas are downloaded loaded as a git dependency
+  # Ensure schemas are downloaded when installed as a git dependency.
+  # This will be handled by rake when the gem is built and published.
   unless File.exist?(SCHEMAS_DIR)
     warn "Getting schemas from @flippercloud.io/expressions..."
     Dir.chdir(__dir__) { exec "npm install --silent" }
