@@ -31,6 +31,8 @@ jobs:
             rails: "5.2"
           - ruby: "3.1"
             rails: "6.0.0"
+          - ruby: "3.2"
+            rails: "5.2"
 
     env:
       SQLITE3_VERSION: 1.4.1
