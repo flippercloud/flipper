@@ -3,6 +3,14 @@ require File.expand_path('../lib/flipper/version', __FILE__)
 require File.expand_path('../lib/flipper/metadata', __FILE__)
 
 Gem::Specification.new do |gem|
+  SCHEMAS_DIR = File.expand_path("node_modules/@flippercloud.io/expressions/schemas", __dir__)
+
+  # Ensure schemas are downloaded loaded as a git dependency
+  unless File.exist?(SCHEMAS_DIR)
+    warn "Getting schemas from @flippercloud.io/expressions..."
+    Dir.chdir(__dir__) { exec "npm install --silent" }
+  end
+
   gem.authors       = ['John Nunemaker']
   gem.email         = 'support@flippercloud.io'
   gem.summary       = 'ActiveRecord adapter for Flipper'
@@ -10,6 +18,8 @@ Gem::Specification.new do |gem|
   gem.homepage      = 'https://www.flippercloud.io/docs/expressions'
 
   gem.files         = [
+    'package.json',
+    'package-lock.json',
     'lib/flipper-expressions-schema.rb',
     'lib/flipper/expression/schema.rb',
     'lib/flipper/version.rb',
