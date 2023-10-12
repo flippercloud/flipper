@@ -1,7 +1,7 @@
 name: CI
 on: [push, pull_request]
 jobs:
-  ruby:
+  test:
     name: Test on ruby ${{ matrix.ruby }} and rails ${{ matrix.rails }}
     runs-on: ubuntu-latest
     services:
