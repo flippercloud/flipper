@@ -50,6 +50,9 @@ jobs:
           mongodb-version: 4.0
       - name: Check out repository code
         uses: actions/checkout@v4
+        with:
+          # Install gems/npm packages from GitHub fails without this
+          persist-credentials: false
       - name: Do some action caching
         uses: actions/cache@v3
         with:
