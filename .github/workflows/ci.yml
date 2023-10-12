@@ -60,20 +60,8 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true # 'bundle install' and cache gems
+      - name: Set up Node
+        uses: actions/setup-node@v3
+      - run: npm clean-install
       - name: Run Rake with Rails ${{ matrix.rails }}
         run: bundle exec rake
-  js:
-    name: JS
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          cache: 'yarn'
-          cache-dependency-path: packages/expressions/yarn.lock
-      - name: Run yarn lint + test
-        run: |
-          cd packages/expressions
-          yarn install
-          yarn lint
-          yarn test

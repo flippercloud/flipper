@@ -19,3 +19,4 @@ cd $(dirname "$0")/..
 
 rm -rf .bundle/{binstubs,config}
 bundle install --binstubs --quiet "$@"
+npm clean-install --silent

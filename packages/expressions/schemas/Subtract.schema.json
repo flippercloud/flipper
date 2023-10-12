@@ -1,8 +1,0 @@
-{
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://www.flippercloud.io/expressions/Subtract.schema.json",
-  "title": "Subtract",
-  "description": "Subtract two values",
-  "operator": "-",
-  "$ref": "schema.json#/definitions/operation"
-}

@@ -3,8 +3,7 @@ require "json_schemer"
 module Flipper
   class Expression
     class Schema < JSONSchemer::Schema::Draft7
-      PATH =
-        Pathname.new(File.expand_path("../../../packages/expressions", __dir__))
+      PATH = Pathname.new(File.expand_path("../../../node_modules/@flippercloud.io/expressions", __dir__))
 
       def self.schemas
         @schemas ||=
