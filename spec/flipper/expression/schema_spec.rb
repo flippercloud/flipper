@@ -1,6 +1,7 @@
 require "json_schemer"
+require "flipper-expressions-schema"
 
-RSpec.describe Flipper::Expressions do
+RSpec.describe Flipper::Expression::Schema do
   let(:schema) { Flipper::Expression::Schema.new }
 
   Flipper::Expression::Schema.examples.each do |name, examples|

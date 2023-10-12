@@ -36,5 +36,4 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency 'concurrent-ruby', '< 2'
   gem.add_dependency 'brow', '~> 0.4.1'
-  gem.add_dependency 'json_schemer', '~> 1.0'
 end

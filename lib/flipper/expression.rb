@@ -1,6 +1,5 @@
 require "flipper/expression/builder"
 require "flipper/expression/constant"
-require "flipper/expression/schema"
 
 module Flipper
   class Expression
