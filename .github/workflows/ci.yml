@@ -59,13 +59,13 @@ jobs:
             ${{ runner.os }}-gems-${{ matrix.ruby }}-${{ matrix.rails }}-
       - name: Install libpq-dev
         run: sudo apt-get -yqq install libpq-dev
+      - name: Set up Node
+        uses: actions/setup-node@v3
       - name: Set up Ruby ${{ matrix.ruby }}
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true # 'bundle install' and cache gems
-      - name: Set up Node
-        uses: actions/setup-node@v3
       - run: npm clean-install
       - name: Run Rake with Rails ${{ matrix.rails }}
         run: bundle exec rake
