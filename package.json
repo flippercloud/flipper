@@ -1,6 +1,6 @@
 {
   "private": true,
   "dependencies": {
-    "@flippercloud.io/expressions": "github:flippercloud/expressions.js"
+    "@flippercloud.io/expressions": "github:flippercloud/expressions"
   }
 }
