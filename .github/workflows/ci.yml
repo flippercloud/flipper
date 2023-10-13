@@ -53,17 +53,12 @@ jobs:
         with:
           # Install gems/npm packages from GitHub fails without this
           persist-credentials: false
-      - name: Do some action caching
-        uses: actions/cache@v3
-        with:
-          path: vendor/bundle
-          key: ${{ runner.os }}-gems-${{ matrix.ruby }}-${{ matrix.rails }}-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-gems-${{ matrix.ruby }}-${{ matrix.rails }}-
       - name: Install libpq-dev
         run: sudo apt-get -yqq install libpq-dev
       - name: Set up Node
         uses: actions/setup-node@v3
+        with:
+          cache: 'npm'
       - name: Set up Ruby ${{ matrix.ruby }}
         uses: ruby/setup-ruby@v1
         with:
