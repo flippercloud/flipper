@@ -59,11 +59,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           cache: 'npm'
+      - run: npm clean-install
       - name: Set up Ruby ${{ matrix.ruby }}
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true # 'bundle install' and cache gems
-      - run: npm clean-install
       - name: Run Rake with Rails ${{ matrix.rails }}
         run: bundle exec rake
