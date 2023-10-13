@@ -7,9 +7,11 @@ Gem::Specification.new do |gem|
 
   # Ensure schemas are downloaded when installed as a git dependency.
   # This will be handled by rake when the gem is built and published.
-  unless File.exist?(SCHEMAS_DIR)
-    warn "Getting schemas from @flippercloud.io/expressions..."
-    Dir.chdir(__dir__) { exec "npm install --silent" }
+  Gem.post_install do
+    unless File.exist?(SCHEMAS_DIR)
+      warn "Getting schemas from @flippercloud.io/expressions..."
+      Dir.chdir(__dir__) { exec "npm install --silent" }
+    end
   end
 
   gem.authors       = ['John Nunemaker']
