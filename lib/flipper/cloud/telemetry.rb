@@ -7,7 +7,7 @@ require "flipper/cloud/telemetry/metric_storage"
 module Flipper
   module Cloud
     class Telemetry
-      SCHEMA_VERSION = "2023-10-12".freeze
+      SCHEMA_VERSION = "V1".freeze
 
       attr_reader :cloud_configuration, :metric_storage
 
@@ -97,18 +97,21 @@ module Flipper
         return if drained.empty?
         @logger.info "pid=#{@pid} name=flipper_telemetry action=post_to_cloud"
 
-        enabled_metrics = drained.inject({}) do |hash, (metric, value)|
-          hash[metric.key] ||= {}
-          hash[metric.key][metric.time] ||= {}
-          hash[metric.key][metric.time][metric.result] = value
-          hash
+        enabled_metrics = drained.inject([]) do |array, (metric, value)|
+          array << {
+            key: metric.key,
+            time: metric.time,
+            result: metric.result,
+            value: value,
+          }
+          array
         end
 
         body = JSON.generate({
-          schema_version: SCHEMA_VERSION,
           enabled_metrics: enabled_metrics,
         })
         http_client = @cloud_configuration.http_client
+        http_client.add_header :schema_version, SCHEMA_VERSION
         http_client.post "/telemetry", body
       end
 
