@@ -61,14 +61,14 @@ RSpec.describe Flipper::Cloud::Configuration do
   end
 
   it "can set sync_interval" do
-    instance = described_class.new(required_options.merge(sync_interval: 1))
-    expect(instance.sync_interval).to eq(1)
+    instance = described_class.new(required_options.merge(sync_interval: 15))
+    expect(instance.sync_interval).to eq(15)
   end
 
   it "can set sync_interval from ENV var" do
-    with_env "FLIPPER_CLOUD_SYNC_INTERVAL" => "5" do
+    with_env "FLIPPER_CLOUD_SYNC_INTERVAL" => "15" do
       instance = described_class.new(required_options.reject { |k, v| k == :sync_interval })
-      expect(instance.sync_interval).to eq(5)
+      expect(instance.sync_interval).to eq(15)
     end
   end
 
@@ -76,9 +76,9 @@ RSpec.describe Flipper::Cloud::Configuration do
     # The initial sync of http to local invokes this web request.
     stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
 
-    instance = described_class.new(required_options.merge(sync_interval: 1))
+    instance = described_class.new(required_options.merge(sync_interval: 20))
     poller = instance.send(:poller)
-    expect(poller.interval).to eq(1)
+    expect(poller.interval).to eq(20)
   end
 
   it "can set telemetry_interval" do

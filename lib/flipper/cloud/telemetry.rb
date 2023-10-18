@@ -1,4 +1,5 @@
 require "json"
+require "forwardable"
 require "concurrent/timer_task"
 require "concurrent/executor/fixed_thread_pool"
 require "flipper/cloud/telemetry/metric"
@@ -7,14 +8,19 @@ require "flipper/cloud/telemetry/metric_storage"
 module Flipper
   module Cloud
     class Telemetry
+      extend Forwardable
+
       SCHEMA_VERSION = "V1".freeze
 
-      attr_reader :cloud_configuration, :metric_storage
-
+      # Internal: Map of instances of telemetry.
       def self.instances
         @instances ||= Concurrent::Map.new
       end
       private_class_method :instances
+
+      def self.reset
+        instances.each { |_,instance| instance.stop }.clear
+      end
 
       # Internal: Fetch an instance of telemetry once per process per url +
       # token (aka cloud endpoint). Should only ever be one instance unless you
@@ -25,23 +31,30 @@ module Flipper
         end
       end
 
+      attr_reader :cloud_configuration, :metric_storage
+
+      def_delegator :@cloud_configuration, :telemetry_logger, :logger
+
       def initialize(cloud_configuration)
         @pid = $$
-        @logger = Logger.new(STDOUT)
         @cloud_configuration = cloud_configuration
         start
 
         at_exit { stop }
       end
 
-      # Records enabled metrics based on feature key and resulting value.
-      def record_enabled(feature_key, result)
+      # Public: Records telemetry events based on active support notifications.
+      def record(name, payload)
+        return unless name == Flipper::Feature::InstrumentationName
+        return unless payload[:operation] == :enabled?
         detect_forking
-        @metric_storage&.increment Metric.new(feature_key, result)
+
+        metric = Metric.new(payload[:feature_name].to_s.freeze, payload[:result])
+        @metric_storage.increment metric
       end
 
       def start
-        @logger.info "pid=#{@pid} name=flipper_telemetry action=start"
+        logger.info "pid=#{@pid} name=flipper_telemetry action=start"
         @metric_storage = MetricStorage.new
         @pool = Concurrent::FixedThreadPool.new(5, pool_options)
         @timer = Concurrent::TimerTask.execute(timer_options) { post_to_pool }
@@ -49,25 +62,25 @@ module Flipper
 
       # Shuts down all the tasks and tries to flush any remaining info to Cloud.
       def stop
-        @logger.info "pid=#{@pid} name=flipper_telemetry action=stop"
+        logger.info "pid=#{@pid} name=flipper_telemetry action=stop"
 
         if @timer
-          @logger.info "pid=#{@pid} name=flipper_telemetry action=timer_shutdown_start"
+          logger.debug "pid=#{@pid} name=flipper_telemetry action=timer_shutdown_start"
           @timer.shutdown
           # no need to wait long for timer, all it does is drain in memory metric
           # storage and post to the pool of background workers
           timer_termination_result = @timer.wait_for_termination(1)
           @timer.kill unless timer_termination_result
-          @logger.info "pid=#{@pid} name=flipper_telemetry action=timer_shutdown_end result=#{timer_termination_result}"
+          logger.debug "pid=#{@pid} name=flipper_telemetry action=timer_shutdown_end result=#{timer_termination_result}"
         end
 
         if @pool
           post_to_pool # one last drain
-          @logger.info "pid=#{@pid} name=flipper_telemetry action=pool_shutdown_start"
+          logger.debug "pid=#{@pid} name=flipper_telemetry action=pool_shutdown_start"
           @pool.shutdown
           pool_termination_result = @pool.wait_for_termination(@cloud_configuration.telemetry_shutdown_timeout)
           @pool.kill unless pool_termination_result
-          @logger.info "pid=#{@pid} name=flipper_telemetry action=pool_shutdown_end result=#{pool_termination_result}"
+          logger.debug "pid=#{@pid} name=flipper_telemetry action=pool_shutdown_end result=#{pool_termination_result}"
         end
       end
 
@@ -80,14 +93,14 @@ module Flipper
 
       def detect_forking
         if @pid != $$
-          @logger.info "pid=#{@pid} name=flipper_telemetry action=fork_detected pid_was#{@pid} pid_is=#{$$}"
+          logger.info "pid=#{@pid} name=flipper_telemetry action=fork_detected pid_was#{@pid} pid_is=#{$$}"
           restart
           @pid = $$
         end
       end
 
       def post_to_pool
-        @logger.info "pid=#{@pid} name=flipper_telemetry action=post_to_pool"
+        logger.debug "pid=#{@pid} name=flipper_telemetry action=post_to_pool"
         drained = @metric_storage.drain
         return if drained.empty?
         @pool.post { post_to_cloud(drained) }
@@ -95,7 +108,7 @@ module Flipper
 
       def post_to_cloud(drained)
         return if drained.empty?
-        @logger.info "pid=#{@pid} name=flipper_telemetry action=post_to_cloud"
+        logger.debug "pid=#{@pid} name=flipper_telemetry action=post_to_cloud"
 
         enabled_metrics = drained.inject([]) do |array, (metric, value)|
           array << {
