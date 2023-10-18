@@ -12,9 +12,13 @@ Flipper.configure do |config|
     Flipper::Cloud.new(
       local_adapter: config.adapter,
       debug_output: STDOUT,
+      sync_interval: 60,
     )
   }
 end
+
+Flipper.enable(:search)
+Flipper.disable(:stats)
 
 # Check every second to see if the feature is enabled
 5.times.map { |i|
@@ -22,11 +26,8 @@ end
     loop do
       sleep rand
 
-      if Flipper[:stats].enabled?
-        puts "#{Time.now.to_i} Enabled!"
-      else
-        puts "#{Time.now.to_i} Disabled!"
-      end
+      Flipper.enabled?(:stats)
+      Flipper.enabled?(:search)
     end
   }
 }.each(&:join)
