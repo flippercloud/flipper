@@ -19,7 +19,7 @@ module Flipper
       private_class_method :instances
 
       def self.reset
-        instances.each { |_,instance| instance.stop }.clear
+        instances.each { |_, instance| instance.stop }.clear
       end
 
       # Internal: Fetch an instance of telemetry once per process per url +
