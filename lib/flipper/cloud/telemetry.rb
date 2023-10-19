@@ -53,6 +53,7 @@ module Flipper
         @metric_storage.increment metric
       end
 
+      # Start all the tasks and setup new metric storage.
       def start
         logger.info "pid=#{@pid} name=flipper_telemetry action=start"
         @metric_storage = MetricStorage.new
