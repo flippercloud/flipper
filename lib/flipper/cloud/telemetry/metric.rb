@@ -10,6 +10,20 @@ module Flipper
           @time = time.to_i / 60 * 60
         end
 
+        def as_json(options = {})
+          data = {
+            "key" => key.to_s,
+            "time" => time,
+            "result" => result,
+          }
+
+          if options[:with]
+            data.merge!(options[:with])
+          end
+
+          data
+        end
+
         def eql?(other)
           self.class.eql?(other.class) &&
             @key == other.key && @time == other.time && @result == other.result

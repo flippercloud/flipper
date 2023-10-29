@@ -63,4 +63,25 @@ RSpec.describe Flipper::Cloud::Telemetry::Metric do
       expect(metric.hash).to eq([described_class, metric.key, metric.time, metric.result].hash)
     end
   end
+
+  describe "#as_json" do
+    it "returns key time and result" do
+      metric = described_class.new(:search, true, 1696793160)
+      expect(metric.as_json).to eq({
+        "key" => "search",
+        "result" => true,
+        "time" => 1696793160,
+      })
+    end
+
+    it "can include other hashes" do
+      metric = described_class.new(:search, true, 1696793160)
+      expect(metric.as_json(with: {"value" => 2})).to eq({
+        "key" => "search",
+        "result" => true,
+        "time" => 1696793160,
+        "value" => 2,
+      })
+    end
+  end
 end

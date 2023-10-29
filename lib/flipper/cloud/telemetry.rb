@@ -112,15 +112,9 @@ module Flipper
         return if drained.empty?
         logger.debug "pid=#{@pid} name=flipper_telemetry action=post_to_cloud"
 
-        enabled_metrics = drained.inject([]) do |array, (metric, value)|
-          array << {
-            key: metric.key,
-            time: metric.time,
-            result: metric.result,
-            value: value,
-          }
-          array
-        end
+        enabled_metrics = drained.map { |metric, value|
+          metric.as_json(with: {"value" => value})
+        }
 
         body = JSON.generate({
           request_id: SecureRandom.uuid,
