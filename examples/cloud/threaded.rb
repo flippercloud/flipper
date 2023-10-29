@@ -17,8 +17,9 @@ Flipper.configure do |config|
   }
 end
 
-Flipper.enable(:search)
-Flipper.disable(:stats)
+# You might want to do this at some point to see different results:
+# Flipper.enable(:search)
+# Flipper.disable(:stats)
 
 # Check every second to see if the feature is enabled
 5.times.map { |i|
