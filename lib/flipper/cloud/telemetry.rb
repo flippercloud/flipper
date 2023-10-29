@@ -1,5 +1,6 @@
 require "json"
 require "forwardable"
+require "securerandom"
 require "concurrent/timer_task"
 require "concurrent/executor/fixed_thread_pool"
 require "flipper/cloud/telemetry/metric"
@@ -122,6 +123,7 @@ module Flipper
         end
 
         body = JSON.generate({
+          request_id: SecureRandom.uuid,
           enabled_metrics: enabled_metrics,
         })
         http_client = @cloud_configuration.http_client
