@@ -38,6 +38,13 @@ Flipper::UI.configure do |config|
       "a/b" => "Why would someone use a slash? I don't know but someone did. Let's make this really long so they regret using slashes. Please don't use slashes.",
     }
   end
+
+  config.actor_names_source = lambda do |_keys|
+    {
+      '1' => 'John',
+      '6' => 'Brandon',
+    }
+  end
 end
 
 # You can uncomment these to get some default data:
