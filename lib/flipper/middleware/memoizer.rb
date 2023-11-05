@@ -53,7 +53,6 @@ module Flipper
       end
 
       def memoized_call(env)
-        reset_on_body_close = false
         flipper = env.fetch(@env_key) { Flipper }
 
         # Already memoizing. This instance does not need to do anything.
