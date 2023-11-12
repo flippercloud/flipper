@@ -1,4 +1,6 @@
 require "json"
+require "zlib"
+require "stringio"
 require "forwardable"
 require "securerandom"
 require "concurrent/timer_task"
@@ -122,7 +124,19 @@ module Flipper
         })
         http_client = @cloud_configuration.http_client
         http_client.add_header :schema_version, SCHEMA_VERSION
-        http_client.post "/telemetry", body
+        http_client.add_header :content_encoding, 'gzip'
+        http_client.post "/telemetry", compress(body)
+      rescue => error
+        # FIXME: Retry for net/http server errors
+        logger.debug "name=flipper_telemetry action=post_to_cloud error=#{error.inspect}"
+      end
+
+      def compress(data)
+        io = StringIO.new
+        writer = Zlib::GzipWriter.new(io)
+        writer.write(data)
+        writer.finish
+        io.string
       end
 
       def pool_options
