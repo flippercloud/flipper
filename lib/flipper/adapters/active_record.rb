@@ -221,7 +221,7 @@ module Flipper
               @gate_class.create! do |g|
                 g.feature_key = feature.key
                 g.key = gate.key
-                g.value = json_feature ? JSON.dump(thing.value) : thing.value.to_s
+                g.value = json_feature ? Typecast.to_json(thing.value) : thing.value.to_s
               end
             rescue ::ActiveRecord::RecordNotUnique
               # assume this happened concurrently with the same thing and its fine

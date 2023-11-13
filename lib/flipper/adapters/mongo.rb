@@ -80,7 +80,7 @@ module Flipper
           }
         when :json
           update feature.key, '$set' => {
-            gate.key.to_s => JSON.dump(thing.value),
+            gate.key.to_s => Typecast.to_json(thing.value),
           }
         else
           unsupported_data_type gate.data_type

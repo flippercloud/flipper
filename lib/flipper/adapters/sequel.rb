@@ -206,7 +206,7 @@ module Flipper
         {
           feature_key: feature.key.to_s,
           key: gate.key.to_s,
-          value: json ? JSON.dump(thing.value) : thing.value.to_s,
+          value: json ? Typecast.to_json(thing.value) : thing.value.to_s,
         }
       end
 

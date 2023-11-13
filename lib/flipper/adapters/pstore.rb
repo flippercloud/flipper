@@ -85,7 +85,7 @@ module Flipper
           when :set
             set_add key(feature, gate), thing.value.to_s
           when :json
-            write key(feature, gate), JSON.dump(thing.value)
+            write key(feature, gate), Typecast.to_json(thing.value)
           else
             raise "#{gate} is not supported by this adapter yet"
           end

@@ -94,7 +94,7 @@ module Flipper
         when :set
           @client.hset feature_key, to_field(gate, thing), 1
         when :json
-          @client.hset feature_key, gate.key, JSON.dump(thing.value)
+          @client.hset feature_key, gate.key, Typecast.to_json(thing.value)
         else
           unsupported_data_type gate.data_type
         end

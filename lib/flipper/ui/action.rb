@@ -176,7 +176,7 @@ module Flipper
         when String
           object
         else
-          JSON.dump(object)
+          Typecast.to_json(object)
         end
         halt [@code, @headers, [body]]
       end
