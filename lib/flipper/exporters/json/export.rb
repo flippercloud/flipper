@@ -1,5 +1,6 @@
 require "flipper/export"
 require "flipper/typecast"
+require "flipper/serializers/json"
 
 module Flipper
   module Exporters
@@ -18,7 +19,7 @@ module Flipper
         # Public: The features hash identical to calling get_all on adapter.
         def features
           @features ||= begin
-            features = JSON.parse(contents).fetch("features")
+            features = Serializers::Json.deserialize(contents).fetch("features")
             Typecast.features_hash(features)
           rescue JSON::ParserError
             raise JsonError

@@ -1,12 +1,11 @@
-require "json"
-require "zlib"
-require "stringio"
 require "forwardable"
 require "securerandom"
 require "concurrent/timer_task"
 require "concurrent/executor/fixed_thread_pool"
 require "flipper/cloud/telemetry/metric"
 require "flipper/cloud/telemetry/metric_storage"
+require "flipper/serializers/json"
+require "flipper/serializers/gzip"
 
 module Flipper
   module Cloud
@@ -118,25 +117,17 @@ module Flipper
           metric.as_json(with: {"value" => value})
         }
 
-        body = JSON.generate({
+        body = Serializers::Json.serialize({
           request_id: SecureRandom.uuid,
           enabled_metrics: enabled_metrics,
         })
         http_client = @cloud_configuration.http_client
         http_client.add_header :schema_version, SCHEMA_VERSION
         http_client.add_header :content_encoding, 'gzip'
-        http_client.post "/telemetry", compress(body)
+        http_client.post "/telemetry", Serializers::Gzip.serialize(body)
       rescue => error
         # FIXME: Retry for net/http server errors
         logger.debug "name=flipper_telemetry action=post_to_cloud error=#{error.inspect}"
-      end
-
-      def compress(data)
-        io = StringIO.new
-        writer = Zlib::GzipWriter.new(io)
-        writer.write(data)
-        writer.finish
-        io.string
       end
 
       def pool_options
