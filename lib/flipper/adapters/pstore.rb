@@ -161,7 +161,7 @@ module Flipper
               set_members key
             when :json
               value = read(key)
-              JSON.parse(value) if value
+              Typecast.from_json(value)
             else
               raise "#{gate} is not supported by this adapter yet"
             end

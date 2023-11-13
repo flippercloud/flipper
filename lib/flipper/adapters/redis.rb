@@ -174,7 +174,7 @@ module Flipper
               fields_to_gate_value fields, gate
             when :json
               value = doc[gate.key.to_s]
-              JSON.parse(value) if value
+              Typecast.from_json(value)
             else
               unsupported_data_type gate.data_type
             end

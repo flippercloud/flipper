@@ -6,10 +6,12 @@ module Flipper
       module_function
 
       def serialize(source)
+        return if source.nil?
         JSON.generate(source)
       end
 
       def deserialize(source)
+        return if source.nil?
         JSON.parse(source)
       end
     end

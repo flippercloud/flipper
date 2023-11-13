@@ -263,7 +263,7 @@ module Flipper
               end
             when :json
               if row = gates.detect { |key, value| !key.nil? && key.to_sym == gate.key }
-                JSON.parse(row.last)
+                Typecast.from_json(row.last)
               end
             when :set
               gates.select { |key, value| !key.nil? && key.to_sym == gate.key }.map(&:last).to_set

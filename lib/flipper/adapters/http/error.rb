@@ -11,7 +11,7 @@ module Flipper
           message = "Failed with status: #{response.code}"
 
           begin
-            data = JSON.parse(response.body)
+            data = Typecast.from_json(response.body)
 
             if error_message = data["message"]
               message << "\n\n#{data["message"]}"

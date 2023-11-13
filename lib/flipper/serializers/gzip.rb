@@ -6,8 +6,17 @@ module Flipper
     module Gzip
       module_function
 
+      class Stream < StringIO
+        def initialize(*)
+          super
+          set_encoding "BINARY"
+        end
+        def close; rewind; end
+      end
+
       def serialize(source)
-        output = StringIO.new
+        return if source.nil?
+        output = Stream.new
         gz = Zlib::GzipWriter.new(output)
         gz.write(source)
         gz.close
@@ -15,6 +24,7 @@ module Flipper
       end
 
       def deserialize(source)
+        return if source.nil?
         Zlib::GzipReader.wrap(StringIO.new(source), &:read)
       end
     end
