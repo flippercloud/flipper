@@ -8,7 +8,8 @@ module Flipper
         route %r{(images|css|js)/.*\Z}
 
         def get
-          Rack::File.new(public_path).call(request.env)
+          klass = Rack.release >= "2.1" ? Rack::Files : Rack::File
+          klass.new(public_path).call(request.env)
         end
       end
     end
