@@ -117,6 +117,11 @@ module Flipper
         @adapter.disable(feature, gate, thing).tap { expire_feature(feature) }
       end
 
+      # Public
+      def read_only?
+        @adapter.read_only?
+      end
+
       def import(source)
         @adapter.import(source).tap { cache.clear if memoizing? }
       end

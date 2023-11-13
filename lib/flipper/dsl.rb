@@ -272,6 +272,10 @@ module Flipper
       adapter.features.map { |name| feature(name) }.to_set
     end
 
+    def read_only?
+      adapter.read_only?
+    end
+
     # Cloud DSL method that does nothing for open source version.
     def sync
     end

@@ -64,6 +64,20 @@ RSpec.describe Flipper::UI::Actions::Features do
         end
       end
     end
+
+    context "when in read-only mode" do
+      before { allow(flipper).to receive(:read_only?) { true}}
+
+      before { get '/features' }
+
+      it 'responds with success' do
+        expect(last_response.status).to be(200)
+      end
+
+      it 'renders template with no button' do
+        expect(last_response.body).not_to include('<a class="btn btn-primary btn-sm" href="/features/new">Add Feature</a>')
+      end
+    end
   end
 
   describe 'POST /features' do

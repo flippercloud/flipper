@@ -40,7 +40,7 @@
                 </strong>
               </h6>
             </div>
-            <% unless Flipper::UI.configuration.read_only %>
+            <% if write_allowed? %>
               <div class="col col-auto toggle-block-when-off">
                 <button class="btn btn-outline-secondary js-toggle-trigger" data-toggle="collapse" data-target="#add-actor">Add an actor</button>
               </div>
@@ -73,7 +73,7 @@
                 </h6>
               </div>
               <div class="col col-auto">
-                <% unless Flipper::UI.configuration.read_only %>
+                <% if write_allowed? %>
                   <form action="<%= script_name %>/features/<%= @feature.key %>/actors" method="post">
                     <%== csrf_input_tag %>
                     <input type="hidden" name="operation" value="disable">
@@ -102,7 +102,7 @@
                 </strong>
               </h6>
             </div>
-            <% unless Flipper::UI.configuration.read_only %>
+            <% if write_allowed? %>
               <div class="col col-auto toggle-block-when-off">
                 <button class="btn btn-outline-secondary js-toggle-trigger" data-toggle="collapse" data-target="#add-actor">Add a group</button>
               </div>
@@ -138,7 +138,7 @@
                 <h6 class="m-0"><%= item %></h6>
               </div>
               <div class="col col-auto">
-                <% unless Flipper::UI.configuration.read_only %>
+                <% if write_allowed? %>
                   <form action="<%= script_name %>/features/<%= @feature.key %>/groups" method="post">
                     <%== csrf_input_tag %>
                     <input type="hidden" name="operation" value="disable">
@@ -160,7 +160,7 @@
               <div class="col col-mr-auto">
                 <h6 class="m-0"><strong class="<%= "text-muted" unless @feature.percentage_of_actors_value > 0 %>">Enabled for <%= @feature.percentage_of_actors_value %>% of actors</strong></h6>
               </div>
-              <% unless Flipper::UI.configuration.read_only %>
+              <% if write_allowed? %>
                 <div class="col col-auto toggle-block-when-off">
                   <button class="btn btn-outline-secondary js-toggle-trigger">Edit</button>
                 </div>
@@ -171,7 +171,7 @@
             </div>
           </div>
 
-          <% unless Flipper::UI.configuration.read_only %>
+          <% if write_allowed? %>
             <div class="card-body border-bottom toggle-block-when-on bg-lightest">
               <div class="row">
                 <div class="col-12 col-md-6 mb-3 mb-md-0">
@@ -203,7 +203,7 @@
               <div class="col col-mr-auto">
                 <h6 class="m-0"><strong class="<%= "text-muted" unless @feature.percentage_of_time_value > 0 %>">Enabled for <%= @feature.percentage_of_time_value %>% of time</strong></h6>
               </div>
-              <% unless Flipper::UI.configuration.read_only %>
+              <% if write_allowed? %>
                 <div class="col col-auto toggle-block-when-off">
                   <button class="btn btn-outline-secondary js-toggle-trigger">Edit</button>
                 </div>
@@ -214,7 +214,7 @@
             </div>
           </div>
 
-          <% unless Flipper::UI.configuration.read_only %>
+          <% if write_allowed? %>
             <div class="card-body border-bottom toggle-block-when-on bg-lightest">
               <div class="row">
                 <div class="col-12 col-md-6 mb-3 mb-md-0">
@@ -240,52 +240,45 @@
         </div>
       <% end %>
 
-      <div class="card-body">
-        <form action="<%= script_name %>/features/<%= @feature.key %>/boolean" method="post">
-          <%== csrf_input_tag %>
+      <% if write_allowed? %>
+        <div class="card-body">
+          <form action="<%= script_name %>/features/<%= @feature.key %>/boolean" method="post">
+            <%== csrf_input_tag %>
 
-          <div class="row">
-            <% unless @feature.boolean_value %>
-              <div class="col">
-                <button type="submit" name="action" value="Enable" <% if Flipper::UI.configuration.confirm_fully_enable %>id="enable_feature__button"<% end %> class="btn btn-outline-success btn-block" <% if Flipper::UI.configuration.read_only %>disabled<% end %>>
-                  <span class="d-block" data-toggle="tooltip"
-                    <% if Flipper::UI.configuration.confirm_fully_enable %>
-                      data-confirmation-text="<%= feature_name %>"
-                    <% end %>
-                    <% if Flipper::UI.configuration.read_only %>
-                      title="Fully enable is not allowed in read only mode."
-                    <% else %>
-                      title="Enable for everyone"
-                    <% end %>
-                    >
-                    Fully Enable
-                  </span>
-                </button>
-              </div>
-            <% end %>
+            <div class="row">
+              <% unless @feature.boolean_value %>
+                <div class="col">
+                  <button type="submit" name="action" value="Enable" <% if Flipper::UI.configuration.confirm_fully_enable %>id="enable_feature__button"<% end %> class="btn btn-outline-success btn-block">
+                    <span class="d-block" data-toggle="tooltip"
+                      <% if Flipper::UI.configuration.confirm_fully_enable %>
+                        data-confirmation-text="<%= feature_name %>"
+                      <% end %>
+                        title="Enable for everyone"
+                      >
+                      Fully Enable
+                    </span>
+                  </button>
+                </div>
+              <% end %>
 
-            <% unless @feature.off? %>
-              <div class="col">
-                <button type="submit" name="action" value="Disable" class="btn btn-outline-danger btn-block" <% if Flipper::UI.configuration.read_only %>disabled<% end %>>
-                  <span class="d-block" data-toggle="tooltip"
-                    <% if Flipper::UI.configuration.read_only %>
-                      title="Disable is not allowed in read only mode.">
-                    <% else %>
-                      title="Disable for everyone by clearing all percentages, groups and actors.">
-                    <% end %>
-                    Disable
-                  </span>
-                </button>
-              </div>
-            <% end %>
-          </div>
-        </form>
-      </div>
+              <% unless @feature.off? %>
+                <div class="col">
+                  <button type="submit" name="action" value="Disable" class="btn btn-outline-danger btn-block">
+                    <span class="d-block" data-toggle="tooltip" title="Disable for everyone by clearing all percentages, groups and actors.">
+                      Disable
+                    </span>
+                  </button>
+                </div>
+              <% end %>
+            </div>
+          </form>
+        </div>
+      <% end %>
     </div>
   </div>
 </div>
 
-<% if !Flipper::UI.configuration.read_only && Flipper::UI.configuration.feature_removal_enabled %>
+<% if write_allowed? && Flipper::UI.configuration.feature_removal_enabled %>
   <div class="row">
     <div class="col">
       <div class="card border">

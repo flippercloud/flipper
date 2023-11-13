@@ -21,6 +21,10 @@ module Flipper
         @adapter.features
       end
 
+      def read_only?
+        true
+      end
+
       def get(feature)
         @adapter.get(feature)
       end
