@@ -1,4 +1,8 @@
-require 'rack/file'
+if Rack.release >= "2.1"
+  require 'rack/files'
+else
+  require 'rack/file'
+end
 require 'flipper/ui/action'
 
 module Flipper
