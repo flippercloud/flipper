@@ -66,7 +66,7 @@ RSpec.describe Flipper::UI::Actions::Features do
     end
 
     context "when in read-only mode" do
-      before { allow(flipper).to receive(:read_only?) { true}}
+      before { allow(flipper).to receive(:read_only?) { true } }
 
       before { get '/features' }
 
