@@ -196,6 +196,73 @@ RSpec.describe Flipper::Middleware::Memoizer do
     end
   end
 
+  context 'with preload block' do
+    let(:app) do
+      app = lambda do |_env|
+        flipper[:stats].enabled?
+        flipper[:stats].enabled?
+        flipper[:shiny].enabled?
+        flipper[:shiny].enabled?
+        [200, {}, []]
+      end
+
+      described_class.new(app, preload: ->(request) {
+        case request.path
+        when "/true"
+          true
+        when "/specific"
+          [:stats]
+        else
+          false
+        end
+      })
+    end
+
+    include_examples 'flipper middleware'
+
+    it 'eagerly caches known features for duration of request if block returns true' do
+      flipper[:stats].enable
+      flipper[:shiny].enable
+
+      # clear the log of operations
+      adapter.reset
+
+      get '/true', {}, 'flipper' => flipper
+
+      expect(adapter.operations.size).to be(1)
+      expect(adapter.count(:get_all)).to be(1)
+      expect(adapter.count(:get)).to be(0)
+    end
+
+    it 'does not eagerly cache known features if block returns false' do
+      flipper[:stats].enable
+      flipper[:shiny].enable
+
+      # clear the log of operations
+      adapter.reset
+
+      get '/false', {}, 'flipper' => flipper
+
+      expect(adapter.operations.size).to be(2)
+      expect(adapter.count(:get_all)).to be(0)
+      expect(adapter.count(:get)).to be(2)
+    end
+
+    it 'eagerly caches specified features for duration of request if block returns array of specified features' do
+      flipper[:stats].enable
+      flipper[:shiny].enable
+
+      # clear the log of operations
+      adapter.reset
+
+      get '/specific', {}, 'flipper' => flipper
+
+      expect(adapter.operations.size).to be(2)
+      expect(adapter.count(:get_multi)).to be(1)
+      expect(adapter.count(:get)).to be(1)
+    end
+  end
+
   context 'with multiple instances' do
     let(:app) do
       # ensure scoped for builder block, annoying...
