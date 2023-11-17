@@ -42,21 +42,16 @@ RSpec.describe Flipper::UI::Actions::AddFeature do
 
   describe 'GET /features/new when an adpter is set to readonly' do
     before do
-      @original_feature_creation_enabled = Flipper::UI.configuration.feature_creation_enabled
-      Flipper::UI.configuration.feature_creation_enabled = false
+      allow(flipper).to receive(:read_only?) { true }
       get '/features/new'
-    end
-
-    after do
-      Flipper::UI.configuration.feature_creation_enabled = @original_feature_creation_enabled
     end
 
     it 'returns 403' do
       expect(last_response.status).to be(403)
     end
 
-    it 'renders feature creation disabled template' do
-      expect(last_response.body).to include('Feature creation is disabled.')
+    it 'shows that the UI is currently read-only mode' do
+      expect(last_response.body).to include('The UI is currently in read only mode.')
     end
   end
 end
