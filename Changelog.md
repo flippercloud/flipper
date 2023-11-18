@@ -6,6 +6,16 @@ All notable changes to this project will be documented in this file.
 
 ### Additions/Changes
 
+* Better read-only mode for UI (https://github.com/flippercloud/flipper/pull/772).
+* Allow configuring preload via a block similar to memoize (https://github.com/flippercloud/flipper/pull/771).
+  ```ruby
+  Rails.application.configure do
+    # don't preload features for /assets/* but do for everything else
+    config.flipper.preload = ->(request) { !request.path.start_with?('/assets') }
+  end
+  ```
+* Handle deprecation of Rack::File in Rack 3.1 (https://github.com/flippercloud/flipper/pull/773).
+* Human readable actor names in flipper-ui (https://github.com/flippercloud/flipper/pull/737).
 * Expressions are now available and considered "alpha". They are not yet documented, but you can see examples in [examples/expressions.rb](examples/expressions.rb). (https://github.com/flippercloud/flipper/pull/692)
 * Allow head requests to api (https://github.com/flippercloud/flipper/pull/759)
 

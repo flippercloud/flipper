@@ -112,6 +112,41 @@ RSpec.describe Flipper::UI::Actions::Feature do
       expect(last_response.body).to include('Enabled for 0% of actors')
       expect(last_response.body).to include('Most in-depth search')
     end
+
+    context "when in read-only mode" do
+      before do
+        allow(flipper).to receive(:read_only?) { true }
+      end
+
+      before { get '/features' }
+
+      it 'renders template with no buttons or ways to modify a feature' do
+        expect(last_response.body).not_to include("Fully Enable")
+      end
+    end
+
+    context 'custom actor names' do
+      before do
+        actor = Flipper::Actor.new('some_actor_name')
+        flipper['search'].enable_actor(actor)
+
+        Flipper::UI.configure do |config|
+          config.actor_names_source = lambda { |_keys|
+            {
+              "some_actor_name" => "Some Actor Name",
+              "some_other_actor_name" => "Some Other Actor Name",
+            }
+          }
+        end
+
+        get '/features/search'
+      end
+
+      it 'renders template with custom actor names' do
+        expect(last_response.body).to include('Some Actor Name (some_actor_name)')
+        expect(last_response.body).not_to include('Some Other Actor Name')
+      end
+    end
   end
 
   describe 'GET /features/:feature with _features in feature name' do

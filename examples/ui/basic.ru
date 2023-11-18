@@ -25,6 +25,7 @@ Flipper::UI.configure do |config|
   config.feature_removal_enabled = true
   config.cloud_recommendation = true
   config.confirm_fully_enable = false
+  config.read_only = false
   # config.show_feature_description_in_list = true
   config.descriptions_source = lambda do |_keys|
     {
@@ -36,6 +37,13 @@ Flipper::UI.configure do |config|
       "logging" => "Log all the things.",
       "new_cache" => "Like the old cache but newer.",
       "a/b" => "Why would someone use a slash? I don't know but someone did. Let's make this really long so they regret using slashes. Please don't use slashes.",
+    }
+  end
+
+  config.actor_names_source = lambda do |_keys|
+    {
+      '1' => 'John',
+      '6' => 'Brandon',
     }
   end
 end

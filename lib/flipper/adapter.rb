@@ -24,6 +24,10 @@ module Flipper
       end
     end
 
+    def read_only?
+      false
+    end
+
     # Public: Get all features and gate values in one call. Defaults to one call
     # to features and another to get_multi. Feel free to override per adapter to
     # make this more efficient.

@@ -129,6 +129,23 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
       end
     end
 
+    context "when a readonly adapter is configured" do
+      let(:value) { 'User;6' }
+
+      before do
+        allow(flipper).to receive(:read_only?) { true }
+      end
+
+      it "does not allow an actor to be added" do
+        post 'features/search/actors',
+           { 'value' => value, 'operation' => 'enable', 'authenticity_token' => token },
+           'rack.session' => session
+
+        expect(flipper[:search].actors_value).not_to include('User;6')
+        expect(last_response.body).to include("The UI is currently in read only mode.")
+      end
+    end
+
     context 'disabling an actor' do
       let(:value) { 'User;6' }
       let(:multi_value) { 'User;5, User;7, User;9, User;12' }
