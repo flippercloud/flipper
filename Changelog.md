@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Additions/Changes
 
+* Better read-only mode for UI (https://github.com/flippercloud/flipper/pull/772).
 * Allow configuring preload via a block similar to memoize (https://github.com/flippercloud/flipper/pull/771).
   ```ruby
   Rails.application.configure do
