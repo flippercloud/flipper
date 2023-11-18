@@ -117,14 +117,14 @@ module Flipper
           metric.as_json(with: {"value" => value})
         }
 
-        body = Serializers::Json.serialize({
+        body = Typecast.to_json({
           request_id: SecureRandom.uuid,
           enabled_metrics: enabled_metrics,
         })
         http_client = @cloud_configuration.http_client
         http_client.add_header :schema_version, SCHEMA_VERSION
         http_client.add_header :content_encoding, 'gzip'
-        http_client.post "/telemetry", Serializers::Gzip.serialize(body)
+        http_client.post "/telemetry", Typecast.to_gzip(body)
       rescue => error
         # FIXME: Retry for net/http server errors
         logger.debug "name=flipper_telemetry action=post_to_cloud error=#{error.inspect}"
