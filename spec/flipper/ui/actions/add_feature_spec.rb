@@ -39,4 +39,19 @@ RSpec.describe Flipper::UI::Actions::AddFeature do
       expect(last_response.body).to include('Feature creation is disabled.')
     end
   end
+
+  describe 'GET /features/new when an adpter is set to readonly' do
+    before do
+      allow(flipper).to receive(:read_only?) { true }
+      get '/features/new'
+    end
+
+    it 'returns 403' do
+      expect(last_response.status).to be(403)
+    end
+
+    it 'shows that the UI is currently read-only mode' do
+      expect(last_response.body).to include('The UI is currently in read only mode.')
+    end
+  end
 end

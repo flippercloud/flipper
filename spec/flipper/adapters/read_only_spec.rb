@@ -72,6 +72,10 @@ RSpec.describe Flipper::Adapters::ReadOnly do
     expect(subject.features).to eq(Set['stats'])
   end
 
+  it 'is configured as read only' do
+    expect(subject.read_only?).to eq(true)
+  end
+
   it 'raises error on add' do
     expect { subject.add(feature) }.to raise_error(Flipper::Adapters::ReadOnly::WriteAttempted)
   end
