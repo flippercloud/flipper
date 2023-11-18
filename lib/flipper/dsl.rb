@@ -272,6 +272,7 @@ module Flipper
       adapter.features.map { |name| feature(name) }.to_set
     end
 
+    # Public: Does this adapter support writes or not.
     def read_only?
       adapter.read_only?
     end

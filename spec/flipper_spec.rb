@@ -228,6 +228,10 @@ RSpec.describe Flipper do
       expect(described_class.memoizing?).to eq(described_class.adapter.memoizing?)
     end
 
+    it 'delegates read_only? to instance' do
+      expect(described_class.read_only?).to eq(described_class.adapter.read_only?)
+    end
+
     it 'delegates sync stuff to instance and does nothing' do
       expect(described_class.sync).to be(nil)
       expect(described_class.sync_secret).to be(nil)
