@@ -21,7 +21,7 @@ require 'flipper/ui'
 Dir[FlipperRoot.join('spec/support/**/*.rb')].sort.each { |f| require f }
 
 # Disable telemetry logging in specs.
-ENV["FLIPPER_CLOUD_TELEMETRY_LOGGER"] = "0"
+ENV["FLIPPER_CLOUD_TELEMETRY_LOGGING"] = "0"
 
 RSpec.configure do |config|
   config.before(:example) do

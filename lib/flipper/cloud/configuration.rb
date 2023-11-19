@@ -124,10 +124,10 @@ module Flipper
 
         # Telemetry setup.
         @telemetry_logger = options.fetch(:telemetry_logger) {
-          if ENV["FLIPPER_CLOUD_TELEMETRY_LOGGER"] == "0"
-            Logger.new("/dev/null")
-          else
+          if Flipper::Typecast.to_boolean(ENV["FLIPPER_CLOUD_TELEMETRY_LOGGING"])
             Logger.new(STDOUT)
+          else
+            Logger.new("/dev/null")
           end
         }
         @telemetry_interval = options.fetch(:telemetry_interval) {
@@ -142,14 +142,14 @@ module Flipper
         enforce_minimum(:telemetry_shutdown_timeout, 0)
 
         # This is alpha. Don't use this unless you are me. And you are not me.
-        provided_instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
+        instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
         cloud_instrument = options.fetch(:cloud_instrument) {
-          ENV["FLIPPER_CLOUD_INSTRUMENT"] == "1"
+          Flipper::Typecast.to_boolean(ENV["FLIPPER_CLOUD_INSTRUMENT"])
         }
         @instrumenter = if cloud_instrument
-          Telemetry::Instrumenter.new(self, provided_instrumenter)
+          Telemetry::Instrumenter.new(self, instrumenter)
         else
-          provided_instrumenter
+          instrumenter
         end
       end
 
