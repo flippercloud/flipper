@@ -3,35 +3,44 @@ require 'flipper/cloud/configuration'
 
 RSpec.describe Flipper::Cloud::Telemetry do
   describe '#record_enabled' do
+    it "phones home" do
+      stub = stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").to_return(status: 200)
+      config = Flipper::Cloud::Configuration.new(token: "test")
+      telemetry = described_class.new(config)
+      telemetry.record(Flipper::Feature::InstrumentationName, {
+        operation: :enabled?,
+        feature_name: :foo,
+        result: true,
+      })
+      telemetry.stop
+      expect(stub).to have_been_requested
+    end
+
     it "increments in metric storage" do
-      stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").to_return(status: 200)
-
-      name = Flipper::Feature::InstrumentationName
-
       begin
         config = Flipper::Cloud::Configuration.new(token: "test")
         telemetry = described_class.new(config)
-        telemetry.record(name, {
+        telemetry.record(Flipper::Feature::InstrumentationName, {
           operation: :enabled?,
           feature_name: :foo,
           result: true,
         })
-        telemetry.record(name, {
+        telemetry.record(Flipper::Feature::InstrumentationName, {
           operation: :enabled?,
           feature_name: :foo,
           result: true,
         })
-        telemetry.record(name, {
+        telemetry.record(Flipper::Feature::InstrumentationName, {
           operation: :enabled?,
           feature_name: :bar,
           result: true,
         })
-        telemetry.record(name, {
+        telemetry.record(Flipper::Feature::InstrumentationName, {
           operation: :enabled?,
           feature_name: :baz,
           result: true,
         })
-        telemetry.record(name, {
+        telemetry.record(Flipper::Feature::InstrumentationName, {
           operation: :enabled?,
           feature_name: :foo,
           result: false,
@@ -51,6 +60,7 @@ RSpec.describe Flipper::Cloud::Telemetry do
 
         baz_true_sum = metrics_by_key["baz"].map { |metric| drained[metric] }.sum
         expect(baz_true_sum).to be(1)
+
       ensure
         telemetry.stop
       end

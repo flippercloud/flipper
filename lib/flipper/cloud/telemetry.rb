@@ -1,18 +1,13 @@
 require "forwardable"
-require "securerandom"
 require "concurrent/timer_task"
 require "concurrent/executor/fixed_thread_pool"
 require "flipper/cloud/telemetry/metric"
 require "flipper/cloud/telemetry/metric_storage"
-require "flipper/serializers/json"
-require "flipper/serializers/gzip"
 
 module Flipper
   module Cloud
     class Telemetry
       extend Forwardable
-
-      SCHEMA_VERSION = "V1".freeze
 
       # Internal: Map of instances of telemetry.
       def self.instances
@@ -41,7 +36,6 @@ module Flipper
         @pid = $$
         @cloud_configuration = cloud_configuration
         start
-
         at_exit { stop }
       end
 
@@ -58,9 +52,19 @@ module Flipper
       # Start all the tasks and setup new metric storage.
       def start
         logger.info "name=flipper_telemetry action=start"
+
         @metric_storage = MetricStorage.new
-        @pool = Concurrent::FixedThreadPool.new(5, pool_options)
-        @timer = Concurrent::TimerTask.execute(timer_options) { post_to_pool }
+
+        @pool = Concurrent::FixedThreadPool.new(2, {
+          max_queue: 30,
+          fallback_policy: :discard,
+          name: "flipper-telemetry-post-to-cloud-pool".freeze,
+        })
+
+        @timer = Concurrent::TimerTask.execute({
+          execution_interval: @cloud_configuration.telemetry_interval,
+          name: "flipper-telemetry-post-to-pool-timer".freeze,
+        }) { post_to_pool }
       end
 
       # Shuts down all the tasks and tries to flush any remaining info to Cloud.
@@ -110,39 +114,9 @@ module Flipper
       end
 
       def post_to_cloud(drained)
-        return if drained.empty?
-        logger.debug "name=flipper_telemetry action=post_to_cloud"
-
-        enabled_metrics = drained.map { |metric, value|
-          metric.as_json(with: {"value" => value})
-        }
-
-        body = Typecast.to_json({
-          request_id: SecureRandom.uuid,
-          enabled_metrics: enabled_metrics,
-        })
-        http_client = @cloud_configuration.http_client
-        http_client.add_header :schema_version, SCHEMA_VERSION
-        http_client.add_header :content_encoding, 'gzip'
-        http_client.post "/telemetry", Typecast.to_gzip(body)
+        @cloud_configuration.telemetry_submitter.call(drained)
       rescue => error
-        # FIXME: Retry for net/http server errors
         logger.debug "name=flipper_telemetry action=post_to_cloud error=#{error.inspect}"
-      end
-
-      def pool_options
-        {
-          max_queue: 5,
-          fallback_policy: :discard,
-          name: "flipper-telemetry-post-to-cloud-pool".freeze,
-        }
-      end
-
-      def timer_options
-        {
-          execution_interval: @cloud_configuration.telemetry_interval,
-          name: "flipper-telemetry-post-to-pool-timer".freeze,
-        }
       end
     end
   end

@@ -8,6 +8,7 @@ require "flipper/adapters/dual_write"
 require "flipper/adapters/sync/synchronizer"
 require "flipper/cloud/telemetry"
 require "flipper/cloud/telemetry/instrumenter"
+require "flipper/cloud/telemetry/submitter"
 
 module Flipper
   module Cloud
@@ -75,6 +76,9 @@ module Flipper
       # Public: The telemetry instance to use for tracking feature usage.
       attr_accessor :telemetry
 
+      # Public: The telemetry submitter to use for sending telemetry to Cloud.
+      attr_accessor :telemetry_submitter
+
       # Public: The telemetry logger to use for debugging telemetry inner workings.
       attr_accessor :telemetry_logger
 
@@ -135,6 +139,9 @@ module Flipper
         }
         @telemetry_shutdown_timeout = options.fetch(:telemetry_shutdown_timeout) {
           ENV.fetch("FLIPPER_CLOUD_TELEMETRY_SHUTDOWN_TIMEOUT", 5).to_f
+        }
+        @telemetry_submitter = options.fetch(:telemetry_submitter) {
+          ->(drained) { Telemetry::Submitter.new(self).call(drained) }
         }
         # Needs to be after url and other telemetry config assignments.
         @telemetry = options.fetch(:telemetry) { Telemetry.instance_for(self) }
