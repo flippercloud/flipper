@@ -10,4 +10,4 @@ policy = Flipper::Cloud::Telemetry::BackoffPolicy.new(min_timeout_ms: 1_000, max
 end
 
 pp intervals.map { |i| i.round(2) }
-puts "Total: #{intervals.sum.round(2)} (#{(intervals.sum/1_000.0).round(2)})"
+puts "Total: #{intervals.sum.round(2)}ms (#{(intervals.sum/1_000.0).round(2)} sec)"
