@@ -15,11 +15,11 @@ module Flipper
 
         Error = Class.new(StandardError)
 
-        attr_reader :cloud_configuration, :request_id
+        attr_reader :cloud_configuration, :request_id, :backoff_policy
 
-        def initialize(cloud_configuration)
+        def initialize(cloud_configuration, backoff_policy: nil)
           @cloud_configuration = cloud_configuration
-          @backoff_policy = BackoffPolicy.new
+          @backoff_policy = backoff_policy || BackoffPolicy.new(min_timeout_ms: 1000, max_timeout_ms: 30000)
           reset
         end
 
@@ -46,6 +46,7 @@ module Flipper
           response = client.post PATH, body
           code = response.code.to_i
 
+          # what about redirects?
           if code < 200 || code == 429 || code >= 500
             raise Error.new("Unexpected response code=#{code} request_id=#{request_id}")
           end
@@ -53,23 +54,23 @@ module Flipper
           response
         end
 
-        def retry_with_backoff(retries_remaining, &block)
+        def retry_with_backoff(attempts, &block)
           result, caught_exception = nil
           should_retry = false
+          attempts_remaining = attempts - 1
 
           begin
             result, should_retry = yield
             return [result, nil] unless should_retry
           rescue => error
-            logger.error "name=flipper_telemetry action=post_to_cloud error=#{error.inspect}"
+            logger.error "name=flipper_telemetry action=post_to_cloud attempts_remaining=#{attempts_remaining} error=#{error.inspect}"
             should_retry = true
             caught_exception = error
           end
 
-          if should_retry && (retries_remaining > 1)
-            debug("retrying=true retries_remaining=#{retries_remaining}")
+          if should_retry && attempts_remaining > 0
             sleep @backoff_policy.next_interval.to_f / 1000
-            retry_with_backoff retries_remaining - 1, &block
+            retry_with_backoff attempts_remaining, &block
           else
             [result, caught_exception]
           end

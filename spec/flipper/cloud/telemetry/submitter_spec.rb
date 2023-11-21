@@ -3,11 +3,27 @@ require 'flipper/cloud/configuration'
 require 'flipper/cloud/telemetry/submitter'
 
 RSpec.describe Flipper::Cloud::Telemetry::Submitter do
+  FakeBackoffPolicy = Class.new do
+    def initialize
+      @retries = 0
+    end
+
+    attr_reader :retries
+
+    def next_interval
+      @retries += 1
+      0
+    end
+
+    def reset
+    end
+  end
+
   let(:cloud_configuration) {
     Flipper::Cloud::Configuration.new({token: "asdf"})
   }
-
-  let(:subject) { described_class.new(cloud_configuration) }
+  let(:fake_backoff_policy) { FakeBackoffPolicy.new }
+  let(:subject) { described_class.new(cloud_configuration, backoff_policy: fake_backoff_policy) }
 
   describe "#initialize" do
     it "works with cloud_configuration" do
@@ -66,36 +82,80 @@ RSpec.describe Flipper::Cloud::Telemetry::Submitter do
       subject.call(enabled_metrics)
     end
 
-    it "retries on 429" do
-      output = StringIO.new
-      cloud_configuration.telemetry_logger = Logger.new(output)
-      with_env "FLIPPER_CLOUD_TELEMETRY_LOGGING" => "true" do
+    it "defaults backoff_policy" do
+      stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
+        to_return(status: 429, body: "{}", headers: {}).
+        to_return(status: 200, body: "{}", headers: {})
+      instance = described_class.new(cloud_configuration)
+      expect(instance.backoff_policy.min_timeout_ms).to eq(1_000)
+      expect(instance.backoff_policy.max_timeout_ms).to eq(30_000)
+    end
+
+    it "tries 10 times by default" do
+      stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
+        to_return(status: 500, body: "{}", headers: {})
+      subject.call(enabled_metrics)
+      expect(subject.backoff_policy.retries).to eq(9) # 9 retries + 1 initial attempt
+    end
+
+    [
+      EOFError,
+      Errno::ECONNABORTED,
+      Errno::ECONNREFUSED,
+      Errno::ECONNRESET,
+      Errno::EHOSTUNREACH,
+      Errno::EINVAL,
+      Errno::ENETUNREACH,
+      Errno::ENOTSOCK,
+      Errno::EPIPE,
+      Errno::ETIMEDOUT,
+      Net::HTTPBadResponse,
+      Net::HTTPHeaderSyntaxError,
+      Net::ProtocolError,
+      Net::ReadTimeout,
+      OpenSSL::SSL::SSLError,
+      SocketError,
+      Timeout::Error,  # Also covers subclasses like Net::OpenTimeout.
+    ].each  do |error_class|
+      it "retries on #{error_class}" do
         stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
-          to_return(status: 429, body: "{}", headers: {}).
-          to_return(status: 429, body: "{}", headers: {}).
-          to_return(status: 200, body: "{}", headers: {})
+          to_raise(error_class)
         subject.call(enabled_metrics)
-        expect(output.string).to include("retrying=true retries_remaining=10")
-        expect(output.string).to include("retrying=true retries_remaining=9")
-        expect(output.string).not_to include("retrying=true retries_remaining=8")
+        expect(subject.backoff_policy.retries).to eq(9)
       end
     end
 
-    it "retries on 500" do
-      output = StringIO.new
-      cloud_configuration.telemetry_logger = Logger.new(output)
-      with_env "FLIPPER_CLOUD_TELEMETRY_LOGGING" => "true" do
-        stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
-          to_return(status: 500, body: "{}", headers: {}).
-          to_return(status: 503, body: "{}", headers: {}).
-          to_return(status: 502, body: "{}", headers: {}).
-          to_return(status: 200, body: "{}", headers: {})
-        subject.call(enabled_metrics)
-        expect(output.string).to include("retrying=true retries_remaining=10")
-        expect(output.string).to include("retrying=true retries_remaining=9")
-        expect(output.string).to include("retrying=true retries_remaining=8")
-        expect(output.string).not_to include("retrying=true retries_remaining=7")
-      end
+    it "retries on 429" do
+      stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
+        to_return(status: 429, body: "{}", headers: {}).
+        to_return(status: 429, body: "{}", headers: {}).
+        to_return(status: 200, body: "{}", headers: {})
+      subject.call(enabled_metrics)
+      expect(subject.backoff_policy.retries).to eq(2)
     end
+
+    it "retries on 500" do
+      stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
+        to_return(status: 500, body: "{}", headers: {}).
+        to_return(status: 503, body: "{}", headers: {}).
+        to_return(status: 502, body: "{}", headers: {}).
+        to_return(status: 200, body: "{}", headers: {})
+      subject.call(enabled_metrics)
+      expect(subject.backoff_policy.retries).to eq(3)
+    end
+  end
+
+  def with_telemetry_debug_logging(&block)
+    output = StringIO.new
+    original_logger = cloud_configuration.telemetry_logger
+
+    begin
+      cloud_configuration.telemetry_logger = Logger.new(output)
+      block.call
+    ensure
+      cloud_configuration.telemetry_logger = original_logger
+    end
+
+    output.string
   end
 end
