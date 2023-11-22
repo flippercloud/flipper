@@ -3,22 +3,6 @@ require 'flipper/cloud/configuration'
 require 'flipper/cloud/telemetry/submitter'
 
 RSpec.describe Flipper::Cloud::Telemetry::Submitter do
-  FakeBackoffPolicy = Class.new do
-    def initialize
-      @retries = 0
-    end
-
-    attr_reader :retries
-
-    def next_interval
-      @retries += 1
-      0
-    end
-
-    def reset
-    end
-  end
-
   let(:cloud_configuration) {
     Flipper::Cloud::Configuration.new({token: "asdf"})
   }

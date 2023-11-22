@@ -56,7 +56,7 @@ module Flipper
 
           # what about redirects?
           if code < 200 || code == 429 || code >= 500
-            raise Error, request_id, response
+            raise Error.new(request_id, response)
           end
 
           response
