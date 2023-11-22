@@ -19,7 +19,7 @@ module Flipper
 
         def initialize(cloud_configuration, backoff_policy: nil)
           @cloud_configuration = cloud_configuration
-          @backoff_policy = backoff_policy || BackoffPolicy.new(min_timeout_ms: 1000, max_timeout_ms: 30000)
+          @backoff_policy = backoff_policy || BackoffPolicy.new
           reset
         end
 
