@@ -28,7 +28,7 @@ module Flipper
         end
       end
 
-      attr_reader :cloud_configuration, :metric_storage
+      attr_reader :cloud_configuration, :metric_storage, :pool, :timer
 
       def_delegator :@cloud_configuration, :telemetry_logger, :logger
 
@@ -114,7 +114,15 @@ module Flipper
       end
 
       def post_to_cloud(drained)
-        @cloud_configuration.telemetry_submitter.call(drained)
+        response, error = @cloud_configuration.telemetry_submitter.call(drained)
+        # Some of the errors are response code errors which have a response and
+        # thus may have a telemetry-interval header for us to respect.
+        response ||= error.response if error.respond_to?(:response)
+        if response && telemetry_interval = response["telemetry-interval"]
+          telemetry_interval = telemetry_interval.to_i
+          @timer.execution_interval = telemetry_interval
+          @cloud_configuration.telemetry_interval = telemetry_interval
+        end
       rescue => error
         logger.debug "name=flipper_telemetry action=post_to_cloud error=#{error.inspect}"
       end
