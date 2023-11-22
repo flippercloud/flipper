@@ -3,10 +3,10 @@ module Flipper
     class Telemetry
       class BackoffPolicy
         # Private: The default minimum timeout between intervals in milliseconds.
-        MIN_TIMEOUT_MS = 100
+        MIN_TIMEOUT_MS = 1_000
 
         # Private: The default maximum timeout between intervals in milliseconds.
-        MAX_TIMEOUT_MS = 10_000
+        MAX_TIMEOUT_MS = 30_000
 
         # Private: The value to multiply the current interval with for each
         # retry attempt.

@@ -3,7 +3,7 @@ require 'bundler/setup'
 require 'flipper/cloud/telemetry/backoff_policy'
 
 intervals = []
-policy = Flipper::Cloud::Telemetry::BackoffPolicy.new(min_timeout_ms: 1_000, max_timeout_ms: 30_000)
+policy = Flipper::Cloud::Telemetry::BackoffPolicy.new
 
 10.times do |n|
   intervals << policy.next_interval
