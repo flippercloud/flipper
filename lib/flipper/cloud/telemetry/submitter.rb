@@ -13,7 +13,15 @@ module Flipper
         MIN_RETRY_DELAY = 2
         MAX_RETRY_DELAY = 120
 
-        Error = Class.new(StandardError)
+        Error = Class.new(StandardError) do
+          attr_reader :request_id, :response
+
+          def initialize(request_id, response)
+            @request_id = request_id
+            @response = response
+            super "Unexpected response code=#{response.code} request_id=#{request_id}"
+          end
+        end
 
         attr_reader :cloud_configuration, :request_id, :backoff_policy
 
@@ -48,7 +56,7 @@ module Flipper
 
           # what about redirects?
           if code < 200 || code == 429 || code >= 500
-            raise Error.new("Unexpected response code=#{code} request_id=#{request_id}")
+            raise Error, request_id, response
           end
 
           response
