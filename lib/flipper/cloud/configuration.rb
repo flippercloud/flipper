@@ -84,7 +84,7 @@ module Flipper
 
       # Public: The Integer for Float number of seconds between submission of
       # telemetry to Cloud (default: 60, minimum: 10).
-      attr_accessor :telemetry_interval
+      attr_reader :telemetry_interval
 
       # Public: The Integer or Float number of seconds to wait for telemetry
       # to shutdown (default: 5).
@@ -134,7 +134,7 @@ module Flipper
             Logger.new("/dev/null")
           end
         }
-        @telemetry_interval = options.fetch(:telemetry_interval) {
+        self.telemetry_interval = options.fetch(:telemetry_interval) {
           ENV.fetch("FLIPPER_CLOUD_TELEMETRY_INTERVAL", 60).to_f
         }
         @telemetry_shutdown_timeout = options.fetch(:telemetry_shutdown_timeout) {
@@ -145,7 +145,6 @@ module Flipper
         }
         # Needs to be after url and other telemetry config assignments.
         @telemetry = options.fetch(:telemetry) { Telemetry.instance_for(self) }
-        enforce_minimum(:telemetry_interval, 10)
         enforce_minimum(:telemetry_shutdown_timeout, 0)
 
         # This is alpha. Don't use this unless you are me. And you are not me.
@@ -158,6 +157,14 @@ module Flipper
         else
           instrumenter
         end
+      end
+
+      # Public: Change the telemetry interval.
+      def telemetry_interval=(value)
+        value = value.to_f
+        @telemetry_interval = value
+        enforce_minimum(:telemetry_interval, 10)
+        value
       end
 
       # Public: Read or customize the http adapter. Calling without a block will
@@ -236,7 +243,7 @@ module Flipper
         provided = send(name)
         if provided < minimum
           warn "Flipper::Cloud##{name} must be at least #{minimum} seconds but was #{provided}. Using #{minimum} seconds."
-          send("#{name}=", minimum)
+          send(:instance_variable_set, "@#{name}", minimum)
         end
       end
     end
