@@ -12,7 +12,6 @@ Flipper.configure do |config|
     Flipper::Cloud.new(
       local_adapter: config.adapter,
       debug_output: STDOUT,
-      sync_interval: 60,
     )
   }
 end
