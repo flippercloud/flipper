@@ -25,8 +25,9 @@ module Flipper
       attr_accessor :token
 
       # Public: The url for http adapter. Really should only be customized for
-       #        development work. Feel free to forget you ever saw this.
-      attr_reader :url
+      #         development work if you are me and you are not me. Feel free to
+      #         forget you ever saw this.
+      attr_accessor :url
 
       # Public: net/http read timeout for all http requests (default: 5).
       attr_accessor :read_timeout
@@ -43,10 +44,6 @@ module Flipper
       #  configuration = Flipper::Cloud::Configuration.new
       #  configuration.debug_output = STDOUT
       attr_accessor :debug_output
-
-      # Public: Set the url for http adapter. Really should only be customized
-      # by me and you are not me.
-      attr_accessor :url
 
       # Public: Instrumenter to use for the Flipper instance returned by
       #         Flipper::Cloud.new (default: Flipper::Instrumenters::Noop).
