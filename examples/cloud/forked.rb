@@ -5,15 +5,6 @@ require_relative "./cloud_setup"
 require 'bundler/setup'
 require 'flipper/cloud'
 
-Flipper.configure do |config|
-  config.default {
-    Flipper::Cloud.new(
-      local_adapter: config.adapter,
-      # debug_output: STDOUT,
-    )
-  }
-end
-
 puts Process.pid
 
 # Make a call in the parent process so we can detect forking.
