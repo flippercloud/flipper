@@ -20,9 +20,9 @@ pids = 2.times.map do |n|
           sleep rand
 
           if Flipper[:stats].enabled?
-            # puts "#{Process.pid} #{Time.now.to_i} Enabled!"
+            puts "#{Process.pid} #{Time.now.to_i} Enabled!"
           else
-            # puts "#{Process.pid} #{Time.now.to_i} Disabled!"
+            puts "#{Process.pid} #{Time.now.to_i} Disabled!"
           end
         end
       end
