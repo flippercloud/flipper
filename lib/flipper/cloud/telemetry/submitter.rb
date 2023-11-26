@@ -25,24 +25,19 @@ module Flipper
         def initialize(cloud_configuration, backoff_policy: nil)
           @cloud_configuration = cloud_configuration
           @backoff_policy = backoff_policy || BackoffPolicy.new
-          reset
+          @request_id = SecureRandom.uuid
         end
 
+        # Returns Array of [response, error]. response and error could be nil
+        # but usually one or the other will be present.
         def call(drained)
           return if drained.empty?
           body = to_body(drained)
           return if body.nil? || body.empty?
           retry_with_backoff(10) { submit(body) }
-        ensure
-          reset
         end
 
         private
-
-        def reset
-          @backoff_policy.reset
-          @request_id = SecureRandom.uuid
-        end
 
         def to_body(drained)
           enabled_metrics = drained.map { |metric, value|
