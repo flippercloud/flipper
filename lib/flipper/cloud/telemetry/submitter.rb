@@ -36,12 +36,12 @@ module Flipper
           reset
         end
 
+        private
+
         def reset
           @backoff_policy.reset
           @request_id = SecureRandom.uuid
         end
-
-        private
 
         def submit(body)
           client = @cloud_configuration.http_client
