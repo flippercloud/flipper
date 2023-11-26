@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
 * Human readable actor names in flipper-ui (https://github.com/flippercloud/flipper/pull/737).
 * Expressions are now available and considered "alpha". They are not yet documented, but you can see examples in [examples/expressions.rb](examples/expressions.rb). (https://github.com/flippercloud/flipper/pull/692)
 * Allow head requests to api (https://github.com/flippercloud/flipper/pull/759)
+* Cloud Telemetry alpha (https://github.com/flippercloud/flipper/pull/775).
 
 ### Breaking Changes
 
