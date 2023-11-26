@@ -131,13 +131,13 @@ RSpec.describe Flipper::Cloud::Telemetry::Submitter do
 
   def with_telemetry_debug_logging(&block)
     output = StringIO.new
-    original_logger = cloud_configuration.telemetry_logger
+    original_logger = cloud_configuration.logger
 
     begin
-      cloud_configuration.telemetry_logger = Logger.new(output)
+      cloud_configuration.logger = Logger.new(output)
       block.call
     ensure
-      cloud_configuration.telemetry_logger = original_logger
+      cloud_configuration.logger = original_logger
     end
 
     output.string

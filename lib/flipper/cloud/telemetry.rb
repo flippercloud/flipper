@@ -30,11 +30,14 @@ module Flipper
 
       attr_reader :cloud_configuration, :metric_storage, :pool, :timer
 
-      def_delegator :@cloud_configuration, :telemetry_logger, :logger
+      attr_accessor :submitter
 
       def initialize(cloud_configuration)
         @pid = $$
         @cloud_configuration = cloud_configuration
+        @submitter = ->(drained) {
+          Telemetry::Submitter.new(@cloud_configuration).call(drained)
+        }
         start
         at_exit { stop }
       end
@@ -51,7 +54,7 @@ module Flipper
 
       # Start all the tasks and setup new metric storage.
       def start
-        logger.info "name=flipper_telemetry action=start"
+        info "action=start"
 
         @metric_storage = MetricStorage.new
 
@@ -69,25 +72,25 @@ module Flipper
 
       # Shuts down all the tasks and tries to flush any remaining info to Cloud.
       def stop
-        logger.info "name=flipper_telemetry action=stop"
+        info "action=stop"
 
         if @timer
-          logger.debug "name=flipper_telemetry action=timer_shutdown_start"
+          debug "action=timer_shutdown_start"
           @timer.shutdown
           # no need to wait long for timer, all it does is drain in memory metric
           # storage and post to the pool of background workers
           timer_termination_result = @timer.wait_for_termination(1)
           @timer.kill unless timer_termination_result
-          logger.debug "name=flipper_telemetry action=timer_shutdown_end result=#{timer_termination_result}"
+          debug "action=timer_shutdown_end result=#{timer_termination_result}"
         end
 
         if @pool
           post_to_pool # one last drain
-          logger.debug "name=flipper_telemetry action=pool_shutdown_start"
+          debug "action=pool_shutdown_start"
           @pool.shutdown
           pool_termination_result = @pool.wait_for_termination(@cloud_configuration.telemetry_shutdown_timeout)
           @pool.kill unless pool_termination_result
-          logger.debug "name=flipper_telemetry action=pool_shutdown_end result=#{pool_termination_result}"
+          debug "action=pool_shutdown_end result=#{pool_termination_result}"
         end
       end
 
@@ -100,7 +103,7 @@ module Flipper
 
       def detect_forking
         if @pid != $$
-          logger.info "name=flipper_telemetry action=fork_detected pid_was#{@pid} pid_is=#{$$}"
+          info "action=fork_detected pid_was#{@pid} pid_is=#{$$}"
           restart
           @pid = $$
         end
@@ -109,17 +112,17 @@ module Flipper
       def post_to_pool
         drained = @metric_storage.drain
         return if drained.empty?
-        logger.debug "name=flipper_telemetry action=post_to_pool"
+        debug "action=post_to_pool metrics=#{drained.size}"
         @pool.post { post_to_cloud(drained) }
       end
 
       def post_to_cloud(drained)
-        logger.debug "name=flipper_telemetry action=post_to_cloud"
-        response, error = @cloud_configuration.telemetry_submitter.call(drained)
+        debug "action=post_to_cloud metrics=#{drained.size}"
+        response, error = submitter.call(drained)
 
         # Some of the errors are response code errors which have a response and
         # thus may have a telemetry-interval header for us to respect.
-        response ||= error.response if error.respond_to?(:response)
+        response ||= error.response if error && error.respond_to?(:response)
 
         if response && telemetry_interval = response["telemetry-interval"]
           telemetry_interval = telemetry_interval.to_i
@@ -127,7 +130,19 @@ module Flipper
           @cloud_configuration.telemetry_interval = telemetry_interval
         end
       rescue => error
-        logger.debug "name=flipper_telemetry action=post_to_cloud error=#{error.inspect}"
+        error "action=post_to_cloud error=#{error.inspect}"
+      end
+
+      def error(message)
+        @cloud_configuration.log message, level: :error
+      end
+
+      def info(message)
+        @cloud_configuration.log message, level: :info
+      end
+
+      def debug(message)
+        @cloud_configuration.log message
       end
     end
   end

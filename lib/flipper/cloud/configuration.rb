@@ -70,14 +70,17 @@ module Flipper
       # occur or not.
       attr_accessor :sync_secret
 
+      # Public: The logger to use for debugging inner workings.
+      attr_accessor :logger
+
+      # Public: Should the logger log or not (default: true).
+      attr_accessor :logging_enabled
+
       # Public: The telemetry instance to use for tracking feature usage.
       attr_accessor :telemetry
 
-      # Public: The telemetry submitter to use for sending telemetry to Cloud.
-      attr_accessor :telemetry_submitter
-
-      # Public: The telemetry logger to use for debugging telemetry inner workings.
-      attr_accessor :telemetry_logger
+      # Public: Should telemetry be enabled or not (default: false).
+      attr_accessor :telemetry_enabled
 
       # Public: The Integer for Float number of seconds between submission of
       # telemetry to Cloud (default: 60, minimum: 10).
@@ -88,79 +91,18 @@ module Flipper
       attr_accessor :telemetry_shutdown_timeout
 
       def initialize(options = {})
-        @token = options.fetch(:token) { ENV["FLIPPER_CLOUD_TOKEN"] }
-
-        if @token.nil?
-          raise ArgumentError, "Flipper::Cloud token is missing. Please set FLIPPER_CLOUD_TOKEN or provide the token (e.g. Flipper::Cloud.new(token: 'token'))."
-        end
-
-        # Http related setup.
-        @url = options.fetch(:url) { ENV.fetch("FLIPPER_CLOUD_URL", DEFAULT_URL) }
-        @debug_output = options[:debug_output]
-        @read_timeout = options.fetch(:read_timeout) {
-          ENV.fetch("FLIPPER_CLOUD_READ_TIMEOUT", 5).to_f
-        }
-        @open_timeout = options.fetch(:open_timeout) {
-          ENV.fetch("FLIPPER_CLOUD_OPEN_TIMEOUT", 5).to_f
-        }
-        @write_timeout = options.fetch(:write_timeout) {
-          ENV.fetch("FLIPPER_CLOUD_WRITE_TIMEOUT", 5).to_f
-        }
-        enforce_minimum(:read_timeout, 0.1)
-        enforce_minimum(:open_timeout, 0.1)
-        enforce_minimum(:write_timeout, 0.1)
-
-        # Sync setup.
-        @sync_interval = options.fetch(:sync_interval) {
-          ENV.fetch("FLIPPER_CLOUD_SYNC_INTERVAL", 10).to_f
-        }
-        @sync_secret = options.fetch(:sync_secret) {
-          ENV["FLIPPER_CLOUD_SYNC_SECRET"]
-        }
-        enforce_minimum(:sync_interval, 10)
-
-        # Adapter setup.
-        @local_adapter = options.fetch(:local_adapter) { Adapters::Memory.new }
-        @adapter_block = ->(adapter) { adapter }
-
-        # Telemetry setup.
-        @telemetry_logger = options.fetch(:telemetry_logger) {
-          if Flipper::Typecast.to_boolean(ENV["FLIPPER_CLOUD_TELEMETRY_LOGGING"])
-            Logger.new(STDOUT)
-          else
-            Logger.new("/dev/null")
-          end
-        }
-        self.telemetry_interval = options.fetch(:telemetry_interval) {
-          ENV.fetch("FLIPPER_CLOUD_TELEMETRY_INTERVAL", 60).to_f
-        }
-        @telemetry_shutdown_timeout = options.fetch(:telemetry_shutdown_timeout) {
-          ENV.fetch("FLIPPER_CLOUD_TELEMETRY_SHUTDOWN_TIMEOUT", 5).to_f
-        }
-        @telemetry_submitter = options.fetch(:telemetry_submitter) {
-          ->(drained) { Telemetry::Submitter.new(self).call(drained) }
-        }
-        # Needs to be after url and other telemetry config assignments.
-        @telemetry = options.fetch(:telemetry) { Telemetry.instance_for(self) }
-        enforce_minimum(:telemetry_shutdown_timeout, 0)
-
-        # This is alpha. Don't use this unless you are me. And you are not me.
-        instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
-        cloud_instrument = options.fetch(:cloud_instrument) {
-          Flipper::Typecast.to_boolean(ENV["FLIPPER_CLOUD_INSTRUMENT"])
-        }
-        @instrumenter = if cloud_instrument
-          Telemetry::Instrumenter.new(self, instrumenter)
-        else
-          instrumenter
-        end
+        setup_auth options
+        setup_http options
+        setup_sync options
+        setup_adapter options
+        setup_telemetry options
       end
 
       # Public: Change the telemetry interval.
       def telemetry_interval=(value)
-        value = value.to_f
+        value = Typecast.to_float(value)
         @telemetry_interval = value
-        enforce_minimum(:telemetry_interval, 10)
+        enforce_minimum :telemetry_interval, 10
         value
       end
 
@@ -202,6 +144,12 @@ module Flipper
         http_adapter.client
       end
 
+      # Internal: Logs message if logging is enabled.
+      def log(message, level: :debug)
+        return unless logging_enabled
+        logger.send(level, "name=flipper_cloud #{message}")
+      end
+
       private
 
       def app_adapter
@@ -235,10 +183,86 @@ module Flipper
         })
       end
 
+      def setup_auth(options)
+        set_option :token, options, required: true
+      end
+
+      def setup_http(options)
+        set_option :url, options, default: DEFAULT_URL
+        set_option :debug_output, options, from_env: false
+        set_option :read_timeout, options, default: 5, typecast: :float, minimum: 0.1
+        set_option :open_timeout, options, default: 2, typecast: :float, minimum: 0.1
+        set_option :write_timeout, options, default: 5, typecast: :float, minimum: 0.1
+      end
+
+      def setup_sync(options)
+        set_option :sync_interval, options, default: 10, typecast: :float, minimum: 10
+        set_option :sync_secret, options
+      end
+
+      def setup_adapter(options)
+        set_option :local_adapter, options, default: -> { Adapters::Memory.new }, from_env: false
+        @adapter_block = ->(adapter) { adapter }
+      end
+
+      def setup_telemetry(options)
+        set_option :telemetry_interval, options, default: 60 # typecast and minimum set in writer method.
+        set_option :telemetry_shutdown_timeout, options, default: 5, typecast: :float, minimum: 0.1
+        set_option :logging_enabled, options, default: true, typecast: :boolean
+        set_option :logger, options, from_env: false, default: -> {
+          if logging_enabled
+            Logger.new(STDOUT)
+          else
+            Logger.new("/dev/null")
+          end
+        }
+
+        # Needs to be after url and other telemetry config assignments.
+        set_option :telemetry, options, from_env: false, default: -> {
+          Telemetry.instance_for(self)
+        }
+
+        # This is alpha. Don't use this unless you are me. And you are not me.
+        set_option :telemetry_enabled, options, default: false, typecast: :boolean
+        instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
+        @instrumenter = if telemetry_enabled
+          Telemetry::Instrumenter.new(self, instrumenter)
+        else
+          instrumenter
+        end
+      end
+
+      # Internal: Super helper for defining an option that can be set via
+      # options hash or ENV with defaults, typecasting and minimums.
+      def set_option(name, options, default: nil, typecast: nil, minimum: nil, from_env: true, required: false)
+        env_var = "FLIPPER_CLOUD_#{name.to_s.upcase}"
+        value = options.fetch(name) {
+          default_value = default.respond_to?(:call) ? default.call : default
+          if from_env
+            ENV.fetch(env_var, default_value)
+          else
+            default_value
+          end
+        }
+        value = Flipper::Typecast.send("to_#{typecast}", value) if typecast
+        send("#{name}=", value)
+        enforce_minimum(name, minimum) if minimum
+
+        if required
+          option_value = send(name)
+          if option_value.nil? || option_value.empty?
+            message = "Flipper::Cloud #{name} is missing. Please "
+            message << "set #{env_var} or " if from_env
+            message << "provide #{name} (e.g. Flipper::Cloud.new(#{name}: value))."
+            raise ArgumentError, message
+          end
+        end
+      end
+
       # Enforce minimum interval for tasks that run on a timer.
       def enforce_minimum(name, minimum)
         provided = send(name)
-        if provided < minimum
+        if provided && provided < minimum
           warn "Flipper::Cloud##{name} must be at least #{minimum} seconds but was #{provided}. Using #{minimum} seconds."
           send(:instance_variable_set, "@#{name}", minimum)
         end

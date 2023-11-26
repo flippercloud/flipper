@@ -48,10 +48,12 @@ RSpec.describe Flipper::Cloud::Telemetry do
         to_return(status: 500, body: "{}", headers: {"telemetry-interval" => "120"})
 
       cloud_configuration = Flipper::Cloud::Configuration.new(token: "test")
+      telemetry = described_class.new(cloud_configuration)
+
       # Override the submitter to use back off policy that doesn't actually
       # sleep. If we don't then the stop below kills the working thread and the
       # interval is never updated.
-      cloud_configuration.telemetry_submitter = ->(drained) {
+      telemetry.submitter = ->(drained) {
         Flipper::Cloud::Telemetry::Submitter.new(
           cloud_configuration,
           backoff_policy: FakeBackoffPolicy.new
@@ -59,7 +61,6 @@ RSpec.describe Flipper::Cloud::Telemetry do
       }
 
       # Record some telemetry and stop the threads so we submit a response.
-      telemetry = described_class.new(cloud_configuration)
       telemetry.record(Flipper::Feature::InstrumentationName, {
         operation: :enabled?,
         feature_name: :foo,
@@ -78,7 +79,12 @@ RSpec.describe Flipper::Cloud::Telemetry do
         to_raise(Net::OpenTimeout)
 
       cloud_configuration = Flipper::Cloud::Configuration.new(token: "test")
-      cloud_configuration.telemetry_submitter = ->(drained) {
+      telemetry = described_class.new(cloud_configuration)
+
+      # Override the submitter to use back off policy that doesn't actually
+      # sleep. If we don't then the stop below kills the working thread and the
+      # interval is never updated.
+      telemetry.submitter = ->(drained) {
         Flipper::Cloud::Telemetry::Submitter.new(
           cloud_configuration,
           backoff_policy: FakeBackoffPolicy.new
@@ -86,7 +92,6 @@ RSpec.describe Flipper::Cloud::Telemetry do
       }
 
       # Record some telemetry and stop the threads so we submit a response.
-      telemetry = described_class.new(cloud_configuration)
       telemetry.record(Flipper::Feature::InstrumentationName, {
         operation: :enabled?,
         feature_name: :foo,
