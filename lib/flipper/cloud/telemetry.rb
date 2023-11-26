@@ -1,4 +1,3 @@
-require "forwardable"
 require "concurrent/timer_task"
 require "concurrent/executor/fixed_thread_pool"
 require "flipper/cloud/telemetry/metric"
@@ -8,8 +7,6 @@ require "flipper/cloud/telemetry/submitter"
 module Flipper
   module Cloud
     class Telemetry
-      extend Forwardable
-
       # Internal: Map of instances of telemetry.
       def self.instances
         @instances ||= Concurrent::Map.new
