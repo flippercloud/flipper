@@ -3,6 +3,7 @@ require "concurrent/timer_task"
 require "concurrent/executor/fixed_thread_pool"
 require "flipper/cloud/telemetry/metric"
 require "flipper/cloud/telemetry/metric_storage"
+require "flipper/cloud/telemetry/submitter"
 
 module Flipper
   module Cloud
@@ -28,16 +29,35 @@ module Flipper
         end
       end
 
-      attr_reader :cloud_configuration, :metric_storage, :pool, :timer
+      # Public: The cloud configuration to use for this telemetry instance.
+      attr_reader :cloud_configuration
 
+      # Internal: Where the metrics are stored between cloud submissions.
+      attr_reader :metric_storage
+
+      # Internal: The pool of background threads that submits metrics to cloud.
+      attr_reader :pool
+
+      # Internal: The timer that triggers draining the metrics to the pool.
+      attr_reader :timer
+
+      # Internal: The interval in seconds for how often telemetry should be sent to cloud.
+      attr_reader :interval
+
+      # Internal: The timeout in seconds for how long to wait for the pool to shutdown.
+      attr_reader :shutdown_timeout
+
+      # Internal: The proc that is called to submit metrics to cloud.
       attr_accessor :submitter
 
       def initialize(cloud_configuration)
         @pid = $$
         @cloud_configuration = cloud_configuration
-        @submitter = ->(drained) {
-          Telemetry::Submitter.new(@cloud_configuration).call(drained)
+        self.submitter = ->(drained) {
+          Submitter.new(@cloud_configuration).call(drained)
         }
+        self.interval = ENV.fetch("FLIPPER_TELEMETRY_INTERVAL", 60).to_f
+        self.shutdown_timeout = ENV.fetch("FLIPPER_TELEMETRY_SHUTDOWN_TIMEOUT", 5).to_f
         start
         at_exit { stop }
       end
@@ -52,7 +72,7 @@ module Flipper
         @metric_storage.increment metric
       end
 
-      # Start all the tasks and setup new metric storage.
+      # Public: Start all the tasks and setup new metric storage.
       def start
         info "action=start"
 
@@ -65,12 +85,12 @@ module Flipper
         })
 
         @timer = Concurrent::TimerTask.execute({
-          execution_interval: @cloud_configuration.telemetry_interval,
+          execution_interval: interval,
           name: "flipper-telemetry-post-to-pool-timer".freeze,
         }) { post_to_pool }
       end
 
-      # Shuts down all the tasks and tries to flush any remaining info to Cloud.
+      # Public: Shuts down all the tasks and tries to flush any remaining info to Cloud.
       def stop
         info "action=stop"
 
@@ -88,15 +108,29 @@ module Flipper
           post_to_pool # one last drain
           debug "action=pool_shutdown_start"
           @pool.shutdown
-          pool_termination_result = @pool.wait_for_termination(@cloud_configuration.telemetry_shutdown_timeout)
+          pool_termination_result = @pool.wait_for_termination(@shutdown_timeout)
           @pool.kill unless pool_termination_result
           debug "action=pool_shutdown_end result=#{pool_termination_result}"
         end
       end
 
+      # Public: Restart all the tasks and reset the storage.
       def restart
         stop
         start
+      end
+
+      # Internal: Sets the interval in seconds for how often telemetry should be sent to cloud.
+      def interval=(value)
+        new_interval = [Typecast.to_float(value), 10].max
+        @timer&.execution_interval = new_interval
+        @interval = new_interval
+      end
+
+      # Internal: Sets the timeout in seconds for how long to wait for the pool to shutdown.
+      def shutdown_timeout=(value)
+        new_shutdown_timeout = [Typecast.to_float(value), 0.1].max
+        @shutdown_timeout = new_shutdown_timeout
       end
 
       private
@@ -109,6 +143,7 @@ module Flipper
         end
       end
 
+      # Drains the metric storage and enqueues the metrics to be posted to cloud.
       def post_to_pool
         drained = @metric_storage.drain
         return if drained.empty?
@@ -116,6 +151,7 @@ module Flipper
         @pool.post { post_to_cloud(drained) }
       end
 
+      # Posts the drained metrics to cloud.
       def post_to_cloud(drained)
         debug "action=post_to_cloud metrics=#{drained.size}"
         response, error = submitter.call(drained)
@@ -124,10 +160,8 @@ module Flipper
         # thus may have a telemetry-interval header for us to respect.
         response ||= error.response if error && error.respond_to?(:response)
 
-        if response && telemetry_interval = response["telemetry-interval"]
-          telemetry_interval = telemetry_interval.to_i
-          @timer.execution_interval = telemetry_interval
-          @cloud_configuration.telemetry_interval = telemetry_interval
+        if response && interval = response["telemetry-interval"]
+          self.interval = interval.to_f
         end
       rescue => error
         error "action=post_to_cloud error=#{error.inspect}"

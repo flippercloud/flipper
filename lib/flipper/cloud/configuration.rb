@@ -82,28 +82,13 @@ module Flipper
       # Public: Should telemetry be enabled or not (default: false).
       attr_accessor :telemetry_enabled
 
-      # Public: The Integer for Float number of seconds between submission of
-      # telemetry to Cloud (default: 60, minimum: 10).
-      attr_reader :telemetry_interval
-
-      # Public: The Integer or Float number of seconds to wait for telemetry
-      # to shutdown (default: 5).
-      attr_accessor :telemetry_shutdown_timeout
-
       def initialize(options = {})
         setup_auth options
+        setup_log options
         setup_http options
         setup_sync options
         setup_adapter options
         setup_telemetry options
-      end
-
-      # Public: Change the telemetry interval.
-      def telemetry_interval=(value)
-        value = Typecast.to_float(value)
-        @telemetry_interval = value
-        enforce_minimum :telemetry_interval, 10
-        value
       end
 
       # Public: Read or customize the http adapter. Calling without a block will
@@ -187,6 +172,17 @@ module Flipper
         set_option :token, options, required: true
       end
 
+      def setup_log(options)
+        set_option :logging_enabled, options, default: true, typecast: :boolean
+        set_option :logger, options, from_env: false, default: -> {
+          if logging_enabled
+            Logger.new(STDOUT)
+          else
+            Logger.new("/dev/null")
+          end
+        }
+      end
+
       def setup_http(options)
         set_option :url, options, default: DEFAULT_URL
         set_option :debug_output, options, from_env: false
@@ -206,18 +202,8 @@ module Flipper
       end
 
       def setup_telemetry(options)
-        set_option :telemetry_interval, options, default: 60 # typecast and minimum set in writer method.
-        set_option :telemetry_shutdown_timeout, options, default: 5, typecast: :float, minimum: 0.1
-        set_option :logging_enabled, options, default: true, typecast: :boolean
-        set_option :logger, options, from_env: false, default: -> {
-          if logging_enabled
-            Logger.new(STDOUT)
-          else
-            Logger.new("/dev/null")
-          end
-        }
-
-        # Needs to be after url and other telemetry config assignments.
+        # Needs to be after url and token assignments because they are used for
+        # uniqueness in Telemetry.instance_for.
         set_option :telemetry, options, from_env: false, default: -> {
           Telemetry.instance_for(self)
         }

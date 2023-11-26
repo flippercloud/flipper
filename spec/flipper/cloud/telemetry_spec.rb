@@ -18,7 +18,7 @@ RSpec.describe Flipper::Cloud::Telemetry do
       })
       telemetry.stop
 
-      expect(cloud_configuration.telemetry_interval).to eq(60)
+      expect(telemetry.interval).to eq(60)
       expect(telemetry.timer.execution_interval).to eq(60)
       expect(stub).to have_been_requested
     end
@@ -38,7 +38,7 @@ RSpec.describe Flipper::Cloud::Telemetry do
       })
       telemetry.stop
 
-      expect(cloud_configuration.telemetry_interval).to eq(120)
+      expect(telemetry.interval).to eq(120)
       expect(telemetry.timer.execution_interval).to eq(120)
       expect(stub).to have_been_requested
     end
@@ -69,7 +69,7 @@ RSpec.describe Flipper::Cloud::Telemetry do
       telemetry.stop
 
       # Check the conig interval and the timer interval.
-      expect(cloud_configuration.telemetry_interval).to eq(120)
+      expect(telemetry.interval).to eq(120)
       expect(telemetry.timer.execution_interval).to eq(120)
       expect(stub).to have_been_requested.times(10)
     end
@@ -99,7 +99,7 @@ RSpec.describe Flipper::Cloud::Telemetry do
       })
       telemetry.stop
 
-      expect(cloud_configuration.telemetry_interval).to eq(60)
+      expect(telemetry.interval).to eq(60)
       expect(telemetry.timer.execution_interval).to eq(60)
       expect(stub).to have_been_requested.times(10)
     end
