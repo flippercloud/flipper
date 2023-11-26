@@ -1,5 +1,7 @@
+require "concurrent/map"
 require "concurrent/timer_task"
 require "concurrent/executor/fixed_thread_pool"
+require "flipper/typecast"
 require "flipper/cloud/telemetry/metric"
 require "flipper/cloud/telemetry/metric_storage"
 require "flipper/cloud/telemetry/submitter"
@@ -50,11 +52,9 @@ module Flipper
       def initialize(cloud_configuration)
         @pid = $$
         @cloud_configuration = cloud_configuration
-        self.submitter = ->(drained) {
-          Submitter.new(@cloud_configuration).call(drained)
-        }
         self.interval = ENV.fetch("FLIPPER_TELEMETRY_INTERVAL", 60).to_f
         self.shutdown_timeout = ENV.fetch("FLIPPER_TELEMETRY_SHUTDOWN_TIMEOUT", 5).to_f
+        self.submitter = ->(drained) { Submitter.new(@cloud_configuration).call(drained) }
         start
         at_exit { stop }
       end
