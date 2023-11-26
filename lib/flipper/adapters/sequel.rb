@@ -206,7 +206,7 @@ module Flipper
         {
           feature_key: feature.key.to_s,
           key: gate.key.to_s,
-          value: json ? JSON.dump(thing.value) : thing.value.to_s,
+          value: json ? Typecast.to_json(thing.value) : thing.value.to_s,
         }
       end
 
@@ -227,7 +227,7 @@ module Flipper
               db_gates.select { |db_gate| db_gate.key == gate.key.to_s }.map(&:value).to_set
             when :json
               if detected_db_gate = db_gates.detect { |db_gate| db_gate.key == gate.key.to_s }
-                JSON.parse(detected_db_gate.value)
+                Typecast.from_json(detected_db_gate.value)
               end
             else
               unsupported_data_type gate.data_type

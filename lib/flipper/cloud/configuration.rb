@@ -1,3 +1,4 @@
+require "logger"
 require "socket"
 require "flipper/adapters/http"
 require "flipper/adapters/poll"
@@ -5,8 +6,9 @@ require "flipper/poller"
 require "flipper/adapters/memory"
 require "flipper/adapters/dual_write"
 require "flipper/adapters/sync/synchronizer"
-require "flipper/cloud/instrumenter"
-require "brow"
+require "flipper/cloud/telemetry"
+require "flipper/cloud/telemetry/instrumenter"
+require "flipper/cloud/telemetry/submitter"
 
 module Flipper
   module Cloud
@@ -19,18 +21,13 @@ module Flipper
 
       DEFAULT_URL = "https://www.flippercloud.io/adapter".freeze
 
-      # Private: Keeps track of brow instances so they can be shared across
-      # threads.
-      def self.brow_instances
-        @brow_instances ||= Concurrent::Map.new
-      end
-
       # Public: The token corresponding to an environment on flippercloud.io.
       attr_accessor :token
 
       # Public: The url for http adapter. Really should only be customized for
-       #        development work. Feel free to forget you ever saw this.
-      attr_reader :url
+      #         development work if you are me and you are not me. Feel free to
+      #         forget you ever saw this.
+      attr_accessor :url
 
       # Public: net/http read timeout for all http requests (default: 5).
       attr_accessor :read_timeout
@@ -73,6 +70,23 @@ module Flipper
       # occur or not.
       attr_accessor :sync_secret
 
+      # Public: The telemetry instance to use for tracking feature usage.
+      attr_accessor :telemetry
+
+      # Public: The telemetry submitter to use for sending telemetry to Cloud.
+      attr_accessor :telemetry_submitter
+
+      # Public: The telemetry logger to use for debugging telemetry inner workings.
+      attr_accessor :telemetry_logger
+
+      # Public: The Integer for Float number of seconds between submission of
+      # telemetry to Cloud (default: 60, minimum: 10).
+      attr_reader :telemetry_interval
+
+      # Public: The Integer or Float number of seconds to wait for telemetry
+      # to shutdown (default: 5).
+      attr_accessor :telemetry_shutdown_timeout
+
       def initialize(options = {})
         @token = options.fetch(:token) { ENV["FLIPPER_CLOUD_TOKEN"] }
 
@@ -80,25 +94,74 @@ module Flipper
           raise ArgumentError, "Flipper::Cloud token is missing. Please set FLIPPER_CLOUD_TOKEN or provide the token (e.g. Flipper::Cloud.new(token: 'token'))."
         end
 
-        @read_timeout = options.fetch(:read_timeout) { ENV.fetch("FLIPPER_CLOUD_READ_TIMEOUT", 5).to_f }
-        @open_timeout = options.fetch(:open_timeout) { ENV.fetch("FLIPPER_CLOUD_OPEN_TIMEOUT", 5).to_f }
-        @write_timeout = options.fetch(:write_timeout) { ENV.fetch("FLIPPER_CLOUD_WRITE_TIMEOUT", 5).to_f }
-        @sync_interval = options.fetch(:sync_interval) { ENV.fetch("FLIPPER_CLOUD_SYNC_INTERVAL", 10).to_f }
-        @sync_secret = options.fetch(:sync_secret) { ENV["FLIPPER_CLOUD_SYNC_SECRET"] }
-        @local_adapter = options.fetch(:local_adapter) { Adapters::Memory.new }
+        # Http related setup.
+        @url = options.fetch(:url) { ENV.fetch("FLIPPER_CLOUD_URL", DEFAULT_URL) }
         @debug_output = options[:debug_output]
-        @adapter_block = ->(adapter) { adapter }
-        self.url = options.fetch(:url) { ENV.fetch("FLIPPER_CLOUD_URL", DEFAULT_URL) }
+        @read_timeout = options.fetch(:read_timeout) {
+          ENV.fetch("FLIPPER_CLOUD_READ_TIMEOUT", 5).to_f
+        }
+        @open_timeout = options.fetch(:open_timeout) {
+          ENV.fetch("FLIPPER_CLOUD_OPEN_TIMEOUT", 5).to_f
+        }
+        @write_timeout = options.fetch(:write_timeout) {
+          ENV.fetch("FLIPPER_CLOUD_WRITE_TIMEOUT", 5).to_f
+        }
+        enforce_minimum(:read_timeout, 0.1)
+        enforce_minimum(:open_timeout, 0.1)
+        enforce_minimum(:write_timeout, 0.1)
 
-        instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
+        # Sync setup.
+        @sync_interval = options.fetch(:sync_interval) {
+          ENV.fetch("FLIPPER_CLOUD_SYNC_INTERVAL", 10).to_f
+        }
+        @sync_secret = options.fetch(:sync_secret) {
+          ENV["FLIPPER_CLOUD_SYNC_SECRET"]
+        }
+        enforce_minimum(:sync_interval, 10)
+
+        # Adapter setup.
+        @local_adapter = options.fetch(:local_adapter) { Adapters::Memory.new }
+        @adapter_block = ->(adapter) { adapter }
+
+        # Telemetry setup.
+        @telemetry_logger = options.fetch(:telemetry_logger) {
+          if Flipper::Typecast.to_boolean(ENV["FLIPPER_CLOUD_TELEMETRY_LOGGING"])
+            Logger.new(STDOUT)
+          else
+            Logger.new("/dev/null")
+          end
+        }
+        self.telemetry_interval = options.fetch(:telemetry_interval) {
+          ENV.fetch("FLIPPER_CLOUD_TELEMETRY_INTERVAL", 60).to_f
+        }
+        @telemetry_shutdown_timeout = options.fetch(:telemetry_shutdown_timeout) {
+          ENV.fetch("FLIPPER_CLOUD_TELEMETRY_SHUTDOWN_TIMEOUT", 5).to_f
+        }
+        @telemetry_submitter = options.fetch(:telemetry_submitter) {
+          ->(drained) { Telemetry::Submitter.new(self).call(drained) }
+        }
+        # Needs to be after url and other telemetry config assignments.
+        @telemetry = options.fetch(:telemetry) { Telemetry.instance_for(self) }
+        enforce_minimum(:telemetry_shutdown_timeout, 0)
 
         # This is alpha. Don't use this unless you are me. And you are not me.
-        cloud_instrument = options.fetch(:cloud_instrument) { ENV["FLIPPER_CLOUD_INSTRUMENT"] == "1" }
+        instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
+        cloud_instrument = options.fetch(:cloud_instrument) {
+          Flipper::Typecast.to_boolean(ENV["FLIPPER_CLOUD_INSTRUMENT"])
+        }
         @instrumenter = if cloud_instrument
-          Instrumenter.new(brow: brow, instrumenter: instrumenter)
+          Telemetry::Instrumenter.new(self, instrumenter)
         else
           instrumenter
         end
+      end
+
+      # Public: Change the telemetry interval.
+      def telemetry_interval=(value)
+        value = value.to_f
+        @telemetry_interval = value
+        enforce_minimum(:telemetry_interval, 10)
+        value
       end
 
       # Public: Read or customize the http adapter. Calling without a block will
@@ -120,36 +183,23 @@ module Flipper
         end
       end
 
-      # Public: Set url for the http adapter.
-      attr_writer :url
-
+      # Public: Force a sync.
       def sync
         Flipper::Adapters::Sync::Synchronizer.new(local_adapter, http_adapter, {
           instrumenter: instrumenter,
         }).call
       end
 
-      def brow
-        self.class.brow_instances.compute_if_absent(url + token) do
-          uri = URI.parse(url)
-          uri.path = "#{uri.path}/events".squeeze("/")
-
-          Brow::Client.new({
-            url: uri.to_s,
-            headers: {
-              "Accept" => "application/json",
-              "Content-Type" => "application/json",
-              "User-Agent" => "Flipper v#{VERSION} via Brow v#{Brow::VERSION}",
-              "Flipper-Cloud-Token" => @token,
-            }
-          })
-        end
-      end
-
       # Public: The method that will be used to synchronize local adapter with
       # cloud. (default: :poll, will be :webhook if sync_secret is set).
       def sync_method
         sync_secret ? :webhook : :poll
+      end
+
+      # Internal: The http client used by the http adapter. Exposed so we can
+      # use the same client for posting telemetry.
+      def http_client
+        http_adapter.client
       end
 
       private
@@ -183,6 +233,15 @@ module Flipper
             "Flipper-Cloud-Token" => @token,
           },
         })
+      end
+
+      # Enforce minimum interval for tasks that run on a timer.
+      def enforce_minimum(name, minimum)
+        provided = send(name)
+        if provided < minimum
+          warn "Flipper::Cloud##{name} must be at least #{minimum} seconds but was #{provided}. Using #{minimum} seconds."
+          send(:instance_variable_set, "@#{name}", minimum)
+        end
       end
     end
   end

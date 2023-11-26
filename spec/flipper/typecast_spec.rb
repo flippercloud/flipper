@@ -217,4 +217,16 @@ RSpec.describe Flipper::Typecast do
       })
     end
   end
+
+  it "converts to and from json" do
+    source = {"foo" => "bar"}
+    output = described_class.to_json(source)
+    expect(described_class.from_json(output)).to eq(source)
+  end
+
+  it "converts to and from gzip" do
+    source = "foo bar"
+    output = described_class.to_gzip(source)
+    expect(described_class.from_gzip(output)).to eq(source)
+  end
 end

@@ -1,4 +1,6 @@
 require 'set'
+require "flipper/serializers/json"
+require "flipper/serializers/gzip"
 
 module Flipper
   module Typecast
@@ -88,6 +90,22 @@ module Flipper
         end
       end
       normalized_source
+    end
+
+    def self.to_json(source)
+      Serializers::Json.serialize(source)
+    end
+
+    def self.from_json(source)
+      Serializers::Json.deserialize(source)
+    end
+
+    def self.to_gzip(source)
+      Serializers::Gzip.serialize(source)
+    end
+
+    def self.from_gzip(source)
+      Serializers::Gzip.deserialize(source)
     end
   end
 end

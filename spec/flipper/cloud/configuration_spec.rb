@@ -61,14 +61,14 @@ RSpec.describe Flipper::Cloud::Configuration do
   end
 
   it "can set sync_interval" do
-    instance = described_class.new(required_options.merge(sync_interval: 1))
-    expect(instance.sync_interval).to eq(1)
+    instance = described_class.new(required_options.merge(sync_interval: 15))
+    expect(instance.sync_interval).to eq(15)
   end
 
   it "can set sync_interval from ENV var" do
-    with_env "FLIPPER_CLOUD_SYNC_INTERVAL" => "5" do
+    with_env "FLIPPER_CLOUD_SYNC_INTERVAL" => "15" do
       instance = described_class.new(required_options.reject { |k, v| k == :sync_interval })
-      expect(instance.sync_interval).to eq(5)
+      expect(instance.sync_interval).to eq(15)
     end
   end
 
@@ -76,9 +76,24 @@ RSpec.describe Flipper::Cloud::Configuration do
     # The initial sync of http to local invokes this web request.
     stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
 
-    instance = described_class.new(required_options.merge(sync_interval: 1))
+    instance = described_class.new(required_options.merge(sync_interval: 20))
     poller = instance.send(:poller)
-    expect(poller.interval).to eq(1)
+    expect(poller.interval).to eq(20)
+  end
+
+  it "can set telemetry_interval" do
+    instance = described_class.new(required_options.merge(telemetry_interval: 10))
+    expect(instance.telemetry_interval).to eq(10)
+  end
+
+  it "defaults telemetry_interval" do
+    instance = described_class.new(required_options)
+    expect(instance.telemetry_interval).to eq(60)
+  end
+
+  it "cannot set telemetry_interval to lower than 10" do
+    instance = described_class.new(required_options.merge(telemetry_interval: 9))
+    expect(instance.telemetry_interval).to eq(10)
   end
 
   it "can set debug_output" do
@@ -248,22 +263,5 @@ RSpec.describe Flipper::Cloud::Configuration do
     expect(all.keys).to eq(["search", "history"])
     expect(all["search"][:boolean]).to eq("true")
     expect(all["history"][:boolean]).to eq(nil)
-  end
-
-  it "can setup brow to report events to cloud" do
-    # skip logging brow
-    Brow.logger = Logger.new(File::NULL)
-    brow = described_class.new(required_options).brow
-
-    stub = stub_request(:post, "https://www.flippercloud.io/adapter/events")
-      .with { |request|
-        data = JSON.parse(request.body)
-        data.keys == ["uuid", "messages"] && data["messages"] == [{"n" => 1}]
-      }
-      .to_return(status: 201, body: "{}", headers: {})
-
-    brow.push({"n" => 1})
-    brow.worker.stop
-    expect(stub).to have_been_requested.times(1)
   end
 end

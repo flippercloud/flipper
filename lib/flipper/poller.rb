@@ -17,7 +17,7 @@ module Flipper
     end
 
     def self.reset
-      instances.each {|_,poller| poller.stop }.clear
+      instances.each {|_, instance| instance.stop }.clear
     end
 
     def initialize(options = {})

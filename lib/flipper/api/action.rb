@@ -116,7 +116,7 @@ module Flipper
       def json_response(object, status = 200)
         header 'content-type', Api::CONTENT_TYPE
         status(status)
-        body = JSON.dump(object)
+        body = Typecast.to_json(object)
         halt [@code, @headers, [body]]
       end
 

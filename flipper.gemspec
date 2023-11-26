@@ -35,5 +35,4 @@ Gem::Specification.new do |gem|
   gem.metadata      = Flipper::METADATA
 
   gem.add_dependency 'concurrent-ruby', '< 2'
-  gem.add_dependency 'brow', '~> 0.4.1'
 end

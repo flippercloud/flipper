@@ -20,8 +20,12 @@ require 'flipper/ui'
 
 Dir[FlipperRoot.join('spec/support/**/*.rb')].sort.each { |f| require f }
 
+# Disable telemetry logging in specs.
+ENV["FLIPPER_CLOUD_TELEMETRY_LOGGING"] = "0"
+
 RSpec.configure do |config|
   config.before(:example) do
+    Flipper::Cloud::Telemetry.reset if defined?(Flipper::Cloud::Telemetry) && Flipper::Cloud::Telemetry.respond_to?(:reset)
     Flipper::Poller.reset if defined?(Flipper::Poller)
     Flipper.unregister_groups
     Flipper.configuration = nil
