@@ -107,17 +107,20 @@ module Flipper
       end
 
       def post_to_pool
-        logger.debug "name=flipper_telemetry action=post_to_pool"
         drained = @metric_storage.drain
         return if drained.empty?
+        logger.debug "name=flipper_telemetry action=post_to_pool"
         @pool.post { post_to_cloud(drained) }
       end
 
       def post_to_cloud(drained)
+        logger.debug "name=flipper_telemetry action=post_to_cloud"
         response, error = @cloud_configuration.telemetry_submitter.call(drained)
+
         # Some of the errors are response code errors which have a response and
         # thus may have a telemetry-interval header for us to respect.
         response ||= error.response if error.respond_to?(:response)
+
         if response && telemetry_interval = response["telemetry-interval"]
           telemetry_interval = telemetry_interval.to_i
           @timer.execution_interval = telemetry_interval
