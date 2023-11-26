@@ -94,7 +94,6 @@ module Flipper
           Typecast.to_gzip(json)
         rescue => exception
           error(exception)
-          return
         end
 
         def debug(message)
