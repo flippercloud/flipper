@@ -10,9 +10,6 @@ module Flipper
         SCHEMA_VERSION = "V1".freeze
         GZIP_ENCODING = "gzip".freeze
 
-        MIN_RETRY_DELAY = 2
-        MAX_RETRY_DELAY = 120
-
         Error = Class.new(StandardError) do
           attr_reader :request_id, :response
 
