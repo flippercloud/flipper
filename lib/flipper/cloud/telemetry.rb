@@ -146,6 +146,8 @@ module Flipper
         return if drained.empty?
         debug "action=post_to_pool metrics=#{drained.size}"
         @pool.post { post_to_cloud(drained) }
+      rescue => error
+        error "action=post_to_pool error=#{error.inspect}"
       end
 
       # Posts the drained metrics to cloud.
