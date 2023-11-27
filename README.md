@@ -43,7 +43,7 @@ Use `Flipper#enabled?` in your app to check if a feature is enabled.
 
 ```ruby
 # check if search is enabled
-if Flipper.enabled? :search, current_user
+if Flipper.enabled?(:search, current_user)
   puts 'Search away!'
 else
   puts 'No search for you!'
@@ -70,15 +70,15 @@ Read more about [getting started with Flipper](https://flippercloud.io/docs) and
 
 ## Flipper Cloud
 
-Like Flipper and want more? Check out [Flipper Cloud](https://www.flippercloud.io), which comes with:
+Like Flipper and want more? Check out [Flipper Cloud](https://www.flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=check_out), which comes with:
 
-* **everything in one place** &mdash; no need to bounce around from different application UIs or IRB consoles.
-* **permissions** &mdash; grant access to everyone in your organization or lockdown each project to particular people.
-* **multiple environments** &mdash; production, staging, enterprise, by continent, whatever you need.
-* **personal environments** &mdash; no more rake scripts or manual enable/disable to get your laptop to look like production. Every developer gets a personal environment that inherits from production that they can override as they please ([read more](https://www.johnnunemaker.com/flipper-cloud-environments/)).
-* **no maintenance** &mdash; we'll keep the lights on for you. We also have handy webhooks for keeping your app in sync with Cloud, so **our availability won't affect yours**. All your feature flag reads are local to your app.
+* **multiple environments** &mdash; production, staging, per continent, whatever you need. Every environment inherits from production by default and every project comes with a [project overview page](https://blog.flippercloud.io/project-overview/) that shows each feature and its status in each environment.
+* **personal environments** &mdash; everyone on your team gets a personal environment (that inherits from production) which they can modify however they want without stepping on anyone else's toes.
+* **permissions** &mdash; grant access to everyone in your organization or lockdown each project to particular people. You can even limit access to a particular environment (like production) to specific people.
 * **audit history** &mdash; every feature change and who made it.
 * **rollbacks** &mdash; enable or disable a feature accidentally? No problem. You can roll back to any point in the audit history with a single click.
+* **maintenance** &mdash; we'll keep the lights on for you. We also have handy webhooks and background polling for keeping your app in sync with Cloud, so **our availability won't affect yours**. All your feature flag reads are local to your app.
+* **everything in one place** &mdash; no need to bounce around from different application UIs or IRB consoles.
 
 [![Flipper Cloud Screenshot](docs/images/flipper_cloud.png)](https://www.flippercloud.io)
 
