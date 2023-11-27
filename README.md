@@ -84,6 +84,8 @@ Like Flipper and want more? Check out [Flipper Cloud](https://www.flippercloud.i
 
 Cloud is super simple to integrate with Rails ([demo app](https://github.com/fewerandfaster/flipper-rails-demo)), Sinatra or any other framework.
 
+We also have a [free plan](https://www.flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=free_plan) that you can use forever.
+
 ## Contributing
 
 1. Fork it
