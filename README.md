@@ -1,6 +1,6 @@
 [![Flipper Mark](docs/images/banner.jpg)](https://www.flippercloud.io)
 
-[Website](https://flippercloud.io) | [Documentation](https://flippercloud.io/docs) | [Examples](examples) | [Twitter](https://twitter.com/flipper_cloud)
+[Website](https://flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=website_link) | [Documentation](https://flippercloud.io/docs?utm_source=oss&utm_medium=readme&utm_campaign=docs_link) | [Examples](examples) | [Twitter](https://twitter.com/flipper_cloud) | [Ruby.social](https://ruby.social/@flipper)
 
 # Flipper
 
@@ -35,7 +35,7 @@ Or install it yourself with:
 
 ## Subscribe &amp; Ship
 
-[💌 &nbsp;Subscribe](https://blog.flippercloud.io/#/portal/signup) - we'll send you short and sweet emails when we release new versions.
+[💌 &nbsp;Subscribe](https://blog.flippercloud.io/#/portal/signup) - we'll send you short and sweet emails when we release new versions ([examples](https://blog.flippercloud.io/tag/releases/)).
 
 ## Getting Started
 
@@ -66,7 +66,7 @@ Flipper.enable_group :search, :admin
 Flipper.enable_percentage_of_actors :search, 2
 ```
 
-Read more about [getting started with Flipper](https://flippercloud.io/docs) and [enabling features](https://flippercloud.io/docs/features).
+Read more about [getting started with Flipper](https://flippercloud.io/docs?utm_source=oss&utm_medium=readme&utm_campaign=getting_started) and [enabling features](https://flippercloud.io/docs/features?utm_source=oss&utm_medium=readme&utm_campaign=enabling_features).
 
 ## Flipper Cloud
 
@@ -80,7 +80,7 @@ Like Flipper and want more? Check out [Flipper Cloud](https://www.flippercloud.i
 * **maintenance** &mdash; we'll keep the lights on for you. We also have handy webhooks and background polling for keeping your app in sync with Cloud, so **our availability won't affect yours**. All your feature flag reads are local to your app.
 * **everything in one place** &mdash; no need to bounce around from different application UIs or IRB consoles.
 
-[![Flipper Cloud Screenshot](docs/images/flipper_cloud.png)](https://www.flippercloud.io)
+[![Flipper Cloud Screenshot](docs/images/flipper_cloud.png)](https://www.flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=screenshot)
 
 Cloud is super simple to integrate with Rails ([demo app](https://github.com/fewerandfaster/flipper-rails-demo)), Sinatra or any other framework.
 
