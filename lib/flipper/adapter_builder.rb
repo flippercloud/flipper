@@ -8,18 +8,21 @@ module Flipper
   #   end.to_adapter
   #
   class AdapterBuilder
-    def initialize(default_store = Adapters::Memory, &block)
+    def initialize(&block)
       @stack = []
-      store default_store
-      instance_eval(&block) if block
+
+      # Default to memory adapter
+      store Flipper::Adapters::Memory
+
+      block.arity == 0 ? instance_eval(&block) : block.call(self) if block
     end
 
-    def use(klass, *args, **kwargs)
-      @stack.push ->(adapter) { klass.new(adapter, *args, **kwargs) }
+    def use(klass, *args, **kwargs, &block)
+      @stack.push ->(adapter) { klass.new(adapter, *args, **kwargs, &block) }
     end
 
-    def store(adapter, *args, **kwargs)
-      @store = adapter.respond_to?(:call) ? adapter : -> { adapter.new(*args, **kwargs) }
+    def store(adapter, *args, **kwargs, &block)
+      @store = adapter.respond_to?(:call) ? adapter : -> { adapter.new(*args, **kwargs, &block) }
     end
 
     def to_adapter

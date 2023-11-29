@@ -1,7 +1,7 @@
 module Flipper
   class Configuration
     def initialize(options = {})
-      @builder = AdapterBuilder.new(Flipper::Adapters::Memory)
+      @builder = AdapterBuilder.new { store Flipper::Adapters::Memory }
       @default = -> { Flipper.new(@builder.to_adapter) }
     end
 
