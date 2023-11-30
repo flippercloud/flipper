@@ -154,7 +154,7 @@ module Flipper
       def post_to_cloud(drained)
         debug "action=post_to_cloud metrics=#{drained.size}"
         response, error = submitter.call(drained)
-        debug "action=post_to_cloud response=#{response.inspect} body=#{response.body.inspect} error=#{error.inspect}"
+        debug "action=post_to_cloud response=#{response.inspect} body=#{response&.body.inspect} error=#{error.inspect}"
 
         # Some of the errors are response code errors which have a response and
         # thus may have a telemetry-interval header for us to respect.
