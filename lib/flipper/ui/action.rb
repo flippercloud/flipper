@@ -176,7 +176,7 @@ module Flipper
         when String
           object
         else
-          JSON.dump(object)
+          Typecast.to_json(object)
         end
         halt [@code, @headers, [body]]
       end
@@ -276,7 +276,7 @@ module Flipper
 
       # Internal: Method to call when the UI is in read only mode and you want
       # to inform people of that fact.
-      def read_only
+      def render_read_only
         status 403
 
         breadcrumb 'Home', '/'
@@ -284,6 +284,14 @@ module Flipper
         breadcrumb 'Noooooope'
 
         halt view_response(:read_only)
+      end
+
+      def read_only?
+        Flipper::UI.configuration.read_only || flipper.read_only?
+      end
+
+      def write_allowed?
+        !read_only?
       end
 
       def bootstrap_css

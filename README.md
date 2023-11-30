@@ -1,6 +1,6 @@
 [![Flipper Mark](docs/images/banner.jpg)](https://www.flippercloud.io)
 
-[Website](https://flippercloud.io) | [Documentation](https://flippercloud.io/docs) | [Examples](examples) | [Twitter](https://twitter.com/flipper_cloud)
+[Website](https://flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=website_link) | [Documentation](https://flippercloud.io/docs?utm_source=oss&utm_medium=readme&utm_campaign=docs_link) | [Examples](examples) | [Twitter](https://twitter.com/flipper_cloud) | [Ruby.social](https://ruby.social/@flipper)
 
 # Flipper
 
@@ -35,7 +35,7 @@ Or install it yourself with:
 
 ## Subscribe &amp; Ship
 
-[💌 &nbsp;Subscribe](https://blog.flippercloud.io/#/portal/signup) - we'll send you short and sweet emails when we release new versions.
+[💌 &nbsp;Subscribe](https://blog.flippercloud.io/#/portal/signup) - we'll send you short and sweet emails when we release new versions ([examples](https://blog.flippercloud.io/tag/releases/)).
 
 ## Getting Started
 
@@ -43,7 +43,7 @@ Use `Flipper#enabled?` in your app to check if a feature is enabled.
 
 ```ruby
 # check if search is enabled
-if Flipper.enabled? :search, current_user
+if Flipper.enabled?(:search, current_user)
   puts 'Search away!'
 else
   puts 'No search for you!'
@@ -66,23 +66,25 @@ Flipper.enable_group :search, :admin
 Flipper.enable_percentage_of_actors :search, 2
 ```
 
-Read more about [getting started with Flipper](https://flippercloud.io/docs) and [enabling features](https://flippercloud.io/docs/features).
+Read more about [getting started with Flipper](https://flippercloud.io/docs?utm_source=oss&utm_medium=readme&utm_campaign=getting_started) and [enabling features](https://flippercloud.io/docs/features?utm_source=oss&utm_medium=readme&utm_campaign=enabling_features).
 
 ## Flipper Cloud
 
-Like Flipper and want more? Check out [Flipper Cloud](https://www.flippercloud.io), which comes with:
+Like Flipper and want more? Check out [Flipper Cloud](https://www.flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=check_out), which comes with:
 
-* **everything in one place** &mdash; no need to bounce around from different application UIs or IRB consoles.
-* **permissions** &mdash; grant access to everyone in your organization or lockdown each project to particular people.
-* **multiple environments** &mdash; production, staging, enterprise, by continent, whatever you need.
-* **personal environments** &mdash; no more rake scripts or manual enable/disable to get your laptop to look like production. Every developer gets a personal environment that inherits from production that they can override as they please ([read more](https://www.johnnunemaker.com/flipper-cloud-environments/)).
-* **no maintenance** &mdash; we'll keep the lights on for you. We also have handy webhooks for keeping your app in sync with Cloud, so **our availability won't affect yours**. All your feature flag reads are local to your app.
+* **multiple environments** &mdash; production, staging, per continent, whatever you need. Every environment inherits from production by default and every project comes with a [project overview page](https://blog.flippercloud.io/project-overview/) that shows each feature and its status in each environment.
+* **personal environments** &mdash; everyone on your team gets a personal environment (that inherits from production) which they can modify however they want without stepping on anyone else's toes.
+* **permissions** &mdash; grant access to everyone in your organization or lockdown each project to particular people. You can even limit access to a particular environment (like production) to specific people.
 * **audit history** &mdash; every feature change and who made it.
 * **rollbacks** &mdash; enable or disable a feature accidentally? No problem. You can roll back to any point in the audit history with a single click.
+* **maintenance** &mdash; we'll keep the lights on for you. We also have handy webhooks and background polling for keeping your app in sync with Cloud, so **our availability won't affect yours**. All your feature flag reads are local to your app.
+* **everything in one place** &mdash; no need to bounce around from different application UIs or IRB consoles.
 
-[![Flipper Cloud Screenshot](docs/images/flipper_cloud.png)](https://www.flippercloud.io)
+[![Flipper Cloud Screenshot](docs/images/flipper_cloud.png)](https://www.flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=screenshot)
 
 Cloud is super simple to integrate with Rails ([demo app](https://github.com/fewerandfaster/flipper-rails-demo)), Sinatra or any other framework.
+
+We also have a [free plan](https://www.flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=free_plan) that you can use forever.
 
 ## Contributing
 

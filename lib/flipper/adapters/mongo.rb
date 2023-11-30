@@ -7,15 +7,11 @@ module Flipper
     class Mongo
       include ::Flipper::Adapter
 
-      # Public: The name of the adapter.
-      attr_reader :name
-
       # Public: The name of the collection storing the feature data.
       attr_reader :collection
 
       def initialize(collection)
         @collection = collection
-        @name = :mongo
         @features_key = :flipper_features
       end
 
@@ -84,7 +80,7 @@ module Flipper
           }
         when :json
           update feature.key, '$set' => {
-            gate.key.to_s => JSON.dump(thing.value),
+            gate.key.to_s => Typecast.to_json(thing.value),
           }
         else
           unsupported_data_type gate.data_type
@@ -179,7 +175,7 @@ module Flipper
               doc.fetch(gate.key.to_s) { Set.new }.to_set
             when :json
               value = doc[gate.key.to_s]
-              JSON.parse(value) if value
+              Typecast.from_json(value)
             else
               unsupported_data_type gate.data_type
             end

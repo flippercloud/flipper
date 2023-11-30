@@ -8,9 +8,6 @@ module Flipper
     class Sync
       include ::Flipper::Adapter
 
-      # Public: The name of the adapter.
-      attr_reader :name
-
       # Public: The synchronizer that will keep the local and remote in sync.
       attr_reader :synchronizer
 
@@ -22,7 +19,6 @@ module Flipper
       # interval - The Float or Integer number of seconds between syncs from
       # remote to local. Default value is set in IntervalSynchronizer.
       def initialize(local, remote, options = {})
-        @name = :sync
         @local = local
         @remote = remote
         @synchronizer = options.fetch(:synchronizer) do

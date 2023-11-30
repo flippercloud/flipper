@@ -10,7 +10,7 @@ module Flipper
     class Http
       include Flipper::Adapter
 
-      attr_reader :name, :client
+      attr_reader :client
 
       def initialize(options = {})
         @client = Client.new(url: options.fetch(:url),
@@ -22,13 +22,12 @@ module Flipper
                              write_timeout: options[:write_timeout],
                              max_retries: options[:max_retries],
                              debug_output: options[:debug_output])
-        @name = :http
       end
 
       def get(feature)
         response = @client.get("/features/#{feature.key}")
         if response.is_a?(Net::HTTPOK)
-          parsed_response = JSON.parse(response.body)
+          parsed_response = Typecast.from_json(response.body)
           result_for_feature(feature, parsed_response.fetch('gates'))
         elsif response.is_a?(Net::HTTPNotFound)
           default_config
@@ -42,7 +41,7 @@ module Flipper
         response = @client.get("/features?keys=#{csv_keys}&exclude_gate_names=true")
         raise Error, response unless response.is_a?(Net::HTTPOK)
 
-        parsed_response = JSON.parse(response.body)
+        parsed_response = Typecast.from_json(response.body)
         parsed_features = parsed_response.fetch('features')
         gates_by_key = parsed_features.each_with_object({}) do |parsed_feature, hash|
           hash[parsed_feature['key']] = parsed_feature['gates']
@@ -60,7 +59,7 @@ module Flipper
         response = @client.get("/features?exclude_gate_names=true")
         raise Error, response unless response.is_a?(Net::HTTPOK)
 
-        parsed_response = JSON.parse(response.body)
+        parsed_response = Typecast.from_json(response.body)
         parsed_features = parsed_response.fetch('features')
         gates_by_key = parsed_features.each_with_object({}) do |parsed_feature, hash|
           hash[parsed_feature['key']] = parsed_feature['gates']
@@ -79,7 +78,7 @@ module Flipper
         response = @client.get('/features?exclude_gate_names=true')
         raise Error, response unless response.is_a?(Net::HTTPOK)
 
-        parsed_response = JSON.parse(response.body)
+        parsed_response = Typecast.from_json(response.body)
         parsed_response['features'].map { |feature| feature['key'] }.to_set
       end
 

@@ -45,6 +45,11 @@ module Flipper
       # page, and optionally the `features` pages. Defaults to empty block.
       attr_accessor :descriptions_source
 
+      # Public: If you set this, Flipper::UI will fetch actor names
+      # from your external source. Descriptions for `actors` will be shown on `feature`
+      # page. Defaults to empty block.
+      attr_accessor :actor_names_source
+
       # Public: Should feature descriptions be show on the `features` list page.
       # Default false. Only works when using descriptions.
       attr_accessor :show_feature_description_in_list
@@ -70,6 +75,7 @@ module Flipper
       ).freeze
 
       DEFAULT_DESCRIPTIONS_SOURCE = ->(_keys) { {} }
+      DEFAULT_ACTOR_NAMES_SOURCE = ->(_keys) { {} }
 
       def initialize
         @delete = Option.new("Danger Zone", "Deleting a feature removes it from the list of features and disables it for everyone.")
@@ -81,6 +87,7 @@ module Flipper
         @cloud_recommendation = true
         @add_actor_placeholder = "a flipper id"
         @descriptions_source = DEFAULT_DESCRIPTIONS_SOURCE
+        @actor_names_source = DEFAULT_ACTOR_NAMES_SOURCE
         @show_feature_description_in_list = false
         @actors_separator = ','
         @confirm_fully_enable = false

@@ -19,6 +19,7 @@ module Flipper
       extend Forwardable
 
       VALID_REQUEST_METHOD_NAMES = Set.new([
+                                             'head'.freeze,
                                              'get'.freeze,
                                              'post'.freeze,
                                              'put'.freeze,
@@ -115,7 +116,7 @@ module Flipper
       def json_response(object, status = 200)
         header 'content-type', Api::CONTENT_TYPE
         status(status)
-        body = JSON.dump(object)
+        body = Typecast.to_json(object)
         halt [@code, @headers, [body]]
       end
 
@@ -147,8 +148,12 @@ module Flipper
       private
 
       # Private: Returns the request method converted to an action method.
+      # Converts head to get.
       def request_method_name
-        @request_method_name ||= @request.request_method.downcase
+        @request_method_name ||= begin
+          name = @request.request_method.downcase
+          name == "head" ? "get" : name
+        end
       end
 
       # Private: split request path by "/"

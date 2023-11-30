@@ -37,9 +37,6 @@ module Flipper
         See https://github.com/flippercloud/flipper/issues/557
       EOS
 
-      # Public: The name of the adapter.
-      attr_reader :name
-
       # Public: Initialize a new ActiveRecord adapter instance.
       #
       # name - The Symbol name for this adapter. Optional (default :active_record)
@@ -224,7 +221,7 @@ module Flipper
               @gate_class.create! do |g|
                 g.feature_key = feature.key
                 g.key = gate.key
-                g.value = json_feature ? JSON.dump(thing.value) : thing.value.to_s
+                g.value = json_feature ? Typecast.to_json(thing.value) : thing.value.to_s
               end
             rescue ::ActiveRecord::RecordNotUnique
               # assume this happened concurrently with the same thing and its fine
@@ -266,7 +263,7 @@ module Flipper
               end
             when :json
               if row = gates.detect { |key, value| !key.nil? && key.to_sym == gate.key }
-                JSON.parse(row.last)
+                Typecast.from_json(row.last)
               end
             when :set
               gates.select { |key, value| !key.nil? && key.to_sym == gate.key }.map(&:last).to_set

@@ -12,17 +12,17 @@ module Flipper
         end
       end
 
-      # Internal: The name of the adapter.
-      attr_reader :name
-
       # Public
       def initialize(adapter)
         @adapter = adapter
-        @name = :read_only
       end
 
       def features
         @adapter.features
+      end
+
+      def read_only?
+        true
       end
 
       def get(feature)

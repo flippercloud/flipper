@@ -30,6 +30,10 @@ module Flipper
           @debug_output = options[:debug_output]
         end
 
+        def add_header(key, value)
+          @headers[key] = value
+        end
+
         def get(path)
           perform Net::HTTP::Get, path, @headers
         end
@@ -77,13 +81,13 @@ module Flipper
 
         def build_request(http_method, uri, headers, options)
           request_headers = {
-            "Client-Language" => "ruby",
-            "Client-Language-Version" => "#{RUBY_VERSION} p#{RUBY_PATCHLEVEL} (#{RUBY_RELEASE_DATE})",
-            "Client-Platform" => RUBY_PLATFORM,
-            "Client-Engine" => defined?(RUBY_ENGINE) ? RUBY_ENGINE : "",
-            "Client-Pid" => Process.pid.to_s,
-            "Client-Thread" => Thread.current.object_id.to_s,
-            "Client-Hostname" => Socket.gethostname,
+            client_language: "ruby",
+            client_language_version: "#{RUBY_VERSION} p#{RUBY_PATCHLEVEL} (#{RUBY_RELEASE_DATE})",
+            client_platform: RUBY_PLATFORM,
+            client_engine: defined?(RUBY_ENGINE) ? RUBY_ENGINE : "",
+            client_pid: Process.pid.to_s,
+            client_thread: Thread.current.object_id.to_s,
+            client_hostname: Socket.gethostname,
           }.merge(headers)
 
           body = options[:body]

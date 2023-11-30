@@ -10,7 +10,7 @@ module Flipper
         route %r{\A/features/(?<feature_name>.*)/percentage_of_actors/?\Z}
 
         def post
-          read_only if Flipper::UI.configuration.read_only
+          render_read_only if read_only?
 
           feature = flipper[feature_name]
           @feature = Decorators::Feature.new(feature)
