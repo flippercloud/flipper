@@ -22,14 +22,8 @@ All notable changes to this project will be documented in this file.
 
 ### Breaking Changes
 
-* Removed top level `Flipper.bool`, `Flipper.actors`, `Flipper.time`, `Flipper.actor`,  `Flipper.percentage_of_actors`, `Flipper.time`, and `Flipper.percentage_of_time`. Also removed correlated Flipper::DSL instance method. They conflict with some new expression stuff and are rarely if ever used. If you are using them, you can migrate via a search and replace like so:
-  * Change Flipper.bool => Flipper::Types::Boolean.new
-  * Change Flipper.boolean => Flipper::Types::Boolean.new
-  * Change Flipper.actor => Flipper::Types::Actor.new
-  * Change Flipper.percentage_of_actors => Flipper::Types::PercentageOfActors.new
-  * Change Flipper.actors => Flipper::Types::PercentageOfActors.new
-  * Change Flipper.percentage_of_time => Flipper::Types::PercentageOfTime.new
-  * Change Flipper.time => Flipper::Types::PercentageOfTime.new
+* Ruby 2.6 and 2.7 are EOL and no longer supported
+* Rails 5.2 and 6.0 are EOL and no longer supported
 
 ## 1.0.0
 

@@ -143,14 +143,8 @@ module Flipper
         !!@memoize
       end
 
-      if RUBY_VERSION >= '3.0'
-        def method_missing(name, *args, **kwargs, &block)
-          @adapter.send name, *args, **kwargs, &block
-        end
-      else
-        def method_missing(name, *args, &block)
-          @adapter.send name, *args, &block
-        end
+      def method_missing(name, *args, **kwargs, &block)
+        @adapter.send name, *args, **kwargs, &block
       end
 
       private
