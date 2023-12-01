@@ -17,23 +17,28 @@ module Flipper
       block.arity == 0 ? instance_eval(&block) : block.call(self) if block
     end
 
-    def use(klass, *args, &block)
-      @stack.push ->(adapter) { klass.new(adapter, *args, &block) }
+    if RUBY_VERSION >= '2.7'
+      def use(klass, ...)
+        @stack.push ->(adapter) { klass.new(adapter, ...) }
+      end
+    else
+      def use(klass, *args, &block)
+        @stack.push ->(adapter) { klass.new(adapter, *args, &block) }
+      end
     end
 
-    def store(adapter, *args, &block)
-      @store = adapter.respond_to?(:call) ? adapter : -> { adapter.new(*args, &block) }
+    if RUBY_VERSION >= '2.7'
+      def store(adapter, ...)
+        @store = adapter.respond_to?(:call) ? adapter : -> { adapter.new(...) }
+      end
+    else
+      def store(adapter, *args, &block)
+        @store = adapter.respond_to?(:call) ? adapter : -> { adapter.new(*args, &block) }
+      end
     end
 
     def to_adapter
       @stack.reverse.inject(@store.call) { |adapter, wrapper| wrapper.call(adapter) }
-    end
-
-    # Properly pass kwargs to `use` and `store` methods.
-    # Replace with `...` once support for Ruby 2.6 and 2.7 are dropped
-    if respond_to?(:ruby2_keywords, true)
-      ruby2_keywords :use
-      ruby2_keywords :store
     end
   end
 end
