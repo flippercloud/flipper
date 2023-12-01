@@ -29,7 +29,49 @@ RSpec.describe Flipper::Engine do
 
   subject { application.initialize! }
 
+  shared_examples 'config.strict' do
+    let(:adapter) { Flipper.adapter.adapter }
+
+    it 'can set strict=true from ENV' do
+      with_env 'FLIPPER_STRICT' => 'true' do
+        subject
+        expect(config.strict).to eq(:raise)
+        expect(adapter).to be_instance_of(Flipper::Adapters::Strict)
+      end
+    end
+
+    it 'can set strict=warn from ENV' do
+      with_env 'FLIPPER_STRICT' => 'warn' do
+        subject
+        expect(config.strict).to eq(:warn)
+        expect(adapter).to be_instance_of(Flipper::Adapters::Strict)
+        expect(adapter.handler).to be(Flipper::Adapters::Strict::HANDLERS.fetch(:warn))
+      end
+    end
+
+    it 'can set strict=false from ENV' do
+      with_env 'FLIPPER_STRICT' => 'false' do
+        subject
+        expect(config.strict).to eq(false)
+        expect(adapter).to be_instance_of(Flipper::Adapters::Memory)
+      end
+    end
+
+    %w(development test production).each do |env|
+      it "defaults to strict=warn in RAILS_ENV=#{env}" do
+        Rails.env = env
+        expect(Rails.env).to eq(env)
+        subject
+        expect(config.strict).to eq(:warn)
+        expect(adapter).to be_instance_of(Flipper::Adapters::Strict)
+        expect(adapter.handler).to be(Flipper::Adapters::Strict::HANDLERS.fetch(:warn))
+      end
+    end
+  end
+
   context 'cloudless' do
+    it_behaves_like 'config.strict'
+
     it 'can set env_key from ENV' do
       with_env 'FLIPPER_ENV_KEY' => 'flopper' do
         subject
@@ -63,44 +105,6 @@ RSpec.describe Flipper::Engine do
       with_env 'FLIPPER_LOG' => 'false' do
         subject
         expect(config.log).to eq(false)
-      end
-    end
-
-    describe 'config.strict' do
-      it 'can set strict=true from ENV' do
-        with_env 'FLIPPER_STRICT' => 'true' do
-          subject
-          expect(config.strict).to eq(:raise)
-          expect(Flipper.adapter.adapter).to be_instance_of(Flipper::Adapters::Strict)
-        end
-      end
-
-      it 'can set strict=warn from ENV' do
-        with_env 'FLIPPER_STRICT' => 'warn' do
-          subject
-          expect(config.strict).to eq(:warn)
-          expect(Flipper.adapter.adapter).to be_instance_of(Flipper::Adapters::Strict)
-          expect(Flipper.adapter.adapter.handler).to be(Flipper::Adapters::Strict::HANDLERS.fetch(:warn))
-        end
-      end
-
-      it 'can set strict=false from ENV' do
-        with_env 'FLIPPER_STRICT' => 'false' do
-          subject
-          expect(config.strict).to eq(false)
-          expect(Flipper.adapter.adapter).to be_instance_of(Flipper::Adapters::Memory)
-        end
-      end
-
-      %w(development test production).each do |env|
-        it "defaults to strict=warn in RAILS_ENV=#{env}" do
-          Rails.env = env
-          expect(Rails.env).to eq(env)
-          subject
-          expect(config.strict).to eq(:warn)
-          expect(Flipper.adapter.adapter).to be_instance_of(Flipper::Adapters::Strict)
-          expect(Flipper.adapter.adapter.handler).to be(Flipper::Adapters::Strict::HANDLERS.fetch(:warn))
-        end
       end
     end
 
@@ -153,6 +157,15 @@ RSpec.describe Flipper::Engine do
 
     # App for Rack::Test
     let(:app) { application.routes }
+
+    it_behaves_like 'config.strict' do
+      let(:adapter) do
+        puts "WAT?"
+        dual_write = Flipper.adapter.adapter
+        poll = dual_write.local
+        poll.adapter
+      end
+    end
 
     it "initializes cloud configuration" do
       stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
