@@ -54,5 +54,15 @@ module Flipper
         @default.call
       end
     end
+
+    def statsd
+      require 'flipper/instrumentation/statsd_subscriber'
+      Flipper::Instrumentation::StatsdSubscriber.client
+    end
+
+    def statsd=(client)
+      require "flipper/instrumentation/statsd"
+      Flipper::Instrumentation::StatsdSubscriber.client = client
+    end
   end
 end
