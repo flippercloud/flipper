@@ -90,6 +90,40 @@ RSpec.describe Flipper::Adapters::Http do
     adapter.get(flipper[:feature_panel])
   end
 
+  it "sends framework versions" do
+    stub_const("Rails", Struct.new(:version).new("7.1.0"))
+    stub_const("Sinatra::VERSION", "3.1.0")
+    stub_const("Hanami::VERSION", "0.7.2")
+
+    headers = {
+      "Client-Framework" => ["rails=7.1.0", "sinatra=3.1.0", "hanami=0.7.2"]
+    }
+
+    stub_request(:get, "http://app.com/flipper/features/feature_panel")
+      .with(headers: headers)
+      .to_return(status: 404, body: "", headers: {})
+
+    adapter = described_class.new(url: 'http://app.com/flipper')
+    adapter.get(flipper[:feature_panel])
+  end
+
+  it "does not send undefined framework versions" do
+    stub_const("Rails", Struct.new(:version).new("7.1.0"))
+    stub_const("Sinatra::VERSION", "3.1.0")
+
+    headers = {
+      "Client-Framework" => ["rails=7.1.0", "sinatra=3.1.0"]
+    }
+
+    stub_request(:get, "http://app.com/flipper/features/feature_panel")
+      .with(headers: headers)
+      .to_return(status: 404, body: "", headers: {})
+
+    adapter = described_class.new(url: 'http://app.com/flipper')
+    adapter.get(flipper[:feature_panel])
+  end
+
+
   describe "#get" do
     it "raises error when not successful response" do
       stub_request(:get, "http://app.com/flipper/features/feature_panel")

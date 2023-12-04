@@ -58,10 +58,10 @@ RSpec.describe Flipper::Cloud::Telemetry::Submitter do
         'User-Agent' => "Flipper HTTP Adapter v#{Flipper::VERSION}",
       }
       stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
-        with { |request|
+        with(headers: expected_headers) { |request|
           gunzipped = Flipper::Typecast.from_gzip(request.body)
           body = Flipper::Typecast.from_json(gunzipped)
-          body == expected_body && request.headers == expected_headers
+          body == expected_body
         }.to_return(status: 200, body: "{}", headers: {})
       subject.call(enabled_metrics)
     end
