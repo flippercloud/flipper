@@ -20,17 +20,6 @@ All notable changes to this project will be documented in this file.
 * Allow head requests to api (https://github.com/flippercloud/flipper/pull/759)
 * Cloud Telemetry alpha (https://github.com/flippercloud/flipper/pull/775).
 
-### Breaking Changes
-
-* Removed top level `Flipper.bool`, `Flipper.actors`, `Flipper.time`, `Flipper.actor`,  `Flipper.percentage_of_actors`, `Flipper.time`, and `Flipper.percentage_of_time`. Also removed correlated Flipper::DSL instance method. They conflict with some new expression stuff and are rarely if ever used. If you are using them, you can migrate via a search and replace like so:
-  * Change Flipper.bool => Flipper::Types::Boolean.new
-  * Change Flipper.boolean => Flipper::Types::Boolean.new
-  * Change Flipper.actor => Flipper::Types::Actor.new
-  * Change Flipper.percentage_of_actors => Flipper::Types::PercentageOfActors.new
-  * Change Flipper.actors => Flipper::Types::PercentageOfActors.new
-  * Change Flipper.percentage_of_time => Flipper::Types::PercentageOfTime.new
-  * Change Flipper.time => Flipper::Types::PercentageOfTime.new
-
 ## 1.0.0
 
 ### Additions/Changes
