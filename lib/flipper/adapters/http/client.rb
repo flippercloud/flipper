@@ -114,7 +114,7 @@ module Flipper
         end
 
         def client_frameworks
-          CLIENT_FRAMEWORKS.transform_values(&:call).select { |_, version| version }
+          CLIENT_FRAMEWORKS.transform_values { |detect| detect.call rescue nil }.select { |_, version| version }
         end
       end
     end
