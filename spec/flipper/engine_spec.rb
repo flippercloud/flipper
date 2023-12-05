@@ -57,7 +57,14 @@ RSpec.describe Flipper::Engine do
       end
     end
 
-    %w(development test production).each do |env|
+    it "defaults to strict=false in RAILS_ENV=production" do
+        Rails.env = "production"
+        subject
+        expect(config.strict).to eq(false)
+        expect(adapter).to be_instance_of(Flipper::Adapters::Memory)
+    end
+
+    %w(development test).each do |env|
       it "defaults to strict=warn in RAILS_ENV=#{env}" do
         Rails.env = env
         expect(Rails.env).to eq(env)
@@ -160,7 +167,6 @@ RSpec.describe Flipper::Engine do
 
     it_behaves_like 'config.strict' do
       let(:adapter) do
-        puts "WAT?"
         dual_write = Flipper.adapter.adapter
         poll = dual_write.local
         poll.adapter

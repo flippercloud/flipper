@@ -73,6 +73,8 @@ module Flipper
         value.to_sym
       elsif value
         Typecast.to_boolean(value) ? :raise : false
+      elsif Rails.env.production?
+        false
       else
         # Warn for now. Future versions will default to :raise in development and test
         :warn
