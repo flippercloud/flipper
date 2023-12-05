@@ -35,4 +35,6 @@ Gem::Specification.new do |gem|
   gem.metadata      = Flipper::METADATA
 
   gem.add_dependency 'concurrent-ruby', '< 2'
+
+  gem.required_ruby_version = ">= 3"
 end
