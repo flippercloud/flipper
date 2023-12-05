@@ -1,8 +1,8 @@
 module Flipper
   class Configuration
     def initialize(options = {})
-      @default = -> { Flipper.new(adapter) }
-      @adapter = -> { Flipper::Adapters::Memory.new }
+      @builder = AdapterBuilder.new { store Flipper::Adapters::Memory }
+      @default = -> { Flipper.new(@builder.to_adapter) }
     end
 
     # The default adapter to use.
@@ -24,9 +24,20 @@ module Flipper
     #
     def adapter(&block)
       if block_given?
-        @adapter = block
+        @builder.store(block)
       else
-        @adapter.call
+        @builder.to_adapter
+      end
+    end
+
+    # An adapter to use to augment the primary storage adapter. See `AdapterBuilder#use`
+    if RUBY_VERSION >= '3.0'
+      def use(klass, *args, **kwargs, &block)
+        @builder.use(klass, *args, **kwargs, &block)
+      end
+    else
+      def use(klass, *args, &block)
+        @builder.use(klass, *args, &block)
       end
     end
 

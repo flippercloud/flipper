@@ -14,6 +14,14 @@ All notable changes to this project will be documented in this file.
     config.flipper.preload = ->(request) { !request.path.start_with?('/assets') }
   end
   ```
+* Added `strict` configuration to warn when accessing a feature that doesn't exist (https://github.com/flippercloud/flipper/pull/760, https://github.com/flippercloud/flipper/pull/763)
+  ```ruby
+  Rails.application.configure do
+    # Setting to `true` or `:raise` will raise error when a feature doesn't exist.
+    # Use `:warn` to log a warning instead.
+    config.flipper.strict = !Rails.env.production?
+  end
+  ```
 * Handle deprecation of Rack::File in Rack 3.1 (https://github.com/flippercloud/flipper/pull/773).
 * Human readable actor names in flipper-ui (https://github.com/flippercloud/flipper/pull/737).
 * Expressions are now available and considered "alpha". They are not yet documented, but you can see examples in [examples/expressions.rb](examples/expressions.rb). (https://github.com/flippercloud/flipper/pull/692)
