@@ -14,6 +14,12 @@ module Flipper
 
         HTTPS_SCHEME = "https".freeze
 
+        CLIENT_FRAMEWORKS = {
+          rails: -> { Rails.version if defined?(Rails) },
+          sinatra: -> { Sinatra::VERSION if defined?(Sinatra) },
+          hanami: -> { Hanami::VERSION if defined?(Hanami) },
+        }
+
         attr_reader :uri, :headers
         attr_reader :basic_auth_username, :basic_auth_password
         attr_reader :read_timeout, :open_timeout, :write_timeout, :max_retries, :debug_output
@@ -93,6 +99,11 @@ module Flipper
           body = options[:body]
           request = http_method.new(uri.request_uri)
           request.initialize_http_header(request_headers)
+
+          client_frameworks.each do |framework, version|
+            request.add_field("Client-Framework", [framework, version].join("="))
+          end
+
           request.body = body if body
 
           if @basic_auth_username && @basic_auth_password
@@ -100,6 +111,10 @@ module Flipper
           end
 
           request
+        end
+
+        def client_frameworks
+          CLIENT_FRAMEWORKS.transform_values { |detect| detect.call rescue nil }.select { |_, version| version }
         end
       end
     end

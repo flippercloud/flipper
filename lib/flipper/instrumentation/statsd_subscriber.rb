@@ -12,13 +12,11 @@ module Flipper
       end
 
       def update_timer(metric)
-        if self.class.client
-          self.class.client.timing metric, (@duration * 1_000).round
-        end
+        self.class.client&.timing metric, (@duration * 1_000).round
       end
 
       def update_counter(metric)
-        self.class.client.increment metric if self.class.client
+        self.class.client&.increment metric
       end
     end
   end
