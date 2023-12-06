@@ -84,14 +84,14 @@ RSpec.describe Flipper::Adapters::Http do
     }
     stub_request(:get, "http://app.com/flipper/features/feature_panel")
       .with(headers: headers)
-      .to_return(status: 404, body: "", headers: {})
+      .to_return(status: 404)
 
     adapter = described_class.new(url: 'http://app.com/flipper')
     adapter.get(flipper[:feature_panel])
   end
 
   it "sends framework versions" do
-    stub_const("Rails", Struct.new(:version).new("7.1.0"))
+    stub_const("Rails", double(version: "7.1.0"))
     stub_const("Sinatra::VERSION", "3.1.0")
     stub_const("Hanami::VERSION", "0.7.2")
 
@@ -101,14 +101,14 @@ RSpec.describe Flipper::Adapters::Http do
 
     stub_request(:get, "http://app.com/flipper/features/feature_panel")
       .with(headers: headers)
-      .to_return(status: 404, body: "", headers: {})
+      .to_return(status: 404)
 
     adapter = described_class.new(url: 'http://app.com/flipper')
     adapter.get(flipper[:feature_panel])
   end
 
   it "does not send undefined framework versions" do
-    stub_const("Rails", Struct.new(:version).new("7.1.0"))
+    stub_const("Rails", double(version: "7.1.0"))
     stub_const("Sinatra::VERSION", "3.1.0")
 
     headers = {
@@ -117,7 +117,7 @@ RSpec.describe Flipper::Adapters::Http do
 
     stub_request(:get, "http://app.com/flipper/features/feature_panel")
       .with(headers: headers)
-      .to_return(status: 404, body: "", headers: {})
+      .to_return(status: 404)
 
     adapter = described_class.new(url: 'http://app.com/flipper')
     adapter.get(flipper[:feature_panel])
@@ -127,7 +127,7 @@ RSpec.describe Flipper::Adapters::Http do
   describe "#get" do
     it "raises error when not successful response" do
       stub_request(:get, "http://app.com/flipper/features/feature_panel")
-        .to_return(status: 503, body: "", headers: {})
+        .to_return(status: 503)
 
       adapter = described_class.new(url: 'http://app.com/flipper')
       expect {
@@ -139,7 +139,7 @@ RSpec.describe Flipper::Adapters::Http do
   describe "#get_multi" do
     it "raises error when not successful response" do
       stub_request(:get, "http://app.com/flipper/features?keys=feature_panel&exclude_gate_names=true")
-        .to_return(status: 503, body: "", headers: {})
+        .to_return(status: 503)
 
       adapter = described_class.new(url: 'http://app.com/flipper')
       expect {
@@ -151,7 +151,7 @@ RSpec.describe Flipper::Adapters::Http do
   describe "#get_all" do
     it "raises error when not successful response" do
       stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
-        .to_return(status: 503, body: "", headers: {})
+        .to_return(status: 503)
 
       adapter = described_class.new(url: 'http://app.com/flipper')
       expect {
@@ -163,7 +163,7 @@ RSpec.describe Flipper::Adapters::Http do
   describe "#features" do
     it "raises error when not successful response" do
       stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
-        .to_return(status: 503, body: "", headers: {})
+        .to_return(status: 503)
 
       adapter = described_class.new(url: 'http://app.com/flipper')
       expect {
