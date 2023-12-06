@@ -6,7 +6,7 @@ RSpec.describe Flipper::Engine do
     Class.new(Rails::Application) do
       config.eager_load = false
       config.logger = ActiveSupport::Logger.new($stdout)
-    end
+    end.instance
   end
 
   before do
@@ -244,12 +244,12 @@ RSpec.describe Flipper::Engine do
 
   context 'with cloud secrets in Rails.credentials' do
     before do
-      application.credentials = {
+      allow(application).to receive(:credentials).and_return({
         flipper: {
           cloud_token: "credentials-token",
           cloud_sync_secret: "credentials-secret",
         }
-      }
+      })
     end
 
     it "enables cloud" do
