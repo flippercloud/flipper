@@ -242,6 +242,24 @@ RSpec.describe Flipper::Engine do
     end
   end
 
+  context 'with cloud secrets in Rails.credentials' do
+    before do
+      application.credentials = {
+        flipper: {
+          cloud_token: "credentials-token",
+          cloud_sync_secret: "credentials-secret",
+        }
+      }
+    end
+
+    it "enables cloud" do
+      application.initialize!
+      expect(ENV["FLIPPER_CLOUD_TOKEN"]).to eq("credentials-token")
+      expect(ENV["FLIPPER_CLOUD_SYNC_SECRET"]).to eq("credentials-secret")
+      expect(Flipper.instance).to be_a(Flipper::Cloud::DSL)
+    end
+  end
+
   it "includes model methods" do
     subject
     require 'active_record'
