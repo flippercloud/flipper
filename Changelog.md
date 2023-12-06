@@ -27,6 +27,13 @@ All notable changes to this project will be documented in this file.
 * Expressions are now available and considered "alpha". They are not yet documented, but you can see examples in [examples/expressions.rb](examples/expressions.rb). (https://github.com/flippercloud/flipper/pull/692)
 * Allow head requests to api (https://github.com/flippercloud/flipper/pull/759)
 * Cloud Telemetry alpha (https://github.com/flippercloud/flipper/pull/775).
+* Easier statsd setup (https://github.com/flippercloud/flipper/pull/779).
+  ```ruby
+  # You can now just do this in your configure block and it'll require the files and configure the client.
+  Flipper.configure do |conf|
+    conf.statsd = my_client
+  end
+  ```
 
 ## 1.0.0
 
