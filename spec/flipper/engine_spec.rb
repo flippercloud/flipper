@@ -244,12 +244,14 @@ RSpec.describe Flipper::Engine do
 
   context 'with cloud secrets in Rails.credentials' do
     before do
-      allow(application).to receive(:credentials).and_return({
+      ENV["RAILS_MASTER_KEY"] = "a" * 32
+      application.config.credentials.content_path = Tempfile.new.path
+      application.credentials.write(YAML.dump({
         flipper: {
           cloud_token: "credentials-token",
           cloud_sync_secret: "credentials-secret",
         }
-      })
+      }))
     end
 
     it "enables cloud" do
