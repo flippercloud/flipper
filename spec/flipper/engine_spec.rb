@@ -6,7 +6,7 @@ RSpec.describe Flipper::Engine do
     Class.new(Rails::Application) do
       config.eager_load = false
       config.logger = ActiveSupport::Logger.new($stdout)
-    end
+    end.instance
   end
 
   before do
@@ -239,6 +239,40 @@ RSpec.describe Flipper::Engine do
         post "/_flipper"
         expect(last_response.status).to eq(404)
       end
+    end
+  end
+
+  context 'with cloud secrets in Rails.credentials' do
+    around do |example|
+      # Create temporary directory for Rails.root to write credentials to
+      # Once Rails 5.2 support is dropped, this can all be replaced with
+      # `config.credentials.content_path = Tempfile.new.path`
+      Dir.mktmpdir do |dir|
+        Dir.chdir(dir) do
+          Dir.mkdir("#{dir}/config")
+
+          example.run
+        end
+      end
+    end
+
+    before do
+      # Set master key which is needed to write credentials
+      ENV["RAILS_MASTER_KEY"] = "a" * 32
+
+      application.credentials.write(YAML.dump({
+        flipper: {
+          cloud_token: "credentials-token",
+          cloud_sync_secret: "credentials-secret",
+        }
+      }))
+    end
+
+    it "enables cloud" do
+      application.initialize!
+      expect(ENV["FLIPPER_CLOUD_TOKEN"]).to eq("credentials-token")
+      expect(ENV["FLIPPER_CLOUD_SYNC_SECRET"]).to eq("credentials-secret")
+      expect(Flipper.instance).to be_a(Flipper::Cloud::DSL)
     end
   end
 
