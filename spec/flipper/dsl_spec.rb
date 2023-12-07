@@ -171,6 +171,30 @@ RSpec.describe Flipper::DSL do
       end
     end
   end
+  describe '#features_for_actor' do
+    actor = Flipper::Actor.new(5)
+    context 'with no features' do
+      it 'defaults to empty set' do
+        expect(subject.features_for_actor(actor)).to eq(Set.new)
+      end
+    end
+
+    context 'with features enabled and disabled' do
+      before do
+        subject.enable_actor(:stats, actor)
+        subject.enable_actor(:cache, actor)
+        subject[:search].disable
+      end
+
+      it 'returns set of feature instances' do
+        expect(subject.features_for_actor(actor)).to be_instance_of(Set)
+        subject.features_for_actor(actor).each do |feature|
+          expect(feature).to be_instance_of(Flipper::Feature)
+        end
+        expect(subject.features_for_actor(actor).map(&:name).map(&:to_s).sort).to eq(%w(cache stats))
+      end
+    end
+  end
 
   describe '#enable/disable' do
     it 'enables and disables the feature' do
