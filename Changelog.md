@@ -34,6 +34,15 @@ All notable changes to this project will be documented in this file.
     conf.statsd = my_client
   end
   ```
+* Load cloud secrets from Rails credentials (https://github.com/flippercloud/flipper/pull/782)
+  ```bash
+  $ rails credentials:edit
+  ```
+  ```yaml
+  flipper:
+    cloud_token: <your-cloud-token>
+    cloud_sync_secret: <your-webhook-secret>
+  ```
 
 ## 1.0.0
 
