@@ -36,7 +36,7 @@ All notable changes to this project will be documented in this file.
   ```
 * Load cloud secrets from Rails credentials (https://github.com/flippercloud/flipper/pull/782)
   ```bash
-  $ rails credentials:edit
+  $ rails credentials:edit -e development
   ```
   ```yaml
   flipper:
