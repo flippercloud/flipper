@@ -14,9 +14,8 @@ module Flipper
     end
 
     initializer "flipper.properties" do
-      require "flipper/model/active_record"
-
       ActiveSupport.on_load(:active_record) do
+        require "flipper/model/active_record"
         ActiveRecord::Base.include Flipper::Model::ActiveRecord
       end
     end
