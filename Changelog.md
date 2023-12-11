@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## v1.1.2
+
+### Additions/Changes
+
+- Added `$ rails generate flipper:update && rails db:migrate` to generate necessary schema migrations (https://github.com/flippercloud/flipper/pull/787)
+
 ## v1.1.1
 
 ### Bug Fixes
@@ -30,12 +36,9 @@ All notable changes to this project will be documented in this file.
   ```
 - Handle deprecation of Rack::File in Rack 3.1 (https://github.com/flippercloud/flipper/pull/773).
 - Human readable actor names in flipper-ui (https://github.com/flippercloud/flipper/pull/737).
-- Expressions are now available and considered "alpha". They are not yet documented, but you can see examples in [examples/expressions.rb](examples/expressions.rb). Those using the `flipper-active_record` adapter will want to migrate the database so it can store JSON expressions (https://github.com/flippercloud/flipper/pull/692)
+- Expressions are now available and considered "alpha". They are not yet documented, but you can see examples in [examples/expressions.rb](examples/expressions.rb). Those using the `flipper-active_record` adapter will want to [migrate the database](See https://github.com/flippercloud/flipper/issues/557) so it can store JSON expressions (https://github.com/flippercloud/flipper/pull/692)
   ```
-  $ rails generate migration change_flipper_gates_value_to_text
-  ```
-  ```ruby
-  change_column :flipper_gates, :value, :text
+  $ rails generate flipper:update && rails db:migrate
   ```
 - Allow head requests to api (https://github.com/flippercloud/flipper/pull/759)
 - Cloud Telemetry alpha (https://github.com/flippercloud/flipper/pull/775).
