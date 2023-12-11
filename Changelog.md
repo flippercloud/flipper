@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+### Bug Fixes
+
+- Fix an error where the Rails integration in `Flipper::Engine` was not properly delegating a class method to the instance (https://github.com/flippercloud/flipper/pull/788)
+  ```
+  undefined local variable or method `default_strict_value' for Flipper::Engine:Class
+  ```
+
 ## v1.1.1
 
 ### Bug Fixes
