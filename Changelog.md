@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Bug Fixes
 
+- Fix AR adapter when table doesn't exist (https://github.com/flippercloud/flipper/pull/786).
 - Fix an error where the Rails integration in `Flipper::Engine` was not properly delegating a class method to the instance (https://github.com/flippercloud/flipper/pull/788)
   ```
   undefined local variable or method `default_strict_value' for Flipper::Engine:Class
