@@ -45,6 +45,16 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
 
   it_should_behave_like 'a flipper adapter'
 
+  fit "works when table doesn't exist" do
+    ActiveRecord::Base.connection.execute("DROP table IF EXISTS `flipper_gates`")
+
+    Flipper.configuration = nil
+    Flipper.instance = nil
+
+    silence_warnings { load 'flipper/adapters/active_record.rb' }
+    expect { Flipper::Adapters::ActiveRecord.new }.not_to raise_error
+  end
+
   it "should load actor ids fine" do
     flipper.enable_percentage_of_time(:foo, 1)
 
