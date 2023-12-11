@@ -25,6 +25,8 @@ gem 'benchmark-ips'
 gem 'stackprof-webnav'
 gem 'flamegraph'
 gem 'climate_control'
+gem 'mysql2'
+gem 'pg'
 
 group(:guard) do
   gem 'guard'
