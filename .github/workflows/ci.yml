@@ -17,9 +17,6 @@ jobs:
         image: postgres:13
         ports:
           - 5432:5432
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -55,6 +52,8 @@ jobs:
       RAILS_VERSION: ${{ matrix.rails }}
       MYSQL_USER: root
       MYSQL_PASSWORD: root
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     steps:
       - name: Set up MySQL
         run: sudo /etc/init.d/mysql start
