@@ -278,7 +278,7 @@ module Flipper
       # See https://github.com/flippercloud/flipper/pull/692
       def value_not_text?
         @gate_class.column_for_attribute(:value).type != :text
-      rescue ::ActiveRecord::AdapterError => error
+      rescue ::ActiveRecord::ActiveRecordError => error
         # If the table doesn't exist, the column doesn't exist either
         warn "#{error.message}. You likely need to run `rails g flipper:active_record` and/or `rails db:migrate`."
       end
