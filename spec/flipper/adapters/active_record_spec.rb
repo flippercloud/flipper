@@ -16,26 +16,26 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
 
   {
     sqlite: {
-      adapter: 'sqlite3',
-      database: ':memory:'
+      adapter: "sqlite3",
+      database: ":memory:"
     },
 
     mysql2: {
-      adapter: 'mysql2',
-      encoding: 'utf8mb4',
-      username: 'root',
-      # password: '',
-      socket: '/tmp/mysql.sock',
-      database: 'flipper_test'
+      adapter: "mysql2",
+      encoding: "utf8mb4",
+      username: ENV["MYSQL_USER"] || "root",
+      password: ENV["MYSQL_PASSWORD"] || "",
+      database: ENV["MYSQL_DATABASE"] || "flipper_test",
+      port: ENV["DB_PORT"] || 3306
     },
 
     postgres: {
       adapter: "postgresql",
       encoding: "unicode",
       host: "127.0.0.1",
-      database: "flipper_test",
-      username: ENV['POSTGRES_USER'] || '',
-      password: ENV['POSTGRES_PASSWORD'] || ''
+      username: ENV["POSTGRES_USER"] || "",
+      password: ENV["POSTGRES_PASSWORD"] || "",
+      database: ENV["POSTGRES_DATABASE"] || "flipper_test",
     }
   }.each do |name, config|
     context "with #{name}" do

@@ -13,6 +13,18 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      postgres:
+        image: postgres:13
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     strategy:
       matrix:
         ruby: ['2.6', '2.7', '3.0', '3.1', '3.2']
@@ -41,7 +53,11 @@ jobs:
       REDIS_URL: redis://localhost:6379/0
       CI: true
       RAILS_VERSION: ${{ matrix.rails }}
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
     steps:
+      - name: Set up MySQL
+        run: sudo /etc/init.d/mysql start
       - name: Setup memcached
         uses: KeisukeYamashita/memcached-actions@v1
       - name: Start MongoDB
