@@ -70,7 +70,7 @@ module Flipper
       !!ENV["FLIPPER_CLOUD_TOKEN"]
     end
 
-    def default_strict_value
+    def self.default_strict_value
       value = ENV["FLIPPER_STRICT"]
       if value.in?(["warn", "raise", "noop"])
         value.to_sym
