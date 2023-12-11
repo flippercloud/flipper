@@ -15,7 +15,7 @@ class FlipperActiveRecordGeneratorTest < Rails::Generators::TestCase
                         end
     assert_migration 'db/migrate/create_flipper_tables.rb', <<~MIGRATION
       class CreateFlipperTables < ActiveRecord::Migration#{migration_version}
-        def self.up
+        def up
           create_table :flipper_features do |t|
             t.string :key, null: false
             t.timestamps null: false
@@ -31,7 +31,7 @@ class FlipperActiveRecordGeneratorTest < Rails::Generators::TestCase
           add_index :flipper_gates, [:feature_key, :key, :value], unique: true
         end
 
-        def self.down
+        def down
           drop_table :flipper_gates
           drop_table :flipper_features
         end

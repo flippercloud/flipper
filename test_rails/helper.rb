@@ -9,3 +9,20 @@ begin
 rescue NoMethodError
   # no biggie, means we are on older version of AS that doesn't have this option
 end
+
+def silence
+  # Store the original stderr and stdout in order to restore them later
+  original_stderr = $stderr
+  original_stdout = $stdout
+
+  # Redirect stderr and stdout
+  output = $stderr = $stdout = StringIO.new
+
+  yield
+
+  $stderr = original_stderr
+  $stdout = original_stdout
+
+  # Return output
+  output.string
+end

@@ -9,6 +9,6 @@ class ChangeFlipperGatesValueToText < ActiveRecord::Migration<%= migration_versi
   end
 
   def down
-    change_column :flipper_gates, :text, :value
+    change_column :flipper_gates, :value, :string
   end
 end
