@@ -1,6 +1,6 @@
 require 'rubygems'
-require 'bundler'
-Bundler.setup(:default)
+require 'bundler/setup'
+require 'minitest/autorun'
 require 'rails'
 require 'rails/test_help'
 

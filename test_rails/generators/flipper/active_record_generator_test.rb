@@ -1,5 +1,4 @@
-require 'active_record'
-require 'rails/generators/test_case'
+require 'helper'
 require 'generators/flipper/active_record_generator'
 
 class FlipperActiveRecordGeneratorTest < Rails::Generators::TestCase
@@ -26,7 +25,7 @@ class FlipperActiveRecordGeneratorTest < Rails::Generators::TestCase
           create_table :flipper_gates do |t|
             t.string :feature_key, null: false
             t.string :key, null: false
-            t.string :value
+            t.text :value
             t.timestamps null: false
           end
           add_index :flipper_gates, [:feature_key, :key, :value], unique: true
