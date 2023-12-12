@@ -28,7 +28,7 @@ class FlipperActiveRecordGeneratorTest < Rails::Generators::TestCase
             t.text :value
             t.timestamps null: false
           end
-          add_index :flipper_gates, [:feature_key, :key, :value], unique: true
+          add_index :flipper_gates, [:feature_key, :key, :value], unique: true, length: { value: 255 }
         end
 
         def down
