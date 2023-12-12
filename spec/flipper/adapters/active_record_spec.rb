@@ -41,8 +41,11 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
     context "with #{name}" do
       before(:each) do
         ActiveRecord::Tasks::DatabaseTasks.purge(config) rescue nil
-        ActiveRecord::Base.establish_connection(config)
-        CreateFlipperTables.migrate(:up)
+
+        skip_on_error(ActiveRecord::ConnectionNotEstablished, "#{name} not available") do
+          ActiveRecord::Base.establish_connection(config)
+          CreateFlipperTables.migrate(:up)
+        end
       end
 
       after(:each) do
