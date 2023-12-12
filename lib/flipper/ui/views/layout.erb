@@ -23,6 +23,12 @@
         Version: <%= Flipper::VERSION %>
         <a href="#" class="badge badge-warning ml-2 d-none" style="font-size:100%" id="new-version-badge" data-version="<%= Flipper::VERSION %>">
         </a>
+
+        <% if Flipper.deprecated_ruby_version? %>
+          <a href="https://github.com/flippercloud/flipper/pull/776" class="badge badge-danger ml-2" style="font-size:100%">
+            Ruby <%= RUBY_VERSION %> deprecated
+          </a>
+        <% end %>
       </div>
 
       <nav aria-label="breadcrumb">
