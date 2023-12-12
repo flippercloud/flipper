@@ -1,7 +1,7 @@
 require "helper"
 require "generators/flipper/update_generator"
 
-class BasicsGeneratorTest < Rails::Generators::TestCase
+class UpdateGeneratorTest < Rails::Generators::TestCase
   tests Flipper::Generators::UpdateGenerator
   ROOT = File.expand_path("../../../../tmp/generators", __FILE__)
   destination ROOT
