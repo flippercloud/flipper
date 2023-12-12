@@ -4,14 +4,14 @@
 
 # Flipper
 
-> Beautiful, performant feature flags for Ruby.
+> Beautiful, performant feature flags for Ruby and Rails.
 
 Flipper gives you control over who has access to features in your app.
 
-* Enable or disable features for everyone, specific actors, groups of actors, a percentage of actors, or a percentage of time.
-* Configure your feature flags from the console or a web UI.
-* Regardless of what data store you are using, Flipper can performantly store your feature flags.
-* Use [Flipper Cloud](#flipper-cloud) to cascade features from multiple environments, share settings with your team, control permissions, keep an audit history, and rollback.
+- Enable or disable features for everyone, specific actors, groups of actors, a percentage of actors, or a percentage of time.
+- Configure your feature flags from the console or a web UI.
+- Regardless of what data store you are using, Flipper can performantly store your feature flags.
+- Use [Flipper Cloud](#flipper-cloud) to cascade features from multiple environments, share settings with your team, control permissions, keep an audit history, and rollback.
 
 Control your software &mdash; don't let it control you.
 
@@ -72,13 +72,13 @@ Read more about [getting started with Flipper](https://flippercloud.io/docs?utm_
 
 Like Flipper and want more? Check out [Flipper Cloud](https://www.flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=check_out), which comes with:
 
-* **multiple environments** &mdash; production, staging, per continent, whatever you need. Every environment inherits from production by default and every project comes with a [project overview page](https://blog.flippercloud.io/project-overview/) that shows each feature and its status in each environment.
-* **personal environments** &mdash; everyone on your team gets a personal environment (that inherits from production) which they can modify however they want without stepping on anyone else's toes.
-* **permissions** &mdash; grant access to everyone in your organization or lockdown each project to particular people. You can even limit access to a particular environment (like production) to specific people.
-* **audit history** &mdash; every feature change and who made it.
-* **rollbacks** &mdash; enable or disable a feature accidentally? No problem. You can roll back to any point in the audit history with a single click.
-* **maintenance** &mdash; we'll keep the lights on for you. We also have handy webhooks and background polling for keeping your app in sync with Cloud, so **our availability won't affect yours**. All your feature flag reads are local to your app.
-* **everything in one place** &mdash; no need to bounce around from different application UIs or IRB consoles.
+- **multiple environments** &mdash; production, staging, per continent, whatever you need. Every environment inherits from production by default and every project comes with a [project overview page](https://blog.flippercloud.io/project-overview/) that shows each feature and its status in each environment.
+- **personal environments** &mdash; everyone on your team gets a personal environment (that inherits from production) which they can modify however they want without stepping on anyone else's toes.
+- **permissions** &mdash; grant access to everyone in your organization or lockdown each project to particular people. You can even limit access to a particular environment (like production) to specific people.
+- **audit history** &mdash; every feature change and who made it.
+- **rollbacks** &mdash; enable or disable a feature accidentally? No problem. You can roll back to any point in the audit history with a single click.
+- **maintenance** &mdash; we'll keep the lights on for you. We also have handy webhooks and background polling for keeping your app in sync with Cloud, so **our availability won't affect yours**. All your feature flag reads are local to your app.
+- **everything in one place** &mdash; no need to bounce around from different application UIs or IRB consoles.
 
 [![Flipper Cloud Screenshot](docs/images/flipper_cloud.png)](https://www.flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=screenshot)
 
@@ -103,11 +103,11 @@ We also have a [free plan](https://www.flippercloud.io?utm_source=oss&utm_medium
 
 ## Brought To You By
 
-| pic | @mention | area |
-|---|---|---|
-| ![@jnunemaker](https://avatars3.githubusercontent.com/u/235?s=64) | [@jnunemaker](https://github.com/jnunemaker) | most things |
-| ![@bkeepers](https://avatars3.githubusercontent.com/u/173?s=64) | [@bkeepers](https://github.com/bkeepers) | most things |
-| ![@dpep](https://avatars3.githubusercontent.com/u/918804?s=64) | [@dpep](https://github.com/dpep) | tbd |
-| ![@alexwheeler](https://avatars3.githubusercontent.com/u/3260042?s=64) | [@alexwheeler](https://github.com/alexwheeler) | api |
-| ![@thetimbanks](https://avatars1.githubusercontent.com/u/471801?s=64) | [@thetimbanks](https://github.com/thetimbanks) | ui |
-| ![@lazebny](https://avatars1.githubusercontent.com/u/6276766?s=64) | [@lazebny](https://github.com/lazebny) | docker |
+| pic                                                                    | @mention                                       | area        |
+| ---------------------------------------------------------------------- | ---------------------------------------------- | ----------- |
+| ![@jnunemaker](https://avatars3.githubusercontent.com/u/235?s=64)      | [@jnunemaker](https://github.com/jnunemaker)   | most things |
+| ![@bkeepers](https://avatars3.githubusercontent.com/u/173?s=64)        | [@bkeepers](https://github.com/bkeepers)       | most things |
+| ![@dpep](https://avatars3.githubusercontent.com/u/918804?s=64)         | [@dpep](https://github.com/dpep)               | tbd         |
+| ![@alexwheeler](https://avatars3.githubusercontent.com/u/3260042?s=64) | [@alexwheeler](https://github.com/alexwheeler) | api         |
+| ![@thetimbanks](https://avatars1.githubusercontent.com/u/471801?s=64)  | [@thetimbanks](https://github.com/thetimbanks) | ui          |
+| ![@lazebny](https://avatars1.githubusercontent.com/u/6276766?s=64)     | [@lazebny](https://github.com/lazebny)         | docker      |
