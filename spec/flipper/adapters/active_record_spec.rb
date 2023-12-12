@@ -3,6 +3,7 @@ require 'active_support/core_ext/kernel'
 
 # Turn off migration logging for specs
 ActiveRecord::Migration.verbose = false
+ActiveRecord::Tasks::DatabaseTasks.root = File.dirname(__FILE__)
 
 RSpec.describe Flipper::Adapters::ActiveRecord do
   subject { described_class.new }
@@ -14,13 +15,13 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
     eval migration.result(binding) # defines CreateFlipperTables
   end
 
-  {
-    sqlite: {
+  [
+    {
       adapter: "sqlite3",
       database: ":memory:"
     },
 
-    mysql2: {
+    {
       adapter: "mysql2",
       encoding: "utf8mb4",
       username: ENV["MYSQL_USER"] || "root",
@@ -29,7 +30,7 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
       port: ENV["DB_PORT"] || 3306
     },
 
-    postgres: {
+    {
       adapter: "postgresql",
       encoding: "unicode",
       host: "127.0.0.1",
@@ -37,12 +38,12 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
       password: ENV["POSTGRES_PASSWORD"] || "",
       database: ENV["POSTGRES_DATABASE"] || "flipper_test",
     }
-  }.each do |name, config|
-    context "with #{name}" do
+  ].each do |config|
+    context "with #{config[:adapter]}" do
       before(:each) do
-        ActiveRecord::Tasks::DatabaseTasks.purge(config) rescue nil
+        ActiveRecord::Tasks::DatabaseTasks.purge(config)
 
-        skip_on_error(ActiveRecord::ConnectionNotEstablished, "#{name} not available") do
+        skip_on_error(ActiveRecord::ConnectionNotEstablished, "#{config[:adapter]} not available") do
           ActiveRecord::Base.establish_connection(config)
           CreateFlipperTables.migrate(:up)
         end
