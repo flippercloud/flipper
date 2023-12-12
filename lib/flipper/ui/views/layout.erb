@@ -29,6 +29,12 @@
             Ruby <%= RUBY_VERSION %> deprecated
           </a>
         <% end %>
+
+        <% if defined?(Rails) && Flipper::Engine.deprecated_rails_version? %>
+          <a href="https://github.com/flippercloud/flipper/pull/776" class="badge badge-danger ml-2" style="font-size:100%">
+            Rails <%= Rails.version %> deprecated
+          </a>
+        <% end %>
       </div>
 
       <nav aria-label="breadcrumb">
