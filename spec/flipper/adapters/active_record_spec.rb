@@ -41,6 +41,7 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
   ].each do |config|
     context "with #{config[:adapter]}" do
       before(:each) do
+        config = config.with_indifferent_access
         ActiveRecord::Tasks::DatabaseTasks.purge(config)
 
         skip_on_error(ActiveRecord::ConnectionNotEstablished, "#{config[:adapter]} not available") do
