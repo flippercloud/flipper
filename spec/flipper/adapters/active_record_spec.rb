@@ -39,11 +39,14 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
       database: ENV["POSTGRES_DATABASE"] || "flipper_test",
     }
   ].each do |config|
-    context "with #{config[:adapter]}" do
-      before(:each) do
-        config = config.with_indifferent_access
-        ActiveRecord::Tasks::DatabaseTasks.purge(config)
+    config = config.with_indifferent_access
 
+    context "with #{config[:adapter]}" do
+      before(:all) do
+        ActiveRecord::Tasks::DatabaseTasks.create(config)
+      end
+
+      before(:each) do
         skip_on_error(ActiveRecord::ConnectionNotEstablished, "#{config[:adapter]} not available") do
           ActiveRecord::Base.establish_connection(config)
           CreateFlipperTables.migrate(:up)
@@ -51,7 +54,12 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
       end
 
       after(:each) do
+        ActiveRecord::Tasks::DatabaseTasks.purge(config)
         ActiveRecord::Base.connection.close
+      end
+
+      after(:all) do
+        ActiveRecord::Tasks::DatabaseTasks.drop(config)
       end
 
       it_should_behave_like 'a flipper adapter'
