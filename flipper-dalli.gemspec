@@ -9,7 +9,7 @@ end
 Gem::Specification.new do |gem|
   gem.authors       = ['John Nunemaker']
   gem.email         = 'support@flippercloud.io'
-  gem.summary       = 'Dalli adapter for Flipper'
+  gem.summary       = 'Dalli feature flag cache adapter for Flipper'
   gem.license       = 'MIT'
   gem.homepage      = 'https://www.flippercloud.io/docs/adapters'
 

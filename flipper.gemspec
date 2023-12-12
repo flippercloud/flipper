@@ -23,7 +23,7 @@ ignored_test_files.flatten!.uniq!
 Gem::Specification.new do |gem|
   gem.authors       = ['John Nunemaker']
   gem.email         = 'support@flippercloud.io'
-  gem.summary       = 'Beautiful, performant feature flags for Ruby.'
+  gem.summary       = 'Beautiful, performant feature flags for Ruby and Rails.'
   gem.homepage      = 'https://www.flippercloud.io/docs'
   gem.license       = 'MIT'
 
