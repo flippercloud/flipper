@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## 1.1.2
 
 ### Bug Fixes
 
@@ -14,13 +14,13 @@ All notable changes to this project will be documented in this file.
 
 - Added `$ rails generate flipper:update` to generate necessary schema migrations (https://github.com/flippercloud/flipper/pull/787)
 
-## v1.1.1
+## 1.1.1
 
 ### Bug Fixes
 
 - Whoops! Anyone not using flipper-active_record would hit a missing require because of our fancy gemspecs (https://github.com/flippercloud/flipper/pull/785).
 
-## v1.1.0
+## 1.1.0
 
 ### Additions/Changes
 
