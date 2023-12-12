@@ -5,7 +5,7 @@ module Flipper
 
       def self.call(text, percentage, context: {})
         prefix = context[:feature_name] || ""
-        Zlib.crc32("#{prefix}#{text}") % (100 * SCALING_FACTOR) < percentage * SCALING_FACTOR
+        Zlib.crc32("#{prefix}#{text}") % (100 * SCALING_FACTOR) < percentage.clamp(0, 100) * SCALING_FACTOR
       end
     end
   end

@@ -83,6 +83,11 @@ RSpec.describe Flipper::Gates::Expression do
       expect(subject.protects?(expression)).to be(true)
     end
 
+    it 'returns true for Flipper::Constant' do
+      expression = Flipper.boolean(true)
+      expect(subject.protects?(expression)).to be(true)
+    end
+
     it 'returns true for Hash' do
       expression = Flipper.number(20).eq(20)
       expect(subject.protects?(expression.value)).to be(true)

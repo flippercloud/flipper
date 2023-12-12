@@ -7,6 +7,7 @@ require 'flipper/version'
 # gem uninstall flipper flipper-ui flipper-redis
 desc 'Build gem into the pkg directory'
 task :build do
+  sh 'npm clean-install --silent'
   FileUtils.rm_rf('pkg')
   Dir['*.gemspec'].each do |gemspec|
     system "gem build #{gemspec}"

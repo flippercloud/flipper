@@ -6,7 +6,7 @@ plugin_files = []
 plugin_test_files = []
 
 Dir['flipper-*.gemspec'].map do |gemspec|
-  spec = eval(File.read(gemspec))
+  spec = Bundler.load_gemspec(gemspec)
   plugin_files << spec.files
   plugin_test_files << spec.files
 end

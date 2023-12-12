@@ -10,14 +10,18 @@ module Flipper
 
       case object
       when Hash
-        name = object.keys.first
-        args = object.values.first
-        unless name
+        if(object.keys.size != 1)
           raise ArgumentError, "#{object.inspect} cannot be converted into an expression"
         end
 
-        new(name, Array(args).map { |o| build(o) })
-      when String, Numeric, FalseClass, TrueClass
+        name = object.keys.first
+        args = object.values.first
+
+        # Ensure args are an array, but we can't just use Array(args) because it will convert a Hash to Array
+        args = args.is_a?(Hash) ? [args] : Array(args)
+
+        new(name, args.map { |o| build(o) })
+      when String, Numeric, FalseClass, TrueClass, nil
         Expression::Constant.new(object)
       when Symbol
         Expression::Constant.new(object.to_s)
@@ -54,6 +58,10 @@ module Flipper
       {
         name => args.map(&:value)
       }
+    end
+
+    def validate
+      Schema.new.validate(value)
     end
 
     private

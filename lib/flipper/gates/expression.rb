@@ -39,7 +39,7 @@ module Flipper
       end
 
       def protects?(thing)
-        thing.is_a?(Flipper::Expression) || thing.is_a?(Hash)
+        thing.is_a?(Flipper::Expression) || thing.is_a?(Flipper::Expression::Constant) || thing.is_a?(Hash)
       end
 
       def wrap(thing)
