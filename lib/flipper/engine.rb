@@ -84,10 +84,8 @@ module Flipper
       end
     end
 
-    NEXT_REQUIRED_RAILS_VERSION = '6.1.0'.freeze
-
     def self.deprecated_rails_version?
-      Gem::Version.new(Rails.version) < Gem::Version.new(NEXT_REQUIRED_RAILS_VERSION)
+      Gem::Version.new(Rails.version) < Gem::Version.new(Flipper::NEXT_REQUIRED_RAILS_VERSION)
     end
   end
 end
