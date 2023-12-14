@@ -83,5 +83,9 @@ module Flipper
         :warn
       end
     end
+
+    def self.deprecated_rails_version?
+      Gem::Version.new(Rails.version) < Gem::Version.new(Flipper::NEXT_REQUIRED_RAILS_VERSION)
+    end
   end
 end
