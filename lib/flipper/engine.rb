@@ -1,5 +1,19 @@
 module Flipper
   class Engine < Rails::Engine
+    def self.default_strict_value
+      value = ENV["FLIPPER_STRICT"]
+      if value.in?(["warn", "raise", "noop"])
+        value.to_sym
+      elsif value
+        Typecast.to_boolean(value) ? :raise : false
+      elsif Rails.env.production?
+        false
+      else
+        # Warn for now. Future versions will default to :raise in development and test
+        :warn
+      end
+    end
+
     paths["config/routes.rb"] = ["lib/flipper/cloud/routes.rb"]
 
     config.before_configuration do
@@ -68,20 +82,6 @@ module Flipper
 
     def cloud?
       !!ENV["FLIPPER_CLOUD_TOKEN"]
-    end
-
-    def self.default_strict_value
-      value = ENV["FLIPPER_STRICT"]
-      if value.in?(["warn", "raise", "noop"])
-        value.to_sym
-      elsif value
-        Typecast.to_boolean(value) ? :raise : false
-      elsif Rails.env.production?
-        false
-      else
-        # Warn for now. Future versions will default to :raise in development and test
-        :warn
-      end
     end
 
     def self.deprecated_rails_version?
