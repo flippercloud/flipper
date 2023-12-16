@@ -1,15 +1,12 @@
 #
 # Usage:
-#   # if you want it to not reload and be really fast
 #   bin/rackup examples/api/custom_memoized.ru -p 9999
-#
-#   # if you want reloading
-#   bin/shotgun examples/api/custom_memoized.ru -p 9999
 #
 #   http://localhost:9999/
 #
 
 require 'bundler/setup'
+require 'rack/reloader'
 require "active_support/notifications"
 require "flipper/api"
 require "flipper/adapters/pstore"
@@ -30,6 +27,8 @@ ActiveSupport::Notifications.subscribe(/.*/, ->(*args) {
 
 # You can uncomment this to get some default data:
 # flipper[:logging].enable_percentage_of_time 5
+
+use Rack::Reloader
 
 run Flipper::Api.app(flipper) { |builder|
   builder.use Flipper::Middleware::SetupEnv, flipper

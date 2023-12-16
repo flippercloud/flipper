@@ -1,5 +1,9 @@
 module Flipper
   METADATA = {
-    'changelog_uri' => 'https://github.com/jnunemaker/flipper/blob/main/Changelog.md',
+    "documentation_uri" => "https://www.flippercloud.io/docs",
+    "homepage_uri"      => "https://www.flippercloud.io",
+    "source_code_uri"   => "https://github.com/flippercloud/flipper",
+    "bug_tracker_uri"   => "https://github.com/flippercloud/flipper/issues",
+    "changelog_uri"     => "https://github.com/flippercloud/flipper/releases",
   }.freeze
 end

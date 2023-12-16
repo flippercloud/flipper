@@ -29,32 +29,31 @@ module Flipper
 
       SOURCES = {
         bootstrap_css: {
-          src: 'https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css'.freeze,
+          src: '/css/bootstrap-4.6.0.min.css'.freeze,
           hash: 'sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l'.freeze
         }.freeze,
         jquery_js: {
-          src: 'https://code.jquery.com/jquery-3.6.0.slim.js'.freeze,
+          src: '/js/jquery-3.6.0.slim.js'.freeze,
           hash: 'sha256-HwWONEZrpuoh951cQD1ov2HUK5zA5DwJ1DNUXaM6FsY='.freeze
         }.freeze,
         popper_js: {
-          src: 'https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js'.freeze,
+          src: '/js/popper-1.12.9.min.js'.freeze,
           hash: 'sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q'.freeze
         }.freeze,
         bootstrap_js: {
-          src: 'https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js'.freeze,
+          src: '/js/bootstrap-4.6.0.min.js'.freeze,
           hash: 'sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF'.freeze
         }.freeze
       }.freeze
-      SCRIPT_SRCS = SOURCES.values_at(:jquery_js, :popper_js, :bootstrap_js).map { |s| s[:src] }
-      STYLE_SRCS = SOURCES.values_at(:bootstrap_css).map { |s| s[:src] }
       CONTENT_SECURITY_POLICY = <<-CSP.delete("\n")
         default-src 'none';
         img-src 'self';
         font-src 'self';
-        script-src 'report-sample' 'self' #{SCRIPT_SRCS.join(' ')};
-        style-src 'self' 'unsafe-inline' #{STYLE_SRCS.join(' ')};
+        script-src 'report-sample' 'self';
+        style-src 'self' 'unsafe-inline';
         style-src-attr 'unsafe-inline' ;
-        style-src-elem 'self' #{STYLE_SRCS.join(' ')};
+        style-src-elem 'self';
+        connect-src https://www.flippercloud.io;
       CSP
 
       # Public: Call this in subclasses so the action knows its route.
@@ -110,7 +109,7 @@ module Flipper
         @flipper = flipper
         @request = request
         @code = 200
-        @headers = { 'Content-Type' => 'text/plain' }
+        @headers = { 'content-type' => 'text/plain' }
         @breadcrumbs =
           if Flipper::UI.configuration.application_breadcrumb_href
             [Breadcrumb.new('App', Flipper::UI.configuration.application_breadcrumb_href)]
@@ -160,21 +159,26 @@ module Flipper
       #
       # Returns a response.
       def view_response(name)
-        header 'Content-Type', 'text/html'
-        header 'Content-Security-Policy', CONTENT_SECURITY_POLICY
+        header 'content-type', 'text/html'
+        header 'content-security-policy', CONTENT_SECURITY_POLICY
         body = view_with_layout { view_without_layout name }
         halt [@code, @headers, [body]]
       end
 
       # Public: Dumps an object as json and returns rack response with that as
-      # the body. Automatically sets Content-Type to "application/json".
+      # the body. Automatically sets content-type to "application/json".
       #
       # object - The Object that should be dumped as json.
       #
       # Returns a response.
       def json_response(object)
-        header 'Content-Type', 'application/json'
-        body = JSON.dump(object)
+        header 'content-type', 'application/json'
+        body = case object
+        when String
+          object
+        else
+          Typecast.to_json(object)
+        end
         halt [@code, @headers, [body]]
       end
 
@@ -183,7 +187,7 @@ module Flipper
       # location - The String location to set the Location header to.
       def redirect_to(location)
         status 302
-        header 'Location', "#{script_name}#{Rack::Utils.escape_path(location)}"
+        header 'location', "#{script_name}#{Rack::Utils.escape_path(location)}"
         halt [@code, @headers, ['']]
       end
 
@@ -273,7 +277,7 @@ module Flipper
 
       # Internal: Method to call when the UI is in read only mode and you want
       # to inform people of that fact.
-      def read_only
+      def render_read_only
         status 403
 
         breadcrumb 'Home', '/'
@@ -281,6 +285,14 @@ module Flipper
         breadcrumb 'Noooooope'
 
         halt view_response(:read_only)
+      end
+
+      def read_only?
+        Flipper::UI.configuration.read_only || flipper.read_only?
+      end
+
+      def write_allowed?
+        !read_only?
       end
 
       def bootstrap_css

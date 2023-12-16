@@ -5,8 +5,8 @@ module Flipper
     # Public: Adapter that wraps another adapter and stores the operations.
     #
     # Useful in tests to verify calls and such. Never use outside of testing.
-    class OperationLogger < SimpleDelegator
-      include ::Flipper::Adapter
+    class OperationLogger
+      include Flipper::Adapter
 
       class Operation
         attr_reader :type, :args
@@ -18,6 +18,8 @@ module Flipper
       end
 
       OperationTypes = [
+        :import,
+        :export,
         :features,
         :add,
         :remove,
@@ -32,14 +34,9 @@ module Flipper
       # Internal: An array of the operations that have happened.
       attr_reader :operations
 
-      # Internal: The name of the adapter.
-      attr_reader :name
-
       # Public
       def initialize(adapter, operations = nil)
-        super(adapter)
         @adapter = adapter
-        @name = :operation_logger
         @operations = operations || []
       end
 
@@ -96,6 +93,18 @@ module Flipper
       def disable(feature, gate, thing)
         @operations << Operation.new(:disable, [feature, gate, thing])
         @adapter.disable(feature, gate, thing)
+      end
+
+      # Public
+      def import(source)
+        @operations << Operation.new(:import, [source])
+        @adapter.import(source)
+      end
+
+      # Public
+      def export(format: :json, version: 1)
+        @operations << Operation.new(:export, [format, version])
+        @adapter.export(format: format, version: version)
       end
 
       # Public: Count the number of times a certain operation happened.

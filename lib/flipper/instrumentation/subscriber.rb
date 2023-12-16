@@ -45,7 +45,6 @@ module Flipper
         gate_name = @payload[:gate_name]
         operation = strip_trailing_question_mark(@payload[:operation])
         result = @payload[:result]
-        thing = @payload[:thing]
 
         update_timer "flipper.feature_operation.#{operation}"
 
@@ -70,6 +69,14 @@ module Flipper
         key = @payload[:key]
 
         update_timer "flipper.adapter.#{adapter_name}.#{operation}"
+      end
+
+      def update_poller_metrics
+        # noop
+      end
+
+      def update_synchronizer_call_metrics
+        # noop
       end
 
       QUESTION_MARK = '?'.freeze

@@ -80,13 +80,13 @@ RSpec.describe Flipper::GateValues do
   it 'raises argument error for percentage of time value that cannot be converted to an integer' do
     expect do
       described_class.new(percentage_of_time: ['asdf'])
-    end.to raise_error(ArgumentError, %(["asdf"] cannot be converted to an integer))
+    end.to raise_error(ArgumentError, %(["asdf"] cannot be converted to a number))
   end
 
   it 'raises argument error for percentage of actors value that cannot be converted to an int' do
     expect do
       described_class.new(percentage_of_actors: ['asdf'])
-    end.to raise_error(ArgumentError, %(["asdf"] cannot be converted to an integer))
+    end.to raise_error(ArgumentError, %(["asdf"] cannot be converted to a number))
   end
 
   it 'raises argument error for actors value that cannot be converted to a set' do
@@ -99,36 +99,5 @@ RSpec.describe Flipper::GateValues do
     expect do
       described_class.new(groups: 'asdf')
     end.to raise_error(ArgumentError, %("asdf" cannot be converted to a set))
-  end
-
-  describe '#[]' do
-    it 'can read the boolean value' do
-      expect(described_class.new(boolean: true)[:boolean]).to be(true)
-      expect(described_class.new(boolean: true)['boolean']).to be(true)
-    end
-
-    it 'can read the actors value' do
-      expect(described_class.new(actors: Set[1, 2])[:actors]).to eq(Set[1, 2])
-      expect(described_class.new(actors: Set[1, 2])['actors']).to eq(Set[1, 2])
-    end
-
-    it 'can read the groups value' do
-      expect(described_class.new(groups: Set[:admins])[:groups]).to eq(Set[:admins])
-      expect(described_class.new(groups: Set[:admins])['groups']).to eq(Set[:admins])
-    end
-
-    it 'can read the percentage of time value' do
-      expect(described_class.new(percentage_of_time: 15)[:percentage_of_time]).to eq(15)
-      expect(described_class.new(percentage_of_time: 15)['percentage_of_time']).to eq(15)
-    end
-
-    it 'can read the percentage of actors value' do
-      expect(described_class.new(percentage_of_actors: 15)[:percentage_of_actors]).to eq(15)
-      expect(described_class.new(percentage_of_actors: 15)['percentage_of_actors']).to eq(15)
-    end
-
-    it 'returns nil for value that is not present' do
-      expect(described_class.new({})['not legit']).to be(nil)
-    end
   end
 end

@@ -11,8 +11,6 @@ class ActiveRecordTest < MiniTest::Test
                                           database: ':memory:')
 
   def setup
-    @adapter = Flipper::Adapters::ActiveRecord.new
-
     ActiveRecord::Base.connection.execute <<-SQL
       CREATE TABLE flipper_features (
         id integer PRIMARY KEY,
@@ -36,6 +34,8 @@ class ActiveRecordTest < MiniTest::Test
     ActiveRecord::Base.connection.execute <<-SQL
       CREATE UNIQUE INDEX index_gates_on_keys_and_value on flipper_gates (feature_key, key, value)
     SQL
+
+    @adapter = Flipper::Adapters::ActiveRecord.new
   end
 
   def teardown

@@ -1,4 +1,5 @@
-require 'concurrent/atomic/read_write_lock'
+require "flipper/adapter"
+require "flipper/typecast"
 
 module Flipper
   module Adapters
@@ -7,49 +8,44 @@ module Flipper
     class Memory
       include ::Flipper::Adapter
 
-      FeaturesKey = :features
-
-      # Public: The name of the adapter.
-      attr_reader :name
-
       # Public
-      def initialize(source = nil)
-        @source = Hash.new.update(source || {})
-        @name = :memory
-        @lock = Concurrent::ReadWriteLock.new
+      def initialize(source = nil, threadsafe: true)
+        @source = Typecast.features_hash(source)
+        @lock = Mutex.new if threadsafe
+        reset
       end
 
       # Public: The set of known features.
       def features
-        @lock.with_read_lock { @source.keys }.to_set
+        synchronize { @source.keys }.to_set
       end
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
-        @lock.with_write_lock { @source[feature.key] ||= default_config }
+        synchronize { @source[feature.key] ||= default_config }
         true
       end
 
       # Public: Removes a feature from the set of known features and clears
       # all the values for the feature.
       def remove(feature)
-        @lock.with_write_lock { @source.delete(feature.key) }
+        synchronize { @source.delete(feature.key) }
         true
       end
 
       # Public: Clears all the gate values for a feature.
       def clear(feature)
-        @lock.with_write_lock { @source[feature.key] = default_config }
+        synchronize { @source[feature.key] = default_config }
         true
       end
 
       # Public
       def get(feature)
-        @lock.with_read_lock { @source[feature.key] } || default_config
+        synchronize { @source[feature.key] } || default_config
       end
 
       def get_multi(features)
-        @lock.with_read_lock do
+        synchronize do
           result = {}
           features.each do |feature|
             result[feature.key] = @source[feature.key] || default_config
@@ -59,12 +55,12 @@ module Flipper
       end
 
       def get_all
-        @lock.with_read_lock { @source.to_h }
+        synchronize { Typecast.features_hash(@source) }
       end
 
       # Public
       def enable(feature, gate, thing)
-        @lock.with_write_lock do
+        synchronize do
           @source[feature.key] ||= default_config
 
           case gate.data_type
@@ -75,6 +71,8 @@ module Flipper
             @source[feature.key][gate.key] = thing.value.to_s
           when :set
             @source[feature.key][gate.key] << thing.value.to_s
+          when :json
+            @source[feature.key][gate.key] = thing.value
           else
             raise "#{gate} is not supported by this adapter yet"
           end
@@ -85,7 +83,7 @@ module Flipper
 
       # Public
       def disable(feature, gate, thing)
-        @lock.with_write_lock do
+        synchronize do
           @source[feature.key] ||= default_config
 
           case gate.data_type
@@ -95,6 +93,8 @@ module Flipper
             @source[feature.key][gate.key] = thing.value.to_s
           when :set
             @source[feature.key][gate.key].delete thing.value.to_s
+          when :json
+            @source[feature.key].delete(gate.key)
           else
             raise "#{gate} is not supported by this adapter yet"
           end
@@ -113,9 +113,31 @@ module Flipper
       end
 
       # Public: a more efficient implementation of import for this adapter
-      def import(source_adapter)
-        get_all = source_adapter.get_all
-        @lock.with_write_lock { @source.replace(get_all) }
+      def import(source)
+        adapter = self.class.from(source)
+        get_all = Typecast.features_hash(adapter.get_all)
+        synchronize { @source.replace(get_all) }
+        true
+      end
+
+      private
+
+      def reset
+        @pid = Process.pid
+        @lock&.unlock if @lock&.locked?
+      end
+
+      def forked?
+        @pid != Process.pid
+      end
+
+      def synchronize(&block)
+        if @lock
+          reset if forked?
+          @lock.synchronize(&block)
+        else
+          block.call
+        end
       end
     end
   end

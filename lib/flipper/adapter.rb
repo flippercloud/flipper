@@ -1,7 +1,3 @@
-require "set"
-require "flipper/feature"
-require "flipper/adapters/sync/synchronizer"
-
 module Flipper
   # Adding a module include so we have some hooks for stuff down the road
   module Adapter
@@ -16,10 +12,20 @@ module Flipper
           boolean: nil,
           groups: Set.new,
           actors: Set.new,
+          expression: nil,
           percentage_of_actors: nil,
           percentage_of_time: nil,
         }
       end
+
+      def from(source)
+        return source if source.is_a?(Flipper::Adapter)
+        source.adapter
+      end
+    end
+
+    def read_only?
+      false
     end
 
     # Public: Get all features and gate values in one call. Defaults to one call
@@ -43,14 +49,34 @@ module Flipper
 
     # Public: Ensure that adapter is in sync with source adapter provided.
     #
-    # Returns result of Synchronizer#call.
-    def import(source_adapter)
-      Adapters::Sync::Synchronizer.new(self, source_adapter, raise: true).call
+    # source - The source dsl, adapter or export to import.
+    #
+    # Returns true if successful.
+    def import(source)
+      Adapters::Sync::Synchronizer.new(self, self.class.from(source), raise: true).call
+      true
+    end
+
+    # Public: Exports the adapter in a given format for a given format version.
+    #
+    # Returns a Flipper::Export instance.
+    def export(format: :json, version: 1)
+      Flipper::Exporter.build(format: format, version: version).call(self)
     end
 
     # Public: Default config for a feature's gate values.
     def default_config
       self.class.default_config
     end
+
+    # Public: default name of the adapter
+    def name
+      @name ||= self.class.name.split('::').last.split(/(?=[A-Z])/).join('_').downcase.to_sym
+    end
   end
 end
+
+require "set"
+require "flipper/exporter"
+require "flipper/feature"
+require "flipper/adapters/sync/synchronizer"

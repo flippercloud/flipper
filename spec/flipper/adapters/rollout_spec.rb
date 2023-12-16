@@ -11,10 +11,8 @@ RSpec.describe Flipper::Adapters::Rollout do
   let(:destination_flipper) { Flipper.new(destination_adapter) }
 
   before do
-    begin
+    skip_on_error(Redis::CannotConnectError, 'Redis not available') do
       redis.flushdb
-    rescue Redis::CannotConnectError
-      ENV['CI'] ? raise : skip('Redis not available')
     end
   end
 
@@ -33,8 +31,9 @@ RSpec.describe Flipper::Adapters::Rollout do
       feature = source_flipper[:chat]
       expected = {
         boolean: nil,
-        groups: Set.new([:admins]),
+        groups: Set.new(["admins"]),
         actors: Set.new(["1"]),
+        expression: nil,
         percentage_of_actors: 20.0,
         percentage_of_time: nil,
       }
@@ -48,6 +47,7 @@ RSpec.describe Flipper::Adapters::Rollout do
         boolean: true,
         groups: Set.new,
         actors: Set.new,
+        expression: nil,
         percentage_of_actors: nil,
         percentage_of_time: nil,
       }
@@ -63,6 +63,7 @@ RSpec.describe Flipper::Adapters::Rollout do
         boolean: true,
         groups: Set.new,
         actors: Set.new,
+        expression: nil,
         percentage_of_actors: nil,
         percentage_of_time: nil,
       }

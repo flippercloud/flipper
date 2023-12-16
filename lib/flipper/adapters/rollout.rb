@@ -11,12 +11,8 @@ module Flipper
         end
       end
 
-      # Public: The name of the adapter.
-      attr_reader :name
-
       def initialize(rollout)
         @rollout = rollout
-        @name = :rollout
       end
 
       # Public: The set of known features.
@@ -32,7 +28,7 @@ module Flipper
         return default_config if rollout_feature.nil?
 
         boolean = nil
-        groups = Set.new(rollout_feature.groups)
+        groups = Set.new(rollout_feature.groups.map(&:to_s))
         actors = Set.new(rollout_feature.users)
 
         percentage_of_actors = case rollout_feature.percentage
@@ -53,6 +49,7 @@ module Flipper
           actors: actors,
           percentage_of_actors: percentage_of_actors,
           percentage_of_time: nil,
+          expression: nil,
         }
       end
 

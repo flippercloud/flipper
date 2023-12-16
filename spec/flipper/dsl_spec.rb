@@ -134,18 +134,6 @@ RSpec.describe Flipper::DSL do
     end
   end
 
-  describe '#boolean' do
-    it_should_behave_like 'a DSL boolean method' do
-      let(:method_name) { :boolean }
-    end
-  end
-
-  describe '#bool' do
-    it_should_behave_like 'a DSL boolean method' do
-      let(:method_name) { :bool }
-    end
-  end
-
   describe '#group' do
     context 'for registered group' do
       before do
@@ -159,66 +147,15 @@ RSpec.describe Flipper::DSL do
     end
   end
 
-  describe '#actor' do
-    context 'for a thing' do
-      it 'returns actor instance' do
-        thing = Flipper::Actor.new(33)
-        actor = subject.actor(thing)
-        expect(actor).to be_instance_of(Flipper::Types::Actor)
-        expect(actor.value).to eq('33')
-      end
+  describe '#expression' do
+    it "returns nil if feature has no expression" do
+      expect(subject.expression(:stats)).to be(nil)
     end
 
-    context 'for nil' do
-      it 'raises argument error' do
-        expect do
-          subject.actor(nil)
-        end.to raise_error(ArgumentError)
-      end
-    end
-
-    context 'for something that is not actor wrappable' do
-      it 'raises argument error' do
-        expect do
-          subject.actor(Object.new)
-        end.to raise_error(ArgumentError)
-      end
-    end
-  end
-
-  describe '#time' do
-    before do
-      @result = subject.time(5)
-    end
-
-    it 'returns percentage of time' do
-      expect(@result).to be_instance_of(Flipper::Types::PercentageOfTime)
-    end
-
-    it 'sets value' do
-      expect(@result.value).to eq(5)
-    end
-
-    it 'is aliased to percentage_of_time' do
-      expect(@result).to eq(subject.percentage_of_time(@result.value))
-    end
-  end
-
-  describe '#actors' do
-    before do
-      @result = subject.actors(17)
-    end
-
-    it 'returns percentage of actors' do
-      expect(@result).to be_instance_of(Flipper::Types::PercentageOfActors)
-    end
-
-    it 'sets value' do
-      expect(@result.value).to eq(17)
-    end
-
-    it 'is aliased to percentage_of_actors' do
-      expect(@result).to eq(subject.percentage_of_actors(@result.value))
+    it "returns expression if feature has expression" do
+      expression = Flipper.property(:plan).eq("basic")
+      subject[:stats].enable_expression expression
+      expect(subject.expression(:stats)).to eq(expression)
     end
   end
 
@@ -254,6 +191,33 @@ RSpec.describe Flipper::DSL do
 
       subject.disable(:stats)
       expect(subject[:stats].boolean_value).to eq(false)
+    end
+  end
+
+  describe '#enable_expression/disable_expression' do
+    it 'enables and disables the feature for the expression' do
+      expression = Flipper.property(:plan).eq("basic")
+
+      expect(subject[:stats].expression).to be(nil)
+      subject.enable_expression(:stats, expression)
+      expect(subject[:stats].expression).to eq(expression)
+
+      subject.disable_expression(:stats)
+      expect(subject[:stats].expression).to be(nil)
+    end
+  end
+
+  describe '#add_expression/remove_expression' do
+    it 'enables and disables the feature for the expression' do
+      expression = Flipper.property(:plan).eq("basic")
+      any_expression = Flipper.any(expression)
+
+      expect(subject[:stats].expression).to be(nil)
+      subject.add_expression(:stats, any_expression)
+      expect(subject[:stats].expression).to eq(any_expression)
+
+      subject.remove_expression(:stats, expression)
+      expect(subject[:stats].expression).to eq(Flipper.any)
     end
   end
 
@@ -353,10 +317,27 @@ RSpec.describe Flipper::DSL do
   end
 
   describe '#import' do
+    context "with flipper instance" do
+      it 'delegates to adapter' do
+        destination_flipper = build_flipper
+        expect(subject.adapter).to receive(:import).with(destination_flipper)
+        subject.import(destination_flipper)
+      end
+    end
+
+    context "with flipper adapter" do
+      it 'delegates to adapter' do
+        destination_flipper = build_flipper
+        expect(subject.adapter).to receive(:import).with(destination_flipper.adapter)
+        subject.import(destination_flipper.adapter)
+      end
+    end
+  end
+
+  describe "#export" do
     it 'delegates to adapter' do
-      destination_flipper = build_flipper
-      expect(subject.adapter).to receive(:import).with(destination_flipper.adapter)
-      subject.import(destination_flipper)
+      expect(subject.export).to eq(subject.adapter.export)
+      expect(subject.export(format: :json)).to eq(subject.adapter.export(format: :json))
     end
   end
 

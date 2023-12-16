@@ -5,11 +5,11 @@ RSpec.describe Flipper::Gates::PercentageOfTime do
     described_class.new
   end
 
-  def context(percentage_of_time_value, feature = feature_name, thing = nil)
+  def context(percentage_of_time_value, feature = feature_name, actors = nil)
     Flipper::FeatureCheckContext.new(
       feature_name: feature,
       values: Flipper::GateValues.new(percentage_of_time: percentage_of_time_value),
-      thing: thing || Flipper::Types::Actor.new(Flipper::Actor.new(1))
+      actors: Array(actors) || [Flipper::Types::Actor.new(Flipper::Actor.new('1'))]
     )
   end
 

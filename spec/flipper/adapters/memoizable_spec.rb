@@ -2,7 +2,7 @@ require 'flipper/adapters/memoizable'
 require 'flipper/adapters/operation_logger'
 
 RSpec.describe Flipper::Adapters::Memoizable do
-  let(:features_key) { described_class::FeaturesKey }
+  let(:features_key) { :flipper_features }
   let(:adapter) { Flipper::Adapters::Memory.new }
   let(:flipper) { Flipper.new(adapter) }
   let(:cache)   { {} }
@@ -10,16 +10,6 @@ RSpec.describe Flipper::Adapters::Memoizable do
   subject { described_class.new(adapter, cache) }
 
   it_should_behave_like 'a flipper adapter'
-
-  it 'forwards missing methods to underlying adapter' do
-    adapter = Class.new do
-      def foo
-        :foo
-      end
-    end.new
-    memoizable = described_class.new(adapter)
-    expect(memoizable.foo).to eq(:foo)
-  end
 
   describe '#name' do
     it 'is instrumented' do
@@ -64,7 +54,7 @@ RSpec.describe Flipper::Adapters::Memoizable do
       it 'memoizes feature' do
         feature = flipper[:stats]
         result = subject.get(feature)
-        expect(cache[described_class.key_for(feature.key)]).to be(result)
+        expect(cache["feature/#{feature.key}"]).to be(result)
       end
     end
 
@@ -93,8 +83,8 @@ RSpec.describe Flipper::Adapters::Memoizable do
         features = names.map { |name| flipper[name] }
         results = subject.get_multi(features)
         features.each do |feature|
-          expect(cache[described_class.key_for(feature.key)]).not_to be(nil)
-          expect(cache[described_class.key_for(feature.key)]).to be(results[feature.key])
+          expect(cache["feature/#{feature.key}"]).not_to be(nil)
+          expect(cache["feature/#{feature.key}"]).to be(results[feature.key])
         end
       end
     end
@@ -125,10 +115,10 @@ RSpec.describe Flipper::Adapters::Memoizable do
         features = names.map { |name| flipper[name].tap(&:enable) }
         results = subject.get_all
         features.each do |feature|
-          expect(cache[described_class.key_for(feature.key)]).not_to be(nil)
-          expect(cache[described_class.key_for(feature.key)]).to be(results[feature.key])
+          expect(cache["feature/#{feature.key}"]).not_to be(nil)
+          expect(cache["feature/#{feature.key}"]).to be(results[feature.key])
         end
-        expect(cache[subject.class::FeaturesKey]).to eq(names.map(&:to_s).to_set)
+        expect(cache[:flipper_features]).to eq(names.map(&:to_s).to_set)
       end
 
       it 'only calls get_all once for memoized adapter' do
@@ -198,9 +188,9 @@ RSpec.describe Flipper::Adapters::Memoizable do
       it 'unmemoizes feature' do
         feature = flipper[:stats]
         gate = feature.gate(:boolean)
-        cache[described_class.key_for(feature.key)] = { some: 'thing' }
-        subject.enable(feature, gate, flipper.bool)
-        expect(cache[described_class.key_for(feature.key)]).to be_nil
+        cache["feature/#{feature.key}"] = { some: 'thing' }
+        subject.enable(feature, gate, Flipper::Types::Boolean.new)
+        expect(cache["feature/#{feature.key}"]).to be_nil
       end
     end
 
@@ -212,8 +202,8 @@ RSpec.describe Flipper::Adapters::Memoizable do
       it 'returns result' do
         feature = flipper[:stats]
         gate = feature.gate(:boolean)
-        result = subject.enable(feature, gate, flipper.bool)
-        adapter_result = adapter.enable(feature, gate, flipper.bool)
+        result = subject.enable(feature, gate, Flipper::Types::Boolean.new)
+        adapter_result = adapter.enable(feature, gate, Flipper::Types::Boolean.new)
         expect(result).to eq(adapter_result)
       end
     end
@@ -228,9 +218,9 @@ RSpec.describe Flipper::Adapters::Memoizable do
       it 'unmemoizes feature' do
         feature = flipper[:stats]
         gate = feature.gate(:boolean)
-        cache[described_class.key_for(feature.key)] = { some: 'thing' }
-        subject.disable(feature, gate, flipper.bool)
-        expect(cache[described_class.key_for(feature.key)]).to be_nil
+        cache["feature/#{feature.key}"] = { some: 'thing' }
+        subject.disable(feature, gate, Flipper::Types::Boolean.new)
+        expect(cache["feature/#{feature.key}"]).to be_nil
       end
     end
 
@@ -242,9 +232,39 @@ RSpec.describe Flipper::Adapters::Memoizable do
       it 'returns result' do
         feature = flipper[:stats]
         gate = feature.gate(:boolean)
-        result = subject.disable(feature, gate, flipper.bool)
-        adapter_result = adapter.disable(feature, gate, flipper.bool)
+        result = subject.disable(feature, gate, Flipper::Types::Boolean.new)
+        adapter_result = adapter.disable(feature, gate, Flipper::Types::Boolean.new)
         expect(result).to eq(adapter_result)
+      end
+    end
+  end
+
+  describe "#import" do
+    context "with memoization enabled" do
+      before do
+        subject.memoize = true
+      end
+
+      it "unmemoizes features" do
+        cache[:foo] = "bar"
+        flipper[:stats].enable
+        flipper[:search].disable
+        subject.import(Flipper::Adapters::Memory.new)
+        expect(cache).to be_empty
+      end
+    end
+
+    context "with memoization disabled" do
+      before do
+        subject.memoize = false
+      end
+
+      it "does not unmemoize features" do
+        cache[:foo] = "bar"
+        flipper[:stats].enable
+        flipper[:search].disable
+        subject.import(Flipper::Adapters::Memory.new)
+        expect(cache).not_to be_empty
       end
     end
   end
@@ -312,9 +332,9 @@ RSpec.describe Flipper::Adapters::Memoizable do
 
       it 'unmemoizes the feature' do
         feature = flipper[:stats]
-        cache[described_class.key_for(feature.key)] = { some: 'thing' }
+        cache["feature/#{feature.key}"] = { some: 'thing' }
         subject.remove(feature)
-        expect(cache[described_class.key_for(feature.key)]).to be_nil
+        expect(cache["feature/#{feature.key}"]).to be_nil
       end
     end
 
@@ -337,9 +357,9 @@ RSpec.describe Flipper::Adapters::Memoizable do
 
       it 'unmemoizes feature' do
         feature = flipper[:stats]
-        cache[described_class.key_for(feature.key)] = { some: 'thing' }
+        cache["feature/#{feature.key}"] = { some: 'thing' }
         subject.clear(feature)
-        expect(cache[described_class.key_for(feature.key)]).to be_nil
+        expect(cache["feature/#{feature.key}"]).to be_nil
       end
     end
 

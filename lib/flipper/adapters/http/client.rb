@@ -14,6 +14,12 @@ module Flipper
 
         HTTPS_SCHEME = "https".freeze
 
+        CLIENT_FRAMEWORKS = {
+          rails: -> { Rails.version if defined?(Rails) },
+          sinatra: -> { Sinatra::VERSION if defined?(Sinatra) },
+          hanami: -> { Hanami::VERSION if defined?(Hanami) },
+        }
+
         attr_reader :uri, :headers
         attr_reader :basic_auth_username, :basic_auth_password
         attr_reader :read_timeout, :open_timeout, :write_timeout, :max_retries, :debug_output
@@ -28,6 +34,10 @@ module Flipper
           @write_timeout = options[:write_timeout]
           @max_retries = options.key?(:max_retries) ? options[:max_retries] : 0
           @debug_output = options[:debug_output]
+        end
+
+        def add_header(key, value)
+          @headers[key] = value
         end
 
         def get(path)
@@ -77,18 +87,23 @@ module Flipper
 
         def build_request(http_method, uri, headers, options)
           request_headers = {
-            "Client-Language" => "ruby",
-            "Client-Language-Version" => "#{RUBY_VERSION} p#{RUBY_PATCHLEVEL} (#{RUBY_RELEASE_DATE})",
-            "Client-Platform" => RUBY_PLATFORM,
-            "Client-Engine" => defined?(RUBY_ENGINE) ? RUBY_ENGINE : "",
-            "Client-Pid" => Process.pid.to_s,
-            "Client-Thread" => Thread.current.object_id.to_s,
-            "Client-Hostname" => Socket.gethostname,
+            client_language: "ruby",
+            client_language_version: "#{RUBY_VERSION} p#{RUBY_PATCHLEVEL} (#{RUBY_RELEASE_DATE})",
+            client_platform: RUBY_PLATFORM,
+            client_engine: defined?(RUBY_ENGINE) ? RUBY_ENGINE : "",
+            client_pid: Process.pid.to_s,
+            client_thread: Thread.current.object_id.to_s,
+            client_hostname: Socket.gethostname,
           }.merge(headers)
 
           body = options[:body]
           request = http_method.new(uri.request_uri)
           request.initialize_http_header(request_headers)
+
+          client_frameworks.each do |framework, version|
+            request.add_field("Client-Framework", [framework, version].join("="))
+          end
+
           request.body = body if body
 
           if @basic_auth_username && @basic_auth_password
@@ -96,6 +111,10 @@ module Flipper
           end
 
           request
+        end
+
+        def client_frameworks
+          CLIENT_FRAMEWORKS.transform_values { |detect| detect.call rescue nil }.compact
         end
       end
     end

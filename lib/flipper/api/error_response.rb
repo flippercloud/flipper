@@ -24,10 +24,11 @@ module Flipper
       ERRORS = {
         feature_not_found: Error.new(1, 'Feature not found.', 404),
         group_not_registered: Error.new(2, 'Group not registered.', 404),
-        percentage_invalid:
-          Error.new(3, 'Percentage must be a positive number less than or equal to 100.', 422),
+        percentage_invalid: Error.new(3, 'Percentage must be a positive number less than or equal to 100.', 422),
         flipper_id_invalid: Error.new(4, 'Required parameter flipper_id is missing.', 422),
         name_invalid: Error.new(5, 'Required parameter name is missing.', 422),
+        import_invalid: Error.new(6, 'Import invalid.', 422),
+        expression_invalid: Error.new(7, 'The provided expression was not valid.', 422),
       }.freeze
     end
   end

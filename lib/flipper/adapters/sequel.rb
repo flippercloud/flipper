@@ -1,6 +1,7 @@
 require 'set'
 require 'flipper'
 require 'sequel'
+require 'flipper/model/sequel'
 
 module Flipper
   module Adapters
@@ -28,12 +29,14 @@ module Flipper
         ::Sequel::Model.require_valid_table = old
       end
 
-      # Public: The name of the adapter.
-      attr_reader :name
+      VALUE_TO_TEXT_WARNING = <<-EOS
+        Your database needs migrated to use the latest Flipper features.
+        See https://github.com/flippercloud/flipper/issues/557
+      EOS
 
       # Public: Initialize a new Sequel adapter instance.
       #
-      # name - The Symbol name for this adapter. Optional (default :active_record)
+      # name - The Symbol name for this adapter. Optional (default :sequel)
       # feature_class - The AR class responsible for the features table.
       # gate_class - The AR class responsible for the gates table.
       #
@@ -47,6 +50,8 @@ module Flipper
         @name = options.fetch(:name, :sequel)
         @feature_class = options.fetch(:feature_class) { Feature }
         @gate_class = options.fetch(:gate_class) { Gate }
+
+        warn VALUE_TO_TEXT_WARNING if value_not_text?
       end
 
       # Public: The set of known features.
@@ -129,10 +134,9 @@ module Flipper
         when :integer
           set(feature, gate, thing)
         when :set
-          begin
-            @gate_class.create(gate_attrs(feature, gate, thing))
-          rescue ::Sequel::UniqueConstraintViolation
-          end
+          enable_multi(feature, gate, thing)
+        when :json
+          set(feature, gate, thing, json: true)
         else
           unsupported_data_type gate.data_type
         end
@@ -153,9 +157,10 @@ module Flipper
           clear(feature)
         when :integer
           set(feature, gate, thing)
+        when :json
+          delete(feature, gate)
         when :set
-          @gate_class.where(gate_attrs(feature, gate, thing))
-                     .delete
+          @gate_class.where(gate_attrs(feature, gate, thing, json: gate.data_type == :json)).delete
         else
           unsupported_data_type gate.data_type
         end
@@ -171,27 +176,37 @@ module Flipper
 
       def set(feature, gate, thing, options = {})
         clear_feature = options.fetch(:clear, false)
-        args = {
-          feature_key: feature.key,
-          key: gate.key.to_s,
-        }
+        json_feature = options.fetch(:json, false)
+
+        raise VALUE_TO_TEXT_WARNING if json_feature && value_not_text?
 
         @gate_class.db.transaction do
           clear(feature) if clear_feature
-          @gate_class.where(args).delete
+          delete(feature, gate)
 
           begin
-            @gate_class.create(gate_attrs(feature, gate, thing))
+            @gate_class.create(gate_attrs(feature, gate, thing, json: json_feature))
           rescue ::Sequel::UniqueConstraintViolation
           end
         end
       end
 
-      def gate_attrs(feature, gate, thing)
+      def delete(feature, gate)
+        @gate_class.where(feature_key: feature.key, key: gate.key.to_s).delete
+      end
+
+      def enable_multi(feature, gate, thing)
+        begin
+          @gate_class.create(gate_attrs(feature, gate, thing, json: gate.data_type == :json))
+        rescue ::Sequel::UniqueConstraintViolation
+        end
+      end
+
+      def gate_attrs(feature, gate, thing, json: false)
         {
           feature_key: feature.key.to_s,
           key: gate.key.to_s,
-          value: thing.value.to_s,
+          value: json ? Typecast.to_json(thing.value) : thing.value.to_s,
         }
       end
 
@@ -210,10 +225,20 @@ module Flipper
               end
             when :set
               db_gates.select { |db_gate| db_gate.key == gate.key.to_s }.map(&:value).to_set
+            when :json
+              if detected_db_gate = db_gates.detect { |db_gate| db_gate.key == gate.key.to_s }
+                Typecast.from_json(detected_db_gate.value)
+              end
             else
               unsupported_data_type gate.data_type
             end
         end
+      end
+
+      # Check if value column is text instead of string
+      # See https://github.com/flippercloud/flipper/pull/692
+      def value_not_text?
+        "text".casecmp(@gate_class.db_schema[:value][:db_type]) != 0
       end
     end
   end
@@ -223,4 +248,4 @@ Flipper.configure do |config|
   config.adapter { Flipper::Adapters::Sequel.new }
 end
 
-Sequel::Model.include Flipper::Identifier
+Sequel::Model.include Flipper::Model::Sequel

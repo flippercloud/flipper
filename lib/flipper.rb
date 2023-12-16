@@ -56,28 +56,60 @@ module Flipper
   # Public: All the methods delegated to instance. These should match the
   # interface of Flipper::DSL.
   def_delegators :instance,
-                 :enabled?, :enable, :disable, :bool, :boolean,
-                 :enable_actor, :disable_actor, :actor,
+                 :enabled?, :enable, :disable,
+                 :enable_expression, :disable_expression,
+                 :expression, :add_expression, :remove_expression,
+                 :enable_actor, :disable_actor,
                  :enable_group, :disable_group,
                  :enable_percentage_of_actors, :disable_percentage_of_actors,
-                 :actors, :percentage_of_actors,
                  :enable_percentage_of_time, :disable_percentage_of_time,
-                 :time, :percentage_of_time,
                  :features, :feature, :[], :preload, :preload_all,
-                 :adapter, :add, :exist?, :remove, :import,
-                 :memoize=, :memoizing?,
+                 :adapter, :add, :exist?, :remove, :import, :export,
+                 :memoize=, :memoizing?, :read_only?,
                  :sync, :sync_secret # For Flipper::Cloud. Will error for OSS Flipper.
+
+  def any(*args)
+    Expression.build({ Any: args.flatten })
+  end
+
+  def all(*args)
+    Expression.build({ All: args.flatten })
+  end
+
+  def constant(value)
+    Expression.build(value)
+  end
+
+  def property(name)
+    Expression.build({ Property: name })
+  end
+
+  def string(value)
+    Expression.build({ String: value })
+  end
+
+  def number(value)
+    Expression.build({ Number: value })
+  end
+
+  def boolean(value)
+    Expression.build({ Boolean: value })
+  end
+
+  def random(max)
+    Expression.build({ Random: max })
+  end
 
   # Public: Use this to register a group by name.
   #
   # name - The Symbol name of the group.
   # block - The block that should be used to determine if the group matches a
-  #         given thing.
+  #         given actor.
   #
   # Examples
   #
-  #   Flipper.register(:admins) { |thing|
-  #     thing.respond_to?(:admin?) && thing.admin?
+  #   Flipper.register(:admins) { |actor|
+  #     actor.respond_to?(:admin?) && actor.admin?
   #   }
   #
   # Returns a Flipper::Group.
@@ -144,8 +176,10 @@ require 'flipper/actor'
 require 'flipper/adapter'
 require 'flipper/adapters/memoizable'
 require 'flipper/adapters/memory'
+require 'flipper/adapters/strict'
 require 'flipper/adapters/instrumented'
 require 'flipper/adapters/poll'
+require 'flipper/adapter_builder'
 require 'flipper/configuration'
 require 'flipper/dsl'
 require 'flipper/errors'
@@ -159,6 +193,7 @@ require 'flipper/middleware/setup_env'
 require 'flipper/middleware/sync'
 require 'flipper/poller'
 require 'flipper/registry'
+require 'flipper/expression'
 require 'flipper/type'
 require 'flipper/types/actor'
 require 'flipper/types/boolean'
@@ -167,5 +202,6 @@ require 'flipper/types/percentage'
 require 'flipper/types/percentage_of_actors'
 require 'flipper/types/percentage_of_time'
 require 'flipper/typecast'
+require 'flipper/version'
 
-require "flipper/railtie" if defined?(Rails::Railtie)
+require "flipper/engine" if defined?(Rails)

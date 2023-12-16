@@ -36,7 +36,7 @@ RSpec.describe Flipper::UI do
     end
   end
 
-  # See https://github.com/jnunemaker/flipper/issues/80
+  # See https://github.com/flippercloud/flipper/issues/80
   it 'can route features with names that match static directories' do
     post 'features/refactor-images/actors',
          { 'value' => 'User;6', 'operation' => 'enable', 'authenticity_token' => token },

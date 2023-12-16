@@ -34,7 +34,8 @@ module Flipper
       # This method accomplishes similar functionality
       def update_params(env, data)
         return if data.empty?
-        parsed_request_body = JSON.parse(data)
+        parsed_request_body = Typecast.from_json(data)
+        env["parsed_request_body".freeze] = parsed_request_body
         parsed_query_string = parse_query(env[QUERY_STRING])
         parsed_query_string.merge!(parsed_request_body)
         parameters = build_query(parsed_query_string)

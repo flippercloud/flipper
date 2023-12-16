@@ -1,4 +1,6 @@
 require 'set'
+require "flipper/serializers/json"
+require "flipper/serializers/gzip"
 
 module Flipper
   module Typecast
@@ -21,11 +23,9 @@ module Flipper
     # Returns an Integer representation of the value.
     # Raises ArgumentError if conversion is not possible.
     def self.to_integer(value)
-      if value.respond_to?(:to_i)
-        value.to_i
-      else
-        raise ArgumentError, "#{value.inspect} cannot be converted to an integer"
-      end
+      value.to_i
+    rescue NoMethodError
+      raise ArgumentError, "#{value.inspect} cannot be converted to an integer"
     end
 
     # Internal: Convert value to a float.
@@ -33,24 +33,30 @@ module Flipper
     # Returns a Float representation of the value.
     # Raises ArgumentError if conversion is not possible.
     def self.to_float(value)
-      if value.respond_to?(:to_f)
-        value.to_f
-      else
-        raise ArgumentError, "#{value.inspect} cannot be converted to a float"
-      end
+      value.to_f
+    rescue NoMethodError
+      raise ArgumentError, "#{value.inspect} cannot be converted to a float"
     end
 
-    # Internal: Convert value to a percentage.
+    # Internal: Convert value to a number.
     #
     # Returns a Integer or Float representation of the value.
     # Raises ArgumentError if conversion is not possible.
-    def self.to_percentage(value)
-      if value.to_s.include?('.'.freeze)
-        to_float(value)
+    def self.to_number(value)
+      case value
+      when Numeric
+        value
+      when String
+        value.include?('.') ? to_float(value) : to_integer(value)
+      when NilClass
+        0
       else
-        to_integer(value)
+        value.to_f
       end
+    rescue NoMethodError
+      raise ArgumentError, "#{value.inspect} cannot be converted to a number"
     end
+    singleton_class.send(:alias_method, :to_percentage, :to_number)
 
     # Internal: Convert value to a set.
     #
@@ -65,6 +71,41 @@ module Flipper
       else
         raise ArgumentError, "#{value.inspect} cannot be converted to a set"
       end
+    end
+
+    def self.features_hash(source)
+      normalized_source = {}
+      (source || {}).each do |feature_key, gates|
+        normalized_source[feature_key] ||= {}
+        gates.each do |gate_key, value|
+          normalized_value = case value
+          when Array, Set
+            value.to_set
+          when Hash
+            value
+          else
+            value ? value.to_s : value
+          end
+          normalized_source[feature_key][gate_key.to_sym] = normalized_value
+        end
+      end
+      normalized_source
+    end
+
+    def self.to_json(source)
+      Serializers::Json.serialize(source)
+    end
+
+    def self.from_json(source)
+      Serializers::Json.deserialize(source)
+    end
+
+    def self.to_gzip(source)
+      Serializers::Gzip.serialize(source)
+    end
+
+    def self.from_gzip(source)
+      Serializers::Gzip.deserialize(source)
     end
   end
 end

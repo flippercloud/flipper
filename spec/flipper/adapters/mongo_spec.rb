@@ -15,11 +15,11 @@ RSpec.describe Flipper::Adapters::Mongo do
   let(:collection) { client['testing'] }
 
   before do
-    begin
-      collection.drop
-    rescue Mongo::Error::NoServerAvailable
-      ENV['CI'] ? raise : skip('Mongo not available')
-    rescue Mongo::Error::OperationFailure
+    skip_on_error(Mongo::Error::NoServerAvailable, 'Mongo not available') do
+      begin
+        collection.drop
+      rescue Mongo::Error::OperationFailure
+      end
     end
     collection.create
   end
@@ -32,7 +32,8 @@ RSpec.describe Flipper::Adapters::Mongo do
 
     load 'flipper/adapters/mongo.rb'
 
-    ENV["MONGO_URL"] ||= "mongodb://127.0.0.1:27017/testing"
-    expect(Flipper.adapter.adapter).to be_a(Flipper::Adapters::Mongo)
+    with_env "MONGO_URL" => ENV.fetch("MONGO_URL", "mongodb://127.0.0.1:27017/testing") do
+      expect(Flipper.adapter.adapter).to be_a(Flipper::Adapters::Mongo)
+    end
   end
 end

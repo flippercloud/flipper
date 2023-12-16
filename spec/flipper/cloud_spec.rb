@@ -26,7 +26,7 @@ RSpec.describe Flipper::Cloud do
       # pardon the nesting...
       memoized_adapter = @instance.adapter
       poll_adapter = memoized_adapter.adapter
-
+      expect(poll_adapter).to be_instance_of(Flipper::Adapters::Poll)
       expect(poll_adapter).to be_instance_of(Flipper::Adapters::Poll)
 
       http_adapter = poll_adapter.remote
@@ -41,8 +41,12 @@ RSpec.describe Flipper::Cloud do
 
   context 'initialize with token and options' do
     it 'sets correct url' do
-      @instance = described_class.new(token: 'asdf', url: 'https://www.fakeflipper.com/sadpanda')
-      uri = @instance.adapter.adapter.remote.client.uri
+      instance = described_class.new(token: 'asdf', url: 'https://www.fakeflipper.com/sadpanda')
+      # pardon the nesting...
+      memoized = instance.adapter
+      poll_adapter = memoized.adapter
+      remote = poll_adapter.remote
+      uri = remote.client.uri
       expect(uri.scheme).to eq('https')
       expect(uri.host).to eq('www.fakeflipper.com')
       expect(uri.path).to eq('/sadpanda')
@@ -50,8 +54,9 @@ RSpec.describe Flipper::Cloud do
   end
 
   it 'can initialize with no token explicitly provided' do
-    ENV['FLIPPER_CLOUD_TOKEN'] = 'asdf'
-    expect(described_class.new).to be_instance_of(Flipper::Cloud::DSL)
+    with_env 'FLIPPER_CLOUD_TOKEN' => 'asdf' do
+      expect(described_class.new).to be_instance_of(Flipper::Cloud::DSL)
+    end
   end
 
   it 'can set instrumenter' do
@@ -110,10 +115,10 @@ RSpec.describe Flipper::Cloud do
     cloud_flipper = Flipper::Cloud.new(token: "asdf")
 
     get_all = {
-      "logging" => {actors: Set.new, boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: "5"},
-      "search" => {actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
-      "stats" => {actors: Set["jnunemaker"], boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
-      "test" => {actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
+      "logging" => {actors: Set.new, boolean: nil, groups: Set.new, expression: nil, percentage_of_actors: nil, percentage_of_time: "5"},
+      "search" => {actors: Set.new, boolean: "true", groups: Set.new, expression: nil, percentage_of_actors: nil, percentage_of_time: nil},
+      "stats" => {actors: Set["jnunemaker"], boolean: nil, groups: Set.new, expression: nil, percentage_of_actors: nil, percentage_of_time: nil},
+      "test" => {actors: Set.new, boolean: "true", groups: Set.new, expression: nil, percentage_of_actors: nil, percentage_of_time: nil},
     }
 
     expect(flipper.adapter.get_all).to eq(get_all)
@@ -136,10 +141,10 @@ RSpec.describe Flipper::Cloud do
     cloud_flipper = Flipper::Cloud.new(token: "asdf")
 
     get_all = {
-      "logging" => {actors: Set.new, boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: "5"},
-      "search" => {actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
-      "stats" => {actors: Set["jnunemaker"], boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
-      "test" => {actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
+      "logging" => {actors: Set.new, boolean: nil, groups: Set.new, expression: nil, percentage_of_actors: nil, percentage_of_time: "5"},
+      "search" => {actors: Set.new, boolean: "true", groups: Set.new, expression: nil, percentage_of_actors: nil, percentage_of_time: nil},
+      "stats" => {actors: Set["jnunemaker"], boolean: nil, groups: Set.new, expression: nil, percentage_of_actors: nil, percentage_of_time: nil},
+      "test" => {actors: Set.new, boolean: "true", groups: Set.new, expression: nil, percentage_of_actors: nil, percentage_of_time: nil},
     }
 
     expect(flipper.adapter.get_all).to eq(get_all)
@@ -161,10 +166,10 @@ RSpec.describe Flipper::Cloud do
     cloud_flipper = Flipper::Cloud.new(token: "asdf")
 
     get_all = {
-      "logging" => {actors: Set.new, boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: "5"},
-      "search" => {actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
-      "stats" => {actors: Set["jnunemaker"], boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
-      "test" => {actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
+      "logging" => {actors: Set.new, boolean: nil, groups: Set.new, expression: nil, percentage_of_actors: nil, percentage_of_time: "5"},
+      "search" => {actors: Set.new, boolean: "true", groups: Set.new, expression: nil, percentage_of_actors: nil, percentage_of_time: nil},
+      "stats" => {actors: Set["jnunemaker"], boolean: nil, groups: Set.new, expression: nil, percentage_of_actors: nil, percentage_of_time: nil},
+      "test" => {actors: Set.new, boolean: "true", groups: Set.new, expression: nil, percentage_of_actors: nil, percentage_of_time: nil},
     }
 
     expect(flipper.adapter.get_all).to eq(get_all)

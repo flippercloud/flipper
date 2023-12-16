@@ -1,14 +1,12 @@
 #
 # Usage:
 #   # if you want it to not reload and be really fast
-#   bin/rackup examples/ui/basic.ru -p 9999
-#
-#   # if you want reloading
-#   bin/shotgun examples/ui/basic.ru -p 9999
+#   bundle exec rackup examples/ui/basic.ru -p 9999
 #
 #   http://localhost:9999/
 #
 require 'bundler/setup'
+require 'rack/reloader'
 require "flipper/ui"
 require "flipper/adapters/pstore"
 
@@ -26,7 +24,8 @@ Flipper::UI.configure do |config|
   config.feature_creation_enabled = true
   config.feature_removal_enabled = true
   config.cloud_recommendation = true
-  config.confirm_fully_enable = true
+  config.confirm_fully_enable = false
+  config.read_only = false
   # config.show_feature_description_in_list = true
   config.descriptions_source = lambda do |_keys|
     {
@@ -38,6 +37,13 @@ Flipper::UI.configure do |config|
       "logging" => "Log all the things.",
       "new_cache" => "Like the old cache but newer.",
       "a/b" => "Why would someone use a slash? I don't know but someone did. Let's make this really long so they regret using slashes. Please don't use slashes.",
+    }
+  end
+
+  config.actor_names_source = lambda do |_keys|
+    {
+      '1' => 'John',
+      '6' => 'Brandon',
     }
   end
 end
@@ -53,6 +59,8 @@ end
 # Flipper.enable_percentage_of_time(:logging, 5)
 # Flipper.enable_percentage_of_actors(:new_cache, 15)
 # Flipper.add("a/b")
+
+use Rack::Reloader
 
 run Flipper::UI.app { |builder|
   builder.use Rack::Session::Cookie, secret: "_super_secret"

@@ -14,6 +14,7 @@ module Flipper
           @feature = Decorators::Feature.new(flipper_feature)
           descriptions = Flipper::UI.configuration.descriptions_source.call([flipper_feature.key])
           @feature.description = descriptions[@feature.key]
+          @feature.actor_names = Flipper::UI.configuration.actor_names_source.call(@feature.actors_value)
           @page_title = "#{@feature.key} // Features"
           @percentages = [0, 1, 5, 10, 25, 50, 100]
 
@@ -25,7 +26,7 @@ module Flipper
         end
 
         def delete
-          read_only if Flipper::UI.configuration.read_only
+          render_read_only if read_only?
 
           unless Flipper::UI.configuration.feature_removal_enabled
             status 403

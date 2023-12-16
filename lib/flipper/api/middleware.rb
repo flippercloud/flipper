@@ -14,6 +14,7 @@ module Flipper
         @env_key = options.fetch(:env_key, 'flipper')
 
         @action_collection = ActionCollection.new
+        @action_collection.add Api::V1::Actions::ExpressionGate
         @action_collection.add Api::V1::Actions::PercentageOfTimeGate
         @action_collection.add Api::V1::Actions::PercentageOfActorsGate
         @action_collection.add Api::V1::Actions::ActorsGate
@@ -23,6 +24,7 @@ module Flipper
         @action_collection.add Api::V1::Actions::Actors
         @action_collection.add Api::V1::Actions::Feature
         @action_collection.add Api::V1::Actions::Features
+        @action_collection.add Api::V1::Actions::Import
       end
 
       def call(env)

@@ -1,7 +1,7 @@
 require 'bundler/setup'
 require 'flipper'
 
-# create a thing with an identifier
+# create an actor with an identifier
 class Person < Struct.new(:id)
   include Flipper::Identifier
 end
@@ -46,20 +46,6 @@ stats.disable
 puts "stats.enabled?: #{stats.enabled?}"
 puts "stats.enabled? person: #{stats.enabled? person}"
 puts
-
-# get an instance of the percentage of time type set to 5
-puts Flipper.time(5).inspect
-
-# get an instance of the percentage of actors type set to 15
-puts Flipper.actors(15).inspect
-
-# get an instance of an actor using an object that responds to flipper_id
-responds_to_flipper_id = Struct.new(:flipper_id).new(10)
-puts Flipper.actor(responds_to_flipper_id).inspect
-
-# get an instance of an actor using an object
-thing = Struct.new(:flipper_id).new(22)
-puts Flipper.actor(thing).inspect
 
 # register a top level group
 admins = Flipper.register(:admins) { |actor|

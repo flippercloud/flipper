@@ -8,23 +8,13 @@ RSpec.describe Flipper::Adapters::Instrumented do
 
   let(:feature) { flipper[:stats] }
   let(:gate) { feature.gate(:percentage_of_actors) }
-  let(:thing) { flipper.actors(22) }
+  let(:thing) { Flipper::Types::PercentageOfActors.new(22) }
 
   subject do
     described_class.new(adapter, instrumenter: instrumenter)
   end
 
   it_should_behave_like 'a flipper adapter'
-
-  it 'forwards missing methods to underlying adapter' do
-    adapter = Class.new do
-      def foo
-        :foo
-      end
-    end.new
-    instrumented = described_class.new(adapter)
-    expect(instrumented.foo).to eq(:foo)
-  end
 
   describe '#name' do
     it 'is instrumented' do
@@ -143,6 +133,34 @@ RSpec.describe Flipper::Adapters::Instrumented do
       expect(event.name).to eq('adapter_operation.flipper')
       expect(event.payload[:operation]).to eq(:features)
       expect(event.payload[:adapter_name]).to eq(:memory)
+      expect(event.payload[:result]).to be(result)
+    end
+  end
+
+  describe '#import' do
+    it 'records instrumentation' do
+      result = subject.import(Flipper::Adapters::Memory.new)
+
+      event = instrumenter.events.last
+      expect(event).not_to be_nil
+      expect(event.name).to eq('adapter_operation.flipper')
+      expect(event.payload[:operation]).to eq(:import)
+      expect(event.payload[:adapter_name]).to eq(:memory)
+      expect(event.payload[:result]).to be(result)
+    end
+  end
+
+  describe '#export' do
+    it 'records instrumentation' do
+      result = subject.export(format: :json, version: 1)
+
+      event = instrumenter.events.last
+      expect(event).not_to be_nil
+      expect(event.name).to eq('adapter_operation.flipper')
+      expect(event.payload[:operation]).to eq(:export)
+      expect(event.payload[:adapter_name]).to eq(:memory)
+      expect(event.payload[:format]).to be(:json)
+      expect(event.payload[:version]).to be(1)
       expect(event.payload[:result]).to be(result)
     end
   end

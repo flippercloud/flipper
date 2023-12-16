@@ -14,19 +14,23 @@ module Flipper
             @value = value
           end
 
-          def as_json
-            {
+          def as_json(exclude_name: false)
+            as_json = {
               'key' => gate.key.to_s,
-              'name' => gate.name.to_s,
               'value' => value_as_json,
             }
+            as_json['name'] = gate.name.to_s unless exclude_name
+            as_json
           end
 
           private
 
+          # Set of types that should be represented as Array in JSON.
+          JSON_ARRAY_TYPES = Set[:set].freeze
+
           # json doesn't like sets
           def value_as_json
-            data_type == :set ? value.to_a : value
+            JSON_ARRAY_TYPES.include?(data_type) ? value.to_a : value
           end
         end
       end

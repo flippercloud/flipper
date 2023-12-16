@@ -1,11 +1,13 @@
+require "logger"
 require "socket"
 require "flipper/adapters/http"
 require "flipper/adapters/poll"
 require "flipper/adapters/memory"
 require "flipper/adapters/dual_write"
 require "flipper/adapters/sync/synchronizer"
-require "flipper/cloud/instrumenter"
-require "brow"
+require "flipper/cloud/telemetry"
+require "flipper/cloud/telemetry/instrumenter"
+require "flipper/cloud/telemetry/submitter"
 
 module Flipper
   module Cloud
@@ -18,18 +20,13 @@ module Flipper
 
       DEFAULT_URL = "https://www.flippercloud.io/adapter".freeze
 
-      # Private: Keeps track of brow instances so they can be shared across
-      # threads.
-      def self.brow_instances
-        @brow_instances ||= Concurrent::Map.new
-      end
-
       # Public: The token corresponding to an environment on flippercloud.io.
       attr_accessor :token
 
       # Public: The url for http adapter. Really should only be customized for
-       #        development work. Feel free to forget you ever saw this.
-      attr_reader :url
+      #         development work if you are me and you are not me. Feel free to
+      #         forget you ever saw this.
+      attr_accessor :url
 
       # Public: net/http read timeout for all http requests (default: 5).
       attr_accessor :read_timeout
@@ -75,33 +72,25 @@ module Flipper
       # occur or not.
       attr_accessor :sync_secret
 
+      # Public: The logger to use for debugging inner workings.
+      attr_accessor :logger
+
+      # Public: Should the logger log or not (default: true).
+      attr_accessor :logging_enabled
+
+      # Public: The telemetry instance to use for tracking feature usage.
+      attr_accessor :telemetry
+
+      # Public: Should telemetry be enabled or not (default: false).
+      attr_accessor :telemetry_enabled
+
       def initialize(options = {})
-        @token = options.fetch(:token) { ENV["FLIPPER_CLOUD_TOKEN"] }
-
-        if @token.nil?
-          raise ArgumentError, "Flipper::Cloud token is missing. Please set FLIPPER_CLOUD_TOKEN or provide the token (e.g. Flipper::Cloud.new(token: 'token'))."
-        end
-
-        @read_timeout = options.fetch(:read_timeout) { ENV.fetch("FLIPPER_CLOUD_READ_TIMEOUT", 5).to_f }
-        @open_timeout = options.fetch(:open_timeout) { ENV.fetch("FLIPPER_CLOUD_OPEN_TIMEOUT", 5).to_f }
-        @write_timeout = options.fetch(:write_timeout) { ENV.fetch("FLIPPER_CLOUD_WRITE_TIMEOUT", 5).to_f }
-        @sync_interval = options.fetch(:sync_interval) { ENV.fetch("FLIPPER_CLOUD_SYNC_INTERVAL", 10).to_f }
-        @sync_secret = options.fetch(:sync_secret) { ENV["FLIPPER_CLOUD_SYNC_SECRET"] }
-        @local_adapter = options.fetch(:local_adapter) { Adapters::Memory.new }
-        @memoize = options.fetch(:memoize, true)
-        @debug_output = options[:debug_output]
-        @adapter_block = ->(adapter) { adapter }
-        self.url = options.fetch(:url) { ENV.fetch("FLIPPER_CLOUD_URL", DEFAULT_URL) }
-
-        instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
-
-        # This is alpha. Don't use this unless you are me. And you are not me.
-        cloud_instrument = options.fetch(:cloud_instrument) { ENV["FLIPPER_CLOUD_INSTRUMENT"] == "1" }
-        @instrumenter = if cloud_instrument
-          Instrumenter.new(brow: brow, instrumenter: instrumenter)
-        else
-          instrumenter
-        end
+        setup_auth options
+        setup_log options
+        setup_http options
+        setup_sync options
+        setup_adapter options
+        setup_telemetry options
       end
 
       # Public: Read or customize the http adapter. Calling without a block will
@@ -123,31 +112,11 @@ module Flipper
         end
       end
 
-      # Public: Set url for the http adapter.
-      attr_writer :url
-
+      # Public: Force a sync.
       def sync
         Flipper::Adapters::Sync::Synchronizer.new(local_adapter, http_adapter, {
           instrumenter: instrumenter,
-          interval: sync_interval,
         }).call
-      end
-
-      def brow
-        self.class.brow_instances.compute_if_absent(url + token) do
-          uri = URI.parse(url)
-          uri.path = "#{uri.path}/events".squeeze("/")
-
-          Brow::Client.new({
-            url: uri.to_s,
-            headers: {
-              "Accept" => "application/json",
-              "Content-Type" => "application/json",
-              "User-Agent" => "Flipper v#{VERSION} via Brow v#{Brow::VERSION}",
-              "Flipper-Cloud-Token" => @token,
-            }
-          })
-        end
       end
 
       # Public: The method that will be used to synchronize local adapter with
@@ -156,14 +125,26 @@ module Flipper
         sync_secret ? :webhook : :poll
       end
 
+      # Internal: The http client used by the http adapter. Exposed so we can
+      # use the same client for posting telemetry.
+      def http_client
+        http_adapter.client
+      end
+
+      # Internal: Logs message if logging is enabled.
+      def log(message, level: :debug)
+        return unless logging_enabled
+        logger.send(level, "name=flipper_cloud #{message}")
+      end
+
       private
 
       def app_adapter
-        sync_method == :webhook ? dual_write_adapter : poll_adapter
-      end
-
-      def dual_write_adapter
-        Flipper::Adapters::DualWrite.new(local_adapter, http_adapter)
+        if sync_method == :webhook
+          Flipper::Adapters::DualWrite.new(local_adapter, http_adapter)
+        else
+          poll_adapter
+        end
       end
 
       def poll_adapter
@@ -186,6 +167,93 @@ module Flipper
             "Flipper-Cloud-Token" => @token,
           },
         })
+      end
+
+      def setup_auth(options)
+        set_option :token, options, required: true
+      end
+
+      def setup_log(options)
+        set_option :logging_enabled, options, default: true, typecast: :boolean
+        set_option :logger, options, from_env: false, default: -> {
+          if logging_enabled
+            Logger.new(STDOUT)
+          else
+            Logger.new("/dev/null")
+          end
+        }
+      end
+
+      def setup_http(options)
+        set_option :url, options, default: DEFAULT_URL
+        set_option :debug_output, options, from_env: false
+        set_option :read_timeout, options, default: 5, typecast: :float, minimum: 0.1
+        set_option :open_timeout, options, default: 2, typecast: :float, minimum: 0.1
+        set_option :write_timeout, options, default: 5, typecast: :float, minimum: 0.1
+      end
+
+      def setup_sync(options)
+        set_option :sync_interval, options, default: 10, typecast: :float, minimum: 10
+        set_option :sync_secret, options
+      end
+
+      def setup_adapter(options)
+        set_option :memoize, options, default: true
+        set_option :local_adapter, options, default: -> { Adapters::Memory.new }, from_env: false
+        @adapter_block = ->(adapter) { adapter }
+      end
+
+      def setup_telemetry(options)
+        # Needs to be after url and token assignments because they are used for
+        # uniqueness in Telemetry.instance_for.
+        set_option :telemetry, options, from_env: false, default: -> {
+          Telemetry.instance_for(self)
+        }
+
+        # This is alpha. Don't use this unless you are me. And you are not me.
+        set_option :telemetry_enabled, options, default: false, typecast: :boolean
+        instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
+        @instrumenter = if telemetry_enabled
+          Telemetry::Instrumenter.new(self, instrumenter)
+        else
+          instrumenter
+        end
+      end
+
+      # Internal: Super helper for defining an option that can be set via
+      # options hash or ENV with defaults, typecasting and minimums.
+      def set_option(name, options, default: nil, typecast: nil, minimum: nil, from_env: true, required: false)
+        env_var = "FLIPPER_CLOUD_#{name.to_s.upcase}"
+        value = options.fetch(name) {
+          default_value = default.respond_to?(:call) ? default.call : default
+          if from_env
+            ENV.fetch(env_var, default_value)
+          else
+            default_value
+          end
+        }
+        value = Flipper::Typecast.send("to_#{typecast}", value) if typecast
+        send("#{name}=", value)
+        enforce_minimum(name, minimum) if minimum
+
+        if required
+          option_value = send(name)
+          if option_value.nil? || option_value.empty?
+            message = "Flipper::Cloud #{name} is missing. Please "
+            message << "set #{env_var} or " if from_env
+            message << "provide #{name} (e.g. Flipper::Cloud.new(#{name}: value))."
+            raise ArgumentError, message
+          end
+        end
+      end
+
+      # Enforce minimum interval for tasks that run on a timer.
+      def enforce_minimum(name, minimum)
+        provided = send(name)
+        if provided && provided < minimum
+          warn "Flipper::Cloud##{name} must be at least #{minimum} seconds but was #{provided}. Using #{minimum} seconds."
+          send(:instance_variable_set, "@#{name}", minimum)
+        end
       end
     end
   end

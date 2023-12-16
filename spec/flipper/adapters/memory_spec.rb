@@ -1,8 +1,17 @@
 RSpec.describe Flipper::Adapters::Memory do
   let(:source) { {} }
-  subject { described_class.new(source) }
 
-  it_should_behave_like 'a flipper adapter'
+  context 'threadsafe: true' do
+    subject { described_class.new(source, threadsafe: true) }
+
+    it_should_behave_like 'a flipper adapter'
+  end
+
+  context 'threadsafe: false' do
+    subject { described_class.new(source, threadsafe: false) }
+
+    it_should_behave_like 'a flipper adapter'
+  end
 
   it "can initialize from big hash" do
     flipper = Flipper.new(subject)

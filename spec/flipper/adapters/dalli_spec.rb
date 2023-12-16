@@ -14,10 +14,8 @@ RSpec.describe Flipper::Adapters::Dalli do
 
   before do
     Dalli.logger = Logger.new('/dev/null')
-    begin
+    skip_on_error(Dalli::NetworkError, 'Memcached not available') do
       cache.flush
-    rescue Dalli::NetworkError
-      ENV['CI'] ? raise : skip('Memcached not available')
     end
   end
 
@@ -28,7 +26,7 @@ RSpec.describe Flipper::Adapters::Dalli do
       feature = flipper[:stats]
       adapter.get(feature)
       adapter.remove(feature)
-      expect(cache.get(described_class.key_for(feature))).to be(nil)
+      expect(cache.get("flipper/v1/#{feature.key}")).to be(nil)
     end
   end
 
@@ -43,13 +41,13 @@ RSpec.describe Flipper::Adapters::Dalli do
       memory_adapter.reset
 
       adapter.get(stats)
-      expect(cache.get(described_class.key_for(search))).to be(nil)
-      expect(cache.get(described_class.key_for(other))).to be(nil)
+      expect(cache.get("flipper/v1/feature/#{search.key}")).to be(nil)
+      expect(cache.get("flipper/v1/feature/#{other.key}")).to be(nil)
 
       adapter.get_multi([stats, search, other])
 
-      expect(cache.get(described_class.key_for(search))[:boolean]).to eq('true')
-      expect(cache.get(described_class.key_for(other))[:boolean]).to be(nil)
+      expect(cache.get("flipper/v1/feature/#{search.key}")[:boolean]).to eq('true')
+      expect(cache.get("flipper/v1/feature/#{other.key}")[:boolean]).to be(nil)
 
       adapter.get_multi([stats, search, other])
       adapter.get_multi([stats, search, other])
@@ -68,9 +66,9 @@ RSpec.describe Flipper::Adapters::Dalli do
 
     it 'warms all features' do
       adapter.get_all
-      expect(cache.get(described_class.key_for(stats))[:boolean]).to eq('true')
-      expect(cache.get(described_class.key_for(search))[:boolean]).to be(nil)
-      expect(cache.get(described_class::GetAllKey)).to be_within(2).of(Time.now.to_i)
+      expect(cache.get("flipper/v1/feature/#{stats.key}")[:boolean]).to eq('true')
+      expect(cache.get("flipper/v1/feature/#{search.key}")[:boolean]).to be(nil)
+      expect(cache.get("flipper/v1/get_all")).to be_within(2).of(Time.now.to_i)
     end
 
     it 'returns same result when already cached' do

@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" href="<%= bootstrap_css[:src] %>" integrity="<%= bootstrap_css[:hash] %>" crossorigin="anonymous">
+    <link rel="stylesheet" href="<%= script_name + bootstrap_css[:src] %>" integrity="<%= bootstrap_css[:hash] %>" crossorigin="anonymous">
     <link rel="stylesheet" href="<%= script_name %>/css/application.css">
   </head>
   <body class="py-4">
@@ -16,6 +16,26 @@
           <%== Sanitize.fragment(Flipper::UI.configuration.banner_text, Sanitize::Config::BASIC) %>
         </div>
       <%- end -%>
+
+      <div class="container text-muted small mb-3">
+        <a href="https://www.flippercloud.io/docs/ui?utm_source=oss&utm_medium=ui&utm_campaign=docs">Docs</a> &bull;
+        <a href="<%= script_name %>/settings">Settings</a> &bull;
+        Version: <%= Flipper::VERSION %>
+        <a href="#" class="badge badge-warning ml-2 d-none" style="font-size:100%" id="new-version-badge" data-version="<%= Flipper::VERSION %>">
+        </a>
+
+        <% if Flipper.deprecated_ruby_version? %>
+          <a href="https://github.com/flippercloud/flipper/pull/776" class="badge badge-danger ml-2" style="font-size:100%">
+            Ruby <%= RUBY_VERSION %> deprecated
+          </a>
+        <% end %>
+
+        <% if defined?(Rails) && Flipper::Engine.deprecated_rails_version? %>
+          <a href="https://github.com/flippercloud/flipper/pull/776" class="badge badge-danger ml-2" style="font-size:100%">
+            Rails <%= Rails.version %> deprecated
+          </a>
+        <% end %>
+      </div>
 
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb bg-white border align-items-center mb-4">
@@ -44,16 +64,17 @@
               </a>
             </div>
             <div class="col text-muted p-0">
-              <small>For support, audit history, finer-grained permissions, multi-environment sync, and all your projects in one place check out <a href="https://www.flippercloud.io/?utm_source=oss&utm_medium=ui&utm_campaign=spread_the_love">Flipper&nbsp;Cloud</a>.</small>
+              <small>For audit history, rollback, finer-grained permissions, and multi-environment sync check out <a href="https://www.flippercloud.io/?utm_source=oss&utm_medium=ui&utm_campaign=spread_the_love">Flipper&nbsp;Cloud</a>. We even have a free tier!</small>
             </div>
           </div>
         </div>
       <% end %>
     </div>
 
-    <script src="<%= jquery_js[:src] %>" integrity="<%= jquery_js[:hash] %>" crossorigin="anonymous"></script>
-    <script src="<%= popper_js[:src] %>" integrity="<%= popper_js[:hash] %>" crossorigin="anonymous"></script>
-    <script src="<%= bootstrap_js[:src] %>" integrity="<%= bootstrap_js[:hash] %>" crossorigin="anonymous"></script>
-    <script src="<%= script_name %>/js/application.js"></script>
+    <script src="<%= script_name + jquery_js[:src] %>" integrity="<%= jquery_js[:hash] %>" crossorigin="anonymous"></script>
+    <script src="<%= script_name + popper_js[:src] %>" integrity="<%= popper_js[:hash] %>" crossorigin="anonymous"></script>
+    <script src="<%= script_name + bootstrap_js[:src] %>" integrity="<%= bootstrap_js[:hash] %>" crossorigin="anonymous"></script>
+    <script src="<%= script_name %>/js/application.js?v=<%= Flipper::VERSION %>"></script>
+    <script src="<%= script_name %>/js/version.js?v=<%= Flipper::VERSION %>"></script>
   </body>
 </html>

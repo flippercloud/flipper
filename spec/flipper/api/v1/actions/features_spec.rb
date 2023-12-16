@@ -8,10 +8,11 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
       before do
         flipper[:my_feature].enable
         flipper[:my_feature].enable(admin)
-        get '/features'
       end
 
       it 'responds with correct attributes' do
+        get '/features'
+
         expected_response = {
           'features' => [
             {
@@ -22,6 +23,11 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
                   'key' => 'boolean',
                   'name' => 'boolean',
                   'value' => 'true',
+                },
+                {
+                  'key' => 'expression',
+                  'name' => 'expression',
+                  'value' => nil,
                 },
                 {
                   'key' => 'actors',
@@ -47,6 +53,29 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
             },
           ],
         }
+        expect(last_response.status).to eq(200)
+        expect(json_response).to eq(expected_response)
+      end
+
+      it 'responds without names when instructed by param' do
+        expected_response = {
+          'features' => [
+            {
+              'key' => 'my_feature',
+              'state' => 'on',
+              'gates' => [
+                { 'key' => 'boolean', 'value' => 'true'},
+                {"key" => "expression", "value" => nil},
+                { 'key' => 'actors', 'value' => ['10']},
+                {'key' => 'percentage_of_actors', 'value' => nil},
+                { 'key' => 'percentage_of_time', 'value' => nil},
+                { 'key' => 'groups', 'value' => []},
+              ],
+            },
+          ],
+        }
+
+        get '/features', 'exclude_gate_names' => 'true'
         expect(last_response.status).to eq(200)
         expect(json_response).to eq(expected_response)
       end
@@ -103,19 +132,23 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
         post '/features', name: 'my_feature'
       end
 
-      it 'responds 200 ' do
+      it 'responds 200' do
         expect(last_response.status).to eq(200)
       end
 
       it 'returns decorated feature' do
         expected_response = {
-
           'key' => 'my_feature',
           'state' => 'off',
           'gates' => [
             {
               'key' => 'boolean',
               'name' => 'boolean',
+              'value' => nil,
+            },
+            {
+              'key' => 'expression',
+              'name' => 'expression',
               'value' => nil,
             },
             {
