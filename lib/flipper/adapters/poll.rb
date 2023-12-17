@@ -18,6 +18,14 @@ module Flipper
         @adapter = adapter
         @poller = poller
         @last_synced_at = 0
+
+        # If the adapter is empty, we need to sync before starting the poller.
+        # Yes, this will block the main thread, but that's better than thinking
+        # nothing is enabled.
+        if adapter.features.empty?
+          @poller.sync
+        end
+
         @poller.start
       end
 
