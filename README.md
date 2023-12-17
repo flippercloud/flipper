@@ -99,7 +99,7 @@ We also have a [free plan](https://www.flippercloud.io?utm_source=oss&utm_medium
 
 1. Update the version to be whatever it should be and commit.
 2. `script/release`
-3. Profit.
+3. Create a new [GitHub Release](https://github.com/flippercloud/flipper/releases/new)
 
 ## Brought To You By
 

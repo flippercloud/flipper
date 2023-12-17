@@ -53,6 +53,7 @@ module Flipper
         style-src 'self' 'unsafe-inline';
         style-src-attr 'unsafe-inline' ;
         style-src-elem 'self';
+        connect-src https://www.flippercloud.io;
       CSP
 
       # Public: Call this in subclasses so the action knows its route.
