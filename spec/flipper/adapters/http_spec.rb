@@ -5,74 +5,83 @@ require 'rack/handler/webrick'
 FLIPPER_SPEC_API_PORT = ENV.fetch('FLIPPER_SPEC_API_PORT', 9001).to_i
 
 RSpec.describe Flipper::Adapters::Http do
-  context 'adapter' do
-    subject do
-      described_class.new(url: "http://localhost:#{FLIPPER_SPEC_API_PORT}")
-    end
+  default_options = {
+    url: "http://localhost:#{FLIPPER_SPEC_API_PORT}",
+  }
 
-    before :all do
-      dir = FlipperRoot.join('tmp').tap(&:mkpath)
-      log_path = dir.join('flipper_adapters_http_spec.log')
-      @pstore_file = dir.join('flipper.pstore')
-      @pstore_file.unlink if @pstore_file.exist?
+  {
+    basic: default_options.dup,
+    gzip: default_options.dup.merge(headers: { accept_encoding: 'gzip' }),
+  }.each do |name, options|
+    context "adapter (#{name} #{options.inspect})" do
+      subject do
+        described_class.new(options)
+      end
 
-      api_adapter = Flipper::Adapters::PStore.new(@pstore_file)
-      flipper_api = Flipper.new(api_adapter)
-      app = Flipper::Api.app(flipper_api)
-      server_options = {
-        Port: FLIPPER_SPEC_API_PORT,
-        StartCallback: -> { @started = true },
-        Logger: WEBrick::Log.new(log_path.to_s, WEBrick::Log::INFO),
-        AccessLog: [
-          [log_path.open('w'), WEBrick::AccessLog::COMBINED_LOG_FORMAT],
-        ],
-      }
-      @server = WEBrick::HTTPServer.new(server_options)
-      @server.mount '/', Rack::Handler::WEBrick, app
+      before :all do
+        dir = FlipperRoot.join('tmp').tap(&:mkpath)
+        log_path = dir.join('flipper_adapters_http_spec.log')
+        @pstore_file = dir.join('flipper.pstore')
+        @pstore_file.unlink if @pstore_file.exist?
 
-      Thread.new { @server.start }
-      Timeout.timeout(1) { :wait until @started }
-    end
+        api_adapter = Flipper::Adapters::PStore.new(@pstore_file)
+        flipper_api = Flipper.new(api_adapter)
+        app = Flipper::Api.app(flipper_api)
+        server_options = {
+          Port: FLIPPER_SPEC_API_PORT,
+          StartCallback: -> { @started = true },
+          Logger: WEBrick::Log.new(log_path.to_s, WEBrick::Log::INFO),
+          AccessLog: [
+            [log_path.open('w'), WEBrick::AccessLog::COMBINED_LOG_FORMAT],
+          ],
+        }
+        @server = WEBrick::HTTPServer.new(server_options)
+        @server.mount '/', Rack::Handler::WEBrick, app
 
-    after :all do
-      @server.shutdown if @server
-    end
+        Thread.new { @server.start }
+        Timeout.timeout(1) { :wait until @started }
+      end
 
-    before(:each) do
-      @pstore_file.unlink if @pstore_file.exist?
-    end
+      after :all do
+        @server.shutdown if @server
+      end
 
-    it_should_behave_like 'a flipper adapter'
+      before(:each) do
+        @pstore_file.unlink if @pstore_file.exist?
+      end
 
-    it "can enable and disable unregistered group" do
-      flipper = Flipper.new(subject)
-      expect(flipper[:search].enable_group(:some_made_up_group)).to be(true)
-      expect(flipper[:search].groups_value).to eq(Set["some_made_up_group"])
+      it_should_behave_like 'a flipper adapter'
 
-      expect(flipper[:search].disable_group(:some_made_up_group)).to be(true)
-      expect(flipper[:search].groups_value).to eq(Set.new)
-    end
+      it "can enable and disable unregistered group" do
+        flipper = Flipper.new(subject)
+        expect(flipper[:search].enable_group(:some_made_up_group)).to be(true)
+        expect(flipper[:search].groups_value).to eq(Set["some_made_up_group"])
 
-    it "can import" do
-      adapter = Flipper::Adapters::Memory.new
-      source_flipper = Flipper.new(adapter)
-      source_flipper.enable_percentage_of_actors :search, 10
-      source_flipper.enable_percentage_of_time :search, 15
-      source_flipper.enable_actor :search, Flipper::Actor.new('User;1')
-      source_flipper.enable_actor :search, Flipper::Actor.new('User;100')
-      source_flipper.enable_group :search, :admins
-      source_flipper.enable_group :search, :employees
-      source_flipper.enable :plausible
-      source_flipper.disable :google_analytics
+        expect(flipper[:search].disable_group(:some_made_up_group)).to be(true)
+        expect(flipper[:search].groups_value).to eq(Set.new)
+      end
 
-      flipper = Flipper.new(subject)
-      flipper.import(source_flipper)
-      expect(flipper[:search].percentage_of_actors_value).to be(10)
-      expect(flipper[:search].percentage_of_time_value).to be(15)
-      expect(flipper[:search].actors_value).to eq(Set["User;1", "User;100"])
-      expect(flipper[:search].groups_value).to eq(Set["admins", "employees"])
-      expect(flipper[:plausible].boolean_value).to be(true)
-      expect(flipper[:google_analytics].boolean_value).to be(false)
+      it "can import" do
+        adapter = Flipper::Adapters::Memory.new
+        source_flipper = Flipper.new(adapter)
+        source_flipper.enable_percentage_of_actors :search, 10
+        source_flipper.enable_percentage_of_time :search, 15
+        source_flipper.enable_actor :search, Flipper::Actor.new('User;1')
+        source_flipper.enable_actor :search, Flipper::Actor.new('User;100')
+        source_flipper.enable_group :search, :admins
+        source_flipper.enable_group :search, :employees
+        source_flipper.enable :plausible
+        source_flipper.disable :google_analytics
+
+        flipper = Flipper.new(subject)
+        flipper.import(source_flipper)
+        expect(flipper[:search].percentage_of_actors_value).to be(10)
+        expect(flipper[:search].percentage_of_time_value).to be(15)
+        expect(flipper[:search].actors_value).to eq(Set["User;1", "User;100"])
+        expect(flipper[:search].groups_value).to eq(Set["admins", "employees"])
+        expect(flipper[:plausible].boolean_value).to be(true)
+        expect(flipper[:google_analytics].boolean_value).to be(false)
+      end
     end
   end
 
