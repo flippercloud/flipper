@@ -13,6 +13,7 @@ module Flipper
       builder = Rack::Builder.new
       yield builder if block_given?
       builder.use Rack::Head
+      builder.use Rack::Deflater
       builder.use Flipper::Api::JsonParams
       builder.use Flipper::Middleware::SetupEnv, flipper, env_key: env_key
       builder.use Flipper::Api::Middleware, env_key: env_key
