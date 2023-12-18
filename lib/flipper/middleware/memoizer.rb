@@ -51,7 +51,11 @@ module Flipper
       private
 
       def memoize?(request)
-        if @opts[:if]
+        flipper = request.env.fetch(@env_key) { Flipper }
+
+        if !flipper.adapter.is_a?(Flipper::Adapters::Memoizable)
+          return false
+        elsif @opts[:if]
           @opts[:if].call(request)
         elsif @opts[:unless]
           !@opts[:unless].call(request)

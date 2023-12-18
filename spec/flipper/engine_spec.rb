@@ -137,6 +137,11 @@ RSpec.describe Flipper::Engine do
       expect(subject.middleware).not_to include(Flipper::Middleware::Memoizer)
     end
 
+    it 'uses Sync middleware if config.memoize = :poll' do
+      initializer { config.memoize = :poll }
+      expect(subject.middleware).to include(Flipper::Middleware::Sync)
+    end
+
     it 'passes config to memoizer' do
       initializer do
         config.update(
@@ -167,9 +172,8 @@ RSpec.describe Flipper::Engine do
 
     it_behaves_like 'config.strict' do
       let(:adapter) do
-        dual_write = Flipper.adapter.adapter
-        poll = dual_write.local
-        poll.adapter
+        poll = Flipper.adapter.adapter
+        poll.local
       end
     end
 

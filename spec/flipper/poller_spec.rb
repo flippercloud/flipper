@@ -7,7 +7,7 @@ RSpec.describe Flipper::Poller do
 
   subject do
     described_class.new(
-      remote_adapter: remote_adapter,
+      remote_adapter,
       start_automatically: false,
       interval: Float::INFINITY
     )

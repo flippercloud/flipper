@@ -14,6 +14,17 @@ RSpec.describe Flipper::DSL do
       end
     end
 
+    context 'when using the :poll memoize strategy' do
+      it 'wraps the given adapter with Flipper::Adapters::Poll' do
+        dsl = described_class.new(adapter, memoize: :poll)
+        expect(dsl.adapter).to be_a(Flipper::Adapters::Poll)
+        expect(dsl.adapter.local).to be_a(Flipper::Adapters::Memory)
+        expect(dsl.adapter.remote).to be(adapter)
+
+        expect(Flipper::Poller.get('memoizer')).to be(dsl.adapter.poller)
+      end
+    end
+
     context 'when disabling memoization' do
       it 'uses the given adapter directly' do
         dsl = described_class.new(adapter, memoize: false)

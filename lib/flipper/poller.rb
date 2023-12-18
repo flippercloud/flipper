@@ -12,34 +12,32 @@ module Flipper
     end
     private_class_method :instances
 
-    def self.get(key, options = {})
-      instances.compute_if_absent(key) { new(options) }
+    def self.get(key, *args)
+      instances.compute_if_absent(key) { new(*args) }
     end
 
     def self.reset
       instances.each {|_, instance| instance.stop }.clear
     end
 
-    def initialize(options = {})
-      @thread = nil
-      @pid = Process.pid
-      @mutex = Mutex.new
+    def initialize(remote_adapter, options = {})
+      @remote_adapter = remote_adapter
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
-      @remote_adapter = options.fetch(:remote_adapter)
       @interval = options.fetch(:interval, 10).to_f
-      @last_synced_at = Concurrent::AtomicFixnum.new(0)
-      @adapter = Adapters::Memory.new(nil, threadsafe: true)
 
       if @interval < 1
         warn "Flipper::Cloud poll interval must be greater than or equal to 1 but was #{@interval}. Setting @interval to 1."
         @interval = 1
       end
 
-      @start_automatically = options.fetch(:start_automatically, true)
+      @thread = nil
+      @pid = Process.pid
+      @mutex = Mutex.new
+      @last_synced_at = Concurrent::AtomicFixnum.new(0)
+      @adapter = Adapters::Memory.new
 
-      if options.fetch(:shutdown_automatically, true)
-        at_exit { stop }
-      end
+      start if options.fetch(:start_automatically, true)
+      at_exit { stop } if options.fetch(:shutdown_automatically, true)
     end
 
     def start

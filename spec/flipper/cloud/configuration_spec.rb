@@ -77,7 +77,7 @@ RSpec.describe Flipper::Cloud::Configuration do
     stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
 
     instance = described_class.new(required_options.merge(sync_interval: 20))
-    poller = instance.send(:poller)
+    poller = instance.send(:poll_adapter).poller
     expect(poller.interval).to eq(20)
   end
 
@@ -98,7 +98,7 @@ RSpec.describe Flipper::Cloud::Configuration do
     stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
 
     instance = described_class.new(required_options)
-    expect(instance.adapter).to be_instance_of(Flipper::Adapters::DualWrite)
+    expect(instance.adapter).to be_instance_of(Flipper::Adapters::Poll)
   end
 
   it "can override adapter block" do

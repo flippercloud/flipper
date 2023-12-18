@@ -21,8 +21,21 @@ module Flipper
     def initialize(adapter, options = {})
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
       memoize = options.fetch(:memoize, true)
-      adapter = Adapters::Memoizable.new(adapter) if memoize
-      @adapter = adapter
+      @adapter = if memoize == :poll
+        Adapters::Poll.new(Adapters::Memory.new, adapter,
+          key: 'memoizer',
+          interval: 5,
+          instrumenter: @instrumenter
+        ).tap do |poll|
+          # Force poller to sync in current thread now
+          poll.poller.sync
+        end
+      elsif memoize
+        Adapters::Memoizable.new(adapter)
+      else
+        adapter
+      end
+
       @memoized_features = {}
     end
 

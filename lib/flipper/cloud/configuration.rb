@@ -2,7 +2,6 @@ require "logger"
 require "socket"
 require "flipper/adapters/http"
 require "flipper/adapters/poll"
-require "flipper/poller"
 require "flipper/adapters/memory"
 require "flipper/adapters/dual_write"
 require "flipper/adapters/sync/synchronizer"
@@ -37,6 +36,9 @@ module Flipper
 
       # Public: net/http write timeout for all http requests (default: 5).
       attr_accessor :write_timeout
+
+      # Public: Memoize adapter operations. Defaults to true.
+      attr_accessor :memoize
 
       # Public: IO stream to send debug output too. Off by default.
       #
@@ -138,20 +140,19 @@ module Flipper
       private
 
       def app_adapter
-        read_adapter = sync_method == :webhook ? local_adapter : poll_adapter
-        Flipper::Adapters::DualWrite.new(read_adapter, http_adapter)
-      end
-
-      def poller
-        Flipper::Poller.get(@url + @token, {
-          interval: sync_interval,
-          remote_adapter: http_adapter,
-          instrumenter: instrumenter,
-        }).tap(&:start)
+        if sync_method == :webhook
+          Flipper::Adapters::DualWrite.new(local_adapter, http_adapter)
+        else
+          poll_adapter
+        end
       end
 
       def poll_adapter
-        Flipper::Adapters::Poll.new(poller, local_adapter)
+        Flipper::Adapters::Poll.new(local_adapter, http_adapter,
+          key: @url + @token,
+          interval: sync_interval,
+          instrumenter: instrumenter,
+        )
       end
 
       def http_adapter
@@ -203,6 +204,7 @@ module Flipper
       end
 
       def setup_adapter(options)
+        set_option :memoize, options, default: true
         set_option :local_adapter, options, default: -> { Adapters::Memory.new }, from_env: false
         @adapter_block = ->(adapter) { adapter }
       end
