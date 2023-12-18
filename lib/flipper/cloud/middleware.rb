@@ -24,7 +24,7 @@ module Flipper
         if request.post? && (request.path_info.match(ROOT_PATH) || request.path_info.match(WEBHOOK_PATH))
           status = 200
           headers = {
-            "content-type" => "application/json",
+            Rack::CONTENT_TYPE => "application/json",
           }
           body = "{}"
           payload = request.body.read

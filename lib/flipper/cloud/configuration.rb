@@ -163,7 +163,8 @@ module Flipper
           max_retries: 0, # we'll handle retries ourselves
           debug_output: @debug_output,
           headers: {
-            "Flipper-Cloud-Token" => @token,
+            flipper_cloud_token: @token,
+            accept_encoding: "gzip",
           },
         })
       end

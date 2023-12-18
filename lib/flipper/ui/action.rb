@@ -109,7 +109,7 @@ module Flipper
         @flipper = flipper
         @request = request
         @code = 200
-        @headers = { 'content-type' => 'text/plain' }
+        @headers = {Rack::CONTENT_TYPE => 'text/plain'}
         @breadcrumbs =
           if Flipper::UI.configuration.application_breadcrumb_href
             [Breadcrumb.new('App', Flipper::UI.configuration.application_breadcrumb_href)]
@@ -159,7 +159,7 @@ module Flipper
       #
       # Returns a response.
       def view_response(name)
-        header 'content-type', 'text/html'
+        header Rack::CONTENT_TYPE, 'text/html'
         header 'content-security-policy', CONTENT_SECURITY_POLICY
         body = view_with_layout { view_without_layout name }
         halt [@code, @headers, [body]]
@@ -172,7 +172,7 @@ module Flipper
       #
       # Returns a response.
       def json_response(object)
-        header 'content-type', 'application/json'
+        header Rack::CONTENT_TYPE, 'application/json'
         body = case object
         when String
           object

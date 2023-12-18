@@ -27,7 +27,11 @@ module SpecHelpers
   end
 
   def json_response
-    JSON.parse(last_response.body)
+    body = last_response.body
+    if last_response["content-encoding"] == 'gzip'
+      body = Flipper::Typecast.from_gzip(body)
+    end
+    JSON.parse(body)
   end
 
   def api_error_code_reference_url
