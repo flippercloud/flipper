@@ -103,9 +103,17 @@ RSpec.describe Flipper::Adapters::Http do
     stub_const("Rails", double(version: "7.1.0"))
     stub_const("Sinatra::VERSION", "3.1.0")
     stub_const("Hanami::VERSION", "0.7.2")
+    stub_const("GoodJob::VERSION", "3.21.5")
+    stub_const("Sidekiq::VERSION", "7.2.0")
 
     headers = {
-      "client-framework" => ["rails=7.1.0", "sinatra=3.1.0", "hanami=0.7.2"]
+      "client-framework" => [
+        "rails=7.1.0",
+        "sinatra=3.1.0",
+        "hanami=0.7.2",
+        "good_job=3.21.5",
+        "sidekiq=7.2.0",
+      ]
     }
 
     stub_request(:get, "http://app.com/flipper/features/feature_panel")

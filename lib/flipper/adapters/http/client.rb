@@ -15,10 +15,10 @@ module Flipper
         HTTPS_SCHEME = "https".freeze
 
         CLIENT_FRAMEWORKS = {
-          rails: -> { Rails.version if defined?(Rails) },
-          sinatra: -> { Sinatra::VERSION if defined?(Sinatra) },
-          hanami: -> { Hanami::VERSION if defined?(Hanami) },
-          sidekiq: -> { Sidekiq::VERSION if defined?(Sidekiq) },
+          rails:    -> { Rails.version if defined?(Rails) },
+          sinatra:  -> { Sinatra::VERSION if defined?(Sinatra) },
+          hanami:   -> { Hanami::VERSION if defined?(Hanami) },
+          sidekiq:  -> { Sidekiq::VERSION if defined?(Sidekiq) },
           good_job: -> { GoodJob::VERSION if defined?(GoodJob) },
         }
 
@@ -45,7 +45,7 @@ module Flipper
         end
 
         def add_header(key, value)
-          key = key.to_s.downcase.freeze
+          key = key.to_s.downcase.gsub('_'.freeze, '-'.freeze).freeze
           @headers[key] = value
         end
 
