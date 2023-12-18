@@ -109,7 +109,7 @@ module Flipper
           request.initialize_http_header(request_headers)
 
           client_frameworks.each do |framework, version|
-            request.add_field("Client-Framework", [framework, version].join("="))
+            request.add_field("client-framework", [framework, version].join("="))
           end
 
           request.body = body if body
