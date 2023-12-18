@@ -38,10 +38,9 @@ RSpec.describe Flipper::AdapterBuilder do
       strict_adapter = memoizable_adapter.adapter
       memory_adapter = strict_adapter.adapter
 
-
       expect(memoizable_adapter).to be_instance_of(Flipper::Adapters::Memoizable)
       expect(strict_adapter).to be_instance_of(Flipper::Adapters::Strict)
-      expect(strict_adapter.handler).to be(Flipper::Adapters::Strict::HANDLERS.fetch(:warn))
+      expect(strict_adapter.handler).to be(:warn)
       expect(memory_adapter).to be_instance_of(Flipper::Adapters::Memory)
     end
 

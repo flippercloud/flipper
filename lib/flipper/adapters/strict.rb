@@ -12,18 +12,12 @@ module Flipper
         end
       end
 
-      HANDLERS = {
-        raise: ->(feature) { raise NotFound.new(feature.key) },
-        warn: ->(feature) { warn NotFound.new(feature.key).message },
-        noop: ->(_) { },
-      }
-
       def_delegators :@adapter, :features, :get_all, :add, :remove, :clear, :enable, :disable
 
       def initialize(adapter, handler = nil, &block)
         @name = :strict
         @adapter = adapter
-        @handler = block || HANDLERS.fetch(handler)
+        @handler = block || handler
       end
 
       def get(feature)
@@ -39,7 +33,15 @@ module Flipper
       private
 
       def assert_feature_exists(feature)
-        @handler.call(feature) unless @adapter.features.include?(feature.key)
+        return if @adapter.features.include?(feature.key)
+
+        case handler
+        when Proc then handler.call(feature)
+        when true, :raise then raise NotFound.new(feature.key)
+        when :warn then warn NotFound.new(feature.key).message
+        else
+          # noop or unknown handler
+        end
       end
 
     end

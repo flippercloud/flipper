@@ -45,7 +45,7 @@ RSpec.describe Flipper::Engine do
         subject
         expect(config.strict).to eq(:warn)
         expect(adapter).to be_instance_of(Flipper::Adapters::Strict)
-        expect(adapter.handler).to be(Flipper::Adapters::Strict::HANDLERS.fetch(:warn))
+        expect(adapter.handler).to be(:warn)
       end
     end
 
@@ -57,11 +57,27 @@ RSpec.describe Flipper::Engine do
       end
     end
 
-    it "defaults to strict=false in RAILS_ENV=production" do
-        Rails.env = "production"
+    [true, :raise, :warn].each do |value|
+      it "can set strict=#{value.inspect} in initializer" do
+        initializer { config.strict = value }
         subject
-        expect(config.strict).to eq(false)
-        expect(adapter).to be_instance_of(Flipper::Adapters::Memory)
+        expect(adapter).to be_instance_of(Flipper::Adapters::Strict)
+        expect(adapter.handler).to be(value)
+      end
+    end
+
+    it "can set strict=false in initializer" do
+      initializer { config.strict = false }
+      subject
+      expect(config.strict).to eq(false)
+      expect(adapter).to be_instance_of(Flipper::Adapters::Memory)
+    end
+
+    it "defaults to strict=false in RAILS_ENV=production" do
+      Rails.env = "production"
+      subject
+      expect(config.strict).to eq(false)
+      expect(adapter).to be_instance_of(Flipper::Adapters::Memory)
     end
 
     %w(development test).each do |env|
@@ -71,7 +87,7 @@ RSpec.describe Flipper::Engine do
         subject
         expect(config.strict).to eq(:warn)
         expect(adapter).to be_instance_of(Flipper::Adapters::Strict)
-        expect(adapter.handler).to be(Flipper::Adapters::Strict::HANDLERS.fetch(:warn))
+        expect(adapter.handler).to be(:warn)
       end
     end
   end
@@ -167,7 +183,8 @@ RSpec.describe Flipper::Engine do
 
     it_behaves_like 'config.strict' do
       let(:adapter) do
-        dual_write = Flipper.adapter.adapter
+        memoizable = Flipper.adapter
+        dual_write = memoizable.adapter
         poll = dual_write.local
         poll.adapter
       end

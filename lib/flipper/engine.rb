@@ -43,10 +43,6 @@ module Flipper
       require 'flipper/cloud' if cloud?
 
       Flipper.configure do |config|
-        if app.config.flipper.strict
-          config.use Flipper::Adapters::Strict, app.config.flipper.strict
-        end
-
         config.default do
           if cloud?
             Flipper::Cloud.new(
@@ -65,6 +61,16 @@ module Flipper
 
       if flipper.log && flipper.instrumenter == ActiveSupport::Notifications
         require "flipper/instrumentation/log_subscriber"
+      end
+    end
+
+    initializer "flipper.strict", after: :load_config_initializers do |app|
+      flipper = app.config.flipper
+
+      if flipper.strict
+        Flipper.configure do |config|
+          config.use Flipper::Adapters::Strict, flipper.strict
+        end
       end
     end
 
