@@ -210,7 +210,7 @@ RSpec.describe Flipper::Engine do
         application.initialize!
 
         stub = stub_request(:get, "https://www.flippercloud.io/adapter/features?exclude_gate_names=true").with({
-          headers: { "Flipper-Cloud-Token" => ENV["FLIPPER_CLOUD_TOKEN"] },
+          headers: { "flipper-cloud-token" => ENV["FLIPPER_CLOUD_TOKEN"] },
         }).to_return(status: 200, body: JSON.generate({ features: {} }), headers: {})
 
         post "/_flipper", request_body, { "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value }

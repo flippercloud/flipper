@@ -35,7 +35,7 @@ RSpec.describe Flipper::Cloud do
       expect(client.uri.scheme).to eq('https')
       expect(client.uri.host).to eq('www.flippercloud.io')
       expect(client.uri.path).to eq('/adapter')
-      expect(client.headers[:flipper_cloud_token]).to eq(token)
+      expect(client.headers["flipper-cloud-token"]).to eq(token)
       expect(@instance.instrumenter).to be(Flipper::Instrumenters::Noop)
     end
   end
@@ -104,7 +104,7 @@ RSpec.describe Flipper::Cloud do
 
   it 'can import' do
     stub_request(:post, /www\.flippercloud\.io\/adapter\/features.*/).
-      with(headers: {'Flipper-Cloud-Token'=>'asdf'}).to_return(status: 200, body: "{}", headers: {})
+      with(headers: {'flipper-cloud-token'=>'asdf'}).to_return(status: 200, body: "{}", headers: {})
 
     flipper = Flipper.new(Flipper::Adapters::Memory.new)
 
@@ -130,7 +130,7 @@ RSpec.describe Flipper::Cloud do
 
   it 'raises error for failure while importing' do
     stub_request(:post, /www\.flippercloud\.io\/adapter\/features.*/).
-      with(headers: {'Flipper-Cloud-Token'=>'asdf'}).to_return(status: 500, body: "{}")
+      with(headers: {'flipper-cloud-token'=>'asdf'}).to_return(status: 500, body: "{}")
 
     flipper = Flipper.new(Flipper::Adapters::Memory.new)
 
@@ -155,7 +155,7 @@ RSpec.describe Flipper::Cloud do
 
   it 'raises error for timeout while importing' do
     stub_request(:post, /www\.flippercloud\.io\/adapter\/features.*/).
-      with(headers: {'Flipper-Cloud-Token'=>'asdf'}).to_timeout
+      with(headers: {'flipper-cloud-token'=>'asdf'}).to_timeout
 
     flipper = Flipper.new(Flipper::Adapters::Memory.new)
 

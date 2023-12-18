@@ -68,7 +68,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
 
       it 'redirects back to feature' do
         expect(last_response.status).to be(302)
-        expect(last_response.headers['Location']).to eq('/features/search')
+        expect(last_response.headers['location']).to eq('/features/search')
       end
 
       context "when feature name contains space" do
@@ -84,7 +84,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
 
         it "redirects back to feature" do
           expect(last_response.status).to be(302)
-          expect(last_response.headers['Location']).to eq('/features/sp%20ace')
+          expect(last_response.headers['location']).to eq('/features/sp%20ace')
         end
       end
 
@@ -114,7 +114,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
 
           it 'redirects back to feature' do
             expect(last_response.status).to be(302)
-            expect(last_response.headers['Location']).to eq('/features/search/actors?error=%22%22%20is%20not%20a%20valid%20actor%20value.')
+            expect(last_response.headers['location']).to eq('/features/search/actors?error=%22%22%20is%20not%20a%20valid%20actor%20value.')
           end
         end
 
@@ -123,7 +123,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
 
           it 'redirects back to feature' do
             expect(last_response.status).to be(302)
-            expect(last_response.headers['Location']).to eq('/features/search/actors?error=%22%22%20is%20not%20a%20valid%20actor%20value.')
+            expect(last_response.headers['location']).to eq('/features/search/actors?error=%22%22%20is%20not%20a%20valid%20actor%20value.')
           end
         end
       end
@@ -175,7 +175,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
 
       it 'redirects back to feature' do
         expect(last_response.status).to be(302)
-        expect(last_response.headers['Location']).to eq('/features/search')
+        expect(last_response.headers['location']).to eq('/features/search')
       end
 
       context 'value contains whitespace' do

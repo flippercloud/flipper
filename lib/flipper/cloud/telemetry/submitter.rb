@@ -78,8 +78,8 @@ module Flipper
 
         def submit(body)
           client = @cloud_configuration.http_client
-          client.add_header :schema_version, SCHEMA_VERSION
-          client.add_header :content_encoding, GZIP_ENCODING
+          client.add_header "schema-version", SCHEMA_VERSION
+          client.add_header "content-encoding", GZIP_ENCODING
 
           response = client.post PATH, body
           code = response.code.to_i

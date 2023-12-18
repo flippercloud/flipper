@@ -233,9 +233,9 @@ RSpec.describe Flipper::Cloud::Configuration do
     stub = stub_request(:get, "https://www.flippercloud.io/adapter/features?exclude_gate_names=true").
       with({
         headers: {
-          'Flipper-Cloud-Token'=>'asdf',
+          'flipper-cloud-token'=>'asdf',
         },
-      }).to_return(status: 200, body: body, headers: {})
+      }).to_return(status: 200, body: body)
     instance = described_class.new(required_options)
     instance.sync
 

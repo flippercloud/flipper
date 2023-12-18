@@ -8,7 +8,7 @@ RSpec.describe Flipper::UI::Actions::Home do
 
     it 'responds with redirect' do
       expect(last_response.status).to be(302)
-      expect(last_response.headers['Location']).to eq('/features')
+      expect(last_response.headers['location']).to eq('/features')
     end
   end
 end

@@ -4,7 +4,7 @@ require 'flipper/cloud/configuration'
 RSpec.describe Flipper::Cloud::Telemetry do
   it "phones home and does not update telemetry interval if missing" do
     stub = stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
-      to_return(status: 200, body: "{}", headers: {})
+      to_return(status: 200, body: "{}")
 
     cloud_configuration = Flipper::Cloud::Configuration.new(token: "test")
 

@@ -43,33 +43,33 @@ RSpec.describe Flipper::Cloud::Telemetry::Submitter do
         ]
       }
       expected_headers = {
-        'Accept' => 'application/json',
-        'Client-Engine' => defined?(RUBY_ENGINE) ? RUBY_ENGINE : "",
-        'Client-Hostname' => Socket.gethostname,
-        'Client-Language' => 'ruby',
-        'Client-Language-Version' => "#{RUBY_VERSION} p#{RUBY_PATCHLEVEL} (#{RUBY_RELEASE_DATE})",
-        'Client-Pid' => Process.pid.to_s,
-        'Client-Platform' => RUBY_PLATFORM,
-        'Client-Thread' => Thread.current.object_id.to_s,
-        'Content-Encoding' => 'gzip',
-        'Content-Type' => 'application/json',
-        'Flipper-Cloud-Token' => 'asdf',
-        'Schema-Version' => 'V1',
-        'User-Agent' => "Flipper HTTP Adapter v#{Flipper::VERSION}",
+        'accept' => 'application/json',
+        'client-engine' => defined?(RUBY_ENGINE) ? RUBY_ENGINE : "",
+        'client-hostname' => Socket.gethostname,
+        'client-language' => 'ruby',
+        'client-language-version' => "#{RUBY_VERSION} p#{RUBY_PATCHLEVEL} (#{RUBY_RELEASE_DATE})",
+        'client-pid' => Process.pid.to_s,
+        'client-platform' => RUBY_PLATFORM,
+        'client-thread' => Thread.current.object_id.to_s,
+        'content-encoding' => 'gzip',
+        'content-type' => 'application/json',
+        'flipper-cloud-token' => 'asdf',
+        'schema-version' => 'V1',
+        'user-agent' => "Flipper HTTP Adapter v#{Flipper::VERSION}",
       }
       stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
         with(headers: expected_headers) { |request|
           gunzipped = Flipper::Typecast.from_gzip(request.body)
           body = Flipper::Typecast.from_json(gunzipped)
           body == expected_body
-        }.to_return(status: 200, body: "{}", headers: {})
+        }.to_return(status: 200, body: "{}")
       subject.call(enabled_metrics)
     end
 
     it "defaults backoff_policy" do
       stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
-        to_return(status: 429, body: "{}", headers: {}).
-        to_return(status: 200, body: "{}", headers: {})
+        to_return(status: 429, body: "{}").
+        to_return(status: 200, body: "{}")
       instance = described_class.new(cloud_configuration)
       expect(instance.backoff_policy.min_timeout_ms).to eq(1_000)
       expect(instance.backoff_policy.max_timeout_ms).to eq(30_000)
@@ -77,7 +77,7 @@ RSpec.describe Flipper::Cloud::Telemetry::Submitter do
 
     it "tries 10 times by default" do
       stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
-        to_return(status: 500, body: "{}", headers: {})
+        to_return(status: 500, body: "{}")
       subject.call(enabled_metrics)
       expect(subject.backoff_policy.retries).to eq(9) # 9 retries + 1 initial attempt
     end
@@ -111,19 +111,19 @@ RSpec.describe Flipper::Cloud::Telemetry::Submitter do
 
     it "retries on 429" do
       stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
-        to_return(status: 429, body: "{}", headers: {}).
-        to_return(status: 429, body: "{}", headers: {}).
-        to_return(status: 200, body: "{}", headers: {})
+        to_return(status: 429, body: "{}").
+        to_return(status: 429, body: "{}").
+        to_return(status: 200, body: "{}")
       subject.call(enabled_metrics)
       expect(subject.backoff_policy.retries).to eq(2)
     end
 
     it "retries on 500" do
       stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
-        to_return(status: 500, body: "{}", headers: {}).
-        to_return(status: 503, body: "{}", headers: {}).
-        to_return(status: 502, body: "{}", headers: {}).
-        to_return(status: 200, body: "{}", headers: {})
+        to_return(status: 500, body: "{}").
+        to_return(status: 503, body: "{}").
+        to_return(status: 502, body: "{}").
+        to_return(status: 200, body: "{}")
       subject.call(enabled_metrics)
       expect(subject.backoff_policy.retries).to eq(3)
     end
