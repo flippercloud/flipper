@@ -11,7 +11,7 @@ RSpec.describe Flipper::Adapters::Http do
 
   {
     basic: default_options.dup,
-    gzip: default_options.dup.merge(headers: { accept_encoding: 'gzip' }),
+    gzip: default_options.dup.merge(headers: { 'accept-encoding': 'gzip' }),
   }.each do |name, options|
     context "adapter (#{name} #{options.inspect})" do
       subject do
@@ -87,9 +87,9 @@ RSpec.describe Flipper::Adapters::Http do
 
   it "sends default headers" do
     headers = {
-      'Accept' => 'application/json',
-      'Content-Type' => 'application/json',
-      'User-Agent' => "Flipper HTTP Adapter v#{Flipper::VERSION}",
+      'accept' => 'application/json',
+      'content-type' => 'application/json',
+      'user-agent' => "Flipper HTTP Adapter v#{Flipper::VERSION}",
     }
     stub_request(:get, "http://app.com/flipper/features/feature_panel")
       .with(headers: headers)
@@ -103,9 +103,17 @@ RSpec.describe Flipper::Adapters::Http do
     stub_const("Rails", double(version: "7.1.0"))
     stub_const("Sinatra::VERSION", "3.1.0")
     stub_const("Hanami::VERSION", "0.7.2")
+    stub_const("GoodJob::VERSION", "3.21.5")
+    stub_const("Sidekiq::VERSION", "7.2.0")
 
     headers = {
-      "Client-Framework" => ["rails=7.1.0", "sinatra=3.1.0", "hanami=0.7.2"]
+      "client-framework" => [
+        "rails=7.1.0",
+        "sinatra=3.1.0",
+        "hanami=0.7.2",
+        "good_job=3.21.5",
+        "sidekiq=7.2.0",
+      ]
     }
 
     stub_request(:get, "http://app.com/flipper/features/feature_panel")
@@ -121,7 +129,7 @@ RSpec.describe Flipper::Adapters::Http do
     stub_const("Sinatra::VERSION", "3.1.0")
 
     headers = {
-      "Client-Framework" => ["rails=7.1.0", "sinatra=3.1.0"]
+      "client-framework" => ["rails=7.1.0", "sinatra=3.1.0"]
     }
 
     stub_request(:get, "http://app.com/flipper/features/feature_panel")
@@ -289,7 +297,7 @@ RSpec.describe Flipper::Adapters::Http do
     let(:options) do
       {
         url: 'http://app.com/mount-point',
-        headers: { 'X-Custom-Header' => 'foo' },
+        headers: { 'x-custom-header' => 'foo' },
         basic_auth_username: 'username',
         basic_auth_password: 'password',
         read_timeout: 100,
@@ -310,7 +318,7 @@ RSpec.describe Flipper::Adapters::Http do
       subject.get(feature)
       expect(
         a_request(:get, 'http://app.com/mount-point/features/feature_panel')
-        .with(headers: { 'X-Custom-Header' => 'foo' })
+        .with(headers: { 'x-custom-header' => 'foo' })
       ).to have_been_made.once
     end
 

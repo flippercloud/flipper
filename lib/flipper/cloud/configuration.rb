@@ -163,8 +163,8 @@ module Flipper
           max_retries: 0, # we'll handle retries ourselves
           debug_output: @debug_output,
           headers: {
-            flipper_cloud_token: @token,
-            accept_encoding: "gzip",
+            "flipper-cloud-token" => @token,
+            "accept-encoding" => "gzip",
           },
         })
       end
@@ -187,6 +187,11 @@ module Flipper
       def setup_http(options)
         set_option :url, options, default: DEFAULT_URL
         set_option :debug_output, options, from_env: false
+
+        if @debug_output.nil? && Flipper::Typecast.to_boolean(ENV["FLIPPER_CLOUD_DEBUG_OUTPUT_STDOUT"])
+          @debug_output = STDOUT
+        end
+
         set_option :read_timeout, options, default: 5, typecast: :float, minimum: 0.1
         set_option :open_timeout, options, default: 2, typecast: :float, minimum: 0.1
         set_option :write_timeout, options, default: 5, typecast: :float, minimum: 0.1

@@ -86,6 +86,13 @@ RSpec.describe Flipper::Cloud::Configuration do
     expect(instance.debug_output).to eq(STDOUT)
   end
 
+  it "defaults debug_output to STDOUT if FLIPPER_CLOUD_DEBUG_OUTPUT_STDOUT set to true" do
+    with_env "FLIPPER_CLOUD_DEBUG_OUTPUT_STDOUT" => "true" do
+      instance = described_class.new(required_options)
+    expect(instance.debug_output).to eq(STDOUT)
+    end
+  end
+
   it "defaults adapter block" do
     # The initial sync of http to local invokes this web request.
     stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
@@ -233,9 +240,9 @@ RSpec.describe Flipper::Cloud::Configuration do
     stub = stub_request(:get, "https://www.flippercloud.io/adapter/features?exclude_gate_names=true").
       with({
         headers: {
-          'Flipper-Cloud-Token'=>'asdf',
+          'flipper-cloud-token'=>'asdf',
         },
-      }).to_return(status: 200, body: body, headers: {})
+      }).to_return(status: 200, body: body)
     instance = described_class.new(required_options)
     instance.sync
 

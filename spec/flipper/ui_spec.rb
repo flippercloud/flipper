@@ -42,7 +42,7 @@ RSpec.describe Flipper::UI do
          { 'value' => 'User;6', 'operation' => 'enable', 'authenticity_token' => token },
          'rack.session' => session
     expect(last_response.status).to be(302)
-    expect(last_response.headers['Location']).to eq('/features/refactor-images')
+    expect(last_response.headers['location']).to eq('/features/refactor-images')
   end
 
   describe 'configure' do

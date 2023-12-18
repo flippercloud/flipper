@@ -41,12 +41,12 @@ module Flipper
                 })
               rescue Flipper::Adapters::Http::Error => error
                 status = error.response.code.to_i == 402 ? 402 : 500
-                headers["Flipper-Cloud-Response-Error-Class"] = error.class.name
-                headers["Flipper-Cloud-Response-Error-Message"] = error.message
+                headers["flipper-cloud-response-error-class"] = error.class.name
+                headers["flipper-cloud-response-error-message"] = error.message
               rescue => error
                 status = 500
-                headers["Flipper-Cloud-Response-Error-Class"] = error.class.name
-                headers["Flipper-Cloud-Response-Error-Message"] = error.message
+                headers["flipper-cloud-response-error-class"] = error.class.name
+                headers["flipper-cloud-response-error-message"] = error.message
               end
             end
           rescue MessageVerifier::InvalidSignature
