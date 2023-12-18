@@ -24,7 +24,8 @@ module Flipper
 
         attr_reader :uri, :headers
         attr_reader :basic_auth_username, :basic_auth_password
-        attr_reader :read_timeout, :open_timeout, :write_timeout, :max_retries, :debug_output
+        attr_reader :read_timeout, :open_timeout, :write_timeout
+        attr_reader :max_retries, :debug_output
 
         def initialize(options = {})
           @uri = URI(options.fetch(:url))
