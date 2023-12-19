@@ -33,12 +33,12 @@ RSpec.describe Flipper::UI::Actions::Features do
     end
 
     it 'sets content disposition' do
-      expect(last_response.headers['Content-Disposition']).to match(/Attachment;filename=flipper_memory_[0-9]*\.json/)
+      expect(last_response.headers['content-disposition']).to match(/Attachment;filename=flipper_memory_[0-9]*\.json/)
     end
 
     it 'renders json' do
       data = JSON.parse(last_response.body)
-      expect(last_response.headers['Content-Type']).to eq('application/json')
+      expect(last_response.headers['content-type']).to eq('application/json')
       expect(data['version']).to eq(1)
       expect(data['features']).to eq({
         "analytics" => {"boolean"=>nil, "expression"=>{"Equal"=>[{"Property"=>["plan"]}, "basic"]}, "groups"=>[], "actors"=>[], "percentage_of_actors"=>nil, "percentage_of_time"=>nil},

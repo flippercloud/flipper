@@ -7,26 +7,28 @@ module Flipper
     class Http
       class Client
         DEFAULT_HEADERS = {
-          'Content-Type' => 'application/json',
-          'Accept' => 'application/json',
-          'User-Agent' => "Flipper HTTP Adapter v#{VERSION}",
+          'content-type' => 'application/json',
+          'accept' => 'application/json',
+          'user-agent' => "Flipper HTTP Adapter v#{VERSION}",
         }.freeze
 
         HTTPS_SCHEME = "https".freeze
 
         CLIENT_FRAMEWORKS = {
-          rails: -> { Rails.version if defined?(Rails) },
-          sinatra: -> { Sinatra::VERSION if defined?(Sinatra) },
-          hanami: -> { Hanami::VERSION if defined?(Hanami) },
+          rails:    -> { Rails.version if defined?(Rails) },
+          sinatra:  -> { Sinatra::VERSION if defined?(Sinatra) },
+          hanami:   -> { Hanami::VERSION if defined?(Hanami) },
+          sidekiq:  -> { Sidekiq::VERSION if defined?(Sidekiq) },
+          good_job: -> { GoodJob::VERSION if defined?(GoodJob) },
         }
 
         attr_reader :uri, :headers
         attr_reader :basic_auth_username, :basic_auth_password
-        attr_reader :read_timeout, :open_timeout, :write_timeout, :max_retries, :debug_output
+        attr_reader :read_timeout, :open_timeout, :write_timeout
+        attr_reader :max_retries, :debug_output
 
         def initialize(options = {})
           @uri = URI(options.fetch(:url))
-          @headers = DEFAULT_HEADERS.merge(options[:headers] || {})
           @basic_auth_username = options[:basic_auth_username]
           @basic_auth_password = options[:basic_auth_password]
           @read_timeout = options[:read_timeout]
@@ -34,9 +36,16 @@ module Flipper
           @write_timeout = options[:write_timeout]
           @max_retries = options.key?(:max_retries) ? options[:max_retries] : 0
           @debug_output = options[:debug_output]
+
+          @headers = {}
+          DEFAULT_HEADERS.each { |key, value| add_header key, value }
+          if options[:headers]
+            options[:headers].each { |key, value| add_header key, value }
+          end
         end
 
         def add_header(key, value)
+          key = key.to_s.downcase.gsub('_'.freeze, '-'.freeze).freeze
           @headers[key] = value
         end
 
@@ -87,13 +96,13 @@ module Flipper
 
         def build_request(http_method, uri, headers, options)
           request_headers = {
-            client_language: "ruby",
-            client_language_version: "#{RUBY_VERSION} p#{RUBY_PATCHLEVEL} (#{RUBY_RELEASE_DATE})",
-            client_platform: RUBY_PLATFORM,
-            client_engine: defined?(RUBY_ENGINE) ? RUBY_ENGINE : "",
-            client_pid: Process.pid.to_s,
-            client_thread: Thread.current.object_id.to_s,
-            client_hostname: Socket.gethostname,
+            'client-language' => "ruby",
+            'client-language-version' => "#{RUBY_VERSION} p#{RUBY_PATCHLEVEL} (#{RUBY_RELEASE_DATE})",
+            'client-platform' => RUBY_PLATFORM,
+            'client-engine' => defined?(RUBY_ENGINE) ? RUBY_ENGINE : "",
+            'client-pid' => Process.pid.to_s,
+            'client-thread' => Thread.current.object_id.to_s,
+            'client-hostname' => Socket.gethostname,
           }.merge(headers)
 
           body = options[:body]
@@ -101,7 +110,7 @@ module Flipper
           request.initialize_http_header(request_headers)
 
           client_frameworks.each do |framework, version|
-            request.add_field("Client-Framework", [framework, version].join("="))
+            request.add_field("client-framework", [framework, version].join("="))
           end
 
           request.body = body if body
@@ -114,7 +123,7 @@ module Flipper
         end
 
         def client_frameworks
-          CLIENT_FRAMEWORKS.transform_values { |detect| detect.call rescue nil }.select { |_, version| version }
+          CLIENT_FRAMEWORKS.transform_values { |detect| detect.call rescue nil }.compact
         end
       end
     end

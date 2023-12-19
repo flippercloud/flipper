@@ -9,7 +9,7 @@ end
 Gem::Specification.new do |gem|
   gem.authors       = ['John Nunemaker']
   gem.email         = 'support@flippercloud.io'
-  gem.summary       = 'UI for the Flipper gem'
+  gem.summary       = 'Feature flag UI for the Flipper gem'
   gem.license       = 'MIT'
   gem.homepage      = 'https://www.flippercloud.io/docs/ui'
 

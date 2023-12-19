@@ -34,7 +34,7 @@ module Flipper
 
       VALUE_TO_TEXT_WARNING = <<-EOS
         Your database needs migrated to use the latest Flipper features.
-        See https://github.com/flippercloud/flipper/issues/557
+        Run `rails generate flipper:update` and `rails db:migrate`.
       EOS
 
       # Public: Initialize a new ActiveRecord adapter instance.
@@ -278,6 +278,9 @@ module Flipper
       # See https://github.com/flippercloud/flipper/pull/692
       def value_not_text?
         @gate_class.column_for_attribute(:value).type != :text
+      rescue ::ActiveRecord::ActiveRecordError => error
+        # If the table doesn't exist, the column doesn't exist either
+        warn "#{error.message}. You likely need to run `rails g flipper:active_record` and/or `rails db:migrate`."
       end
 
       def with_connection(model = @feature_class, &block)

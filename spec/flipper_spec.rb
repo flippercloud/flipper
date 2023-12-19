@@ -241,7 +241,7 @@ RSpec.describe Flipper do
       stub = stub_request(:get, "https://www.flippercloud.io/adapter/features?exclude_gate_names=true").
         with({
           headers: {
-            'Flipper-Cloud-Token'=>'asdf',
+            'flipper-cloud-token'=>'asdf',
           },
         }).to_return(status: 200, body: '{"features": {}}', headers: {})
       cloud_configuration = Flipper::Cloud::Configuration.new({

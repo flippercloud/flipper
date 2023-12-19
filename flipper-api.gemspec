@@ -9,7 +9,7 @@ end
 Gem::Specification.new do |gem|
   gem.authors       = ['John Nunemaker']
   gem.email         = 'support@flippercloud.io'
-  gem.summary       = 'API for the Flipper gem'
+  gem.summary       = 'Feature flag API for the Flipper gem'
   gem.license       = 'MIT'
   gem.homepage      = 'https://www.flippercloud.io/docs/api'
   gem.files         = `git ls-files`.split("\n").select(&flipper_api_files) + ['lib/flipper/version.rb']

@@ -16,10 +16,16 @@ jobs:
           --health-retries 5
     strategy:
       matrix:
-        ruby: ['3.0', '3.1', '3.2']
+        ruby: ['3.0', '3.1', '3.2', '3.3']
         rails: ['6.1.0', '7.0.0', '7.1.0']
         exclude:
           - ruby: "3.2"
+            rails: "6.1.0"
+          - ruby: "3.3"
+            rails: "5.2"
+          - ruby: "3.3"
+            rails: "6.0.0"
+          - ruby: "3.3"
             rails: "6.1.0"
     env:
       SQLITE3_VERSION: 1.4.1

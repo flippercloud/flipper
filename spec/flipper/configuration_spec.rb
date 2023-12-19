@@ -30,4 +30,21 @@ RSpec.describe Flipper::Configuration do
       expect(subject.default).to be(instance)
     end
   end
+
+  describe '#statsd' do
+    let(:statsd) { double(Statsd) }
+
+    after do
+      Flipper::Instrumentation::StatsdSubscriber.client = nil
+    end
+
+    it 'returns nil by default' do
+      expect(subject.statsd).to be_nil
+    end
+
+    it 'can be set' do
+      subject.statsd = statsd
+      expect(subject.statsd).to be(statsd)
+    end
+  end
 end

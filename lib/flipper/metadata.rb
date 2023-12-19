@@ -4,6 +4,6 @@ module Flipper
     "homepage_uri"      => "https://www.flippercloud.io",
     "source_code_uri"   => "https://github.com/flippercloud/flipper",
     "bug_tracker_uri"   => "https://github.com/flippercloud/flipper/issues",
-    "changelog_uri"     => "https://github.com/flippercloud/flipper/blob/main/Changelog.md",
+    "changelog_uri"     => "https://github.com/flippercloud/flipper/releases",
   }.freeze
 end

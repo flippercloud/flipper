@@ -18,7 +18,7 @@ RSpec.describe Flipper::Cloud::DSL do
     stub = stub_request(:get, "https://www.flippercloud.io/adapter/features?exclude_gate_names=true").
       with({
         headers: {
-          'Flipper-Cloud-Token'=>'asdf',
+          'flipper-cloud-token'=>'asdf',
         },
       }).to_return(status: 200, body: '{"features": {}}', headers: {})
     cloud_configuration = Flipper::Cloud::Configuration.new({
@@ -65,11 +65,11 @@ RSpec.describe Flipper::Cloud::DSL do
 
     it "sends writes to cloud and local" do
       add_stub = stub_request(:post, "https://www.flippercloud.io/adapter/features").
-        with({headers: {'Flipper-Cloud-Token'=>'asdf'}}).
-        to_return(status: 200, body: '{}', headers: {})
+        with({headers: {'flipper-cloud-token'=>'asdf'}}).
+        to_return(status: 200, body: '{}')
       enable_stub = stub_request(:post, "https://www.flippercloud.io/adapter/features/foo/boolean").
-        with(headers: {'Flipper-Cloud-Token'=>'asdf'}).
-        to_return(status: 200, body: '{}', headers: {})
+        with(headers: {'flipper-cloud-token'=>'asdf'}).
+        to_return(status: 200, body: '{}')
 
       subject.enable(:foo)
 

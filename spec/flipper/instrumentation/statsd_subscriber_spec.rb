@@ -1,6 +1,5 @@
 require 'flipper/adapters/instrumented'
 require 'flipper/instrumentation/statsd'
-require 'statsd'
 
 begin
   require 'active_support/isolated_execution_state'

@@ -6,18 +6,20 @@ RSpec.describe Flipper::Adapters::Strict do
     subject { described_class.new(Flipper::Adapters::Memory.new, :noop) }
   end
 
-  context "handler = :raise" do
-    subject { described_class.new(Flipper::Adapters::Memory.new, :raise) }
+  [true, :raise].each do |handler|
+    context "handler = #{handler}" do
+      subject { described_class.new(Flipper::Adapters::Memory.new, handler) }
 
-    context "#get" do
-      it "raises an error for unknown feature" do
-        expect { subject.get(feature) }.to raise_error(Flipper::Adapters::Strict::NotFound)
+      context "#get" do
+        it "raises an error for unknown feature" do
+          expect { subject.get(feature) }.to raise_error(Flipper::Adapters::Strict::NotFound)
+        end
       end
-    end
 
-    context "#get_multi" do
-      it "raises an error for unknown feature" do
-        expect { subject.get_multi([feature]) }.to raise_error(Flipper::Adapters::Strict::NotFound)
+      context "#get_multi" do
+        it "raises an error for unknown feature" do
+          expect { subject.get_multi([feature]) }.to raise_error(Flipper::Adapters::Strict::NotFound)
+        end
       end
     end
   end
