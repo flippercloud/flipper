@@ -104,9 +104,9 @@ module Flipper
       def get_all
         feature_table = @feature_class.table_name.to_sym
         gate_table = @gate_class.table_name.to_sym
-        features_sql = @feature_class.select(:key.qualify(feature_table).as(:feature_key))
-            .select_append(:key.qualify(gate_table))
-            .select_append(:value.qualify(gate_table))
+        features_sql = @feature_class.select(::Sequel.qualify(feature_table, :key).as(:feature_key))
+            .select_append(::Sequel.qualify(gate_table, :key))
+            .select_append(::Sequel.qualify(gate_table, :value))
             .left_join(@gate_class.table_name.to_sym, feature_key: :key)
             .sql
 
