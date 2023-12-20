@@ -37,10 +37,11 @@ module Flipper
 
         case handler
         when Proc then handler.call(feature)
-        when true, :raise then raise NotFound.new(feature.key)
         when :warn then warn NotFound.new(feature.key).message
-        else
-          # noop or unknown handler
+        when :noop, false, nil
+         # noop
+        else # truthy or :raise
+         raise NotFound.new(feature.key)
         end
       end
 
