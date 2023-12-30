@@ -47,4 +47,18 @@ class SetupGeneratorTest < Rails::Generators::TestCase
     run_generator
     assert_file ".env", ""
   end
+
+  test "configures Flipper Cloud token in config/credentials.yml.enc if credentials.yml.enc exist" do
+    Dir.chdir(ROOT) do
+      FileUtils.mkdir_p("config")
+      ENV["RAILS_MASTER_KEY"] = "a" * 32
+      Rails.application = Class.new(Rails::Application)
+      Rails.application.credentials.write("")
+
+      run_generator ["--token", "abc123"]
+      assert_file "config/credentials.yml.enc"
+      expected_config = { flipper: { cloud_token: "abc123" } }
+      assert_equal expected_config, Rails.application.credentials.config
+    end
+  end
 end

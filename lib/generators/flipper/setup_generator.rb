@@ -28,7 +28,7 @@ module Flipper
       end
 
       def configure_with_credentials
-        return unless exists?("config/master.key") && exists?("config/credentials.yml.enc")
+        return unless exists?("config/credentials.yml.enc") && (ENV["RAILS_MASTER_KEY"] || exists?("config/master.key"))
 
         content = "flipper:\n  cloud_token: #{options[:token]}\n"
         action InjectIntoEncryptedFile.new(self, Rails.application.credentials, content, after: /\z/)
