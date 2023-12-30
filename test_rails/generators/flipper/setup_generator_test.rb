@@ -24,4 +24,27 @@ class SetupGeneratorTest < Rails::Generators::TestCase
     run_generator
     assert_no_migration "db/migrate/create_flipper_tables.rb"
   end
+
+  %w(.env.development .env.local .env).each do |file|
+    test "configures Flipper Cloud token in #{file} if it exists" do
+      File.write("#{ROOT}/#{file}", "")
+      run_generator ["--token", "abc123"]
+      assert_file file, /^FLIPPER_CLOUD_TOKEN=abc123$/m
+    end
+  end
+
+  test "configures Flipper Cloud token in .env.development before .env" do
+    File.write("#{ROOT}/.env.development", "")
+    File.write("#{ROOT}/.env", "")
+
+    run_generator ["--token", "abc123"]
+    assert_file ".env.development", /^FLIPPER_CLOUD_TOKEN=abc123$/m
+    assert_file ".env", ""
+  end
+
+  test "does not write to .env if no token provided" do
+    File.write("#{ROOT}/.env", "")
+    run_generator
+    assert_file ".env", ""
+  end
 end
