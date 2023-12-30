@@ -28,7 +28,7 @@ class SetupGeneratorTest < Rails::Generators::TestCase
   %w(.env.development .env.local .env).each do |file|
     test "configures Flipper Cloud token in #{file} if it exists" do
       File.write("#{ROOT}/#{file}", "")
-      run_generator ["--token", "abc123"]
+      run_generator %w(--token abc123)
       assert_file file, /^FLIPPER_CLOUD_TOKEN=abc123$/m
     end
   end
@@ -37,7 +37,7 @@ class SetupGeneratorTest < Rails::Generators::TestCase
     File.write("#{ROOT}/.env.development", "")
     File.write("#{ROOT}/.env", "")
 
-    run_generator ["--token", "abc123"]
+    run_generator %w(--token abc123)
     assert_file ".env.development", /^FLIPPER_CLOUD_TOKEN=abc123$/m
     assert_file ".env", ""
   end
@@ -55,7 +55,7 @@ class SetupGeneratorTest < Rails::Generators::TestCase
       Rails.application = Class.new(Rails::Application)
       Rails.application.credentials.write("")
 
-      run_generator ["--token", "abc123"]
+      run_generator %w(--token abc123)
       assert_file "config/credentials.yml.enc"
       expected_config = { flipper: { cloud_token: "abc123" } }
       assert_equal expected_config, Rails.application.credentials.config
