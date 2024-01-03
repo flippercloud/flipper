@@ -80,20 +80,27 @@ RSpec.describe Flipper::Engine do
       expect(adapter).to be_instance_of(Flipper::Adapters::Memory)
     end
 
-    %w(development test).each do |env|
-      it "defaults to strict=warn in RAILS_ENV=#{env}" do
-        Rails.env = env
-        expect(Rails.env).to eq(env)
+    it "defaults to strict=warn in RAILS_ENV=development" do
+      Rails.env = "development"
+      expect(Rails.env).to eq("development")
+      subject
+      expect(config.strict).to eq(:warn)
+      expect(adapter).to be_instance_of(Flipper::Adapters::Strict)
+      expect(adapter.handler).to be(:warn)
+    end
+  end
+
+  context 'cloudless' do
+    it_behaves_like 'config.strict' do
+      it "defaults to strict=warn in RAILS_ENV=test" do
+        Rails.env = "test"
+        expect(Rails.env).to eq("test")
         subject
         expect(config.strict).to eq(:warn)
         expect(adapter).to be_instance_of(Flipper::Adapters::Strict)
         expect(adapter.handler).to be(:warn)
       end
     end
-  end
-
-  context 'cloudless' do
-    it_behaves_like 'config.strict'
 
     it 'can set env_key from ENV' do
       with_env 'FLIPPER_ENV_KEY' => 'flopper' do
@@ -169,6 +176,22 @@ RSpec.describe Flipper::Engine do
         if: nil
       })
     end
+
+    it 'uses Memory adapter if RAILS_ENV=test' do
+      Rails.env = "test"
+
+      # Change default adapter to something besides memory
+      Flipper.configure do |config|
+        config.adapter { double('some other adapter') }
+      end
+
+      subject
+
+      memoized = Flipper.adapter
+      strict = memoized.adapter
+      memory = strict.adapter
+      expect(Flipper.adapter.adapter.adapter).to be_instance_of(Flipper::Adapters::Memory)
+    end
   end
 
   context 'with cloud' do
@@ -188,6 +211,12 @@ RSpec.describe Flipper::Engine do
         poll = dual_write.local
         poll.adapter
       end
+    end
+
+    it "does not use cloud if RAILS_ENV=test" do
+      Rails.env = "test"
+      application.initialize!
+      expect(Flipper.instance).to be_a(Flipper::DSL)
     end
 
     it "initializes cloud configuration" do

@@ -43,6 +43,10 @@ module Flipper
       require 'flipper/cloud' if cloud?
 
       Flipper.configure do |config|
+        if Rails.env.test?
+          config.adapter { Flipper::Adapters::Memory.new }
+        end
+
         config.default do
           if cloud?
             Flipper::Cloud.new(
@@ -87,7 +91,7 @@ module Flipper
     end
 
     def cloud?
-      !!ENV["FLIPPER_CLOUD_TOKEN"]
+      !!ENV["FLIPPER_CLOUD_TOKEN"] && !Rails.env.test?
     end
 
     def self.deprecated_rails_version?
