@@ -171,6 +171,7 @@ RSpec.describe Flipper::DSL do
       end
     end
   end
+
   describe '#features_for_actor' do
     actor = Flipper::Actor.new(5)
     context 'with no features' do
