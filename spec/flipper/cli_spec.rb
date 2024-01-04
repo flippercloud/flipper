@@ -28,6 +28,27 @@ RSpec.describe Flipper::CLI do
         expect(Flipper).to be_enabled(:feature, Flipper::Actor.new("User;1"))
       end
     end
+
+    describe "feature -g admins" do
+      it do
+        expect(subject).to have_attributes(status: 0, stdout: /"feature" is enabled for 1 group/)
+        expect(Flipper.feature('feature').enabled_groups.map(&:name)).to eq([:admins])
+      end
+    end
+
+    describe "feature -p 30" do
+      it do
+        expect(subject).to have_attributes(status: 0, stdout: /"feature" is enabled for 30% of actors/)
+        expect(Flipper.feature('feature').percentage_of_actors_value).to eq(30)
+      end
+    end
+
+    describe "feature -t 50" do
+      it do
+        expect(subject).to have_attributes(status: 0, stdout: /"feature" is enabled for 50% of time/)
+        expect(Flipper.feature('feature').percentage_of_time_value).to eq(50)
+      end
+    end
   end
 
   describe "disable" do
@@ -37,6 +58,15 @@ RSpec.describe Flipper::CLI do
       it do
         expect(subject).to have_attributes(status: 0, stdout: /"feature" is disabled/)
         expect(Flipper).not_to be_enabled(:feature)
+      end
+    end
+
+    describe "feature -g admins" do
+      before { Flipper.enable_group(:feature, :admins) }
+
+      it do
+        expect(subject).to have_attributes(status: 0, stdout: /"feature" is disabled/)
+        expect(Flipper.feature('feature').enabled_groups).to be_empty
       end
     end
   end

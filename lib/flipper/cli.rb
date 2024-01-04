@@ -147,7 +147,7 @@ module Flipper
           when :percentage_of_actors
             "#{feature.percentage_of_actors_value}% of actors"
           when :percentage_of_time
-            "#{feature.percentage_of_time_value}% of actors"
+            "#{feature.percentage_of_time_value}% of time"
           end
         end.join(', ')
       end
@@ -169,8 +169,8 @@ module Flipper
       end
 
       def run(argv)
-        # Parse argv and call command with arguments
-        @action.call(*order(argv))
+        # Parse argv and call action with arguments
+        @action.call(*permute(argv))
       end
 
       def action(&block)
