@@ -27,6 +27,7 @@ Gem::Specification.new do |gem|
   gem.homepage      = 'https://www.flippercloud.io/docs'
   gem.license       = 'MIT'
 
+  gem.bindir = "exe"
   gem.executables   = `git ls-files -- exe/*`.split("\n").map { |f| File.basename(f) }
   gem.files         = `git ls-files`.split("\n") - ignored_files + ['lib/flipper/version.rb']
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n") - ignored_test_files
