@@ -25,7 +25,7 @@ RSpec.describe Flipper::UI::Actions::BooleanGate do
 
       it 'redirects back to feature' do
         expect(last_response.status).to be(302)
-        expect(last_response.headers['Location']).to eq('/features/search')
+        expect(last_response.headers['location']).to eq('/features/search')
       end
     end
 
@@ -43,7 +43,7 @@ RSpec.describe Flipper::UI::Actions::BooleanGate do
 
       it 'redirects back to feature' do
         expect(last_response.status).to be(302)
-        expect(last_response.headers['Location']).to eq('/features/sp%20ace')
+        expect(last_response.headers['location']).to eq('/features/sp%20ace')
       end
     end
 
@@ -61,7 +61,7 @@ RSpec.describe Flipper::UI::Actions::BooleanGate do
 
       it 'redirects back to feature' do
         expect(last_response.status).to be(302)
-        expect(last_response.headers['Location']).to eq('/features/search')
+        expect(last_response.headers['location']).to eq('/features/search')
       end
     end
   end

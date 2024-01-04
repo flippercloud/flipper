@@ -11,12 +11,8 @@ module Flipper
         end
       end
 
-      # Public: The name of the adapter.
-      attr_reader :name
-
       def initialize(rollout)
         @rollout = rollout
-        @name = :rollout
       end
 
       # Public: The set of known features.
@@ -53,6 +49,7 @@ module Flipper
           actors: actors,
           percentage_of_actors: percentage_of_actors,
           percentage_of_time: nil,
+          expression: nil,
         }
       end
 

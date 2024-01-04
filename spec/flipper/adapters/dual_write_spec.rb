@@ -55,14 +55,14 @@ RSpec.describe Flipper::Adapters::DualWrite do
 
   it 'updates remote and local for #enable' do
     feature = sync[:search]
-    subject.enable feature, feature.gate(:boolean), local.boolean
+    subject.enable feature, feature.gate(:boolean), Flipper::Types::Boolean.new(true)
     expect(remote_adapter.count(:enable)).to be(1)
     expect(local_adapter.count(:enable)).to be(1)
   end
 
   it 'updates remote and local for #disable' do
     feature = sync[:search]
-    subject.disable feature, feature.gate(:boolean), local.boolean(false)
+    subject.disable feature, feature.gate(:boolean), Flipper::Types::Boolean.new(false)
     expect(remote_adapter.count(:disable)).to be(1)
     expect(local_adapter.count(:disable)).to be(1)
   end

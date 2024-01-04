@@ -25,10 +25,12 @@ gem 'benchmark-ips'
 gem 'stackprof-webnav'
 gem 'flamegraph'
 gem 'climate_control'
+gem 'mysql2'
+gem 'pg'
 
 group(:guard) do
-  gem 'guard', '~> 2.15'
-  gem 'guard-rspec', '~> 4.5'
-  gem 'guard-bundler', '~> 2.2'
-  gem 'rb-fsevent', '~> 0.9'
+  gem 'guard'
+  gem 'guard-rspec'
+  gem 'guard-bundler'
+  gem 'rb-fsevent'
 end

@@ -13,9 +13,6 @@ module Flipper
       # Private: What is used to instrument all the things.
       attr_reader :instrumenter
 
-      # Public: The name of the adapter.
-      attr_reader :name
-
       # Internal: Initializes a new adapter instance.
       #
       # adapter - Vanilla adapter instance to wrap.
@@ -25,7 +22,6 @@ module Flipper
       #
       def initialize(adapter, options = {})
         @adapter = adapter
-        @name = :instrumented
         @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
       end
 

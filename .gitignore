@@ -21,3 +21,4 @@ log
 .sass-cache
 bin
 .DS_Store
+.tool-versions

@@ -2,14 +2,17 @@
 # to Flipper::Feature#enabled?.
 module Flipper
   class Actor
-    attr_reader :flipper_id
+    attr_reader :flipper_id, :flipper_properties
 
-    def initialize(flipper_id)
+    def initialize(flipper_id, flipper_properties = {})
       @flipper_id = flipper_id
+      @flipper_properties = flipper_properties
     end
 
     def eql?(other)
-      self.class.eql?(other.class) && @flipper_id == other.flipper_id
+      self.class.eql?(other.class) &&
+        @flipper_id == other.flipper_id &&
+        @flipper_properties == other.flipper_properties
     end
     alias_method :==, :eql?
 

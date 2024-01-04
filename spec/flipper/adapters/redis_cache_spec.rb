@@ -29,7 +29,7 @@ RSpec.describe Flipper::Adapters::RedisCache do
       feature = flipper[:stats]
       adapter.get(feature)
       adapter.remove(feature)
-      expect(client.get(described_class.key_for(feature))).to be(nil)
+      expect(client.get("flipper/v1/feature/#{feature.key}")).to be(nil)
     end
   end
 
@@ -37,7 +37,7 @@ RSpec.describe Flipper::Adapters::RedisCache do
     it 'uses correct cache key' do
       stats = flipper[:stats]
       adapter.get(stats)
-      expect(client.get(described_class.key_for(stats))).not_to be_nil
+      expect(client.get("flipper/v1/feature/#{stats.key}")).not_to be_nil
     end
   end
 
@@ -52,13 +52,13 @@ RSpec.describe Flipper::Adapters::RedisCache do
       memory_adapter.reset
 
       adapter.get(stats)
-      expect(client.get(described_class.key_for(search))).to be(nil)
-      expect(client.get(described_class.key_for(other))).to be(nil)
+      expect(client.get("flipper/v1/feature/#{search.key}")).to be(nil)
+      expect(client.get("flipper/v1/feature/#{other.key}")).to be(nil)
 
       adapter.get_multi([stats, search, other])
 
       search_cache_value, other_cache_value = [search, other].map do |f|
-        Marshal.load(client.get(described_class.key_for(f)))
+        Marshal.load(client.get("flipper/v1/feature/#{f.key}"))
       end
       expect(search_cache_value[:boolean]).to eq('true')
       expect(other_cache_value[:boolean]).to be(nil)
@@ -80,9 +80,9 @@ RSpec.describe Flipper::Adapters::RedisCache do
 
     it 'warms all features' do
       adapter.get_all
-      expect(Marshal.load(client.get(described_class.key_for(stats.key)))[:boolean]).to eq('true')
-      expect(Marshal.load(client.get(described_class.key_for(search.key)))[:boolean]).to be(nil)
-      expect(client.get(described_class::GetAllKey).to_i).to be_within(2).of(Time.now.to_i)
+      expect(Marshal.load(client.get("flipper/v1/feature/#{stats.key}"))[:boolean]).to eq('true')
+      expect(Marshal.load(client.get("flipper/v1/feature/#{search.key}"))[:boolean]).to be(nil)
+      expect(client.get("flipper/v1/get_all").to_i).to be_within(2).of(Time.now.to_i)
     end
 
     it 'returns same result when already cached' do

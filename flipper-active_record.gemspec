@@ -1,15 +1,22 @@
 # -*- encoding: utf-8 -*-
 require File.expand_path('../lib/flipper/version', __FILE__)
 require File.expand_path('../lib/flipper/metadata', __FILE__)
+require "set"
+
+# Files that should exist in main flipper gem.
+main_flipper_active_record_files = Set[
+  "lib/flipper/model/active_record.rb",
+  "spec/flipper/model/active_record_spec.rb",
+]
 
 flipper_active_record_files = lambda do |file|
-  file =~ /active_record/
+  file =~ /active_record/ && !main_flipper_active_record_files.include?(file)
 end
 
 Gem::Specification.new do |gem|
   gem.authors       = ['John Nunemaker']
   gem.email         = 'support@flippercloud.io'
-  gem.summary       = 'ActiveRecord adapter for Flipper'
+  gem.summary       = 'ActiveRecord feature flag adapter for Flipper'
   gem.license       = 'MIT'
   gem.homepage      = 'https://www.flippercloud.io/docs/adapters/active-record'
 

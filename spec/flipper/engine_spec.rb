@@ -6,7 +6,7 @@ RSpec.describe Flipper::Engine do
     Class.new(Rails::Application) do
       config.eager_load = false
       config.logger = ActiveSupport::Logger.new($stdout)
-    end
+    end.instance
   end
 
   before do
@@ -15,11 +15,86 @@ RSpec.describe Flipper::Engine do
     ActiveSupport::Dependencies.autoload_once_paths = ActiveSupport::Dependencies.autoload_once_paths.dup
   end
 
+  # Reset Rails.env around each example
+  around do |example|
+    begin
+      env = Rails.env.to_s
+      example.run
+    ensure
+      Rails.env = env
+    end
+  end
+
   let(:config) { application.config.flipper }
 
   subject { application.initialize! }
 
+  shared_examples 'config.strict' do
+    let(:adapter) { Flipper.adapter.adapter }
+
+    it 'can set strict=true from ENV' do
+      with_env 'FLIPPER_STRICT' => 'true' do
+        subject
+        expect(config.strict).to eq(:raise)
+        expect(adapter).to be_instance_of(Flipper::Adapters::Strict)
+      end
+    end
+
+    it 'can set strict=warn from ENV' do
+      with_env 'FLIPPER_STRICT' => 'warn' do
+        subject
+        expect(config.strict).to eq(:warn)
+        expect(adapter).to be_instance_of(Flipper::Adapters::Strict)
+        expect(adapter.handler).to be(:warn)
+      end
+    end
+
+    it 'can set strict=false from ENV' do
+      with_env 'FLIPPER_STRICT' => 'false' do
+        subject
+        expect(config.strict).to eq(false)
+        expect(adapter).to be_instance_of(Flipper::Adapters::Memory)
+      end
+    end
+
+    [true, :raise, :warn].each do |value|
+      it "can set strict=#{value.inspect} in initializer" do
+        initializer { config.strict = value }
+        subject
+        expect(adapter).to be_instance_of(Flipper::Adapters::Strict)
+        expect(adapter.handler).to be(value)
+      end
+    end
+
+    it "can set strict=false in initializer" do
+      initializer { config.strict = false }
+      subject
+      expect(config.strict).to eq(false)
+      expect(adapter).to be_instance_of(Flipper::Adapters::Memory)
+    end
+
+    it "defaults to strict=false in RAILS_ENV=production" do
+      Rails.env = "production"
+      subject
+      expect(config.strict).to eq(false)
+      expect(adapter).to be_instance_of(Flipper::Adapters::Memory)
+    end
+
+    %w(development test).each do |env|
+      it "defaults to strict=warn in RAILS_ENV=#{env}" do
+        Rails.env = env
+        expect(Rails.env).to eq(env)
+        subject
+        expect(config.strict).to eq(:warn)
+        expect(adapter).to be_instance_of(Flipper::Adapters::Strict)
+        expect(adapter.handler).to be(:warn)
+      end
+    end
+  end
+
   context 'cloudless' do
+    it_behaves_like 'config.strict'
+
     it 'can set env_key from ENV' do
       with_env 'FLIPPER_ENV_KEY' => 'flopper' do
         subject
@@ -94,12 +169,6 @@ RSpec.describe Flipper::Engine do
         if: nil
       })
     end
-
-    it "defines #flipper_id on AR::Base" do
-      subject
-      require 'active_record'
-      expect(ActiveRecord::Base.ancestors).to include(Flipper::Identifier)
-    end
   end
 
   context 'with cloud' do
@@ -111,6 +180,15 @@ RSpec.describe Flipper::Engine do
 
     # App for Rack::Test
     let(:app) { application.routes }
+
+    it_behaves_like 'config.strict' do
+      let(:adapter) do
+        memoizable = Flipper.adapter
+        dual_write = memoizable.adapter
+        poll = dual_write.local
+        poll.adapter
+      end
+    end
 
     it "initializes cloud configuration" do
       stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
@@ -149,7 +227,7 @@ RSpec.describe Flipper::Engine do
         application.initialize!
 
         stub = stub_request(:get, "https://www.flippercloud.io/adapter/features?exclude_gate_names=true").with({
-          headers: { "Flipper-Cloud-Token" => ENV["FLIPPER_CLOUD_TOKEN"] },
+          headers: { "flipper-cloud-token" => ENV["FLIPPER_CLOUD_TOKEN"] },
         }).to_return(status: 200, body: JSON.generate({ features: {} }), headers: {})
 
         post "/_flipper", request_body, { "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value }
@@ -179,6 +257,46 @@ RSpec.describe Flipper::Engine do
         expect(last_response.status).to eq(404)
       end
     end
+  end
+
+  context 'with cloud secrets in Rails.credentials' do
+    around do |example|
+      # Create temporary directory for Rails.root to write credentials to
+      # Once Rails 5.2 support is dropped, this can all be replaced with
+      # `config.credentials.content_path = Tempfile.new.path`
+      Dir.mktmpdir do |dir|
+        Dir.chdir(dir) do
+          Dir.mkdir("#{dir}/config")
+
+          example.run
+        end
+      end
+    end
+
+    before do
+      # Set master key which is needed to write credentials
+      ENV["RAILS_MASTER_KEY"] = "a" * 32
+
+      application.credentials.write(YAML.dump({
+        flipper: {
+          cloud_token: "credentials-token",
+          cloud_sync_secret: "credentials-secret",
+        }
+      }))
+    end
+
+    it "enables cloud" do
+      application.initialize!
+      expect(ENV["FLIPPER_CLOUD_TOKEN"]).to eq("credentials-token")
+      expect(ENV["FLIPPER_CLOUD_SYNC_SECRET"]).to eq("credentials-secret")
+      expect(Flipper.instance).to be_a(Flipper::Cloud::DSL)
+    end
+  end
+
+  it "includes model methods" do
+    subject
+    require 'active_record'
+    expect(ActiveRecord::Base.ancestors).to include(Flipper::Model::ActiveRecord)
   end
 
   # Add app initializer in the same order as config/initializers/*

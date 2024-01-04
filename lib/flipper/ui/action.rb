@@ -53,6 +53,7 @@ module Flipper
         style-src 'self' 'unsafe-inline';
         style-src-attr 'unsafe-inline' ;
         style-src-elem 'self';
+        connect-src https://www.flippercloud.io;
       CSP
 
       # Public: Call this in subclasses so the action knows its route.
@@ -108,7 +109,7 @@ module Flipper
         @flipper = flipper
         @request = request
         @code = 200
-        @headers = { 'content-type' => 'text/plain' }
+        @headers = {Rack::CONTENT_TYPE => 'text/plain'}
         @breadcrumbs =
           if Flipper::UI.configuration.application_breadcrumb_href
             [Breadcrumb.new('App', Flipper::UI.configuration.application_breadcrumb_href)]
@@ -158,7 +159,7 @@ module Flipper
       #
       # Returns a response.
       def view_response(name)
-        header 'content-type', 'text/html'
+        header Rack::CONTENT_TYPE, 'text/html'
         header 'content-security-policy', CONTENT_SECURITY_POLICY
         body = view_with_layout { view_without_layout name }
         halt [@code, @headers, [body]]
@@ -171,12 +172,12 @@ module Flipper
       #
       # Returns a response.
       def json_response(object)
-        header 'content-type', 'application/json'
+        header Rack::CONTENT_TYPE, 'application/json'
         body = case object
         when String
           object
         else
-          JSON.dump(object)
+          Typecast.to_json(object)
         end
         halt [@code, @headers, [body]]
       end
@@ -276,7 +277,7 @@ module Flipper
 
       # Internal: Method to call when the UI is in read only mode and you want
       # to inform people of that fact.
-      def read_only
+      def render_read_only
         status 403
 
         breadcrumb 'Home', '/'
@@ -284,6 +285,14 @@ module Flipper
         breadcrumb 'Noooooope'
 
         halt view_response(:read_only)
+      end
+
+      def read_only?
+        Flipper::UI.configuration.read_only || flipper.read_only?
+      end
+
+      def write_allowed?
+        !read_only?
       end
 
       def bootstrap_css

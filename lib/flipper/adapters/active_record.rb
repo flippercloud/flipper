@@ -19,6 +19,8 @@ module Flipper
           "flipper_features",
           Model.table_name_suffix,
         ].join
+
+        has_many :gates, foreign_key: "feature_key", primary_key: "key"
       end
 
       # Private: Do not use outside of this adapter.
@@ -30,8 +32,10 @@ module Flipper
         ].join
       end
 
-      # Public: The name of the adapter.
-      attr_reader :name
+      VALUE_TO_TEXT_WARNING = <<-EOS
+        Your database needs migrated to use the latest Flipper features.
+        Run `rails generate flipper:update` and `rails db:migrate`.
+      EOS
 
       # Public: Initialize a new ActiveRecord adapter instance.
       #
@@ -49,6 +53,8 @@ module Flipper
         @name = options.fetch(:name, :active_record)
         @feature_class = options.fetch(:feature_class) { Feature }
         @gate_class = options.fetch(:gate_class) { Gate }
+
+        warn VALUE_TO_TEXT_WARNING if value_not_text?
       end
 
       # Public: The set of known features.
@@ -156,6 +162,8 @@ module Flipper
           set(feature, gate, thing, clear: true)
         when :integer
           set(feature, gate, thing)
+        when :json
+          set(feature, gate, thing, json: true)
         when :set
           enable_multi(feature, gate, thing)
         else
@@ -178,6 +186,8 @@ module Flipper
           clear(feature)
         when :integer
           set(feature, gate, thing)
+        when :json
+          delete(feature, gate)
         when :set
           with_connection(@gate_class) do
             @gate_class.where(feature_key: feature.key, key: gate.key, value: thing.value).destroy_all
@@ -198,24 +208,33 @@ module Flipper
 
       def set(feature, gate, thing, options = {})
         clear_feature = options.fetch(:clear, false)
+        json_feature = options.fetch(:json, false)
+
+        raise VALUE_TO_TEXT_WARNING if json_feature && value_not_text?
+
         with_connection(@gate_class) do
           @gate_class.transaction do
             clear(feature) if clear_feature
+            delete(feature, gate)
             @gate_class.where(feature_key: feature.key, key: gate.key).destroy_all
             begin
               @gate_class.create! do |g|
                 g.feature_key = feature.key
                 g.key = gate.key
-                g.value = thing.value.to_s
+                g.value = json_feature ? Typecast.to_json(thing.value) : thing.value.to_s
               end
             rescue ::ActiveRecord::RecordNotUnique
               # assume this happened concurrently with the same thing and its fine
-              # see https://github.com/jnunemaker/flipper/issues/544
+              # see https://github.com/flippercloud/flipper/issues/544
             end
           end
         end
 
         nil
+      end
+
+      def delete(feature, gate)
+        @gate_class.where(feature_key: feature.key, key: gate.key).destroy_all
       end
 
       def enable_multi(feature, gate, thing)
@@ -238,13 +257,13 @@ module Flipper
         feature.gates.each do |gate|
           result[gate.key] =
             case gate.data_type
-            when :boolean
+            when :boolean, :integer
               if row = gates.detect { |key, value| !key.nil? && key.to_sym == gate.key }
                 row.last
               end
-            when :integer
+            when :json
               if row = gates.detect { |key, value| !key.nil? && key.to_sym == gate.key }
-                row.last
+                Typecast.from_json(row.last)
               end
             when :set
               gates.select { |key, value| !key.nil? && key.to_sym == gate.key }.map(&:last).to_set
@@ -253,6 +272,15 @@ module Flipper
             end
         end
         result
+      end
+
+      # Check if value column is text instead of string
+      # See https://github.com/flippercloud/flipper/pull/692
+      def value_not_text?
+        @gate_class.column_for_attribute(:value).type != :text
+      rescue ::ActiveRecord::ActiveRecordError => error
+        # If the table doesn't exist, the column doesn't exist either
+        warn "#{error.message}. You likely need to run `rails g flipper:active_record` and/or `rails db:migrate`."
       end
 
       def with_connection(model = @feature_class, &block)

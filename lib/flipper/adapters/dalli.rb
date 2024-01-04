@@ -8,21 +8,8 @@ module Flipper
     class Dalli
       include ::Flipper::Adapter
 
-      Version = 'v1'.freeze
-      Namespace = "flipper/#{Version}".freeze
-      FeaturesKey = "#{Namespace}/features".freeze
-      GetAllKey = "#{Namespace}/get_all".freeze
-
-      # Private
-      def self.key_for(key)
-        "#{Namespace}/feature/#{key}"
-      end
-
       # Internal
       attr_reader :cache
-
-      # Public: The name of the adapter.
-      attr_reader :name
 
       # Public: The ttl for all cached data.
       attr_reader :ttl
@@ -30,9 +17,13 @@ module Flipper
       # Public
       def initialize(adapter, cache, ttl = 0)
         @adapter = adapter
-        @name = :dalli
         @cache = cache
         @ttl = ttl
+
+        @cache_version = 'v1'.freeze
+        @namespace = "flipper/#{@cache_version}".freeze
+        @features_key = "#{@namespace}/features".freeze
+        @get_all_key = "#{@namespace}/get_all".freeze
       end
 
       # Public
@@ -43,14 +34,14 @@ module Flipper
       # Public
       def add(feature)
         result = @adapter.add(feature)
-        @cache.delete(FeaturesKey)
+        @cache.delete(@features_key)
         result
       end
 
       # Public
       def remove(feature)
         result = @adapter.remove(feature)
-        @cache.delete(FeaturesKey)
+        @cache.delete(@features_key)
         @cache.delete(key_for(feature.key))
         result
       end
@@ -74,12 +65,12 @@ module Flipper
       end
 
       def get_all
-        if @cache.add(GetAllKey, Time.now.to_i, @ttl)
+        if @cache.add(@get_all_key, Time.now.to_i, @ttl)
           response = @adapter.get_all
           response.each do |key, value|
             @cache.set(key_for(key), value, @ttl)
           end
-          @cache.set(FeaturesKey, response.keys.to_set, @ttl)
+          @cache.set(@features_key, response.keys.to_set, @ttl)
           response
         else
           features = read_feature_keys.map { |key| Flipper::Feature.new(key, self) }
@@ -104,11 +95,11 @@ module Flipper
       private
 
       def key_for(key)
-        self.class.key_for(key)
+        "#{@namespace}/feature/#{key}"
       end
 
       def read_feature_keys
-        @cache.fetch(FeaturesKey, @ttl) { @adapter.features }
+        @cache.fetch(@features_key, @ttl) { @adapter.features }
       end
 
       # Internal: Given an array of features, attempts to read through cache in

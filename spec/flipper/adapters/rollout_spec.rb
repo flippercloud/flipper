@@ -33,6 +33,7 @@ RSpec.describe Flipper::Adapters::Rollout do
         boolean: nil,
         groups: Set.new(["admins"]),
         actors: Set.new(["1"]),
+        expression: nil,
         percentage_of_actors: 20.0,
         percentage_of_time: nil,
       }
@@ -46,6 +47,7 @@ RSpec.describe Flipper::Adapters::Rollout do
         boolean: true,
         groups: Set.new,
         actors: Set.new,
+        expression: nil,
         percentage_of_actors: nil,
         percentage_of_time: nil,
       }
@@ -61,6 +63,7 @@ RSpec.describe Flipper::Adapters::Rollout do
         boolean: true,
         groups: Set.new,
         actors: Set.new,
+        expression: nil,
         percentage_of_actors: nil,
         percentage_of_time: nil,
       }
@@ -115,7 +118,7 @@ RSpec.describe Flipper::Adapters::Rollout do
     expect(feature.boolean_value).to eq(false)
     expect(feature.actors_value).to eq(Set.new)
     expect(feature.groups_value).to eq(Set.new)
-    expect(feature.percentage_of_actors_value).to be(25)
+    expect(feature.percentage_of_actors_value).to be(25.0)
 
     feature = destination_flipper[:verbose_logging]
     expect(feature.boolean_value).to eq(false)

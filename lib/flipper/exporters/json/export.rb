@@ -18,7 +18,7 @@ module Flipper
         # Public: The features hash identical to calling get_all on adapter.
         def features
           @features ||= begin
-            features = JSON.parse(contents).fetch("features")
+            features = Typecast.from_json(contents).fetch("features")
             Typecast.features_hash(features)
           rescue JSON::ParserError
             raise JsonError

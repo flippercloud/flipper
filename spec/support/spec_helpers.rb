@@ -27,7 +27,11 @@ module SpecHelpers
   end
 
   def json_response
-    JSON.parse(last_response.body)
+    body = last_response.body
+    if last_response["content-encoding"] == 'gzip'
+      body = Flipper::Typecast.from_gzip(body)
+    end
+    JSON.parse(body)
   end
 
   def api_error_code_reference_url
@@ -42,6 +46,14 @@ module SpecHelpers
     }
   end
 
+  def api_positive_percentage_error_response
+    {
+      'code' => 3,
+      'message' => 'Percentage must be a positive number less than or equal to 100.',
+      'more_info' => api_error_code_reference_url,
+    }
+  end
+
   def api_flipper_id_is_missing_response
     {
       'code' => 4,
@@ -50,10 +62,10 @@ module SpecHelpers
     }
   end
 
-  def api_positive_percentage_error_response
+  def api_expression_invalid_response
     {
-      'code' => 3,
-      'message' => 'Percentage must be a positive number less than or equal to 100.',
+      'code' => 7,
+      'message' => 'The provided expression was not valid.',
       'more_info' => api_error_code_reference_url,
     }
   end

@@ -21,6 +21,7 @@ RSpec.describe Flipper::UI::Actions::Features do
       flipper.enable_group :search, :employees
       flipper.enable :plausible
       flipper.disable :google_analytics
+      flipper.enable :analytics, Flipper.property(:plan).eq("basic")
 
       post '/settings/export',
         {'authenticity_token' => token},
@@ -32,17 +33,18 @@ RSpec.describe Flipper::UI::Actions::Features do
     end
 
     it 'sets content disposition' do
-      expect(last_response.headers['Content-Disposition']).to match(/Attachment;filename=flipper_memory_[0-9]*\.json/)
+      expect(last_response.headers['content-disposition']).to match(/Attachment;filename=flipper_memory_[0-9]*\.json/)
     end
 
     it 'renders json' do
       data = JSON.parse(last_response.body)
-      expect(last_response.headers['Content-Type']).to eq('application/json')
+      expect(last_response.headers['content-type']).to eq('application/json')
       expect(data['version']).to eq(1)
       expect(data['features']).to eq({
-        "search"=> {"boolean"=>nil, "groups"=>["admins", "employees"], "actors"=>["User;1", "User;100"], "percentage_of_actors"=>"10", "percentage_of_time"=>"15"},
-        "plausible"=> {"boolean"=>"true", "groups"=>[], "actors"=>[], "percentage_of_actors"=>nil, "percentage_of_time"=>nil},
-        "google_analytics"=> {"boolean"=>nil, "groups"=>[], "actors"=>[], "percentage_of_actors"=>nil, "percentage_of_time"=>nil},
+        "analytics" => {"boolean"=>nil, "expression"=>{"Equal"=>[{"Property"=>["plan"]}, "basic"]}, "groups"=>[], "actors"=>[], "percentage_of_actors"=>nil, "percentage_of_time"=>nil},
+        "search"=> {"boolean"=>nil, "expression"=>nil, "groups"=>["admins", "employees"], "actors"=>["User;1", "User;100"], "percentage_of_actors"=>"10", "percentage_of_time"=>"15"},
+        "plausible"=> {"boolean"=>"true", "expression"=>nil, "groups"=>[], "actors"=>[], "percentage_of_actors"=>nil, "percentage_of_time"=>nil},
+        "google_analytics"=> {"boolean"=>nil, "expression"=>nil, "groups"=>[], "actors"=>[], "percentage_of_actors"=>nil, "percentage_of_time"=>nil},
       })
     end
   end

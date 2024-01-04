@@ -3,9 +3,6 @@ module Flipper
     class Failsafe
       include ::Flipper::Adapter
 
-      # Public: The name of the adapter.
-      attr_reader :name
-
       # Public: Build a new Failsafe instance.
       #
       # adapter   - Flipper adapter to guard.
@@ -15,7 +12,6 @@ module Flipper
       def initialize(adapter, options = {})
         @adapter = adapter
         @errors = options.fetch(:errors, [StandardError])
-        @name = :failsafe
       end
 
       def features

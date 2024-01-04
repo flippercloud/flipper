@@ -18,4 +18,5 @@ cd $(dirname "$0")/..
 }
 
 rm -rf .bundle/{binstubs,config}
-bundle install --binstubs --quiet "$@"
+bundle install --quiet "$@"
+bundle binstubs --all

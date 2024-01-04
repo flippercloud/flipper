@@ -35,7 +35,7 @@ RSpec.describe Flipper::Cloud do
       expect(client.uri.scheme).to eq('https')
       expect(client.uri.host).to eq('www.flippercloud.io')
       expect(client.uri.path).to eq('/adapter')
-      expect(client.headers['Flipper-Cloud-Token']).to eq(token)
+      expect(client.headers["flipper-cloud-token"]).to eq(token)
       expect(@instance.instrumenter).to be(Flipper::Instrumenters::Noop)
     end
   end
@@ -104,7 +104,7 @@ RSpec.describe Flipper::Cloud do
 
   it 'can import' do
     stub_request(:post, /www\.flippercloud\.io\/adapter\/features.*/).
-      with(headers: {'Flipper-Cloud-Token'=>'asdf'}).to_return(status: 200, body: "{}", headers: {})
+      with(headers: {'flipper-cloud-token'=>'asdf'}).to_return(status: 200, body: "{}", headers: {})
 
     flipper = Flipper.new(Flipper::Adapters::Memory.new)
 
@@ -116,10 +116,10 @@ RSpec.describe Flipper::Cloud do
     cloud_flipper = Flipper::Cloud.new(token: "asdf")
 
     get_all = {
-      "logging" => {actors: Set.new, boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: "5"},
-      "search" => {actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
-      "stats" => {actors: Set["jnunemaker"], boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
-      "test" => {actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
+      "logging" => {actors: Set.new, boolean: nil, groups: Set.new, expression: nil, percentage_of_actors: nil, percentage_of_time: "5"},
+      "search" => {actors: Set.new, boolean: "true", groups: Set.new, expression: nil, percentage_of_actors: nil, percentage_of_time: nil},
+      "stats" => {actors: Set["jnunemaker"], boolean: nil, groups: Set.new, expression: nil, percentage_of_actors: nil, percentage_of_time: nil},
+      "test" => {actors: Set.new, boolean: "true", groups: Set.new, expression: nil, percentage_of_actors: nil, percentage_of_time: nil},
     }
 
     expect(flipper.adapter.get_all).to eq(get_all)
@@ -130,7 +130,7 @@ RSpec.describe Flipper::Cloud do
 
   it 'raises error for failure while importing' do
     stub_request(:post, /www\.flippercloud\.io\/adapter\/features.*/).
-      with(headers: {'Flipper-Cloud-Token'=>'asdf'}).to_return(status: 500, body: "{}")
+      with(headers: {'flipper-cloud-token'=>'asdf'}).to_return(status: 500, body: "{}")
 
     flipper = Flipper.new(Flipper::Adapters::Memory.new)
 
@@ -142,10 +142,10 @@ RSpec.describe Flipper::Cloud do
     cloud_flipper = Flipper::Cloud.new(token: "asdf")
 
     get_all = {
-      "logging" => {actors: Set.new, boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: "5"},
-      "search" => {actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
-      "stats" => {actors: Set["jnunemaker"], boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
-      "test" => {actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
+      "logging" => {actors: Set.new, boolean: nil, groups: Set.new, expression: nil, percentage_of_actors: nil, percentage_of_time: "5"},
+      "search" => {actors: Set.new, boolean: "true", groups: Set.new, expression: nil, percentage_of_actors: nil, percentage_of_time: nil},
+      "stats" => {actors: Set["jnunemaker"], boolean: nil, groups: Set.new, expression: nil, percentage_of_actors: nil, percentage_of_time: nil},
+      "test" => {actors: Set.new, boolean: "true", groups: Set.new, expression: nil, percentage_of_actors: nil, percentage_of_time: nil},
     }
 
     expect(flipper.adapter.get_all).to eq(get_all)
@@ -155,7 +155,7 @@ RSpec.describe Flipper::Cloud do
 
   it 'raises error for timeout while importing' do
     stub_request(:post, /www\.flippercloud\.io\/adapter\/features.*/).
-      with(headers: {'Flipper-Cloud-Token'=>'asdf'}).to_timeout
+      with(headers: {'flipper-cloud-token'=>'asdf'}).to_timeout
 
     flipper = Flipper.new(Flipper::Adapters::Memory.new)
 
@@ -167,10 +167,10 @@ RSpec.describe Flipper::Cloud do
     cloud_flipper = Flipper::Cloud.new(token: "asdf")
 
     get_all = {
-      "logging" => {actors: Set.new, boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: "5"},
-      "search" => {actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
-      "stats" => {actors: Set["jnunemaker"], boolean: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
-      "test" => {actors: Set.new, boolean: "true", groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil},
+      "logging" => {actors: Set.new, boolean: nil, groups: Set.new, expression: nil, percentage_of_actors: nil, percentage_of_time: "5"},
+      "search" => {actors: Set.new, boolean: "true", groups: Set.new, expression: nil, percentage_of_actors: nil, percentage_of_time: nil},
+      "stats" => {actors: Set["jnunemaker"], boolean: nil, groups: Set.new, expression: nil, percentage_of_actors: nil, percentage_of_time: nil},
+      "test" => {actors: Set.new, boolean: "true", groups: Set.new, expression: nil, percentage_of_actors: nil, percentage_of_time: nil},
     }
 
     expect(flipper.adapter.get_all).to eq(get_all)

@@ -1,3 +1,4 @@
+require 'json'
 require 'pstore'
 require 'set'
 require 'flipper'
@@ -9,19 +10,14 @@ module Flipper
     class PStore
       include ::Flipper::Adapter
 
-      FeaturesKey = :flipper_features
-
-      # Public: The name of the adapter.
-      attr_reader :name
-
       # Public: The path to where the file is stored.
       attr_reader :path
 
       # Public
       def initialize(path = 'flipper.pstore', thread_safe = true)
-        @name = :pstore
         @path = path
         @store = ::PStore.new(path, thread_safe)
+        @features_key = :flipper_features
       end
 
       # Public: The set of known features.
@@ -34,7 +30,7 @@ module Flipper
       # Public: Adds a feature to the set of known features.
       def add(feature)
         @store.transaction do
-          set_add FeaturesKey, feature.key
+          set_add @features_key, feature.key
         end
         true
       end
@@ -43,7 +39,7 @@ module Flipper
       # all the values for the feature.
       def remove(feature)
         @store.transaction do
-          set_delete FeaturesKey, feature.key
+          set_delete @features_key, feature.key
           clear_gates(feature)
         end
         true
@@ -88,6 +84,8 @@ module Flipper
             write key(feature, gate), thing.value.to_s
           when :set
             set_add key(feature, gate), thing.value.to_s
+          when :json
+            write key(feature, gate), Typecast.to_json(thing.value)
           else
             raise "#{gate} is not supported by this adapter yet"
           end
@@ -108,6 +106,10 @@ module Flipper
         when :set
           @store.transaction do
             set_delete key(feature, gate), thing.value.to_s
+          end
+        when :json
+          @store.transaction do
+            delete key(feature, gate)
           end
         else
           raise "#{gate} is not supported by this adapter yet"
@@ -135,7 +137,7 @@ module Flipper
       end
 
       def read_feature_keys
-        set_members FeaturesKey
+        set_members @features_key
       end
 
       def read_many_features(features)
@@ -150,12 +152,16 @@ module Flipper
         result = {}
 
         feature.gates.each do |gate|
+          key = key(feature, gate)
           result[gate.key] =
             case gate.data_type
             when :boolean, :integer
-              read key(feature, gate)
+              read key
             when :set
-              set_members key(feature, gate)
+              set_members key
+            when :json
+              value = read(key)
+              Typecast.from_json(value)
             else
               raise "#{gate} is not supported by this adapter yet"
             end

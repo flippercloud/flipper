@@ -12,6 +12,7 @@ module Flipper
           boolean: nil,
           groups: Set.new,
           actors: Set.new,
+          expression: nil,
           percentage_of_actors: nil,
           percentage_of_time: nil,
         }
@@ -21,6 +22,10 @@ module Flipper
         return source if source.is_a?(Flipper::Adapter)
         source.adapter
       end
+    end
+
+    def read_only?
+      false
     end
 
     # Public: Get all features and gate values in one call. Defaults to one call
@@ -62,6 +67,11 @@ module Flipper
     # Public: Default config for a feature's gate values.
     def default_config
       self.class.default_config
+    end
+
+    # Public: default name of the adapter
+    def name
+      @name ||= self.class.name.split('::').last.split(/(?=[A-Z])/).join('_').downcase.to_sym
     end
   end
 end

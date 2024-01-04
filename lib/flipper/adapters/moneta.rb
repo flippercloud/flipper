@@ -7,13 +7,9 @@ module Flipper
 
       FEATURES_KEY = :flipper_features
 
-      # Public: The name of the adapter.
-      attr_reader :name
-
       # Public
       def initialize(moneta)
         @moneta = moneta
-        @name = :moneta
       end
 
       # Public:  The set of known features
@@ -70,6 +66,10 @@ module Flipper
           result = get(feature)
           result[gate.key] << thing.value.to_s
           moneta[key(feature.key)] = result
+        when :json
+          result = get(feature)
+          result[gate.key] = thing.value
+          moneta[key(feature.key)] = result
         end
         true
       end
@@ -92,6 +92,10 @@ module Flipper
         when :set
           result = get(feature)
           result[gate.key] = result[gate.key].delete(thing.value.to_s)
+          moneta[key(feature.key)] = result
+        when :json
+          result = get(feature)
+          result[gate.key] = nil
           moneta[key(feature.key)] = result
         end
         true

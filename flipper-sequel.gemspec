@@ -7,7 +7,7 @@ flipper_sequel_files = ->(file) { file =~ /sequel/ }
 Gem::Specification.new do |gem|
   gem.authors       = ['John Nunemaker']
   gem.email         = 'support@flippercloud.io'
-  gem.summary       = 'Sequel adapter for Flipper'
+  gem.summary       = 'Sequel feature flag adapter for Flipper'
   gem.license       = 'MIT'
   gem.homepage      = 'https://www.flippercloud.io/docs/adapters/sequel'
 
