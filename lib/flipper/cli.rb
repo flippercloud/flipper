@@ -1,4 +1,3 @@
-require 'flipper'
 require 'optparse'
 
 module Flipper
@@ -126,6 +125,8 @@ module Flipper
 
     def load_environment!
       require File.expand_path(@require)
+      # Ensure all of flipper gets loaded if it hasn't already.
+      require 'flipper'
     rescue LoadError => e
       warn e.message
       exit 1
