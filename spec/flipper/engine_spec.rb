@@ -169,6 +169,46 @@ RSpec.describe Flipper::Engine do
         if: nil
       })
     end
+
+    context "test_help" do
+      it "is loaded if RAILS_ENV=test" do
+        Rails.env = "test"
+        allow(Flipper::Engine.instance).to receive(:require).and_call_original
+        expect(Flipper::Engine.instance).to receive(:require).with("flipper/test_help")
+        subject
+        expect(config.test_help).to eq(true)
+      end
+
+      it "is loaded if FLIPPER_TEST_HELP=true" do
+        ENV["FLIPPER_TEST_HELP"] = "true"
+        allow(Flipper::Engine.instance).to receive(:require).and_call_original
+        expect(Flipper::Engine.instance).to receive(:require).with("flipper/test_help")
+        subject
+        expect(config.test_help).to eq(true)
+      end
+
+      it "is loaded if config.flipper.test_help = true" do
+        initializer { config.test_help = true }
+        allow(Flipper::Engine.instance).to receive(:require).and_call_original
+        expect(Flipper::Engine.instance).to receive(:require).with("flipper/test_help")
+        subject
+      end
+
+      it "is not loaded if FLIPPER_TEST_HELP=false" do
+        ENV["FLIPPER_TEST_HELP"] = "false"
+        allow(Flipper::Engine.instance).to receive(:require).and_call_original
+        expect(Flipper::Engine.instance).to receive(:require).with("flipper/test_help").never
+        subject
+      end
+
+      it "is not loaded if config.flipper.test_help = false" do
+        Rails.env = "true"
+        initializer { config.test_help = false }
+        allow(Flipper::Engine.instance).to receive(:require).and_call_original
+        expect(Flipper::Engine.instance).to receive(:require).with("flipper/test_help").never
+        subject
+      end
+    end
   end
 
   context 'with cloud' do
