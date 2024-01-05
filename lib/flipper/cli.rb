@@ -38,8 +38,6 @@ module Flipper
           end
 
           c.action do |feature|
-            load_environment!
-
             f = Flipper.feature(feature)
 
             if values.empty?
@@ -48,7 +46,7 @@ module Flipper
               values.each { |value| f.send(action, value) }
             end
 
-            puts feature_summary(f)
+            puts feature_details(f)
           end
         end
       end
@@ -56,23 +54,19 @@ module Flipper
       command 'list' do |c|
         c.description = "List defined features"
         c.action do
-          load_environment!
-
-          Flipper.features.each do |feature|
-            puts feature_summary(feature)
-          end
+          puts feature_summary(Flipper.features)
         end
       end
 
       command 'show' do |c|
         c.description = "Show a defined feature"
         c.action do |feature|
-          load_environment!
-          puts feature_summary(Flipper.feature(feature))
+          puts feature_details(Flipper.feature(feature))
         end
       end
 
       command 'help' do |c|
+        c.load_environment = false
         c.action do |command = nil|
           puts command ? @commands[command].help : help
         end
@@ -106,6 +100,7 @@ module Flipper
       command, *args = order(argv)
 
       if @commands[command]
+        load_environment! if @commands[command].load_environment
         @commands[command].run(args)
       else
         puts help
@@ -124,6 +119,7 @@ module Flipper
     end
 
     def load_environment!
+      ENV["FLIPPER_CLOUD_LOGGING_ENABLED"] ||= "false"
       require File.expand_path(@require)
       # Ensure all of flipper gets loaded if it hasn't already.
       require 'flipper'
@@ -132,28 +128,61 @@ module Flipper
       exit 1
     end
 
-    def feature_summary(feature)
+    def feature_summary(features)
+      features = Array(features)
+      padding = features.map { |f| f.key.to_s.length }.max
+
+      features.map do |feature|
+        summary = case feature.state
+        when :on
+          IRB::Color.colorize("⏺ enabled", [:GREEN])
+        when :off
+          "⦸ disabled"
+        else
+            "#{IRB::Color.colorize("◯ enabled", [:YELLOW])} for " + feature.enabled_gates.map do |gate|
+            case gate.name
+            when :actor
+              pluralize feature.actors_value.size, 'actor', 'actors'
+            when :group
+              pluralize feature.groups_value.size, 'group', 'groups'
+            when :percentage_of_actors
+              "#{feature.percentage_of_actors_value}% of actors"
+            when :percentage_of_time
+              "#{feature.percentage_of_time_value}% of time"
+            end
+          end.join(', ')
+        end
+
+        IRB::Color.colorize("%-#{padding}s" % feature.name, [:BOLD, :WHITE]) + " is #{summary}"
+      end
+    end
+
+    def feature_details(feature)
       summary = case feature.state
       when :on
-        "fully enabled"
+        IRB::Color.colorize("⏺ enabled", [:GREEN])
       when :off
-        "disabled"
+        "⦸ disabled"
       else
-        "enabled for " + feature.enabled_gates.map do |gate|
+        "#{IRB::Color.colorize("◯ enabled", [:YELLOW])} for:\n" + feature.enabled_gates.map do |gate|
           case gate.name
           when :actor
-            pluralize feature.actors_value.size, 'actor', 'actors'
+            [
+              "  #{pluralize(feature.actors_value.size, 'actor', 'actors')}",
+            ] + feature.actors_value.map { |actor| "  - #{actor}" }
           when :group
-            pluralize feature.groups_value.size, 'group', 'groups'
+            [
+              "  #{pluralize(feature.groups_value.size, 'group', 'groups')}",
+            ] + feature.groups_value.map { |group| "  - #{group}" }
           when :percentage_of_actors
-            "#{feature.percentage_of_actors_value}% of actors"
+            "  #{feature.percentage_of_actors_value}% of actors"
           when :percentage_of_time
-            "#{feature.percentage_of_time_value}% of time"
+            "  #{feature.percentage_of_time_value}% of time"
           end
-        end.join(', ')
+        end.flatten.join("\n")
       end
 
-      "#{feature.name.to_s.inspect} is #{summary}"
+      "#{IRB::Color.colorize(feature.name, [:BOLD, :WHITE])} is #{summary}"
     end
 
     def pluralize(count, singular, plural)
@@ -161,11 +190,12 @@ module Flipper
     end
 
     class Command < OptionParser
-      attr_accessor :description
+      attr_accessor :description, :load_environment
 
       def initialize(program_name: nil)
         super()
         @program_name = program_name
+        @load_environment = true
         @action = lambda { }
       end
 

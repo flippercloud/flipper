@@ -17,35 +17,35 @@ RSpec.describe Flipper::CLI do
   describe "enable" do
     describe "feature" do
       it do
-        expect(subject).to have_attributes(status: 0, stdout: /"feature" is fully enabled/)
+        expect(subject).to have_attributes(status: 0, stdout: /feature.*enabled/)
         expect(Flipper).to be_enabled(:feature)
       end
     end
 
     describe "-a User;1 feature" do
       it do
-        expect(subject).to have_attributes(status: 0, stdout: /"feature" is enabled for 1 actor/)
+        expect(subject).to have_attributes(status: 0, stdout: /feature.*enabled.*User;1/m)
         expect(Flipper).to be_enabled(:feature, Flipper::Actor.new("User;1"))
       end
     end
 
     describe "feature -g admins" do
       it do
-        expect(subject).to have_attributes(status: 0, stdout: /"feature" is enabled for 1 group/)
+        expect(subject).to have_attributes(status: 0, stdout: /feature.*enabled.*admins/m)
         expect(Flipper.feature('feature').enabled_groups.map(&:name)).to eq([:admins])
       end
     end
 
     describe "feature -p 30" do
       it do
-        expect(subject).to have_attributes(status: 0, stdout: /"feature" is enabled for 30% of actors/)
+        expect(subject).to have_attributes(status: 0, stdout: /feature.*enabled.*30% of actors/m)
         expect(Flipper.feature('feature').percentage_of_actors_value).to eq(30)
       end
     end
 
     describe "feature -t 50" do
       it do
-        expect(subject).to have_attributes(status: 0, stdout: /"feature" is enabled for 50% of time/)
+        expect(subject).to have_attributes(status: 0, stdout: /feature.*enabled.*50% of time/m)
         expect(Flipper.feature('feature').percentage_of_time_value).to eq(50)
       end
     end
@@ -56,7 +56,7 @@ RSpec.describe Flipper::CLI do
       before { Flipper.enable :feature }
 
       it do
-        expect(subject).to have_attributes(status: 0, stdout: /"feature" is disabled/)
+        expect(subject).to have_attributes(status: 0, stdout: /feature.*disabled/)
         expect(Flipper).not_to be_enabled(:feature)
       end
     end
@@ -65,7 +65,7 @@ RSpec.describe Flipper::CLI do
       before { Flipper.enable_group(:feature, :admins) }
 
       it do
-        expect(subject).to have_attributes(status: 0, stdout: /"feature" is disabled/)
+        expect(subject).to have_attributes(status: 0, stdout: /feature.*disabled/)
         expect(Flipper.feature('feature').enabled_groups).to be_empty
       end
     end
@@ -78,7 +78,7 @@ RSpec.describe Flipper::CLI do
     end
 
     it "lists features" do
-      expect(subject).to have_attributes(status: 0, stdout: /foo.*fully enabled/)
+      expect(subject).to have_attributes(status: 0, stdout: /foo.*enabled/)
       expect(subject).to have_attributes(status: 0, stdout: /bar.*disabled/)
     end
   end
@@ -104,9 +104,21 @@ RSpec.describe Flipper::CLI do
   end
 
   describe "show foo" do
-    before { Flipper.enable :foo }
 
-      it { should have_attributes(status: 0, stdout: /foo.*fully enabled/) }
+    context "boolean" do
+      before { Flipper.enable :foo }
+      it { should have_attributes(status: 0, stdout: /foo.*enabled/) }
+    end
+
+    context "actors" do
+      before { Flipper.enable_actor :foo, Flipper::Actor.new("User;1") }
+      it { should have_attributes(status: 0, stdout: /User;1/) }
+    end
+
+    context "groups" do
+      before { Flipper.enable_group :foo, :admins }
+      it { should have_attributes(status: 0, stdout: /enabled.*admins/m) }
+    end
   end
 
   def run(argv)
