@@ -36,6 +36,17 @@ module Flipper
           c.on('-t NUM', '--percentage-of-time=NUM', Numeric, "#{action} for a percentage of time") do |num|
             values << Types::PercentageOfTime.new(num)
           end
+          c.on('-x expressions', '--expression=NUM', "#{action} for the given expression") do |expression|
+            begin
+              values << Flipper::Expression.build(JSON.parse(expression))
+            rescue JSON::ParserError => e
+              warn "JSON parse error: #{e.message}"
+              exit 1
+            rescue ArgumentError => e
+              warn "Invalid expression: #{e.message}"
+              exit 1
+            end
+          end
 
           c.action do |feature|
             f = Flipper.feature(feature)
@@ -135,11 +146,11 @@ module Flipper
       features.map do |feature|
         summary = case feature.state
         when :on
-          IRB::Color.colorize("⏺ enabled", [:GREEN])
+          colorize("⏺ enabled", [:GREEN])
         when :off
           "⦸ disabled"
         else
-            "#{IRB::Color.colorize("◯ enabled", [:YELLOW])} for " + feature.enabled_gates.map do |gate|
+            "#{colorize("◯ enabled", [:YELLOW])} for " + feature.enabled_gates.map do |gate|
             case gate.name
             when :actor
               pluralize feature.actors_value.size, 'actor', 'actors'
@@ -149,44 +160,56 @@ module Flipper
               "#{feature.percentage_of_actors_value}% of actors"
             when :percentage_of_time
               "#{feature.percentage_of_time_value}% of time"
+            when :expression
+              "an expression"
             end
           end.join(', ')
         end
 
-        IRB::Color.colorize("%-#{padding}s" % feature.name, [:BOLD, :WHITE]) + " is #{summary}"
+        colorize("%-#{padding}s" % feature.name, [:BOLD, :WHITE]) + " is #{summary}"
       end
     end
 
     def feature_details(feature)
       summary = case feature.state
       when :on
-        IRB::Color.colorize("⏺ enabled", [:GREEN])
+        colorize("⏺ enabled", [:GREEN])
       when :off
         "⦸ disabled"
       else
-        "#{IRB::Color.colorize("◯ enabled", [:YELLOW])} for:\n" + feature.enabled_gates.map do |gate|
+        lines = ["#{colorize("◯ enabled", [:YELLOW])} for:\n"] + feature.enabled_gates.map do |gate|
           case gate.name
           when :actor
-            [
-              "  #{pluralize(feature.actors_value.size, 'actor', 'actors')}",
-            ] + feature.actors_value.map { |actor| "  - #{actor}" }
+            [ pluralize(feature.actors_value.size, 'actor', 'actors') ] +
+            feature.actors_value.map { |actor| "- #{actor}" }
           when :group
-            [
-              "  #{pluralize(feature.groups_value.size, 'group', 'groups')}",
-            ] + feature.groups_value.map { |group| "  - #{group}" }
+            [ pluralize(feature.groups_value.size, 'group', 'groups') ] +
+            feature.groups_value.map { |group| "  - #{group}" }
           when :percentage_of_actors
-            "  #{feature.percentage_of_actors_value}% of actors"
+            "#{feature.percentage_of_actors_value}% of actors"
           when :percentage_of_time
-            "  #{feature.percentage_of_time_value}% of time"
+            "#{feature.percentage_of_time_value}% of time"
+          when :expression
+            json = indent(JSON.pretty_generate(feature.expression_value), 2)
+            "the expression: \n#{colorize(json, [:MAGENTA])}"
           end
-        end.flatten.join("\n")
+        end
+        indent(lines.flatten.join("\n"), 2)
       end
 
-      "#{IRB::Color.colorize(feature.name, [:BOLD, :WHITE])} is #{summary}"
+      "#{colorize(feature.name, [:BOLD, :WHITE])} is #{summary}"
     end
 
     def pluralize(count, singular, plural)
       "#{count} #{count == 1 ? singular : plural}"
+    end
+
+    def colorize(text, options)
+      IRB::Color.colorize(text, options)
+    end
+
+    def indent(text, spaces)
+      text.gsub(/^/, " " * spaces)
     end
 
     class Command < OptionParser

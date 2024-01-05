@@ -4,7 +4,7 @@ RSpec.describe Flipper::CLI do
   # Infer the command from the description
   subject(:argv) do
     descriptions = self.class.parent_groups.map {|g| g.metadata[:description_args] }.reverse.flatten.drop(1)
-    descriptions.map { |arg| arg.split }.flatten
+    descriptions.map { |arg| Shellwords.split(arg) }.flatten
   end
 
   subject { run argv }
@@ -12,7 +12,6 @@ RSpec.describe Flipper::CLI do
   before do
     ENV["FLIPPER_REQUIRE"] = "./spec/fixtures/environment"
   end
-
 
   describe "enable" do
     describe "feature" do
@@ -47,6 +46,25 @@ RSpec.describe Flipper::CLI do
       it do
         expect(subject).to have_attributes(status: 0, stdout: /feature.*enabled.*50% of time/m)
         expect(Flipper.feature('feature').percentage_of_time_value).to eq(50)
+      end
+    end
+
+    describe %|feature -x '{"Equal":[{"Property":"flipper_id"},"User;1"]}'| do
+      it do
+        expect(subject).to have_attributes(status: 0, stdout: /feature.*enabled.*User;1/m)
+        expect(Flipper.feature('feature').expression.value).to eq({ "Equal" => [ { "Property" => ["flipper_id"] }, "User;1" ] })
+      end
+    end
+
+    describe %|feature -x invalid_json| do
+      it do
+        expect(subject).to have_attributes(status: 1, stderr: /JSON parse error/m)
+      end
+    end
+
+    describe %|feature -x '{}'| do
+      it do
+        expect(subject).to have_attributes(status: 1, stderr: /Invalid expression/m)
       end
     end
   end
