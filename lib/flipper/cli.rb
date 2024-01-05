@@ -121,6 +121,9 @@ module Flipper
           exit 1
         end
       end
+    rescue OptionParser::InvalidOption => e
+      warn e.message
+      exit 1
     end
 
     # Helper method to define a new command

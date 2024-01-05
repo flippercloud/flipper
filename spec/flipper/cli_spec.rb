@@ -121,8 +121,11 @@ RSpec.describe Flipper::CLI do
     it { should have_attributes(status: 1, stderr: /Unknown command: nope/) }
   end
 
-  describe "show foo" do
+  describe "--nope" do
+    it { should have_attributes(status: 1, stderr: /invalid option: --nope/) }
+  end
 
+  describe "show foo" do
     context "boolean" do
       before { Flipper.enable :foo }
       it { should have_attributes(status: 0, stdout: /foo.*enabled/) }
