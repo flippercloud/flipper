@@ -169,7 +169,7 @@ module Flipper
           end.join(', ')
         end
 
-        colorize("%-#{padding}s" % feature.name, [:BOLD, :WHITE]) + " is #{summary}"
+        colorize("%-#{padding}s" % feature.key, [:BOLD, :WHITE]) + " is #{summary}"
       end
     end
 
@@ -180,7 +180,7 @@ module Flipper
       when :off
         "⦸ disabled"
       else
-        lines = ["#{colorize("◯ enabled", [:YELLOW])} for:\n"] + feature.enabled_gates.map do |gate|
+        lines = feature.enabled_gates.map do |gate|
           case gate.name
           when :actor
             [ pluralize(feature.actors_value.size, 'actor', 'actors') ] +
@@ -197,10 +197,12 @@ module Flipper
             "the expression: \n#{colorize(json, [:MAGENTA])}"
           end
         end
+
+        "#{colorize("◯ conditionally enabled", [:YELLOW])} for:\n" +
         indent(lines.flatten.join("\n"), 2)
       end
 
-      "#{colorize(feature.name, [:BOLD, :WHITE])} is #{summary}"
+      "#{colorize(feature.key, [:BOLD, :WHITE])} is #{summary}"
     end
 
     def pluralize(count, singular, plural)
