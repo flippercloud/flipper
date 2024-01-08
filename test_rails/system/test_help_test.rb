@@ -1,4 +1,8 @@
 require_relative "../helper"
+
+# Not worth trying to test on old Rails versions
+return unless Rails::VERSION::MAJOR >= 7
+
 require "capybara/cuprite"
 require "flipper"
 require "flipper/test_help"
