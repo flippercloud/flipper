@@ -1,7 +1,5 @@
 module Flipper
   module TestHelp
-    extend self
-
     def flipper_configure
       # Create a single shared memory adapter instance for each test
       @flipper_adapter = Flipper::Adapters::Memory.new
