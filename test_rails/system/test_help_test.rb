@@ -23,13 +23,16 @@ TestApp.initialize!
 
 class FeaturesController < ActionController::Base
   def index
-    render inline: Flipper.enabled?(:test) ? "Enabled" : "Disabled"
+    render json: Flipper.enabled?(:test) ? "Enabled" : "Disabled"
   end
 end
 
 class TestHelpTest < ActionDispatch::SystemTestCase
   # Any driver that runs the app in a separate thread will test what we want here.
   driven_by :cuprite
+
+  # Ensure this test uses this app instance
+  setup { Rails.application = TestApp.instance }
 
   test "configures a shared adapter between tests and app" do
     Flipper.disable(:test)
