@@ -18,6 +18,7 @@ require 'flipper'
 require 'flipper/api'
 require 'flipper/spec/shared_adapter_specs'
 require 'flipper/ui'
+require 'flipper/test_help'
 
 Dir[FlipperRoot.join('spec/support/**/*.rb')].sort.each { |f| require f }
 

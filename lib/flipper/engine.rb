@@ -24,7 +24,8 @@ module Flipper
         instrumenter: ENV.fetch('FLIPPER_INSTRUMENTER', 'ActiveSupport::Notifications').constantize,
         log: ENV.fetch('FLIPPER_LOG', 'true').casecmp('true').zero?,
         cloud_path: "_flipper",
-        strict: default_strict_value
+        strict: default_strict_value,
+        test_help: Flipper::Typecast.to_boolean(ENV["FLIPPER_TEST_HELP"] || Rails.env.test?),
       )
     end
 
@@ -84,6 +85,10 @@ module Flipper
           if: flipper.memoize.respond_to?(:call) ? flipper.memoize : nil
         }
       end
+    end
+
+    initializer "flipper.test" do |app|
+      require "flipper/test_help" if app.config.flipper.test_help
     end
 
     def cloud?

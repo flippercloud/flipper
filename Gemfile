@@ -13,7 +13,7 @@ gem 'rspec', '~> 3.0'
 gem 'rack-test'
 gem 'rackup'
 gem 'sqlite3', "~> #{ENV['SQLITE3_VERSION'] || '1.4.1'}"
-gem 'rails', "~> #{ENV['RAILS_VERSION'] || '7.0.4'}"
+gem 'rails', "~> #{ENV['RAILS_VERSION'] || '7.1'}"
 gem 'minitest', '~> 5.18'
 gem 'minitest-documentation'
 gem 'webmock'
@@ -27,6 +27,8 @@ gem 'flamegraph'
 gem 'climate_control'
 gem 'mysql2'
 gem 'pg'
+gem 'cuprite'
+gem 'puma'
 
 group(:guard) do
   gem 'guard'
