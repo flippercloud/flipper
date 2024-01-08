@@ -6,7 +6,7 @@ module Flipper
       desc 'Peform any necessary steps to install Flipper'
 
       class_option :token, type: :string, default: nil, aliases: '-t',
-        desc: "Your Flipper Cloud development token"
+        desc: "Your personal environment token for Flipper Cloud"
 
       def generate_active_record
         invoke 'flipper:active_record' if defined?(Flipper::Adapters::ActiveRecord)
