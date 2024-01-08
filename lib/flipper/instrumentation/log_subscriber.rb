@@ -72,6 +72,15 @@ module Flipper
         self.class.logger
       end
 
+      def self.attach
+        attach_to InstrumentationNamespace
+      end
+
+      def self.detach
+        # Rails 5.2 doesn't support this, that's fine
+        detach_from InstrumentationNamespace if respond_to?(:detach_from)
+      end
+
       private
 
       # Rails 7.1 changed the signature of this function.
@@ -88,5 +97,5 @@ module Flipper
     end
   end
 
-  Instrumentation::LogSubscriber.attach_to InstrumentationNamespace
+  Instrumentation::LogSubscriber.attach
 end
