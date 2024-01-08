@@ -47,8 +47,7 @@ class ActiveRecordTest < MiniTest::Test
     ActiveRecord::Base.table_name_prefix = :foo_
     ActiveRecord::Base.table_name_suffix = :_bar
 
-    Flipper::Adapters::ActiveRecord.send(:remove_const, :Feature)
-    Flipper::Adapters::ActiveRecord.send(:remove_const, :Gate)
+    Flipper::Adapters.send(:remove_const, :ActiveRecord)
     load("flipper/adapters/active_record.rb")
 
     assert_equal "foo_flipper_features_bar", Flipper::Adapters::ActiveRecord::Feature.table_name
@@ -58,8 +57,7 @@ class ActiveRecordTest < MiniTest::Test
     ActiveRecord::Base.table_name_prefix = ""
     ActiveRecord::Base.table_name_suffix = ""
 
-    Flipper::Adapters::ActiveRecord.send(:remove_const, :Feature)
-    Flipper::Adapters::ActiveRecord.send(:remove_const, :Gate)
+    Flipper::Adapters.send(:remove_const, :ActiveRecord)
     load("flipper/adapters/active_record.rb")
   end
 end

@@ -1,4 +1,4 @@
-require 'flipper/adapters/active_record'
+SpecHelpers.silence { require 'flipper/adapters/active_record' }
 require 'active_support/core_ext/kernel'
 
 # Turn off migration logging for specs
@@ -43,7 +43,7 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
 
     context "with #{config[:adapter]}" do
       before(:all) do
-        ActiveRecord::Tasks::DatabaseTasks.create(config)
+        silence { ActiveRecord::Tasks::DatabaseTasks.create(config) }
       end
 
       before(:each) do
@@ -59,7 +59,7 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
       end
 
       after(:all) do
-        ActiveRecord::Tasks::DatabaseTasks.drop(config)
+        silence { ActiveRecord::Tasks::DatabaseTasks.drop(config) }
       end
 
       it_should_behave_like 'a flipper adapter'
@@ -70,8 +70,12 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
         Flipper.configuration = nil
         Flipper.instance = nil
 
-        silence_warnings { load 'flipper/adapters/active_record.rb' }
-        expect { Flipper::Adapters::ActiveRecord.new }.not_to raise_error
+        expect {
+          silence do
+            load 'flipper/adapters/active_record.rb'
+            Flipper::Adapters::ActiveRecord.new
+          end
+        }.not_to raise_error
       end
 
       it "should load actor ids fine" do
@@ -92,7 +96,7 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
           Flipper.configuration = nil
           Flipper.instance = nil
 
-          silence_warnings { load 'flipper/adapters/active_record.rb' }
+          silence { load 'flipper/adapters/active_record.rb' }
         end
 
         it 'configures itself' do
