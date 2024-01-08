@@ -11,9 +11,9 @@ require 'action_dispatch/system_testing/server'
 ActionDispatch::SystemTesting::Server.silence_puma = true
 
 class TestApp < Rails::Application
+  config.load_defaults "#{Rails::VERSION::MAJOR}.#{Rails::VERSION::MINOR}"
   config.eager_load = false
   config.logger = ActiveSupport::Logger.new(StringIO.new)
-  config.active_support.cache_format_version = 7.1
   routes.append do
     root to: "features#index"
   end
