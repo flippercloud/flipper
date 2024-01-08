@@ -32,7 +32,7 @@ RSpec.describe Flipper::Adapters::Sequel do
       Flipper.configuration = nil
       Flipper.instance = nil
 
-      load 'flipper/adapters/sequel.rb'
+      silence { load 'flipper/adapters/sequel.rb' }
     end
 
     it 'configures itself' do

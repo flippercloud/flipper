@@ -3,6 +3,8 @@ require 'json'
 require 'rack/test'
 
 module SpecHelpers
+  extend self
+
   def self.included(base)
     base.let(:flipper) { build_flipper }
     base.let(:app) { build_app(flipper) }
@@ -80,11 +82,11 @@ module SpecHelpers
 
     yield
 
-    $stderr = original_stderr
-    $stdout = original_stdout
-
     # Return output
     output.string
+  ensure
+    $stderr = original_stderr
+    $stdout = original_stdout
   end
 end
 
