@@ -42,8 +42,8 @@ Flipper::UI.configure do |config|
 
   config.actor_names_source = lambda do |_keys|
     {
-      '1' => 'John',
-      '6' => 'Brandon',
+      '1' => '<a href="https://johnnunemaker.com">John</a>',
+      '6' => '<a href="https://opensoul.org">Brandon</a>',
     }
   end
 end
