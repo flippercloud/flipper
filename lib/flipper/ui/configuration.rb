@@ -63,6 +63,10 @@ module Flipper
       # Default is false.
       attr_accessor :confirm_fully_enable
 
+      # Public: if you want to get a confirm pop up box while disabling a feature
+      # Default is false.
+      attr_accessor :confirm_disable
+
       VALID_BANNER_CLASS_VALUES = %w(
         danger
         dark
@@ -91,6 +95,7 @@ module Flipper
         @show_feature_description_in_list = false
         @actors_separator = ','
         @confirm_fully_enable = false
+        @confirm_disable = true
         @read_only = false
       end
 

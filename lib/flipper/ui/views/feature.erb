@@ -263,8 +263,13 @@
 
               <% unless @feature.off? %>
                 <div class="col">
-                  <button type="submit" name="action" value="Disable" class="btn btn-outline-danger btn-block">
-                    <span class="d-block" data-toggle="tooltip" title="Disable for everyone by clearing all percentages, groups and actors.">
+                  <button type="submit" name="action" value="Disable" <% if Flipper::UI.configuration.confirm_disable %>id="disable_feature__button"<% end %> class="btn btn-outline-danger btn-block">
+                    <span class="d-block" data-toggle="tooltip"
+                      <% if Flipper::UI.configuration.confirm_disable %>
+                        data-confirmation-text="<%= feature_name %>"
+                      <% end %>
+                          title="Disable for everyone by clearing all percentages, groups and actors."
+                      >
                       Disable
                     </span>
                   </button>
