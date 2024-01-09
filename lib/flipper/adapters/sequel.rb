@@ -123,8 +123,8 @@ module Flipper
       # Public: Enables a gate for a given thing.
       #
       # feature - The Flipper::Feature for the gate.
-      # gate - The Flipper::Gate to disable.
-      # thing - The Flipper::Type being disabled for the gate.
+      # gate - The Flipper::Gate to enable.
+      # thing - The Flipper::Type being enabled for the gate.
       #
       # Returns true.
       def enable(feature, gate, thing)
