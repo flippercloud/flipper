@@ -73,22 +73,30 @@ RSpec.describe Flipper::Engine do
       expect(adapter).to be_instance_of(Flipper::Adapters::Memory)
     end
 
-    it "defaults to strict=false in RAILS_ENV=production" do
-      Rails.env = "production"
+    it "defaults to strict=:warn in RAILS_ENV=development" do
+      Rails.env = "development"
       subject
-      expect(config.strict).to eq(false)
-      expect(adapter).to be_instance_of(Flipper::Adapters::Memory)
+      expect(config.strict).to eq(:warn)
+      expect(adapter).to be_instance_of(Flipper::Adapters::Strict)
     end
 
-    %w(development test).each do |env|
+    %w(production test).each do |env|
       it "defaults to strict=warn in RAILS_ENV=#{env}" do
         Rails.env = env
         expect(Rails.env).to eq(env)
         subject
-        expect(config.strict).to eq(:warn)
-        expect(adapter).to be_instance_of(Flipper::Adapters::Strict)
-        expect(adapter.handler).to be(:warn)
+        expect(config.strict).to eq(false)
+        expect(adapter).to be_instance_of(Flipper::Adapters::Memory)
       end
+    end
+
+    it "defaults to strict=warn in RAILS_ENV=development" do
+      Rails.env = "development"
+      expect(Rails.env).to eq("development")
+      subject
+      expect(config.strict).to eq(:warn)
+      expect(adapter).to be_instance_of(Flipper::Adapters::Strict)
+      expect(adapter.handler).to be(:warn)
     end
   end
 

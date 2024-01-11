@@ -9,8 +9,8 @@ module Flipper
       elsif Rails.env.production?
         false
       else
-        # Warn for now. Future versions will default to :raise in development and test
-        :warn
+        # Warn in development for now. Future versions may default to :raise in development and test
+        Rails.env.development? && :warn
       end
     end
 
