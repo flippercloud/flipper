@@ -4,9 +4,14 @@ module Flipper
   module Generators
     class SetupGenerator < ::Rails::Generators::Base
       desc 'Peform any necessary steps to install Flipper'
+      source_paths << File.expand_path('templates', __dir__)
 
       class_option :token, type: :string, default: nil, aliases: '-t',
         desc: "Your personal environment token for Flipper Cloud"
+
+      def generate_initializer
+        template 'initializer.rb', 'config/initializers/flipper.rb'
+      end
 
       def generate_active_record
         invoke 'flipper:active_record' if defined?(Flipper::Adapters::ActiveRecord)
