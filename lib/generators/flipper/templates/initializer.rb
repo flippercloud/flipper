@@ -9,7 +9,7 @@ Rails.application.configure do
   ##   * you have limited gate data combined across all features (< 1k enabled gates, like individual actors, across all features)
   ##
   ## For more info, see https://www.flippercloud.io/docs/optimization#preloading
-  # config.flipper.preload = [:only, :these, :common, :features]
+  # config.flipper.preload = true
 
   ## Warn or raise an error if an unknown feature is checked
   ## Can be set to `:warn`, `:raise`, or `false`
@@ -33,3 +33,13 @@ Flipper.configure do |config|
   ## See http://flippercloud.io/docs/adapters
   # config.use Flipper::Adapters::ActiveSupportCacheStore, Rails.cache, expires_in: 5.minutes
 end
+
+## Register a group that can be used for enabling features.
+##
+##   Flipper.enable_group :my_feature, :admins
+##
+## See https://www.flippercloud.io/docs/features#enablement-group
+#
+# Flipper.register(:admins) do |actor|
+#  actor.respond_to?(:admin?) && actor.admin?
+# end
