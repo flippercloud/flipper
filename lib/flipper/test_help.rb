@@ -16,7 +16,7 @@ module Flipper
   end
 end
 
-if defined?(RSpec)
+if defined?(RSpec) && RSpec.respond_to?(:configure)
   RSpec.configure do |config|
     config.include Flipper::TestHelp
     config.before(:all) { flipper_configure }
