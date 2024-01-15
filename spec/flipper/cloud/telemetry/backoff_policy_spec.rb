@@ -49,19 +49,18 @@ RSpec.describe Flipper::Cloud::Telemetry::BackoffPolicy do
     end
 
     it "from env" do
-      env = {
+      ENV.update(
         "FLIPPER_BACKOFF_MIN_TIMEOUT_MS" => "1000",
         "FLIPPER_BACKOFF_MAX_TIMEOUT_MS" => "2000",
         "FLIPPER_BACKOFF_MULTIPLIER" => "1.9",
         "FLIPPER_BACKOFF_RANDOMIZATION_FACTOR" => "0.1",
-      }
-      with_env env do
-        policy = described_class.new
-        expect(policy.min_timeout_ms).to eq(1000)
-        expect(policy.max_timeout_ms).to eq(2000)
-        expect(policy.multiplier).to eq(1.9)
-        expect(policy.randomization_factor).to eq(0.1)
-      end
+      )
+
+      policy = described_class.new
+      expect(policy.min_timeout_ms).to eq(1000)
+      expect(policy.max_timeout_ms).to eq(2000)
+      expect(policy.multiplier).to eq(1.9)
+      expect(policy.randomization_factor).to eq(0.1)
     end
   end
 
