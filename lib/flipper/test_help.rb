@@ -19,8 +19,10 @@ end
 if defined?(RSpec) && RSpec.respond_to?(:configure)
   RSpec.configure do |config|
     config.include Flipper::TestHelp
-    config.before(:all) { flipper_configure }
-    config.before(:each) { flipper_reset }
+    config.before(:each) do
+      flipper_reset
+      flipper_configure
+    end
   end
 end
 
