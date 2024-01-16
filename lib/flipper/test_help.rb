@@ -19,7 +19,7 @@ end
 if defined?(RSpec) && RSpec.respond_to?(:configure)
   RSpec.configure do |config|
     config.include Flipper::TestHelp
-    config.before(:each) do
+    config.prepend_before(:each) do
       flipper_reset
       flipper_configure
     end
