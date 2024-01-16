@@ -1,4 +1,5 @@
 require 'optparse'
+require 'irb/color'
 
 module Flipper
   class CLI < OptionParser
