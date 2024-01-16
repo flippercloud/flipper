@@ -142,6 +142,28 @@ RSpec.describe Flipper::CLI do
     end
   end
 
+  context "bundler is not installed" do
+    let(:argv) { "list" }
+
+    around do |example|
+      original_bundler = Bundler
+      begin
+        Object.send(:remove_const, :Bundler)
+        example.run
+      ensure
+        Object.const_set(:Bundler, original_bundler)
+      end
+    end
+
+    it "should not raise an error" do
+      Flipper.enable(:enabled_feature)
+      Flipper.enable_group(:enabled_groups, :admins)
+      Flipper.add(:disabled_feature)
+
+      expect(subject).to have_attributes(status: 0, stdout: /enabled_feature.*enabled_groups.*disabled_feature/m)
+    end
+  end
+
   def run(argv)
     original_stdout = $stdout
     original_stderr = $stderr

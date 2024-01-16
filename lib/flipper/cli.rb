@@ -209,8 +209,12 @@ module Flipper
       "#{count} #{count == 1 ? singular : plural}"
     end
 
-    def colorize(text, options)
-      IRB::Color.colorize(text, options)
+    def colorize(text, colors)
+      if defined?(Bundler)
+        Bundler.ui.add_color(text, *colors)
+      else
+        text
+      end
     end
 
     def indent(text, spaces)
