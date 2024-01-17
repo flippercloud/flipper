@@ -33,28 +33,25 @@ RSpec.describe Flipper::Engine do
     let(:adapter) { Flipper.adapter.adapter }
 
     it 'can set strict=true from ENV' do
-      with_env 'FLIPPER_STRICT' => 'true' do
-        subject
-        expect(config.strict).to eq(:raise)
-        expect(adapter).to be_instance_of(Flipper::Adapters::Strict)
-      end
+      ENV['FLIPPER_STRICT'] = 'true'
+      subject
+      expect(config.strict).to eq(:raise)
+      expect(adapter).to be_instance_of(Flipper::Adapters::Strict)
     end
 
     it 'can set strict=warn from ENV' do
-      with_env 'FLIPPER_STRICT' => 'warn' do
-        subject
-        expect(config.strict).to eq(:warn)
-        expect(adapter).to be_instance_of(Flipper::Adapters::Strict)
-        expect(adapter.handler).to be(:warn)
-      end
+      ENV['FLIPPER_STRICT'] = 'warn'
+      subject
+      expect(config.strict).to eq(:warn)
+      expect(adapter).to be_instance_of(Flipper::Adapters::Strict)
+      expect(adapter.handler).to be(:warn)
     end
 
     it 'can set strict=false from ENV' do
-      with_env 'FLIPPER_STRICT' => 'false' do
-        subject
-        expect(config.strict).to eq(false)
-        expect(adapter).to be_instance_of(Flipper::Adapters::Memory)
-      end
+      ENV['FLIPPER_STRICT'] = 'false'
+      subject
+      expect(config.strict).to eq(false)
+      expect(adapter).to be_instance_of(Flipper::Adapters::Memory)
     end
 
     [true, :raise, :warn].each do |value|
@@ -104,39 +101,34 @@ RSpec.describe Flipper::Engine do
     it_behaves_like 'config.strict'
 
     it 'can set env_key from ENV' do
-      with_env 'FLIPPER_ENV_KEY' => 'flopper' do
-        subject
-        expect(config.env_key).to eq('flopper')
-      end
+      ENV['FLIPPER_ENV_KEY'] = 'flopper'
+      subject
+      expect(config.env_key).to eq('flopper')
     end
 
     it 'can set memoize from ENV' do
-      with_env 'FLIPPER_MEMOIZE' => 'false' do
-        subject
-        expect(config.memoize).to eq(false)
-      end
+      ENV['FLIPPER_MEMOIZE'] = 'false'
+      subject
+      expect(config.memoize).to eq(false)
     end
 
     it 'can set preload from ENV' do
-      with_env 'FLIPPER_PRELOAD' => 'false' do
-        subject
-        expect(config.preload).to eq(false)
-      end
+      ENV['FLIPPER_PRELOAD'] = 'false'
+      subject
+      expect(config.preload).to eq(false)
     end
 
     it 'can set instrumenter from ENV' do
       stub_const('My::Cool::Instrumenter', Class.new)
-      with_env 'FLIPPER_INSTRUMENTER' => 'My::Cool::Instrumenter' do
-        subject
-        expect(config.instrumenter).to eq(My::Cool::Instrumenter)
-      end
+      ENV['FLIPPER_INSTRUMENTER'] = 'My::Cool::Instrumenter'
+      subject
+      expect(config.instrumenter).to eq(My::Cool::Instrumenter)
     end
 
     it 'can set log from ENV' do
-      with_env 'FLIPPER_LOG' => 'false' do
-        subject
-        expect(config.log).to eq(false)
-      end
+      ENV['FLIPPER_LOG'] = 'false'
+      subject
+      expect(config.log).to eq(false)
     end
 
     it 'sets defaults' do
@@ -220,10 +212,8 @@ RSpec.describe Flipper::Engine do
   end
 
   context 'with cloud' do
-    around do |example|
-      with_env "FLIPPER_CLOUD_TOKEN" => "test-token" do
-        example.run
-      end
+    before do
+      ENV["FLIPPER_CLOUD_TOKEN"] = "test-token"
     end
 
     # App for Rack::Test
@@ -248,10 +238,8 @@ RSpec.describe Flipper::Engine do
     end
 
     context "with CLOUD_SYNC_SECRET" do
-      around do |example|
-        with_env "FLIPPER_CLOUD_SYNC_SECRET" => "test-secret" do
-          example.run
-        end
+      before do
+        ENV["FLIPPER_CLOUD_SYNC_SECRET"] = "test-secret"
       end
 
       let(:request_body) do
@@ -296,10 +284,9 @@ RSpec.describe Flipper::Engine do
 
     context "without FLIPPER_CLOUD_TOKEN" do
       it "gracefully skips configuring webhook app" do
-        with_env "FLIPPER_CLOUD_TOKEN" => nil do
-          application.initialize!
-          expect(Flipper.instance).to be_a(Flipper::DSL)
-        end
+        ENV["FLIPPER_CLOUD_TOKEN"] = nil
+        application.initialize!
+        expect(Flipper.instance).to be_a(Flipper::DSL)
 
         post "/_flipper"
         expect(last_response.status).to eq(404)
