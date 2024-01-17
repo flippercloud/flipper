@@ -16,14 +16,14 @@ RSpec.describe Flipper::CLI do
   describe "enable" do
     describe "feature" do
       it do
-        expect(subject).to have_attributes(status: 0, stdout: /feature.*enabled/)
+        expect(subject).to have_attributes(status: 0, stdout: /feature.*\e\[32m.*enabled/)
         expect(Flipper).to be_enabled(:feature)
       end
     end
 
     describe "-a User;1 feature" do
       it do
-        expect(subject).to have_attributes(status: 0, stdout: /feature.*enabled.*User;1/m)
+        expect(subject).to have_attributes(status: 0, stdout: /feature.*\e\[33m.*enabled.*User;1/m)
         expect(Flipper).to be_enabled(:feature, Flipper::Actor.new("User;1"))
       end
     end
@@ -142,6 +142,28 @@ RSpec.describe Flipper::CLI do
     end
   end
 
+  context "bundler is not installed" do
+    let(:argv) { "list" }
+
+    around do |example|
+      original_bundler = Bundler
+      begin
+        Object.send(:remove_const, :Bundler)
+        example.run
+      ensure
+        Object.const_set(:Bundler, original_bundler)
+      end
+    end
+
+    it "should not raise an error" do
+      Flipper.enable(:enabled_feature)
+      Flipper.enable_group(:enabled_groups, :admins)
+      Flipper.add(:disabled_feature)
+
+      expect(subject).to have_attributes(status: 0, stdout: /enabled_feature.*enabled_groups.*disabled_feature/m)
+    end
+  end
+
   def run(argv)
     original_stdout = $stdout
     original_stderr = $stderr
@@ -149,6 +171,9 @@ RSpec.describe Flipper::CLI do
     $stdout = StringIO.new
     $stderr = StringIO.new
     status = 0
+
+    # Prentend this a TTY so we can test colorization
+    allow($stdout).to receive(:tty?).and_return(true)
 
     begin
       Flipper::CLI.run(argv)
