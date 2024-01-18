@@ -1,6 +1,3 @@
-# frozen_string_literal: true
-# typed: false
-
 require "redis"
 require "flipper"
 
