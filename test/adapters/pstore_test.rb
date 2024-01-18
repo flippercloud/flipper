@@ -5,10 +5,12 @@ class PstoreTest < MiniTest::Test
   prepend Flipper::Test::SharedAdapterTests
 
   def setup
-    dir = FlipperRoot.join('tmp').tap(&:mkpath)
-    pstore_file = dir.join('flipper.pstore')
-    pstore_file.unlink if pstore_file.exist?
-    @adapter = Flipper::Adapters::PStore.new(pstore_file)
+    @tempfile = Tempfile.new('flipper.pstore')
+    @adapter = Flipper::Adapters::PStore.new(@tempfile.path)
+  end
+
+  def teardown
+    @tempfile.unlink
   end
 
   def test_defaults_path_to_flipper_pstore

@@ -28,6 +28,8 @@ gem 'mysql2'
 gem 'pg'
 gem 'cuprite'
 gem 'puma'
+gem 'minitest-fork_executor'
+gem 'minitest-parallel_fork'
 
 group(:guard) do
   gem 'guard'
