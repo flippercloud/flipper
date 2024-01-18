@@ -28,6 +28,7 @@ gem 'mysql2'
 gem 'pg'
 gem 'cuprite'
 gem 'puma'
+gem 'connection_pool'
 
 group(:guard) do
   gem 'guard'
