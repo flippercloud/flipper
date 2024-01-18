@@ -1,14 +1,17 @@
 require 'test_helper'
-require 'sequel'
 
-Sequel::Model.db = Sequel.sqlite(':memory:')
-Sequel.extension :migration, :core_extensions
-
-require 'flipper/adapters/sequel'
-require 'generators/flipper/templates/sequel_migration'
-
-class SequelTest < MiniTest::Test
+class SequelTest < TestCase
   prepend Flipper::Test::SharedAdapterTests
+
+  def before_all
+    require 'sequel'
+
+    Sequel::Model.db = Sequel.sqlite(':memory:')
+    Sequel.extension :migration, :core_extensions
+
+    require 'flipper/adapters/sequel'
+    require 'generators/flipper/templates/sequel_migration'
+  end
 
   def feature_class
     Flipper::Adapters::Sequel::Feature

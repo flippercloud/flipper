@@ -1,8 +1,11 @@
 require 'test_helper'
-require 'flipper/adapters/redis'
 
-class RedisTest < MiniTest::Test
+class RedisTest < TestCase
   prepend Flipper::Test::SharedAdapterTests
+
+  def before_all
+    require 'flipper/adapters/redis'
+  end
 
   def setup
     url = ENV.fetch('REDIS_URL', 'redis://localhost:6379')

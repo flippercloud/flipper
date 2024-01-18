@@ -1,8 +1,11 @@
 require 'test_helper'
-require 'flipper/adapters/redis_cache'
 
-class RedisCacheTest < MiniTest::Test
+class RedisCacheTest < TestCase
   prepend Flipper::Test::SharedAdapterTests
+
+  def before_all
+    require 'flipper/adapters/redis_cache'
+  end
 
   def setup
     url = ENV.fetch('REDIS_URL', 'redis://localhost:6379')

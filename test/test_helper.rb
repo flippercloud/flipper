@@ -4,6 +4,7 @@ require 'flipper/test/shared_adapter_test'
 
 require 'minitest/autorun'
 require 'minitest/unit'
+require 'minitest/hooks'
 
 if ENV["FORK"] == "each"
   # Each `def test_` in each *_test.rb file will be run in a separate process.
@@ -12,4 +13,8 @@ if ENV["FORK"] == "each"
 else
   # Each *_test.rb file will be run in a separate process.
   require "minitest/parallel_fork"
+end
+
+class TestCase < Minitest::Test
+  include Minitest::Hooks
 end

@@ -1,9 +1,12 @@
 require 'test_helper'
-require 'flipper/adapters/dalli'
-require 'logger'
 
-class DalliTest < MiniTest::Test
+class DalliTest < TestCase
   prepend Flipper::Test::SharedAdapterTests
+
+  def before_all
+    require 'flipper/adapters/dalli'
+    require 'logger'
+  end
 
   def setup
     url = ENV.fetch('MEMCACHED_URL', 'localhost:11211')

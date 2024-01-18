@@ -1,8 +1,11 @@
 require 'test_helper'
-require 'flipper/adapters/pstore'
 
-class PstoreTest < MiniTest::Test
+class PstoreTest < TestCase
   prepend Flipper::Test::SharedAdapterTests
+
+  def before_all
+    require 'flipper/adapters/pstore'
+  end
 
   def setup
     @tempfile = Tempfile.new('flipper.pstore')

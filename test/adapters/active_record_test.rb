@@ -1,14 +1,16 @@
 require 'test_helper'
-require 'flipper/adapters/active_record'
 
-# Turn off migration logging for specs
-ActiveRecord::Migration.verbose = false
-
-class ActiveRecordTest < MiniTest::Test
+class ActiveRecordTest < TestCase
   prepend Flipper::Test::SharedAdapterTests
 
-  ActiveRecord::Base.establish_connection(adapter: 'sqlite3',
-                                          database: ':memory:')
+  def before_all
+    require 'flipper/adapters/active_record'
+
+    # Turn off migration logging for specs
+    ActiveRecord::Migration.verbose = false
+
+    ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
+  end
 
   def setup
     ActiveRecord::Base.connection.execute <<-SQL

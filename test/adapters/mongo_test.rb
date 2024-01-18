@@ -1,8 +1,11 @@
 require 'test_helper'
-require 'flipper/adapters/mongo'
 
-class MongoTest < MiniTest::Test
+class MongoTest < TestCase
   prepend Flipper::Test::SharedAdapterTests
+
+  def before_all
+    require 'flipper/adapters/mongo'
+  end
 
   def setup
     host = ENV.fetch('MONGODB_HOST', '127.0.0.1')

@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class MemoryTest < MiniTest::Test
+class MemoryTest < TestCase
   prepend Flipper::Test::SharedAdapterTests
 
   def setup
