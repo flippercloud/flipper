@@ -1,6 +1,7 @@
 require 'ice_age'
 require 'json'
 require 'rack/test'
+require 'rack/session'
 
 module SpecHelpers
   extend self
@@ -12,7 +13,7 @@ module SpecHelpers
 
   def build_app(flipper, options = {})
     Flipper::UI.app(flipper, options) do |builder|
-      builder.use Rack::Session::Cookie, secret: 'test'
+      builder.use Rack::Session::Cookie, secret: 'test' * 16 # Rack 3+ wants a 64-character secret
     end
   end
 
