@@ -1,17 +1,24 @@
 module Flipper
   module TestHelp
+    extend self
+
     def flipper_configure
-      # Create a single shared memory adapter instance for each test
-      @flipper_adapter = Flipper::Adapters::Memory.new
+      # Use a shared Memory adapter for all tests. This is instantiated outside of the
+      # `configure` block so the same instance is returned in new threads.
+      adapter = Flipper::Adapters::Memory.new
 
       Flipper.configure do |config|
-        config.adapter { @flipper_adapter }
+        config.adapter { adapter }
         config.default { Flipper.new(config.adapter) }
       end
     end
 
     def flipper_reset
-      Flipper.instance = nil # Reset previous flipper instance
+      # Remove all features
+      Flipper.features.each(&:remove) rescue nil
+
+      # Reset previous DSL instance
+      Flipper.instance = nil
     end
   end
 end
@@ -19,19 +26,17 @@ end
 if defined?(RSpec) && RSpec.respond_to?(:configure)
   RSpec.configure do |config|
     config.include Flipper::TestHelp
-    config.before(:each) do
-      flipper_reset
-      flipper_configure
-    end
+    config.before(:suite) { Flipper::TestHelp.flipper_configure }
+    config.before(:each) { flipper_reset }
   end
 end
-
 if defined?(ActiveSupport)
   ActiveSupport.on_load(:active_support_test_case) do
+    Flipper::TestHelp.flipper_configure
+
     ActiveSupport::TestCase.class_eval do
       include Flipper::TestHelp
 
-      setup :flipper_configure
       setup :flipper_reset
     end
   end

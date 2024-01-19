@@ -31,8 +31,13 @@ class TestHelpTest < ActionDispatch::SystemTestCase
   # Any driver that runs the app in a separate thread will test what we want here.
   driven_by :cuprite, options: { process_timeout: 30 }
 
-  # Ensure this test uses this app instance
-  setup { Rails.application = TestApp.instance }
+  setup do
+    # Reconfigure Flipper since other tests change the adapter.
+    flipper_configure
+
+    # Ensure this test uses this app instance
+    Rails.application = TestApp.instance
+  end
 
   test "configures a shared adapter between tests and app" do
     Flipper.disable(:test)
