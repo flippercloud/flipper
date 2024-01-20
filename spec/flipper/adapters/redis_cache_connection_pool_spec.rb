@@ -6,8 +6,7 @@ RSpec.describe Flipper::Adapters::RedisCacheConnectionPool do
   let(:client) do
     options = {}
     options[:url] = ENV['REDIS_URL'] if ENV['REDIS_URL']
-    redis = Redis.new(options)
-    ConnectionPool.new(size: 5, timeout: 1) { redis }
+    ConnectionPool.new(size: 1, timeout: 1) { Redis.new(options) }
   end
 
   let(:memory_adapter) do
