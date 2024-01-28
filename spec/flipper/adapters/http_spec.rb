@@ -1,6 +1,15 @@
 require 'flipper/adapters/http'
 require 'flipper/adapters/pstore'
-require 'rack/handler/webrick'
+
+rack_handler = begin
+  # Rack 3+
+  require 'rackup/handler/webrick'
+  Rackup::Handler::WEBrick
+rescue LoadError
+  require 'rack/handler/webrick'
+  Rack::Handler::WEBrick
+end
+
 
 FLIPPER_SPEC_API_PORT = ENV.fetch('FLIPPER_SPEC_API_PORT', 9001).to_i
 
@@ -36,7 +45,7 @@ RSpec.describe Flipper::Adapters::Http do
           ],
         }
         @server = WEBrick::HTTPServer.new(server_options)
-        @server.mount '/', Rack::Handler::WEBrick, app
+        @server.mount '/', rack_handler, app
 
         Thread.new { @server.start }
         Timeout.timeout(1) { :wait until @started }

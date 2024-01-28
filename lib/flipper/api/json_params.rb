@@ -12,6 +12,7 @@ module Flipper
       CONTENT_TYPE = 'CONTENT_TYPE'.freeze
       QUERY_STRING = 'QUERY_STRING'.freeze
       REQUEST_BODY = 'rack.input'.freeze
+      REWIND_BODY = Gem::Version.new(Rack.release) < Gem::Version.new('3.0.0')
 
       # Public: Merge request body params with query string params
       # This way can access all params with Rack::Request#params
@@ -21,7 +22,7 @@ module Flipper
       def call(env)
         if env[CONTENT_TYPE] == 'application/json'
           body = env[REQUEST_BODY].read
-          env[REQUEST_BODY].rewind
+          env[REQUEST_BODY].rewind if REWIND_BODY
           update_params(env, body)
         end
         @app.call(env)
