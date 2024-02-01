@@ -14,6 +14,7 @@ module Flipper
       yield builder if block_given?
       builder.use Rack::Head
       builder.use Rack::Deflater
+      builder.use Rack::RewindableInput::Middleware if Gem::Version.new(Rack.release) >= Gem::Version.new('3.0.0')
       builder.use Flipper::Api::JsonParams
       builder.use Flipper::Middleware::SetupEnv, flipper, env_key: env_key
       builder.use Flipper::Api::Middleware, env_key: env_key
