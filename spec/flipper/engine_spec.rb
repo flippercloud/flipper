@@ -4,8 +4,10 @@ require 'flipper/engine'
 RSpec.describe Flipper::Engine do
   let(:application) do
     Class.new(Rails::Application) do
+      config.load_defaults Rails::VERSION::STRING.to_f
       config.eager_load = false
       config.logger = ActiveSupport::Logger.new($stdout)
+      config.active_support.remove_deprecated_time_with_zone_name = false
     end.instance
   end
 
