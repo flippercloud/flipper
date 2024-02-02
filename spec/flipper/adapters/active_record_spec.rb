@@ -1,5 +1,4 @@
 SpecHelpers.silence { require 'flipper/adapters/active_record' }
-require 'active_support/core_ext/hash/indifferent_access'
 
 # Turn off migration logging for specs
 ActiveRecord::Migration.verbose = false
