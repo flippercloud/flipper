@@ -13,12 +13,14 @@ class Flipper::Adapters::ConnectionPool
   def initialize(pool = nil, &adapter_initializer)
     @pool = pool
     @adapter_initializer = adapter_initializer
+    @adapter_cache = {}
   end
 
   OPERATIONS.each do |method|
     define_method(method) do |*args|
       @pool.with do |connection|
-        @adapter_initializer.call(connection).public_send(method, *args)
+        @adapter_cache[connection] ||= @adapter_initializer.call(connection)
+        @adapter_cache[connection].public_send(method, *args)
       end
     end
   end
