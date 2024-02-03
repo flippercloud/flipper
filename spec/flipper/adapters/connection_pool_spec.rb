@@ -3,22 +3,31 @@ require "flipper/adapters/connection_pool"
 require "flipper-redis"
 
 RSpec.describe Flipper::Adapters::ConnectionPool do
-  let(:pool) do
-    ConnectionPool.new(size: 1, timeout: 5) do
-      Redis.new({url: ENV['REDIS_URL']}.compact)
-    end
-  end
-
-  subject do
-    described_class.new(pool) { |client| Flipper::Adapters::Redis.new(client) }
-  end
+  let(:redis_options) { {url: ENV['REDIS_URL']}.compact }
 
   before do
     skip_on_error(Redis::CannotConnectError, 'Redis not available') do
-      pool.with(&:flushdb)
+      Redis.new(redis_options).flushdb
     end
   end
 
+  context "with an existing pool" do
+    let(:pool) do
+      ConnectionPool.new(size: 1, timeout: 5) { Redis.new(redis_options) }
+    end
 
-  it_should_behave_like 'a flipper adapter'
+    subject do
+      described_class.new(pool) { |client| Flipper::Adapters::Redis.new(client) }
+    end
+
+    it_should_behave_like 'a flipper adapter'
+  end
+
+  context "with a new pool" do
+    subject do
+      described_class.new(size: 2) { Flipper::Adapters::Redis.new(Redis.new(redis_options)) }
+    end
+
+    it_should_behave_like 'a flipper adapter'
+  end
 end
