@@ -1,6 +1,20 @@
 module Flipper
   # Adding a module include so we have some hooks for stuff down the road
   module Adapter
+    OPERATIONS = [
+      :add,
+      :clear,
+      :disable,
+      :enable,
+      :export,
+      :features,
+      :get_all,
+      :get_multi,
+      :get,
+      :import,
+      :remove,
+    ]
+
     def self.included(base)
       base.extend(ClassMethods)
     end
