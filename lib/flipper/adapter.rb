@@ -73,6 +73,11 @@ module Flipper
     def name
       @name ||= self.class.name.split('::').last.split(/(?=[A-Z])/).join('_').downcase.to_sym
     end
+
+    # Return all nested adapter instances
+    def adapters
+      instance_variables.map { |iv| instance_variable_get(iv) }.select { |v| v.is_a?(Flipper::Adapter) }
+    end
   end
 end
 
