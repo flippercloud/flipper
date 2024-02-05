@@ -174,7 +174,7 @@ module Flipper
       end
 
       def setup_log(options)
-        set_option :logging_enabled, options, default: true, typecast: :boolean
+        set_option :logging_enabled, options, default: false, typecast: :boolean
         set_option :logger, options, from_env: false, default: -> {
           if logging_enabled
             Logger.new(STDOUT)
