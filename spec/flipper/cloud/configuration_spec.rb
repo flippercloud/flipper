@@ -20,7 +20,8 @@ RSpec.describe Flipper::Cloud::Configuration do
   it "can set instrumenter" do
     instrumenter = Object.new
     instance = described_class.new(required_options.merge(instrumenter: instrumenter))
-    expect(instance.instrumenter).to be(instrumenter)
+    expect(instance.instrumenter).to be_a(Flipper::Cloud::Telemetry::Instrumenter)
+    expect(instance.instrumenter.instrumenter).to be(instrumenter)
   end
 
   it "can set read_timeout" do

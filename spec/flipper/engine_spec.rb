@@ -236,7 +236,8 @@ RSpec.describe Flipper::Engine do
       application.initialize!
 
       expect(Flipper.instance).to be_a(Flipper::Cloud::DSL)
-      expect(Flipper.instance.instrumenter).to be(ActiveSupport::Notifications)
+      expect(Flipper.instance.instrumenter).to be_a(Flipper::Cloud::Telemetry::Instrumenter)
+      expect(Flipper.instance.instrumenter.instrumenter).to be(ActiveSupport::Notifications)
     end
 
     context "with CLOUD_SYNC_SECRET" do

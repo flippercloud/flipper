@@ -214,8 +214,7 @@ module Flipper
           Telemetry.instance_for(self)
         }
 
-        # This is alpha. Don't use this unless you are me. And you are not me.
-        set_option :telemetry_enabled, options, default: false, typecast: :boolean
+        set_option :telemetry_enabled, options, default: true, typecast: :boolean
         instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
         @instrumenter = if telemetry_enabled
           Telemetry::Instrumenter.new(self, instrumenter)
