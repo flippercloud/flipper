@@ -9,7 +9,9 @@ module Flipper
     # Path to the local Rails application's environment configuration.
     DEFAULT_REQUIRE = "./config/environment"
 
-    def initialize(stdout: $stdout, stderr: $stderr)
+    attr_accessor :shell
+
+    def initialize(stdout: $stdout, stderr: $stderr, shell: Bundler::Thor::Base.shell.new)
       super
 
       # Program is always flipper, no matter how it's invoked
@@ -17,6 +19,8 @@ module Flipper
       @require = ENV.fetch("FLIPPER_REQUIRE", DEFAULT_REQUIRE)
       @commands = {}
 
+      # Extend whatever shell to support output redirection
+      @shell = shell.extend(ShellOutput)
       shell.redirect(stdout: stdout, stderr: stderr)
 
       %w[enable disable].each do |action|
@@ -221,10 +225,6 @@ module Flipper
       @ui ||= Bundler::UI::Shell.new.tap do |ui|
         ui.shell = shell
       end
-    end
-
-    def shell
-      @shell ||= Bundler::Thor::Base.shell.new.extend(ShellOutput)
     end
 
     def indent(text, spaces)
