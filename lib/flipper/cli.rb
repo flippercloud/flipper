@@ -174,7 +174,7 @@ module Flipper
         end
 
         colorize("%-#{padding}s" % feature.key, [:BOLD, :WHITE]) + " is #{summary}"
-      end
+      end.join("\n")
     end
 
     def feature_details(feature)
