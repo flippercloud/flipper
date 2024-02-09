@@ -9,13 +9,15 @@ module Flipper
     # Path to the local Rails application's environment configuration.
     DEFAULT_REQUIRE = "./config/environment"
 
-    def initialize
+    def initialize(stdout: $stdout, stderr: $stderr)
       super
 
       # Program is always flipper, no matter how it's invoked
       @program_name = 'flipper'
       @require = ENV.fetch("FLIPPER_REQUIRE", DEFAULT_REQUIRE)
       @commands = {}
+
+      shell.redirect(stdout: stdout, stderr: stderr)
 
       %w[enable disable].each do |action|
         command action do |c|
@@ -40,10 +42,12 @@ module Flipper
             begin
               values << Flipper::Expression.build(JSON.parse(expression))
             rescue JSON::ParserError => e
-              warn "JSON parse error: #{e.message}"
+              ui.error "JSON parse error #{e.message}"
+              ui.trace(e)
               exit 1
             rescue ArgumentError => e
-              warn "Invalid expression: #{e.message}"
+              ui.error "Invalid expression: #{e.message}"
+              ui.trace(e)
               exit 1
             end
           end
@@ -57,7 +61,7 @@ module Flipper
               values.each { |value| f.send(action, value) }
             end
 
-            puts feature_details(f)
+            ui.info feature_details(f)
           end
         end
       end
@@ -65,21 +69,21 @@ module Flipper
       command 'list' do |c|
         c.description = "List defined features"
         c.action do
-          puts feature_summary(Flipper.features)
+          ui.info feature_summary(Flipper.features)
         end
       end
 
       command 'show' do |c|
         c.description = "Show a defined feature"
         c.action do |feature|
-          puts feature_details(Flipper.feature(feature))
+          ui.info feature_details(Flipper.feature(feature))
         end
       end
 
       command 'help' do |c|
         c.load_environment = false
         c.action do |command = nil|
-          puts command ? @commands[command].help : help
+          ui.info command ? @commands[command].help : help
         end
       end
 
@@ -89,7 +93,7 @@ module Flipper
 
       # Options available on all commands
       on_tail('-h', '--help', 'Print help message') do
-        puts help
+        ui.info help
         exit
       end
 
@@ -114,15 +118,15 @@ module Flipper
         load_environment! if @commands[command].load_environment
         @commands[command].run(args)
       else
-        puts help
+        ui.info help
 
         if command
-          warn "Unknown command: #{command}"
+          ui.error "Unknown command: #{command}"
           exit 1
         end
       end
     rescue OptionParser::InvalidOption => e
-      warn e.message
+      ui.error e.message
       exit 1
     end
 
@@ -138,7 +142,7 @@ module Flipper
       # Ensure all of flipper gets loaded if it hasn't already.
       require 'flipper'
     rescue LoadError => e
-      warn e.message
+      ui.error e.message
       exit 1
     end
 
@@ -210,15 +214,30 @@ module Flipper
     end
 
     def colorize(text, colors)
-      if defined?(Bundler)
-        Bundler.ui.add_color(text, *colors)
-      else
-        text
+      ui.add_color(text, *colors)
+    end
+
+    def ui
+      @ui ||= Bundler::UI::Shell.new.tap do |ui|
+        ui.shell = shell
       end
+    end
+
+    def shell
+      @shell ||= Bundler::Thor::Base.shell.new.extend(ShellOutput)
     end
 
     def indent(text, spaces)
       text.gsub(/^/, " " * spaces)
+    end
+
+    # Redirect the shell's output to the given stdout and stderr streams
+    module ShellOutput
+      attr_reader :stdout, :stderr
+
+      def redirect(stdout: $stdout, stderr: $stderr)
+        @stdout, @stderr = stdout, stderr
+      end
     end
 
     class Command < OptionParser
