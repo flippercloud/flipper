@@ -20,6 +20,8 @@ module Flipper
       instances.each {|_, instance| instance.stop }.clear
     end
 
+    MINIMUM_POLL_INTERVAL = 10
+
     def initialize(options = {})
       @thread = nil
       @pid = Process.pid
@@ -30,9 +32,9 @@ module Flipper
       @last_synced_at = Concurrent::AtomicFixnum.new(0)
       @adapter = Adapters::Memory.new(nil, threadsafe: true)
 
-      if @interval < 1
-        warn "Flipper::Cloud poll interval must be greater than or equal to 1 but was #{@interval}. Setting @interval to 1."
-        @interval = 1
+      if @interval < MINIMUM_POLL_INTERVAL
+        warn "Flipper::Cloud poll interval must be greater than or equal to #{MINIMUM_POLL_INTERVAL} but was #{@interval}. Setting @interval to #{MINIMUM_POLL_INTERVAL}."
+        @interval = MINIMUM_POLL_INTERVAL
       end
 
       @start_automatically = options.fetch(:start_automatically, true)
@@ -64,8 +66,7 @@ module Flipper
           # you can instrument these using poller.flipper
         end
 
-        sleep_interval = interval - (Concurrent.monotonic_time - start)
-        sleep sleep_interval if sleep_interval.positive?
+        sleep interval
       end
     end
 
