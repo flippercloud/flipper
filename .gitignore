@@ -22,3 +22,4 @@ log
 bin
 .DS_Store
 .tool-versions
+tags
