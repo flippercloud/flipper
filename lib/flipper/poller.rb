@@ -66,8 +66,7 @@ module Flipper
           # you can instrument these using poller.flipper
         end
 
-        sleep_interval = interval - (Concurrent.monotonic_time - start)
-        sleep sleep_interval if sleep_interval.positive?
+        sleep interval
       end
     end
 
