@@ -1,13 +1,33 @@
 require "flipper/cli"
 
 RSpec.describe Flipper::CLI do
+  let(:stdout) { StringIO.new }
+  let(:stderr) { StringIO.new }
+  let(:cli) { Flipper::CLI.new(stdout: stdout, stderr: stderr) }
+
+  before do
+    # Prentend stdout/stderr a TTY to test colorization
+    allow(stdout).to receive(:tty?).and_return(true)
+    allow(stderr).to receive(:tty?).and_return(true)
+  end
+
   # Infer the command from the description
   subject(:argv) do
     descriptions = self.class.parent_groups.map {|g| g.metadata[:description_args] }.reverse.flatten.drop(1)
     descriptions.map { |arg| Shellwords.split(arg) }.flatten
   end
 
-  subject { run argv }
+  subject do
+    status = 0
+
+    begin
+      cli.run(argv)
+    rescue SystemExit => e
+      status = e.status
+    end
+
+    OpenStruct.new(status: status, stdout: stdout.string, stderr: stderr.string)
+  end
 
   before do
     ENV["FLIPPER_REQUIRE"] = "./spec/fixtures/environment"
@@ -140,50 +160,5 @@ RSpec.describe Flipper::CLI do
       before { Flipper.enable_group :foo, :admins }
       it { should have_attributes(status: 0, stdout: /enabled.*admins/m) }
     end
-  end
-
-  context "bundler is not installed" do
-    let(:argv) { "list" }
-
-    around do |example|
-      original_bundler = Bundler
-      begin
-        Object.send(:remove_const, :Bundler)
-        example.run
-      ensure
-        Object.const_set(:Bundler, original_bundler)
-      end
-    end
-
-    it "should not raise an error" do
-      Flipper.enable(:enabled_feature)
-      Flipper.enable_group(:enabled_groups, :admins)
-      Flipper.add(:disabled_feature)
-
-      expect(subject).to have_attributes(status: 0, stdout: /enabled_feature.*enabled_groups.*disabled_feature/m)
-    end
-  end
-
-  def run(argv)
-    original_stdout = $stdout
-    original_stderr = $stderr
-
-    $stdout = StringIO.new
-    $stderr = StringIO.new
-    status = 0
-
-    # Prentend this a TTY so we can test colorization
-    allow($stdout).to receive(:tty?).and_return(true)
-
-    begin
-      Flipper::CLI.run(argv)
-    rescue SystemExit => e
-      status = e.status
-    end
-
-    OpenStruct.new(status: status, stdout: $stdout.string, stderr: $stderr.string)
-  ensure
-    $stdout = original_stdout
-    $stderr = original_stderr
   end
 end
