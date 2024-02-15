@@ -36,7 +36,8 @@ RSpec.describe Flipper::Cloud do
       expect(client.uri.host).to eq('www.flippercloud.io')
       expect(client.uri.path).to eq('/adapter')
       expect(client.headers["flipper-cloud-token"]).to eq(token)
-      expect(@instance.instrumenter).to be(Flipper::Instrumenters::Noop)
+      expect(@instance.instrumenter).to be_a(Flipper::Cloud::Telemetry::Instrumenter)
+      expect(@instance.instrumenter.instrumenter).to be(Flipper::Instrumenters::Noop)
     end
   end
 
@@ -62,7 +63,8 @@ RSpec.describe Flipper::Cloud do
   it 'can set instrumenter' do
     instrumenter = Flipper::Instrumenters::Memory.new
     instance = described_class.new(token: 'asdf', instrumenter: instrumenter)
-    expect(instance.instrumenter).to be(instrumenter)
+    expect(instance.instrumenter).to be_a(Flipper::Cloud::Telemetry::Instrumenter)
+    expect(instance.instrumenter.instrumenter).to be(instrumenter)
   end
 
   it 'allows wrapping adapter with another adapter like the instrumenter' do

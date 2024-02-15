@@ -174,7 +174,7 @@ module Flipper
       end
 
       def setup_log(options)
-        set_option :logging_enabled, options, default: true, typecast: :boolean
+        set_option :logging_enabled, options, default: false, typecast: :boolean
         set_option :logger, options, from_env: false, default: -> {
           if logging_enabled
             Logger.new(STDOUT)
@@ -214,8 +214,7 @@ module Flipper
           Telemetry.instance_for(self)
         }
 
-        # This is alpha. Don't use this unless you are me. And you are not me.
-        set_option :telemetry_enabled, options, default: false, typecast: :boolean
+        set_option :telemetry_enabled, options, default: true, typecast: :boolean
         instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
         @instrumenter = if telemetry_enabled
           Telemetry::Instrumenter.new(self, instrumenter)
