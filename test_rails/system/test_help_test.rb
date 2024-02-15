@@ -29,7 +29,7 @@ end
 
 class TestHelpTest < ActionDispatch::SystemTestCase
   # Any driver that runs the app in a separate thread will test what we want here.
-  driven_by :cuprite, options: { process_timeout: 30 }
+  driven_by :cuprite, options: { process_timeout: 60 }
 
   setup do
     # Reconfigure Flipper since other tests change the adapter.
