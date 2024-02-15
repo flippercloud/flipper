@@ -21,6 +21,13 @@ RSpec.describe Flipper::Adapters::ConnectionPool do
     end
 
     it_should_behave_like 'a flipper adapter'
+
+    it "should reset the cache when the pool is reloaded or shutdown" do
+      subject.get_all
+      expect { pool.reload { |_| } }.to change { subject.pool.instance_variable_get(:@instances).size }.from(1).to(0)
+      subject.get_all
+      expect { pool.shutdown { |_| } }.to change { subject.pool.instance_variable_get(:@instances).size }.from(1).to(0)
+    end
   end
 
   context "with a new pool" do

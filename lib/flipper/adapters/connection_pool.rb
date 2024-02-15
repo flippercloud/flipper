@@ -1,3 +1,28 @@
+require "connection_pool"
+require "observer"
+
+# Make ConnectionPool observable so we can reset the cache when the pool is reloaded or shutdown
+ConnectionPool.class_eval do
+  module ShutdownObservable
+    def reload(&block)
+      super(&block).tap do
+        changed
+        notify_observers
+      end
+    end
+
+    def shutdown(&block)
+      super(&block).tap do
+        changed
+        notify_observers
+      end
+    end
+  end
+
+  include Observable
+  prepend ShutdownObservable
+end
+
 # An adapter that uses ConnectionPool to manage connections.
 #
 # Usage:
@@ -21,6 +46,9 @@ class Flipper::Adapters::ConnectionPool
       @pool = pool
       @initializer = initializer
       @instances = {}
+
+      # Reset the cache when the pool is reloaded or shutdown
+      @pool.add_observer(self, :reset)
     end
 
     def with(&block)
@@ -28,7 +56,13 @@ class Flipper::Adapters::ConnectionPool
         yield @instances[resource] ||= @initializer.call(resource)
       end
     end
+
+    def reset
+      @instances.clear
+    end
   end
+
+  attr_reader :pool
 
   def initialize(options = {}, &adapter_initializer)
     @pool = options.is_a?(ConnectionPool) ? Wrapper.new(options, &adapter_initializer) : ConnectionPool.new(options, &adapter_initializer)
