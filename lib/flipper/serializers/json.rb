@@ -2,15 +2,13 @@ require "json"
 
 module Flipper
   module Serializers
-    module Json
-      module_function
-
-      def serialize(source)
+    class Json
+      def self.serialize(source)
         return if source.nil?
         JSON.generate(source)
       end
 
-      def deserialize(source)
+      def self.deserialize(source)
         return if source.nil?
         JSON.parse(source)
       end

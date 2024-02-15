@@ -3,8 +3,8 @@ require "flipper/serializers/json"
 require "flipper/serializers/gzip"
 
 module Flipper
-  module Typecast
-    TruthMap = {
+  class Typecast
+    TRUTH_MAP = {
       true    => true,
       1       => true,
       'true'  => true,
@@ -15,7 +15,7 @@ module Flipper
     #
     # Returns true or false.
     def self.to_boolean(value)
-      !!TruthMap[value]
+      !!TRUTH_MAP[value]
     end
 
     # Internal: Convert value to an integer.
