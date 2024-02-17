@@ -1,4 +1,3 @@
-require 'delegate'
 require 'flipper/api/v1/decorators/gate'
 
 module Flipper
