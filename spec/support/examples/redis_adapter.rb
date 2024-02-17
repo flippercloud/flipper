@@ -24,7 +24,7 @@ RSpec.shared_examples "a redis adapter" do
     Flipper.configuration = nil
     Flipper.instance = nil
 
-    silence { load 'flipper/adapters/redis_pool.rb' }
+    silence { load 'flipper/adapters/redis.rb' }
 
     expect(Flipper.adapter.adapter).to be_a(described_class)
   end
