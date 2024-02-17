@@ -59,7 +59,7 @@ module Flipper
 
       # Public: The set of known features.
       def features
-        with_connection(@feature_class) { @feature_class.all.map(&:key).to_set }
+        with_connection(@feature_class) { @feature_class.distinct.pluck(:key).to_set }
       end
 
       # Public: Adds a feature to the set of known features.
@@ -68,9 +68,9 @@ module Flipper
           # race condition, but add is only used by enable/disable which happen
           # super rarely, so it shouldn't matter in practice
           @feature_class.transaction do
-            unless @feature_class.where(key: feature.key).first
+            unless @feature_class.where(key: feature.key).exists?
               begin
-                @feature_class.create! { |f| f.key = feature.key }
+                @feature_class.create!(key: feature.key)
               rescue ::ActiveRecord::RecordNotUnique
               end
             end
