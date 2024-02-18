@@ -1,5 +1,8 @@
 module Flipper
   module Adapters
+    # Base class for caching adapters. Inherit from this and then override
+    # read_feature_keys, read_many_features, expire_features_cache
+    # and expire_feature_cache.
     class CacheBase
       include ::Flipper::Adapter
 
@@ -14,6 +17,9 @@ module Flipper
 
       # Public: The cache key where the set of known features is cached.
       attr_reader :features_cache_key
+
+      # Public: Alias expires_in to ttl for compatibility.
+      alias_method :expires_in, :ttl
 
       def initialize(adapter, cache, ttl = 300, prefix: nil)
         @adapter = adapter

@@ -7,8 +7,6 @@ module Flipper
     # Public: Adapter that wraps another adapter with the ability to cache
     # adapter calls in Redis.
     class RedisCache < CacheBase
-      alias_method :expires_in, :ttl
-
       # Public: Expire the cache for the set of known feature names.
       def expire_features_cache
         @cache.del(@features_cache_key)
