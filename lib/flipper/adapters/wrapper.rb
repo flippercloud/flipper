@@ -27,15 +27,27 @@ module Flipper
       end
 
       Methods.each do |method|
-        define_method(method) do |*args, **kwargs|
-          wrap(method, *args, **kwargs) { @adapter.public_send(method, *args, **kwargs) }
+        if RUBY_VERSION >= '3.0'
+          define_method(method) do |*args, **kwargs|
+            wrap(method, *args, **kwargs) { @adapter.public_send(method, *args, **kwargs) }
+          end
+        else
+          define_method(method) do |*args|
+            wrap(method, *args) { @adapter.public_send(method, *args) }
+          end
         end
       end
 
       # Override this method to customize the behavior of all delegated methods, and just yield to
       # the block to call the wrapped adapter.
-      def wrap(method, *args, **kwargs, &block)
-        block.call
+      if RUBY_VERSION >= '3.0'
+        def wrap(method, *args, **kwargs, &block)
+          block.call
+        end
+      else
+        def wrap(method, *args, &block)
+          block.call
+        end
       end
     end
   end
