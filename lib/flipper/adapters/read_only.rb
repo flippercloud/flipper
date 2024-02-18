@@ -3,8 +3,8 @@ require 'flipper'
 module Flipper
   module Adapters
     # Public: Adapter that wraps another adapter and raises for any writes.
-    class ReadOnly
-      include ::Flipper::Adapter
+    class ReadOnly < Wrapper
+      WriteMethods = %i[add remove clear enable disable]
 
       class WriteAttempted < Error
         def initialize(message = nil)
@@ -12,49 +12,16 @@ module Flipper
         end
       end
 
-      # Public
-      def initialize(adapter)
-        @adapter = adapter
-      end
-
-      def features
-        @adapter.features
-      end
-
       def read_only?
         true
       end
 
-      def get(feature)
-        @adapter.get(feature)
-      end
+      private
 
-      def get_multi(features)
-        @adapter.get_multi(features)
-      end
+      def wrap(method, *args, **kwargs)
+        raise WriteAttempted if WriteMethods.include?(method)
 
-      def get_all
-        @adapter.get_all
-      end
-
-      def add(_feature)
-        raise WriteAttempted
-      end
-
-      def remove(_feature)
-        raise WriteAttempted
-      end
-
-      def clear(_feature)
-        raise WriteAttempted
-      end
-
-      def enable(_feature, _gate, _thing)
-        raise WriteAttempted
-      end
-
-      def disable(_feature, _gate, _thing)
-        raise WriteAttempted
+        yield
       end
     end
   end

@@ -174,6 +174,7 @@ end
 
 require 'flipper/actor'
 require 'flipper/adapter'
+require 'flipper/adapters/wrapper'
 require 'flipper/adapters/memoizable'
 require 'flipper/adapters/memory'
 require 'flipper/adapters/strict'
