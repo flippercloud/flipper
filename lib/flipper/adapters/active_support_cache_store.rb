@@ -7,8 +7,6 @@ module Flipper
     # Public: Adapter that wraps another adapter with the ability to cache
     # adapter calls in ActiveSupport::ActiveSupportCacheStore caches.
     class ActiveSupportCacheStore < CacheBase
-      include ::Flipper::Adapter
-
       def initialize(adapter, cache, expires_in: 300, write_through: false, prefix: nil)
         super(adapter, cache, expires_in, prefix: prefix)
         @write_through = write_through
