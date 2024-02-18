@@ -458,7 +458,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
       logged_memory = Flipper::Adapters::OperationLogger.new(memory)
       cache = ActiveSupport::Cache::MemoryStore.new
       cache.clear
-      cached = Flipper::Adapters::ActiveSupportCacheStore.new(logged_memory, cache, expires_in: 10)
+      cached = Flipper::Adapters::ActiveSupportCacheStore.new(logged_memory, cache)
       logged_cached = Flipper::Adapters::OperationLogger.new(cached)
       memo = {}
       flipper = Flipper.new(logged_cached)
