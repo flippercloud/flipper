@@ -12,21 +12,11 @@ module Flipper
         @write_through = write_through
       end
 
-      # Public: Expire the cache for the set of known feature names.
-      def expire_features_cache
-        @cache.delete(@features_cache_key)
-      end
-
-      # Public: Expire the cache for a given feature.
-      def expire_feature_cache(key)
-        @cache.delete(feature_cache_key(key))
-      end
-
       def remove(feature)
         if @write_through
           result = @adapter.remove(feature)
           expire_features_cache
-          @cache.write(feature_cache_key(feature.key), default_config, expires_in: @ttl)
+          cache_write feature_cache_key(feature.key), default_config
           result
         else
           super
@@ -36,7 +26,7 @@ module Flipper
       def enable(feature, gate, thing)
         if @write_through
           result = @adapter.enable(feature, gate, thing)
-          @cache.write(feature_cache_key(feature.key), @adapter.get(feature), expires_in: @ttl)
+          cache_write feature_cache_key(feature.key), @adapter.get(feature)
           result
         else
           super
@@ -46,7 +36,7 @@ module Flipper
       def disable(feature, gate, thing)
         if @write_through
           result = @adapter.disable(feature, gate, thing)
-          @cache.write(feature_cache_key(feature.key), @adapter.get(feature), expires_in: @ttl)
+          cache_write feature_cache_key(feature.key), @adapter.get(feature)
           result
         else
           super
@@ -55,37 +45,20 @@ module Flipper
 
       private
 
-      # Private: Returns the Set of known feature keys.
-      def read_feature_keys
-        @cache.fetch(@features_cache_key, expires_in: @ttl) { @adapter.features }
+      def cache_fetch(key, &block)
+        @cache.fetch(key, expires_in: @ttl, &block)
       end
 
-      # Private: Given an array of features, attempts to read through cache in
-      # as few network calls as possible.
-      def read_many_features(features)
-        keys = features.map { |feature| feature_cache_key(feature.key) }
-        cache_result = @cache.read_multi(*keys)
-        uncached_features = features.reject { |feature| cache_result[feature_cache_key(feature)] }
-
-        if uncached_features.any?
-          response = @adapter.get_multi(uncached_features)
-          response.each do |key, value|
-            @cache.write(feature_cache_key(key), value, expires_in: @ttl)
-            cache_result[feature_cache_key(key)] = value
-          end
-        end
-
-        result = {}
-        features.each do |feature|
-          result[feature.key] = cache_result[feature_cache_key(feature.key)]
-        end
-        result
+      def cache_read_multi(keys)
+        @cache.read_multi(*keys)
       end
 
-      def read_feature(feature)
-        @cache.fetch(feature_cache_key(feature.key), expires_in: @ttl) do
-          @adapter.get(feature)
-        end
+      def cache_write(key, value)
+        @cache.write(key, value, expires_in: @ttl)
+      end
+
+      def cache_delete(key)
+        @cache.delete(key)
       end
     end
   end
