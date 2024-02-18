@@ -7,6 +7,10 @@ module Flipper
     # Public: Adapter that wraps another adapter with the ability to cache
     # adapter calls in Redis.
     class RedisCache < CacheBase
+      def initialize(adapter, cache, ttl = 3600, prefix: nil)
+        super
+      end
+
       private
 
       def cache_fetch(key, &block)

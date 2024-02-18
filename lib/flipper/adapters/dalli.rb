@@ -7,6 +7,10 @@ module Flipper
     # Public: Adapter that wraps another adapter with the ability to cache
     # adapter calls in Memcached using the Dalli gem.
     class Dalli < CacheBase
+      def initialize(adapter, cache, ttl = 0, prefix: nil)
+        super
+      end
+
       private
 
       def cache_fetch(key, &block)
