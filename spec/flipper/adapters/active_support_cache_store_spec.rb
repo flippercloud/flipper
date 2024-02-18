@@ -8,7 +8,7 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
   end
   let(:cache) { ActiveSupport::Cache::MemoryStore.new }
   let(:write_through) { false }
-  let(:adapter) { described_class.new(memory_adapter, cache, expires_in: 10.seconds, write_through: write_through) }
+  let(:adapter) { described_class.new(memory_adapter, cache, expires_in: 10, write_through: write_through) }
   let(:flipper) { Flipper.new(adapter) }
 
   subject { adapter }
@@ -20,7 +20,7 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
   it_should_behave_like 'a flipper adapter'
 
   it "knows ttl" do
-    expect(adapter.ttl).to eq(10.seconds)
+    expect(adapter.ttl).to eq(10)
   end
 
   it "knows features_cache_key" do
@@ -52,7 +52,7 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
   end
 
   context "when using a prefix" do
-    let(:adapter) { described_class.new(memory_adapter, cache, expires_in: 10.seconds, prefix: "foo/") }
+    let(:adapter) { described_class.new(memory_adapter, cache, expires_in: 10, prefix: "foo/") }
     it_should_behave_like 'a flipper adapter'
 
     it "knows features_cache_key" do

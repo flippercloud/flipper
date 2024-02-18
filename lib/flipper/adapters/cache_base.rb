@@ -6,9 +6,6 @@ module Flipper
       # Public: The adapter being cached.
       attr_reader :adapter
 
-      # Public: The name of the adapter.
-      attr_reader :name
-
       # Public: The ActiveSupport::Cache::Store to cache with.
       attr_reader :cache
 
