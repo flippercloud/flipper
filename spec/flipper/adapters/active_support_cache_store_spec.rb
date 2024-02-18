@@ -39,7 +39,7 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
 
   it "knows default when no ttl or expires_in provided" do
     adapter = described_class.new(memory_adapter, cache)
-    expect(adapter.ttl).to eq(300)
+    expect(adapter.ttl).to be(nil)
   end
 
   it "knows features_cache_key" do
