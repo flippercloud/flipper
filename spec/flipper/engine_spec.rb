@@ -53,7 +53,7 @@ RSpec.describe Flipper::Engine do
       ENV['FLIPPER_STRICT'] = 'false'
       subject
       expect(config.strict).to eq(false)
-      expect(adapter).to be_instance_of(Flipper::Adapters::Memory)
+      expect(adapter).not_to be_instance_of(Flipper::Adapters::Strict)
     end
 
     [true, :raise, :warn].each do |value|
@@ -69,7 +69,7 @@ RSpec.describe Flipper::Engine do
       initializer { config.strict = false }
       subject
       expect(config.strict).to eq(false)
-      expect(adapter).to be_instance_of(Flipper::Adapters::Memory)
+      expect(adapter).not_to be_instance_of(Flipper::Adapters::Strict)
     end
 
     it "defaults to strict=:warn in RAILS_ENV=development" do
@@ -85,7 +85,7 @@ RSpec.describe Flipper::Engine do
         expect(Rails.env).to eq(env)
         subject
         expect(config.strict).to eq(false)
-        expect(adapter).to be_instance_of(Flipper::Adapters::Memory)
+        expect(adapter).not_to be_instance_of(Flipper::Adapters::Strict)
       end
     end
 
@@ -334,6 +334,33 @@ RSpec.describe Flipper::Engine do
     subject
     require 'active_record'
     expect(ActiveRecord::Base.ancestors).to include(Flipper::Model::ActiveRecord)
+  end
+
+  describe "config.actor_limit" do
+    let(:adapter) do
+      application.initialize!
+      Flipper.adapter.adapter.adapter
+    end
+
+    it "defaults to 100" do
+      expect(adapter).to be_instance_of(Flipper::Adapters::ActorLimit)
+      expect(adapter.limit).to eq(100)
+    end
+
+    it "can be set from FLIPPER_ACTOR_LIMIT env" do
+      ENV["FLIPPER_ACTOR_LIMIT"] = "500"
+      expect(adapter.limit).to eq(500)
+    end
+
+    it "can be set from an initializer" do
+      initializer { config.actor_limit = 99 }
+      expect(adapter.limit).to eq(99)
+    end
+
+    it "can be disabled from an initializer" do
+      initializer { config.actor_limit = false }
+      expect(adapter).not_to be_instance_of(Flipper::Adapters::ActorLimit)
+    end
   end
 
   # Add app initializer in the same order as config/initializers/*

@@ -3,6 +3,8 @@ module Flipper
     class ActorLimit < Wrapper
       LimitExceeded = Class.new(Flipper::Error)
 
+      attr_reader :limit
+
       def initialize(adapter, limit = 100)
         super(adapter)
         @limit = limit
