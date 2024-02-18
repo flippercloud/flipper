@@ -45,13 +45,6 @@ module Flipper
         end
       end
 
-      # Public: Generate the cache key for a given feature.
-      #
-      # key - The String or Symbol feature key.
-      def feature_cache_key(key)
-        "#{@namespace}/feature/#{key}"
-      end
-
       # Public: Expire the cache for the set of known feature names.
       def expire_features_cache
         @cache.delete(@features_cache_key)
