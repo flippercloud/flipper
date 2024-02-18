@@ -7,10 +7,10 @@ end
 
 Gem::Specification.new do |gem|
   gem.authors       = ['John Nunemaker']
-  gem.email         = ['nunemaker@gmail.com']
-  gem.summary       = 'Moneta adapter for Flipper'
+  gem.email         = 'support@flippercloud.io'
+  gem.summary       = 'Moneta feature flag adapter for Flipper'
   gem.license       = 'MIT'
-  gem.homepage      = 'https://github.com/jnunemaker/flipper'
+  gem.homepage      = 'https://www.flippercloud.io/docs/adapters/moneta'
 
   gem.files         = `git ls-files`.split("\n").select(&flipper_moneta_files) + ['lib/flipper/version.rb']
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n").select(&flipper_moneta_files)
@@ -19,5 +19,5 @@ Gem::Specification.new do |gem|
   gem.version       = Flipper::VERSION
 
   gem.add_dependency 'flipper', "~> #{Flipper::VERSION}"
-  gem.add_dependency 'moneta', '>= 0.7.0', '< 1.2'
+  gem.add_dependency 'moneta', '>= 0.7.0', '< 2'
 end

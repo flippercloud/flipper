@@ -20,6 +20,14 @@ module Flipper
       #   # using with preload specific features
       #   use Flipper::Middleware::Memoizer, preload: [:stats, :search, :some_feature]
       #
+      #   # using with preload block that returns true/false
+      #   use Flipper::Middleware::Memoizer, preload: ->(request) { !request.path.start_with?('/assets') }
+      #
+      #   # using with preload block that returns specific features
+      #   use Flipper::Middleware::Memoizer, preload: ->(request) {
+      #     request.path.starts_with?('/admin') ? [:stats, :search] : false
+      #   }
+      #
       def initialize(app, opts = {})
         if opts.is_a?(Flipper::DSL) || opts.is_a?(Proc)
           raise 'Flipper::Middleware::Memoizer no longer initializes with a flipper instance or block. Read more at: https://git.io/vSo31.'
@@ -34,7 +42,7 @@ module Flipper
         request = Rack::Request.new(env)
 
         if memoize?(request)
-          memoized_call(env)
+          memoized_call(request)
         else
           @app.call(env)
         end
@@ -52,26 +60,34 @@ module Flipper
         end
       end
 
-      def memoized_call(env)
-        reset_on_body_close = false
-        flipper = env.fetch(@env_key) { Flipper }
+      def memoized_call(request)
+        flipper = request.env.fetch(@env_key) { Flipper }
 
         # Already memoizing. This instance does not need to do anything.
         if flipper.memoizing?
-          warn "Flipper::Middleware::Memoizer appears to be running twice. Read how to resolve this at https://github.com/jnunemaker/flipper/pull/523"
-          return @app.call(env)
+          warn "Flipper::Middleware::Memoizer appears to be running twice. Read how to resolve this at https://github.com/flippercloud/flipper/pull/523"
+          return @app.call(request.env)
         end
 
-        flipper.memoize = true
+        begin
+          flipper.memoize = true
 
-        case @opts[:preload]
-        when true then flipper.preload_all
-        when Array then flipper.preload(@opts[:preload])
+          # Preloading is pointless without memoizing.
+          preload = if @opts[:preload].respond_to?(:call)
+            @opts[:preload].call(request)
+          else
+            @opts[:preload]
+          end
+
+          case preload
+          when true then flipper.preload_all
+          when Array then flipper.preload(preload)
+          end
+
+          @app.call(request.env)
+        ensure
+          flipper.memoize = false
         end
-
-        @app.call(env)
-      ensure
-        flipper.memoize = false if flipper
       end
     end
   end

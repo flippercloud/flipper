@@ -5,11 +5,16 @@ require_relative "./cloud_setup"
 require 'bundler/setup'
 require 'flipper/cloud'
 
-pids = 5.times.map do |n|
+puts Process.pid
+
+# Make a call in the parent process so we can detect forking.
+Flipper.enabled?(:stats)
+
+pids = 2.times.map do |n|
   fork {
     # Check every second to see if the feature is enabled
     threads = []
-    5.times do
+    2.times do
       threads << Thread.new do
         loop do
           sleep rand

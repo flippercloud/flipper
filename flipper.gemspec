@@ -6,7 +6,7 @@ plugin_files = []
 plugin_test_files = []
 
 Dir['flipper-*.gemspec'].map do |gemspec|
-  spec = eval(File.read(gemspec))
+  spec = Gem::Specification.load(gemspec)
   plugin_files << spec.files
   plugin_test_files << spec.files
 end
@@ -22,11 +22,13 @@ ignored_test_files.flatten!.uniq!
 
 Gem::Specification.new do |gem|
   gem.authors       = ['John Nunemaker']
-  gem.email         = ['nunemaker@gmail.com']
-  gem.summary       = 'Feature flipper for ANYTHING'
-  gem.homepage      = 'https://github.com/jnunemaker/flipper'
+  gem.email         = 'support@flippercloud.io'
+  gem.summary       = 'Beautiful, performant feature flags for Ruby and Rails.'
+  gem.homepage      = 'https://www.flippercloud.io/docs'
   gem.license       = 'MIT'
 
+  gem.bindir = "exe"
+  gem.executables   = `git ls-files -- exe/*`.split("\n").map { |f| File.basename(f) }
   gem.files         = `git ls-files`.split("\n") - ignored_files + ['lib/flipper/version.rb']
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n") - ignored_test_files
   gem.name          = 'flipper'
@@ -35,4 +37,6 @@ Gem::Specification.new do |gem|
   gem.metadata      = Flipper::METADATA
 
   gem.add_dependency 'concurrent-ruby', '< 2'
+
+  gem.required_ruby_version = ">= #{Flipper::REQUIRED_RUBY_VERSION}"
 end

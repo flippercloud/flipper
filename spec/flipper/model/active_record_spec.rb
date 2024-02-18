@@ -30,6 +30,19 @@ RSpec.describe Flipper::Model::ActiveRecord do
     include Flipper::Model::ActiveRecord
   end
 
+  class Admin < User
+  end
+
+  describe "flipper_id" do
+    it "returns class name and id" do
+      expect(User.new(id: 1).flipper_id).to eq("User;1")
+    end
+
+    it "uses base class name" do
+      expect(Admin.new(id: 2).flipper_id).to eq("User;2")
+    end
+  end
+
   describe "flipper_properties" do
     subject { User.create!(name: "Test", age: 22, is_confirmed: true) }
 

@@ -7,13 +7,9 @@ module Flipper
 
       FEATURES_KEY = :flipper_features
 
-      # Public: The name of the adapter.
-      attr_reader :name
-
       # Public
       def initialize(moneta)
         @moneta = moneta
-        @name = :moneta
       end
 
       # Public:  The set of known features
@@ -51,7 +47,7 @@ module Flipper
       # Public: Enables a gate for a given thing.
       #
       # feature - The Flipper::Feature for the gate.
-      # gate - The Flipper::Gate to disable.
+      # gate - The Flipper::Gate to enable.
       # thing - The Flipper::Type being enabled for the gate.
       #
       # Returns true.

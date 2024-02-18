@@ -228,6 +228,10 @@ RSpec.describe Flipper do
       expect(described_class.memoizing?).to eq(described_class.adapter.memoizing?)
     end
 
+    it 'delegates read_only? to instance' do
+      expect(described_class.read_only?).to eq(described_class.adapter.read_only?)
+    end
+
     it 'delegates sync stuff to instance and does nothing' do
       expect(described_class.sync).to be(nil)
       expect(described_class.sync_secret).to be(nil)
@@ -237,7 +241,7 @@ RSpec.describe Flipper do
       stub = stub_request(:get, "https://www.flippercloud.io/adapter/features?exclude_gate_names=true").
         with({
           headers: {
-            'Flipper-Cloud-Token'=>'asdf',
+            'flipper-cloud-token'=>'asdf',
           },
         }).to_return(status: 200, body: '{"features": {}}', headers: {})
       cloud_configuration = Flipper::Cloud::Configuration.new({

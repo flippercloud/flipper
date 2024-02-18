@@ -3,9 +3,13 @@ if ENV["FLIPPER_CLOUD_TOKEN"].nil? || ENV["FLIPPER_CLOUD_TOKEN"].empty?
   exit
 end
 
-suffix_rails = ENV["RAILS_VERSION"].split(".").take(2).join
-suffix_ruby = RUBY_VERSION.split(".").take(2).join
-matrix_key = "FLIPPER_CLOUD_TOKEN_#{suffix_ruby}_#{suffix_rails}"
+matrix_key = if ENV["CI"]
+  suffix_rails = ENV["RAILS_VERSION"].split(".").take(2).join
+  suffix_ruby = RUBY_VERSION.split(".").take(2).join
+  "FLIPPER_CLOUD_TOKEN_#{suffix_ruby}_#{suffix_rails}"
+else
+  "FLIPPER_CLOUD_TOKEN"
+end
 
 if matrix_token = ENV[matrix_key]
   puts "Using #{matrix_key} for FLIPPER_CLOUD_TOKEN"

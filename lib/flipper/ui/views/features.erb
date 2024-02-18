@@ -3,7 +3,7 @@
     <% if Flipper::UI.configuration.fun %>
       <h4>But I've got a blank space baby...</h4>
       <p>And I'll flip your features.</p>
-      <%- if !Flipper::UI.configuration.read_only && Flipper::UI.configuration.feature_creation_enabled -%>
+      <%- if write_allowed? && Flipper::UI.configuration.feature_creation_enabled -%>
         <p>
           <a class="btn btn-primary btn-sm" href="<%= script_name %>/features/new">Add Feature</a>
         </p>
@@ -11,13 +11,13 @@
     <% else %>
       <h4>Getting Started</h4>
       <p class="mb-1">You have not added any features to configure yet.</p>
-      <%- if !Flipper::UI.configuration.read_only && Flipper::UI.configuration.feature_creation_enabled -%>
+      <%- if write_allowed? && Flipper::UI.configuration.feature_creation_enabled -%>
         <p class="mt-2">
           <a class="btn btn-primary btn-sm" href="<%= script_name %>/features/new">Add Feature</a>
         </p>
       <% else %>
         <p>
-          Check the <a href="https://github.com/jnunemaker/flipper#examples">examples</a> to
+          Check the <a href="https://github.com/flippercloud/flipper#examples">examples</a> to
           learn how to add one.
         </p>
       <%- end -%>
@@ -26,7 +26,7 @@
 <% else %>
   <div class="card">
     <div class="card-header">
-      <%- if !Flipper::UI.configuration.read_only && Flipper::UI.configuration.feature_creation_enabled -%>
+      <%- if write_allowed? && Flipper::UI.configuration.feature_creation_enabled -%>
         <div class="float-right">
           <a class="btn btn-primary btn-sm" href="<%= script_name %>/features/new">Add Feature</a>
         </div>

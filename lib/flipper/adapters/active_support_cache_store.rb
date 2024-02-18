@@ -11,7 +11,6 @@ module Flipper
 
       def initialize(adapter, cache, expires_in: 300, write_through: false, prefix: nil)
         super(adapter, cache, expires_in, prefix: prefix)
-        @name = :active_support_cache_store
         @write_through = write_through
       end
 

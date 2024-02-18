@@ -24,6 +24,10 @@ module Flipper
       end
     end
 
+    def read_only?
+      false
+    end
+
     # Public: Get all features and gate values in one call. Defaults to one call
     # to features and another to get_multi. Feel free to override per adapter to
     # make this more efficient.
@@ -63,6 +67,11 @@ module Flipper
     # Public: Default config for a feature's gate values.
     def default_config
       self.class.default_config
+    end
+
+    # Public: default name of the adapter
+    def name
+      @name ||= self.class.name.split('::').last.split(/(?=[A-Z])/).join('_').downcase.to_sym
     end
   end
 end

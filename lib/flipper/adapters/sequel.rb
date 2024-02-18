@@ -31,15 +31,12 @@ module Flipper
 
       VALUE_TO_TEXT_WARNING = <<-EOS
         Your database needs migrated to use the latest Flipper features.
-        See https://github.com/jnunemaker/flipper/issues/557
+        See https://github.com/flippercloud/flipper/issues/557
       EOS
-
-      # Public: The name of the adapter.
-      attr_reader :name
 
       # Public: Initialize a new Sequel adapter instance.
       #
-      # name - The Symbol name for this adapter. Optional (default :active_record)
+      # name - The Symbol name for this adapter. Optional (default :sequel)
       # feature_class - The AR class responsible for the features table.
       # gate_class - The AR class responsible for the gates table.
       #
@@ -107,9 +104,9 @@ module Flipper
       def get_all
         feature_table = @feature_class.table_name.to_sym
         gate_table = @gate_class.table_name.to_sym
-        features_sql = @feature_class.select(:key.qualify(feature_table).as(:feature_key))
-            .select_append(:key.qualify(gate_table))
-            .select_append(:value.qualify(gate_table))
+        features_sql = @feature_class.select(::Sequel.qualify(feature_table, :key).as(:feature_key))
+            .select_append(::Sequel.qualify(gate_table, :key))
+            .select_append(::Sequel.qualify(gate_table, :value))
             .left_join(@gate_class.table_name.to_sym, feature_key: :key)
             .sql
 
@@ -126,8 +123,8 @@ module Flipper
       # Public: Enables a gate for a given thing.
       #
       # feature - The Flipper::Feature for the gate.
-      # gate - The Flipper::Gate to disable.
-      # thing - The Flipper::Type being disabled for the gate.
+      # gate - The Flipper::Gate to enable.
+      # thing - The Flipper::Type being enabled for the gate.
       #
       # Returns true.
       def enable(feature, gate, thing)
@@ -209,7 +206,7 @@ module Flipper
         {
           feature_key: feature.key.to_s,
           key: gate.key.to_s,
-          value: json ? JSON.dump(thing.value) : thing.value.to_s,
+          value: json ? Typecast.to_json(thing.value) : thing.value.to_s,
         }
       end
 
@@ -230,7 +227,7 @@ module Flipper
               db_gates.select { |db_gate| db_gate.key == gate.key.to_s }.map(&:value).to_set
             when :json
               if detected_db_gate = db_gates.detect { |db_gate| db_gate.key == gate.key.to_s }
-                JSON.parse(detected_db_gate.value)
+                Typecast.from_json(detected_db_gate.value)
               end
             else
               unsupported_data_type gate.data_type
@@ -239,7 +236,7 @@ module Flipper
       end
 
       # Check if value column is text instead of string
-      # See https://github.com/jnunemaker/flipper/pull/692
+      # See https://github.com/flippercloud/flipper/pull/692
       def value_not_text?
         "text".casecmp(@gate_class.db_schema[:value][:db_type]) != 0
       end

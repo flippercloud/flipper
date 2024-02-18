@@ -10,6 +10,7 @@ require 'bundler'
 Bundler.setup(:default)
 
 require 'debug'
+require 'statsd'
 require 'webmock/rspec'
 WebMock.disable_net_connect!(allow_localhost: true)
 
@@ -17,11 +18,16 @@ require 'flipper'
 require 'flipper/api'
 require 'flipper/spec/shared_adapter_specs'
 require 'flipper/ui'
+require 'flipper/test_help'
 
 Dir[FlipperRoot.join('spec/support/**/*.rb')].sort.each { |f| require f }
 
+# Disable telemetry logging in specs.
+ENV["FLIPPER_CLOUD_LOGGING_ENABLED"] = "false"
+
 RSpec.configure do |config|
   config.before(:example) do
+    Flipper::Cloud::Telemetry.reset if defined?(Flipper::Cloud::Telemetry) && Flipper::Cloud::Telemetry.respond_to?(:reset)
     Flipper::Poller.reset if defined?(Flipper::Poller)
     Flipper.unregister_groups
     Flipper.configuration = nil
@@ -89,17 +95,5 @@ RSpec.shared_examples_for 'a DSL feature' do
     expect do
       dsl.send(method_name, Object.new)
     end.to raise_error(ArgumentError, /must be a String or Symbol/)
-  end
-end
-
-RSpec.shared_examples_for 'a DSL boolean method' do
-  it 'returns boolean with value set' do
-    result = subject.send(method_name, true)
-    expect(result).to be_instance_of(Flipper::Types::Boolean)
-    expect(result.value).to be(true)
-
-    result = subject.send(method_name, false)
-    expect(result).to be_instance_of(Flipper::Types::Boolean)
-    expect(result.value).to be(false)
   end
 end

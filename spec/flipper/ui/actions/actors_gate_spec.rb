@@ -68,7 +68,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
 
       it 'redirects back to feature' do
         expect(last_response.status).to be(302)
-        expect(last_response.headers['Location']).to eq('/features/search')
+        expect(last_response.headers['location']).to eq('/features/search')
       end
 
       context "when feature name contains space" do
@@ -84,7 +84,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
 
         it "redirects back to feature" do
           expect(last_response.status).to be(302)
-          expect(last_response.headers['Location']).to eq('/features/sp%20ace')
+          expect(last_response.headers['location']).to eq('/features/sp%20ace')
         end
       end
 
@@ -114,7 +114,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
 
           it 'redirects back to feature' do
             expect(last_response.status).to be(302)
-            expect(last_response.headers['Location']).to eq('/features/search/actors?error=%22%22%20is%20not%20a%20valid%20actor%20value.')
+            expect(last_response.headers['location']).to eq('/features/search/actors?error=%22%22%20is%20not%20a%20valid%20actor%20value.')
           end
         end
 
@@ -123,9 +123,26 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
 
           it 'redirects back to feature' do
             expect(last_response.status).to be(302)
-            expect(last_response.headers['Location']).to eq('/features/search/actors?error=%22%22%20is%20not%20a%20valid%20actor%20value.')
+            expect(last_response.headers['location']).to eq('/features/search/actors?error=%22%22%20is%20not%20a%20valid%20actor%20value.')
           end
         end
+      end
+    end
+
+    context "when a readonly adapter is configured" do
+      let(:value) { 'User;6' }
+
+      before do
+        allow(flipper).to receive(:read_only?) { true }
+      end
+
+      it "does not allow an actor to be added" do
+        post 'features/search/actors',
+           { 'value' => value, 'operation' => 'enable', 'authenticity_token' => token },
+           'rack.session' => session
+
+        expect(flipper[:search].actors_value).not_to include('User;6')
+        expect(last_response.body).to include("The UI is currently in read only mode.")
       end
     end
 
@@ -158,7 +175,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
 
       it 'redirects back to feature' do
         expect(last_response.status).to be(302)
-        expect(last_response.headers['Location']).to eq('/features/search')
+        expect(last_response.headers['location']).to eq('/features/search')
       end
 
       context 'value contains whitespace' do

@@ -9,11 +9,6 @@ module Flipper
     class RedisCache < CacheBase
       alias_method :expires_in, :ttl
 
-      def initialize(adapter, cache, ttl = 300, prefix: nil)
-        super
-        @name = :redis_cache
-      end
-
       # Public: Expire the cache for the set of known feature names.
       def expire_features_cache
         @cache.del(@features_cache_key)

@@ -22,7 +22,7 @@ module Flipper
       env_key = options.fetch(:env_key, 'flipper')
       rack_protection_options = options.fetch(:rack_protection, use: :authenticity_token)
 
-      app = ->(_) { [200, { 'Content-Type' => 'text/html' }, ['']] }
+      app = ->(_) { [200, { Rack::CONTENT_TYPE => 'text/html' }, ['']] }
       builder = Rack::Builder.new
       yield builder if block_given?
       builder.use Rack::Protection, rack_protection_options

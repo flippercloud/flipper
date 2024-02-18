@@ -10,15 +10,11 @@ module Flipper
     class PStore
       include ::Flipper::Adapter
 
-      # Public: The name of the adapter.
-      attr_reader :name
-
       # Public: The path to where the file is stored.
       attr_reader :path
 
       # Public
       def initialize(path = 'flipper.pstore', thread_safe = true)
-        @name = :pstore
         @path = path
         @store = ::PStore.new(path, thread_safe)
         @features_key = :flipper_features
@@ -89,7 +85,7 @@ module Flipper
           when :set
             set_add key(feature, gate), thing.value.to_s
           when :json
-            write key(feature, gate), JSON.dump(thing.value)
+            write key(feature, gate), Typecast.to_json(thing.value)
           else
             raise "#{gate} is not supported by this adapter yet"
           end
@@ -165,7 +161,7 @@ module Flipper
               set_members key
             when :json
               value = read(key)
-              JSON.parse(value) if value
+              Typecast.from_json(value)
             else
               raise "#{gate} is not supported by this adapter yet"
             end

@@ -6,10 +6,13 @@ require 'benchmark/ips'
 
 flipper = Flipper.new(Flipper::Adapters::ActiveRecord.new)
 
-2000.times do |i|
-  flipper.enable_actor :foo, Flipper::Actor.new("User;#{i}")
+10.times do |n|
+  2000.times do |i|
+    flipper.enable_actor 'feature' + n.to_s, Flipper::Actor.new("User;#{i}")
+  end
 end
 
 Benchmark.ips do |x|
   x.report("get_all") { flipper.preload_all }
+  x.report("features") { flipper.features }
 end

@@ -4,7 +4,6 @@ require "flipper/middleware/memoizer"
 require "flipper/cloud/configuration"
 require "flipper/cloud/dsl"
 require "flipper/cloud/middleware"
-require "flipper/cloud/engine" if defined?(Rails::Engine)
 
 module Flipper
   module Cloud
@@ -25,7 +24,7 @@ module Flipper
       env_key = options.fetch(:env_key, 'flipper')
       memoizer_options = options.fetch(:memoizer_options, {})
 
-      app = ->(_) { [404, { 'Content-Type'.freeze => 'application/json'.freeze }, ['{}'.freeze]] }
+      app = ->(_) { [404, { Rack::CONTENT_TYPE => 'application/json'.freeze }, ['{}'.freeze]] }
       builder = Rack::Builder.new
       yield builder if block_given?
       builder.use Flipper::Middleware::SetupEnv, flipper, env_key: env_key
@@ -40,13 +39,10 @@ module Flipper
 
     # Private: Configure Flipper to use Cloud by default
     def self.set_default
-      Flipper.configure do |config|
-        config.default do
-          if ENV["FLIPPER_CLOUD_TOKEN"]
+      if ENV["FLIPPER_CLOUD_TOKEN"]
+        Flipper.configure do |config|
+          config.default do
             self.new(local_adapter: config.adapter)
-          else
-            warn "Missing FLIPPER_CLOUD_TOKEN environment variable. Disabling Flipper::Cloud."
-            Flipper.new(config.adapter)
           end
         end
       end

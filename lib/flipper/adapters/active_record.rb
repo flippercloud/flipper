@@ -34,11 +34,8 @@ module Flipper
 
       VALUE_TO_TEXT_WARNING = <<-EOS
         Your database needs migrated to use the latest Flipper features.
-        See https://github.com/jnunemaker/flipper/issues/557
+        Run `rails generate flipper:update` and `rails db:migrate`.
       EOS
-
-      # Public: The name of the adapter.
-      attr_reader :name
 
       # Public: Initialize a new ActiveRecord adapter instance.
       #
@@ -62,7 +59,7 @@ module Flipper
 
       # Public: The set of known features.
       def features
-        with_connection(@feature_class) { @feature_class.all.map(&:key).to_set }
+        with_connection(@feature_class) { @feature_class.distinct.pluck(:key).to_set }
       end
 
       # Public: Adds a feature to the set of known features.
@@ -71,9 +68,9 @@ module Flipper
           # race condition, but add is only used by enable/disable which happen
           # super rarely, so it shouldn't matter in practice
           @feature_class.transaction do
-            unless @feature_class.where(key: feature.key).first
+            unless @feature_class.where(key: feature.key).exists?
               begin
-                @feature_class.create! { |f| f.key = feature.key }
+                @feature_class.create!(key: feature.key)
               rescue ::ActiveRecord::RecordNotUnique
               end
             end
@@ -224,11 +221,11 @@ module Flipper
               @gate_class.create! do |g|
                 g.feature_key = feature.key
                 g.key = gate.key
-                g.value = json_feature ? JSON.dump(thing.value) : thing.value.to_s
+                g.value = json_feature ? Typecast.to_json(thing.value) : thing.value.to_s
               end
             rescue ::ActiveRecord::RecordNotUnique
               # assume this happened concurrently with the same thing and its fine
-              # see https://github.com/jnunemaker/flipper/issues/544
+              # see https://github.com/flippercloud/flipper/issues/544
             end
           end
         end
@@ -266,7 +263,7 @@ module Flipper
               end
             when :json
               if row = gates.detect { |key, value| !key.nil? && key.to_sym == gate.key }
-                JSON.parse(row.last)
+                Typecast.from_json(row.last)
               end
             when :set
               gates.select { |key, value| !key.nil? && key.to_sym == gate.key }.map(&:last).to_set
@@ -278,9 +275,12 @@ module Flipper
       end
 
       # Check if value column is text instead of string
-      # See https://github.com/jnunemaker/flipper/pull/692
+      # See https://github.com/flippercloud/flipper/pull/692
       def value_not_text?
         @gate_class.column_for_attribute(:value).type != :text
+      rescue ::ActiveRecord::ActiveRecordError => error
+        # If the table doesn't exist, the column doesn't exist either
+        warn "#{error.message}. You likely need to run `rails g flipper:active_record` and/or `rails db:migrate`."
       end
 
       def with_connection(model = @feature_class, &block)

@@ -7,11 +7,6 @@ module Flipper
     # Public: Adapter that wraps another adapter with the ability to cache
     # adapter calls in Memcached using the Dalli gem.
     class Dalli < CacheBase
-      def initialize(adapter, cache, ttl = 300, prefix: nil)
-        super
-        @name = :dalli
-      end
-
       # Public: Expire the cache for the set of known feature names.
       def expire_features_cache
         @cache.delete(@features_cache_key)

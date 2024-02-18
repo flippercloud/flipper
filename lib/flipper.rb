@@ -65,7 +65,7 @@ module Flipper
                  :enable_percentage_of_time, :disable_percentage_of_time,
                  :features, :feature, :[], :preload, :preload_all,
                  :adapter, :add, :exist?, :remove, :import, :export,
-                 :memoize=, :memoizing?,
+                 :memoize=, :memoizing?, :read_only?,
                  :sync, :sync_secret # For Flipper::Cloud. Will error for OSS Flipper.
 
   def any(*args)
@@ -176,7 +176,9 @@ require 'flipper/actor'
 require 'flipper/adapter'
 require 'flipper/adapters/memoizable'
 require 'flipper/adapters/memory'
+require 'flipper/adapters/strict'
 require 'flipper/adapters/instrumented'
+require 'flipper/adapter_builder'
 require 'flipper/configuration'
 require 'flipper/dsl'
 require 'flipper/errors'
@@ -200,4 +202,4 @@ require 'flipper/types/percentage_of_time'
 require 'flipper/typecast'
 require 'flipper/version'
 
-require "flipper/railtie" if defined?(Rails::Railtie)
+require "flipper/engine" if defined?(Rails)

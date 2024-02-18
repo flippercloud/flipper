@@ -36,7 +36,7 @@ module Flipper
         end
 
         def post
-          read_only if Flipper::UI.configuration.read_only
+          render_read_only if read_only?
 
           unless Flipper::UI.configuration.feature_creation_enabled
             status 403

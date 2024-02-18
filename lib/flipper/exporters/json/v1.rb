@@ -20,7 +20,7 @@ module Flipper
             end
           end
 
-          json = JSON.dump({
+          json = Typecast.to_json({
             version: VERSION,
             features: features,
           })

@@ -53,6 +53,7 @@ module Flipper
         style-src 'self' 'unsafe-inline';
         style-src-attr 'unsafe-inline' ;
         style-src-elem 'self';
+        connect-src https://www.flippercloud.io;
       CSP
 
       # Public: Call this in subclasses so the action knows its route.
@@ -108,7 +109,7 @@ module Flipper
         @flipper = flipper
         @request = request
         @code = 200
-        @headers = { 'Content-Type' => 'text/plain' }
+        @headers = {Rack::CONTENT_TYPE => 'text/plain'}
         @breadcrumbs =
           if Flipper::UI.configuration.application_breadcrumb_href
             [Breadcrumb.new('App', Flipper::UI.configuration.application_breadcrumb_href)]
@@ -158,25 +159,25 @@ module Flipper
       #
       # Returns a response.
       def view_response(name)
-        header 'Content-Type', 'text/html'
-        header 'Content-Security-Policy', CONTENT_SECURITY_POLICY
+        header Rack::CONTENT_TYPE, 'text/html'
+        header 'content-security-policy', CONTENT_SECURITY_POLICY
         body = view_with_layout { view_without_layout name }
         halt [@code, @headers, [body]]
       end
 
       # Public: Dumps an object as json and returns rack response with that as
-      # the body. Automatically sets Content-Type to "application/json".
+      # the body. Automatically sets content-type to "application/json".
       #
       # object - The Object that should be dumped as json.
       #
       # Returns a response.
       def json_response(object)
-        header 'Content-Type', 'application/json'
+        header Rack::CONTENT_TYPE, 'application/json'
         body = case object
         when String
           object
         else
-          JSON.dump(object)
+          Typecast.to_json(object)
         end
         halt [@code, @headers, [body]]
       end
@@ -186,7 +187,7 @@ module Flipper
       # location - The String location to set the Location header to.
       def redirect_to(location)
         status 302
-        header 'Location', "#{script_name}#{Rack::Utils.escape_path(location)}"
+        header 'location', "#{script_name}#{Rack::Utils.escape_path(location)}"
         halt [@code, @headers, ['']]
       end
 
@@ -276,7 +277,7 @@ module Flipper
 
       # Internal: Method to call when the UI is in read only mode and you want
       # to inform people of that fact.
-      def read_only
+      def render_read_only
         status 403
 
         breadcrumb 'Home', '/'
@@ -284,6 +285,14 @@ module Flipper
         breadcrumb 'Noooooope'
 
         halt view_response(:read_only)
+      end
+
+      def read_only?
+        Flipper::UI.configuration.read_only || flipper.read_only?
+      end
+
+      def write_allowed?
+        !read_only?
       end
 
       def bootstrap_css

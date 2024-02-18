@@ -15,6 +15,10 @@ module Flipper
         # configured for Flipper::UI.
         attr_accessor :description
 
+        # Internal: Used to preload actor names if actor_names_source is
+        # configured for Flipper::UI.
+        attr_accessor :actor_names
+
         # Public: Returns name titleized.
         def pretty_name
           @pretty_name ||= Util.titleize(name)
