@@ -14,6 +14,16 @@ module Flipper
         @write_through = write_through
       end
 
+      # Public: Expire the cache for the set of known feature names.
+      def expire_features_cache
+        @cache.delete(@features_cache_key)
+      end
+
+      # Public: Expire the cache for a given feature.
+      def expire_feature_cache(key)
+        @cache.delete(feature_cache_key(key))
+      end
+
       def remove(feature)
         if @write_through
           result = @adapter.remove(feature)
@@ -43,16 +53,6 @@ module Flipper
         else
           super
         end
-      end
-
-      # Public: Expire the cache for the set of known feature names.
-      def expire_features_cache
-        @cache.delete(@features_cache_key)
-      end
-
-      # Public: Expire the cache for a given feature.
-      def expire_feature_cache(key)
-        @cache.delete(feature_cache_key(key))
       end
 
       private
