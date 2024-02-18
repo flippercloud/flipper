@@ -7,8 +7,17 @@ module Flipper
     # Public: Adapter that wraps another adapter with the ability to cache
     # adapter calls in ActiveSupport::ActiveSupportCacheStore caches.
     class ActiveSupportCacheStore < CacheBase
-      def initialize(adapter, cache, expires_in: 300, write_through: false, prefix: nil)
-        super(adapter, cache, expires_in, prefix: prefix)
+      def initialize(adapter, cache, ttl = 300, expires_in: :none_provided, write_through: false, prefix: nil)
+        if expires_in == :none_provided
+          ttl ||= 300
+        else
+          warn "DEPRECATION WARNING: The `expires_in` kwarg is deprecated for " +
+               "Flipper::Adapters::ActiveSupportCacheStore and will be removed " +
+               "in the next major version. Please pass in expires in as third " +
+               "argument instead."
+          ttl = expires_in
+        end
+        super(adapter, cache, ttl, prefix: prefix)
         @write_through = write_through
       end
 
