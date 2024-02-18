@@ -6,7 +6,7 @@ module Flipper
     class Wrapper
       include Flipper::Adapter
 
-      Methods = [
+      METHODS = [
         :import,
         :export,
         :features,
@@ -26,7 +26,7 @@ module Flipper
         @adapter = adapter
       end
 
-      Methods.each do |method|
+      METHODS.each do |method|
         if RUBY_VERSION >= '3.0'
           define_method(method) do |*args, **kwargs|
             wrap(method, *args, **kwargs) { @adapter.public_send(method, *args, **kwargs) }
