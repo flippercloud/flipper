@@ -2,6 +2,12 @@ require 'flipper/cloud/telemetry'
 require 'flipper/cloud/configuration'
 
 RSpec.describe Flipper::Cloud::Telemetry do
+  before do
+    # Stub polling for features.
+    stub_request(:get, "https://www.flippercloud.io/adapter/features?exclude_gate_names=true").
+      to_return(status: 200, body: "{}")
+  end
+
   it "phones home and does not update telemetry interval if missing" do
     stub = stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
       to_return(status: 200, body: "{}")
