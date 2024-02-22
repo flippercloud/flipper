@@ -160,8 +160,16 @@ module Flipper
         # thus may have a telemetry-interval header for us to respect.
         response ||= error.response if error && error.respond_to?(:response)
 
-        if response && interval = response["telemetry-interval"]
-          self.interval = interval.to_f
+        if response
+          if Flipper::Typecast.to_boolean(response["telemetry-shutdown"])
+            debug "action=telemetry_shutdown message=The server has requested that telemetry be shut down."
+            stop
+            return
+          end
+
+          if interval = response["telemetry-interval"]
+            self.interval = interval.to_f
+          end
         end
       rescue => error
         error "action=post_to_cloud error=#{error.inspect}"

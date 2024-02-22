@@ -42,6 +42,52 @@ RSpec.describe Flipper::Cloud::Telemetry do
     expect(stub).to have_been_requested
   end
 
+  it "phones home and requests shutdown if telemetry-shutdown header is true" do
+    stub = stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
+      to_return(status: 404, body: "{}", headers: {"telemetry-shutdown" => "true"})
+
+    output = StringIO.new
+    cloud_configuration = Flipper::Cloud::Configuration.new(
+      token: "test",
+      logger: Logger.new(output),
+      logging_enabled: true,
+    )
+
+    # Record some telemetry and stop the threads so we submit a response.
+    telemetry = described_class.new(cloud_configuration)
+    telemetry.record(Flipper::Feature::InstrumentationName, {
+      operation: :enabled?,
+      feature_name: :foo,
+      result: true,
+    })
+    telemetry.stop
+    expect(stub).to have_been_requested
+    expect(output.string).to match(/action=telemetry_shutdown message=The server has requested that telemetry be shut down./)
+  end
+
+  it "phones home and does not shutdown if telemetry shutdown header is missing" do
+    stub = stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
+      to_return(status: 404, body: "{}", headers: {})
+
+    output = StringIO.new
+    cloud_configuration = Flipper::Cloud::Configuration.new(
+      token: "test",
+      logger: Logger.new(output),
+      logging_enabled: true,
+    )
+
+    # Record some telemetry and stop the threads so we submit a response.
+    telemetry = described_class.new(cloud_configuration)
+    telemetry.record(Flipper::Feature::InstrumentationName, {
+      operation: :enabled?,
+      feature_name: :foo,
+      result: true,
+    })
+    telemetry.stop
+    expect(stub).to have_been_requested
+    expect(output.string).not_to match(/action=telemetry_shutdown message=The server has requested that telemetry be shut down./)
+  end
+
   it "can update telemetry interval from error" do
     stub = stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
       to_return(status: 500, body: "{}", headers: {"telemetry-interval" => "120"})
