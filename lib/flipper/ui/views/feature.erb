@@ -248,9 +248,10 @@
             <div class="row">
               <% unless @feature.boolean_value %>
                 <div class="col">
-                  <button type="submit" name="action" value="Enable" <% if Flipper::UI.configuration.confirm_fully_enable %>id="enable_feature__button"<% end %> class="btn btn-outline-success btn-block">
+                  <button type="submit" name="action" value="Enable" class="btn btn-outline-success btn-block">
                     <span class="d-block" data-toggle="tooltip"
                       <% if Flipper::UI.configuration.confirm_fully_enable %>
+                        data-confirmation-prompt="Are you sure you want to fully enable this feature for everyone? Please enter the name of the feature to confirm it: <%= feature_name %>"
                         data-confirmation-text="<%= feature_name %>"
                       <% end %>
                         title="Enable for everyone"
@@ -263,9 +264,10 @@
 
               <% unless @feature.off? %>
                 <div class="col">
-                  <button type="submit" name="action" value="Disable" <% if Flipper::UI.configuration.confirm_disable %>id="disable_feature__button"<% end %> class="btn btn-outline-danger btn-block">
+                  <button type="submit" name="action" value="Disable" class="btn btn-outline-danger btn-block">
                     <span class="d-block" data-toggle="tooltip"
                       <% if Flipper::UI.configuration.confirm_disable %>
+                        data-confirmation-prompt="Are you sure you want to disable this feature for everyone? Please enter the name of the feature to confirm it: <%= feature_name %>"
                         data-confirmation-text="<%= feature_name %>"
                       <% end %>
                         title="Disable for everyone by clearing all percentages, groups and actors."
@@ -296,7 +298,13 @@
             <%== csrf_input_tag %>
             <input type="hidden" id="feature_name" name="_feature" value="<%= feature_name %>">
             <input type="hidden" name="_method" value="DELETE">
-            <button type="submit" name="action" value="Delete" id="delete_feature__button" data-confirmation-text="<%= feature_name %>" class="btn btn-outline-danger" data-toggle="tooltip" title="Remove feature from list of features and disable it." data-placement="right">Delete</button>
+            <button type="submit" name="action" value="Delete" id="delete_feature__button" class="btn btn-outline-danger" data-toggle="tooltip" data-placement="right"
+              data-confirmation-prompt="Are you sure you want to remove this feature from the list of features and disable it for everyone? Please enter the name of the feature to confirm it: <%= feature_name%>"
+              data-confirmation-text="<%= feature_name %>"
+              title="Remove feature from list of features and disable it."
+            >
+              Delete
+            </button>
           </form>
         </div>
       </div>
