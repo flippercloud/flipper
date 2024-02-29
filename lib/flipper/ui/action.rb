@@ -27,24 +27,7 @@ module Flipper
                                              'delete'.freeze,
                                            ]).freeze
 
-      SOURCES = {
-        bootstrap_css: {
-          src: '/css/bootstrap-4.6.0.min.css'.freeze,
-          hash: 'sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l'.freeze
-        }.freeze,
-        jquery_js: {
-          src: '/js/jquery-3.6.0.slim.js'.freeze,
-          hash: 'sha256-HwWONEZrpuoh951cQD1ov2HUK5zA5DwJ1DNUXaM6FsY='.freeze
-        }.freeze,
-        popper_js: {
-          src: '/js/popper-1.12.9.min.js'.freeze,
-          hash: 'sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q'.freeze
-        }.freeze,
-        bootstrap_js: {
-          src: '/js/bootstrap-4.6.0.min.js'.freeze,
-          hash: 'sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF'.freeze
-        }.freeze
-      }.freeze
+      SOURCES = JSON.parse(File.read(File.expand_path('sources.json', __dir__))).freeze
       CONTENT_SECURITY_POLICY = <<-CSP.delete("\n")
         default-src 'none';
         img-src 'self';
@@ -296,19 +279,22 @@ module Flipper
       end
 
       def bootstrap_css
-        SOURCES[:bootstrap_css]
+        asset_hash "/css/bootstrap.min.css"
       end
 
       def bootstrap_js
-        SOURCES[:bootstrap_js]
+        asset_hash "/js/bootstrap.min.js"
       end
 
       def popper_js
-        SOURCES[:popper_js]
+        asset_hash "/js/popper.min.js"
       end
 
-      def jquery_js
-        SOURCES[:jquery_js]
+      def asset_hash(src)
+        {
+          src: "#{src}?v=#{Flipper::VERSION}",
+          hash: SOURCES[src]
+        }
       end
     end
   end

@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "dependencies": {
+    "bootstrap": "^5.3.3",
+    "popper.js": "^1.16.1"
+  },
+  "scripts": {
+    "postinstall": "script/vendor-assets"
+  }
+}

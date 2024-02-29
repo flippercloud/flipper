@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+
+require 'fileutils'
+require 'digest'
+require 'json'
+
+sources = [
+  "bootstrap/dist/css/bootstrap.min.css",
+  "bootstrap/dist/js/bootstrap.min.js",
+  "popper.js/dist/popper.min.js"
+]
+
+integrity = sources.map do |src|
+  ext = File.extname(src)[1..-1]
+  FileUtils.cp("node_modules/#{src}", "lib/flipper/ui/public/#{ext}/")
+
+  public_path = "/#{ext}/#{File.basename(src)}"
+  digest = "sha384-" + Digest::SHA2.new(384).base64digest(File.binread("node_modules/#{src}"))
+  [public_path, digest]
+end.to_h
+
+File.write "lib/flipper/ui/sources.json", JSON.pretty_generate(integrity)
