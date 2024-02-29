@@ -10,11 +10,11 @@
     <p>
       Turn on this feature for actors.
     </p>
-    <form action="<%= script_name %>/features/<%= @feature.key %>/actors" method="post" class="form-inline">
+    <form action="<%= script_name %>/features/<%= @feature.key %>/actors" method="post" class="row">
       <%== csrf_input_tag %>
       <input type="hidden" name="operation" value="enable">
-      <input type="text" name="value" placeholder="<%= Flipper::UI.configuration.add_actor_placeholder %>" class="form-control mr-2">
-      <input type="submit" value="Add Actor" class="btn btn-primary">
+      <div class="col"><input type="text" name="value" placeholder="<%= Flipper::UI.configuration.add_actor_placeholder %>" class="form-control"></div>
+      <div class="col-auto"><input type="submit" value="Add Actor" class="btn btn-primary"></div>
     </form>
   </div>
 </div>

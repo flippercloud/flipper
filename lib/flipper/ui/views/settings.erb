@@ -6,7 +6,7 @@
     <form action="<%= script_name %>/settings/export" method="post">
       <%== csrf_input_tag %>
       <p>Download all your feature data in a single file.</p>
-      <input type="submit" value="Download" class="btn btn-sm btn-light">
+      <input type="submit" value="Download" class="btn btn-light">
     </form>
   </div>
 </div>
@@ -17,10 +17,10 @@
   </div>
   <div class="card-body">
     <p>Import a backup file to restore your feature data. This will overwrite any of your existing feature data so be sure you are uploading the correct export.</p>
-    <form action="<%= script_name %>/settings/import" method="post" class="form-inline" enctype="multipart/form-data">
+    <form action="<%= script_name %>/settings/import" method="post" class="row" enctype="multipart/form-data">
       <%== csrf_input_tag %>
-      <input type="file" name="file" class="form-control form-control-sm mr-sm-2 mb-2 mb-sm-0">
-      <input type="submit" value="Import" class="btn btn-sm btn-light">
+      <div class="col-auto"><input type="file" name="file" class="form-control"></div>
+      <div class="col-auto"><input type="submit" value="Import" class="btn btn-light"></div>
     </form>
   </div>
 </div>
