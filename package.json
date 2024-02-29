@@ -1,8 +1,8 @@
 {
   "private": true,
   "dependencies": {
-    "bootstrap": "^5.3.3",
-    "popper.js": "^1.16.1"
+    "@popperjs/core": "^2.11.8",
+    "bootstrap": "^5.3.3"
   },
   "scripts": {
     "postinstall": "script/vendor-assets"

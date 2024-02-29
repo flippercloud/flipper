@@ -7,7 +7,7 @@ require 'json'
 sources = [
   "bootstrap/dist/css/bootstrap.min.css",
   "bootstrap/dist/js/bootstrap.min.js",
-  "popper.js/dist/popper.min.js"
+  "@popperjs/core/dist/umd/popper.min.js"
 ]
 
 integrity = sources.map do |src|

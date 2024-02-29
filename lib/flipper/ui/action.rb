@@ -291,8 +291,9 @@ module Flipper
       end
 
       def asset_hash(src)
+        v = ENV["RACK_ENV"] == "development" ? Time.now.to_i : Flipper::VERSION
         {
-          src: "#{src}?v=#{Flipper::VERSION}",
+          src: "#{src}?v=#{v}",
           hash: SOURCES[src]
         }
       end
