@@ -219,8 +219,14 @@ module Flipper
         request.env['SCRIPT_NAME']
       end
 
+      # Internal: Generate urls relative to the app's script name.
+      #
+      #   url_for("feature")             # => "http://localhost:9292/flipper/feature"
+      #   url_for("/thing")              # => "http://localhost:9292/thing"
+      #   url_for("https://example.com") # => "https://example.com"
+      #
       def url_for(*parts)
-        URI.join(request.base_url, script_name, *parts).to_s
+        URI.join(request.base_url, script_name + '/', *parts).to_s
       end
 
       # Private
