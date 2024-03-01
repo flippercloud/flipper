@@ -5,7 +5,10 @@
 <% end %>
 
 <div class="card">
-  <h4 class="card-header">Enable Group for <%= @feature.key %></h4>
+  <h4 class="card-header">
+    <a class="link-dark" href="<%= script_name %>/features/<%= @feature.key %>"><%= @feature.key %></a>
+    /
+    Enable Group</h4>
   <div class="card-body">
     <% if @feature.disabled_groups.empty? %>
       <p>All groups are enabled for this feature which means there is nothing to add.</p>

@@ -35,14 +35,19 @@ RSpec.describe Flipper::UI::Configuration do
     end
   end
 
-  describe "#application_breadcrumb_href" do
+  describe "#application_href" do
     it "has default value" do
-      expect(configuration.application_breadcrumb_href).to eq(nil)
+      expect(configuration.application_href).to eq(nil)
     end
 
     it "can be updated" do
-      configuration.application_breadcrumb_href = 'http://www.myapp.com'
-      expect(configuration.application_breadcrumb_href).to eq('http://www.myapp.com')
+      configuration.application_href = 'http://www.myapp.com'
+      expect(configuration.application_href).to eq('http://www.myapp.com')
+    end
+
+    it 'aliases application_breadcrumb_href to application_href' do
+      configuration.application_breadcrumb_href = "/myapp"
+      expect(configuration.application_href).to eq("/myapp")
     end
   end
 

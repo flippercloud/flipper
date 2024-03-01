@@ -29,9 +29,6 @@ module Flipper
 
           @show_blank_slate = @features.empty?
 
-          breadcrumb 'Home', '/'
-          breadcrumb 'Features'
-
           view_response :features
         end
 
@@ -40,10 +37,6 @@ module Flipper
 
           unless Flipper::UI.configuration.feature_creation_enabled
             status 403
-
-            breadcrumb 'Home', '/'
-            breadcrumb 'Features', '/features'
-            breadcrumb 'Noooooope'
 
             halt view_response(:feature_creation_disabled)
           end

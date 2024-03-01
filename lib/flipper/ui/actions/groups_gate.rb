@@ -13,11 +13,6 @@ module Flipper
           feature = flipper[feature_name]
           @feature = Decorators::Feature.new(feature)
 
-          breadcrumb 'Home', '/'
-          breadcrumb 'Features', '/features'
-          breadcrumb @feature.key, "/features/#{@feature.key}"
-          breadcrumb 'Add Group'
-
           view_response :add_group
         end
 
