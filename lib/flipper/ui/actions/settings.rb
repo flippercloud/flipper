@@ -10,9 +10,6 @@ module Flipper
         def get
           @page_title = 'Settings'
 
-          breadcrumb 'Home', '/'
-          breadcrumb 'Settings'
-
           view_response :settings
         end
       end

@@ -21,8 +21,13 @@
     <div class="card">
       <%# Gate State Header %>
       <div class="card-header">
-        <span class="status <%= @feature.color_class %> me-2"></span>
-        <%= @feature.gate_state_title %>
+        <div class="row align-items-center">
+          <h4 class="col text-truncate mb-0"><%= feature_name %></h4>
+          <div class="col-auto">
+            <span class="status <%= @feature.color_class %> me-2"></span>
+            <%= @feature.gate_state_title %>
+          </div>
+        </div>
       </div>
 
       <% unless @feature.boolean_value %>

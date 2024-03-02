@@ -93,12 +93,6 @@ module Flipper
         @request = request
         @code = 200
         @headers = {Rack::CONTENT_TYPE => 'text/plain'}
-        @breadcrumbs =
-          if Flipper::UI.configuration.application_breadcrumb_href
-            [Breadcrumb.new('App', Flipper::UI.configuration.application_breadcrumb_href)]
-          else
-            []
-          end
       end
 
       # Public: Runs the request method for the provided request.
@@ -202,16 +196,6 @@ module Flipper
         end
       end
 
-      # Public: Add a breadcrumb to the trail.
-      #
-      # text - The String text for the breadcrumb.
-      # href - The String href for the anchor tag (optional). If nil, breadcrumb
-      #        is assumed to be the end of the trail.
-      def breadcrumb(text, href = nil)
-        breadcrumb_href = href.nil? ? href : "#{script_name}#{href}"
-        @breadcrumbs << Breadcrumb.new(text, breadcrumb_href)
-      end
-
       # Private
       def view_with_layout(&block)
         view :layout, &block
@@ -233,6 +217,16 @@ module Flipper
       # Internal: The path the app is mounted at.
       def script_name
         request.env['SCRIPT_NAME']
+      end
+
+      # Internal: Generate urls relative to the app's script name.
+      #
+      #   url_for("feature")             # => "http://localhost:9292/flipper/feature"
+      #   url_for("/thing")              # => "http://localhost:9292/thing"
+      #   url_for("https://example.com") # => "https://example.com"
+      #
+      def url_for(*parts)
+        URI.join(request.base_url, script_name + '/', *parts).to_s
       end
 
       # Private
@@ -262,11 +256,6 @@ module Flipper
       # to inform people of that fact.
       def render_read_only
         status 403
-
-        breadcrumb 'Home', '/'
-        breadcrumb 'Features', '/features'
-        breadcrumb 'Noooooope'
-
         halt view_response(:read_only)
       end
 

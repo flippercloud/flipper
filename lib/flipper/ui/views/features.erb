@@ -30,7 +30,7 @@
         <h4 class="col m-0">Features</h4>
         <%- if write_allowed? && Flipper::UI.configuration.feature_creation_enabled -%>
           <div class="col-auto">
-            <a class="btn btn-primary" href="<%= script_name %>/features/new">Add Feature</a>
+            <a class="btn btn-primary btn-sm" href="<%= script_name %>/features/new">Add Feature</a>
           </div>
         <%- end -%>
       </div>

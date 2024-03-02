@@ -76,56 +76,44 @@ RSpec.describe Flipper::UI do
       end
     end
 
-    describe "application_breadcrumb_href" do
-      it 'does not have an application_breadcrumb_href by default' do
-        expect(configuration.application_breadcrumb_href).to be(nil)
+    describe "application_href" do
+      around do |example|
+        original_href = configuration.application_href
+        example.run
+      ensure
+        configuration.application_href = original_href
       end
 
-      context 'with application_breadcrumb_href not set' do
-        before do
-          @original_application_breadcrumb_href = configuration.application_breadcrumb_href
-          configuration.application_breadcrumb_href = nil
-        end
+      it 'does not have an application_href by default' do
+        expect(configuration.application_href).to be(nil)
+      end
 
-        after do
-          configuration.application_breadcrumb_href = @original_application_breadcrumb_href
-        end
-
-        it 'does not add App breadcrumb' do
+      context 'with application_href not set' do
+        it 'does not add App link' do
           get '/features'
           expect(last_response.body).not_to include('<a href="/myapp">App</a>')
         end
       end
 
-      context 'with application_breadcrumb_href set' do
+      context 'with application_href set' do
         before do
-          @original_application_breadcrumb_href = configuration.application_breadcrumb_href
-          configuration.application_breadcrumb_href = '/myapp'
+          configuration.application_href = '/myapp'
         end
 
-        after do
-          configuration.application_breadcrumb_href = @original_application_breadcrumb_href
-        end
-
-        it 'does add App breadcrumb' do
+        it 'does add App link' do
           get '/features'
-          expect(last_response.body).to include('<a href="/myapp">App</a>')
+          expect(last_response.body).to match('<a.*href="/myapp"')
         end
       end
 
-      context 'with application_breadcrumb_href set to full url' do
+      context 'with application_href set to full url' do
         before do
-          @original_application_breadcrumb_href = configuration.application_breadcrumb_href
-          configuration.application_breadcrumb_href = 'https://myapp.com/'
+          configuration.application_href = "https://myapp.com/"
         end
 
-        after do
-          configuration.application_breadcrumb_href = @original_application_breadcrumb_href
-        end
-
-        it 'does add App breadcrumb' do
+        it 'does add App link' do
           get '/features'
-          expect(last_response.body).to include('<a href="https://myapp.com/">App</a>')
+          expect(last_response.body).to match('<a.*href="https://myapp.com/"')
         end
       end
     end
