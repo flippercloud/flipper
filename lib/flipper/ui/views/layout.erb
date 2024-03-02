@@ -73,7 +73,7 @@
 
     <script src="<%= script_name + popper_js[:src] %>" integrity="<%= popper_js[:hash] %>" crossorigin="anonymous"></script>
     <script src="<%= script_name + bootstrap_js[:src] %>" integrity="<%= bootstrap_js[:hash] %>" crossorigin="anonymous"></script>
-    <script src="<%= script_name %>/js/application.js?v=<%= Flipper::VERSION + Time.now.to_s %>"></script>
+    <script src="<%= script_name %>/js/application.js?v=<%= Flipper::VERSION %>"></script>
     <script src="<%= script_name %>/js/version.js?v=<%= Flipper::VERSION %>"></script>
   </body>
 </html>
