@@ -108,19 +108,19 @@ RSpec.shared_examples_for 'a flipper adapter' do
     actor22 = Flipper::Actor.new('22')
     actor_asdf = Flipper::Actor.new('asdf')
 
-    expect(subject.enable(feature, actor_gate, Flipper::Types::Actor.new(actor22))).to eq(true)
-    expect(subject.enable(feature, actor_gate, Flipper::Types::Actor.new(actor_asdf))).to eq(true)
+    expect(feature.enable(actor22)).to be(true)
+    expect(feature.enable(actor_asdf)).to be(true)
 
-    result = subject.get(feature)
-    expect(result[:actors]).to eq(Set['22', 'asdf'])
+    expect(feature).to be_enabled(actor22)
+    expect(feature).to be_enabled(actor_asdf)
 
-    expect(subject.disable(feature, actor_gate, Flipper::Types::Actor.new(actor22))).to eq(true)
-    result = subject.get(feature)
-    expect(result[:actors]).to eq(Set['asdf'])
+    expect(feature.disable(actor22)).to be(true)
+    expect(feature).not_to be_enabled(actor22)
+    expect(feature).to be_enabled(actor_asdf)
 
-    expect(subject.disable(feature, actor_gate, Flipper::Types::Actor.new(actor_asdf))).to eq(true)
-    result = subject.get(feature)
-    expect(result[:actors]).to eq(Set.new)
+    expect(feature.disable(actor_asdf)).to eq(true)
+    expect(feature).not_to be_enabled(actor22)
+    expect(feature).not_to be_enabled(actor_asdf)
   end
 
   it 'can enable, disable and get value for percentage of actors gate' do
@@ -182,9 +182,10 @@ RSpec.shared_examples_for 'a flipper adapter' do
   end
 
   it 'converts the actor value to a string' do
-    expect(subject.enable(feature, actor_gate, Flipper::Types::Actor.new(Flipper::Actor.new(22)))).to eq(true)
-    result = subject.get(feature)
-    expect(result[:actors]).to eq(Set['22'])
+    actor = Flipper::Actor.new(22)
+    expect(feature).not_to be_enabled(actor)
+    feature.enable_actor actor
+    expect(feature).to be_enabled(actor)
   end
 
   it 'converts group value to a string' do
@@ -295,9 +296,9 @@ RSpec.shared_examples_for 'a flipper adapter' do
 
   it 'can double enable an actor without error' do
     actor = Flipper::Actor.new('Flipper::Actor;22')
-    expect(subject.enable(feature, actor_gate, Flipper::Types::Actor.new(actor))).to eq(true)
-    expect(subject.enable(feature, actor_gate, Flipper::Types::Actor.new(actor))).to eq(true)
-    expect(subject.get(feature).fetch(:actors)).to eq(Set['Flipper::Actor;22'])
+    expect(feature.enable(actor)).to be(true)
+    expect(feature.enable(actor)).to be(true)
+    expect(feature).to be_enabled(actor)
   end
 
   it 'can double enable a group without error' do
