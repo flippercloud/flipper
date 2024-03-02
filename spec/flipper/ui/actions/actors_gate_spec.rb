@@ -20,7 +20,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
     end
 
     it 'renders add new actor form' do
-      form = '<form action="/features/search/actors" method="post" class="form-inline">'
+      form = '<form action="/features/search/actors" method="post" class="row">'
       expect(last_response.body).to include(form)
     end
   end
@@ -35,7 +35,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
     end
 
     it 'renders add new actor form' do
-      form = '<form action="/features/a/b/actors" method="post" class="form-inline">'
+      form = '<form action="/features/a/b/actors" method="post" class="row">'
       expect(last_response.body).to include(form)
     end
   end
