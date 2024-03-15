@@ -12,7 +12,7 @@ module Flipper
 
       def enable(feature, gate, resource)
         if gate.is_a?(Flipper::Gates::Actor) && over_limit?(feature)
-          raise LimitExceeded, "Actor limit of #{@limit} exceeded for feature #{feature.key}"
+          raise LimitExceeded, "Actor limit of #{@limit} exceeded for feature #{feature.key}. See https://www.flippercloud.io/docs/features/actors#limitations"
         else
           super
         end
