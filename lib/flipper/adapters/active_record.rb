@@ -21,6 +21,8 @@ module Flipper
         ].join
 
         has_many :gates, foreign_key: "feature_key", primary_key: "key"
+
+        validates :key, presence: true
       end
 
       # Private: Do not use outside of this adapter.
@@ -30,6 +32,9 @@ module Flipper
           "flipper_gates",
           Model.table_name_suffix,
         ].join
+
+        validates :feature_key, presence: true
+        validates :key, presence: true
       end
 
       VALUE_TO_TEXT_WARNING = <<-EOS
