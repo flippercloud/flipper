@@ -25,6 +25,7 @@ module Flipper
         log: ENV.fetch('FLIPPER_LOG', 'true').casecmp('true').zero?,
         cloud_path: "_flipper",
         strict: default_strict_value,
+        actor_limit: ENV["FLIPPER_ACTOR_LIMIT"]&.to_i || 100,
         test_help: Flipper::Typecast.to_boolean(ENV["FLIPPER_TEST_HELP"] || Rails.env.test?),
       )
     end
@@ -65,13 +66,12 @@ module Flipper
       end
     end
 
-    initializer "flipper.strict", after: :load_config_initializers do |app|
+    initializer "flipper.adapters", after: :load_config_initializers do |app|
       flipper = app.config.flipper
 
-      if flipper.strict
-        Flipper.configure do |config|
-          config.use Flipper::Adapters::Strict, flipper.strict
-        end
+      Flipper.configure do |config|
+        config.use Flipper::Adapters::Strict, flipper.strict if flipper.strict
+        config.use Flipper::Adapters::ActorLimit, flipper.actor_limit if flipper.actor_limit
       end
     end
 
