@@ -17,6 +17,11 @@ class SetupGeneratorTest < Rails::Generators::TestCase
     end
   end
 
+  test "generates an initializer" do
+    run_generator
+    assert_file 'config/initializers/flipper.rb', /Flipper\.configure/
+  end
+
   test "does not invoke flipper:active_record generator if ActiveRecord adapter not defined" do
     # Ensure adapter not defined
     Flipper::Adapters.send(:remove_const, :ActiveRecord) rescue nil
