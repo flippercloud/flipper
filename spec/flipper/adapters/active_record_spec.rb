@@ -39,15 +39,19 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
     }
   ].each do |config|
     context "with #{config['adapter']}" do
-      context "with tables created" do
-        before(:all) do
-          skip_on_error(ActiveRecord::ConnectionNotEstablished, "#{config['adapter']} not available") do
-            silence { ActiveRecord::Tasks::DatabaseTasks.create(config) }
-          end
-
-          Flipper.configuration = nil
+      before(:all) do
+        skip_on_error(ActiveRecord::ConnectionNotEstablished, "#{config['adapter']} not available") do
+          silence { ActiveRecord::Tasks::DatabaseTasks.create(config) }
         end
 
+        Flipper.configuration = nil
+      end
+
+      after(:all) do
+        silence { ActiveRecord::Tasks::DatabaseTasks.drop(config) } unless $skip
+      end
+
+      context "with tables created" do
         before(:each) do
           skip_on_error(ActiveRecord::ConnectionNotEstablished, "#{config['adapter']} not available") do
             ActiveRecord::Base.establish_connection(config)
@@ -58,10 +62,6 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
         after(:each) do
           ActiveRecord::Tasks::DatabaseTasks.purge(config)
           ActiveRecord::Base.connection.close
-        end
-
-        after(:all) do
-          silence { ActiveRecord::Tasks::DatabaseTasks.drop(config) } unless $skip
         end
 
         it_should_behave_like 'a flipper adapter'
@@ -215,18 +215,27 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
         end
       end
 
-      it "works when table doesn't exist" do
+      context "without tables created" do
+        before(:each) do
+          skip_on_error(ActiveRecord::ConnectionNotEstablished, "#{config['adapter']} not available") do
+            ActiveRecord::Base.establish_connection(config)
+          end
+        end
 
-        Flipper.configuration = nil
-        Flipper.instance = nil
+        after(:each) do
+          ActiveRecord::Base.connection.close
+        end
 
-        Flipper::Adapters.send(:remove_const, :ActiveRecord) if Flipper::Adapters.const_defined?(:ActiveRecord)
+        it "does not raise an error" do
+          Flipper.configuration = nil
+          Flipper.instance = nil
 
-        silence do
-          expect {
-            load 'flipper/adapters/active_record.rb'
-            Flipper::Adapters::ActiveRecord.new
-          }.not_to raise_error
+          silence do
+            expect {
+              load 'flipper/adapters/active_record.rb'
+              Flipper::Adapters::ActiveRecord.new
+            }.not_to raise_error
+          end
         end
       end
     end
