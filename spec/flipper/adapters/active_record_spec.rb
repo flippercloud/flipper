@@ -23,6 +23,7 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
     {
       "adapter" => "mysql2",
       "encoding" => "utf8mb4",
+      "host" => ENV["MYSQL_HOST"],
       "username" => ENV["MYSQL_USER"] || "root",
       "password" => ENV["MYSQL_PASSWORD"] || "",
       "database" => ENV["MYSQL_DATABASE"] || "flipper_test",
@@ -42,22 +43,17 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
       context "with tables created" do
         before(:all) do
           skip_on_error(ActiveRecord::ConnectionNotEstablished, "#{config['adapter']} not available") do
-            silence { ActiveRecord::Tasks::DatabaseTasks.create(config) }
+            silence do
+              ActiveRecord::Tasks::DatabaseTasks.create(config)
+            end
           end
 
           Flipper.configuration = nil
         end
 
         before(:each) do
-          skip_on_error(ActiveRecord::ConnectionNotEstablished, "#{config['adapter']} not available") do
-            ActiveRecord::Base.establish_connection(config)
-            CreateFlipperTables.migrate(:up)
-          end
-        end
-
-        after(:each) do
           ActiveRecord::Tasks::DatabaseTasks.purge(config)
-          ActiveRecord::Base.connection.close
+          CreateFlipperTables.migrate(:up)
         end
 
         after(:all) do
@@ -215,18 +211,39 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
         end
       end
 
-      it "works when table doesn't exist" do
+      context "without tables created" do
+        before(:all) do
+          skip_on_error(ActiveRecord::ConnectionNotEstablished, "#{config['adapter']} not available") do
+            silence do
+              ActiveRecord::Tasks::DatabaseTasks.create(config)
+            end
+          end
 
-        Flipper.configuration = nil
-        Flipper.instance = nil
+          Flipper.configuration = nil
+        end
 
-        Flipper::Adapters.send(:remove_const, :ActiveRecord) if Flipper::Adapters.const_defined?(:ActiveRecord)
+        before(:each) do
+          ActiveRecord::Base.establish_connection(config)
+        end
 
-        silence do
-          expect {
-            load 'flipper/adapters/active_record.rb'
-            Flipper::Adapters::ActiveRecord.new
-          }.not_to raise_error
+        after(:each) do
+          ActiveRecord::Base.connection.close
+        end
+
+        after(:all) do
+          silence { ActiveRecord::Tasks::DatabaseTasks.drop(config) } unless $skip
+        end
+
+        it "does not raise an error" do
+          Flipper.configuration = nil
+          Flipper.instance = nil
+
+          silence do
+            expect {
+              load 'flipper/adapters/active_record.rb'
+              Flipper::Adapters::ActiveRecord.new
+            }.not_to raise_error
+          end
         end
       end
     end
