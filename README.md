@@ -112,3 +112,4 @@ We also have a [free plan](https://www.flippercloud.io?utm_source=oss&utm_medium
 | ![@thetimbanks](https://avatars1.githubusercontent.com/u/471801?s=64)  | [@thetimbanks](https://github.com/thetimbanks) | ui          |
 | ![@lazebny](https://avatars1.githubusercontent.com/u/6276766?s=64)     | [@lazebny](https://github.com/lazebny)         | docker      |
 | ![@pagertree](https://avatars.githubusercontent.com/u/24941240?s=64)   | [@pagertree](https://github.com/pagertree)   | sponsor     |
+| ![@kdaigle](https://avatars.githubusercontent.com/u/2501?s=64)   | [@kdaigle](https://github.com/kdaigle)   | sponsor     |
