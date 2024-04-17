@@ -1,6 +1,6 @@
 [![Flipper Mark](docs/images/banner.jpg)](https://www.flippercloud.io)
 
-[Website](https://flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=website_link) | [Documentation](https://flippercloud.io/docs?utm_source=oss&utm_medium=readme&utm_campaign=docs_link) | [Examples](examples) | [Twitter](https://twitter.com/flipper_cloud) | [Ruby.social](https://ruby.social/@flipper)
+[Website](https://flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=website_link) | [Documentation](https://flippercloud.io/docs?utm_source=oss&utm_medium=readme&utm_campaign=docs_link) | [Examples](examples) | [Chat](https://chat.flippercloud.io/join/xjHq-aJsA-BeZH) | [Twitter](https://twitter.com/flipper_cloud) | [Ruby.social](https://ruby.social/@flipper)
 
 # Flipper
 
