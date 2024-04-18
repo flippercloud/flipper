@@ -3,7 +3,7 @@ module Flipper
   #
   #   adapter = Flipper::AdapterBuilder.new do
   #     use Flipper::Adapters::Strict
-  #     use Flipper::Adapters::Memoizer
+  #     use Flipper::Adapters::Memoizable
   #     store Flipper::Adapters::Memory
   #   end.to_adapter
   #
