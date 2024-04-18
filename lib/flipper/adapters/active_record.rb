@@ -221,7 +221,6 @@ module Flipper
           @gate_class.transaction do
             clear(feature) if clear_feature
             delete(feature, gate)
-            @gate_class.where(feature_key: feature.key, key: gate.key).destroy_all
             begin
               @gate_class.create! do |g|
                 g.feature_key = feature.key
