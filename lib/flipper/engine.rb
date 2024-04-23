@@ -39,8 +39,10 @@ module Flipper
 
     initializer "flipper.default", before: :load_config_initializers do |app|
       # Load cloud secrets from Rails credentials
-      ENV["FLIPPER_CLOUD_TOKEN"] ||= app.credentials.dig(:flipper, :cloud_token)
-      ENV["FLIPPER_CLOUD_SYNC_SECRET"] ||= app.credentials.dig(:flipper, :cloud_sync_secret)
+      if defined?(app.credentials)
+        ENV["FLIPPER_CLOUD_TOKEN"] ||= app.credentials.dig(:flipper, :cloud_token)
+        ENV["FLIPPER_CLOUD_SYNC_SECRET"] ||= app.credentials.dig(:flipper, :cloud_sync_secret)
+      end
 
       require 'flipper/cloud' if cloud?
 
