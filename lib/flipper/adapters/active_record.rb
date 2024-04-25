@@ -135,7 +135,9 @@ module Flipper
           rows_query = features.join(gates, ::Arel::Nodes::OuterJoin)
             .on(features[:key].eq(gates[:feature_key]))
             .project(features[:key].as('feature_key'), gates[:key], gates[:value])
-          gates = @feature_class.connection.select_rows(rows_query)
+          select_method = rails_version_over_4_2? ? :select_rows : :select_all
+          gates =  @feature_class.connection.send(select_method, rows_query)
+
 
           # group the gates by feature key
           grouped_gates = gates.inject({}) do |hash, (feature_key, key, value)|
@@ -152,6 +154,10 @@ module Flipper
           end
           result
         end
+      end
+
+      def rails_version_over_4_2?
+        Rails::VERSION::MAJOR * 10 + Rails::VERSION::MINOR > 42
       end
 
       # Public: Enables a gate for a given thing.
