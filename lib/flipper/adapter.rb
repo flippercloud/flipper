@@ -1,8 +1,11 @@
+require 'flipper/adapters/poolable'
+
 module Flipper
   # Adding a module include so we have some hooks for stuff down the road
   module Adapter
     def self.included(base)
       base.extend(ClassMethods)
+      base.include(::Flipper::Adapters::Poolable)
     end
 
     module ClassMethods
