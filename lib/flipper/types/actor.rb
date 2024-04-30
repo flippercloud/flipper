@@ -23,14 +23,8 @@ module Flipper
         super || @actor.respond_to?(*args)
       end
 
-      if RUBY_VERSION >= '3.0'
-        def method_missing(name, *args, **kwargs, &block)
-          @actor.send name, *args, **kwargs, &block
-        end
-      else
-        def method_missing(name, *args, &block)
-          @actor.send name, *args, &block
-        end
+      def method_missing(name, *args, **kwargs, &block)
+        @actor.send name, *args, **kwargs, &block
       end
     end
   end

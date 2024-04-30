@@ -17,24 +17,12 @@ module Flipper
       block.arity == 0 ? instance_eval(&block) : block.call(self) if block
     end
 
-    if RUBY_VERSION >= '3.0'
-      def use(klass, *args, **kwargs, &block)
-        @stack.push ->(adapter) { klass.new(adapter, *args, **kwargs, &block) }
-      end
-    else
-      def use(klass, *args, &block)
-        @stack.push ->(adapter) { klass.new(adapter, *args, &block) }
-      end
+    def use(klass, *args, **kwargs, &block)
+      @stack.push ->(adapter) { klass.new(adapter, *args, **kwargs, &block) }
     end
 
-    if RUBY_VERSION >= '3.0'
-      def store(adapter, *args, **kwargs, &block)
-        @store = adapter.respond_to?(:call) ? adapter : -> { adapter.new(*args, **kwargs, &block) }
-      end
-    else
-      def store(adapter, *args, &block)
-        @store = adapter.respond_to?(:call) ? adapter : -> { adapter.new(*args, &block) }
-      end
+    def store(adapter, *args, **kwargs, &block)
+      @store = adapter.respond_to?(:call) ? adapter : -> { adapter.new(*args, **kwargs, &block) }
     end
 
     def to_adapter
