@@ -62,6 +62,27 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
 
         it_should_behave_like 'a flipper adapter'
 
+        it "should not poision wrapping transactions" do
+          flipper = Flipper.new(subject)
+
+          actor = Struct.new(:flipper_id).new("flipper-id-123")
+          flipper.enable_actor(:foo, actor)
+
+          ActiveRecord::Base.transaction do
+            flipper.enable_actor(:foo, actor)
+
+            # we get here just fine!
+            puts "got here!"
+            expect(true).to be true
+
+            # whoa it's not until the next read that the transaction blows up
+            # with StatementInvalid
+            expect(Flipper::Adapters::ActiveRecord::Gate.count).to eq 1
+            puts "never got here!"
+            expect(true).to be false
+          end
+        end
+
         it "should load actor ids fine" do
           flipper.enable_percentage_of_time(:foo, 1)
 
