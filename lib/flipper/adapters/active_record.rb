@@ -130,14 +130,14 @@ module Flipper
       end
 
       def get_all
-        with_connection(@feature_class) do
+        with_connection(@feature_class) do |connection|
           # query the gates from the db in a single query
           features = ::Arel::Table.new(@feature_class.table_name.to_sym)
           gates = ::Arel::Table.new(@gate_class.table_name.to_sym)
           rows_query = features.join(gates, ::Arel::Nodes::OuterJoin)
             .on(features[:key].eq(gates[:feature_key]))
             .project(features[:key].as('feature_key'), gates[:key], gates[:value])
-          gates = @feature_class.connection.select_rows(rows_query)
+          gates = connection.select_rows(rows_query)
 
           # group the gates by feature key
           grouped_gates = gates.inject({}) do |hash, (feature_key, key, value)|
