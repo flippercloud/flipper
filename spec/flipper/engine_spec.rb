@@ -29,7 +29,7 @@ RSpec.describe Flipper::Engine do
 
   let(:config) { application.config.flipper }
 
-  subject { application.initialize! }
+  subject { SpecHelpers.silence { application.initialize! } }
 
   shared_examples 'config.strict' do
     let(:adapter) { Flipper.adapter.adapter }
