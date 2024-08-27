@@ -75,7 +75,7 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
           flipper.preload([:foo])
         end
 
-        it 'should not poision wrapping transactions' do
+        it 'should not poison wrapping transactions' do
           flipper = Flipper.new(subject)
 
           actor = Struct.new(:flipper_id).new('flipper-id-123')
