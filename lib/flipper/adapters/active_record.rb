@@ -247,20 +247,15 @@ module Flipper
       def enable_multi(feature, gate, thing)
         with_connection(@gate_class) do |connection|
           begin
-            connection.transaction do
-              savepoint_name = "flipper_savepoint_#{SecureRandom.hex(8)}"
-              connection.execute("SAVEPOINT #{savepoint_name}")
-              begin
-                @gate_class.create! do |g|
-                  g.feature_key = feature.key
-                  g.key = gate.key
-                  g.value = thing.value.to_s
-                end
-              rescue ::ActiveRecord::RecordNotUnique
-                # already added so no need move on with life
-                connection.execute("ROLLBACK TO SAVEPOINT #{savepoint_name}")
+            connection.transaction(requires_new: true) do
+              @gate_class.create! do |g|
+                g.feature_key = feature.key
+                g.key = gate.key
+                g.value = thing.value.to_s
               end
             end
+          rescue ::ActiveRecord::RecordNotUnique
+            # already added so no need move on with life
           end
         end
 
