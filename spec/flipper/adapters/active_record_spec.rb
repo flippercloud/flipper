@@ -83,7 +83,9 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
 
           ActiveRecord::Base.transaction do
             flipper.enable_actor(:foo, actor)
-            expect(Flipper::Adapters::ActiveRecord::Gate.count).to eq 1
+            # any read on the next line is fine, just need to ensure that
+            # poisoned transaction isn't raised
+            expect(Flipper::Adapters::ActiveRecord::Gate.count).to eq(1)
           end
         end
 
