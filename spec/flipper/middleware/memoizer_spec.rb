@@ -285,7 +285,7 @@ RSpec.describe Flipper::Middleware::Memoizer do
     end
 
     def get(uri, params = {}, env = {}, &block)
-      silence { super(uri, params, env, &block) }
+      capture_output { super(uri, params, env, &block) }
     end
 
     include_examples 'flipper middleware'

@@ -79,11 +79,22 @@ module SpecHelpers
     original_stdout = $stdout
 
     # Redirect stderr and stdout
-    output = $stderr = $stdout = StringIO.new
+    $stderr = $stdout = StringIO.new
+
+    yield
+  ensure
+    $stderr = original_stderr
+    $stdout = original_stdout
+  end
+
+  def capture_output
+    original_stderr = $stderr
+    original_stdout = $stdout
+
+    output = $stdout = $stderr = StringIO.new
 
     yield
 
-    # Return output
     output.string
   ensure
     $stderr = original_stderr

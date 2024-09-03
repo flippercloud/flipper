@@ -75,6 +75,20 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
           flipper.preload([:foo])
         end
 
+        it 'should not poison wrapping transactions' do
+          flipper = Flipper.new(subject)
+
+          actor = Struct.new(:flipper_id).new('flipper-id-123')
+          flipper.enable_actor(:foo, actor)
+
+          ActiveRecord::Base.transaction do
+            flipper.enable_actor(:foo, actor)
+            # any read on the next line is fine, just need to ensure that
+            # poisoned transaction isn't raised
+            expect(Flipper::Adapters::ActiveRecord::Gate.count).to eq(1)
+          end
+        end
+
         context "ActiveRecord connection_pool" do
           before do
             ActiveRecord::Base.connection_handler.clear_active_connections!

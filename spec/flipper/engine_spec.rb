@@ -29,7 +29,7 @@ RSpec.describe Flipper::Engine do
 
   let(:config) { application.config.flipper }
 
-  subject { application.initialize! }
+  subject { SpecHelpers.silence { application.initialize! } }
 
   shared_examples 'config.strict' do
     let(:adapter) { Flipper.adapter.adapter }
@@ -233,7 +233,7 @@ RSpec.describe Flipper::Engine do
     it "initializes cloud configuration" do
       stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
 
-      application.initialize!
+      silence { application.initialize! }
 
       expect(Flipper.instance).to be_a(Flipper::Cloud::DSL)
       expect(Flipper.instance.instrumenter).to be_a(Flipper::Cloud::Telemetry::Instrumenter)
@@ -263,7 +263,7 @@ RSpec.describe Flipper::Engine do
       }
 
       it "configures webhook app" do
-        application.initialize!
+        silence { application.initialize! }
 
         stub = stub_request(:get, "https://www.flippercloud.io/adapter/features?exclude_gate_names=true").with({
           headers: { "flipper-cloud-token" => ENV["FLIPPER_CLOUD_TOKEN"] },
@@ -278,7 +278,7 @@ RSpec.describe Flipper::Engine do
 
     context "without CLOUD_SYNC_SECRET" do
       it "does not configure webhook app" do
-        application.initialize!
+        silence { application.initialize! }
 
         post "/_flipper"
         expect(last_response.status).to eq(404)
@@ -288,7 +288,7 @@ RSpec.describe Flipper::Engine do
     context "without FLIPPER_CLOUD_TOKEN" do
       it "gracefully skips configuring webhook app" do
         ENV["FLIPPER_CLOUD_TOKEN"] = nil
-        application.initialize!
+        silence { application.initialize! }
         expect(Flipper.instance).to be_a(Flipper::DSL)
 
         post "/_flipper"
@@ -324,7 +324,7 @@ RSpec.describe Flipper::Engine do
     end
 
     it "enables cloud" do
-      application.initialize!
+      silence { application.initialize! }
       expect(ENV["FLIPPER_CLOUD_TOKEN"]).to eq("credentials-token")
       expect(ENV["FLIPPER_CLOUD_SYNC_SECRET"]).to eq("credentials-secret")
       expect(Flipper.instance).to be_a(Flipper::Cloud::DSL)
@@ -339,7 +339,7 @@ RSpec.describe Flipper::Engine do
 
   describe "config.actor_limit" do
     let(:adapter) do
-      application.initialize!
+      silence { application.initialize! }
       Flipper.adapter.adapter.adapter
     end
 

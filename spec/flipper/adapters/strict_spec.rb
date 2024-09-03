@@ -29,13 +29,13 @@ RSpec.describe Flipper::Adapters::Strict do
 
     context "#get" do
       it "raises an error for unknown feature" do
-        expect(silence { subject.get(feature) }).to match(/Could not find feature "unknown"/)
+        expect(capture_output { subject.get(feature) }).to match(/Could not find feature "unknown"/)
       end
     end
 
     context "#get_multi" do
       it "raises an error for unknown feature" do
-        expect(silence { subject.get_multi([feature]) }).to match(/Could not find feature "unknown"/)
+        expect(capture_output { subject.get_multi([feature]) }).to match(/Could not find feature "unknown"/)
       end
     end
   end

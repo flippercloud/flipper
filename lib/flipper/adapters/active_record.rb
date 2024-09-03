@@ -1,4 +1,5 @@
 require 'set'
+require 'securerandom'
 require 'flipper'
 require 'active_record'
 
@@ -72,14 +73,15 @@ module Flipper
       # Public: Adds a feature to the set of known features.
       def add(feature)
         with_connection(@feature_class) do
-          # race condition, but add is only used by enable/disable which happen
-          # super rarely, so it shouldn't matter in practice
-          @feature_class.transaction do
-            unless @feature_class.where(key: feature.key).exists?
-              begin
+          @feature_class.transaction(requires_new: true) do
+            begin
+              # race condition, but add is only used by enable/disable which happen
+              # super rarely, so it shouldn't matter in practice
+              unless @feature_class.where(key: feature.key).exists?
                 @feature_class.create!(key: feature.key)
-              rescue ::ActiveRecord::RecordNotUnique
               end
+            rescue ::ActiveRecord::RecordNotUnique
+              # already added
             end
           end
         end
@@ -220,7 +222,7 @@ module Flipper
         raise VALUE_TO_TEXT_WARNING if json_feature && value_not_text?
 
         with_connection(@gate_class) do
-          @gate_class.transaction do
+          @gate_class.transaction(requires_new: true) do
             clear(feature) if clear_feature
             delete(feature, gate)
             begin
@@ -244,17 +246,21 @@ module Flipper
       end
 
       def enable_multi(feature, gate, thing)
-        with_connection(@gate_class) do
-          @gate_class.create! do |g|
-            g.feature_key = feature.key
-            g.key = gate.key
-            g.value = thing.value.to_s
+        with_connection(@gate_class) do |connection|
+          begin
+            connection.transaction(requires_new: true) do
+              @gate_class.create! do |g|
+                g.feature_key = feature.key
+                g.key = gate.key
+                g.value = thing.value.to_s
+              end
+            end
+          rescue ::ActiveRecord::RecordNotUnique
+            # already added so move on with life
           end
         end
 
         nil
-      rescue ::ActiveRecord::RecordNotUnique
-        # already added so no need move on with life
       end
 
       def result_for_gates(feature, gates)
