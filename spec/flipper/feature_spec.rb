@@ -58,12 +58,12 @@ RSpec.describe Flipper::Feature do
 
       it 'returns true if feature is enabled' do
         subject.enable
-        expect(subject.enabled?(actors)).to be(true)
+        expect(subject.enabled?(*actors)).to be(true)
       end
 
       it 'returns true if feature is enabled for any actor' do
         subject.enable_actor actors.first
-        expect(subject.enabled?(actors)).to be(true)
+        expect(subject.enabled?(*actors)).to be(true)
       end
 
       it 'returns true if feature is enabled for any actor with multiple arguments' do
@@ -73,7 +73,7 @@ RSpec.describe Flipper::Feature do
 
       it 'returns false if feature is disabled for all actors' do
         subject.disable
-        expect(subject.enabled?(actors)).to be(false)
+        expect(subject.enabled?(*actors)).to be(false)
       end
     end
   end
