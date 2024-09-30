@@ -17,7 +17,8 @@ module Flipper
             {}
           end
 
-          @features = flipper.features.map do |feature|
+          @features = keys.map do |feature_key|
+            feature = Flipper::Feature.new(feature_key, Flipper.adapter)
             decorated_feature = Decorators::Feature.new(feature)
 
             if Flipper::UI.configuration.show_feature_description_in_list?
