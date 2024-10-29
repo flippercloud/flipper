@@ -125,7 +125,7 @@
                     <div class="col">
                       <select name="value" class="form-select">
                         <option value="">Select a group...</option>
-                        <% @feature.disabled_groups.each do |group| %>
+                        <% @feature.disabled_groups.sort_by(&:name).each do |group| %>
                           <option value="<%= group.name %>"><%= group.name %></option>
                         <% end %>
                       </select>
