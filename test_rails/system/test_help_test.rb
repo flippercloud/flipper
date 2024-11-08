@@ -6,6 +6,7 @@ return unless Rails::VERSION::MAJOR >= 7
 require "capybara/cuprite"
 require "flipper"
 require "flipper/test_help"
+require "action_controller/railtie"
 
 require 'action_dispatch/system_testing/server'
 ActionDispatch::SystemTesting::Server.silence_puma = true
