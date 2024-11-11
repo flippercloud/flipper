@@ -6,14 +6,26 @@ Dir['flipper-*.gemspec'].each do |gemspec|
   gemspec(name: "flipper-#{plugin}", development_group: plugin)
 end
 
+rails_version = ENV['RAILS_VERSION'] || '8.0'
+sqlite3_version = ENV['SQLITE3_VERSION'] || case rails_version
+when /8\.\d+/
+  '2.1.0'
+when /7\.\d+/
+  '1.4.1'
+when /6\.\d+/
+  '1.4.1'
+when /5\.\d+/
+  '1.3.11'
+end
+
 gem 'debug'
 gem 'rake'
 gem 'statsd-ruby', '~> 1.2.1'
 gem 'rspec', '~> 3.0'
 gem 'rack-test'
 gem 'rackup'
-gem 'sqlite3', "~> #{ENV['SQLITE3_VERSION'] || '1.4.1'}"
-gem 'rails', "~> #{ENV['RAILS_VERSION'] || '7.1'}"
+gem 'sqlite3', "~> #{sqlite3_version}"
+gem 'rails', "~> #{rails_version}"
 gem 'minitest', '~> 5.18'
 gem 'minitest-documentation'
 gem 'webmock'
