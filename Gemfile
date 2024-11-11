@@ -38,8 +38,9 @@ gem 'stackprof-webnav'
 gem 'flamegraph'
 gem 'mysql2'
 gem 'pg'
-gem 'cuprite'
+gem 'cuprite', '0.15.0'
 gem 'puma'
+gem 'ferrum', '0.14.0' # until we can upgrae to whatever is after 0.15.0 as that doesn't support 2.7
 
 group(:guard) do
   gem 'guard'
