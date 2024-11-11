@@ -5,6 +5,8 @@ RSpec.describe Flipper::CLI do
   let(:stderr) { StringIO.new }
   let(:cli) { Flipper::CLI.new(stdout: stdout, stderr: stderr) }
 
+  Result = Struct.new(:status, :stdout, :stderr, keyword_init: true)
+
   before do
     # Prentend stdout/stderr a TTY to test colorization
     allow(stdout).to receive(:tty?).and_return(true)
@@ -12,7 +14,7 @@ RSpec.describe Flipper::CLI do
   end
 
   # Infer the command from the description
-  subject(:argv) do
+  let(:argv) do
     descriptions = self.class.parent_groups.map {|g| g.metadata[:description_args] }.reverse.flatten.drop(1)
     descriptions.map { |arg| Shellwords.split(arg) }.flatten
   end
@@ -26,7 +28,7 @@ RSpec.describe Flipper::CLI do
       status = e.status
     end
 
-    OpenStruct.new(status: status, stdout: stdout.string, stderr: stderr.string)
+    Result.new(status: status, stdout: stdout.string, stderr: stderr.string)
   end
 
   before do
