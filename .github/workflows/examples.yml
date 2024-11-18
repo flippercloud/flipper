@@ -58,6 +58,7 @@ jobs:
           - ruby: "3.3"
             rails: "6.1.0"
     env:
+      SQLITE3_VERSION: ${{ matrix.rails == '8.0.0' && '2.1.0' || '1.4.1' }}
       REDIS_URL: redis://localhost:6379/0
       CI: true
       RAILS_VERSION: ${{ matrix.rails }}
