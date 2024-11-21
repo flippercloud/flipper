@@ -84,5 +84,16 @@
     <script src="<%= script_name + bootstrap_js[:src] %>" integrity="<%= bootstrap_js[:hash] %>" crossorigin="anonymous"></script>
     <script src="<%= script_name %>/js/application.js?v=<%= Flipper::VERSION %>"></script>
     <script src="<%= script_name %>/js/version.js?v=<%= Flipper::VERSION %>"></script>
+    <% unless Flipper::UI.configuration.scripts.empty? %>
+      <% Flipper::UI.configuration.scripts.each do |script| %>
+        <script
+          src="<%= script[:src] %>"
+          <% if script[:integrity].present? %>
+            integrity="<%= script[:integrity] %>"
+          <% end %>
+          crossorigin="anonymous">
+        </script>
+      <% end %>
+    <% end %>
   </body>
 </html>
