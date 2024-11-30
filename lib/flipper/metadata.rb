@@ -7,5 +7,6 @@ module Flipper
     "source_code_uri"   => "https://github.com/flippercloud/flipper",
     "bug_tracker_uri"   => "https://github.com/flippercloud/flipper/issues",
     "changelog_uri"     => "https://github.com/flippercloud/flipper/releases/tag/v#{Flipper::VERSION}",
+    "funding_uri"       => "https://github.com/sponsors/flippercloud",
   }.freeze
 end
