@@ -1,146 +1,79 @@
 require 'flipper'
+require 'flipper/adapters/cache_base'
 require 'active_support/notifications'
 
 module Flipper
   module Adapters
     # Public: Adapter that wraps another adapter with the ability to cache
     # adapter calls in ActiveSupport::ActiveSupportCacheStore caches.
-    #
-    class ActiveSupportCacheStore
-      include ::Flipper::Adapter
-
-      # Internal
-      attr_reader :cache
-
-      # Public
-      def initialize(adapter, cache, expires_in: nil, write_through: false)
-        @adapter = adapter
-        @cache = cache
-        @write_options = {}
-        @write_options[:expires_in] = expires_in if expires_in
+    class ActiveSupportCacheStore < CacheBase
+      def initialize(adapter, cache, ttl = nil, expires_in: :none_provided, write_through: false, prefix: nil)
+        if expires_in == :none_provided
+          ttl ||= nil
+        else
+          warn "DEPRECATION WARNING: The `expires_in` kwarg is deprecated for " +
+               "Flipper::Adapters::ActiveSupportCacheStore and will be removed " +
+               "in the next major version. Please pass in expires in as third " +
+               "argument instead."
+          ttl = expires_in
+        end
+        super(adapter, cache, ttl, prefix: prefix)
         @write_through = write_through
-
-        @cache_version = 'v1'.freeze
-        @namespace = "flipper/#{@cache_version}".freeze
-        @features_key = "#{@namespace}/features".freeze
-        @get_all_key = "#{@namespace}/get_all".freeze
       end
 
-      # Public
-      def features
-        read_feature_keys
-      end
-
-      # Public
-      def add(feature)
-        result = @adapter.add(feature)
-        @cache.delete(@features_key)
-        result
-      end
-
-      ## Public
       def remove(feature)
-        result = @adapter.remove(feature)
-        @cache.delete(@features_key)
-
         if @write_through
-          @cache.write(key_for(feature.key), default_config, @write_options)
+          result = @adapter.remove(feature)
+          expire_features_cache
+          cache_write feature_cache_key(feature.key), default_config
+          result
         else
-          @cache.delete(key_for(feature.key))
-        end
-
-        result
-      end
-
-      ## Public
-      def clear(feature)
-        result = @adapter.clear(feature)
-        @cache.delete(key_for(feature.key))
-        result
-      end
-
-      ## Public
-      def get(feature)
-        @cache.fetch(key_for(feature.key), @write_options) do
-          @adapter.get(feature)
+          super
         end
       end
 
-      def get_multi(features)
-        read_many_features(features)
-      end
-
-      def get_all
-        if @cache.write(@get_all_key, Time.now.to_i, @write_options.merge(unless_exist: true))
-          response = @adapter.get_all
-          response.each do |key, value|
-            @cache.write(key_for(key), value, @write_options)
-          end
-          @cache.write(@features_key, response.keys.to_set, @write_options)
-          response
-        else
-          features = read_feature_keys.map { |key| Flipper::Feature.new(key, self) }
-          read_many_features(features)
-        end
-      end
-
-      ## Public
       def enable(feature, gate, thing)
-        result = @adapter.enable(feature, gate, thing)
-
         if @write_through
-          @cache.write(key_for(feature.key), @adapter.get(feature), @write_options)
+          result = @adapter.enable(feature, gate, thing)
+          cache_write feature_cache_key(feature.key), @adapter.get(feature)
+          result
         else
-          @cache.delete(key_for(feature.key))
+          super
         end
-
-        result
       end
 
-      ## Public
       def disable(feature, gate, thing)
-        result = @adapter.disable(feature, gate, thing)
-
         if @write_through
-          @cache.write(key_for(feature.key), @adapter.get(feature), @write_options)
+          result = @adapter.disable(feature, gate, thing)
+          cache_write feature_cache_key(feature.key), @adapter.get(feature)
+          result
         else
-          @cache.delete(key_for(feature.key))
+          super
         end
-
-        result
       end
 
       private
 
-      def key_for(key)
-        "#{@namespace}/feature/#{key}"
+      def cache_fetch(key, &block)
+        @cache.fetch(key, write_options, &block)
       end
 
-      # Internal: Returns an array of the known feature keys.
-      def read_feature_keys
-        @cache.fetch(@features_key, @write_options) { @adapter.features }
+      def cache_read_multi(keys)
+        @cache.read_multi(*keys)
       end
 
-      # Internal: Given an array of features, attempts to read through cache in
-      # as few network calls as possible.
-      def read_many_features(features)
-        keys = features.map { |feature| key_for(feature.key) }
-        cache_result = @cache.read_multi(*keys)
-        uncached_features = features.reject { |feature| cache_result[key_for(feature)] }
+      def cache_write(key, value)
+        @cache.write(key, value, write_options)
+      end
 
-        if uncached_features.any?
-          response = @adapter.get_multi(uncached_features)
-          response.each do |key, value|
-            @cache.write(key_for(key), value, @write_options)
-            cache_result[key_for(key)] = value
-          end
-        end
+      def cache_delete(key)
+        @cache.delete(key)
+      end
 
-        result = {}
-        features.each do |feature|
-          result[feature.key] = cache_result[key_for(feature.key)]
-        end
-        result
+      def write_options
+        write_options = {}
+        write_options[:expires_in] = @ttl if @ttl
+        write_options
       end
     end
   end

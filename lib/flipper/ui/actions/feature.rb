@@ -18,10 +18,6 @@ module Flipper
           @page_title = "#{@feature.key} // Features"
           @percentages = [0, 1, 5, 10, 25, 50, 100]
 
-          breadcrumb 'Home', '/'
-          breadcrumb 'Features', '/features'
-          breadcrumb @feature.key
-
           view_response :feature
         end
 
@@ -30,9 +26,6 @@ module Flipper
 
           unless Flipper::UI.configuration.feature_removal_enabled
             status 403
-
-            breadcrumb 'Home', '/'
-            breadcrumb 'Features', '/features'
 
             halt view_response(:feature_removal_disabled)
           end

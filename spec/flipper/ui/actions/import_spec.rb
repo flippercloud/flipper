@@ -35,7 +35,7 @@ RSpec.describe Flipper::UI::Actions::Import do
 
     it 'responds with redirect to settings' do
       expect(last_response.status).to be(302)
-      expect(last_response.headers['Location']).to eq('/features')
+      expect(last_response.headers['location']).to eq('/features')
     end
   end
 end

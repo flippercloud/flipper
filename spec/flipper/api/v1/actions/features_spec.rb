@@ -124,6 +124,61 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
         expect(json_response).to eq(expected_response)
       end
     end
+
+    context 'with accept encoding header set to gzip' do
+      before do
+        flipper[:my_feature].enable
+        flipper[:my_feature].enable(admin)
+      end
+
+      it 'responds with content encoding gzip and correct attributes' do
+        get '/features', {}, 'HTTP_ACCEPT_ENCODING' => 'gzip'
+
+        expected_response = {
+          'features' => [
+            {
+              'key' => 'my_feature',
+              'state' => 'on',
+              'gates' => [
+                {
+                  'key' => 'boolean',
+                  'name' => 'boolean',
+                  'value' => 'true',
+                },
+                {
+                  'key' => 'expression',
+                  'name' => 'expression',
+                  'value' => nil,
+                },
+                {
+                  'key' => 'actors',
+                  'name' => 'actor',
+                  'value' => ['10'],
+                },
+                {
+                  'key' => 'percentage_of_actors',
+                  'name' => 'percentage_of_actors',
+                  'value' => nil,
+                },
+                {
+                  'key' => 'percentage_of_time',
+                  'name' => 'percentage_of_time',
+                  'value' => nil,
+                },
+                {
+                  'key' => 'groups',
+                  'name' => 'group',
+                  'value' => [],
+                },
+              ],
+            },
+          ],
+        }
+        expect(last_response["content-encoding"]).to eq('gzip')
+        expect(last_response.status).to eq(200)
+        expect(json_response).to eq(expected_response)
+      end
+    end
   end
 
   describe 'post' do

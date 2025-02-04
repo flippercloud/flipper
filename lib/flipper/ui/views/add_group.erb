@@ -5,7 +5,10 @@
 <% end %>
 
 <div class="card">
-  <h4 class="card-header">Enable Group for <%= @feature.key %></h4>
+  <h4 class="card-header">
+    <a class="link-dark" href="<%= script_name %>/features/<%= @feature.key %>"><%= @feature.key %></a>
+    /
+    Enable Group</h4>
   <div class="card-body">
     <% if @feature.disabled_groups.empty? %>
       <p>All groups are enabled for this feature which means there is nothing to add.</p>
@@ -13,16 +16,18 @@
       <p>
         Turn on this feature for an entire group of actors.
       </p>
-      <form action="<%= script_name %>/features/<%= @feature.key %>/groups" method="post" class="form-inline">
+      <form action="<%= script_name %>/features/<%= @feature.key %>/groups" method="post" class="row">
         <%== csrf_input_tag %>
         <input type="hidden" name="operation" value="enable">
-        <select name="value" class="form-control mr-2">
-          <option value="">Select a group...</option>
-          <% @feature.disabled_groups.each do |group| %>
-            <option value="<%= group.name %>"><%= group.name %></option>
-          <% end %>
-        </select>
-        <input type="submit" value="Add Group" class="btn btn-primary">
+        <div class="col">
+          <select name="value" class="form-select">
+            <option value="">Select a group...</option>
+            <% @feature.disabled_groups.each do |group| %>
+              <option value="<%= group.name %>"><%= group.name %></option>
+            <% end %>
+          </select>
+        </div>
+        <div class="col-auto"><input type="submit" value="Add Group" class="btn btn-primary"></div>
       </form>
     <% end %>
   </div>

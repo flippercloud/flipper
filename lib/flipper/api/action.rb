@@ -69,7 +69,7 @@ module Flipper
         @flipper = flipper
         @request = request
         @code = 200
-        @headers = { 'content-type' => Api::CONTENT_TYPE }
+        @headers = {Rack::CONTENT_TYPE => Api::CONTENT_TYPE}
       end
 
       # Public: Runs the request method for the provided request.
@@ -114,7 +114,7 @@ module Flipper
       # status - http status code
 
       def json_response(object, status = 200)
-        header 'content-type', Api::CONTENT_TYPE
+        header Rack::CONTENT_TYPE, Api::CONTENT_TYPE
         status(status)
         body = Typecast.to_json(object)
         halt [@code, @headers, [body]]

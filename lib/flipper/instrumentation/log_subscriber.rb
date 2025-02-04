@@ -1,4 +1,5 @@
 require 'securerandom'
+require 'active_support/gem_version'
 require 'active_support/notifications'
 require 'active_support/log_subscriber'
 
@@ -71,11 +72,19 @@ module Flipper
         self.class.logger
       end
 
+      def self.attach
+        attach_to InstrumentationNamespace
+      end
+
+      def self.detach
+        # Rails 5.2 doesn't support this, that's fine
+        detach_from InstrumentationNamespace if respond_to?(:detach_from)
+      end
+
       private
 
       # Rails 7.1 changed the signature of this function.
-      # Checking if > 7.0.99 rather than >= 7.1 so that 7.1 pre-release versions are included.
-      COLOR_OPTIONS = if Rails.gem_version > Gem::Version.new('7.0.99')
+      COLOR_OPTIONS = if Gem::Requirement.new(">=7.1").satisfied_by?(ActiveSupport.gem_version)
         { bold: true }.freeze
       else
         true
@@ -88,5 +97,5 @@ module Flipper
     end
   end
 
-  Instrumentation::LogSubscriber.attach_to InstrumentationNamespace
+  Instrumentation::LogSubscriber.attach
 end

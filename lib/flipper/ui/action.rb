@@ -27,24 +27,7 @@ module Flipper
                                              'delete'.freeze,
                                            ]).freeze
 
-      SOURCES = {
-        bootstrap_css: {
-          src: '/css/bootstrap-4.6.0.min.css'.freeze,
-          hash: 'sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l'.freeze
-        }.freeze,
-        jquery_js: {
-          src: '/js/jquery-3.6.0.slim.js'.freeze,
-          hash: 'sha256-HwWONEZrpuoh951cQD1ov2HUK5zA5DwJ1DNUXaM6FsY='.freeze
-        }.freeze,
-        popper_js: {
-          src: '/js/popper-1.12.9.min.js'.freeze,
-          hash: 'sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q'.freeze
-        }.freeze,
-        bootstrap_js: {
-          src: '/js/bootstrap-4.6.0.min.js'.freeze,
-          hash: 'sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF'.freeze
-        }.freeze
-      }.freeze
+      SOURCES = JSON.parse(File.read(File.expand_path('sources.json', __dir__))).freeze
       CONTENT_SECURITY_POLICY = <<-CSP.delete("\n")
         default-src 'none';
         img-src 'self';
@@ -109,13 +92,7 @@ module Flipper
         @flipper = flipper
         @request = request
         @code = 200
-        @headers = { 'content-type' => 'text/plain' }
-        @breadcrumbs =
-          if Flipper::UI.configuration.application_breadcrumb_href
-            [Breadcrumb.new('App', Flipper::UI.configuration.application_breadcrumb_href)]
-          else
-            []
-          end
+        @headers = {Rack::CONTENT_TYPE => 'text/plain'}
       end
 
       # Public: Runs the request method for the provided request.
@@ -159,7 +136,7 @@ module Flipper
       #
       # Returns a response.
       def view_response(name)
-        header 'content-type', 'text/html'
+        header Rack::CONTENT_TYPE, 'text/html'
         header 'content-security-policy', CONTENT_SECURITY_POLICY
         body = view_with_layout { view_without_layout name }
         halt [@code, @headers, [body]]
@@ -172,7 +149,7 @@ module Flipper
       #
       # Returns a response.
       def json_response(object)
-        header 'content-type', 'application/json'
+        header Rack::CONTENT_TYPE, 'application/json'
         body = case object
         when String
           object
@@ -219,16 +196,6 @@ module Flipper
         end
       end
 
-      # Public: Add a breadcrumb to the trail.
-      #
-      # text - The String text for the breadcrumb.
-      # href - The String href for the anchor tag (optional). If nil, breadcrumb
-      #        is assumed to be the end of the trail.
-      def breadcrumb(text, href = nil)
-        breadcrumb_href = href.nil? ? href : "#{script_name}#{href}"
-        @breadcrumbs << Breadcrumb.new(text, breadcrumb_href)
-      end
-
       # Private
       def view_with_layout(&block)
         view :layout, &block
@@ -250,6 +217,16 @@ module Flipper
       # Internal: The path the app is mounted at.
       def script_name
         request.env['SCRIPT_NAME']
+      end
+
+      # Internal: Generate urls relative to the app's script name.
+      #
+      #   url_for("feature")             # => "http://localhost:9292/flipper/feature"
+      #   url_for("/thing")              # => "http://localhost:9292/thing"
+      #   url_for("https://example.com") # => "https://example.com"
+      #
+      def url_for(*parts)
+        URI.join(request.base_url, script_name + '/', *parts).to_s
       end
 
       # Private
@@ -279,11 +256,6 @@ module Flipper
       # to inform people of that fact.
       def render_read_only
         status 403
-
-        breadcrumb 'Home', '/'
-        breadcrumb 'Features', '/features'
-        breadcrumb 'Noooooope'
-
         halt view_response(:read_only)
       end
 
@@ -296,19 +268,23 @@ module Flipper
       end
 
       def bootstrap_css
-        SOURCES[:bootstrap_css]
+        asset_hash "/css/bootstrap.min.css"
       end
 
       def bootstrap_js
-        SOURCES[:bootstrap_js]
+        asset_hash "/js/bootstrap.min.js"
       end
 
       def popper_js
-        SOURCES[:popper_js]
+        asset_hash "/js/popper.min.js"
       end
 
-      def jquery_js
-        SOURCES[:jquery_js]
+      def asset_hash(src)
+        v = ENV["RACK_ENV"] == "development" ? Time.now.to_i : Flipper::VERSION
+        {
+          src: "#{src}?v=#{v}",
+          hash: SOURCES[src]
+        }
       end
     end
   end

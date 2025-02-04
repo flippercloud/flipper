@@ -135,6 +135,10 @@ module Flipper
         logger.send(level, "name=flipper_cloud #{message}")
       end
 
+      def instrument(name, payload = {}, &block)
+        instrumenter.instrument(name, payload, &block)
+      end
+
       private
 
       def app_adapter
@@ -163,7 +167,8 @@ module Flipper
           max_retries: 0, # we'll handle retries ourselves
           debug_output: @debug_output,
           headers: {
-            "Flipper-Cloud-Token" => @token,
+            "flipper-cloud-token" => @token,
+            "accept-encoding" => "gzip",
           },
         })
       end
@@ -173,7 +178,7 @@ module Flipper
       end
 
       def setup_log(options)
-        set_option :logging_enabled, options, default: true, typecast: :boolean
+        set_option :logging_enabled, options, default: false, typecast: :boolean
         set_option :logger, options, from_env: false, default: -> {
           if logging_enabled
             Logger.new(STDOUT)
@@ -186,6 +191,11 @@ module Flipper
       def setup_http(options)
         set_option :url, options, default: DEFAULT_URL
         set_option :debug_output, options, from_env: false
+
+        if @debug_output.nil? && Flipper::Typecast.to_boolean(ENV["FLIPPER_CLOUD_DEBUG_OUTPUT_STDOUT"])
+          @debug_output = STDOUT
+        end
+
         set_option :read_timeout, options, default: 5, typecast: :float, minimum: 0.1
         set_option :open_timeout, options, default: 2, typecast: :float, minimum: 0.1
         set_option :write_timeout, options, default: 5, typecast: :float, minimum: 0.1
@@ -208,8 +218,7 @@ module Flipper
           Telemetry.instance_for(self)
         }
 
-        # This is alpha. Don't use this unless you are me. And you are not me.
-        set_option :telemetry_enabled, options, default: false, typecast: :boolean
+        set_option :telemetry_enabled, options, default: true, typecast: :boolean
         instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
         @instrumenter = if telemetry_enabled
           Telemetry::Instrumenter.new(self, instrumenter)

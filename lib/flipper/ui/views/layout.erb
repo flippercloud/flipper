@@ -12,43 +12,52 @@
   <body class="py-4">
     <div class="container mw-600">
       <%- unless Flipper::UI.configuration.banner_text.nil? -%>
-        <div class="alert alert-<%= Flipper::UI.configuration.banner_class %> text-center font-weight-bold">
+        <div class="alert alert-<%= Flipper::UI.configuration.banner_class %> text-center fw-bold">
           <%== Sanitize.fragment(Flipper::UI.configuration.banner_text, Sanitize::Config::BASIC) %>
         </div>
       <%- end -%>
 
-      <div class="container text-muted small mb-3">
-        <a href="https://www.flippercloud.io/docs/ui?utm_source=oss&utm_medium=ui&utm_campaign=docs">Docs</a> &bull;
-        <a href="<%= script_name %>/settings">Settings</a> &bull;
-        Version: <%= Flipper::VERSION %>
-        <a href="#" class="badge badge-warning ml-2 d-none" style="font-size:100%" id="new-version-badge" data-version="<%= Flipper::VERSION %>">
+      <div class="text-muted small text-end">
+        <a href="#" class="badge text-bg-warning ms-2 d-none" style="font-size:100%" id="new-version-badge" data-version="<%= Flipper::VERSION %>">
         </a>
 
         <% if Flipper.deprecated_ruby_version? %>
-          <a href="https://github.com/flippercloud/flipper/pull/776" class="badge badge-danger ml-2" style="font-size:100%">
+          <a href="https://github.com/flippercloud/flipper/pull/776" class="badge text-bg-danger ms-2" style="font-size:100%">
             Ruby <%= RUBY_VERSION %> deprecated
           </a>
         <% end %>
 
         <% if defined?(Rails) && Flipper::Engine.deprecated_rails_version? %>
-          <a href="https://github.com/flippercloud/flipper/pull/776" class="badge badge-danger ml-2" style="font-size:100%">
+          <a href="https://github.com/flippercloud/flipper/pull/776" class="badge text-bg-danger ms-2" style="font-size:100%">
             Rails <%= Rails.version %> deprecated
           </a>
         <% end %>
       </div>
-
-      <nav aria-label="breadcrumb">
-        <ol class="breadcrumb bg-white border align-items-center mb-4">
-          <% @breadcrumbs.each do |breadcrumb| %>
-            <li class="breadcrumb-item <% if breadcrumb.active? %>active<% end %>">
-              <% if breadcrumb.active? %>
-                <%= breadcrumb.text %>
-              <% else %>
-                <a href="<%= breadcrumb.href %>"><%= breadcrumb.text %></a>
-              <% end %>
+      <nav>
+        <ul class="nav nav-underline mb-3 align-items-center">
+          <% if Flipper::UI.configuration.application_href %>
+            <li class="nav-item">
+              <a class="nav-link" href="<%= Flipper::UI.configuration.application_href %>">
+                ‹ App
+              </a>
             </li>
           <% end %>
-        </ol>
+
+
+          <% Flipper::UI.configuration.nav_items.each do |item| %>
+            <li class="nav-item">
+              <a href="<%= url_for(item[:href]) %>" class="nav-link<%= " active" if request.url.start_with?(url_for(item[:href])) %>">
+                <%= item[:title] %>
+              </a>
+            </li>
+          <% end %>
+
+          <li class="nav-item ms-auto text-muted small">
+            <a href="https://www.flippercloud.io/docs/ui?utm_source=oss&utm_medium=ui&utm_campaign=docs">Docs</a>
+            &bull;
+            Version: <%= Flipper::VERSION %>
+          </li>
+        </ul>
       </nav>
 
       <div>
@@ -71,7 +80,6 @@
       <% end %>
     </div>
 
-    <script src="<%= script_name + jquery_js[:src] %>" integrity="<%= jquery_js[:hash] %>" crossorigin="anonymous"></script>
     <script src="<%= script_name + popper_js[:src] %>" integrity="<%= popper_js[:hash] %>" crossorigin="anonymous"></script>
     <script src="<%= script_name + bootstrap_js[:src] %>" integrity="<%= bootstrap_js[:hash] %>" crossorigin="anonymous"></script>
     <script src="<%= script_name %>/js/application.js?v=<%= Flipper::VERSION %>"></script>

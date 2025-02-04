@@ -77,7 +77,7 @@ RSpec.describe Flipper::Api::Action do
         status, headers, body = response
         parsed_body = JSON.parse(body[0])
 
-        expect(headers['content-type']).to eq('application/json')
+        expect(headers[Rack::CONTENT_TYPE]).to eq('application/json')
         expect(parsed_body).to eql(api_not_found_response)
       end
     end
@@ -91,7 +91,7 @@ RSpec.describe Flipper::Api::Action do
         status, headers, body = response
         parsed_body = JSON.parse(body[0])
 
-        expect(headers['content-type']).to eq('application/json')
+        expect(headers[Rack::CONTENT_TYPE]).to eq('application/json')
         expect(parsed_body['code']).to eq(2)
         expect(parsed_body['message']).to eq('Group not registered.')
         expect(parsed_body['more_info']).to eq(api_error_code_reference_url)

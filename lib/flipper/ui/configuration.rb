@@ -13,10 +13,20 @@ module Flipper
       # (feature_creation_enabled and feature_removal_enabled).
       attr_accessor :read_only
 
-      # Public: If you set this, the UI will always have a first breadcrumb that
+      # Public: If you set this, the UI will always have a first nav item that
       # says "App" which points to this href. The href can be a path (ie: "/")
       # or full url ("https://app.example.com/").
-      attr_accessor :application_breadcrumb_href
+      attr_accessor :application_href
+      alias_method :application_breadcrumb_href, :application_href
+      alias_method :application_breadcrumb_href=, :application_href=
+
+      # Public: An array of nav items to show. By default "Features" and
+      # "Settings" are shown, but you can add your own. Each item must have
+      # a `:title` and `:href` key:
+      #
+      #   config.nav_items << { title: "Custom", href: "/custom/page" }
+      #
+      attr_accessor :nav_items
 
       # Public: Is feature creation allowed from the UI? Defaults to true. If
       # set to false, users of the UI cannot create features. All feature
@@ -63,6 +73,10 @@ module Flipper
       # Default is false.
       attr_accessor :confirm_fully_enable
 
+      # Public: if you want to get a confirm pop up box while disabling a feature
+      # Default is false.
+      attr_accessor :confirm_disable
+
       VALID_BANNER_CLASS_VALUES = %w(
         danger
         dark
@@ -91,7 +105,12 @@ module Flipper
         @show_feature_description_in_list = false
         @actors_separator = ','
         @confirm_fully_enable = false
+        @confirm_disable = true
         @read_only = false
+        @nav_items = [
+          { title: "Features", href: "features" },
+          { title: "Settings", href: "settings" },
+        ]
       end
 
       def using_descriptions?

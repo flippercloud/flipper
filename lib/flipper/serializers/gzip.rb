@@ -3,10 +3,8 @@ require "stringio"
 
 module Flipper
   module Serializers
-    module Gzip
-      module_function
-
-      def serialize(source)
+    class Gzip
+      def self.serialize(source)
         return if source.nil?
         output = StringIO.new
         gz = Zlib::GzipWriter.new(output)
@@ -15,7 +13,7 @@ module Flipper
         output.string
       end
 
-      def deserialize(source)
+      def self.deserialize(source)
         return if source.nil?
         Zlib::GzipReader.wrap(StringIO.new(source), &:read)
       end

@@ -21,8 +21,9 @@ Gem::Specification.new do |gem|
   gem.metadata      = Flipper::METADATA
 
   gem.add_dependency 'rack', '>= 1.4', '< 4'
-  gem.add_dependency 'rack-protection', '>= 1.5.3', '<= 4.0.0'
+  gem.add_dependency 'rack-protection', '>= 1.5.3', '<5.0.0'
+  gem.add_dependency 'rack-session', '>= 1.0.2', '< 3.0.0'
   gem.add_dependency 'flipper', "~> #{Flipper::VERSION}"
   gem.add_dependency 'erubi', '>= 1.0.0', '< 2.0.0'
-  gem.add_dependency 'sanitize', '< 7'
+  gem.add_dependency 'sanitize', '< 8'
 end

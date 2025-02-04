@@ -8,6 +8,9 @@ RSpec.describe Flipper::Api do
 
       get '/features'
 
+      expect(last_request.env["flipper.action_class"]).to eq(Flipper::Api::V1::Actions::Features)
+      expect(last_request.env["flipper.action_method"]).to eq("get")
+
       expect(last_response.status).to be(200)
       feature_names = json_response.fetch('features').map { |feature| feature.fetch('key') }
       expect(feature_names).to eq(%w(a b))

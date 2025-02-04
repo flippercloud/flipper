@@ -1,3 +1,5 @@
+require 'delegate'
+
 module Flipper
   module Api
     module V1

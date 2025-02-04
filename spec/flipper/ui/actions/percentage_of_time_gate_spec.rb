@@ -24,7 +24,7 @@ RSpec.describe Flipper::UI::Actions::PercentageOfTimeGate do
 
       it 'redirects back to feature' do
         expect(last_response.status).to be(302)
-        expect(last_response.headers['Location']).to eq('/features/search')
+        expect(last_response.headers['location']).to eq('/features/search')
       end
     end
 
@@ -41,7 +41,7 @@ RSpec.describe Flipper::UI::Actions::PercentageOfTimeGate do
 
       it 'redirects back to feature' do
         expect(last_response.status).to be(302)
-        expect(last_response.headers['Location']).to eq('/features/sp%20ace')
+        expect(last_response.headers['location']).to eq('/features/sp%20ace')
       end
     end
 
@@ -58,7 +58,7 @@ RSpec.describe Flipper::UI::Actions::PercentageOfTimeGate do
 
       it 'redirects back to feature' do
         expect(last_response.status).to be(302)
-        expect(last_response.headers['Location']).to eq('/features/search?error=Invalid%20percentage%20of%20time%20value:%20value%20must%20be%20a%20positive%20number%20less%20than%20or%20equal%20to%20100,%20but%20was%20555')
+        expect(last_response.headers['location']).to eq('/features/search?error=Invalid%20percentage%20of%20time%20value:%20value%20must%20be%20a%20positive%20number%20less%20than%20or%20equal%20to%20100,%20but%20was%20555')
       end
     end
   end

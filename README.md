@@ -1,6 +1,6 @@
 [![Flipper Mark](docs/images/banner.jpg)](https://www.flippercloud.io)
 
-[Website](https://flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=website_link) | [Documentation](https://flippercloud.io/docs?utm_source=oss&utm_medium=readme&utm_campaign=docs_link) | [Examples](examples) | [Twitter](https://twitter.com/flipper_cloud) | [Ruby.social](https://ruby.social/@flipper)
+[Website](https://flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=website_link) | [Documentation](https://flippercloud.io/docs?utm_source=oss&utm_medium=readme&utm_campaign=docs_link) | [Examples](examples) | [Chat](https://chat.flippercloud.io/join/xjHq-aJsA-BeZH) | [Twitter](https://twitter.com/flipper_cloud) | [Ruby.social](https://ruby.social/@flipper)
 
 # Flipper
 
@@ -111,3 +111,5 @@ We also have a [free plan](https://www.flippercloud.io?utm_source=oss&utm_medium
 | ![@alexwheeler](https://avatars3.githubusercontent.com/u/3260042?s=64) | [@alexwheeler](https://github.com/alexwheeler) | api         |
 | ![@thetimbanks](https://avatars1.githubusercontent.com/u/471801?s=64)  | [@thetimbanks](https://github.com/thetimbanks) | ui          |
 | ![@lazebny](https://avatars1.githubusercontent.com/u/6276766?s=64)     | [@lazebny](https://github.com/lazebny)         | docker      |
+| ![@pagertree](https://avatars.githubusercontent.com/u/24941240?s=64)   | [@pagertree](https://github.com/pagertree)   | sponsor     |
+| ![@kdaigle](https://avatars.githubusercontent.com/u/2501?s=64)   | [@kdaigle](https://github.com/kdaigle)   | sponsor     |

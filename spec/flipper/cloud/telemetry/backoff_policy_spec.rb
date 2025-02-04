@@ -4,8 +4,8 @@ RSpec.describe Flipper::Cloud::Telemetry::BackoffPolicy do
   context "#initialize" do
     it "with no options" do
       policy = described_class.new
-      expect(policy.min_timeout_ms).to eq(1_000)
-      expect(policy.max_timeout_ms).to eq(30_000)
+      expect(policy.min_timeout_ms).to eq(30_000)
+      expect(policy.max_timeout_ms).to eq(120_000)
       expect(policy.multiplier).to eq(1.5)
       expect(policy.randomization_factor).to eq(0.5)
     end
@@ -49,19 +49,18 @@ RSpec.describe Flipper::Cloud::Telemetry::BackoffPolicy do
     end
 
     it "from env" do
-      env = {
+      ENV.update(
         "FLIPPER_BACKOFF_MIN_TIMEOUT_MS" => "1000",
         "FLIPPER_BACKOFF_MAX_TIMEOUT_MS" => "2000",
         "FLIPPER_BACKOFF_MULTIPLIER" => "1.9",
         "FLIPPER_BACKOFF_RANDOMIZATION_FACTOR" => "0.1",
-      }
-      with_env env do
-        policy = described_class.new
-        expect(policy.min_timeout_ms).to eq(1000)
-        expect(policy.max_timeout_ms).to eq(2000)
-        expect(policy.multiplier).to eq(1.9)
-        expect(policy.randomization_factor).to eq(0.1)
-      end
+      )
+
+      policy = described_class.new
+      expect(policy.min_timeout_ms).to eq(1000)
+      expect(policy.max_timeout_ms).to eq(2000)
+      expect(policy.multiplier).to eq(1.9)
+      expect(policy.randomization_factor).to eq(0.1)
     end
   end
 
@@ -88,7 +87,7 @@ RSpec.describe Flipper::Cloud::Telemetry::BackoffPolicy do
         randomization_factor: 0.5,
       })
       10.times { policy.next_interval }
-      expect(policy.next_interval).to eq(10_000)
+      expect(policy.next_interval).to be_within(10_000*0.1).of(10_000)
     end
   end
 

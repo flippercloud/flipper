@@ -9,8 +9,8 @@ module Flipper
       elsif Rails.env.production?
         false
       else
-        # Warn for now. Future versions will default to :raise in development and test
-        :warn
+        # Warn in development for now. Future versions may default to :raise in development and test
+        Rails.env.development? && :warn
       end
     end
 
@@ -24,7 +24,9 @@ module Flipper
         instrumenter: ENV.fetch('FLIPPER_INSTRUMENTER', 'ActiveSupport::Notifications').constantize,
         log: ENV.fetch('FLIPPER_LOG', 'true').casecmp('true').zero?,
         cloud_path: "_flipper",
-        strict: default_strict_value
+        strict: default_strict_value,
+        actor_limit: ENV["FLIPPER_ACTOR_LIMIT"]&.to_i || 100,
+        test_help: Flipper::Typecast.to_boolean(ENV["FLIPPER_TEST_HELP"] || Rails.env.test?),
       )
     end
 
@@ -43,10 +45,6 @@ module Flipper
       require 'flipper/cloud' if cloud?
 
       Flipper.configure do |config|
-        if app.config.flipper.strict
-          config.use Flipper::Adapters::Strict, app.config.flipper.strict
-        end
-
         config.default do
           if cloud?
             Flipper::Cloud.new(
@@ -68,6 +66,15 @@ module Flipper
       end
     end
 
+    initializer "flipper.adapters", after: :load_config_initializers do |app|
+      flipper = app.config.flipper
+
+      Flipper.configure do |config|
+        config.use Flipper::Adapters::Strict, flipper.strict if flipper.strict
+        config.use Flipper::Adapters::ActorLimit, flipper.actor_limit if flipper.actor_limit
+      end
+    end
+
     initializer "flipper.memoizer", after: :load_config_initializers do |app|
       flipper = app.config.flipper
 
@@ -78,6 +85,10 @@ module Flipper
           if: flipper.memoize.respond_to?(:call) ? flipper.memoize : nil
         }
       end
+    end
+
+    initializer "flipper.test" do |app|
+      require "flipper/test_help" if app.config.flipper.test_help
     end
 
     def cloud?

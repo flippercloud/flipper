@@ -34,6 +34,8 @@ module Flipper
       def call!(env)
         request = Rack::Request.new(env)
         action_class = @action_collection.action_for_request(request)
+        env["flipper.action_class"] = action_class
+        env["flipper.action_method"] = request.request_method.downcase
 
         if action_class.nil?
           @app.call(env)

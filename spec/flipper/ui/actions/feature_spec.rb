@@ -24,7 +24,7 @@ RSpec.describe Flipper::UI::Actions::Feature do
 
     it 'redirects to features' do
       expect(last_response.status).to be(302)
-      expect(last_response.headers['Location']).to eq('/features')
+      expect(last_response.headers['location']).to eq('/features')
     end
 
     context "with space in feature name" do
@@ -41,7 +41,7 @@ RSpec.describe Flipper::UI::Actions::Feature do
 
       it 'redirects to features' do
         expect(last_response.status).to be(302)
-        expect(last_response.headers['Location']).to eq('/features')
+        expect(last_response.headers['location']).to eq('/features')
       end
     end
 
@@ -80,7 +80,7 @@ RSpec.describe Flipper::UI::Actions::Feature do
 
     it 'redirects to features' do
       expect(last_response.status).to be(302)
-      expect(last_response.headers['Location']).to eq('/features')
+      expect(last_response.headers['location']).to eq('/features')
     end
   end
 
@@ -138,13 +138,34 @@ RSpec.describe Flipper::UI::Actions::Feature do
             }
           }
         end
-
-        get '/features/search'
       end
 
       it 'renders template with custom actor names' do
+        get '/features/search'
         expect(last_response.body).to include('Some Actor Name (some_actor_name)')
         expect(last_response.body).not_to include('Some Other Actor Name')
+      end
+
+      it 'allows basic html' do
+        Flipper::UI.configure do |config|
+          config.actor_names_source = lambda { |_keys|
+            { "some_actor_name" => '<a href="/users/some_actor_name">Some Actor Name</a>', }
+          }
+        end
+
+        get '/features/search'
+        expect(last_response.body).to include('<a href="/users/some_actor_name" rel="nofollow">Some Actor Name</a>')
+      end
+
+      it 'sanitizes dangerous markup' do
+        Flipper::UI.configure do |config|
+          config.actor_names_source = lambda { |_keys|
+            { "some_actor_name" => '<a href="javascript:alert(\'hello\')">Some Actor Name</a>', }
+          }
+        end
+
+        get '/features/search'
+        expect(last_response.body).not_to include('javascript:alert')
       end
     end
   end

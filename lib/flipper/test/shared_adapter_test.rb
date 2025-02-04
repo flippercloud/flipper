@@ -104,19 +104,19 @@ module Flipper
         actor22 = Flipper::Actor.new('22')
         actor_asdf = Flipper::Actor.new('asdf')
 
-        assert_equal true, @adapter.enable(@feature, @actor_gate, Flipper::Types::Actor.new(actor22))
-        assert_equal true, @adapter.enable(@feature, @actor_gate, Flipper::Types::Actor.new(actor_asdf))
+        assert_equal true, @feature.enable(actor22)
+        assert_equal true, @feature.enable(actor_asdf)
 
-        result = @adapter.get(@feature)
-        assert_equal Set['22', 'asdf'], result[:actors]
+        assert @feature.enabled?(actor22)
+        assert @feature.enabled?(actor_asdf)
 
-        assert true, @adapter.disable(@feature, @actor_gate, Flipper::Types::Actor.new(actor22))
-        result = @adapter.get(@feature)
-        assert_equal Set['asdf'], result[:actors]
+        assert_equal true, @feature.disable(actor22)
+        refute @feature.enabled?(actor22)
+        assert @feature.enabled?(actor_asdf)
 
-        assert_equal true, @adapter.disable(@feature, @actor_gate, Flipper::Types::Actor.new(actor_asdf))
-        result = @adapter.get(@feature)
-        assert_equal Set.new, result[:actors]
+        assert_equal true, @feature.disable(actor_asdf)
+        refute @feature.enabled?(actor22)
+        refute @feature.enabled?(actor_asdf)
       end
 
       def test_can_enable_disable_get_value_for_percentage_of_actors_gate
@@ -178,10 +178,10 @@ module Flipper
       end
 
       def test_converts_the_actor_value_to_a_string
-        assert_equal true,
-                     @adapter.enable(@feature, @actor_gate, Flipper::Types::Actor.new(Flipper::Actor.new(22)))
-        result = @adapter.get(@feature)
-        assert_equal Set['22'], result[:actors]
+        actor = Flipper::Actor.new(22)
+        refute @feature.enabled?(actor)
+        @feature.enable_actor actor
+        assert @feature.enabled?(actor)
       end
 
       def test_converts_group_value_to_a_string
@@ -292,9 +292,9 @@ module Flipper
 
       def test_can_double_enable_an_actor_without_error
         actor = Flipper::Actor.new('Flipper::Actor;22')
-        assert_equal true, @adapter.enable(@feature, @actor_gate, Flipper::Types::Actor.new(actor))
-        assert_equal true, @adapter.enable(@feature, @actor_gate, Flipper::Types::Actor.new(actor))
-        assert_equal Set['Flipper::Actor;22'], @adapter.get(@feature).fetch(:actors)
+        assert_equal true, @feature.enable(actor)
+        assert_equal true, @feature.enable(actor)
+        assert @feature.enabled?(actor)
       end
 
       def test_can_double_enable_a_group_without_error

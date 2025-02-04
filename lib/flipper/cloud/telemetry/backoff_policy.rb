@@ -3,10 +3,10 @@ module Flipper
     class Telemetry
       class BackoffPolicy
         # Private: The default minimum timeout between intervals in milliseconds.
-        MIN_TIMEOUT_MS = 1_000
+        MIN_TIMEOUT_MS = 30_000
 
         # Private: The default maximum timeout between intervals in milliseconds.
-        MAX_TIMEOUT_MS = 30_000
+        MAX_TIMEOUT_MS = 120_000
 
         # Private: The value to multiply the current interval with for each
         # retry attempt.
@@ -67,7 +67,10 @@ module Flipper
 
           @attempts += 1
 
-          [interval, @max_timeout_ms].min
+          # cap the interval to the max timeout
+          result = [interval, @max_timeout_ms].min
+          # jitter even when maxed out
+          result == @max_timeout_ms ? add_jitter(result, 0.05) : result
         end
 
         def reset

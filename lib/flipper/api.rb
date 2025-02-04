@@ -9,10 +9,15 @@ module Flipper
 
     def self.app(flipper = nil, options = {})
       env_key = options.fetch(:env_key, 'flipper')
-      app = ->(_) { [404, { 'content-type'.freeze => CONTENT_TYPE }, ['{}'.freeze]] }
+      use_rewindable_middleware = options.fetch(:use_rewindable_middleware) {
+        Gem::Version.new(Rack.release) >= Gem::Version.new('3.0.0')
+      }
+      app = ->(_) { [404, { Rack::CONTENT_TYPE => CONTENT_TYPE }, ['{}'.freeze]] }
       builder = Rack::Builder.new
       yield builder if block_given?
       builder.use Rack::Head
+      builder.use Rack::Deflater
+      builder.use Rack::RewindableInput::Middleware if use_rewindable_middleware
       builder.use Flipper::Api::JsonParams
       builder.use Flipper::Middleware::SetupEnv, flipper, env_key: env_key
       builder.use Flipper::Api::Middleware, env_key: env_key

@@ -1,8 +1,11 @@
 require 'ice_age'
 require 'json'
 require 'rack/test'
+require 'rack/session'
 
 module SpecHelpers
+  extend self
+
   def self.included(base)
     base.let(:flipper) { build_flipper }
     base.let(:app) { build_app(flipper) }
@@ -10,7 +13,7 @@ module SpecHelpers
 
   def build_app(flipper, options = {})
     Flipper::UI.app(flipper, options) do |builder|
-      builder.use Rack::Session::Cookie, secret: 'test'
+      builder.use Rack::Session::Cookie, secret: 'test' * 16 # Rack 3+ wants a 64-character secret
     end
   end
 
@@ -27,7 +30,11 @@ module SpecHelpers
   end
 
   def json_response
-    JSON.parse(last_response.body)
+    body = last_response.body
+    if last_response["content-encoding"] == 'gzip'
+      body = Flipper::Typecast.from_gzip(body)
+    end
+    JSON.parse(body)
   end
 
   def api_error_code_reference_url
@@ -72,15 +79,26 @@ module SpecHelpers
     original_stdout = $stdout
 
     # Redirect stderr and stdout
-    output = $stderr = $stdout = StringIO.new
+    $stderr = $stdout = StringIO.new
+
+    yield
+  ensure
+    $stderr = original_stderr
+    $stdout = original_stdout
+  end
+
+  def capture_output
+    original_stderr = $stderr
+    original_stdout = $stdout
+
+    output = $stdout = $stderr = StringIO.new
 
     yield
 
+    output.string
+  ensure
     $stderr = original_stderr
     $stdout = original_stdout
-
-    # Return output
-    output.string
   end
 end
 

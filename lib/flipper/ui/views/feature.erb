@@ -21,15 +21,20 @@
     <div class="card">
       <%# Gate State Header %>
       <div class="card-header">
-        <span class="status <%= @feature.color_class %> mr-2"></span>
-        <%= @feature.gate_state_title %>
+        <div class="row align-items-center">
+          <h4 class="col text-truncate mb-0"><%= feature_name %></h4>
+          <div class="col-auto">
+            <span class="status <%= @feature.color_class %> me-2"></span>
+            <%= @feature.gate_state_title %>
+          </div>
+        </div>
       </div>
 
       <% unless @feature.boolean_value %>
         <%# Actors Info and Form %>
         <div class="card-body border-bottom">
           <div class="row align-items-center js-toggle-container">
-            <div class="col col-mr-auto toggle-block-when-off">
+            <div class="col col-me-auto toggle-block-when-off">
               <h6 class="m-0">
                 <strong class="<%= "text-muted" if @feature.actors_value.empty? %>">
                   <% if @feature.actors_value.count > 0 %>
@@ -42,14 +47,18 @@
             </div>
             <% if write_allowed? %>
               <div class="col col-auto toggle-block-when-off">
-                <button class="btn btn-outline-secondary js-toggle-trigger" data-toggle="collapse" data-target="#add-actor">Add an actor</button>
+                <button class="btn btn-outline-secondary js-toggle-trigger" data-bs-toggle="collapse" data-bs-target="#add-actor">Add an actor</button>
               </div>
               <div class="col toggle-block-when-on">
-                <form action="<%= script_name %>/features/<%= @feature.key %>/actors" method="post" class="form-inline">
+                <form action="<%= script_name %>/features/<%= @feature.key %>/actors" method="post" class="row">
                   <%== csrf_input_tag %>
                   <input type="hidden" name="operation" value="enable">
-                  <input type="text" name="value" placeholder="<%= Flipper::UI.configuration.add_actor_placeholder %>" class="form-control form-control-sm mr-sm-2 mb-2 mb-sm-0">
-                  <input type="submit" value="Add Actor" class="btn btn-sm btn-light">
+                  <div class="col">
+                    <input type="text" name="value" placeholder="<%= Flipper::UI.configuration.add_actor_placeholder %>" class="form-control">
+                  </div>
+                  <div class="col-auto">
+                    <input type="submit" value="Add Actor" class="btn btn-primary">
+                  </div>
                 </form>
               </div>
               <div class="col col-auto toggle-block-when-on">
@@ -63,10 +72,10 @@
         <% @feature.actors_value.each do |item| %>
           <div class="card-body bg-lightest border-bottom py-3">
             <div class="row align-items-center">
-              <div class="col col-mr-auto pl-md-5">
+              <div class="col col-me-auto ps-md-5">
                 <h6 class="m-0">
                   <% if Flipper::UI::Util.present?(@feature.actor_names[item]) %>
-                    <%= "#{@feature.actor_names[item]} (#{item})" %>
+                    <%== Sanitize.fragment("#{@feature.actor_names[item]} (#{item})", Sanitize::Config::BASIC) %>
                   <% else %>
                     <%= item %>
                   <% end %>
@@ -78,7 +87,7 @@
                     <%== csrf_input_tag %>
                     <input type="hidden" name="operation" value="disable">
                     <input type="hidden" name="value" value="<%= item %>">
-                    <button type="submit" value="Disable" class="btn btn-outline-danger" data-toggle="tooltip" title="Disable <%= item %>" data-placement="left">
+                    <button type="submit" value="Disable" class="btn btn-outline-danger" data-bs-toggle="tooltip" title="Disable <%= item %>" data-bs-placement="left">
                       Remove
                     </button>
                   </form>
@@ -91,7 +100,7 @@
         <%# Groups Info and Form %>
         <div class="card-body border-bottom">
           <div class="row align-items-center js-toggle-container">
-            <div class="col col-mr-auto toggle-block-when-off">
+            <div class="col col-me-auto toggle-block-when-off">
               <h6 class="m-0">
                 <strong class="<%= "text-muted" if @feature.groups_value.empty? %>">
                   <% if @feature.groups_value.count > 0 %>
@@ -104,22 +113,24 @@
             </div>
             <% if write_allowed? %>
               <div class="col col-auto toggle-block-when-off">
-                <button class="btn btn-outline-secondary js-toggle-trigger" data-toggle="collapse" data-target="#add-actor">Add a group</button>
+                <button class="btn btn-outline-secondary js-toggle-trigger" data-bs-toggle="collapse" data-bs-target="#add-actor">Add a group</button>
               </div>
               <div class="col collapse toggle-block-when-on">
                 <% if @feature.disabled_groups.empty? %>
                   All groups enabled.
                 <% else %>
-                  <form action="<%= script_name %>/features/<%= @feature.key %>/groups" method="post" class="form-inline">
+                  <form action="<%= script_name %>/features/<%= @feature.key %>/groups" method="post" class="row">
                     <%== csrf_input_tag %>
                     <input type="hidden" name="operation" value="enable">
-                    <select name="value" class="form-control form-control-sm mr-sm-2 mb-2 mb-sm-0">
-                      <option value="">Select a group...</option>
-                      <% @feature.disabled_groups.each do |group| %>
-                        <option value="<%= group.name %>"><%= group.name %></option>
-                      <% end %>
-                    </select>
-                    <input type="submit" value="Add Group" class="btn btn-sm btn-light btn">
+                    <div class="col">
+                      <select name="value" class="form-select">
+                        <option value="">Select a group...</option>
+                        <% @feature.disabled_groups.sort_by(&:name).each do |group| %>
+                          <option value="<%= group.name %>"><%= group.name %></option>
+                        <% end %>
+                      </select>
+                    </div>
+                    <div class="col-auto"><input type="submit" value="Add Group" class="btn btn-primary btn"></div>
                   </form>
                 <% end %>
               </div>
@@ -134,7 +145,7 @@
         <% @feature.groups_value.each do |item| %>
           <div class="card-body bg-lightest border-bottom py-3">
             <div class="row align-items-center">
-              <div class="col col-mr-auto pl-md-5">
+              <div class="col col-me-auto ps-md-5">
                 <h6 class="m-0"><%= item %></h6>
               </div>
               <div class="col col-auto">
@@ -143,7 +154,7 @@
                     <%== csrf_input_tag %>
                     <input type="hidden" name="operation" value="disable">
                     <input type="hidden" name="value" value="<%= item %>">
-                    <button type="submit" value="Disable" class="btn btn-outline-danger" data-toggle="tooltip" title="Disable <%= item %>" data-placement="left">
+                    <button type="submit" value="Disable" class="btn btn-outline-danger" data-bs-toggle="tooltip" title="Disable <%= item %>" data-bs-placement="left">
                       Remove
                     </button>
                   </form>
@@ -157,7 +168,7 @@
         <div class="js-toggle-container">
           <div class="card-body border-bottom">
             <div class="row align-items-center">
-              <div class="col col-mr-auto">
+              <div class="col col-me-auto">
                 <h6 class="m-0"><strong class="<%= "text-muted" unless @feature.percentage_of_actors_value > 0 %>">Enabled for <%= @feature.percentage_of_actors_value %>% of actors</strong></h6>
               </div>
               <% if write_allowed? %>
@@ -173,24 +184,22 @@
 
           <% if write_allowed? %>
             <div class="card-body border-bottom toggle-block-when-on bg-lightest">
-              <div class="row">
-                <div class="col-12 col-md-6 mb-3 mb-md-0">
-                  <form action="<%= script_name %>/features/<%= @feature.key %>/percentage_of_actors" method="post">
-                    <%== csrf_input_tag %>
-                    <div class="btn-group">
-                      <% @percentages.each do |number| %>
-                        <input type="submit" name="value" value="<%= number %>%" class="btn btn-light btn-sm" <% if number == @feature.percentage_of_actors_value %>disabled<% end %>>
-                      <% end %>
-                    </div>
-                  </form>
-                </div>
-                <div class="col-12 col-md-6">
-                  <form action="<%= script_name %>/features/<%= @feature.key %>/percentage_of_actors" method="post" class="form-inline">
-                    <%== csrf_input_tag %>
-                    <input type="text" name="value" <% if @feature.percentage_of_actors_value > 0 %>value="<%= @feature.percentage_of_actors_value %>"<% end %> placeholder="custom (26, 32, etc.)" class="form-control form-control-sm mr-sm-2 mb-2 mb-md-0">
-                    <input type="submit" name="action" value="Save" class="btn btn-light btn-sm">
-                  </form>
-                </div>
+              <div class="row align-items-center">
+                <form action="<%= script_name %>/features/<%= @feature.key %>/percentage_of_actors" method="post" class="col">
+                  <%== csrf_input_tag %>
+                  <div class="btn-group">
+                    <% @percentages.each do |number| %>
+                      <input type="submit" name="value" value="<%= number %>%" class="btn btn-light" <% if number == @feature.percentage_of_actors_value %>disabled<% end %>>
+                    <% end %>
+                  </div>
+                </form>
+                <form action="<%= script_name %>/features/<%= @feature.key %>/percentage_of_actors" method="post" class="col-auto row">
+                  <%== csrf_input_tag %>
+                  <div class="col-auto">
+                    <input style="width:5em;" type="number" max="100" min="0" name="value" <% if @feature.percentage_of_actors_value > 0 %>value="<%= @feature.percentage_of_actors_value %>"<% end %> title="Custom percentage (26, 32, etc.)" placeholder="0" class="form-control">
+                  </div>
+                  <div class="col-auto ms-auto"><input type="submit" name="action" value="Save" class="btn btn-primary"></div>
+                </form>
               </div>
             </div>
           <% end %>
@@ -200,7 +209,7 @@
         <div class="js-toggle-container">
           <div class="card-body border-bottom">
             <div class="row align-items-center">
-              <div class="col col-mr-auto">
+              <div class="col col-me-auto">
                 <h6 class="m-0"><strong class="<%= "text-muted" unless @feature.percentage_of_time_value > 0 %>">Enabled for <%= @feature.percentage_of_time_value %>% of time</strong></h6>
               </div>
               <% if write_allowed? %>
@@ -216,24 +225,22 @@
 
           <% if write_allowed? %>
             <div class="card-body border-bottom toggle-block-when-on bg-lightest">
-              <div class="row">
-                <div class="col-12 col-md-6 mb-3 mb-md-0">
-                  <form action="<%= script_name %>/features/<%= @feature.key %>/percentage_of_time" method="post">
-                    <%== csrf_input_tag %>
-                    <div class="btn-group">
-                      <% @percentages.each do |number| %>
-                        <input type="submit" name="value" value="<%= number %>%" class="btn btn-light btn-sm" <% if number == @feature.percentage_of_time_value %>disabled<% end %>>
-                      <% end %>
-                    </div>
-                  </form>
-                </div>
-                <div class="col-12 col-md-6">
-                  <form action="<%= script_name %>/features/<%= @feature.key %>/percentage_of_time" method="post" class="form-inline">
-                    <%== csrf_input_tag %>
-                    <input type="text" name="value" <% if @feature.percentage_of_time_value > 0 %>value="<%= @feature.percentage_of_time_value %>"<% end %> placeholder="custom (26, 32, etc.)" class="form-control form-control-sm mr-sm-2 mb-2 mb-md-0">
-                    <input type="submit" name="action" value="Save" class="btn btn-light btn-sm">
-                  </form>
-                </div>
+              <div class="row align-items-center">
+                <form action="<%= script_name %>/features/<%= @feature.key %>/percentage_of_time" method="post" class="col">
+                  <%== csrf_input_tag %>
+                  <div class="btn-group">
+                    <% @percentages.each do |number| %>
+                      <input type="submit" name="value" value="<%= number %>%" class="btn btn-light" <% if number == @feature.percentage_of_time_value %>disabled<% end %>>
+                    <% end %>
+                  </div>
+                </form>
+                <form action="<%= script_name %>/features/<%= @feature.key %>/percentage_of_time" method="post" class="col-auto row">
+                  <%== csrf_input_tag %>
+                  <div class="col-auto">
+                    <input style="width:5em;" type="number" max="100" min="0" name="value" <% if @feature.percentage_of_time_value > 0 %>value="<%= @feature.percentage_of_time_value %>"<% end %> title="Custom percentage (26, 32, etc.)" placeholder="0" class="form-control">
+                  </div>
+                  <div class="col-auto ms-auto"><input type="submit" name="action" value="Save" class="btn btn-primary"></div>
+                </form>
               </div>
             </div>
           <% end %>
@@ -247,10 +254,11 @@
 
             <div class="row">
               <% unless @feature.boolean_value %>
-                <div class="col">
-                  <button type="submit" name="action" value="Enable" <% if Flipper::UI.configuration.confirm_fully_enable %>id="enable_feature__button"<% end %> class="btn btn-outline-success btn-block">
-                    <span class="d-block" data-toggle="tooltip"
+                <div class="col d-grid">
+                  <button type="submit" name="action" value="Enable" class="btn btn-outline-success">
+                    <span class="d-block" data-bs-toggle="tooltip"
                       <% if Flipper::UI.configuration.confirm_fully_enable %>
+                        data-confirmation-prompt="Are you sure you want to fully enable this feature for everyone? Please enter the name of the feature to confirm it: <%= feature_name %>"
                         data-confirmation-text="<%= feature_name %>"
                       <% end %>
                         title="Enable for everyone"
@@ -262,9 +270,15 @@
               <% end %>
 
               <% unless @feature.off? %>
-                <div class="col">
-                  <button type="submit" name="action" value="Disable" class="btn btn-outline-danger btn-block">
-                    <span class="d-block" data-toggle="tooltip" title="Disable for everyone by clearing all percentages, groups and actors.">
+                <div class="col d-grid">
+                  <button type="submit" name="action" value="Disable" class="btn btn-outline-danger">
+                    <span class="d-block" data-bs-toggle="tooltip"
+                      <% if Flipper::UI.configuration.confirm_disable %>
+                        data-confirmation-prompt="Are you sure you want to disable this feature for everyone? Please enter the name of the feature to confirm it: <%= feature_name %>"
+                        data-confirmation-text="<%= feature_name %>"
+                      <% end %>
+                        title="Disable for everyone by clearing all percentages, groups and actors."
+                      >
                       Disable
                     </span>
                   </button>
@@ -291,7 +305,13 @@
             <%== csrf_input_tag %>
             <input type="hidden" id="feature_name" name="_feature" value="<%= feature_name %>">
             <input type="hidden" name="_method" value="DELETE">
-            <button type="submit" name="action" value="Delete" id="delete_feature__button" data-confirmation-text="<%= feature_name %>" class="btn btn-outline-danger" data-toggle="tooltip" title="Remove feature from list of features and disable it." data-placement="right">Delete</button>
+            <button type="submit" name="action" value="Delete" id="delete_feature__button" class="btn btn-outline-danger" data-bs-toggle="tooltip" data-bs-placement="right"
+              data-confirmation-prompt="Are you sure you want to remove this feature from the list of features and disable it for everyone? Please enter the name of the feature to confirm it: <%= feature_name%>"
+              data-confirmation-text="<%= feature_name %>"
+              title="Remove feature from list of features and disable it."
+            >
+              Delete
+            </button>
           </form>
         </div>
       </div>

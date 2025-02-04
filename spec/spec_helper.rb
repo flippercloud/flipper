@@ -18,6 +18,7 @@ require 'flipper'
 require 'flipper/api'
 require 'flipper/spec/shared_adapter_specs'
 require 'flipper/ui'
+require 'flipper/test_help'
 
 Dir[FlipperRoot.join('spec/support/**/*.rb')].sort.each { |f| require f }
 
@@ -26,6 +27,9 @@ ENV["FLIPPER_CLOUD_LOGGING_ENABLED"] = "false"
 
 RSpec.configure do |config|
   config.before(:example) do
+    # default stub for telemetry
+    stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
+      to_return(status: 200, body: "", headers: {})
     Flipper::Cloud::Telemetry.reset if defined?(Flipper::Cloud::Telemetry) && Flipper::Cloud::Telemetry.respond_to?(:reset)
     Flipper::Poller.reset if defined?(Flipper::Poller)
     Flipper.unregister_groups

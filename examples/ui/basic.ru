@@ -42,10 +42,12 @@ Flipper::UI.configure do |config|
 
   config.actor_names_source = lambda do |_keys|
     {
-      '1' => 'John',
-      '6' => 'Brandon',
+      '1' => '<a href="https://johnnunemaker.com">John</a>',
+      '6' => '<a href="https://opensoul.org">Brandon</a>',
     }
   end
+
+  config.application_href = "https://example.com"
 end
 
 # You can uncomment these to get some default data:
@@ -63,5 +65,6 @@ end
 use Rack::Reloader
 
 run Flipper::UI.app { |builder|
+  builder.use Rack::Reloader, 1
   builder.use Rack::Session::Cookie, secret: "_super_secret"
 }

@@ -15,7 +15,7 @@ RSpec.describe Flipper::UI::Actions::AddFeature do
     end
 
     it 'renders template' do
-      form = '<form action="/features" method="post" class="form-inline mb-2">'
+      form = '<form action="/features" method="post" class="row g-3 mb-2">'
       expect(last_response.body).to include(form)
     end
   end

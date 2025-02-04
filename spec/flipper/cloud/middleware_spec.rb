@@ -101,8 +101,8 @@ RSpec.describe Flipper::Cloud::Middleware do
       post '/', request_body, env
 
       expect(last_response.status).to eq(402)
-      expect(last_response.headers["Flipper-Cloud-Response-Error-Class"]).to eq("Flipper::Adapters::Http::Error")
-      expect(last_response.headers["Flipper-Cloud-Response-Error-Message"]).to include("Failed with status: 402")
+      expect(last_response.headers["flipper-cloud-response-error-class"]).to eq("Flipper::Adapters::Http::Error")
+      expect(last_response.headers["flipper-cloud-response-error-message"]).to include("Failed with status: 402")
       expect(stub).to have_been_requested
     end
   end
@@ -124,8 +124,8 @@ RSpec.describe Flipper::Cloud::Middleware do
       post '/', request_body, env
 
       expect(last_response.status).to eq(500)
-      expect(last_response.headers["Flipper-Cloud-Response-Error-Class"]).to eq("Flipper::Adapters::Http::Error")
-      expect(last_response.headers["Flipper-Cloud-Response-Error-Message"]).to include("Failed with status: 503")
+      expect(last_response.headers["flipper-cloud-response-error-class"]).to eq("Flipper::Adapters::Http::Error")
+      expect(last_response.headers["flipper-cloud-response-error-message"]).to include("Failed with status: 503")
       expect(stub).to have_been_requested
     end
   end
@@ -147,8 +147,8 @@ RSpec.describe Flipper::Cloud::Middleware do
       post '/', request_body, env
 
       expect(last_response.status).to eq(500)
-      expect(last_response.headers["Flipper-Cloud-Response-Error-Class"]).to eq("Net::OpenTimeout")
-      expect(last_response.headers["Flipper-Cloud-Response-Error-Message"]).to eq("execution expired")
+      expect(last_response.headers["flipper-cloud-response-error-class"]).to eq("Net::OpenTimeout")
+      expect(last_response.headers["flipper-cloud-response-error-message"]).to eq("execution expired")
       expect(stub).to have_been_requested
     end
   end
@@ -277,13 +277,13 @@ RSpec.describe Flipper::Cloud::Middleware do
     stub = stub_request(:get, "https://www.flippercloud.io/adapter/features?exclude_gate_names=true").
       with({
         headers: {
-          'Flipper-Cloud-Token' => token,
+          'flipper-cloud-token' => token,
         },
       })
     if status == :timeout
       stub.to_timeout
     else
-      stub.to_return(status: status, body: response_body, headers: {})
+      stub.to_return(status: status, body: response_body)
     end
   end
 end
