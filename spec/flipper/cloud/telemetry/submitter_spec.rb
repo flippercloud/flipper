@@ -71,15 +71,15 @@ RSpec.describe Flipper::Cloud::Telemetry::Submitter do
         to_return(status: 429, body: "{}").
         to_return(status: 200, body: "{}")
       instance = described_class.new(cloud_configuration)
-      expect(instance.backoff_policy.min_timeout_ms).to eq(1_000)
-      expect(instance.backoff_policy.max_timeout_ms).to eq(30_000)
+      expect(instance.backoff_policy.min_timeout_ms).to eq(30_000)
+      expect(instance.backoff_policy.max_timeout_ms).to eq(120_000)
     end
 
     it "tries 10 times by default" do
       stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
         to_return(status: 500, body: "{}")
       subject.call(enabled_metrics)
-      expect(subject.backoff_policy.retries).to eq(9) # 9 retries + 1 initial attempt
+      expect(subject.backoff_policy.retries).to eq(4) # 4 retries + 1 initial attempt
     end
 
     [
@@ -105,7 +105,7 @@ RSpec.describe Flipper::Cloud::Telemetry::Submitter do
         stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
           to_raise(error_class)
         subject.call(enabled_metrics)
-        expect(subject.backoff_policy.retries).to eq(9)
+        expect(subject.backoff_policy.retries).to eq(4)
       end
     end
 
