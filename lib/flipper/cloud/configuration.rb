@@ -135,6 +135,10 @@ module Flipper
         logger.send(level, "name=flipper_cloud #{message}")
       end
 
+      def instrument(name, payload = {}, &block)
+        instrumenter.instrument(name, payload, &block)
+      end
+
       private
 
       def app_adapter

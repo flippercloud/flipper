@@ -51,6 +51,7 @@ module Flipper
 
           Typecast.to_gzip(json)
         rescue => exception
+          @cloud_configuration.instrument "telemetry_error.#{Flipper::InstrumentationNamespace}", exception: exception, request_id: request_id
           @cloud_configuration.log "action=to_body request_id=#{request_id} error=#{exception.inspect}", level: :error
         end
 
@@ -63,6 +64,7 @@ module Flipper
             result, should_retry = yield
             return [result, nil] unless should_retry
           rescue => error
+            @cloud_configuration.instrument "telemetry_retry.#{Flipper::InstrumentationNamespace}", attempts_remaining: attempts_remaining, exception: error
             @cloud_configuration.log "action=post_to_cloud attempts_remaining=#{attempts_remaining} error=#{error.inspect}", level: :error
             should_retry = true
             caught_exception = error
