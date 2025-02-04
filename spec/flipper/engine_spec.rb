@@ -12,6 +12,7 @@ RSpec.describe Flipper::Engine do
   end
 
   before do
+    stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
     Rails.application = nil
     ActiveSupport::Dependencies.autoload_paths = ActiveSupport::Dependencies.autoload_paths.dup
     ActiveSupport::Dependencies.autoload_once_paths = ActiveSupport::Dependencies.autoload_once_paths.dup
