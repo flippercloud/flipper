@@ -34,7 +34,7 @@ module Flipper
           return if drained.empty?
           body = to_body(drained)
           return if body.nil? || body.empty?
-          retry_with_backoff(10) { submit(body) }
+          retry_with_backoff(5) { submit(body) }
         end
 
         private

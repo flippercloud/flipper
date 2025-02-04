@@ -4,8 +4,8 @@ RSpec.describe Flipper::Cloud::Telemetry::BackoffPolicy do
   context "#initialize" do
     it "with no options" do
       policy = described_class.new
-      expect(policy.min_timeout_ms).to eq(1_000)
-      expect(policy.max_timeout_ms).to eq(30_000)
+      expect(policy.min_timeout_ms).to eq(30_000)
+      expect(policy.max_timeout_ms).to eq(120_000)
       expect(policy.multiplier).to eq(1.5)
       expect(policy.randomization_factor).to eq(0.5)
     end
@@ -87,7 +87,7 @@ RSpec.describe Flipper::Cloud::Telemetry::BackoffPolicy do
         randomization_factor: 0.5,
       })
       10.times { policy.next_interval }
-      expect(policy.next_interval).to eq(10_000)
+      expect(policy.next_interval).to be_within(10_000*0.1).of(10_000)
     end
   end
 

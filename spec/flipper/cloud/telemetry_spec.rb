@@ -122,7 +122,7 @@ RSpec.describe Flipper::Cloud::Telemetry do
     # Check the conig interval and the timer interval.
     expect(telemetry.interval).to eq(120)
     expect(telemetry.timer.execution_interval).to eq(120)
-    expect(stub).to have_been_requested.times(10)
+    expect(stub).to have_been_requested.times(5)
   end
 
   it "doesn't try to update telemetry interval from error if not response error" do
@@ -152,7 +152,7 @@ RSpec.describe Flipper::Cloud::Telemetry do
 
     expect(telemetry.interval).to eq(60)
     expect(telemetry.timer.execution_interval).to eq(60)
-    expect(stub).to have_been_requested.times(10)
+    expect(stub).to have_been_requested.times(5)
   end
 
   describe '#record' do

@@ -76,7 +76,7 @@ module Flipper
         @metric_storage = MetricStorage.new
 
         @pool = Concurrent::FixedThreadPool.new(2, {
-          max_queue: 5,
+          max_queue: 20, # ~ 20 minutes of data at 1 minute intervals
           fallback_policy: :discard,
           name: "flipper-telemetry-post-to-cloud-pool".freeze,
         })
