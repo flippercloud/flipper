@@ -23,7 +23,14 @@ module Flipper
         # Yes, this will block the main thread, but that's better than thinking
         # nothing is enabled.
         if adapter.features.empty?
-          @poller.sync
+          begin
+            @poller.sync
+          rescue => error
+            # TODO: Warn here that it's possible that no data has been synced
+            # and flags are being evaluated without flag data being present
+            # until a sync completes. We rescue to avoid flipper being down
+            # causing your processes to crash.
+          end
         end
 
         @poller.start
