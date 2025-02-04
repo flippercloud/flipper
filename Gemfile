@@ -6,6 +6,7 @@ Dir['flipper-*.gemspec'].each do |gemspec|
   gemspec(name: "flipper-#{plugin}", development_group: plugin)
 end
 
+gem 'concurrent-ruby', '1.3.4'
 gem 'debug'
 gem 'rake'
 gem 'statsd-ruby', '~> 1.2.1'
