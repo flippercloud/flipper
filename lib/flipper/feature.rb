@@ -100,7 +100,9 @@ module Flipper
     #
     # Returns true if enabled, false if not.
     def enabled?(*actors)
-      actors = actors.flatten.compact.map { |actor| Types::Actor.wrap(actor) }
+      # Allows null object pattern. See PR for more.
+      # https://github.com/flippercloud/flipper/pull/887
+      actors = actors.flatten.reject(&:nil?).map { |actor| Types::Actor.wrap(actor) }
       actors = nil if actors.empty?
 
       # thing is left for backwards compatibility

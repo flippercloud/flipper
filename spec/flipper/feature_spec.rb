@@ -76,6 +76,26 @@ RSpec.describe Flipper::Feature do
         expect(subject.enabled?(actors)).to be(false)
       end
     end
+
+    context "for an object that implements .nil? == true" do
+      let(:actor) { Flipper::Actor.new("User;1") }
+
+      before do
+        def actor.nil?
+          true
+        end
+      end
+
+      it 'returns true if feature is enabled' do
+        subject.enable
+        expect(subject.enabled?(actor)).to be(true)
+      end
+
+      it 'returns false if feature is disabled' do
+        subject.disable
+        expect(subject.enabled?(actor)).to be(false)
+      end
+    end
   end
 
   describe '#to_s' do
