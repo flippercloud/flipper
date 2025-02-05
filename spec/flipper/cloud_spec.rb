@@ -43,6 +43,7 @@ RSpec.describe Flipper::Cloud do
 
   context 'initialize with token and options' do
     it 'sets correct url' do
+      stub_request(:any, %r{fakeflipper.com}).to_return(status: 200)
       instance = described_class.new(token: 'asdf', url: 'https://www.fakeflipper.com/sadpanda')
       # pardon the nesting...
       memoized = instance.adapter
@@ -78,27 +79,31 @@ RSpec.describe Flipper::Cloud do
   end
 
   it 'can set debug_output' do
+    instance = Flipper::Adapters::Http::Client.new(token: 'asdf', url: 'https://www.flippercloud.io/adapter')
     expect(Flipper::Adapters::Http::Client).to receive(:new)
-      .with(hash_including(debug_output: STDOUT)).at_least(:once)
+      .with(hash_including(debug_output: STDOUT)).at_least(:once).and_return(instance)
     described_class.new(token: 'asdf', debug_output: STDOUT)
   end
 
   it 'can set read_timeout' do
+    instance = Flipper::Adapters::Http::Client.new(token: 'asdf', url: 'https://www.flippercloud.io/adapter')
     expect(Flipper::Adapters::Http::Client).to receive(:new)
-      .with(hash_including(read_timeout: 1)).at_least(:once)
+      .with(hash_including(read_timeout: 1)).at_least(:once).and_return(instance)
     described_class.new(token: 'asdf', read_timeout: 1)
   end
 
   it 'can set open_timeout' do
+    instance = Flipper::Adapters::Http::Client.new(token: 'asdf', url: 'https://www.flippercloud.io/adapter')
     expect(Flipper::Adapters::Http::Client).to receive(:new)
-      .with(hash_including(open_timeout: 1)).at_least(:once)
+      .with(hash_including(open_timeout: 1)).at_least(:once).and_return(instance)
     described_class.new(token: 'asdf', open_timeout: 1)
   end
 
   if RUBY_VERSION >= '2.6.0'
     it 'can set write_timeout' do
+      instance = Flipper::Adapters::Http::Client.new(token: 'asdf', url: 'https://www.flippercloud.io/adapter')
       expect(Flipper::Adapters::Http::Client).to receive(:new)
-        .with(hash_including(open_timeout: 1)).at_least(:once)
+        .with(hash_including(open_timeout: 1)).at_least(:once).and_return(instance)
       described_class.new(token: 'asdf', open_timeout: 1)
     end
   end

@@ -59,8 +59,8 @@ module Flipper
         response = @client.get("/features?exclude_gate_names=true")
         raise Error, response unless response.is_a?(Net::HTTPOK)
 
-        parsed_response = Typecast.from_json(response.body)
-        parsed_features = parsed_response.fetch('features')
+        parsed_response = response.body.empty? ? {} : Typecast.from_json(response.body)
+        parsed_features = parsed_response['features'] || []
         gates_by_key = parsed_features.each_with_object({}) do |parsed_feature, hash|
           hash[parsed_feature['key']] = parsed_feature['gates']
           hash
