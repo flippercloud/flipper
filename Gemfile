@@ -7,6 +7,7 @@ Dir['flipper-*.gemspec'].each do |gemspec|
 end
 
 gem 'concurrent-ruby', '1.3.4'
+gem 'connection_pool'
 gem 'debug'
 gem 'rake'
 gem 'statsd-ruby', '~> 1.2.1'
