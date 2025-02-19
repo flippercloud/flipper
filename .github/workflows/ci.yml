@@ -104,4 +104,4 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true # 'bundle install' and cache gems
       - name: Run Rake with Rails ${{ matrix.rails }}
-        run: RUBYOPT="-w" bundle exec rake
+        run: bundle exec rake
