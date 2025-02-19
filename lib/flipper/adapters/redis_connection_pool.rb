@@ -13,9 +13,10 @@ module Flipper
 
         size = ENV.fetch('FLIPPER_REDIS_POOL_SIZE', 5).to_i
         timeout = ENV.fetch('FLIPPER_REDIS_POOL_TIMEOUT', 5).to_i
-        @default_pool = ConnectionPool.new(size: size, timeout: timeout) do
-          Redis.new(url: ENV["FLIPPER_REDIS_URL"] || ENV["REDIS_URL"])
-        end
+
+        @default_pool = ConnectionPool.new(size: size, timeout: timeout) {
+          ::Redis.new(url: ENV["FLIPPER_REDIS_URL"] || ENV["REDIS_URL"] || "redis://localhost:6379")
+        }
       end
 
       attr_reader :key_prefix
@@ -233,7 +234,8 @@ end
 
 Flipper.configure do |config|
   config.adapter do
-    default_pool = Flipper::Adapters::RedisConnectionPool.default_pool
-    Flipper::Adapters::RedisConnectionPool.new(default_pool)
+    Flipper::Adapters::RedisConnectionPool.new(
+      Flipper::Adapters::RedisConnectionPool.default_pool
+    )
   end
 end
