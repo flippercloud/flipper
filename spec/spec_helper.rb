@@ -9,6 +9,11 @@ require 'bundler'
 
 Bundler.setup(:default)
 
+require 'warning'
+Warning.ignore(/lib\/statsd/)
+Warning.ignore(/lib\/moneta\//)
+Warning.ignore(/lib\/mongo\//)
+
 require 'debug'
 require 'statsd'
 require 'webmock/rspec'
@@ -24,11 +29,6 @@ Dir[FlipperRoot.join('spec/support/**/*.rb')].sort.each { |f| require f }
 
 # Disable telemetry logging in specs.
 ENV["FLIPPER_CLOUD_LOGGING_ENABLED"] = "false"
-
-require 'warning'
-Warning.ignore(/lib\/statsd/)
-Warning.ignore(/lib\/moneta\//)
-Warning.ignore(/lib\/mongo\//)
 
 RSpec.configure do |config|
   config.before(:example) do
