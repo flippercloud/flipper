@@ -1,5 +1,3 @@
-require "flipper/adapters/memory"
-
 module Flipper
   class Export
     attr_reader :contents, :format, :version

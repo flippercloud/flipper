@@ -1,4 +1,5 @@
 require 'logger'
+require 'active_support/core_ext/object/blank'
 require 'flipper/instrumentation/log_subscriber'
 require 'flipper/adapters/instrumented'
 

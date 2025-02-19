@@ -4,6 +4,9 @@ require 'minitest/autorun'
 require 'rails'
 require 'rails/test_help'
 
+require 'warning'
+Warning.ignore(/lib\/capybara\//)
+
 begin
   ActiveSupport::TestCase.test_order = :random
 rescue NoMethodError

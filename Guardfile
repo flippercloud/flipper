@@ -10,7 +10,7 @@ rspec_options = {
   all_after_pass: false,
   all_on_start: false,
   failed_mode: :keep,
-  cmd: 'bundle exec rspec',
+  cmd: 'bundle exec ruby -w $(which rspec)',
 }
 
 guard 'rspec', rspec_options do

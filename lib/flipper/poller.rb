@@ -59,10 +59,10 @@ module Flipper
     def run
       loop do
         sleep jitter
-        start = Concurrent.monotonic_time
+
         begin
           sync
-        rescue => exception
+        rescue
           # you can instrument these using poller.flipper
         end
 

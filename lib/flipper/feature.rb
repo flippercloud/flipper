@@ -100,9 +100,14 @@ module Flipper
     #
     # Returns true if enabled, false if not.
     def enabled?(*actors)
-      # Allows null object pattern. See PR for more.
-      # https://github.com/flippercloud/flipper/pull/887
-      actors = actors.flatten.reject(&:nil?).map { |actor| Types::Actor.wrap(actor) }
+      actors = Array(actors).
+        # Avoids to_ary warning that happens when passing DelegateClass of an 
+        # ActiveRecord object and using flatten here. This is tested in 
+        # spec/flipper/model/active_record_spec.rb.
+        flat_map { |actor| actor.is_a?(Array) ? actor : [actor] }. 
+        # Allows null object pattern. See PR for more. https://github.com/flippercloud/flipper/pull/887
+        reject(&:nil?). 
+        map { |actor| Types::Actor.wrap(actor) }
       actors = nil if actors.empty?
 
       # thing is left for backwards compatibility

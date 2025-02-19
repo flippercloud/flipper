@@ -31,6 +31,7 @@ gem 'mysql2'
 gem 'pg'
 gem 'cuprite'
 gem 'puma'
+gem 'warning'
 
 group(:guard) do
   gem 'guard'

@@ -53,7 +53,6 @@ module Flipper
 
         feature_name = event.payload[:feature_name]
         adapter_name = event.payload[:adapter_name]
-        gate_name = event.payload[:gate_name]
         operation = event.payload[:operation]
         result = event.payload[:result]
 
