@@ -2,12 +2,7 @@ $LOAD_PATH.unshift(File.expand_path('../../lib', __FILE__))
 
 require 'pp'
 require 'pathname'
-FlipperRoot = Pathname(__FILE__).dirname.join('..').expand_path
-
-require 'rubygems'
-require 'bundler'
-
-Bundler.setup(:default)
+require 'bundler/setup'
 
 require 'warning'
 Warning.ignore(/lib\/statsd/)
@@ -27,6 +22,7 @@ require 'flipper/spec/shared_adapter_specs'
 require 'flipper/ui'
 require 'flipper/test_help'
 
+FlipperRoot = Pathname(__FILE__).dirname.join('..').expand_path
 Dir[FlipperRoot.join('spec/support/**/*.rb')].sort.each { |f| require f }
 
 # Disable telemetry logging in specs.
