@@ -53,8 +53,10 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
         end
 
         before(:each) do
-          ActiveRecord::Tasks::DatabaseTasks.purge(config)
-          CreateFlipperTables.migrate(:up)
+          silence do
+            ActiveRecord::Tasks::DatabaseTasks.purge(config)
+            CreateFlipperTables.migrate(:up)
+          end
         end
 
         after(:all) do
