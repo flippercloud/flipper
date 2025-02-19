@@ -3,9 +3,7 @@ require 'flipper/adapters/redis_cache'
 
 RSpec.describe Flipper::Adapters::RedisCache do
   let(:client) do
-    options = {}
-    options[:url] = ENV['REDIS_URL'] if ENV['REDIS_URL']
-    Redis.new(options)
+    Redis.new(url: ENV.fetch('REDIS_URL', 'redis://localhost:6379'))
   end
 
   let(:memory_adapter) do

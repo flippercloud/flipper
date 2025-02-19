@@ -1,11 +1,13 @@
 require 'set'
 require 'redis'
 require 'flipper'
+require 'flipper/adapters/redis_shared/methods'
 
 module Flipper
   module Adapters
     class Redis
       include ::Flipper::Adapter
+      include ::Flipper::Adapters::RedisShared
 
       attr_reader :key_prefix
 
@@ -25,6 +27,9 @@ module Flipper
       def initialize(client, key_prefix: nil)
         @client = client
         @key_prefix = key_prefix
+        @sadd_returns_boolean = with_connection do |conn|
+          conn.class.respond_to?(:sadd_returns_boolean) && conn.class.sadd_returns_boolean
+        end
       end
 
       # Public: The set of known features.
@@ -35,9 +40,9 @@ module Flipper
       # Public: Adds a feature to the set of known features.
       def add(feature)
         if redis_sadd_returns_boolean?
-          @client.sadd? features_key, feature.key
+          with_connection { |conn| conn.sadd? features_key, feature.key }
         else
-          @client.sadd features_key, feature.key
+          with_connection { |conn| conn.sadd features_key, feature.key }
         end
         true
       end
@@ -45,17 +50,17 @@ module Flipper
       # Public: Removes a feature from the set of known features.
       def remove(feature)
         if redis_sadd_returns_boolean?
-          @client.srem? features_key, feature.key
+          with_connection { |conn| conn.srem? features_key, feature.key }
         else
-          @client.srem features_key, feature.key
+          with_connection { |conn| conn.srem features_key, feature.key }
         end
-        @client.del key_for(feature.key)
+        with_connection { |conn| conn.del key_for(feature.key) }
         true
       end
 
       # Public: Clears the gate values for a feature.
       def clear(feature)
-        @client.del key_for(feature.key)
+        with_connection { |conn| conn.del key_for(feature.key) }
         true
       end
 
@@ -88,13 +93,13 @@ module Flipper
         case gate.data_type
         when :boolean
           clear(feature)
-          @client.hset feature_key, gate.key, thing.value.to_s
+          with_connection { |conn| conn.hset feature_key, gate.key, thing.value.to_s }
         when :integer
-          @client.hset feature_key, gate.key, thing.value.to_s
+          with_connection { |conn| conn.hset feature_key, gate.key, thing.value.to_s }
         when :set
-          @client.hset feature_key, to_field(gate, thing), 1
+          with_connection { |conn| conn.hset feature_key, to_field(gate, thing), 1 }
         when :json
-          @client.hset feature_key, gate.key, Typecast.to_json(thing.value)
+          with_connection { |conn| conn.hset feature_key, gate.key, Typecast.to_json(thing.value) }
         else
           unsupported_data_type gate.data_type
         end
@@ -113,13 +118,13 @@ module Flipper
         feature_key = key_for(feature.key)
         case gate.data_type
         when :boolean
-          @client.del feature_key
+          with_connection { |conn| conn.del feature_key }
         when :integer
-          @client.hset feature_key, gate.key, thing.value.to_s
+          with_connection { |conn| conn.hset feature_key, gate.key, thing.value.to_s }
         when :set
-          @client.hdel feature_key, to_field(gate, thing)
+          with_connection { |conn| conn.hdel feature_key, to_field(gate, thing) }
         when :json
-          @client.hdel feature_key, gate.key
+          with_connection { |conn| conn.hdel feature_key, gate.key }
         else
           unsupported_data_type gate.data_type
         end
@@ -130,7 +135,7 @@ module Flipper
       private
 
       def redis_sadd_returns_boolean?
-        @client.class.respond_to?(:sadd_returns_boolean) && @client.class.sadd_returns_boolean
+        @sadd_returns_boolean
       end
 
       def read_many_features(features)
@@ -143,20 +148,26 @@ module Flipper
       end
 
       def read_feature_keys
-        @client.smembers(features_key).to_set
+        with_connection { |conn| conn.smembers(features_key).to_set }
       end
 
       # Private: Gets a hash of fields => values for the given feature.
       #
       # Returns a Hash of fields => values.
-      def doc_for(feature, pipeline: @client)
-        pipeline.hgetall(key_for(feature.key))
+      def doc_for(feature, pipeline: nil)
+        if pipeline
+          pipeline.hgetall(key_for(feature.key))
+        else
+          with_connection { |conn| conn.hgetall(key_for(feature.key)) }
+        end
       end
 
       def docs_for(features)
-        @client.pipelined do |pipeline|
-          features.each do |feature|
-            doc_for(feature, pipeline: pipeline)
+        with_connection do |conn|
+          conn.pipelined do |pipeline|
+            features.each do |feature|
+              doc_for(feature, pipeline: pipeline)
+            end
           end
         end
       end
@@ -208,7 +219,7 @@ end
 
 Flipper.configure do |config|
   config.adapter do
-    client = Redis.new(url: ENV["FLIPPER_REDIS_URL"] || ENV["REDIS_URL"])
+    client = Redis.new(url: ENV["FLIPPER_REDIS_URL"] || ENV["REDIS_URL"] || "redis://localhost:6379")
     Flipper::Adapters::Redis.new(client)
   end
 end

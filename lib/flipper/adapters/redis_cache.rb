@@ -1,20 +1,24 @@
 require 'redis'
 require 'flipper'
 require 'flipper/adapters/cache_base'
+require 'flipper/adapters/redis_shared/methods'
 
 module Flipper
   module Adapters
     # Public: Adapter that wraps another adapter with the ability to cache
     # adapter calls in Redis.
     class RedisCache < CacheBase
+      include ::Flipper::Adapters::RedisShared
+
       def initialize(adapter, cache, ttl = 3600, prefix: nil)
+        @client = cache
         super
       end
 
       private
 
       def cache_fetch(key, &block)
-        cached = @cache.get(key)
+        cached = with_connection { |conn| conn.get(key) }
         if cached
           Marshal.load(cached)
         else
@@ -27,7 +31,7 @@ module Flipper
       def cache_read_multi(keys)
         return {} if keys.empty?
 
-        values = @cache.mget(*keys).map do |value|
+        values = with_connection { |conn| conn.mget(*keys) }.map do |value|
           value ? Marshal.load(value) : nil
         end
 
@@ -35,11 +39,11 @@ module Flipper
       end
 
       def cache_write(key, value)
-        @cache.setex(key, @ttl, Marshal.dump(value))
+        with_connection { |conn| conn.setex(key, @ttl, Marshal.dump(value)) }
       end
 
       def cache_delete(key)
-        @cache.del(key)
+        with_connection { |conn| conn.del(key) }
       end
     end
   end

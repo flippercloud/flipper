@@ -25,7 +25,7 @@ RSpec.describe Flipper::Cloud::Telemetry do
 
     expect(telemetry.interval).to eq(60)
     expect(telemetry.timer.execution_interval).to eq(60)
-    expect(stub).to have_been_requested
+    expect(stub).to have_been_requested.at_least_once
   end
 
   it "phones home and updates telemetry interval if present" do
