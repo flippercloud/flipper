@@ -29,6 +29,13 @@ guard 'rspec', rspec_options do
       'spec/flipper/adapters/active_support_cache_store_spec.rb',
     ]
   }
+  watch('lib/flipper/adapters/redis_shared/methods.rb') {
+    [
+      'spec/flipper/adapters/redis_spec.rb',
+      'spec/flipper/adapters/redis_cache_spec.rb',
+      'spec/flipper/adapters/redis_connection_pool_spec.rb',
+    ]
+  }
 
   # To run all specs on every change... (useful with focus and fit)
   # watch(%r{.*}) { 'spec' }
