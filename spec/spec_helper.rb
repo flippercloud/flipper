@@ -26,9 +26,9 @@ Dir[FlipperRoot.join('spec/support/**/*.rb')].sort.each { |f| require f }
 ENV["FLIPPER_CLOUD_LOGGING_ENABLED"] = "false"
 
 require 'warning'
-Warning.ignore(/lib\/statsd.rb/)
-Warning.ignore(/lib\/moneta\/transformer.rb/)
-Warning.ignore(/lib\/mongo\/uri.rb/)
+Warning.ignore(/lib\/statsd/)
+Warning.ignore(/lib\/moneta\//)
+Warning.ignore(/lib\/mongo\//)
 
 RSpec.configure do |config|
   config.before(:example) do
