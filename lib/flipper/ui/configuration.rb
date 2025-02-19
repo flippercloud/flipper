@@ -5,8 +5,8 @@ module Flipper
     class Configuration
       attr_reader :delete
 
-      attr_accessor :banner_text,
-                    :banner_class
+      attr_accessor :banner_text
+      attr_reader :banner_class
 
       # Public: Is the UI in read only mode or not. Default is false. This
       # supersedes all other write-related options such as

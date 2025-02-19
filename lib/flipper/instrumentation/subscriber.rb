@@ -42,7 +42,6 @@ module Flipper
       # Private
       def update_feature_operation_metrics
         feature_name = @payload[:feature_name]
-        gate_name = @payload[:gate_name]
         operation = strip_trailing_question_mark(@payload[:operation])
         result = @payload[:result]
 
@@ -64,9 +63,6 @@ module Flipper
       def update_adapter_operation_metrics
         adapter_name = @payload[:adapter_name]
         operation = @payload[:operation]
-        result = @payload[:result]
-        value = @payload[:value]
-        key = @payload[:key]
 
         update_timer "flipper.adapter.#{adapter_name}.#{operation}"
       end

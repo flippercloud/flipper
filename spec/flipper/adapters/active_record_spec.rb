@@ -9,9 +9,10 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
 
   before(:all) do
     # Eval migration template so we can run migration against each database
-    migration = ERB.new(File.read(File.join(File.dirname(__FILE__), '../../../lib/generators/flipper/templates/migration.erb')))
+    template_path = File.join(File.dirname(__FILE__), '../../../lib/generators/flipper/templates/migration.erb')
+    migration = ERB.new(File.read(template_path))
     migration_version = "[#{ActiveRecord::VERSION::MAJOR}.#{ActiveRecord::VERSION::MINOR}]"
-    eval migration.result(binding) # defines CreateFlipperTables
+    eval migration.result_with_hash(migration_version: migration_version) # defines CreateFlipperTables
   end
 
   [

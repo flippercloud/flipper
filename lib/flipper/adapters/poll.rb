@@ -25,7 +25,7 @@ module Flipper
         if adapter.features.empty?
           begin
             @poller.sync
-          rescue => error
+          rescue
             # TODO: Warn here that it's possible that no data has been synced
             # and flags are being evaluated without flag data being present
             # until a sync completes. We rescue to avoid flipper being down

@@ -74,7 +74,7 @@ RSpec.describe Flipper::Api::Action do
         response = catch(:halt) do
           action.json_error_response(:feature_not_found)
         end
-        status, headers, body = response
+        _, headers, body = response
         parsed_body = JSON.parse(body[0])
 
         expect(headers[Rack::CONTENT_TYPE]).to eq('application/json')
@@ -88,7 +88,7 @@ RSpec.describe Flipper::Api::Action do
         response = catch(:halt) do
           action.json_error_response(:group_not_registered)
         end
-        status, headers, body = response
+        _, headers, body = response
         parsed_body = JSON.parse(body[0])
 
         expect(headers[Rack::CONTENT_TYPE]).to eq('application/json')

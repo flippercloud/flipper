@@ -313,7 +313,7 @@ RSpec.describe Flipper do
 
   describe '.group_exists' do
     it 'returns true if the group is already created' do
-      group = described_class.register('admins', &:admin?)
+      described_class.register('admins', &:admin?)
       expect(described_class.group_exists?(:admins)).to eq(true)
     end
 

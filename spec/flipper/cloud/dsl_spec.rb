@@ -45,7 +45,7 @@ RSpec.describe Flipper::Cloud::DSL do
     end
 
     let(:cloud_configuration) do
-      cloud_configuration = Flipper::Cloud::Configuration.new({
+      Flipper::Cloud::Configuration.new({
         token: "asdf",
         sync_secret: "tasty",
         local_adapter: local_adapter

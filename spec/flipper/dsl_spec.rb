@@ -225,9 +225,6 @@ RSpec.describe Flipper::DSL do
 
   describe '#enable_group/disable_group' do
     it 'enables and disables the feature for group' do
-      actor = Flipper::Actor.new(5)
-      group = Flipper.register(:fives) { |actor| actor.flipper_id == 5 }
-
       expect(subject[:stats].groups_value).to be_empty
       subject.enable_group(:stats, :fives)
       expect(subject[:stats].groups_value).to eq(Set['fives'])

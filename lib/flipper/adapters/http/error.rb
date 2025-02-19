@@ -20,7 +20,7 @@ module Flipper
             if more_info = data["more_info"]
               message << "\n#{data["more_info"]}"
             end
-          rescue => exception
+          rescue
             # welp we tried
           end
 
