@@ -2,13 +2,10 @@ require 'flipper/adapters/redis_connection_pool'
 
 RSpec.describe Flipper::Adapters::RedisConnectionPool do
   let(:pool) do
-    options = {}
-
-    options[:url] = ENV['REDIS_URL'] if ENV['REDIS_URL']
-
     Redis.raise_deprecations = true
-
-    ConnectionPool.new(size: 5, timeout: 5) { Redis.new(options) }
+    ConnectionPool.new(size: 5, timeout: 5) {
+      Redis.new(url: ENV.fetch('REDIS_URL', 'redis://localhost:6379'))
+    }
   end
 
   subject { described_class.new(pool) }

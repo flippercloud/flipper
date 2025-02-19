@@ -2,12 +2,8 @@ require 'flipper/adapters/redis'
 
 RSpec.describe Flipper::Adapters::Redis do
   let(:client) do
-    options = {}
-
-    options[:url] = ENV['REDIS_URL'] if ENV['REDIS_URL']
-
     Redis.raise_deprecations = true
-    Redis.new(options)
+    Redis.new(url: ENV.fetch('REDIS_URL', 'redis://localhost:6379'))
   end
 
   subject { described_class.new(client) }
