@@ -4,4 +4,5 @@ require 'flipper/instrumentation/statsd_subscriber'
 
 ActiveSupport::Notifications.subscribe(
   /\.flipper$/,
-  Flipper::Instrumentation::StatsdSubscriber)
+  Flipper::Instrumentation::StatsdSubscriber
+)
