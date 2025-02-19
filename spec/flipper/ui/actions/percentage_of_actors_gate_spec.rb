@@ -30,7 +30,7 @@ RSpec.describe Flipper::UI::Actions::PercentageOfActorsGate do
 
     context 'with space in feature name' do
       before do
-        post 'features/sp%20ace/percentage_of_actors',
+        post 'features/sp+ace/percentage_of_actors',
              { 'value' => '24', 'authenticity_token' => token },
              'rack.session' => session
       end
@@ -41,7 +41,7 @@ RSpec.describe Flipper::UI::Actions::PercentageOfActorsGate do
 
       it 'redirects back to feature' do
         expect(last_response.status).to be(302)
-        expect(last_response.headers['location']).to eq('/features/sp%20ace')
+        expect(last_response.headers['location']).to eq('/features/sp+ace')
       end
     end
 
@@ -58,7 +58,7 @@ RSpec.describe Flipper::UI::Actions::PercentageOfActorsGate do
 
       it 'redirects back to feature' do
         expect(last_response.status).to be(302)
-        expect(last_response.headers['location']).to eq('/features/search?error=Invalid%20percentage%20of%20actors%20value:%20value%20must%20be%20a%20positive%20number%20less%20than%20or%20equal%20to%20100,%20but%20was%20555')
+        expect(last_response.headers['location']).to eq('/features/search?error=Invalid+percentage+of+actors+value%3A+value+must+be+a+positive+number+less+than+or+equal+to+100%2C+but+was+555')
       end
     end
   end

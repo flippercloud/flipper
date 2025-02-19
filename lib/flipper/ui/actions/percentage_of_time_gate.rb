@@ -19,10 +19,10 @@ module Flipper
             feature.enable_percentage_of_time params['value']
           rescue ArgumentError => exception
             error = "Invalid percentage of time value: #{exception.message}"
-            redirect_to("/features/#{@feature.key}?error=#{error}")
+            redirect_to("/features/#{Flipper::UI::Util.escape @feature.key}?error=#{Flipper::UI::Util.escape error}")
           end
 
-          redirect_to "/features/#{@feature.key}"
+          redirect_to "/features/#{Flipper::UI::Util.escape @feature.key}"
         end
       end
     end

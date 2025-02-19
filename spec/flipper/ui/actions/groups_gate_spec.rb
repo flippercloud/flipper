@@ -60,7 +60,7 @@ RSpec.describe Flipper::UI::Actions::GroupsGate do
 
       context 'feature name contains space' do
         before do
-          post 'features/sp%20ace/groups',
+          post 'features/sp+ace/groups',
                { 'value' => group_name, 'operation' => 'enable', 'authenticity_token' => token },
                'rack.session' => session
         end
@@ -71,7 +71,7 @@ RSpec.describe Flipper::UI::Actions::GroupsGate do
 
         it 'redirects back to feature' do
           expect(last_response.status).to be(302)
-          expect(last_response.headers['location']).to eq('/features/sp%20ace')
+          expect(last_response.headers['location']).to eq('/features/sp+ace')
         end
       end
 
@@ -89,7 +89,7 @@ RSpec.describe Flipper::UI::Actions::GroupsGate do
 
           it 'redirects back to feature' do
             expect(last_response.status).to be(302)
-            expect(last_response.headers['location']).to eq('/features/search/groups?error=The%20group%20named%20%22not_here%22%20has%20not%20been%20registered.')
+            expect(last_response.headers['location']).to eq('/features/search/groups?error=The+group+named+%22not_here%22+has+not+been+registered.')
           end
         end
 
@@ -98,7 +98,7 @@ RSpec.describe Flipper::UI::Actions::GroupsGate do
 
           it 'redirects back to feature' do
             expect(last_response.status).to be(302)
-            expect(last_response.headers['location']).to eq('/features/search/groups?error=The%20group%20named%20%22%22%20has%20not%20been%20registered.')
+            expect(last_response.headers['location']).to eq('/features/search/groups?error=The+group+named+%22%22+has+not+been+registered.')
           end
         end
 
@@ -107,7 +107,7 @@ RSpec.describe Flipper::UI::Actions::GroupsGate do
 
           it 'redirects back to feature' do
             expect(last_response.status).to be(302)
-            expect(last_response.headers['location']).to eq('/features/search/groups?error=The%20group%20named%20%22%22%20has%20not%20been%20registered.')
+            expect(last_response.headers['location']).to eq('/features/search/groups?error=The+group+named+%22%22+has+not+been+registered.')
           end
         end
       end

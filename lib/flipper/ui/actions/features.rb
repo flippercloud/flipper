@@ -45,13 +45,13 @@ module Flipper
 
           if Util.blank?(value)
             error = "#{value.inspect} is not a valid feature name."
-            redirect_to("/features/new?error=#{error}")
+            redirect_to("/features/new?error=#{Flipper::UI::Util.escape error}")
           end
 
           feature = flipper[value]
           feature.add
 
-          redirect_to "/features/#{value}"
+          redirect_to "/features/#{Flipper::UI::Util.escape value}"
         end
       end
     end

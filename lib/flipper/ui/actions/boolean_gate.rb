@@ -21,7 +21,7 @@ module Flipper
             feature.disable
           end
 
-          redirect_to "/features/#{@feature.key}"
+          redirect_to "/features/#{Flipper::UI::Util.escape @feature.key}"
         end
       end
     end

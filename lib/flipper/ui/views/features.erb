@@ -36,7 +36,7 @@
       </div>
     </div>
     <% @features.each do |feature| %>
-      <a href="<%= "#{script_name}/features/#{feature.key}" %>" class="list-group-item list-group-item-action">
+      <a href="<%= "#{script_name}/features/#{Flipper::UI::Util.escape(feature.key)}" %>" class="list-group-item list-group-item-action">
         <div class="row align-items-center">
           <div class="col-1 text-center">
             <span class="status <%= feature.color_class %>" data-bs-toggle="tooltip" title=<%= feature.state.to_s.capitalize %>></span>
