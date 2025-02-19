@@ -30,7 +30,18 @@ RSpec.describe Flipper::Model::ActiveRecord do
     include Flipper::Model::ActiveRecord
   end
 
+  class DelegatedUser < DelegateClass(User)
+  end
+
   class Admin < User
+  end
+
+  it "doesn't warn for to_ary" do
+    # looks like we should remove this but you are wrong, we have specs that
+    # fail if there are warnings and if this regresses it will print a warning
+    # so it is in fact testing something
+    user = User.create!(name: "Test")
+    Flipper.enabled?(:something, DelegatedUser.new(user))
   end
 
   describe "flipper_id" do
