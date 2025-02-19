@@ -11,6 +11,8 @@ Bundler.setup(:default)
 
 require 'warning'
 Warning.ignore(/lib\/statsd/)
+Warning.ignore(/lib\/debug\//)
+Warning.ignore(/lib\/ice_age\//)
 Warning.ignore(/lib\/moneta\//)
 Warning.ignore(/lib\/mongo\//)
 
