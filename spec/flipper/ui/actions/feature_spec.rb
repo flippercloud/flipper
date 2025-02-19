@@ -197,4 +197,18 @@ RSpec.describe Flipper::UI::Actions::Feature do
       expect(last_response.body).to include('a/b')
     end
   end
+
+  describe 'GET /features/:feature with dot dot slash repeated in feature name' do
+    before do
+      get '/features/..%2F..%2F..%2F..%2Fblah'
+    end
+
+    it 'responds with success' do
+      expect(last_response.status).to be(200)
+    end
+
+    it 'renders template' do
+      expect(last_response.body).to include('../../../../blah')
+    end
+  end
 end

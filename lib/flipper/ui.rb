@@ -20,12 +20,17 @@ module Flipper
 
     def self.app(flipper = nil, options = {})
       env_key = options.fetch(:env_key, 'flipper')
-      rack_protection_options = options.fetch(:rack_protection, use: :authenticity_token)
+
+      if options.key?(:rack_protection)
+        warn "[DEPRECATION] `rack_protection` option is deprecated. " +
+          "Flipper::UI now only includes Rack::Protection::AuthenticityToken middleware. " +
+          "If you need additional protection, you can add it yourself."
+      end
 
       app = ->(_) { [200, { Rack::CONTENT_TYPE => 'text/html' }, ['']] }
       builder = Rack::Builder.new
       yield builder if block_given?
-      builder.use Rack::Protection, rack_protection_options
+      builder.use Rack::Protection::AuthenticityToken
       builder.use Rack::MethodOverride
       builder.use Flipper::Middleware::SetupEnv, flipper, env_key: env_key
       builder.use Flipper::UI::Middleware, flipper: flipper, env_key: env_key
