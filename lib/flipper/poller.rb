@@ -59,7 +59,7 @@ module Flipper
     def run
       loop do
         sleep jitter
-        Concurrent.monotonic_time
+
         begin
           sync
         rescue
