@@ -25,7 +25,7 @@ module Flipper
 
           if values.empty?
             error = "#{value.inspect} is not a valid actor value."
-            redirect_to("/features/#{feature.key}/actors?error=#{error}")
+            redirect_to("/features/#{Flipper::UI::Util.escape feature.key}/actors?error=#{Flipper::UI::Util.escape error}")
           end
 
           values.each do |value|
@@ -39,7 +39,7 @@ module Flipper
             end
           end
 
-          redirect_to("/features/#{feature.key}")
+          redirect_to("/features/#{Flipper::UI::Util.escape feature.key}")
         end
       end
     end

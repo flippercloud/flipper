@@ -43,7 +43,7 @@ RSpec.describe Flipper::UI::Actions::BooleanGate do
 
       it 'redirects back to feature' do
         expect(last_response.status).to be(302)
-        expect(last_response.headers['location']).to eq('/features/sp%20ace')
+        expect(last_response.headers['location']).to eq('/features/sp+ace')
       end
     end
 

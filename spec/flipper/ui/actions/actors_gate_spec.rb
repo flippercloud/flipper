@@ -35,7 +35,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
     end
 
     it 'renders add new actor form' do
-      form = '<form action="/features/a/b/actors" method="post" class="row">'
+      form = '<form action="/features/a%2Fb/actors" method="post" class="row">'
       expect(last_response.body).to include(form)
     end
   end
@@ -73,7 +73,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
 
       context "when feature name contains space" do
         before do
-          post 'features/sp%20ace/actors',
+          post 'features/sp+ace/actors',
                { 'value' => value, 'operation' => 'enable', 'authenticity_token' => token },
                'rack.session' => session
         end
@@ -84,7 +84,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
 
         it "redirects back to feature" do
           expect(last_response.status).to be(302)
-          expect(last_response.headers['location']).to eq('/features/sp%20ace')
+          expect(last_response.headers['location']).to eq('/features/sp+ace')
         end
       end
 
@@ -114,7 +114,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
 
           it 'redirects back to feature' do
             expect(last_response.status).to be(302)
-            expect(last_response.headers['location']).to eq('/features/search/actors?error=%22%22%20is%20not%20a%20valid%20actor%20value.')
+            expect(last_response.headers['location']).to eq('/features/search/actors?error=%22%22+is+not+a+valid+actor+value.')
           end
         end
 
@@ -123,7 +123,7 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
 
           it 'redirects back to feature' do
             expect(last_response.status).to be(302)
-            expect(last_response.headers['location']).to eq('/features/search/actors?error=%22%22%20is%20not%20a%20valid%20actor%20value.')
+            expect(last_response.headers['location']).to eq('/features/search/actors?error=%22%22+is+not+a+valid+actor+value.')
           end
         end
       end

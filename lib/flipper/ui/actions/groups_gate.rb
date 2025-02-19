@@ -30,10 +30,10 @@ module Flipper
               feature.disable_group value
             end
 
-            redirect_to("/features/#{feature.key}")
+            redirect_to("/features/#{Flipper::UI::Util.escape feature.key}")
           else
             error = "The group named #{value.inspect} has not been registered."
-            redirect_to("/features/#{feature.key}/groups?error=#{error}")
+            redirect_to("/features/#{Flipper::UI::Util.escape feature.key}/groups?error=#{Flipper::UI::Util.escape error}")
           end
         end
       end

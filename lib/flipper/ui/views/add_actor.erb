@@ -6,7 +6,7 @@
 
 <div class="card">
   <h4 class="card-header">
-    <a class="link-dark" href="<%= script_name %>/features/<%= @feature.key %>"><%= @feature.key %></a>
+    <a class="link-dark" href="<%= script_name %>/features/<%= Flipper::UI::Util.escape @feature.key %>"><%= @feature.key %></a>
     /
     Enable Actor
   </h4>
@@ -14,7 +14,7 @@
     <p>
       Turn on this feature for actors.
     </p>
-    <form action="<%= script_name %>/features/<%= @feature.key %>/actors" method="post" class="row">
+    <form action="<%= script_name %>/features/<%= Flipper::UI::Util.escape @feature.key %>/actors" method="post" class="row">
       <%== csrf_input_tag %>
       <input type="hidden" name="operation" value="enable">
       <div class="col"><input type="text" name="value" placeholder="<%= Flipper::UI.configuration.add_actor_placeholder %>" class="form-control"></div>
