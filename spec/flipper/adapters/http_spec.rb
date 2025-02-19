@@ -28,6 +28,7 @@ RSpec.describe Flipper::Adapters::Http do
       end
 
       before :all do
+        @started = false
         dir = FlipperRoot.join('tmp').tap(&:mkpath)
         log_path = dir.join('flipper_adapters_http_spec.log')
         @pstore_file = dir.join('flipper.pstore')
