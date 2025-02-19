@@ -45,7 +45,7 @@ RSpec.describe Flipper::Cloud::Telemetry do
 
     expect(telemetry.interval).to eq(120)
     expect(telemetry.timer.execution_interval).to eq(120)
-    expect(stub).to have_been_requested
+    expect(stub).to have_been_requested.at_least_once
   end
 
   it "phones home and requests shutdown if telemetry-shutdown header is true" do
@@ -67,7 +67,7 @@ RSpec.describe Flipper::Cloud::Telemetry do
       result: true,
     })
     telemetry.stop
-    expect(stub).to have_been_requested
+    expect(stub).to have_been_requested.at_least_once
     expect(output.string).to match(/action=telemetry_shutdown message=The server has requested that telemetry be shut down./)
   end
 
@@ -90,7 +90,7 @@ RSpec.describe Flipper::Cloud::Telemetry do
       result: true,
     })
     telemetry.stop
-    expect(stub).to have_been_requested
+    expect(stub).to have_been_requested.at_least_once
     expect(output.string).not_to match(/action=telemetry_shutdown message=The server has requested that telemetry be shut down./)
   end
 
