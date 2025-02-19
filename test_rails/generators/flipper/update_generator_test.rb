@@ -65,7 +65,7 @@ class UpdateGeneratorTest < Rails::Generators::TestCase
 
     assert_migration "db/migrate/create_flipper_tables.rb" do |migration|
       assert_method :up, migration do |up|
-        assert_match /text :value/, up
+        assert_match(/text :value/, up)
       end
     end
 
