@@ -18,7 +18,7 @@ Rails.application.configure do
   ## Show Flipper checks in logs
   # config.flipper.log = true
 
-  ## Reconfigure Flipper to use the Memory adaper and disable Cloud in tests
+  ## Reconfigure Flipper to use the Memory adapter and disable Cloud in tests
   # config.flipper.test_help = true
 
   ## The path that Flipper Cloud will use to sync features
