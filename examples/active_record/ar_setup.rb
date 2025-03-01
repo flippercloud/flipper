@@ -28,3 +28,18 @@ SQL
 ActiveRecord::Base.connection.execute <<-SQL
   CREATE UNIQUE INDEX index_gates_on_keys_and_value on flipper_gates (feature_key, key, value)
 SQL
+
+ActiveRecord::Base.connection.execute <<-SQL
+  CREATE TABLE users (
+    id integer PRIMARY KEY,
+    name string NOT NULL,
+    influencer boolean,
+    created_at datetime NOT NULL,
+    updated_at datetime NOT NULL
+  )
+SQL
+
+require 'flipper/model/active_record'
+class User < ActiveRecord::Base
+  include Flipper::Model::ActiveRecord
+end
