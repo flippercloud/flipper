@@ -26,7 +26,7 @@ module Flipper
     # in subclass.
     #
     # Returns true if gate open for any actor, false if not.
-    def open?(actors, value, options = {})
+    def open?(context)
       false
     end
 
