@@ -20,17 +20,26 @@ module Flipper
 
     def self.app(flipper = nil, options = {})
       env_key = options.fetch(:env_key, 'flipper')
-
-      if options.key?(:rack_protection)
-        warn "[DEPRECATION] `rack_protection` option is deprecated. " +
-          "Flipper::UI now only includes Rack::Protection::AuthenticityToken middleware. " +
-          "If you need additional protection, you can add it yourself."
+      rack_protection_options = if options.key?(:rack_protection)
+        options[:rack_protection]
+      else
+        {}
       end
 
       app = ->(_) { [200, { Rack::CONTENT_TYPE => 'text/html' }, ['']] }
       builder = Rack::Builder.new
       yield builder if block_given?
-      builder.use Rack::Protection::AuthenticityToken
+
+      # Only use Rack::Protection::AuthenticityToken if no other options are
+      # provided. Should avoid some pain for some people. If any options are
+      # provided then go whole hog and include all of Rack::Protection for
+      # backwards compatibility.
+      if rack_protection_options.empty?
+        builder.use Rack::Protection::AuthenticityToken
+      else
+        builder.use Rack::Protection, rack_protection_options
+      end
+
       builder.use Rack::MethodOverride
       builder.use Flipper::Middleware::SetupEnv, flipper, env_key: env_key
       builder.use Flipper::UI::Middleware, flipper: flipper, env_key: env_key
