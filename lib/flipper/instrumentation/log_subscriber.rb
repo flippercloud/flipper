@@ -56,7 +56,7 @@ module Flipper
         operation = event.payload[:operation]
         result = event.payload[:result]
 
-        description = 'Flipper '
+        description = String.new('Flipper ')
         description << "feature(#{feature_name}) " unless feature_name.nil?
         description << "adapter(#{adapter_name}) "
         description << "#{operation} "
