@@ -56,15 +56,15 @@ module Flipper
         operation = event.payload[:operation]
         result = event.payload[:result]
 
-        description = 'Flipper '
-        description << "feature(#{feature_name}) " unless feature_name.nil?
-        description << "adapter(#{adapter_name}) "
-        description << "#{operation} "
+        description = ['Flipper']
+        description << "feature(#{feature_name})" unless feature_name.nil?
+        description << "adapter(#{adapter_name})"
+        description << "#{operation}"
+        description << sprintf('(%.1fms)', event.duration)
 
         details = "result=#{result.inspect}"
 
-        name = '%s (%.1fms)' % [description, event.duration]
-        debug "  #{color_name(name)}  [ #{details} ]"
+        debug "  #{color_name(description.join(' '))}  [ #{details} ]"
       end
 
       def logger
