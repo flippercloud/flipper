@@ -245,7 +245,7 @@ module Flipper
         if required
           option_value = send(name)
           if option_value.nil? || option_value.empty?
-            message = "Flipper::Cloud #{name} is missing. Please "
+            message = String.new("Flipper::Cloud #{name} is missing. Please ")
             message << "set #{env_var} or " if from_env
             message << "provide #{name} (e.g. Flipper::Cloud.new(#{name}: value))."
             raise ArgumentError, message
