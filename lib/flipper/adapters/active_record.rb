@@ -61,8 +61,6 @@ module Flipper
         @name = options.fetch(:name, :active_record)
         @feature_class = options.fetch(:feature_class) { Feature }
         @gate_class = options.fetch(:gate_class) { Gate }
-
-        warn VALUE_TO_TEXT_WARNING if value_not_text?
       end
 
       # Public: The set of known features.
@@ -289,14 +287,22 @@ module Flipper
       # Check if value column is text instead of string
       # See https://github.com/flippercloud/flipper/pull/692
       def value_not_text?
-        @gate_class.column_for_attribute(:value).type != :text
+        with_connection(@gate_class) do |connection|
+          @gate_class.column_for_attribute(:value).type != :text
+        end
       rescue ::ActiveRecord::ActiveRecordError => error
         # If the table doesn't exist, the column doesn't exist either
         warn "#{error.message}. You likely need to run `rails g flipper:active_record` and/or `rails db:migrate`."
       end
 
       def with_connection(model = @feature_class, &block)
+        warn VALUE_TO_TEXT_WARNING if !warned_about_value_not_text? && value_not_text?
         model.connection_pool.with_connection(&block)
+      end
+
+      def warned_about_value_not_text?
+        return @warned_about_value_not_text if defined?(@warned_about_value_not_text)
+        @warned_about_value_not_text = true
       end
     end
   end
