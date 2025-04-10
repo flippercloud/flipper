@@ -58,9 +58,10 @@ module Flipper
       # Allowing the overriding of the default feature/gate classes means you
       # can roll your own tables and what not, if you so desire.
       def initialize(options = {})
+        ::ActiveRecord::Base
         @name = options.fetch(:name, :active_record)
-        @feature_class = options.fetch(:feature_class) { Feature }
-        @gate_class = options.fetch(:gate_class) { Gate }
+        @feature_class = options.fetch(:feature_class) { Flipper::Adapters::ActiveRecord::Feature }
+        @gate_class = options.fetch(:gate_class) { Flipper::Adapters::ActiveRecord::Gate }
       end
 
       # Public: The set of known features.
