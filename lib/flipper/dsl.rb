@@ -76,6 +76,16 @@ module Flipper
       feature(name).enable_actor(actor)
     end
 
+    # Public: All Enabled features for an actor.
+    #
+    # actor - a Flipper::Types::Actor instance or an object that responds
+    #         to flipper_id.
+    #
+    # Returns Set of Flipper::Feature instances.
+    def features_for_actor(actor)
+      adapter.features.keep_if { |feature_name| enabled?(feature_name, actor) }.to_set { |name| feature(name) }
+    end
+
     # Public: Enable a feature for a group.
     #
     # name - The String or Symbol name of the feature.
@@ -269,7 +279,7 @@ module Flipper
     #
     # Returns Set of Flipper::Feature instances.
     def features
-      adapter.features.map { |name| feature(name) }.to_set
+      adapter.features.to_set { |name| feature(name) }
     end
 
     # Public: Does this adapter support writes or not.
