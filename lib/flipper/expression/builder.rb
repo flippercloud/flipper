@@ -57,10 +57,6 @@ module Flipper
         build({ Include: [self, object] })
       end
 
-      def in(object)
-        build({ In: [self, object] })
-      end
-
       def percentage_of_actors(object)
         build({ PercentageOfActors: [self, build(object)] })
       end
