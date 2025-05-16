@@ -30,7 +30,7 @@ module Flipper
       end
 
       VALUE_TO_TEXT_WARNING = <<-EOS
-        Your database needs migrated to use the latest Flipper features.
+        Your database needs to be migrated to use the latest Flipper features.
         See https://github.com/flippercloud/flipper/issues/557
       EOS
 
