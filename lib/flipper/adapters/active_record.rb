@@ -38,7 +38,7 @@ module Flipper
       end
 
       VALUE_TO_TEXT_WARNING = <<-EOS
-        Your database needs migrated to use the latest Flipper features.
+        Your database needs to be migrated to use the latest Flipper features.
         Run `rails generate flipper:update` and `rails db:migrate`.
       EOS
 
