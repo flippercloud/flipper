@@ -58,5 +58,9 @@ module Flipper
     def self.configuration
       @configuration ||= ::Flipper::UI::Configuration.new
     end
+
+    def self.expression_properties
+      configuration.expression_properties
+    end
   end
 end

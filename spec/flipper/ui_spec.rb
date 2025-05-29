@@ -194,4 +194,12 @@ RSpec.describe Flipper::UI do
       end
     end
   end
+
+  describe '.expression_properties' do
+    it 'delegates to configuration.expression_properties' do
+      properties = { user_id: { type: 'string' } }
+      described_class.configuration.expression_properties = properties
+      expect(described_class.expression_properties).to eq(properties)
+    end
+  end
 end

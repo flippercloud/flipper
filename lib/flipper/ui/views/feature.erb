@@ -247,6 +247,165 @@
         </div>
       <% end %>
 
+      <%# Expression %>
+      <% unless @feature.boolean_value %>
+        <div class="js-toggle-container">
+          <div class="card-body border-bottom">
+            <div class="row align-items-center">
+              <div class="col col-me-auto">
+                <h6 class="m-0">
+                  <strong class="<%= "text-muted" unless @feature.has_expression? %>">
+                    <% if @feature.has_expression? %>
+                      Enabled for actors with <%= @feature.expression_description %>
+                    <% else %>
+                      No expression enabled
+                    <% end %>
+                  </strong>
+                </h6>
+              </div>
+              <% if write_allowed? %>
+                <div class="col col-auto toggle-block-when-off">
+                  <button class="btn btn-outline-secondary js-toggle-trigger">
+                    <%= @feature.has_expression? ? "Edit" : "Add an expression" %>
+                  </button>
+                </div>
+                <div class="col col-auto toggle-block-when-on">
+                  <button class="btn btn-outline-secondary js-toggle-trigger">Hide</button>
+                </div>
+              <% end %>
+            </div>
+          </div>
+
+          <% if write_allowed? %>
+            <div class="card-body border-bottom toggle-block-when-on bg-lightest">
+              <!-- Expression Type Selection -->
+              <div class="row mb-3">
+                <div class="col">
+                  <div class="btn-group" role="group" aria-label="Expression type">
+                    <input type="radio" class="btn-check" name="expression_type" id="type-property" value="property" autocomplete="off" <%= "checked" if @feature.expression_form_data[:type] == "property" %>>
+                    <label class="btn btn-light" for="type-property">Property</label>
+
+                    <input type="radio" class="btn-check" name="expression_type" id="type-any" value="any" autocomplete="off" <%= "checked" if @feature.expression_form_data[:type] == "any" %>>
+                    <label class="btn btn-light" for="type-any">Any</label>
+
+                    <input type="radio" class="btn-check" name="expression_type" id="type-all" value="all" autocomplete="off" <%= "checked" if @feature.expression_form_data[:type] == "all" %>>
+                    <label class="btn btn-light" for="type-all">All</label>
+                  </div>
+                </div>
+                  <div class="col-auto ms-auto">
+                    <button type="button" class="btn btn-outline-secondary" id="add-expression-btn">
+                      Add an expression
+                    </button>
+                  </div>
+                  <% if @feature.has_expression? %>
+                    <div class="col-auto">
+                      <form action="<%= script_name %>/features/<%= Flipper::UI::Util.escape @feature.key %>/expression" method="post">
+                        <%== csrf_input_tag %>
+                        <input type="hidden" name="operation" value="disable">
+                        <button type="submit" class="btn btn-outline-danger" data-bs-toggle="tooltip" title="Disable expression" data-bs-placement="left">
+                          Remove
+                        </button>
+                      </form>
+                    </div>
+                  <% end %>
+              </div>
+
+              <form action="<%= script_name %>/features/<%= Flipper::UI::Util.escape @feature.key %>/expression" method="post" class="col" id="expression-form">
+                <%== csrf_input_tag %>
+                <input type="hidden" name="operation" value="enable">
+
+                <!-- Simple Property Expression Form -->
+                <div id="simple-expression-form" class="<%= 'd-none' unless @feature.expression_form_data[:type] == 'property' %>">
+                  <div class="row">
+                    <div class="col-md-4 mb-3">
+                      <select name="expression_property" class="form-select">
+                        <option value="">Select a property...</option>
+                        <% Flipper::UI.expression_properties.each do |property, config| %>
+                          <option value="<%= property %>" <%= "selected" if @feature.expression_form_data[:property] == property.to_s %>><%= property %></option>
+                        <% end %>
+                        <% if @feature.expression_form_data[:property] && !Flipper::UI.expression_properties.has_key?(@feature.expression_form_data[:property].to_sym) %>
+                          <option value="<%= @feature.expression_form_data[:property] %>" selected><%= @feature.expression_form_data[:property] %> (no longer available)</option>
+                        <% end %>
+                      </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                      <select name="expression_operator" class="form-select">
+                        <option value="">Select an operator...</option>
+                        <option value="eq" <%= "selected" if @feature.expression_form_data[:operator] == "eq" %>>equals (=)</option>
+                        <option value="ne" <%= "selected" if @feature.expression_form_data[:operator] == "ne" %>>not equal (≠)</option>
+                        <option value="gt" <%= "selected" if @feature.expression_form_data[:operator] == "gt" %>>greater than (>)</option>
+                        <option value="gte" <%= "selected" if @feature.expression_form_data[:operator] == "gte" %>>greater than or equal (≥)</option>
+                        <option value="lt" <%= "selected" if @feature.expression_form_data[:operator] == "lt" %>>less than (<)</option>
+                        <option value="lte" <%= "selected" if @feature.expression_form_data[:operator] == "lte" %>>less than or equal (≤)</option>
+                      </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                      <input type="text" name="expression_value" placeholder="value" class="form-control" value="<%= @feature.expression_form_data[:value] %>">
+                    </div>
+                    <div class="col-auto ms-auto mb-3">
+                      <button type="button" class="btn btn-outline-danger remove-expression-btn" disabled>Remove</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Complex Expression Form -->
+                <div id="complex-expression-form" class="<%= 'd-none' unless @feature.expression_form_data[:type] == 'any' || @feature.expression_form_data[:type] == 'all' %>">
+                  <div class="row">
+                    <div class="col">
+                      <div id="expression-list">
+                        <!-- Dynamic expression rows will be added here -->
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Expression form initialization data -->
+                <script id="expression-form-data" type="application/json">
+                  <%== @feature.expression_form_data.to_json %>
+                </script>
+
+                <div class="row">
+                  <div class="col-auto ms-auto">
+                    <input type="submit" value="Save" form="expression-form" class="btn btn-primary">
+                  </div>
+                </div>
+              </form>
+
+              <!-- Template for complex expression rows -->
+              <template id="expression-row-template">
+                <div class="row">
+                  <div class="col-md-4 mb-3">
+                    <select name="complex_expressions[COUNTER][property]" class="form-select" required>
+                      <option value="">Select a property...</option>
+                      <% Flipper::UI.expression_properties.each do |property, config| %>
+                        <option value="<%= property %>"><%= property %></option>
+                      <% end %>
+                    </select>
+                  </div>
+                  <div class="col-md-3 mb-3">
+                    <select name="complex_expressions[COUNTER][operator]" class="form-select" required>
+                      <option value="">Select an operator...</option>
+                      <option value="eq">equals (=)</option>
+                      <option value="ne">not equal (≠)</option>
+                      <option value="gt">greater than (>)</option>
+                      <option value="gte">greater than or equal (≥)</option>
+                      <option value="lt">less than (<)</option>
+                      <option value="lte">less than or equal (≤)</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3 mb-3">
+                    <input type="text" name="complex_expressions[COUNTER][value]" placeholder="value" class="form-control" required>
+                  </div>
+                  <div class="col-auto ms-auto mb-3">
+                    <button type="button" class="btn btn-outline-danger remove-expression-btn">Remove</button>
+                  </div>
+                </div>
+              </template>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
       <% if write_allowed? %>
         <div class="card-body">
           <form action="<%= script_name %>/features/<%= Flipper::UI::Util.escape @feature.key %>/boolean" method="post">

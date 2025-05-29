@@ -1,5 +1,6 @@
 require 'flipper/ui/configuration/option'
 
+
 module Flipper
   module UI
     class Configuration
@@ -77,6 +78,11 @@ module Flipper
       # Default is false.
       attr_accessor :confirm_disable
 
+      # Public: Hash of available expression properties for feature flag expressions.
+      # Each key is the property name, each value is a hash with type (boolean, string, number).
+      # Used for UI dropdowns and type conversion. Default is empty hash.
+      attr_accessor :expression_properties
+
       VALID_BANNER_CLASS_VALUES = %w(
         danger
         dark
@@ -107,6 +113,7 @@ module Flipper
         @confirm_fully_enable = false
         @confirm_disable = true
         @read_only = false
+        @expression_properties = {}
         @nav_items = [
           { title: "Features", href: "features" },
           { title: "Settings", href: "settings" },

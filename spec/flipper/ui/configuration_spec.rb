@@ -182,4 +182,19 @@ RSpec.describe Flipper::UI::Configuration do
       it { is_expected.to eq(true) }
     end
   end
+
+  describe "#expression_properties" do
+    it "has default value" do
+      expect(configuration.expression_properties).to eq({})
+    end
+
+    it "can be updated" do
+      properties = {
+        user_id: { type: 'string' },
+        is_premium: { type: 'boolean' }
+      }
+      configuration.expression_properties = properties
+      expect(configuration.expression_properties).to eq(properties)
+    end
+  end
 end
