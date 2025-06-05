@@ -293,9 +293,12 @@
                   </div>
                 </div>
                   <div class="col-auto ms-auto">
-                    <button type="button" class="btn btn-outline-secondary" id="add-expression-btn">
-                      Add an expression
-                    </button>
+                    <%# Disabled buttons don't respond to hover events: https://getbootstrap.com/docs/4.0/components/tooltips/#disabled-elements %>
+                    <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" title="Add an expression is only available for 'Any' and 'All' expression types">
+                      <button type="button" class="btn btn-outline-secondary" id="add-expression-btn">
+                        Add an expression
+                      </button>
+                    </span>
                   </div>
                   <% if @feature.has_expression? %>
                     <div class="col-auto">
@@ -343,7 +346,9 @@
                       <input type="text" name="expression_value" placeholder="value" class="form-control" value="<%= @feature.expression_form_data[:value] %>">
                     </div>
                     <div class="col-auto ms-auto mb-3">
+                      <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" title="'Remove' is only available for 'Any' or 'All' expression types">
                       <button type="button" class="btn btn-outline-danger remove-expression-btn" disabled>Remove</button>
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -397,7 +402,9 @@
                     <input type="text" name="complex_expressions[COUNTER][value]" placeholder="value" class="form-control" required>
                   </div>
                   <div class="col-auto ms-auto mb-3">
-                    <button type="button" class="btn btn-outline-danger remove-expression-btn">Remove</button>
+                    <span class="d-inline-block" tabindex="0" data-toggle="tooltip" data-placement="top" title="N > 1 expressions required to remove one.">
+                      <button type="button" class="btn btn-outline-danger remove-expression-btn">Remove</button>
+                    </span>
                   </div>
                 </div>
               </template>
