@@ -63,7 +63,7 @@ module Flipper
                  :enable_group, :disable_group,
                  :enable_percentage_of_actors, :disable_percentage_of_actors,
                  :enable_percentage_of_time, :disable_percentage_of_time,
-                 :features, :feature, :[], :preload, :preload_all,
+                 :features, :feature, :features_for_actor, :[], :preload, :preload_all,
                  :adapter, :add, :exist?, :remove, :import, :export,
                  :memoize=, :memoizing?, :read_only?,
                  :sync, :sync_secret # For Flipper::Cloud. Will error for OSS Flipper.
