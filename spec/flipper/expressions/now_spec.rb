@@ -8,4 +8,10 @@ RSpec.describe Flipper::Expressions::Now do
       expect(described_class.call.zone).to eq("UTC")
     end
   end
+
+  describe "#in_words" do
+    it "returns 'now'" do
+      expect(described_class.in_words).to eq("now")
+    end
+  end
 end

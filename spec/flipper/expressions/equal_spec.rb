@@ -21,4 +21,12 @@ RSpec.describe Flipper::Expressions::Equal do
       expect { described_class.call(10) }.to raise_error(ArgumentError)
     end
   end
+
+  describe "#in_words" do
+    it "formats comparison in words" do
+      left = double("left", in_words: "user_id")
+      right = double("right", in_words: "123")
+      expect(described_class.in_words(left, right)).to eq("user_id is equal to 123")
+    end
+  end
 end

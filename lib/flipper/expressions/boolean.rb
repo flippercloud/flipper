@@ -4,6 +4,10 @@ module Flipper
       def self.call(value)
         Flipper::Typecast.to_boolean(value)
       end
+
+      def self.in_words(arg)
+        self.call(arg.value)
+      end
     end
   end
 end

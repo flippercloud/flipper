@@ -16,6 +16,14 @@ module Flipper
         value
       end
 
+      def in_words
+        value
+      end
+
+      def name
+        'Constant'
+      end
+
       def eql?(other)
         other.is_a?(self.class) && other.value == value
       end

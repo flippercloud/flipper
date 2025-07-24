@@ -40,4 +40,17 @@ RSpec.describe Flipper::Expressions::Duration do
       expect(described_class.call(2, 'years')).to eq(63_113_904)
     end
   end
+
+  describe "#in_words" do
+    it "handles single argument" do
+      arg = double("arg", in_words: "30")
+      expect(described_class.in_words(arg)).to eq("30 seconds")
+    end
+
+    it "handles multiple arguments" do
+      arg1 = double("arg1", in_words: "1")
+      arg2 = double("arg2", in_words: "hour")
+      expect(described_class.in_words(arg1, arg2)).to eq("1 hour")
+    end
+  end
 end

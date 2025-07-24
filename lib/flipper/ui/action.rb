@@ -214,6 +214,22 @@ module Flipper
         eval(Erubi::Engine.new(path.read, escape: true).src)
       end
 
+      # Private: Renders a partial template.
+      #
+      # name - The Symbol or String name of the partial template.
+      # locals - Hash of local variables to make available in the partial.
+      #
+      # Returns the rendered partial as a string.
+      def partial(name, locals = {})
+        path = views_path.join("_#{name}.erb")
+        raise "Partial does not exist: #{path}" unless path.exist?
+
+        partial_binding = binding
+        locals.each { |key, value| partial_binding.local_variable_set(key, value) }
+
+        partial_binding.eval(Erubi::Engine.new(path.read, escape: true).src)
+      end
+
       # Internal: The path the app is mounted at.
       def script_name
         request.env['SCRIPT_NAME']

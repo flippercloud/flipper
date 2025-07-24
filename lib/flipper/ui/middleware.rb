@@ -23,6 +23,7 @@ module Flipper
         @action_collection.add UI::Actions::BooleanGate
         @action_collection.add UI::Actions::PercentageOfTimeGate
         @action_collection.add UI::Actions::PercentageOfActorsGate
+        @action_collection.add UI::Actions::ExpressionGate
         @action_collection.add UI::Actions::Feature
         @action_collection.add UI::Actions::Features
         @action_collection.add UI::Actions::Export

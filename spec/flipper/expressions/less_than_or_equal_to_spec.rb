@@ -25,4 +25,12 @@ RSpec.describe Flipper::Expressions::LessThanOrEqualTo do
       expect { described_class.call(10) }.to raise_error(ArgumentError)
     end
   end
+
+  describe "#in_words" do
+    it "formats comparison in words" do
+      left = double("left", in_words: "temperature")
+      right = double("right", in_words: "32")
+      expect(described_class.in_words(left, right)).to eq("temperature is less than or equal to 32")
+    end
+  end
 end

@@ -77,6 +77,9 @@ module Flipper
       # Default is false.
       attr_accessor :confirm_disable
 
+      # Public: Are expressions viewable and editable in the UI or not. Default is false.
+      attr_accessor :expressions_enabled
+
       VALID_BANNER_CLASS_VALUES = %w(
         danger
         dark
@@ -107,6 +110,7 @@ module Flipper
         @confirm_fully_enable = false
         @confirm_disable = true
         @read_only = false
+        @expressions_enabled = false
         @nav_items = [
           { title: "Features", href: "features" },
           { title: "Settings", href: "settings" },

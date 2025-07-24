@@ -45,6 +45,10 @@ module Flipper
       end
     end
 
+    def in_words
+      function.in_words(*args)
+    end
+
     def eql?(other)
       other.is_a?(self.class) && @function == other.function && @args == other.args
     end

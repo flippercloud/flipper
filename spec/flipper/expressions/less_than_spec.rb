@@ -29,4 +29,12 @@ RSpec.describe Flipper::Expressions::LessThan do
       expect { described_class.call(10) }.to raise_error(ArgumentError)
     end
   end
+
+  describe "#in_words" do
+    it "formats comparison in words" do
+      left = double("left", in_words: "age")
+      right = double("right", in_words: "65")
+      expect(described_class.in_words(left, right)).to eq("age is less than 65")
+    end
+  end
 end

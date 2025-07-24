@@ -168,6 +168,52 @@ RSpec.describe Flipper::UI::Actions::Feature do
         expect(last_response.body).not_to include('javascript:alert')
       end
     end
+
+    context 'with expressions enabled' do
+      before do
+        allow(Flipper::UI.configuration).to receive(:expressions_enabled).and_return(true)
+      end
+
+      context 'with expression enabled on feature' do
+        before do
+          expression = Flipper::Expression.build({
+            "Any" => [
+              {"Equal" => [{"Property" => ["userId"]}, {"String" => ["123"]}]},
+              {"All" => [
+                {"GreaterThan" => [{"Property" => ["age"]}, {"Number" => [18]}]},
+                {"LessThan" => [{"Now" => []}, {"Time" => ["2025-12-31T23:59:59Z"]}]}
+              ]},
+              {"GreaterThanOrEqualTo" => [{"Percentage" => [50]}, {"Number" => [50]}]},
+              {"LessThanOrEqualTo" => [{"Random" => [100]}, {"Number" => [0.75]}]},
+              {"NotEqual" => [{"Property" => ["role"]}, {"String" => ["guest"]}]},
+              {"PercentageOfActors" => ["User;1", 50 ]},
+              {"Boolean" => [true]},
+              {"Duration" => ["1", "days"]}
+            ]
+          })
+          flipper[:search].enable_expression(expression)
+        end
+
+        it 'shows expression is enabled in feature view' do
+          get '/features/search'
+          expect(last_response.status).to be(200)
+          expect(last_response.body).to include('Enabled for actors where')
+        end
+      end
+    end
+
+    context 'with expressions disabled' do
+      before do
+        allow(Flipper::UI.configuration).to receive(:expressions_enabled).and_return(false)
+      end
+
+      it 'does not show expression section when expressions are disabled' do
+        get '/features/search'
+        expect(last_response.status).to be(200)
+        expect(last_response.body).not_to include('No expression enabled')
+        expect(last_response.body).not_to include('Add an expression')
+      end
+    end
   end
 
   describe 'GET /features/:feature with _features in feature name' do

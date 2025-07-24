@@ -1,0 +1,13 @@
+<div class="row align-items-center mb-3">
+  <div class="col-auto">
+    <select class="form-select" name="<%= base_name %>[type]">
+      <option value="Any" <%= 'selected' if expression.name == 'Any' %>>Any</option>
+      <option value="All" <%= 'selected' if expression.name == 'All' %>>All</option>
+    </select>
+  </div>
+</div>
+<div class="ms-2">
+  <% expression.args.each_with_index do |arg, index| %>
+    <%== partial(arg.name.downcase, { expression: arg, base_name: "#{base_name}[args][#{index}]" }) %>
+  <% end %>
+</div>

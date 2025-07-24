@@ -12,4 +12,12 @@ RSpec.describe Flipper::Expressions::NotEqual do
       expect { described_class.call(20, 10, 20).evaluate }.to raise_error(ArgumentError)
     end
   end
+
+  describe "#in_words" do
+    it "formats comparison in words" do
+      left = double("left", in_words: "role")
+      right = double("right", in_words: "guest")
+      expect(described_class.in_words(left, right)).to eq("role is not equal to guest")
+    end
+  end
 end
