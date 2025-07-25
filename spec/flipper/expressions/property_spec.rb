@@ -10,4 +10,11 @@ RSpec.describe Flipper::Expressions::Property do
       expect(described_class.call("flipper_id", context: context)).to be(nil)
     end
   end
+
+  describe "#in_words" do
+    it "delegates to argument's in_words method" do
+      arg = double("arg", in_words: "user_id")
+      expect(described_class.in_words(arg)).to eq("user_id")
+    end
+  end
 end

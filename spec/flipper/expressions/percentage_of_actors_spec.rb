@@ -17,4 +17,12 @@ RSpec.describe Flipper::Expressions::PercentageOfActors do
       expect(described_class.call("User;1", 70, context: {feature_name: "b"})).to be(false)
     end
   end
+
+  describe "#in_words" do
+    it "formats as 'X in Y% of actors'" do
+      arg1 = double("arg1", in_words: "User;1")
+      arg2 = double("arg2", in_words: "25")
+      expect(described_class.in_words(arg1, arg2)).to eq("User;1 in 25% of actors")
+    end
+  end
 end
