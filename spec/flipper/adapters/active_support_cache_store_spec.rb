@@ -8,7 +8,8 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
   end
   let(:cache) { ActiveSupport::Cache::MemoryStore.new }
   let(:write_through) { false }
-  let(:adapter) { described_class.new(memory_adapter, cache, 10, write_through: write_through) }
+  let(:race_condition_ttl) { 5 }
+  let(:adapter) { described_class.new(memory_adapter, cache, 10, race_condition_ttl: race_condition_ttl, write_through: write_through) }
   let(:flipper) { Flipper.new(adapter) }
 
   subject { adapter }
@@ -40,6 +41,15 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
   it "knows default when no ttl or expires_in provided" do
     adapter = described_class.new(memory_adapter, cache)
     expect(adapter.ttl).to be(nil)
+  end
+
+  it "knows race_condition_ttl" do
+    expect(adapter.race_condition_ttl).to eq(race_condition_ttl)
+  end
+
+  it "knows default when no ttl or expires_in provided" do
+    adapter = described_class.new(memory_adapter, cache)
+    expect(adapter.race_condition_ttl).to be(nil)
   end
 
   it "knows features_cache_key" do
