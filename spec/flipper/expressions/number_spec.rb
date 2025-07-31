@@ -18,4 +18,11 @@ RSpec.describe Flipper::Expressions::Number do
       expect(described_class.call('10.1')).to be(10.1)
     end
   end
+
+  describe "#in_words" do
+    it "delegates to argument's in_words method" do
+      arg = double("arg", in_words: "42")
+      expect(described_class.in_words(arg)).to eq("42")
+    end
+  end
 end

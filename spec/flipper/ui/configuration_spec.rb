@@ -182,4 +182,15 @@ RSpec.describe Flipper::UI::Configuration do
       it { is_expected.to eq(true) }
     end
   end
+
+  describe "#expressions_enabled" do
+    it "has default value" do
+      expect(configuration.expressions_enabled).to eq(false)
+    end
+
+    it "can be updated" do
+      configuration.expressions_enabled = true
+      expect(configuration.expressions_enabled).to eq(true)
+    end
+  end
 end
