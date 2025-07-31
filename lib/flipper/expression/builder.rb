@@ -53,6 +53,10 @@ module Flipper
       alias lte less_than_or_equal_to
       alias less_than_or_equal less_than_or_equal_to
 
+      def include(object)
+        build({ Include: [self, object] })
+      end
+
       def percentage_of_actors(object)
         build({ PercentageOfActors: [self, build(object)] })
       end
