@@ -12,4 +12,16 @@ RSpec.describe Flipper::Expressions::Boolean do
       end
     end
   end
+
+  describe "#in_words" do
+    it "returns boolean value" do
+      arg = double("arg", value: true)
+      expect(described_class.in_words(arg)).to eq(true)
+    end
+
+    it "converts values to boolean" do
+      arg = double("arg", value: "false")
+      expect(described_class.in_words(arg)).to eq(false)
+    end
+  end
 end

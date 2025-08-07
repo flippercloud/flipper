@@ -245,6 +245,79 @@
             </div>
           <% end %>
         </div>
+
+        <% if Flipper::UI.configuration.expressions_enabled %>
+          <%# Expression %>
+          <div class="js-toggle-container <%= params['expression_format'] ? 'toggle-on' : '' %>">
+            <div class="card-body border-bottom">
+              <div class="row align-items-center">
+                <div class="col col-me-auto">
+                  <h6 class="m-0">
+                    <strong class="<%= 'text-muted' unless @feature.expression %>"><% if @feature.expression %>Enabled for actors where <%= @feature.expression.in_words %><% else %>No expression enabled<% end %></strong>
+                  </h6>
+                </div>
+                <% if write_allowed? %>
+                  <div class="col col-auto toggle-block-when-off">
+                    <button class="btn btn-outline-secondary js-toggle-trigger">
+                      <%= @feature.expression ? 'Edit' : 'Add an expression' %>
+                    </button>
+                  </div>
+                  <div class="col col-auto toggle-block-when-on">
+                    <button class="btn btn-outline-secondary js-toggle-trigger">Hide</button>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+
+            <% if write_allowed? %>
+              <div class="card-body border-bottom toggle-block-when-on bg-lightest">
+                <form action="<%= script_name %>/features/<%= Flipper::UI::Util.escape @feature.key %>/expression" method="post" id="expression">
+                  <%== csrf_input_tag %>
+                  <input type="hidden" name="operation" value="enable">
+                  <% if @feature.expression %>
+                    <ul class="nav nav-pills mb-3">
+                      <li class="nav-item">
+                        <a class="nav-link <%= params['expression_format'] != 'json' ? 'active' : '' %>" aria-current="page" href="?expression_format=edit">Edit</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link <%= params['expression_format'] == 'json' ? 'active' : '' %>" aria-current="page" href="?expression_format=json">JSON</a>
+                      </li>
+                    </ul>
+                    <% if params['expression_format'] != 'json' %>
+                      <%== partial(@feature.expression.name.downcase, {  expression: @feature.expression,  base_name: 'expression' }) %>
+                    <% else %>
+                      <div class="mb-3">
+                        <label for="expression" class="form-label visually-hidden">Expression</label>
+                        <textarea name="expression" class="form-control" rows="10"><%= JSON.pretty_generate(@feature.expression.value) %></textarea>
+                      </div>
+                    <% end %>
+                  <% else %>
+                    <div class="mb-3">
+                      <label for="expression" class="form-label visually-hidden">Expression</label>
+                      <textarea name="expression" class="form-control" rows="3" placeholder="Enter an expression..."></textarea>
+                    </div>
+                  <% end %>
+                </form>
+                <div class="row">
+                  <div class="col-auto ms-auto">
+                    <button type="submit" form="expression" class="btn btn-primary">
+                      Save
+                    </button>
+                  </div>
+                  <% if @feature.expression %>
+                    <form action="<%= script_name %>/features/<%= Flipper::UI::Util.escape @feature.key %>/expression" method="post" class="col-auto">
+                      <%== csrf_input_tag %>
+                      <input type="hidden" name="operation" value="disable">
+                      <button type="submit" class="btn btn-outline-danger" data-bs-toggle="tooltip" title="Disable expression" data-bs-placement="left">
+                        Remove
+                      </button>
+                    </form>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
       <% end %>
 
       <% if write_allowed? %>

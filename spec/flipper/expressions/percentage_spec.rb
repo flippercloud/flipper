@@ -12,4 +12,11 @@ RSpec.describe Flipper::Expressions::Percentage do
       expect(described_class.call(101)).to be(100)
     end
   end
+
+  describe "#in_words" do
+    it "formats as percentage" do
+      arg = double("arg", value: 75)
+      expect(described_class.in_words(arg)).to eq("75.0%")
+    end
+  end
 end
