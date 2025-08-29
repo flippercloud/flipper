@@ -227,7 +227,11 @@ module Flipper
         partial_binding = binding
         locals.each { |key, value| partial_binding.local_variable_set(key, value) }
 
-        partial_binding.eval(Erubi::Engine.new(path.read, escape: true).src)
+        begin
+          eval(Erubi::Engine.new(path.read, escape: true).src, partial_binding)
+        rescue => e
+          "Failed to render partial: #{name} - #{e.message}"
+        end
       end
 
       # Internal: The path the app is mounted at.
