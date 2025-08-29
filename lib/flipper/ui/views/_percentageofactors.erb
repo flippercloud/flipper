@@ -1,9 +1,9 @@
 <input type="hidden" name="<%= base_name %>[type]" value="PercentageOfActors" />
 <div class="row">
   <div class="col">
-    <input type="text" name="<%= base_name %>[args][0]" value="<%= expression.args[0].value %>" class="form-control" />
+    <%== partial(expression.args[0].name.downcase, { expression: expression.args[0], base_name: "#{base_name}[args][0]" }) %>
   </div>
   <div class="col">
-    <input type="text" name="<%= base_name %>[args][1]" value="<%= expression.args[1].value %>" class="form-control" />
+    <%== partial(expression.args[1].name.downcase, { expression: expression.args[1], base_name: "#{base_name}[args][1]" }) %>
   </div>
 </div>
