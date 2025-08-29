@@ -6,4 +6,11 @@ RSpec.describe Flipper::Expressions::Random do
       end
     end
   end
+
+  describe "#in_words" do
+    it "formats as random function" do
+      arg = double("arg", in_words: "100")
+      expect(described_class.in_words(arg)).to eq("random(100)")
+    end
+  end
 end

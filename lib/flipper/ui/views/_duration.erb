@@ -1,0 +1,13 @@
+<input type="hidden" name="<%= base_name %>[type]" value="Duration" />
+<div class="row">
+  <div class="col">
+    <input type="text" name="<%= base_name %>[args][0]" value="<%= expression.args[0].value %>" class="form-control" />
+  </div>
+  <div class="col">
+    <select name="<%= base_name %>[args][1]" class="form-control">
+      <% Flipper::Expressions::Duration::SECONDS_PER.keys.each do |unit| %>
+        <option value="<%= unit %>" <%= unit == expression.args[1].value.to_s.downcase.chomp("s") ? 'selected' : '' %>><%= unit %></option>
+      <% end %>
+    </select>
+  </div>
+</div>

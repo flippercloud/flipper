@@ -1,0 +1,5 @@
+<input type="hidden" name="<%= base_name %>[type]" value="Boolean" />
+<select name="<%= base_name %>[args][0]" class="form-select">
+  <option value="true" <%= Flipper::Typecast.to_boolean(expression.args[0].value) ? 'selected' : '' %>>true</option>
+  <option value="false" <%= Flipper::Typecast.to_boolean(expression.args[0].value) ? '' : 'selected' %>>false</option>
+</select>

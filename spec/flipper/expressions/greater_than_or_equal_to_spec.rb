@@ -25,4 +25,12 @@ RSpec.describe Flipper::Expressions::GreaterThanOrEqualTo do
       expect { described_class.call(10) }.to raise_error(ArgumentError)
     end
   end
+
+  describe "#in_words" do
+    it "formats comparison in words" do
+      left = double("left", in_words: "score")
+      right = double("right", in_words: "100")
+      expect(described_class.in_words(left, right)).to eq("score is greater than or equal to 100")
+    end
+  end
 end
