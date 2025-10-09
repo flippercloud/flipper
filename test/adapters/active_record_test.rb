@@ -47,8 +47,16 @@ class ActiveRecordTest < MiniTest::Test
     ActiveRecord::Base.table_name_prefix = :foo_
     ActiveRecord::Base.table_name_suffix = :_bar
 
+    # Remove constants so they get redefined with new prefix/suffix
+    Flipper::Adapters::ActiveRecord.send(:remove_const, :Model) if Flipper::Adapters::ActiveRecord.const_defined?(:Model)
+    Flipper::Adapters::ActiveRecord.send(:remove_const, :Feature) if Flipper::Adapters::ActiveRecord.const_defined?(:Feature)
+    Flipper::Adapters::ActiveRecord.send(:remove_const, :Gate) if Flipper::Adapters::ActiveRecord.const_defined?(:Gate)
     Flipper::Adapters.send(:remove_const, :ActiveRecord)
+
     load("flipper/adapters/active_record.rb")
+    load("flipper/adapters/active_record/model.rb")
+    load("flipper/adapters/active_record/feature.rb")
+    load("flipper/adapters/active_record/gate.rb")
 
     assert_equal "foo_flipper_features_bar", Flipper::Adapters::ActiveRecord::Feature.table_name
     assert_equal "foo_flipper_gates_bar", Flipper::Adapters::ActiveRecord::Gate.table_name
@@ -57,7 +65,15 @@ class ActiveRecordTest < MiniTest::Test
     ActiveRecord::Base.table_name_prefix = ""
     ActiveRecord::Base.table_name_suffix = ""
 
+    # Remove constants so they get redefined with reset prefix/suffix
+    Flipper::Adapters::ActiveRecord.send(:remove_const, :Model) if Flipper::Adapters::ActiveRecord.const_defined?(:Model)
+    Flipper::Adapters::ActiveRecord.send(:remove_const, :Feature) if Flipper::Adapters::ActiveRecord.const_defined?(:Feature)
+    Flipper::Adapters::ActiveRecord.send(:remove_const, :Gate) if Flipper::Adapters::ActiveRecord.const_defined?(:Gate)
     Flipper::Adapters.send(:remove_const, :ActiveRecord)
+
     load("flipper/adapters/active_record.rb")
+    load("flipper/adapters/active_record/model.rb")
+    load("flipper/adapters/active_record/feature.rb")
+    load("flipper/adapters/active_record/gate.rb")
   end
 end
