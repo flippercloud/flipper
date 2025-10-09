@@ -2,42 +2,14 @@ require 'set'
 require 'securerandom'
 require 'flipper'
 require 'active_record'
+require_relative 'active_record/model'
+require_relative 'active_record/feature'
+require_relative 'active_record/gate'
 
 module Flipper
   module Adapters
     class ActiveRecord
       include ::Flipper::Adapter
-
-      ActiveSupport.on_load(:active_record) do
-        class Model < ::ActiveRecord::Base
-          self.abstract_class = true
-        end
-
-        # Private: Do not use outside of this adapter.
-        class Feature < Model
-          self.table_name = [
-            Model.table_name_prefix,
-            "flipper_features",
-            Model.table_name_suffix,
-          ].join
-
-          has_many :gates, foreign_key: "feature_key", primary_key: "key"
-
-          validates :key, presence: true
-        end
-
-        # Private: Do not use outside of this adapter.
-        class Gate < Model
-          self.table_name = [
-            Model.table_name_prefix,
-            "flipper_gates",
-            Model.table_name_suffix,
-          ].join
-
-          validates :feature_key, presence: true
-          validates :key, presence: true
-        end
-      end
 
       VALUE_TO_TEXT_WARNING = <<-EOS
         Your database needs to be migrated to use the latest Flipper features.
