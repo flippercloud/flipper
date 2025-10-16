@@ -135,6 +135,9 @@ RSpec.describe Flipper::Cloud::Configuration do
   end
 
   it "sets sync_method to :webhook if sync_secret provided" do
+    # The initial sync of http to local invokes this web request.
+    stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
+
     instance = described_class.new(required_options.merge({
       sync_secret: "secret",
     }))
@@ -144,6 +147,9 @@ RSpec.describe Flipper::Cloud::Configuration do
   end
 
   it "sets sync_method to :webhook if FLIPPER_CLOUD_SYNC_SECRET set" do
+    # The initial sync of http to local invokes this web request.
+    stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
+
     ENV["FLIPPER_CLOUD_SYNC_SECRET"] = "abc"
     instance = described_class.new(required_options)
 
