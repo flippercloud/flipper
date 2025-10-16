@@ -66,7 +66,7 @@ module Flipper
         end
       end
 
-      def get_all
+      def get_all(**kwargs)
         @store.transaction do
           features = read_feature_keys.map { |key| Flipper::Feature.new(key, self) }
           read_many_features(features)

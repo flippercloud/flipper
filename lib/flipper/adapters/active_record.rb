@@ -100,7 +100,7 @@ module Flipper
         end
       end
 
-      def get_all
+      def get_all(**kwargs)
         with_connection(@feature_class) do |connection|
           # query the gates from the db in a single query
           features = ::Arel::Table.new(@feature_class.table_name.to_sym)

@@ -35,7 +35,7 @@ module Flipper
             message_verifier = MessageVerifier.new(secret: flipper.sync_secret)
             if message_verifier.verify(payload, signature)
               begin
-                flipper.sync
+                flipper.sync(cache_bust: true)
                 body = JSON.generate({
                   groups: Flipper.group_names.map { |name| {name: name}}
                 })

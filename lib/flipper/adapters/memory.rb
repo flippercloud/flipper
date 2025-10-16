@@ -54,7 +54,7 @@ module Flipper
         end
       end
 
-      def get_all
+      def get_all(**kwargs)
         synchronize { Typecast.features_hash(@source) }
       end
 

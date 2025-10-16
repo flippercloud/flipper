@@ -50,8 +50,8 @@ module Flipper
         {}
       end
 
-      def get_all
-        @adapter.get_all
+      def get_all(**kwargs)
+        @adapter.get_all(**kwargs)
       rescue *@errors
         {}
       end

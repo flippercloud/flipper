@@ -263,10 +263,10 @@ RSpec.describe Flipper::Engine do
         Flipper::Cloud::MessageVerifier.new(secret: "").header(signature, timestamp)
       }
 
-      it "configures webhook app" do
+      it "configures webhook app and uses cache busting" do
         silence { application.initialize! }
 
-        stub = stub_request(:get, "https://www.flippercloud.io/adapter/features?exclude_gate_names=true").with({
+        stub = stub_request(:get, /https:\/\/www\.flippercloud\.io\/adapter\/features\?_cb=\d+&exclude_gate_names=true/).with({
           headers: { "flipper-cloud-token" => ENV["FLIPPER_CLOUD_TOKEN"] },
         }).to_return(status: 200, body: JSON.generate({ features: {} }), headers: {})
 
