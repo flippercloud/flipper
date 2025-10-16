@@ -101,7 +101,7 @@ module Flipper
         result
       end
 
-      def get_all
+      def get_all(**kwargs)
         feature_table = @feature_class.table_name.to_sym
         gate_table = @gate_class.table_name.to_sym
         features_sql = @feature_class.select(::Sequel.qualify(feature_table, :key).as(:feature_key))

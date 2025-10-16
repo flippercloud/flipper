@@ -55,8 +55,10 @@ module Flipper
         result
       end
 
-      def get_all
-        response = @client.get("/features?exclude_gate_names=true")
+      def get_all(cache_bust: false)
+        path = "/features?exclude_gate_names=true"
+        path += "&_cb=#{Time.now.to_i}" if cache_bust
+        response = @client.get(path)
         raise Error, response unless response.is_a?(Net::HTTPOK)
 
         parsed_response = response.body.empty? ? {} : Typecast.from_json(response.body)

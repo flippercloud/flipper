@@ -110,9 +110,10 @@ module Flipper
       end
 
       # Public: Force a sync.
-      def sync
+      def sync(cache_bust: false)
         Flipper::Adapters::Sync::Synchronizer.new(local_adapter, http_adapter, {
           instrumenter: instrumenter,
+          cache_bust: cache_bust,
         }).call
       end
 

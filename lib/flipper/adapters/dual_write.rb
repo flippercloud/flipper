@@ -27,8 +27,8 @@ module Flipper
         @local.get_multi(features)
       end
 
-      def get_all
-        @local.get_all
+      def get_all(**kwargs)
+        @local.get_all(**kwargs)
       end
 
       def add(feature)

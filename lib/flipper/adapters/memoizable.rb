@@ -81,7 +81,7 @@ module Flipper
         end
       end
 
-      def get_all
+      def get_all(**kwargs)
         if memoizing?
           response = nil
           if cache[@get_all_key]
@@ -90,7 +90,7 @@ module Flipper
               response[key] = cache[key_for(key)]
             end
           else
-            response = @adapter.get_all
+            response = @adapter.get_all(**kwargs)
             response.each do |key, value|
               cache[key_for(key)] = value
             end
@@ -103,7 +103,7 @@ module Flipper
           response.default_proc = ->(memo, key) { memo[key] = default_config }
           response
         else
-          @adapter.get_all
+          @adapter.get_all(**kwargs)
         end
       end
 

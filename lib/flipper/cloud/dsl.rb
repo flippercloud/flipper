@@ -10,8 +10,8 @@ module Flipper
         super Flipper.new(@cloud_configuration.adapter, instrumenter: @cloud_configuration.instrumenter)
       end
 
-      def sync
-        @cloud_configuration.sync
+      def sync(**kwargs)
+        @cloud_configuration.sync(**kwargs)
       end
 
       def sync_secret

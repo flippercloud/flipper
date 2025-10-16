@@ -39,10 +39,10 @@ module Flipper
         @secondary.get_multi(features)
       end
 
-      def get_all
-        @primary.get_all
+      def get_all(**kwargs)
+        @primary.get_all(**kwargs)
       rescue *@errors
-        @secondary.get_all
+        @secondary.get_all(**kwargs)
       end
 
       def add(feature)

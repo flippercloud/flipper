@@ -101,14 +101,14 @@ module Flipper
         end
       end
 
-      def get_all
+      def get_all(**kwargs)
         default_payload = {
           operation: :get_all,
           adapter_name: @adapter.name,
         }
 
         @instrumenter.instrument(InstrumentationName, default_payload) do |payload|
-          payload[:result] = @adapter.get_all
+          payload[:result] = @adapter.get_all(**kwargs)
         end
       end
 

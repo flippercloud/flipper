@@ -48,9 +48,9 @@ module Flipper
         @local.get_multi(features)
       end
 
-      def get_all
+      def get_all(**kwargs)
         synchronize
-        @local.get_all
+        @local.get_all(**kwargs)
       end
 
       def add(feature)

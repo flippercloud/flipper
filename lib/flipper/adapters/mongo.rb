@@ -51,7 +51,7 @@ module Flipper
         read_many_features(features)
       end
 
-      def get_all
+      def get_all(**kwargs)
         features = read_feature_keys.map { |key| Flipper::Feature.new(key, self) }
         read_many_features(features)
       end
