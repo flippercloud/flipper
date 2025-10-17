@@ -80,7 +80,9 @@ module Flipper
     private
 
     def jitter
-      rand
+      # Cap jitter at 30 seconds to prevent excessive delays for large intervals
+      max_jitter = [interval * 0.1, 30].min
+      rand * max_jitter
     end
 
     def forked?

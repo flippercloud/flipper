@@ -1,7 +1,9 @@
 name: CI
 on: [push, pull_request]
+
 jobs:
   test:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository)
     name: Test on ruby ${{ matrix.ruby }} and rails ${{ matrix.rails }}
     runs-on: ubuntu-latest
     services:
