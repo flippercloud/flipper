@@ -105,7 +105,7 @@ RSpec.describe Flipper::Adapters::Sync::FeatureSynchronizer do
       expect_no_enable_or_disable
     end
 
-    fit "updates expression when remote conditionally enabled but expression is nil" do
+    it "updates expression when remote conditionally enabled but expression is nil" do
       remote = Flipper::GateValues.new(expression: nil, actors: Set["1"])
       feature.enable_expression(plan_expression)
       feature.enable_actor(Flipper::Actor.new("1"))
