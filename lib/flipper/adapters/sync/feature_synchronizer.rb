@@ -53,9 +53,13 @@ module Flipper
         private
 
         def sync_expression
-          return if remote_expression.nil? || local_expression == remote_expression
+          return if local_expression == remote_expression
 
-          @feature.enable_expression remote_expression
+          if remote_expression.nil?
+            @feature.disable_expression
+          else
+            @feature.enable_expression remote_expression
+          end
         end
 
         def sync_actors
