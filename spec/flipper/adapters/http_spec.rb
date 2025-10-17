@@ -185,6 +185,112 @@ RSpec.describe Flipper::Adapters::Http do
         adapter.get_all
       }.to raise_error(Flipper::Adapters::Http::Error)
     end
+
+    it "stores ETag and sends If-None-Match on subsequent requests" do
+      features_response = {
+        "features" => [
+          {
+            "key" => "search",
+            "gates" => [
+              {"key" => "boolean", "value" => true}
+            ]
+          }
+        ]
+      }
+
+      # First request - server returns ETag
+      stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
+        .to_return(
+          status: 200,
+          body: JSON.generate(features_response),
+          headers: { 'ETag' => '"abc123"' }
+        )
+
+      adapter = described_class.new(url: 'http://app.com/flipper')
+      result = adapter.get_all
+
+      expect(result).to have_key("search")
+
+      # Second request - should send If-None-Match header
+      stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
+        .with(headers: { 'If-None-Match' => '"abc123"' })
+        .to_return(
+          status: 200,
+          body: JSON.generate(features_response),
+          headers: { 'ETag' => '"abc123"' }
+        )
+
+      etag_result = adapter.get_all
+
+      expect(etag_result).to eq(result)
+      expect(etag_result).to have_key("search")
+      expect(
+        a_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
+        .with(headers: { 'If-None-Match' => '"abc123"' })
+      ).to have_been_made.once
+    end
+
+    it "returns cached result when server returns 304 Not Modified" do
+      features_response = {
+        "features" => [
+          {
+            "key" => "search",
+            "gates" => [
+              {"key" => "boolean", "value" => true}
+            ]
+          }
+        ]
+      }
+
+      # First request - server returns ETag
+      stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
+        .to_return(
+          status: 200,
+          body: JSON.generate(features_response),
+          headers: { 'ETag' => '"abc123"' }
+        )
+
+      adapter = described_class.new(url: 'http://app.com/flipper')
+      first_result = adapter.get_all
+
+      expect(first_result).to have_key("search")
+
+      # Second request - server returns 304
+      stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
+        .with(headers: { 'If-None-Match' => '"abc123"' })
+        .to_return(status: 304, headers: { 'ETag' => '"abc123"' })
+
+      second_result = adapter.get_all
+
+      # Should return the cached result
+      expect(second_result).to eq(first_result)
+      expect(second_result).to have_key("search")
+    end
+
+    it "raises error when 304 received without cached result" do
+      # Server returns 304 without any prior request
+      stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
+        .to_return(status: 304)
+
+      adapter = described_class.new(url: 'http://app.com/flipper')
+      expect {
+        adapter.get_all
+      }.to raise_error(Flipper::Adapters::Http::Error)
+    end
+
+    it "does not send If-None-Match for other endpoints" do
+      stub_request(:get, "http://app.com/flipper/features/search")
+        .to_return(status: 404)
+
+      adapter = described_class.new(url: 'http://app.com/flipper')
+      adapter.get(flipper[:search])
+
+      # Verify no If-None-Match header was sent
+      expect(
+        a_request(:get, "http://app.com/flipper/features/search")
+        .with { |req| req.headers['If-None-Match'].nil? }
+      ).to have_been_made.once
+    end
   end
 
   describe "#features" do

@@ -22,6 +22,8 @@ module Flipper
                              write_timeout: options[:write_timeout],
                              max_retries: options[:max_retries],
                              debug_output: options[:debug_output])
+        @last_get_all_etag = nil
+        @last_get_all_result = nil
       end
 
       def get(feature)
@@ -58,8 +60,26 @@ module Flipper
       def get_all(cache_bust: false)
         path = "/features?exclude_gate_names=true"
         path += "&_cb=#{Time.now.to_i}" if cache_bust
-        response = @client.get(path)
+
+        # Pass If-None-Match header if we have an ETag
+        options = {}
+        if @last_get_all_etag
+          options[:headers] = { if_none_match: @last_get_all_etag }
+        end
+
+        response = @client.get(path, options)
+
+        # Handle 304 Not Modified - return cached result
+        if response.is_a?(Net::HTTPNotModified)
+          return @last_get_all_result if @last_get_all_result
+          # If we somehow got 304 without a cached result, treat as error
+          raise Error, response
+        end
+
         raise Error, response unless response.is_a?(Net::HTTPOK)
+
+        # Store ETag from response for future requests
+        @last_get_all_etag = response['etag'] if response['etag']
 
         parsed_response = response.body.empty? ? {} : Typecast.from_json(response.body)
         parsed_features = parsed_response['features'] || []
@@ -73,6 +93,9 @@ module Flipper
           feature = Feature.new(key, self)
           result[feature.key] = result_for_feature(feature, gates_by_key[feature.key])
         end
+
+        # Cache the result for 304 responses
+        @last_get_all_result = result
         result
       end
 

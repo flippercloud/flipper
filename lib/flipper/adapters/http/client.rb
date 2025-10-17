@@ -45,12 +45,19 @@ module Flipper
         end
 
         def add_header(key, value)
-          key = key.to_s.downcase.gsub('_'.freeze, '-'.freeze).freeze
-          @headers[key] = value
+          @headers[normalize_header_key(key)] = value
         end
 
-        def get(path)
-          perform Net::HTTP::Get, path, @headers
+        def get(path, options = {})
+          headers = @headers.dup
+
+          if options[:headers]
+            options[:headers].each do |key, value|
+              headers[normalize_header_key(key)] = value
+            end
+          end
+
+          perform Net::HTTP::Get, path, headers
         end
 
         def post(path, body = nil)
@@ -124,6 +131,10 @@ module Flipper
 
         def client_frameworks
           CLIENT_FRAMEWORKS.transform_values { |detect| detect.call rescue nil }.compact
+        end
+
+        def normalize_header_key(key)
+          key.to_s.downcase.gsub('_'.freeze, '-'.freeze)
         end
       end
     end
