@@ -10,7 +10,7 @@ module Flipper
     class Http
       include Flipper::Adapter
 
-      attr_reader :client
+      attr_reader :client, :last_get_all_response
 
       def initialize(options = {})
         @client = Client.new(url: options.fetch(:url),
@@ -69,16 +69,18 @@ module Flipper
 
         response = @client.get(path, options)
 
-        # Handle 304 Not Modified - return cached result
+        @last_get_all_response = response
+
         if response.is_a?(Net::HTTPNotModified)
-          return @last_get_all_result if @last_get_all_result
-          # If we somehow got 304 without a cached result, treat as error
-          raise Error, response
+          if @last_get_all_result
+            return @last_get_all_result
+          else
+            raise Error, response
+          end
         end
 
         raise Error, response unless response.is_a?(Net::HTTPOK)
 
-        # Store ETag from response for future requests
         @last_get_all_etag = response['etag'] if response['etag']
 
         parsed_response = response.body.empty? ? {} : Typecast.from_json(response.body)
