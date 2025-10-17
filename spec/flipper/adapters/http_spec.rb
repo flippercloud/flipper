@@ -291,6 +291,51 @@ RSpec.describe Flipper::Adapters::Http do
         .with { |req| req.headers['If-None-Match'].nil? }
       ).to have_been_made.once
     end
+
+    it "stores last get_all response for poll-shutdown header checking" do
+      features_response = {
+        "features" => [
+          {
+            "key" => "search",
+            "gates" => [
+              {"key" => "boolean", "value" => true}
+            ]
+          }
+        ]
+      }
+
+      stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
+        .to_return(
+          status: 200,
+          body: JSON.generate(features_response),
+          headers: { 'poll-shutdown' => 'true' }
+        )
+
+      adapter = described_class.new(url: 'http://app.com/flipper')
+      adapter.get_all
+
+      expect(adapter.last_get_all_response).not_to be_nil
+      expect(adapter.last_get_all_response['poll-shutdown']).to eq('true')
+    end
+
+    it "stores last get_all response even for error responses" do
+      stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
+        .to_return(
+          status: 404,
+          body: JSON.generate({ error: "Not found" }),
+          headers: { 'poll-shutdown' => 'true' }
+        )
+
+      adapter = described_class.new(url: 'http://app.com/flipper')
+
+      expect {
+        adapter.get_all
+      }.to raise_error(Flipper::Adapters::Http::Error)
+
+      # Even though it raised an error, response should be stored
+      expect(adapter.last_get_all_response).not_to be_nil
+      expect(adapter.last_get_all_response['poll-shutdown']).to eq('true')
+    end
   end
 
   describe "#features" do

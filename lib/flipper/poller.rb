@@ -31,6 +31,7 @@ module Flipper
       @interval = options.fetch(:interval, 10).to_f
       @last_synced_at = Concurrent::AtomicFixnum.new(0)
       @adapter = Adapters::Memory.new(nil, threadsafe: true)
+      @shutdown_requested = false
 
       if @interval < MINIMUM_POLL_INTERVAL
         warn "Flipper::Cloud poll interval must be greater than or equal to #{MINIMUM_POLL_INTERVAL} but was #{@interval}. Setting @interval to #{MINIMUM_POLL_INTERVAL}."
@@ -46,6 +47,7 @@ module Flipper
 
     def start
       reset if forked?
+      return if @shutdown_requested
       ensure_worker_running
     end
 
@@ -72,8 +74,22 @@ module Flipper
 
     def sync
       @instrumenter.instrument("poller.#{InstrumentationNamespace}", operation: :poll) do
-        @adapter.import @remote_adapter
-        @last_synced_at.update { |time| Concurrent.monotonic_time }
+        begin
+          @adapter.import @remote_adapter
+          @last_synced_at.update { |time| Concurrent.monotonic_time }
+        rescue
+          raise
+        ensure
+          if @remote_adapter.respond_to?(:last_get_all_response) && @remote_adapter.last_get_all_response
+            if Flipper::Typecast.to_boolean(@remote_adapter.last_get_all_response["poll-shutdown"])
+              @shutdown_requested = true
+              @instrumenter.instrument("poller.#{InstrumentationNamespace}", {
+                operation: :shutdown_requested,
+              })
+              stop
+            end
+          end
+        end
       end
     end
 
@@ -114,6 +130,7 @@ module Flipper
 
     def reset
       @pid = Process.pid
+      @shutdown_requested = false
       mutex.unlock if mutex.locked?
     end
   end
