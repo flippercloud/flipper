@@ -168,7 +168,7 @@ module Flipper
           end
 
           if interval = response["telemetry-interval"]
-            self.interval = interval.to_f
+            self.interval = interval
           end
         end
       rescue => error
