@@ -470,18 +470,15 @@ RSpec.describe Flipper::Middleware::Memoizer do
 
       get '/', {}, 'flipper' => flipper
       expect(logged_cached.count(:get_all)).to be(1)
-      expect(logged_memory.count(:features)).to be(1)
-      expect(logged_memory.count(:get_multi)).to be(1)
+      expect(logged_memory.count(:get_all)).to be(1)
 
       get '/', {}, 'flipper' => flipper
       expect(logged_cached.count(:get_all)).to be(2)
-      expect(logged_memory.count(:features)).to be(1)
-      expect(logged_memory.count(:get_multi)).to be(1)
+      expect(logged_memory.count(:get_all)).to be(1)
 
       get '/', {}, 'flipper' => flipper
       expect(logged_cached.count(:get_all)).to be(3)
-      expect(logged_memory.count(:features)).to be(1)
-      expect(logged_memory.count(:get_multi)).to be(1)
+      expect(logged_memory.count(:get_all)).to be(1)
     end
   end
 end

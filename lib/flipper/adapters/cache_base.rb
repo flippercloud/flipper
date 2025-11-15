@@ -17,6 +17,9 @@ module Flipper
       # Public: The cache key where the set of known features is cached.
       attr_reader :features_cache_key
 
+      # Public: The cache key where the set of all features with gates is cached.
+      attr_reader :get_all_cache_key
+
       # Public: Alias expires_in to ttl for compatibility.
       alias_method :expires_in, :ttl
 
@@ -29,16 +32,24 @@ module Flipper
         @namespace = "flipper/#{@cache_version}"
         @namespace = @namespace.prepend(prefix) if prefix
         @features_cache_key = "#{@namespace}/features"
+        @get_all_cache_key = "#{@namespace}/get_all"
+      end
+
+      # Public: Expire the cache for the set of all features with gates.
+      def expire_get_all_cache
+        cache_delete @get_all_cache_key
       end
 
       # Public: Expire the cache for the set of known feature names.
       def expire_features_cache
         cache_delete @features_cache_key
+        expire_get_all_cache
       end
 
       # Public: Expire the cache for a given feature.
       def expire_feature_cache(key)
         cache_delete feature_cache_key(key)
+        expire_get_all_cache
       end
 
       # Public
@@ -80,8 +91,11 @@ module Flipper
 
       # Public
       def get_all(**kwargs)
-        features = read_feature_keys.map { |key| Flipper::Feature.new(key, self) }
-        read_many_features(features)
+        cache_fetch(@get_all_cache_key) {
+          result = read_all_features(**kwargs)
+          cache_write @features_cache_key, result.keys.to_set
+          result
+        }
       end
 
       # Public
@@ -106,6 +120,10 @@ module Flipper
       end
 
       private
+
+      def read_all_features(**kwargs)
+        @adapter.get_all(**kwargs)
+      end
 
       # Private: Returns the Set of known feature keys.
       def read_feature_keys

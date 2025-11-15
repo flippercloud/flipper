@@ -79,9 +79,11 @@ RSpec.describe Flipper::Adapters::Dalli do
       flipper.enable(:stats)
 
       # populate the cache
-      adapter.get_all
+      adapter.features
+      adapter.get_multi([flipper[:stats], flipper[:search]])
 
       # verify cached with prefix
+      expect(cache.get("foo/flipper/v1/features")).to eq(Set["stats", "search"])
       expect(cache.get("foo/flipper/v1/feature/search")[:percentage_of_actors]).to eq("10")
       expect(cache.get("foo/flipper/v1/feature/stats")[:boolean]).to eq("true")
     end
@@ -132,8 +134,9 @@ RSpec.describe Flipper::Adapters::Dalli do
 
     it 'warms all features' do
       adapter.get_all
-      expect(cache.get("flipper/v1/feature/#{stats.key}")[:boolean]).to eq('true')
-      expect(cache.get("flipper/v1/feature/#{search.key}")[:boolean]).to be(nil)
+      get_all_cache_value = cache.get("flipper/v1/get_all")
+      expect(get_all_cache_value["stats"][:boolean]).to eq("true")
+      expect(get_all_cache_value["search"][:boolean]).to be(nil)
       expect(cache.get("flipper/v1/features")).to eq(Set["stats", "search"])
     end
 
@@ -141,12 +144,11 @@ RSpec.describe Flipper::Adapters::Dalli do
       expect(adapter.get_all).to eq(adapter.get_all)
     end
 
-    it 'only invokes two calls to wrapped adapter (for features set and gate data for each feature in set)' do
+    it 'only invokes one call to wrapped adapter (for features set and gate data for each feature in set)' do
       memory_adapter.reset
       5.times { adapter.get_all }
-      expect(memory_adapter.count(:features)).to eq(1)
-      expect(memory_adapter.count(:get_multi)).to eq(1)
-      expect(memory_adapter.count).to eq(2)
+      expect(memory_adapter.count(:get_all)).to eq(1)
+      expect(memory_adapter.count).to eq(1)
     end
   end
 
