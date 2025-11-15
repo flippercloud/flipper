@@ -78,8 +78,6 @@ module Flipper
         begin
           @adapter.import @remote_adapter
           @last_synced_at.update { |time| Concurrent.monotonic_time }
-        rescue
-          raise
         ensure
           if @remote_adapter.respond_to?(:last_get_all_response) && @remote_adapter.last_get_all_response
             if Flipper::Typecast.to_boolean(@remote_adapter.last_get_all_response["poll-shutdown"])
