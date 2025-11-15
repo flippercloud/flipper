@@ -29,15 +29,11 @@ module Flipper
       @mutex = Mutex.new
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
       @remote_adapter = options.fetch(:remote_adapter)
-      @interval = options.fetch(:interval, 10).to_f
       @last_synced_at = Concurrent::AtomicFixnum.new(0)
       @adapter = Adapters::Memory.new(nil, threadsafe: true)
       @shutdown_requested = Concurrent::AtomicBoolean.new(false)
 
-      if @interval < MINIMUM_POLL_INTERVAL
-        warn "Flipper::Cloud poll interval must be greater than or equal to #{MINIMUM_POLL_INTERVAL} but was #{@interval}. Setting @interval to #{MINIMUM_POLL_INTERVAL}."
-        @interval = MINIMUM_POLL_INTERVAL
-      end
+      self.interval = options.fetch(:interval, 10)
 
       @start_automatically = options.fetch(:start_automatically, true)
 
@@ -80,16 +76,34 @@ module Flipper
           @last_synced_at.update { |time| Concurrent.monotonic_time }
         ensure
           if @remote_adapter.respond_to?(:last_get_all_response) && @remote_adapter.last_get_all_response
-            if Flipper::Typecast.to_boolean(@remote_adapter.last_get_all_response["poll-shutdown"])
+            response = @remote_adapter.last_get_all_response
+
+            if Flipper::Typecast.to_boolean(response["poll-shutdown"])
               @shutdown_requested.make_true
               @instrumenter.instrument("poller.#{InstrumentationNamespace}", {
                 operation: :shutdown_requested,
               })
               stop
             end
+
+            if interval = response["poll-interval"]
+              self.interval = interval
+            end
           end
         end
       end
+    end
+
+    # Internal: Sets the interval in seconds for how often to poll.
+    def interval=(value)
+      requested_interval = Flipper::Typecast.to_float(value)
+      new_interval = [requested_interval, MINIMUM_POLL_INTERVAL].max
+
+      if requested_interval < MINIMUM_POLL_INTERVAL
+        warn "Flipper::Cloud poll interval must be greater than or equal to #{MINIMUM_POLL_INTERVAL} but was #{requested_interval}. Setting interval to #{MINIMUM_POLL_INTERVAL}."
+      end
+
+      @interval = new_interval
     end
 
     private

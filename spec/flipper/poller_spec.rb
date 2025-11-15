@@ -2,8 +2,8 @@ require "flipper/poller"
 require "flipper/adapters/http"
 
 RSpec.describe Flipper::Poller do
-  let(:remote_adapter) { Flipper::Adapters::Memory.new }
-  let(:remote) { Flipper.new(remote_adapter) }
+  let(:url) { "http://app.com/flipper" }
+  let(:remote_adapter) { Flipper::Adapters::Http.new(url: url) }
   let(:local) { Flipper.new(subject.adapter) }
 
   subject do
@@ -15,6 +15,9 @@ RSpec.describe Flipper::Poller do
   end
 
   before do
+    stub_request(:get, "#{url}/features?exclude_gate_names=true")
+      .to_return(status: 200, body: JSON.generate(features: []))
+
     allow(subject).to receive(:loop).and_yield # Make loop just call once
     allow(subject).to receive(:sleep)          # Disable sleep
     allow(Thread).to receive(:new).and_yield   # Disable separate thread
@@ -29,7 +32,17 @@ RSpec.describe Flipper::Poller do
 
   describe "#sync" do
     it "syncs remote adapter to local adapter" do
-      remote.enable :polling
+      stub_request(:get, "#{url}/features?exclude_gate_names=true")
+        .to_return(status: 200, body: JSON.generate(
+          features: [
+            {
+              key: "polling",
+              gates: [
+                { key: "boolean", value: true }
+              ]
+            }
+          ]
+        ))
 
       expect(local.enabled?(:polling)).to be(false)
       subject.sync
@@ -37,23 +50,30 @@ RSpec.describe Flipper::Poller do
     end
 
     context "when poll-shutdown header is present" do
-      let(:response) { instance_double(Net::HTTPOK, "[]" => "true") }
-      let(:remote_adapter) do
-        adapter = Flipper::Adapters::Memory.new
-        allow(adapter).to receive(:last_get_all_response).and_return(response)
-        adapter
+      before do
+        stub_request(:get, "#{url}/features?exclude_gate_names=true")
+          .to_return(
+            status: 200,
+            body: JSON.generate(
+              features: [
+                {
+                  key: "polling",
+                  gates: [
+                    { key: "boolean", value: true }
+                  ]
+                }
+              ]
+            ),
+            headers: { "poll-shutdown" => "true" }
+          )
       end
 
       it "stops the poller when poll-shutdown header is true" do
-        remote.enable :polling
-
         expect(subject).to receive(:stop).and_call_original
         subject.sync
       end
 
       it "prevents poller from restarting after shutdown" do
-        remote.enable :polling
-
         subject.sync # This should trigger shutdown
 
         # Try to start again - should be a no-op
@@ -61,22 +81,7 @@ RSpec.describe Flipper::Poller do
         subject.start
       end
 
-      it "stops polling even when sync fails with error response" do
-        error_response = instance_double(Net::HTTPNotFound, "[]" => "true", code: "404", body: "{}")
-        allow(remote_adapter).to receive(:last_get_all_response).and_return(error_response)
-        allow(remote_adapter).to receive(:get_all).and_raise(Flipper::Adapters::Http::Error.new(error_response))
-
-        # sync will raise an error, but should still check shutdown header
-        expect { subject.sync }.to raise_error(Flipper::Adapters::Http::Error)
-
-        # Verify shutdown was triggered
-        expect(Thread).not_to receive(:new)
-        subject.start
-      end
-
       it "instruments the shutdown_requested event" do
-        remote.enable :polling
-
         instrumenter = subject.instance_variable_get(:@instrumenter)
 
         expect(instrumenter).to receive(:instrument).with(
@@ -98,35 +103,148 @@ RSpec.describe Flipper::Poller do
       end
     end
 
+    context "when poll-shutdown header is present on error response" do
+      before do
+        stub_request(:get, "#{url}/features?exclude_gate_names=true")
+          .to_return(
+            status: 404,
+            body: JSON.generate({ error: "Not found" }),
+            headers: { "poll-shutdown" => "true" }
+          )
+      end
+
+      it "stops polling even when sync fails with error response" do
+        # sync will raise an error, but should still check shutdown header
+        expect { subject.sync }.to raise_error(Flipper::Adapters::Http::Error)
+
+        # Verify shutdown was triggered
+        expect(Thread).not_to receive(:new)
+        subject.start
+      end
+    end
+
     context "when poll-shutdown header is false" do
-      let(:response) { instance_double(Net::HTTPOK, "[]" => "false") }
-      let(:remote_adapter) do
-        adapter = Flipper::Adapters::Memory.new
-        allow(adapter).to receive(:last_get_all_response).and_return(response)
-        adapter
+      before do
+        stub_request(:get, "#{url}/features?exclude_gate_names=true")
+          .to_return(
+            status: 200,
+            body: JSON.generate(
+              features: [
+                {
+                  key: "polling",
+                  gates: [
+                    { key: "boolean", value: true }
+                  ]
+                }
+              ]
+            ),
+            headers: { "poll-shutdown" => "false" }
+          )
       end
 
       it "does not stop the poller" do
-        remote.enable :polling
-
         expect(subject).not_to receive(:stop)
         subject.sync
       end
     end
 
     context "when poll-shutdown header is missing" do
-      let(:response) { instance_double(Net::HTTPOK, "[]" => nil) }
-      let(:remote_adapter) do
-        adapter = Flipper::Adapters::Memory.new
-        allow(adapter).to receive(:last_get_all_response).and_return(response)
-        adapter
+      before do
+        stub_request(:get, "#{url}/features?exclude_gate_names=true")
+          .to_return(
+            status: 200,
+            body: JSON.generate(
+              features: [
+                {
+                  key: "polling",
+                  gates: [
+                    { key: "boolean", value: true }
+                  ]
+                }
+              ]
+            )
+          )
       end
 
       it "does not stop the poller" do
-        remote.enable :polling
-
         expect(subject).not_to receive(:stop)
         subject.sync
+      end
+    end
+
+    context "when poll-interval header is present" do
+      before do
+        stub_request(:get, "#{url}/features?exclude_gate_names=true")
+          .to_return(
+            status: 200,
+            body: JSON.generate(
+              features: [
+                {
+                  key: "polling",
+                  gates: [
+                    { key: "boolean", value: true }
+                  ]
+                }
+              ]
+            ),
+            headers: { "poll-interval" => "30" }
+          )
+      end
+
+      it "adjusts the poll interval" do
+        expect(subject.interval).to eq(Float::INFINITY)
+        subject.sync
+        expect(subject.interval).to eq(30.0)
+      end
+    end
+
+    context "when poll-interval header is below minimum" do
+      before do
+        stub_request(:get, "#{url}/features?exclude_gate_names=true")
+          .to_return(
+            status: 200,
+            body: JSON.generate(
+              features: [
+                {
+                  key: "polling",
+                  gates: [
+                    { key: "boolean", value: true }
+                  ]
+                }
+              ]
+            ),
+            headers: { "poll-interval" => "5" }
+          )
+      end
+
+      it "enforces minimum poll interval" do
+        subject.sync
+        expect(subject.interval).to eq(Flipper::Poller::MINIMUM_POLL_INTERVAL)
+      end
+    end
+
+    context "when poll-interval header is missing" do
+      before do
+        stub_request(:get, "#{url}/features?exclude_gate_names=true")
+          .to_return(
+            status: 200,
+            body: JSON.generate(
+              features: [
+                {
+                  key: "polling",
+                  gates: [
+                    { key: "boolean", value: true }
+                  ]
+                }
+              ]
+            )
+          )
+      end
+
+      it "does not change the interval" do
+        original_interval = subject.interval
+        subject.sync
+        expect(subject.interval).to eq(original_interval)
       end
     end
   end
@@ -140,11 +258,13 @@ RSpec.describe Flipper::Poller do
     end
 
     context "after shutdown_requested" do
-      let(:response) { instance_double(Net::HTTPOK, "[]" => "true") }
-      let(:remote_adapter) do
-        adapter = Flipper::Adapters::Memory.new
-        allow(adapter).to receive(:last_get_all_response).and_return(response)
-        adapter
+      before do
+        stub_request(:get, "#{url}/features?exclude_gate_names=true")
+          .to_return(
+            status: 200,
+            body: JSON.generate(features: []),
+            headers: { "poll-shutdown" => "true" }
+          )
       end
 
       it "does not start when shutdown was requested" do
