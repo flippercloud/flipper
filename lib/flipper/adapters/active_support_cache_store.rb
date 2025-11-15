@@ -41,6 +41,7 @@ module Flipper
         if @write_through
           result = @adapter.enable(feature, gate, thing)
           cache_write feature_cache_key(feature.key), @adapter.get(feature)
+          expire_get_all_cache
           result
         else
           super
@@ -51,6 +52,7 @@ module Flipper
         if @write_through
           result = @adapter.disable(feature, gate, thing)
           cache_write feature_cache_key(feature.key), @adapter.get(feature)
+          expire_get_all_cache
           result
         else
           super

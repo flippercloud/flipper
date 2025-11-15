@@ -80,7 +80,8 @@ RSpec.describe Flipper::Adapters::RedisCache do
       flipper.enable(:stats)
 
       # populate the cache
-      adapter.get_all
+      adapter.features
+      adapter.get_multi([flipper[:stats], flipper[:search]])
 
       # verify cached with prefix
       expect(Marshal.load(client.get("foo/flipper/v1/features"))).to eq(Set["stats", "search"])
@@ -145,8 +146,8 @@ RSpec.describe Flipper::Adapters::RedisCache do
 
     it 'warms all features' do
       adapter.get_all
-      expect(Marshal.load(client.get("flipper/v1/feature/#{stats.key}"))[:boolean]).to eq('true')
-      expect(Marshal.load(client.get("flipper/v1/feature/#{search.key}"))[:boolean]).to be(nil)
+      get_all_cache_value = client.get("flipper/v1/get_all")
+      expect(Marshal.load(get_all_cache_value)["stats"][:boolean]).to eq("true")
       expect(Marshal.load(client.get("flipper/v1/features"))).to eq(Set["stats", "search"])
     end
 
@@ -154,12 +155,11 @@ RSpec.describe Flipper::Adapters::RedisCache do
       expect(adapter.get_all).to eq(adapter.get_all)
     end
 
-    it 'only invokes two calls to wrapped adapter (for features set and gate data for each feature in set)' do
+    it 'only invokes one calls to wrapped adapter (for features set and gate data for each feature in set)' do
       memory_adapter.reset
       5.times { adapter.get_all }
-      expect(memory_adapter.count(:features)).to eq(1)
-      expect(memory_adapter.count(:get_multi)).to eq(1)
-      expect(memory_adapter.count).to eq(2)
+      expect(memory_adapter.count(:get_all)).to eq(1)
+      expect(memory_adapter.count).to eq(1)
     end
   end
 
