@@ -2,6 +2,7 @@ require 'logger'
 require 'concurrent/utility/monotonic_time'
 require 'concurrent/map'
 require 'concurrent/atomic/atomic_fixnum'
+require 'concurrent/atomic/atomic_boolean'
 
 module Flipper
   class Poller
@@ -28,14 +29,12 @@ module Flipper
       @mutex = Mutex.new
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
       @remote_adapter = options.fetch(:remote_adapter)
-      @interval = options.fetch(:interval, 10).to_f
       @last_synced_at = Concurrent::AtomicFixnum.new(0)
       @adapter = Adapters::Memory.new(nil, threadsafe: true)
+      @shutdown_requested = Concurrent::AtomicBoolean.new(false)
 
-      if @interval < MINIMUM_POLL_INTERVAL
-        warn "Flipper::Cloud poll interval must be greater than or equal to #{MINIMUM_POLL_INTERVAL} but was #{@interval}. Setting @interval to #{MINIMUM_POLL_INTERVAL}."
-        @interval = MINIMUM_POLL_INTERVAL
-      end
+      self.interval = options.fetch(:interval, 10)
+      @initial_interval = @interval
 
       @start_automatically = options.fetch(:start_automatically, true)
 
@@ -46,6 +45,7 @@ module Flipper
 
     def start
       reset if forked?
+      return if @shutdown_requested.true?
       ensure_worker_running
     end
 
@@ -72,9 +72,25 @@ module Flipper
 
     def sync
       @instrumenter.instrument("poller.#{InstrumentationNamespace}", operation: :poll) do
-        @adapter.import @remote_adapter
-        @last_synced_at.update { |time| Concurrent.monotonic_time }
+        begin
+          @adapter.import @remote_adapter
+          @last_synced_at.update { |time| Concurrent.monotonic_time }
+        ensure
+          apply_response_headers
+        end
       end
+    end
+
+    # Internal: Sets the interval in seconds for how often to poll.
+    def interval=(value)
+      requested_interval = Flipper::Typecast.to_float(value)
+      new_interval = [requested_interval, MINIMUM_POLL_INTERVAL].max
+
+      if requested_interval < MINIMUM_POLL_INTERVAL
+        warn "Flipper::Cloud poll interval must be greater than or equal to #{MINIMUM_POLL_INTERVAL} but was #{requested_interval}. Setting interval to #{MINIMUM_POLL_INTERVAL}."
+      end
+
+      @interval = new_interval
     end
 
     private
@@ -114,7 +130,28 @@ module Flipper
 
     def reset
       @pid = Process.pid
+      @shutdown_requested.make_false
       mutex.unlock if mutex.locked?
+    end
+
+    def apply_response_headers
+      return unless @remote_adapter.respond_to?(:last_get_all_response)
+
+      if response = @remote_adapter.last_get_all_response
+        # shutdown based on response header
+        if Flipper::Typecast.to_boolean(response["poll-shutdown"])
+          @shutdown_requested.make_true
+          @instrumenter.instrument("poller.#{InstrumentationNamespace}", {
+            operation: :shutdown_requested,
+          })
+          stop
+        end
+
+        # update interval based on response header
+        if interval = response["poll-interval"]
+          self.interval = [Flipper::Typecast.to_float(interval), @initial_interval].max
+        end
+      end
     end
   end
 end

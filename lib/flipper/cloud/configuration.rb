@@ -203,10 +203,10 @@ module Flipper
       def setup_sync(options)
         set_option :sync_secret, options
 
-        # 5 minutes for webhook, 10 seconds for poll. If using webhooks we don't
+        # 1 hour for webhook, 10 seconds for poll. If using webhooks we don't
         # need to sync as often but we should still sync occasionally to avoid
         # any chance of stale data.
-        default_interval = sync_method == :webhook ? 600 : 10
+        default_interval = sync_method == :webhook ? 3600 : 10
         set_option :sync_interval, options, default: default_interval, typecast: :float, minimum: 10
       end
 
