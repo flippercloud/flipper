@@ -10,7 +10,7 @@ RSpec.describe Flipper::Poller do
     described_class.new(
       remote_adapter: remote_adapter,
       start_automatically: false,
-      interval: Float::INFINITY
+      interval: 3600 # 1 hour
     )
   end
 
@@ -172,7 +172,7 @@ RSpec.describe Flipper::Poller do
       end
     end
 
-    context "when poll-interval header is present" do
+    context "when poll-interval header is lower than initial interval" do
       before do
         stub_request(:get, "#{url}/features?exclude_gate_names=true")
           .to_return(
@@ -191,14 +191,22 @@ RSpec.describe Flipper::Poller do
           )
       end
 
-      it "adjusts the poll interval" do
-        expect(subject.interval).to eq(Float::INFINITY)
+      it "uses the initial interval as minimum" do
+        expect(subject.interval).to eq(3600.0)
         subject.sync
-        expect(subject.interval).to eq(30.0)
+        expect(subject.interval).to eq(3600.0) # Keeps 3600 because it's the initial interval
       end
     end
 
     context "when poll-interval header is below minimum" do
+      subject do
+        described_class.new(
+          remote_adapter: remote_adapter,
+          start_automatically: false,
+          interval: 10 # Set initial to minimum
+        )
+      end
+
       before do
         stub_request(:get, "#{url}/features?exclude_gate_names=true")
           .to_return(
@@ -218,8 +226,99 @@ RSpec.describe Flipper::Poller do
       end
 
       it "enforces minimum poll interval" do
+        expect(subject.interval).to eq(10.0)
         subject.sync
+        # Header says 5, minimum is 10, initial is 10, so max(5->10, 10) = 10
         expect(subject.interval).to eq(Flipper::Poller::MINIMUM_POLL_INTERVAL)
+      end
+    end
+
+    context "when poll-interval header is higher than initial interval" do
+      subject do
+        described_class.new(
+          remote_adapter: remote_adapter,
+          start_automatically: false,
+          interval: 20
+        )
+      end
+
+      before do
+        stub_request(:get, "#{url}/features?exclude_gate_names=true")
+          .to_return(
+            status: 200,
+            body: JSON.generate(
+              features: [
+                {
+                  key: "polling",
+                  gates: [
+                    { key: "boolean", value: true }
+                  ]
+                }
+              ]
+            ),
+            headers: { "poll-interval" => "60" }
+          )
+      end
+
+      it "updates to the higher interval from header" do
+        expect(subject.interval).to eq(20.0)
+        subject.sync
+        expect(subject.interval).to eq(60.0) # Uses 60 because it's higher than initial 20
+      end
+    end
+
+    context "when poll-interval header can decrease back to initial interval" do
+      subject do
+        described_class.new(
+          remote_adapter: remote_adapter,
+          start_automatically: false,
+          interval: 10
+        )
+      end
+
+      before do
+        # First sync increases interval to 60
+        stub_request(:get, "#{url}/features?exclude_gate_names=true")
+          .to_return(
+            status: 200,
+            body: JSON.generate(
+              features: [
+                {
+                  key: "polling",
+                  gates: [
+                    { key: "boolean", value: true }
+                  ]
+                }
+              ]
+            ),
+            headers: { "poll-interval" => "60" }
+          ).times(1).then
+          .to_return(
+            status: 200,
+            body: JSON.generate(
+              features: [
+                {
+                  key: "polling",
+                  gates: [
+                    { key: "boolean", value: true }
+                  ]
+                }
+              ]
+            ),
+            headers: { "poll-interval" => "10" }
+          )
+      end
+
+      it "allows interval to go back down to initial after being increased" do
+        expect(subject.interval).to eq(10.0)
+
+        # First sync: header says 60, initial is 10, so use 60
+        subject.sync
+        expect(subject.interval).to eq(60.0)
+
+        # Second sync: header says 10, initial is 10, so use 10
+        subject.sync
+        expect(subject.interval).to eq(10.0)
       end
     end
 

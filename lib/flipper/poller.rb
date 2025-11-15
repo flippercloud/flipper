@@ -34,6 +34,7 @@ module Flipper
       @shutdown_requested = Concurrent::AtomicBoolean.new(false)
 
       self.interval = options.fetch(:interval, 10)
+      @initial_interval = @interval
 
       @start_automatically = options.fetch(:start_automatically, true)
 
@@ -87,7 +88,7 @@ module Flipper
             end
 
             if interval = response["poll-interval"]
-              self.interval = interval
+              self.interval = [Flipper::Typecast.to_float(interval), @initial_interval].max
             end
           end
         end
