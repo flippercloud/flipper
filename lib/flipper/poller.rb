@@ -2,6 +2,7 @@ require 'logger'
 require 'concurrent/utility/monotonic_time'
 require 'concurrent/map'
 require 'concurrent/atomic/atomic_fixnum'
+require 'concurrent/atomic/atomic_boolean'
 
 module Flipper
   class Poller
@@ -31,7 +32,7 @@ module Flipper
       @interval = options.fetch(:interval, 10).to_f
       @last_synced_at = Concurrent::AtomicFixnum.new(0)
       @adapter = Adapters::Memory.new(nil, threadsafe: true)
-      @shutdown_requested = false
+      @shutdown_requested = Concurrent::AtomicBoolean.new(false)
 
       if @interval < MINIMUM_POLL_INTERVAL
         warn "Flipper::Cloud poll interval must be greater than or equal to #{MINIMUM_POLL_INTERVAL} but was #{@interval}. Setting @interval to #{MINIMUM_POLL_INTERVAL}."
@@ -47,7 +48,7 @@ module Flipper
 
     def start
       reset if forked?
-      return if @shutdown_requested
+      return if @shutdown_requested.true?
       ensure_worker_running
     end
 
@@ -82,7 +83,7 @@ module Flipper
         ensure
           if @remote_adapter.respond_to?(:last_get_all_response) && @remote_adapter.last_get_all_response
             if Flipper::Typecast.to_boolean(@remote_adapter.last_get_all_response["poll-shutdown"])
-              @shutdown_requested = true
+              @shutdown_requested.make_true
               @instrumenter.instrument("poller.#{InstrumentationNamespace}", {
                 operation: :shutdown_requested,
               })
@@ -130,7 +131,7 @@ module Flipper
 
     def reset
       @pid = Process.pid
-      @shutdown_requested = false
+      @shutdown_requested.make_false
       mutex.unlock if mutex.locked?
     end
   end
