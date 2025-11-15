@@ -76,21 +76,7 @@ module Flipper
           @adapter.import @remote_adapter
           @last_synced_at.update { |time| Concurrent.monotonic_time }
         ensure
-          if @remote_adapter.respond_to?(:last_get_all_response) && @remote_adapter.last_get_all_response
-            response = @remote_adapter.last_get_all_response
-
-            if Flipper::Typecast.to_boolean(response["poll-shutdown"])
-              @shutdown_requested.make_true
-              @instrumenter.instrument("poller.#{InstrumentationNamespace}", {
-                operation: :shutdown_requested,
-              })
-              stop
-            end
-
-            if interval = response["poll-interval"]
-              self.interval = [Flipper::Typecast.to_float(interval), @initial_interval].max
-            end
-          end
+          apply_response_headers
         end
       end
     end
@@ -146,6 +132,26 @@ module Flipper
       @pid = Process.pid
       @shutdown_requested.make_false
       mutex.unlock if mutex.locked?
+    end
+
+    def apply_response_headers
+      return unless @remote_adapter.respond_to?(:last_get_all_response)
+
+      if response = @remote_adapter.last_get_all_response
+        # shutdown based on response header
+        if Flipper::Typecast.to_boolean(response["poll-shutdown"])
+          @shutdown_requested.make_true
+          @instrumenter.instrument("poller.#{InstrumentationNamespace}", {
+            operation: :shutdown_requested,
+          })
+          stop
+        end
+
+        # update interval based on response header
+        if interval = response["poll-interval"]
+          self.interval = [Flipper::Typecast.to_float(interval), @initial_interval].max
+        end
+      end
     end
   end
 end
