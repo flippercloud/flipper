@@ -41,7 +41,7 @@ module Flipper
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
-        with_connection(@feature_class) do
+        with_write_connection(@feature_class) do
           @feature_class.transaction(requires_new: true) do
             begin
               # race condition, but add is only used by enable/disable which happen
@@ -60,7 +60,7 @@ module Flipper
 
       # Public: Removes a feature from the set of known features.
       def remove(feature)
-        with_connection(@feature_class) do
+        with_write_connection(@feature_class) do
           @feature_class.transaction do
             @feature_class.where(key: feature.key).destroy_all
             clear(feature)
@@ -71,7 +71,7 @@ module Flipper
 
       # Public: Clears the gate values for a feature.
       def clear(feature)
-        with_connection(@gate_class) { @gate_class.where(feature_key: feature.key).destroy_all }
+        with_write_connection(@gate_class) { @gate_class.where(feature_key: feature.key).destroy_all }
         true
       end
 
@@ -165,9 +165,11 @@ module Flipper
         when :integer
           set(feature, gate, thing)
         when :json
-          delete(feature, gate)
+          with_write_connection(@gate_class) do
+            delete(feature, gate)
+          end
         when :set
-          with_connection(@gate_class) do
+          with_write_connection(@gate_class) do
             @gate_class.where(feature_key: feature.key, key: gate.key, value: thing.value).destroy_all
           end
         else
@@ -190,7 +192,7 @@ module Flipper
 
         raise VALUE_TO_TEXT_WARNING if json_feature && value_not_text?
 
-        with_connection(@gate_class) do
+        with_write_connection(@gate_class) do
           @gate_class.transaction(requires_new: true) do
             clear(feature) if clear_feature
             delete(feature, gate)
@@ -215,7 +217,7 @@ module Flipper
       end
 
       def enable_multi(feature, gate, thing)
-        with_connection(@gate_class) do |connection|
+        with_write_connection(@gate_class) do |connection|
           begin
             connection.transaction(requires_new: true) do
               @gate_class.create! do |g|
@@ -269,6 +271,34 @@ module Flipper
       def with_connection(model = @feature_class, &block)
         warn VALUE_TO_TEXT_WARNING if !warned_about_value_not_text? && value_not_text?
         model.connection_pool.with_connection(&block)
+      end
+
+      def with_write_connection(model = @feature_class, &block)
+        warn VALUE_TO_TEXT_WARNING if !warned_about_value_not_text? && value_not_text?
+
+        # Use connected_to for role switching if available (Rails 6.1+)
+        # This ensures writes go to primary/write database when using read/write roles
+        if model.respond_to?(:connected_to)
+          begin
+            # Find the abstract class that manages the connection
+            # Walk up the inheritance chain to find it
+            connection_class = model
+            until connection_class.abstract_class? || connection_class == ::ActiveRecord::Base
+              connection_class = connection_class.superclass
+              break if connection_class == ::ActiveRecord::Base || !connection_class.respond_to?(:abstract_class?)
+            end
+
+            connection_class.connected_to(role: :writing) do
+              model.connection_pool.with_connection(&block)
+            end
+          rescue NotImplementedError
+            # connected_to not available or not configured for roles, fall back
+            model.connection_pool.with_connection(&block)
+          end
+        else
+          # Fall back to regular connection for single database or older Rails
+          model.connection_pool.with_connection(&block)
+        end
       end
 
       def warned_about_value_not_text?
