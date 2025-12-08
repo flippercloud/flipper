@@ -276,27 +276,21 @@ module Flipper
       def with_write_connection(model = @feature_class, &block)
         warn VALUE_TO_TEXT_WARNING if !warned_about_value_not_text? && value_not_text?
 
-        # Use connected_to for role switching if available (Rails 6.1+)
-        # This ensures writes go to primary/write database when using read/write roles
-        if model.respond_to?(:connected_to)
-          begin
-            # Find the abstract class that manages the connection
-            # Walk up the inheritance chain to find it
-            connection_class = model
-            until connection_class.abstract_class? || connection_class == ::ActiveRecord::Base
-              connection_class = connection_class.superclass
-              break if connection_class == ::ActiveRecord::Base || !connection_class.respond_to?(:abstract_class?)
-            end
+        # Use Rails' built-in method to find the class that controls the connection
+        # This walks up the inheritance chain to find which class called connects_to
+        if model.respond_to?(:connection_class_for_self)
+          connection_class = model.connection_class_for_self
 
+          # Only use connected_to if this class actually has connects_to configured
+          # connection_class? returns true when connects_to was called on the class
+          if connection_class.respond_to?(:connection_class?) && connection_class.connection_class?
             connection_class.connected_to(role: :writing) do
               model.connection_pool.with_connection(&block)
             end
-          rescue NotImplementedError
-            # connected_to not available or not configured for roles, fall back
+          else
             model.connection_pool.with_connection(&block)
           end
         else
-          # Fall back to regular connection for single database or older Rails
           model.connection_pool.with_connection(&block)
         end
       end
