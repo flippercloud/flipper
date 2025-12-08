@@ -214,100 +214,102 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
           end
         end
 
-        context 'with read/write roles' do
-          # Skip for older Rails versions that don't support connected_to with roles
-          next unless ActiveRecord::Base.respond_to?(:connected_to) && ActiveRecord.version >= Gem::Version.new('7.1')
+        if ActiveRecord::Base.respond_to?(:connected_to) && ActiveRecord.version >= Gem::Version.new('7.1')
+          context 'with read/write roles' do
+            # Skip for older Rails versions that don't support connected_to with roles
 
-          # Skip for SQLite as it doesn't handle role-based connections well with :memory: databases
-          next if config["adapter"] == "sqlite3"
 
-          let(:abstract_class) do
-            # Create a named abstract class (Rails requires names for connects_to)
-            klass = Class.new(ActiveRecord::Base) do
-              self.abstract_class = true
+            # Skip for SQLite as it doesn't handle role-based connections well with :memory: databases
+            next if config["adapter"] == "sqlite3"
+
+            let(:abstract_class) do
+              # Create a named abstract class (Rails requires names for connects_to)
+              klass = Class.new(ActiveRecord::Base) do
+                self.abstract_class = true
+              end
+              stub_const('TestApplicationRecord', klass)
+
+              # Now configure connects_to with the same database for both roles
+              # In production, these would be different (primary/replica)
+              klass.connects_to database: {
+                writing: config,
+                reading: config
+              }
+
+              klass
             end
-            stub_const('TestApplicationRecord', klass)
 
-            # Now configure connects_to with the same database for both roles
-            # In production, these would be different (primary/replica)
-            klass.connects_to database: {
-              writing: config,
-              reading: config
-            }
-
-            klass
-          end
-
-          after do
-            # Disconnect role-based connections to avoid interfering with database cleanup
-            clear_all_connections!
-          end
-
-          let(:feature_class) do
-            klass = Class.new(abstract_class) do
-              self.table_name = 'flipper_features'
-              validates :key, presence: true
+            after do
+              # Disconnect role-based connections to avoid interfering with database cleanup
+              clear_all_connections!
             end
-            stub_const('TestFeature', klass)
-            klass
-          end
 
-          let(:gate_class) do
-            klass = Class.new(abstract_class) do
-              self.table_name = 'flipper_gates'
+            let(:feature_class) do
+              klass = Class.new(abstract_class) do
+                self.table_name = 'flipper_features'
+                validates :key, presence: true
+              end
+              stub_const('TestFeature', klass)
+              klass
             end
-            stub_const('TestGate', klass)
-            klass
-          end
 
-          let(:adapter_with_roles) do
-            described_class.new(
-              feature_class: feature_class,
-              gate_class: gate_class
-            )
-          end
-
-          it 'can perform write operations when forced to reading role' do
-            abstract_class.connected_to(role: :reading) do
-              flipper = Flipper.new(adapter_with_roles)
-
-              feature = flipper[:test_feature]
-              expect { feature.enable }.not_to raise_error
-              expect(feature.enabled?).to be(true)
-              expect { feature.disable }.not_to raise_error
-              expect(feature.enabled?).to be(false)
-
-              feature = flipper[:actor_test]
-              actor = Struct.new(:flipper_id).new(123)
-              expect { feature.enable_actor(actor) }.not_to raise_error
-              expect(feature.enabled?(actor)).to be(true)
-              expect { feature.disable_actor(actor) }.not_to raise_error
-              expect(feature.enabled?(actor)).to be(false)
-
-              feature = flipper[:gate_test]
-              expect { feature.enable_percentage_of_time(50) }.not_to raise_error
-              expect { feature.disable_percentage_of_time }.not_to raise_error
-              feature.enable
-              expect { feature.remove }.not_to raise_error
-
-              feature = flipper[:expression_test]
-              expression = Flipper.property(:plan).eq("premium")
-              expect { feature.enable_expression(expression) }.not_to raise_error
-              expect(feature.expression).to eq(expression)
-              expect { feature.disable_expression }.not_to raise_error
-              expect(feature.expression).to be_nil
+            let(:gate_class) do
+              klass = Class.new(abstract_class) do
+                self.table_name = 'flipper_gates'
+              end
+              stub_const('TestGate', klass)
+              klass
             end
-          end
 
-          it 'does not hold onto connections during write operations' do
-            clear_active_connections!
+            let(:adapter_with_roles) do
+              described_class.new(
+                feature_class: feature_class,
+                gate_class: gate_class
+              )
+            end
 
-            abstract_class.connected_to(role: :reading) do
-              flipper = Flipper.new(adapter_with_roles)
-              feature = flipper[:connection_test]
+            it 'can perform write operations when forced to reading role' do
+              abstract_class.connected_to(role: :reading) do
+                flipper = Flipper.new(adapter_with_roles)
 
-              feature.enable
-              expect(active_connections?).to be(false)
+                feature = flipper[:test_feature]
+                expect { feature.enable }.not_to raise_error
+                expect(feature.enabled?).to be(true)
+                expect { feature.disable }.not_to raise_error
+                expect(feature.enabled?).to be(false)
+
+                feature = flipper[:actor_test]
+                actor = Struct.new(:flipper_id).new(123)
+                expect { feature.enable_actor(actor) }.not_to raise_error
+                expect(feature.enabled?(actor)).to be(true)
+                expect { feature.disable_actor(actor) }.not_to raise_error
+                expect(feature.enabled?(actor)).to be(false)
+
+                feature = flipper[:gate_test]
+                expect { feature.enable_percentage_of_time(50) }.not_to raise_error
+                expect { feature.disable_percentage_of_time }.not_to raise_error
+                feature.enable
+                expect { feature.remove }.not_to raise_error
+
+                feature = flipper[:expression_test]
+                expression = Flipper.property(:plan).eq("premium")
+                expect { feature.enable_expression(expression) }.not_to raise_error
+                expect(feature.expression).to eq(expression)
+                expect { feature.disable_expression }.not_to raise_error
+                expect(feature.expression).to be_nil
+              end
+            end
+
+            it 'does not hold onto connections during write operations' do
+              clear_active_connections!
+
+              abstract_class.connected_to(role: :reading) do
+                flipper = Flipper.new(adapter_with_roles)
+                feature = flipper[:connection_test]
+
+                feature.enable
+                expect(active_connections?).to be(false)
+              end
             end
           end
         end
