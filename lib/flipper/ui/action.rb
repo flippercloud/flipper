@@ -7,6 +7,14 @@ require 'sanitize'
 
 module Flipper
   module UI
+    # Sanitize config for descriptions in list view. Removes anchor tags to
+    # avoid nested links (the feature row is wrapped in an <a> tag).
+    # See: https://github.com/flippercloud/flipper/issues/939
+    SANITIZE_LIST = Sanitize::Config.merge(
+      Sanitize::Config::BASIC,
+      elements: Sanitize::Config::BASIC[:elements] - ['a']
+    )
+
     class Action
       module FeatureNameFromRoute
         def feature_name

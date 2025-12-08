@@ -88,6 +88,25 @@ RSpec.describe Flipper::UI::Actions::Features do
         expect(last_response.body).not_to include('<a class="btn btn-primary btn-sm" href="/features/new">Add Feature</a>')
       end
     end
+
+    context 'when descriptions have links' do
+      before do
+        Flipper::UI.configuration.show_feature_description_in_list = true
+        Flipper::UI.configuration.descriptions_source = lambda { |_keys|
+          { 'test_feature' => 'Check <a href="https://example.com">this link</a> for more info' }
+        }
+
+        flipper[:test_feature].enable
+      end
+
+      it 'strips anchor tags from descriptions to avoid nested links' do
+        get '/features'
+
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to include('Check this link for more info')
+        expect(last_response.body).not_to include('<a href="https://example.com">this link</a>')
+      end
+    end
   end
 
   describe 'POST /features' do
