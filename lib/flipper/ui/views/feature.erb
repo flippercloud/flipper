@@ -255,14 +255,13 @@
             <div class="row">
               <% unless @feature.boolean_value %>
                 <div class="col d-grid">
-                  <button type="submit" name="action" value="Enable" class="btn btn-outline-success">
-                    <span class="d-block" data-bs-toggle="tooltip"
-                      <% if Flipper::UI.configuration.confirm_fully_enable %>
-                        data-confirmation-prompt="Are you sure you want to fully enable this feature for everyone? Please enter the name of the feature to confirm it: <%= feature_name %>"
-                        data-confirmation-text="<%= feature_name %>"
-                      <% end %>
-                        title="Enable for everyone"
-                      >
+                  <button type="submit" name="action" value="Enable" class="btn btn-outline-success"
+                    <% if Flipper::UI.configuration.confirm_fully_enable %>
+                      data-confirmation-prompt="Are you sure you want to fully enable this feature for everyone? Please enter the name of the feature to confirm it: <%= feature_name %>"
+                      data-confirmation-text="<%= feature_name %>"
+                    <% end %>
+                  >
+                    <span class="d-block" data-bs-toggle="tooltip" title="Enable for everyone">
                       Fully Enable
                     </span>
                   </button>
@@ -271,14 +270,13 @@
 
               <% unless @feature.off? %>
                 <div class="col d-grid">
-                  <button type="submit" name="action" value="Disable" class="btn btn-outline-danger">
-                    <span class="d-block" data-bs-toggle="tooltip"
-                      <% if Flipper::UI.configuration.confirm_disable %>
-                        data-confirmation-prompt="Are you sure you want to disable this feature for everyone? Please enter the name of the feature to confirm it: <%= feature_name %>"
-                        data-confirmation-text="<%= feature_name %>"
-                      <% end %>
-                        title="Disable for everyone by clearing all percentages, groups and actors."
-                      >
+                  <button type="submit" name="action" value="Disable" class="btn btn-outline-danger"
+                    <% if Flipper::UI.configuration.confirm_disable %>
+                      data-confirmation-prompt="Are you sure you want to disable this feature for everyone? Please enter the name of the feature to confirm it: <%= feature_name %>"
+                      data-confirmation-text="<%= feature_name %>"
+                    <% end %>
+                  >
+                    <span class="d-block" data-bs-toggle="tooltip" title="Disable for everyone by clearing all percentages, groups and actors.">
                       Disable
                     </span>
                   </button>
