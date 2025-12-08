@@ -94,7 +94,7 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
 
         context "ActiveRecord connection_pool" do
           before do
-            ActiveRecord::Base.connection_handler.clear_active_connections!
+            ActiveRecord::Base.connection_handler.clear_active_connections!(:all)
           end
 
           context "#features" do
@@ -300,7 +300,7 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
           end
 
           it 'does not hold onto connections during write operations' do
-            ActiveRecord::Base.connection_handler.clear_active_connections!
+            ActiveRecord::Base.connection_handler.clear_active_connections!(:all)
 
             abstract_class.connected_to(role: :reading) do
               flipper = Flipper.new(adapter_with_roles)
