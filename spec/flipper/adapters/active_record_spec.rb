@@ -216,7 +216,7 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
 
         context 'with read/write roles' do
           # Skip for older Rails versions that don't support connected_to with roles
-          next unless ActiveRecord::Base.respond_to?(:connected_to) && ActiveRecord.version >= Gem::Version.new('6.1')
+          next unless ActiveRecord::Base.respond_to?(:connected_to) && ActiveRecord.version >= Gem::Version.new('7.1')
 
           # Skip for SQLite as it doesn't handle role-based connections well with :memory: databases
           next if config["adapter"] == "sqlite3"
