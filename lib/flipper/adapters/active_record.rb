@@ -270,7 +270,7 @@ module Flipper
 
       def with_connection(model = @feature_class, &block)
         warn VALUE_TO_TEXT_WARNING if !warned_about_value_not_text? && value_not_text?
-        model.with_connection(&block)
+        model.connection_pool.with_connection(&block)
       end
 
       def with_write_connection(model = @feature_class, &block)
