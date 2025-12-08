@@ -240,7 +240,7 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
 
           after do
             # Disconnect role-based connections to avoid interfering with database cleanup
-            ActiveRecord::Base.connection_handler.clear_all_connections!
+            clear_all_connections!
           end
 
           let(:feature_class) do
@@ -371,6 +371,11 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
 
   def clear_active_connections!
     method = ActiveRecord::Base.connection_handler.method(:clear_active_connections!)
+    method.arity == 0 ? method.call : method.call(:all)
+  end
+
+  def clear_all_connections!
+    method = ActiveRecord::Base.connection_handler.method(:clear_all_connections!)
     method.arity == 0 ? method.call : method.call(:all)
   end
 end
