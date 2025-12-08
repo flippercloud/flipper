@@ -270,12 +270,10 @@ module Flipper
 
       def with_connection(model = @feature_class, &block)
         warn VALUE_TO_TEXT_WARNING if !warned_about_value_not_text? && value_not_text?
-        model.connection_pool.with_connection(&block)
+        model.with_connection(&block)
       end
 
       def with_write_connection(model = @feature_class, &block)
-        warn VALUE_TO_TEXT_WARNING if !warned_about_value_not_text? && value_not_text?
-
         # Use Rails' built-in method to find the class that controls the connection
         # This walks up the inheritance chain to find which class called connects_to
         if model.respond_to?(:connection_class_for_self)
@@ -285,13 +283,13 @@ module Flipper
           # connection_class? returns true when connects_to was called on the class
           if connection_class.respond_to?(:connection_class?) && connection_class.connection_class?
             connection_class.connected_to(role: :writing) do
-              model.connection_pool.with_connection(&block)
+              with_connection(model, &block)
             end
           else
-            model.connection_pool.with_connection(&block)
+            with_connection(model, &block)
           end
         else
-          model.connection_pool.with_connection(&block)
+          with_connection(model, &block)
         end
       end
 
