@@ -94,36 +94,36 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
 
         context "ActiveRecord connection_pool" do
           before do
-            ActiveRecord::Base.connection_handler.clear_active_connections!
+            clear_active_connections!
           end
 
           context "#features" do
             it "does not hold onto connections" do
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+              expect(active_connections?).to be(false)
               subject.features
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+              expect(active_connections?).to be(false)
             end
 
             it "does not release previously held connection" do
               ActiveRecord::Base.connection # establish a new connection
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+              expect(active_connections?).to be(true)
               subject.features
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+              expect(active_connections?).to be(true)
             end
           end
 
           context "#get_all" do
             it "does not hold onto connections" do
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+              expect(active_connections?).to be(false)
               subject.get_all
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+              expect(active_connections?).to be(false)
             end
 
             it "does not release previously held connection" do
               ActiveRecord::Base.connection # establish a new connection
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+              expect(active_connections?).to be(true)
               subject.get_all
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+              expect(active_connections?).to be(true)
             end
           end
 
@@ -131,24 +131,24 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
             let(:feature) { Flipper::Feature.new(:search, subject) }
 
             it "does not hold onto connections" do
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+              expect(active_connections?).to be(false)
               subject.add(feature)
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+              expect(active_connections?).to be(false)
               subject.remove(feature)
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+              expect(active_connections?).to be(false)
               subject.clear(feature)
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+              expect(active_connections?).to be(false)
             end
 
             it "does not release previously held connection" do
               ActiveRecord::Base.connection # establish a new connection
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+              expect(active_connections?).to be(true)
               subject.add(feature)
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+              expect(active_connections?).to be(true)
               subject.remove(feature)
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+              expect(active_connections?).to be(true)
               subject.clear(feature)
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+              expect(active_connections?).to be(true)
             end
           end
 
@@ -156,16 +156,16 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
             let(:feature) { Flipper::Feature.new(:search, subject) }
 
             it "does not hold onto connections" do
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+              expect(active_connections?).to be(false)
               subject.get_multi([feature])
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+              expect(active_connections?).to be(false)
             end
 
             it "does not release previously held connection" do
               ActiveRecord::Base.connection # establish a new connection
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+              expect(active_connections?).to be(true)
               subject.get_multi([feature])
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+              expect(active_connections?).to be(true)
             end
           end
 
@@ -174,20 +174,20 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
             let(:gate) { feature.gate(:boolean)}
 
             it "does not hold onto connections" do
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+              expect(active_connections?).to be(false)
               subject.enable(feature, gate, gate.wrap(true))
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+              expect(active_connections?).to be(false)
               subject.disable(feature, gate, gate.wrap(false))
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+              expect(active_connections?).to be(false)
             end
 
             it "does not release previously held connection" do
               ActiveRecord::Base.connection # establish a new connection
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+              expect(active_connections?).to be(true)
               subject.enable(feature, gate, gate.wrap(true))
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+              expect(active_connections?).to be(true)
               subject.disable(feature, gate, gate.wrap(false))
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+              expect(active_connections?).to be(true)
             end
           end
 
@@ -196,20 +196,118 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
             let(:gate) { feature.gate(:group) }
 
             it "does not hold onto connections" do
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+              expect(active_connections?).to be(false)
               subject.enable(feature, gate, gate.wrap(:admin))
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+              expect(active_connections?).to be(false)
               subject.disable(feature, gate, gate.wrap(:admin))
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(false)
+              expect(active_connections?).to be(false)
             end
 
             it "does not release previously held connection" do
               ActiveRecord::Base.connection # establish a new connection
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+              expect(active_connections?).to be(true)
               subject.enable(feature, gate, gate.wrap(:admin))
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+              expect(active_connections?).to be(true)
               subject.disable(feature, gate, gate.wrap(:admin))
-              expect(ActiveRecord::Base.connection_handler.active_connections?).to be(true)
+              expect(active_connections?).to be(true)
+            end
+          end
+        end
+
+        if ActiveRecord.version >= Gem::Version.new('7.1')
+          context 'with read/write roles' do
+            before do
+              skip "connected_to with roles is not supported on #{config['adapter']}" if config["adapter"] == "sqlite3"
+            end
+
+            let(:abstract_class) do
+              # Create a named abstract class (Rails requires names for connects_to)
+              klass = Class.new(ActiveRecord::Base) do
+                self.abstract_class = true
+              end
+              stub_const('TestApplicationRecord', klass)
+
+              # Now configure connects_to with the same database for both roles
+              # In production, these would be different (primary/replica)
+              klass.connects_to database: {
+                writing: config,
+                reading: config
+              }
+
+              klass
+            end
+
+            after do
+              # Disconnect role-based connections to avoid interfering with database cleanup
+              clear_all_connections!
+            end
+
+            let(:feature_class) do
+              klass = Class.new(abstract_class) do
+                self.table_name = 'flipper_features'
+                validates :key, presence: true
+              end
+              stub_const('TestFeature', klass)
+              klass
+            end
+
+            let(:gate_class) do
+              klass = Class.new(abstract_class) do
+                self.table_name = 'flipper_gates'
+              end
+              stub_const('TestGate', klass)
+              klass
+            end
+
+            let(:adapter_with_roles) do
+              described_class.new(
+                feature_class: feature_class,
+                gate_class: gate_class
+              )
+            end
+
+            it 'can perform write operations when forced to reading role' do
+              abstract_class.connected_to(role: :reading) do
+                flipper = Flipper.new(adapter_with_roles)
+
+                feature = flipper[:test_feature]
+                expect { feature.enable }.not_to raise_error
+                expect(feature.enabled?).to be(true)
+                expect { feature.disable }.not_to raise_error
+                expect(feature.enabled?).to be(false)
+
+                feature = flipper[:actor_test]
+                actor = Struct.new(:flipper_id).new(123)
+                expect { feature.enable_actor(actor) }.not_to raise_error
+                expect(feature.enabled?(actor)).to be(true)
+                expect { feature.disable_actor(actor) }.not_to raise_error
+                expect(feature.enabled?(actor)).to be(false)
+
+                feature = flipper[:gate_test]
+                expect { feature.enable_percentage_of_time(50) }.not_to raise_error
+                expect { feature.disable_percentage_of_time }.not_to raise_error
+                feature.enable
+                expect { feature.remove }.not_to raise_error
+
+                feature = flipper[:expression_test]
+                expression = Flipper.property(:plan).eq("premium")
+                expect { feature.enable_expression(expression) }.not_to raise_error
+                expect(feature.expression).to eq(expression)
+                expect { feature.disable_expression }.not_to raise_error
+                expect(feature.expression).to be_nil
+              end
+            end
+
+            it 'does not hold onto connections during write operations' do
+              clear_active_connections!
+
+              abstract_class.connected_to(role: :reading) do
+                flipper = Flipper.new(adapter_with_roles)
+                feature = flipper[:connection_test]
+
+                feature.enable
+                expect(active_connections?).to be(false)
+              end
             end
           end
         end
@@ -264,5 +362,20 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
         end
       end
     end
+  end
+
+  def active_connections?
+    method = ActiveRecord::Base.connection_handler.method(:active_connections?)
+    method.arity == 0 ? method.call : method.call(:all)
+  end
+
+  def clear_active_connections!
+    method = ActiveRecord::Base.connection_handler.method(:clear_active_connections!)
+    method.arity == 0 ? method.call : method.call(:all)
+  end
+
+  def clear_all_connections!
+    method = ActiveRecord::Base.connection_handler.method(:clear_all_connections!)
+    method.arity == 0 ? method.call : method.call(:all)
   end
 end

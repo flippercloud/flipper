@@ -1,5 +1,5 @@
 name: Examples
-on: [push, pull_request]
+on: [push]
 jobs:
   test:
     if: github.repository_owner == 'flippercloud'
