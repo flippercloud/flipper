@@ -214,13 +214,11 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
           end
         end
 
-        if ActiveRecord::Base.respond_to?(:connected_to) && ActiveRecord.version >= Gem::Version.new('7.1')
+        if ActiveRecord.version >= Gem::Version.new('7.1')
           context 'with read/write roles' do
-            # Skip for older Rails versions that don't support connected_to with roles
-
-
-            # Skip for SQLite as it doesn't handle role-based connections well with :memory: databases
-            next if config["adapter"] == "sqlite3"
+            before do
+              skip "connected_to with roles is not supported on #{config['adapter']}" if config["adapter"] == "sqlite3"
+            end
 
             let(:abstract_class) do
               # Create a named abstract class (Rails requires names for connects_to)
