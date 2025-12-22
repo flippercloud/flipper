@@ -77,6 +77,11 @@ module Flipper
       # Default is false.
       attr_accessor :confirm_disable
 
+      # Public: An array of scripts to include in the UI. Each script should be
+      # a hash with a `:src` key and optionally a `:integrity` key. Example:
+      # config.scripts << { src: "https://example.com/script.js", integrity: "sha384-abc123" }
+      attr_accessor :scripts
+
       VALID_BANNER_CLASS_VALUES = %w(
         danger
         dark
@@ -111,6 +116,7 @@ module Flipper
           { title: "Features", href: "features" },
           { title: "Settings", href: "settings" },
         ]
+        @scripts = []
       end
 
       def using_descriptions?
