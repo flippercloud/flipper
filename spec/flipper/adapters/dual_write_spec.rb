@@ -66,4 +66,17 @@ RSpec.describe Flipper::Adapters::DualWrite do
     expect(remote_adapter.count(:disable)).to be(1)
     expect(local_adapter.count(:disable)).to be(1)
   end
+
+  describe '#adapter_stack' do
+    it 'returns the tree representation' do
+      expect(subject.adapter_stack).to eq("dual_write(local: operation_logger -> memory, remote: operation_logger -> memory)")
+    end
+
+    it 'shows nested adapters in the tree' do
+      memory = Flipper::Adapters::Memory.new
+      strict = Flipper::Adapters::Strict.new(Flipper::Adapters::Memory.new)
+      adapter = described_class.new(memory, strict)
+      expect(adapter.adapter_stack).to eq("dual_write(local: memory, remote: strict -> memory)")
+    end
+  end
 end

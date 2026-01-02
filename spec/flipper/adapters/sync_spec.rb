@@ -197,4 +197,17 @@ RSpec.describe Flipper::Adapters::Sync do
     expect(remote_adapter).to receive(:get_all).and_raise(exception)
     expect { subject.get_all }.not_to raise_error
   end
+
+  describe '#adapter_stack' do
+    it 'returns the tree representation' do
+      expect(subject.adapter_stack).to eq("sync(local: operation_logger -> memory, remote: operation_logger -> memory)")
+    end
+
+    it 'shows nested adapters in the tree' do
+      memory = Flipper::Adapters::Memory.new
+      strict = Flipper::Adapters::Strict.new(Flipper::Adapters::Memory.new)
+      adapter = described_class.new(memory, strict, interval: 1)
+      expect(adapter.adapter_stack).to eq("sync(local: memory, remote: strict -> memory)")
+    end
+  end
 end

@@ -126,4 +126,16 @@ RSpec.describe Flipper::Adapters::Failover do
       end
     end
   end
+
+  describe '#adapter_stack' do
+    it 'returns the tree representation' do
+      expect(subject.adapter_stack).to eq("failover(primary: memory, secondary: memory)")
+    end
+
+    it 'shows nested adapters in the tree' do
+      strict_primary = Flipper::Adapters::Strict.new(primary)
+      adapter = described_class.new(strict_primary, secondary)
+      expect(adapter.adapter_stack).to eq("failover(primary: strict -> memory, secondary: memory)")
+    end
+  end
 end

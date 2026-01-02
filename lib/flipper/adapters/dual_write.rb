@@ -15,6 +15,10 @@ module Flipper
         @remote = remote
       end
 
+      def adapter_stack
+        "#{name}(local: #{@local.adapter_stack}, remote: #{@remote.adapter_stack})"
+      end
+
       def features
         @local.features
       end

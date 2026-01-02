@@ -143,4 +143,24 @@ RSpec.describe Flipper::Adapter do
       expect(export.features.dig("search", :boolean)).to eq("true")
     end
   end
+
+  describe "#adapter_stack" do
+    it "returns the adapter name for a simple adapter" do
+      adapter = Flipper::Adapters::Memory.new
+      expect(adapter.adapter_stack).to eq("memory")
+    end
+
+    it "returns the chain for wrapped adapters" do
+      memory = Flipper::Adapters::Memory.new
+      memoizable = Flipper::Adapters::Memoizable.new(memory)
+      expect(memoizable.adapter_stack).to eq("memoizable -> memory")
+    end
+
+    it "returns the chain for deeply nested adapters" do
+      memory = Flipper::Adapters::Memory.new
+      strict = Flipper::Adapters::Strict.new(memory)
+      memoizable = Flipper::Adapters::Memoizable.new(strict)
+      expect(memoizable.adapter_stack).to eq("memoizable -> strict -> memory")
+    end
+  end
 end
