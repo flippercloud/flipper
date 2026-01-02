@@ -73,6 +73,22 @@ module Flipper
     def name
       @name ||= self.class.name.split('::').last.split(/(?=[A-Z])/).join('_').downcase.to_sym
     end
+
+    # Public: Returns a string representation of the adapter stack for debugging.
+    # Shows the full chain of wrapped adapters.
+    #
+    # Examples:
+    #   "memoizable -> active_support_cache_store -> active_record"
+    #   "memoizable -> failover(primary: redis, secondary: memory)"
+    #
+    # Returns a String.
+    def adapter_stack
+      if respond_to?(:adapter) && adapter
+        "#{name} -> #{adapter.adapter_stack}"
+      else
+        name.to_s
+      end
+    end
   end
 end
 

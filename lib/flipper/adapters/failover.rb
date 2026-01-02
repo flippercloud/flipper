@@ -13,12 +13,18 @@ module Flipper
       #                           primary is updated
       #             :errors - Array of exception types for which to failover
 
+      attr_reader :primary, :secondary
+
       def initialize(primary, secondary, options = {})
         @primary = primary
         @secondary = secondary
 
         @dual_write = options.fetch(:dual_write, false)
         @errors = options.fetch(:errors, [ StandardError ])
+      end
+
+      def adapter_stack
+        "#{name}(primary: #{@primary.adapter_stack}, secondary: #{@secondary.adapter_stack})"
       end
 
       def features
