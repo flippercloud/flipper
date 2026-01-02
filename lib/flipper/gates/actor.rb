@@ -3,11 +3,15 @@ module Flipper
     class Actor < Gate
       # Internal: The name of the gate. Used for instrumentation, etc.
       def name
+        return :blocking_actor if blocking
+
         :actor
       end
 
       # Internal: Name converted to value safe for adapter.
       def key
+        return :blocking_actors if blocking
+
         :actors
       end
 
@@ -27,6 +31,14 @@ module Flipper
 
         context.actors.any? do |actor|
           context.values.actors.include?(actor.value)
+        end
+      end
+
+      def blocks?(context)
+        return false unless context.actors?
+
+        context.actors.any? do |actor|
+          context.values.blocking_actors.include?(actor.value)
         end
       end
 
