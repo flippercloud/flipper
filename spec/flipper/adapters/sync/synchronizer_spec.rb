@@ -84,5 +84,43 @@ RSpec.describe Flipper::Adapters::Sync::Synchronizer do
 
       expect(local_flipper.features.map(&:key)).to eq([])
     end
+
+    it 'emits feature_operation.flipper events when syncing' do
+      remote_flipper.enable(:search)
+
+      subject.call
+
+      events = instrumenter.events_by_name("feature_operation.flipper")
+      expect(events).not_to be_empty
+
+      feature_names = events.map { |e| e.payload[:feature_name].to_s }
+      expect(feature_names).to include("search")
+    end
+
+    it 'emits feature_operation.flipper events when adding features' do
+      remote_flipper.add(:new_feature)
+
+      subject.call
+
+      events = instrumenter.events_by_name("feature_operation.flipper")
+      add_events = events.select { |e| e.payload[:operation] == :add }
+      expect(add_events).not_to be_empty
+
+      feature_names = add_events.map { |e| e.payload[:feature_name].to_s }
+      expect(feature_names).to include("new_feature")
+    end
+
+    it 'emits feature_operation.flipper events when removing features' do
+      local_flipper.add(:old_feature)
+
+      subject.call
+
+      events = instrumenter.events_by_name("feature_operation.flipper")
+      remove_events = events.select { |e| e.payload[:operation] == :remove }
+      expect(remove_events).not_to be_empty
+
+      feature_names = remove_events.map { |e| e.payload[:feature_name].to_s }
+      expect(feature_names).to include("old_feature")
+    end
   end
 end
