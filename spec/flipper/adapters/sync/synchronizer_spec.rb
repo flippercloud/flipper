@@ -91,9 +91,10 @@ RSpec.describe Flipper::Adapters::Sync::Synchronizer do
       subject.call
 
       events = instrumenter.events_by_name("feature_operation.flipper")
-      expect(events).not_to be_empty
+      enable_events = events.select { |e| e.payload[:operation] == :enable }
+      expect(enable_events).not_to be_empty
 
-      feature_names = events.map { |e| e.payload[:feature_name].to_s }
+      feature_names = enable_events.map { |e| e.payload[:feature_name].to_s }
       expect(feature_names).to include("search")
     end
 
