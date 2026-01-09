@@ -3,11 +3,15 @@ module Flipper
     class Group < Gate
       # Internal: The name of the gate. Used for instrumentation, etc.
       def name
+        return :blocking_group if blocking
+
         :group
       end
 
       # Internal: Name converted to value safe for adapter.
       def key
+        return :blocking_groups if blocking
+
         :groups
       end
 
@@ -26,6 +30,16 @@ module Flipper
         return false unless context.actors?
 
         context.values.groups.any? do |name|
+          context.actors.any? do |actor|
+            Flipper.group(name).match?(actor, context)
+          end
+        end
+      end
+
+      def blocks?(context)
+        return false unless context.actors?
+
+        context.values.blocking_groups.any? do |name|
           context.actors.any? do |actor|
             Flipper.group(name).match?(actor, context)
           end
