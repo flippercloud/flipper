@@ -100,6 +100,18 @@ module Flipper
     Expression.build({ Random: max })
   end
 
+  def now
+    Expression.build({ Now: [] })
+  end
+
+  def time(value)
+    Expression.build({ Time: value })
+  end
+
+  def duration(scalar, unit = 'second')
+    Expression.build({ Duration: [scalar, unit] })
+  end
+
   def feature_enabled(name)
     Expression.build({ FeatureEnabled: name })
   end

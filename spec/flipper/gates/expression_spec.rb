@@ -99,6 +99,64 @@ RSpec.describe Flipper::Gates::Expression do
         expect(subject.open?(context)).to be(false)
       end
     end
+
+    context 'for time-based expressions' do
+      it 'enables when now is past a scheduled epoch' do
+        past_epoch = Time.now.to_i - 86_400
+        expression = Flipper.now.gte(Flipper.time(past_epoch))
+        expect(subject.open?(context(expression.value))).to be(true)
+      end
+
+      it 'does not enable when now is before a future epoch' do
+        future_epoch = Time.now.to_i + 86_400
+        expression = Flipper.now.gte(Flipper.time(future_epoch))
+        expect(subject.open?(context(expression.value))).to be(false)
+      end
+
+      it 'enables when now is past a scheduled datetime' do
+        past_time = (Time.now.utc - 86_400).iso8601
+        expression = Flipper.now.gte(Flipper.time(past_time))
+        expect(subject.open?(context(expression.value))).to be(true)
+      end
+
+      it 'does not enable when now is before a future datetime' do
+        future_time = (Time.now.utc + 86_400).iso8601
+        expression = Flipper.now.gte(Flipper.time(future_time))
+        expect(subject.open?(context(expression.value))).to be(false)
+      end
+
+      it 'enables expiring features with lt' do
+        future_time = (Time.now.utc + 86_400).iso8601
+        expression = Flipper.now.lt(Flipper.time(future_time))
+        expect(subject.open?(context(expression.value))).to be(true)
+      end
+
+      it 'disables expired features with lt' do
+        past_time = (Time.now.utc - 86_400).iso8601
+        expression = Flipper.now.lt(Flipper.time(past_time))
+        expect(subject.open?(context(expression.value))).to be(false)
+      end
+
+      it 'enables within a time window using all' do
+        start_time = (Time.now.utc - 86_400).iso8601
+        end_time = (Time.now.utc + 86_400).iso8601
+        expression = Flipper.all(
+          Flipper.now.gte(Flipper.time(start_time)),
+          Flipper.now.lt(Flipper.time(end_time))
+        )
+        expect(subject.open?(context(expression.value))).to be(true)
+      end
+
+      it 'does not enable outside a time window' do
+        start_time = (Time.now.utc + 86_400).iso8601
+        end_time = (Time.now.utc + 172_800).iso8601
+        expression = Flipper.all(
+          Flipper.now.gte(Flipper.time(start_time)),
+          Flipper.now.lt(Flipper.time(end_time))
+        )
+        expect(subject.open?(context(expression.value))).to be(false)
+      end
+    end
   end
 
   describe '#protects?' do

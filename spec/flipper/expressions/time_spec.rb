@@ -9,5 +9,13 @@ RSpec.describe Flipper::Expressions::Time do
     it "returns time for #iso8601 format" do
       expect(described_class.call(time.iso8601)).to eq(time)
     end
+
+    it "returns time for epoch integer" do
+      expect(described_class.call(time.to_i)).to eq(Time.at(time.to_i).utc)
+    end
+
+    it "returns time for epoch float" do
+      expect(described_class.call(time.to_f)).to be_within(0.001).of(time)
+    end
   end
 end

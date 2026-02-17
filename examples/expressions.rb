@@ -31,13 +31,9 @@ class Org < Struct.new(:id, :flipper_properties)
   include Flipper::Identifier
 end
 
-NOW = Time.now.to_i
-DAY = 60 * 60 * 24
-
 org = Org.new(1, {
   "type" => "Org",
   "id" => 1,
-  "now" => NOW,
 })
 
 user = User.new(1, {
@@ -46,7 +42,6 @@ user = User.new(1, {
   "plan" => "basic",
   "age" => 39,
   "team_user" => true,
-  "now" => NOW,
 })
 
 admin_user = User.new(2, {
@@ -54,7 +49,6 @@ admin_user = User.new(2, {
   "id" => 2,
   "admin" => true,
   "team_user" => true,
-  "now" => NOW,
 })
 
 other_user = User.new(3, {
@@ -63,7 +57,6 @@ other_user = User.new(3, {
   "plan" => "plus",
   "age" => 18,
   "org_admin" => true,
-  "now" => NOW - DAY,
 })
 
 age_expression = Flipper.property(:age).gte(21)
@@ -205,9 +198,40 @@ assert Flipper.enabled?(:something, user)
 assert Flipper.enabled?(:something, admin_user)
 refute Flipper.enabled?(:something, other_user)
 
-puts "\n\nEnabling based on time"
-scheduled_time_expression = Flipper.property(:now).gte(NOW)
-Flipper.enable :something, scheduled_time_expression
+puts "\n\nEnabling based on time (epoch)"
+scheduled_epoch = Flipper.now.gte(Flipper.time(Time.now.to_i - 86_400))
+Flipper.enable :something, scheduled_epoch
 assert Flipper.enabled?(:something, user)
 assert Flipper.enabled?(:something, admin_user)
-refute Flipper.enabled?(:something, other_user)
+assert Flipper.enabled?(:something, other_user)
+reset
+
+puts "\n\nEnabling based on time (datetime)"
+past_time = (Time.now.utc - 86_400).iso8601
+scheduled_datetime = Flipper.now.gte(Flipper.time(past_time))
+Flipper.enable :something, scheduled_datetime
+assert Flipper.enabled?(:something, user)
+assert Flipper.enabled?(:something, admin_user)
+assert Flipper.enabled?(:something, other_user)
+reset
+
+puts "\n\nDisabling after a time (expiring feature)"
+future_time = (Time.now.utc + 86_400).iso8601
+expiring_expression = Flipper.now.lt(Flipper.time(future_time))
+Flipper.enable :something, expiring_expression
+assert Flipper.enabled?(:something, user)
+assert Flipper.enabled?(:something, admin_user)
+assert Flipper.enabled?(:something, other_user)
+reset
+
+puts "\n\nEnabling within a time window"
+start_time = (Time.now.utc - 86_400).iso8601
+end_time = (Time.now.utc + 86_400).iso8601
+time_window = Flipper.all(
+  Flipper.now.gte(Flipper.time(start_time)),
+  Flipper.now.lt(Flipper.time(end_time))
+)
+Flipper.enable :something, time_window
+assert Flipper.enabled?(:something, user)
+assert Flipper.enabled?(:something, admin_user)
+assert Flipper.enabled?(:something, other_user)
