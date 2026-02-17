@@ -13,11 +13,11 @@ module Flipper
         # Track the current feature so A -> B -> A is caught
         added_current = evaluating.add?(current_feature)
 
-        # Circular dependency: return false to break the cycle
-        return false if evaluating.include?(feature_name)
-
-        evaluating.add(feature_name)
         begin
+          # Circular dependency: return false to break the cycle
+          return false if evaluating.include?(feature_name)
+
+          evaluating.add(feature_name)
           actor = context[:actor]
           if actor
             Flipper.enabled?(feature_name, actor)

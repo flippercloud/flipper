@@ -653,6 +653,23 @@ RSpec.describe Flipper do
       evaluating = Thread.current[:flipper_evaluating_features]
       expect(evaluating.nil? || evaluating.empty?).to be(true)
     end
+
+    it "cleans up thread-local state after self-reference" do
+      feature.enable Flipper.feature_enabled(:search)
+
+      feature.enabled?
+      evaluating = Thread.current[:flipper_evaluating_features]
+      expect(evaluating.nil? || evaluating.empty?).to be(true)
+    end
+
+    it "cleans up thread-local state after circular dependency" do
+      feature.enable Flipper.feature_enabled(:other)
+      flipper[:other].enable Flipper.feature_enabled(:search)
+
+      feature.enabled?
+      evaluating = Thread.current[:flipper_evaluating_features]
+      expect(evaluating.nil? || evaluating.empty?).to be(true)
+    end
   end
 
   context "for FeatureDisabled" do
