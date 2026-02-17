@@ -100,6 +100,14 @@ module Flipper
     Expression.build({ Random: max })
   end
 
+  def feature_enabled(name)
+    Expression.build({ FeatureEnabled: name })
+  end
+
+  def feature_disabled(name)
+    feature_enabled(name).eq(false)
+  end
+
   # Public: Use this to register a group by name.
   #
   # name - The Symbol name of the group.

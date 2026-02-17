@@ -30,10 +30,10 @@ module Flipper
         expression = Flipper::Expression.build(data)
 
         if context.actors.nil? || context.actors.empty?
-          !!expression.evaluate(feature_name: context.feature_name, properties: DEFAULT_PROPERTIES)
+          !!expression.evaluate(feature_name: context.feature_name, properties: DEFAULT_PROPERTIES, actor: nil)
         else
           context.actors.any? do |actor|
-            !!expression.evaluate(feature_name: context.feature_name, properties: properties(actor))
+            !!expression.evaluate(feature_name: context.feature_name, properties: properties(actor), actor: actor)
           end
         end
       end

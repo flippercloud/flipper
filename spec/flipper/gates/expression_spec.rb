@@ -62,6 +62,30 @@ RSpec.describe Flipper::Gates::Expression do
       end
     end
 
+    context 'for actor in context' do
+      it 'passes actor to expression context' do
+        actor = Flipper::Actor.new("User;1", {type: "User"})
+        wrapped_actor = Flipper::Types::Actor.new(actor)
+        expression = Flipper.property(:flipper_id).eq("User;1")
+        ctx = Flipper::FeatureCheckContext.new(
+          feature_name: feature_name,
+          values: Flipper::GateValues.new(expression: expression.value),
+          actors: [wrapped_actor]
+        )
+        expect(subject.open?(ctx)).to be(true)
+      end
+
+      it 'passes nil actor when no actors provided' do
+        expression = Flipper.boolean(true).eq(true)
+        ctx = Flipper::FeatureCheckContext.new(
+          feature_name: feature_name,
+          values: Flipper::GateValues.new(expression: expression.value),
+          actors: nil
+        )
+        expect(subject.open?(ctx)).to be(true)
+      end
+    end
+
     context 'for properties that have symbol keys' do
       it 'returns true when expression evalutes to true' do
         expression = Flipper.property(:type).eq("User")
