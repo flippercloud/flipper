@@ -15,6 +15,9 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      memcached:
+        image: memcached
+        ports: ["11211:11211"]
       postgres:
         image: postgres:13
         ports:
@@ -83,8 +86,6 @@ jobs:
     steps:
       - name: Set up MySQL
         run: sudo /etc/init.d/mysql start
-      - name: Setup memcached
-        uses: KeisukeYamashita/memcached-actions@v1
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.12.1
         with:
