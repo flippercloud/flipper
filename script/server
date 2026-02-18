@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #/ Usage: server
 #/
 #/ Starts a server for perusing the UI locally.
@@ -16,4 +16,10 @@ cd $(dirname "$0")/..
     exit 0
 }
 
-script/bootstrap && bundle exec rackup examples/ui/basic.ru -p 9999
+# Activate mise if available so we use the correct ruby
+if command -v mise &> /dev/null; then
+  eval "$(mise activate bash)"
+fi
+
+PORT="${CONDUCTOR_PORT:-9999}"
+script/bootstrap && bundle exec rackup examples/ui/basic.ru -p "$PORT"

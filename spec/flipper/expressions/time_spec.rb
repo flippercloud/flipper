@@ -17,5 +17,13 @@ RSpec.describe Flipper::Expressions::Time do
     it "returns time for epoch float" do
       expect(described_class.call(time.to_f)).to be_within(0.001).of(time)
     end
+
+    it "returns utc for string input" do
+      expect(described_class.call(time.to_s).utc?).to be(true)
+    end
+
+    it "returns utc for numeric input" do
+      expect(described_class.call(time.to_i).utc?).to be(true)
+    end
   end
 end

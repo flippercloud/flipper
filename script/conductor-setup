@@ -1,0 +1,22 @@
+#!/bin/bash
+set -e
+cd "$(dirname "$0")/.."
+
+if command -v mise &> /dev/null; then
+  # Copy .tool-versions from root workspace if it exists
+  if [ -n "$CONDUCTOR_ROOT_PATH" ] && [ -f "$CONDUCTOR_ROOT_PATH/.tool-versions" ]; then
+    ln -sf "$CONDUCTOR_ROOT_PATH/.tool-versions" .tool-versions
+  fi
+
+  # Install ruby version from .tool-versions
+  mise install
+
+  # Activate mise so gem/bundle use the correct ruby
+  eval "$(mise activate bash)"
+fi
+
+# Install the required bundler version
+gem install bundler:4.0.6
+
+# Bundle install and setup binstubs
+script/bootstrap
