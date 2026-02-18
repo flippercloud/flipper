@@ -8,7 +8,7 @@ module Flipper
         when Numeric
           ::Time.at(value).utc
         else
-          ::Time.parse(value)
+          ::Time.parse(value).utc
         end
       end
     end
