@@ -182,4 +182,15 @@ RSpec.describe Flipper::UI::Configuration do
       it { is_expected.to eq(true) }
     end
   end
+
+  describe "#scripts" do
+    it "has default value" do
+      expect(configuration.scripts).to eq([])
+    end
+
+    it "can be updated" do
+      configuration.scripts << { src: "https://example.com/script.js", integrity: "sha384-abc123" }
+      expect(configuration.scripts).to eq([{ src: "https://example.com/script.js", integrity: "sha384-abc123" }])
+    end
+  end
 end
