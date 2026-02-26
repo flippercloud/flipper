@@ -45,6 +45,16 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
               'name' => 'group',
               'value' => [],
             },
+            {
+              'key' => 'block_actors',
+              'name' => 'block_actor',
+              'value' => [],
+            },
+            {
+              'key' => 'block_groups',
+              'name' => 'block_group',
+              'value' => [],
+            },
           ],
         }
 
@@ -92,6 +102,16 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
             {
               'key' => 'groups',
               'name' => 'group',
+              'value' => [],
+            },
+            {
+              'key' => 'block_actors',
+              'name' => 'block_actor',
+              'value' => [],
+            },
+            {
+              'key' => 'block_groups',
+              'name' => 'block_group',
               'value' => [],
             },
           ],
@@ -159,6 +179,16 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
               'name' => 'group',
               'value' => [],
             },
+            {
+              'key' => 'block_actors',
+              'name' => 'block_actor',
+              'value' => [],
+            },
+            {
+              'key' => 'block_groups',
+              'name' => 'block_group',
+              'value' => [],
+            },
           ],
         }
 
@@ -206,6 +236,16 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
             {
               'key' => 'groups',
               'name' => 'group',
+              'value' => [],
+            },
+            {
+              'key' => 'block_actors',
+              'name' => 'block_actor',
+              'value' => [],
+            },
+            {
+              'key' => 'block_groups',
+              'name' => 'block_group',
               'value' => [],
             },
           ],

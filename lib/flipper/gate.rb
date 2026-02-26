@@ -1,10 +1,7 @@
 module Flipper
   class Gate
-    attr_reader :blocking
-
     # Public
     def initialize(options = {})
-      @blocking = options.fetch(:blocking, false)
     end
 
     # Public: The name of the gate. Implemented in subclass.
@@ -68,3 +65,5 @@ require 'flipper/gates/group'
 require 'flipper/gates/percentage_of_actors'
 require 'flipper/gates/percentage_of_time'
 require 'flipper/gates/expression'
+require 'flipper/gates/block_actor'
+require 'flipper/gates/block_group'

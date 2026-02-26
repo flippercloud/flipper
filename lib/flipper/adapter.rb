@@ -15,6 +15,8 @@ module Flipper
           expression: nil,
           percentage_of_actors: nil,
           percentage_of_time: nil,
+          block_actors: Set.new,
+          block_groups: Set.new,
         }
       end
 

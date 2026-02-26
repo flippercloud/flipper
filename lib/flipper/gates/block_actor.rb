@@ -1,14 +1,14 @@
 module Flipper
   module Gates
-    class Group < Gate
+    class BlockActor < Gate
       # Internal: The name of the gate. Used for instrumentation, etc.
       def name
-        :group
+        :block_actor
       end
 
       # Internal: Name converted to value safe for adapter.
       def key
-        :groups
+        :block_actors
       end
 
       def data_type
@@ -19,25 +19,24 @@ module Flipper
         !value.empty?
       end
 
-      # Internal: Checks if the gate is open for a thing.
-      #
-      # Returns true if gate open for thing, false if not.
       def open?(context)
+        false
+      end
+
+      def blocks?(context)
         return false unless context.actors?
 
-        context.values.groups.any? do |name|
-          context.actors.any? do |actor|
-            Flipper.group(name).match?(actor, context)
-          end
+        context.actors.any? do |actor|
+          context.values.block_actors.include?(actor.value)
         end
       end
 
-      def wrap(thing)
-        Types::Group.wrap(thing)
+      def wrap(actor)
+        Types::Actor.wrap(actor)
       end
 
       def protects?(thing)
-        thing.is_a?(Types::Group) || thing.is_a?(Symbol)
+        Types::Actor.wrappable?(thing)
       end
     end
   end

@@ -19,6 +19,8 @@ module Flipper
         @action_collection.add Api::V1::Actions::PercentageOfActorsGate
         @action_collection.add Api::V1::Actions::ActorsGate
         @action_collection.add Api::V1::Actions::GroupsGate
+        @action_collection.add Api::V1::Actions::BlockActorsGate
+        @action_collection.add Api::V1::Actions::BlockGroupsGate
         @action_collection.add Api::V1::Actions::BooleanGate
         @action_collection.add Api::V1::Actions::ClearFeature
         @action_collection.add Api::V1::Actions::Actors

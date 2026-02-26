@@ -91,3 +91,5 @@ For outbound HTTP requests, use `Flipper::Adapters::Http::Client` instead of raw
 Uses both RSpec (currently preferred for new tests) and Minitest. Shared adapter specs ensure consistency across all storage backends. Extensive testing across multiple Rails versions (5.0-8.0).
 
 `Flipper.configuration` is reset to nil before each spec (in `spec/spec_helper.rb`), but `Flipper::UI.configuration` is **not** globally reset. When modifying UI config in tests, set the value in `before` and reset it in `after` to match the existing pattern throughout the spec suite.
+
+**Important**: `lib/flipper/spec/shared_adapter_specs.rb` (RSpec) and `lib/flipper/test/shared_adapter_test.rb` (Minitest) must always be kept in sync. They contain identical test coverage for adapter compliance — one for RSpec, one for Minitest. Any time one is changed, the other must be updated to match.
