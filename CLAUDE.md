@@ -26,6 +26,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `bundle exec rake build` - Build all gems locally into pkg/ directory
 - `script/release` - Manual fallback for local releases (prompts for OTP)
 
+**After releasing**, purge the cached release URLs on flippercloud.io:
+- `/release`
+- `/release.json`
+
 ## Architecture Overview
 
 Flipper is a feature flag library for Ruby with a modular adapter-based architecture:
