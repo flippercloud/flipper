@@ -181,6 +181,22 @@ module Flipper
       feature(name).disable_percentage_of_actors
     end
 
+    def block_actor(name, actor)
+      feature(name).block_actor(actor)
+    end
+
+    def block_group(name, group)
+      feature(name).block_group(group)
+    end
+
+    def unblock_actor(name, actor)
+      feature(name).unblock_actor(actor)
+    end
+
+    def unblock_group(name, group)
+      feature(name).unblock_group(group)
+    end
+
     # Public: Add a feature.
     #
     # name - The String or Symbol name of the feature.
