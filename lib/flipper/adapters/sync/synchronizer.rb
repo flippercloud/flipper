@@ -1,6 +1,7 @@
 require "flipper/feature"
 require "flipper/gate_values"
 require "flipper/adapters/actor_limit"
+require "flipper/adapters/strict"
 require "flipper/adapters/sync/feature_synchronizer"
 
 module Flipper
@@ -29,7 +30,9 @@ module Flipper
         # Public: Forces a sync.
         def call
           @instrumenter.instrument("synchronizer_call.flipper") do
-            Flipper::Adapters::ActorLimit.with_sync_mode { sync }
+            Flipper::Adapters::Strict.with_sync_mode do
+              Flipper::Adapters::ActorLimit.with_sync_mode { sync }
+            end
           end
         end
 
