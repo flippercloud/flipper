@@ -18,6 +18,9 @@ module Flipper
       # Public: The Poller instance used to sync in the background.
       attr_reader :poller
 
+      # Public: The mutex used to synchronize sync operations.
+      attr_reader :sync_mutex
+
       # Public: The local memory adapter that serves reads.
       attr_reader :local
 
@@ -46,13 +49,14 @@ module Flipper
         @local = Adapters::Memory.new
         @remote = source
         @last_synced_at = Concurrent::AtomicFixnum.new(0)
+        @sync_mutex = Mutex.new
 
         # Block the main thread for the initial sync so we don't serve
         # empty/default values before the first poll completes.
         begin
           @poller.sync
           sync
-        rescue
+        rescue StandardError
           # Rescue to avoid source adapter being down causing processes to crash.
         end
       end
@@ -67,11 +71,13 @@ module Flipper
       # If given a block, syncs once at the start and suppresses further syncs
       # for the duration of the block (useful for per-request sync).
       def sync
-        poller_last_synced_at = @poller.last_synced_at.value
-        last = @last_synced_at.value
-        if poller_last_synced_at > last
-          @local.import(@poller.adapter)
-          @last_synced_at.update { poller_last_synced_at }
+        @sync_mutex.synchronize do
+          poller_last_synced_at = @poller.last_synced_at.value
+          last = @last_synced_at.value
+          if poller_last_synced_at > last
+            @local.import(@poller.adapter)
+            @last_synced_at.update { poller_last_synced_at }
+          end
         end
 
         if block_given?
@@ -106,7 +112,10 @@ module Flipper
         @local.get_all(**kwargs)
       end
 
-      # Writes - go to source first, then update local memory
+      # Writes - go to source first, then update local memory.
+      # Note: There is a small window where another thread's sync could overwrite
+      # the local adapter with a stale poller snapshot that doesn't include the
+      # write yet. The write will be picked up on the next poll cycle.
 
       def add(feature)
         @remote.add(feature).tap { @local.add(feature) }
