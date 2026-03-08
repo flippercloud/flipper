@@ -5,10 +5,10 @@ require 'flipper/ui/util'
 module Flipper
   module UI
     module Actions
-      class BlockActorsGate < UI::Action
+      class DenyActorsGate < UI::Action
         include FeatureNameFromRoute
 
-        route %r{\A/features/(?<feature_name>.*)/block_actors/?\Z}
+        route %r{\A/features/(?<feature_name>.*)/deny_actors/?\Z}
 
         def post
           render_read_only if read_only?
@@ -19,17 +19,17 @@ module Flipper
 
           if values.empty?
             error = "#{value.inspect} is not a valid actor value."
-            redirect_to("/features/#{Flipper::UI::Util.escape feature.key}/block_actors?error=#{Flipper::UI::Util.escape error}")
+            redirect_to("/features/#{Flipper::UI::Util.escape feature.key}/deny_actors?error=#{Flipper::UI::Util.escape error}")
           end
 
           values.each do |value|
             actor = Flipper::Actor.new(value)
 
             case params['operation']
-            when 'block'
-              feature.block_actor actor
-            when 'unblock'
-              feature.unblock_actor actor
+            when 'deny'
+              feature.deny_actor actor
+            when 'permit'
+              feature.permit_actor actor
             end
           end
 

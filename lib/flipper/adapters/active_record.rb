@@ -162,7 +162,7 @@ module Flipper
       def disable(feature, gate, thing)
         case gate.data_type
         when :boolean
-          clear(feature)
+          clear_allow_gates(feature)
         when :integer
           set(feature, gate, thing)
         when :json
@@ -187,6 +187,14 @@ module Flipper
 
       private
 
+      def clear_allow_gates(feature)
+        with_write_connection(@gate_class) do
+          @gate_class.where(feature_key: feature.key)
+            .where.not(key: deny_gate_keys.map(&:to_s))
+            .destroy_all
+        end
+      end
+
       def set(feature, gate, thing, options = {})
         clear_feature = options.fetch(:clear, false)
         json_feature = options.fetch(:json, false)
@@ -195,7 +203,7 @@ module Flipper
 
         with_write_connection(@gate_class) do
           @gate_class.transaction(requires_new: true) do
-            clear(feature) if clear_feature
+            clear_allow_gates(feature) if clear_feature
             delete(feature, gate)
             begin
               @gate_class.create! do |g|

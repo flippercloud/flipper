@@ -10,8 +10,8 @@ RSpec.shared_examples_for 'a flipper adapter' do
   let(:actor_gate)        { feature.gate(:actor) }
   let(:actors_gate)       { feature.gate(:percentage_of_actors) }
   let(:time_gate)         { feature.gate(:percentage_of_time) }
-  let(:block_actor_gate)  { feature.gate(:block_actor) }
-  let(:block_group_gate)  { feature.gate(:block_group) }
+  let(:deny_actor_gate)  { feature.gate(:deny_actor) }
+  let(:deny_group_gate)  { feature.gate(:deny_group) }
 
   before do
     Flipper.register(:admins) do |actor|
@@ -334,63 +334,63 @@ RSpec.shared_examples_for 'a flipper adapter' do
     expect(subject.get(feature)).to eq(subject.default_config.merge(boolean: "true"))
   end
 
-  it 'can enable, disable and get value for block actor gate' do
+  it 'can enable, disable and get value for deny actor gate' do
     actor22 = Flipper::Actor.new('22')
     actor_asdf = Flipper::Actor.new('asdf')
 
-    expect(subject.enable(feature, block_actor_gate, Flipper::Types::Actor.new(actor22))).to eq(true)
-    expect(subject.enable(feature, block_actor_gate, Flipper::Types::Actor.new(actor_asdf))).to eq(true)
+    expect(subject.enable(feature, deny_actor_gate, Flipper::Types::Actor.new(actor22))).to eq(true)
+    expect(subject.enable(feature, deny_actor_gate, Flipper::Types::Actor.new(actor_asdf))).to eq(true)
 
     result = subject.get(feature)
-    expect(result[:block_actors]).to eq(Set['22', 'asdf'])
+    expect(result[:deny_actors]).to eq(Set['22', 'asdf'])
 
-    expect(subject.disable(feature, block_actor_gate, Flipper::Types::Actor.new(actor_asdf))).to eq(true)
+    expect(subject.disable(feature, deny_actor_gate, Flipper::Types::Actor.new(actor_asdf))).to eq(true)
     result = subject.get(feature)
-    expect(result[:block_actors]).to eq(Set['22'])
+    expect(result[:deny_actors]).to eq(Set['22'])
 
-    expect(subject.disable(feature, block_actor_gate, Flipper::Types::Actor.new(actor22))).to eq(true)
+    expect(subject.disable(feature, deny_actor_gate, Flipper::Types::Actor.new(actor22))).to eq(true)
     result = subject.get(feature)
-    expect(result[:block_actors]).to eq(Set.new)
+    expect(result[:deny_actors]).to eq(Set.new)
   end
 
-  it 'can enable, disable and get value for block group gate' do
-    expect(subject.enable(feature, block_group_gate, flipper.group(:admins))).to eq(true)
-    expect(subject.enable(feature, block_group_gate, flipper.group(:early_access))).to eq(true)
+  it 'can enable, disable and get value for deny group gate' do
+    expect(subject.enable(feature, deny_group_gate, flipper.group(:admins))).to eq(true)
+    expect(subject.enable(feature, deny_group_gate, flipper.group(:early_access))).to eq(true)
 
     result = subject.get(feature)
-    expect(result[:block_groups]).to eq(Set['admins', 'early_access'])
+    expect(result[:deny_groups]).to eq(Set['admins', 'early_access'])
 
-    expect(subject.disable(feature, block_group_gate, flipper.group(:early_access))).to eq(true)
+    expect(subject.disable(feature, deny_group_gate, flipper.group(:early_access))).to eq(true)
     result = subject.get(feature)
-    expect(result[:block_groups]).to eq(Set['admins'])
+    expect(result[:deny_groups]).to eq(Set['admins'])
 
-    expect(subject.disable(feature, block_group_gate, flipper.group(:admins))).to eq(true)
+    expect(subject.disable(feature, deny_group_gate, flipper.group(:admins))).to eq(true)
     result = subject.get(feature)
-    expect(result[:block_groups]).to eq(Set.new)
+    expect(result[:deny_groups]).to eq(Set.new)
   end
 
-  it 'preserves block actors and groups when feature is enabled' do
+  it 'preserves deny actors and groups when feature is enabled' do
     actor = Flipper::Actor.new('blocked_user')
-    feature.block_actor(actor)
-    feature.block_group(:admins)
+    feature.deny_actor(actor)
+    feature.deny_group(:admins)
 
     feature.enable
 
-    expect(feature.block_actors_value).to eq(Set['blocked_user'])
-    expect(feature.block_groups_value).to eq(Set['admins'])
+    expect(feature.deny_actors_value).to eq(Set['blocked_user'])
+    expect(feature.deny_groups_value).to eq(Set['admins'])
     expect(feature.enabled?(actor)).to be(false)
   end
 
-  it 'preserves block actors and groups when feature is disabled' do
+  it 'preserves deny actors and groups when feature is disabled' do
     actor = Flipper::Actor.new('blocked_user')
     feature.enable_actor(actor)
-    feature.block_actor(actor)
-    feature.block_group(:admins)
+    feature.deny_actor(actor)
+    feature.deny_group(:admins)
 
     feature.disable
 
-    expect(feature.block_actors_value).to eq(Set['blocked_user'])
-    expect(feature.block_groups_value).to eq(Set['admins'])
+    expect(feature.deny_actors_value).to eq(Set['blocked_user'])
+    expect(feature.deny_groups_value).to eq(Set['admins'])
   end
 
   it 'can import and export' do

@@ -5,16 +5,16 @@ module Flipper
   module Api
     module V1
       module Actions
-        class BlockActorsGate < Api::Action
+        class DenyActorsGate < Api::Action
           include FeatureNameFromRoute
 
-          route %r{\A/features/(?<feature_name>.*)/block_actors/?\Z}
+          route %r{\A/features/(?<feature_name>.*)/deny_actors/?\Z}
 
           def post
             ensure_valid_params
             feature = flipper[feature_name]
             actor = Actor.new(flipper_id)
-            feature.block_actor(actor)
+            feature.deny_actor(actor)
             decorated_feature = Decorators::Feature.new(feature)
             json_response(decorated_feature.as_json, 200)
           end
@@ -23,7 +23,7 @@ module Flipper
             ensure_valid_params
             feature = flipper[feature_name]
             actor = Actor.new(flipper_id)
-            feature.unblock_actor(actor)
+            feature.permit_actor(actor)
             decorated_feature = Decorators::Feature.new(feature)
             json_response(decorated_feature.as_json, 200)
           end

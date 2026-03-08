@@ -298,146 +298,162 @@
   </div>
 </div>
 
+<%
+  deny_list_empty = @feature.deny_actors_value.empty? && @feature.deny_groups_value.empty?
+  deny_list_count = @feature.deny_actors_value.count + @feature.deny_groups_value.count
+%>
 <div class="row mb-4">
   <div class="col">
     <div class="card">
-      <div class="card-header">
-        <h4 class="mb-1">Deny List</h4>
-        <p class="text-muted mb-0">Blocked actors and groups are always denied access, even when the feature is fully enabled. These rules are not affected by enabling or disabling the feature.</p>
-      </div>
-
-      <%# Blocked Actors Info and Form %>
-      <div class="card-body border-bottom">
-        <div class="row align-items-center js-toggle-container">
-          <div class="col col-me-auto toggle-block-when-off">
-            <h6 class="m-0">
-              <strong class="<%= "text-muted" if @feature.block_actors_value.empty? %>">
-                <% if @feature.block_actors_value.count > 0 %>
-                  <%= Util.pluralize @feature.block_actors_value.count, 'blocked actor', 'blocked actors' %>
-                <% else %>
-                  No blocked actors
-                <% end %>
-              </strong>
-            </h6>
-          </div>
-          <% if write_allowed? %>
-            <div class="col col-auto toggle-block-when-off">
-              <button class="btn btn-outline-secondary js-toggle-trigger">Block an actor</button>
-            </div>
-            <div class="col toggle-block-when-on">
-              <form action="<%= script_name %>/features/<%= Flipper::UI::Util.escape @feature.key %>/block_actors" method="post" class="row">
-                <%== csrf_input_tag %>
-                <input type="hidden" name="operation" value="block">
-                <div class="col">
-                  <input type="text" name="value" placeholder="<%= Flipper::UI.configuration.add_actor_placeholder %>" class="form-control">
-                </div>
-                <div class="col-auto">
-                  <input type="submit" value="Block Actor" class="btn btn-danger">
-                </div>
-              </form>
-            </div>
-            <div class="col col-auto toggle-block-when-on">
-              <button type="button" class="btn btn-outline-secondary js-toggle-trigger">Cancel</button>
-            </div>
+      <div class="card-body py-2 px-3 deny-list-toggle"
+           data-bs-toggle="collapse"
+           data-bs-target="#deny-list-body"
+           aria-expanded="<%= !deny_list_empty %>"
+           aria-controls="deny-list-body">
+        <div class="d-flex align-items-center">
+          <span class="deny-list-chevron me-2">&#9654;</span>
+          <span class="<%= 'text-muted' if deny_list_empty %>">Deny List</span>
+          <% unless deny_list_empty %>
+            <span class="badge bg-danger ms-2" style="font-size: 0.6rem;"><%= deny_list_count %></span>
           <% end %>
         </div>
       </div>
 
-      <%# Blocked Actors list %>
-      <% @feature.block_actors_value.each do |item| %>
-        <div class="card-body bg-lightest border-bottom py-3">
-          <div class="row align-items-center">
-            <div class="col col-me-auto ps-md-5">
+      <div class="collapse <%= 'show' unless deny_list_empty %>" id="deny-list-body">
+        <%# Denied Actors Info and Form %>
+        <div class="card-body border-top border-bottom">
+          <div class="row align-items-center js-toggle-container">
+            <div class="col col-me-auto toggle-block-when-off">
               <h6 class="m-0">
-                <% if Flipper::UI::Util.present?(@feature.actor_names[item]) %>
-                  <%== Sanitize.fragment("#{@feature.actor_names[item]} (#{item})", Sanitize::Config::BASIC) %>
-                <% else %>
-                  <%= item %>
-                <% end %>
+                <strong class="<%= "text-muted" if @feature.deny_actors_value.empty? %>">
+                  <% if @feature.deny_actors_value.count > 0 %>
+                    <%= Util.pluralize @feature.deny_actors_value.count, 'denied actor', 'denied actors' %>
+                  <% else %>
+                    No denied actors
+                  <% end %>
+                </strong>
               </h6>
             </div>
-            <div class="col col-auto">
-              <% if write_allowed? %>
-                <form action="<%= script_name %>/features/<%= Flipper::UI::Util.escape @feature.key %>/block_actors" method="post">
+            <% if write_allowed? %>
+              <div class="col col-auto toggle-block-when-off">
+                <button class="btn btn-outline-secondary js-toggle-trigger">Deny an actor</button>
+              </div>
+              <div class="col toggle-block-when-on">
+                <form action="<%= script_name %>/features/<%= Flipper::UI::Util.escape @feature.key %>/deny_actors" method="post" class="row">
                   <%== csrf_input_tag %>
-                  <input type="hidden" name="operation" value="unblock">
-                  <input type="hidden" name="value" value="<%= item %>">
-                  <button type="submit" value="Unblock" class="btn btn-outline-danger" data-bs-toggle="tooltip" title="Unblock <%= item %>" data-bs-placement="left">
-                    Remove
-                  </button>
-                </form>
-              <% end %>
-            </div>
-          </div>
-        </div>
-      <% end %>
-
-      <%# Blocked Groups Info and Form %>
-      <div class="card-body border-bottom">
-        <div class="row align-items-center js-toggle-container">
-          <div class="col col-me-auto toggle-block-when-off">
-            <h6 class="m-0">
-              <strong class="<%= "text-muted" if @feature.block_groups_value.empty? %>">
-                <% if @feature.block_groups_value.count > 0 %>
-                  <%= Util.pluralize @feature.block_groups_value.count, 'blocked group', 'blocked groups' %>
-                <% else %>
-                  No blocked groups
-                <% end %>
-              </strong>
-            </h6>
-          </div>
-          <% if write_allowed? %>
-            <div class="col col-auto toggle-block-when-off">
-              <button class="btn btn-outline-secondary js-toggle-trigger">Block a group</button>
-            </div>
-            <div class="col collapse toggle-block-when-on">
-              <% if Flipper.groups.empty? %>
-                No groups available.
-              <% else %>
-                <form action="<%= script_name %>/features/<%= Flipper::UI::Util.escape @feature.key %>/block_groups" method="post" class="row">
-                  <%== csrf_input_tag %>
-                  <input type="hidden" name="operation" value="block">
+                  <input type="hidden" name="operation" value="deny">
                   <div class="col">
-                    <select name="value" class="form-select">
-                      <option value="">Select a group...</option>
-                      <% Flipper.groups.sort_by(&:name).each do |group| %>
-                        <option value="<%= group.name %>"><%= group.name %></option>
-                      <% end %>
-                    </select>
+                    <input type="text" name="value" placeholder="<%= Flipper::UI.configuration.add_actor_placeholder %>" class="form-control">
                   </div>
-                  <div class="col-auto"><input type="submit" value="Block Group" class="btn btn-danger"></div>
+                  <div class="col-auto">
+                    <input type="submit" value="Deny Actor" class="btn btn-danger">
+                  </div>
                 </form>
-              <% end %>
-            </div>
-            <div class="col col-auto toggle-block-when-on">
-              <button type="button" class="btn btn-outline-secondary js-toggle-trigger">Cancel</button>
-            </div>
-          <% end %>
-        </div>
-      </div>
-
-      <%# Blocked Groups list %>
-      <% @feature.block_groups_value.each do |item| %>
-        <div class="card-body bg-lightest border-bottom py-3">
-          <div class="row align-items-center">
-            <div class="col col-me-auto ps-md-5">
-              <h6 class="m-0"><%= item %></h6>
-            </div>
-            <div class="col col-auto">
-              <% if write_allowed? %>
-                <form action="<%= script_name %>/features/<%= Flipper::UI::Util.escape @feature.key %>/block_groups" method="post">
-                  <%== csrf_input_tag %>
-                  <input type="hidden" name="operation" value="unblock">
-                  <input type="hidden" name="value" value="<%= item %>">
-                  <button type="submit" value="Unblock" class="btn btn-outline-danger" data-bs-toggle="tooltip" title="Unblock <%= item %>" data-bs-placement="left">
-                    Remove
-                  </button>
-                </form>
-              <% end %>
-            </div>
+              </div>
+              <div class="col col-auto toggle-block-when-on">
+                <button type="button" class="btn btn-outline-secondary js-toggle-trigger">Cancel</button>
+              </div>
+            <% end %>
           </div>
         </div>
-      <% end %>
+
+        <%# Denied Actors list %>
+        <% @feature.deny_actors_value.each do |item| %>
+          <div class="card-body bg-lightest border-bottom py-3">
+            <div class="row align-items-center">
+              <div class="col col-me-auto ps-md-5">
+                <h6 class="m-0">
+                  <% if Flipper::UI::Util.present?(@feature.actor_names[item]) %>
+                    <%== Sanitize.fragment("#{@feature.actor_names[item]} (#{item})", Sanitize::Config::BASIC) %>
+                  <% else %>
+                    <%= item %>
+                  <% end %>
+                </h6>
+              </div>
+              <div class="col col-auto">
+                <% if write_allowed? %>
+                  <form action="<%= script_name %>/features/<%= Flipper::UI::Util.escape @feature.key %>/deny_actors" method="post">
+                    <%== csrf_input_tag %>
+                    <input type="hidden" name="operation" value="permit">
+                    <input type="hidden" name="value" value="<%= item %>">
+                    <button type="submit" value="Remove" class="btn btn-outline-danger" data-bs-toggle="tooltip" title="Remove <%= item %> from deny list" data-bs-placement="left">
+                      Remove
+                    </button>
+                  </form>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <%# Denied Groups Info and Form %>
+        <div class="card-body border-bottom">
+          <div class="row align-items-center js-toggle-container">
+            <div class="col col-me-auto toggle-block-when-off">
+              <h6 class="m-0">
+                <strong class="<%= "text-muted" if @feature.deny_groups_value.empty? %>">
+                  <% if @feature.deny_groups_value.count > 0 %>
+                    <%= Util.pluralize @feature.deny_groups_value.count, 'denied group', 'denied groups' %>
+                  <% else %>
+                    No denied groups
+                  <% end %>
+                </strong>
+              </h6>
+            </div>
+            <% if write_allowed? %>
+              <div class="col col-auto toggle-block-when-off">
+                <button class="btn btn-outline-secondary js-toggle-trigger">Deny a group</button>
+              </div>
+              <div class="col collapse toggle-block-when-on">
+                <% deniable_groups = Flipper.groups.reject { |g| @feature.deny_groups_value.include?(g.name.to_s) } %>
+                <% if deniable_groups.empty? %>
+                  All groups denied.
+                <% else %>
+                  <form action="<%= script_name %>/features/<%= Flipper::UI::Util.escape @feature.key %>/deny_groups" method="post" class="row">
+                    <%== csrf_input_tag %>
+                    <input type="hidden" name="operation" value="deny">
+                    <div class="col">
+                      <select name="value" class="form-select">
+                        <option value="">Select a group...</option>
+                        <% deniable_groups.sort_by(&:name).each do |group| %>
+                          <option value="<%= group.name %>"><%= group.name %></option>
+                        <% end %>
+                      </select>
+                    </div>
+                    <div class="col-auto"><input type="submit" value="Deny Group" class="btn btn-danger"></div>
+                  </form>
+                <% end %>
+              </div>
+              <div class="col col-auto toggle-block-when-on">
+                <button type="button" class="btn btn-outline-secondary js-toggle-trigger">Cancel</button>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <%# Denied Groups list %>
+        <% @feature.deny_groups_value.each do |item| %>
+          <div class="card-body bg-lightest border-bottom py-3">
+            <div class="row align-items-center">
+              <div class="col col-me-auto ps-md-5">
+                <h6 class="m-0"><%= item %></h6>
+              </div>
+              <div class="col col-auto">
+                <% if write_allowed? %>
+                  <form action="<%= script_name %>/features/<%= Flipper::UI::Util.escape @feature.key %>/deny_groups" method="post">
+                    <%== csrf_input_tag %>
+                    <input type="hidden" name="operation" value="permit">
+                    <input type="hidden" name="value" value="<%= item %>">
+                    <button type="submit" value="Remove" class="btn btn-outline-danger" data-bs-toggle="tooltip" title="Remove <%= item %> from deny list" data-bs-placement="left">
+                      Remove
+                    </button>
+                  </form>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
     </div>
   </div>
 </div>

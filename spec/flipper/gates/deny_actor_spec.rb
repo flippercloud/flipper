@@ -1,4 +1,4 @@
-RSpec.describe Flipper::Gates::BlockActor do
+RSpec.describe Flipper::Gates::DenyActor do
   let(:feature_name) { :search }
 
   subject do
@@ -8,21 +8,21 @@ RSpec.describe Flipper::Gates::BlockActor do
   def context(set, actors: [Flipper::Types::Actor.new(Flipper::Actor.new('5'))])
     Flipper::FeatureCheckContext.new(
       feature_name: feature_name,
-      values: Flipper::GateValues.new(block_actors: set),
+      values: Flipper::GateValues.new(deny_actors: set),
       actors: actors
     )
   end
 
   describe '#blocks?' do
-    it 'returns true when actor is in blocked set' do
+    it 'returns true when actor is in denied set' do
       expect(subject.blocks?(context(Set['5']))).to be(true)
     end
 
-    it 'returns false when actor is not in blocked set' do
+    it 'returns false when actor is not in denied set' do
       expect(subject.blocks?(context(Set['10']))).to be(false)
     end
 
-    it 'returns false when blocked set is empty' do
+    it 'returns false when denied set is empty' do
       expect(subject.blocks?(context(Set.new))).to be(false)
     end
 

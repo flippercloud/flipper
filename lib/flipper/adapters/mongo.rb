@@ -66,7 +66,7 @@ module Flipper
       def enable(feature, gate, thing)
         case gate.data_type
         when :boolean
-          clear(feature)
+          clear_allow_gates(feature)
           update feature.key, '$set' => {
             gate.key.to_s => thing.value.to_s,
           }
@@ -99,7 +99,7 @@ module Flipper
       def disable(feature, gate, thing)
         case gate.data_type
         when :boolean
-          delete feature.key
+          clear_allow_gates(feature)
         when :integer
           update feature.key, '$set' => {
             gate.key.to_s => thing.value.to_s,
@@ -120,6 +120,20 @@ module Flipper
       end
 
       private
+
+      def clear_allow_gates(feature)
+        doc = find(feature.key)
+        return if doc.empty?
+
+        fields_to_unset = doc.keys.reject do |k|
+          k == '_id' || deny_gate_keys.any? { |pk| pk.to_s == k }
+        end
+
+        if fields_to_unset.any?
+          unset_hash = fields_to_unset.each_with_object({}) { |f, h| h[f] = 1 }
+          update feature.key, '$unset' => unset_hash
+        end
+      end
 
       def read_feature_keys
         find(@features_key).fetch('features') { Set.new }.to_set

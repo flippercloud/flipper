@@ -58,12 +58,12 @@ module Flipper
             end
           end
 
-          if feature.block_actors_value.count > 0
-            statuses << %Q(<span data-toggle="tooltip" data-placement="bottom" title="#{Util.to_sentence(feature.block_actors_value.to_a)}">) + Util.pluralize(feature.block_actors_value.count, 'blocked actor', 'blocked actors') + "</span>"
+          if feature.deny_actors_value.count > 0
+            statuses << %Q(<span data-toggle="tooltip" data-placement="bottom" title="#{Util.to_sentence(feature.deny_actors_value.to_a)}">) + Util.pluralize(feature.deny_actors_value.count, 'denied actor', 'denied actors') + "</span>"
           end
 
-          if feature.block_groups_value.count > 0
-            statuses << %Q(<span data-toggle="tooltip" data-placement="bottom" title="#{Util.to_sentence(feature.block_groups_value.to_a)}">) + Util.pluralize(feature.block_groups_value.count, 'blocked group', 'blocked groups') + "</span>"
+          if feature.deny_groups_value.count > 0
+            statuses << %Q(<span data-toggle="tooltip" data-placement="bottom" title="#{Util.to_sentence(feature.deny_groups_value.to_a)}">) + Util.pluralize(feature.deny_groups_value.count, 'denied group', 'denied groups') + "</span>"
           end
 
           Util.to_sentence(statuses)

@@ -15,9 +15,15 @@ module Flipper
           expression: nil,
           percentage_of_actors: nil,
           percentage_of_time: nil,
-          block_actors: Set.new,
-          block_groups: Set.new,
+          deny_actors: Set.new,
+          deny_groups: Set.new,
         }
+      end
+
+      # Gate keys for deny gates. Deny gate values are preserved when
+      # toggling the boolean gate.
+      def deny_gate_keys
+        [:deny_actors, :deny_groups].freeze
       end
 
       def from(source)
@@ -69,6 +75,10 @@ module Flipper
     # Public: Default config for a feature's gate values.
     def default_config
       self.class.default_config
+    end
+
+    def deny_gate_keys
+      self.class.deny_gate_keys
     end
 
     # Public: default name of the adapter

@@ -5,15 +5,15 @@ module Flipper
   module Api
     module V1
       module Actions
-        class BlockGroupsGate < Api::Action
+        class DenyGroupsGate < Api::Action
           include FeatureNameFromRoute
 
-          route %r{\A/features/(?<feature_name>.*)/block_groups/?\Z}
+          route %r{\A/features/(?<feature_name>.*)/deny_groups/?\Z}
 
           def post
             ensure_valid_params
             feature = flipper[feature_name]
-            feature.block_group(group_name)
+            feature.deny_group(group_name)
             decorated_feature = Decorators::Feature.new(feature)
             json_response(decorated_feature.as_json, 200)
           end
@@ -21,7 +21,7 @@ module Flipper
           def delete
             ensure_valid_params
             feature = flipper[feature_name]
-            feature.unblock_group(group_name)
+            feature.permit_group(group_name)
             decorated_feature = Decorators::Feature.new(feature)
             json_response(decorated_feature.as_json, 200)
           end

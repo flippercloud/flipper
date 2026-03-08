@@ -78,7 +78,7 @@ module Flipper
         @store.transaction do
           case gate.data_type
           when :boolean
-            clear_gates(feature)
+            clear_allow_gates(feature)
             write key(feature, gate), thing.value.to_s
           when :integer
             write key(feature, gate), thing.value.to_s
@@ -98,7 +98,7 @@ module Flipper
       def disable(feature, gate, thing)
         case gate.data_type
         when :boolean
-          clear(feature)
+          @store.transaction { clear_allow_gates(feature) }
         when :integer
           @store.transaction do
             write key(feature, gate), thing.value.to_s
@@ -132,6 +132,13 @@ module Flipper
 
       def clear_gates(feature)
         feature.gates.each do |gate|
+          delete key(feature, gate)
+        end
+      end
+
+      def clear_allow_gates(feature)
+        feature.gates.each do |gate|
+          next if gate.deny?
           delete key(feature, gate)
         end
       end

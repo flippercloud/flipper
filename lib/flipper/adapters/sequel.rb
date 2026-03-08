@@ -155,7 +155,7 @@ module Flipper
       def disable(feature, gate, thing)
         case gate.data_type
         when :boolean
-          clear(feature)
+          clear_allow_gates(feature)
         when :integer
           set(feature, gate, thing)
         when :json
@@ -175,6 +175,12 @@ module Flipper
         raise "#{data_type} is not supported by this adapter"
       end
 
+      def clear_allow_gates(feature)
+        @gate_class.where(feature_key: feature.key.to_s)
+          .exclude(key: deny_gate_keys.map(&:to_s))
+          .delete
+      end
+
       def set(feature, gate, thing, options = {})
         clear_feature = options.fetch(:clear, false)
         json_feature = options.fetch(:json, false)
@@ -182,7 +188,7 @@ module Flipper
         raise VALUE_TO_TEXT_WARNING if json_feature && value_not_text?
 
         @gate_class.db.transaction do
-          clear(feature) if clear_feature
+          clear_allow_gates(feature) if clear_feature
           delete(feature, gate)
 
           begin

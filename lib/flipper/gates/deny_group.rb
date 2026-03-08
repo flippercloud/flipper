@@ -1,14 +1,14 @@
 module Flipper
   module Gates
-    class BlockActor < Gate
+    class DenyGroup < Gate
       # Internal: The name of the gate. Used for instrumentation, etc.
       def name
-        :block_actor
+        :deny_group
       end
 
       # Internal: Name converted to value safe for adapter.
       def key
-        :block_actors
+        :deny_groups
       end
 
       def data_type
@@ -26,17 +26,23 @@ module Flipper
       def blocks?(context)
         return false unless context.actors?
 
-        context.actors.any? do |actor|
-          context.values.block_actors.include?(actor.value)
+        context.values.deny_groups.any? do |name|
+          context.actors.any? do |actor|
+            Flipper.group(name).match?(actor, context)
+          end
         end
       end
 
-      def wrap(actor)
-        Types::Actor.wrap(actor)
+      def deny?
+        true
+      end
+
+      def wrap(thing)
+        Types::Group.wrap(thing)
       end
 
       def protects?(thing)
-        Types::Actor.wrappable?(thing)
+        thing.is_a?(Types::Group) || thing.is_a?(Symbol)
       end
     end
   end

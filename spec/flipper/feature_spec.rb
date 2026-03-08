@@ -1214,8 +1214,8 @@ RSpec.describe Flipper::Feature do
               :boolean,
               :group,
               :expression,
-              :block_actor,
-              :block_group,
+              :deny_actor,
+              :deny_group,
             ])
 
       expect(subject.disabled_gate_names.to_set).to eq(Set[
@@ -1223,8 +1223,8 @@ RSpec.describe Flipper::Feature do
               :boolean,
               :group,
               :expression,
-              :block_actor,
-              :block_group,
+              :deny_actor,
+              :deny_group,
             ])
     end
   end

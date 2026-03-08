@@ -63,8 +63,8 @@ RSpec.describe Flipper::Adapters::ReadOnly do
       },
       percentage_of_actors: '25',
       percentage_of_time: '45',
-      block_actors: Set.new,
-      block_groups: Set.new,
+      deny_actors: Set.new,
+      deny_groups: Set.new,
     })
   end
 

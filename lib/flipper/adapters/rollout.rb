@@ -50,8 +50,8 @@ module Flipper
           percentage_of_actors: percentage_of_actors,
           percentage_of_time: nil,
           expression: nil,
-          block_actors: Set.new,
-          block_groups: Set.new,
+          deny_actors: Set.new,
+          deny_groups: Set.new,
         }
       end
 

@@ -25,9 +25,9 @@ RSpec.describe Flipper::Exporters::Json::V1 do
     export = subject.call(adapter)
 
     expect(export.features).to eq({
-      "google_analytics" => {actors: Set.new, boolean: nil, expression: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil, block_actors: Set.new, block_groups: Set.new},
-      "plausible" => {actors: Set.new, boolean: "true", expression: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil, block_actors: Set.new, block_groups: Set.new},
-      "search" => {actors: Set["User;1", "User;100"], boolean: nil, expression: nil, groups: Set["admins", "employees"], percentage_of_actors: "10", percentage_of_time: "15", block_actors: Set.new, block_groups: Set.new},
+      "google_analytics" => {actors: Set.new, boolean: nil, expression: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil, deny_actors: Set.new, deny_groups: Set.new},
+      "plausible" => {actors: Set.new, boolean: "true", expression: nil, groups: Set.new, percentage_of_actors: nil, percentage_of_time: nil, deny_actors: Set.new, deny_groups: Set.new},
+      "search" => {actors: Set["User;1", "User;100"], boolean: nil, expression: nil, groups: Set["admins", "employees"], percentage_of_actors: "10", percentage_of_time: "15", deny_actors: Set.new, deny_groups: Set.new},
     })
   end
 end

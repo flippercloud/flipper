@@ -132,7 +132,7 @@ module Flipper
 
       def enable(feature, gate, thing)
         body = request_body_for_gate(gate, thing.value)
-        query_string = %i[groups block_groups].include?(gate.key) ? "?allow_unregistered_groups=true" : ""
+        query_string = %i[groups deny_groups].include?(gate.key) ? "?allow_unregistered_groups=true" : ""
         response = @client.post("/features/#{feature.key}/#{gate.key}#{query_string}", body)
         raise Error, response unless response.is_a?(Net::HTTPOK)
         true
@@ -140,7 +140,7 @@ module Flipper
 
       def disable(feature, gate, thing)
         body = request_body_for_gate(gate, thing.value)
-        query_string = %i[groups block_groups].include?(gate.key) ? "?allow_unregistered_groups=true" : ""
+        query_string = %i[groups deny_groups].include?(gate.key) ? "?allow_unregistered_groups=true" : ""
         response = case gate.key
         when :percentage_of_actors, :percentage_of_time
           @client.post("/features/#{feature.key}/#{gate.key}#{query_string}", body)
@@ -171,9 +171,9 @@ module Flipper
         data = case gate.key
         when :boolean
           {}
-        when :groups, :block_groups
+        when :groups, :deny_groups
           { name: value.to_s }
-        when :actors, :block_actors
+        when :actors, :deny_actors
           { flipper_id: value.to_s }
         when :percentage_of_actors, :percentage_of_time
           { percentage: value.to_s }

@@ -1,4 +1,4 @@
-RSpec.describe Flipper::UI::Actions::BlockGroupsGate do
+RSpec.describe Flipper::UI::Actions::DenyGroupsGate do
   let(:token) do
     if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
       Rack::Protection::AuthenticityToken.random_token
@@ -11,7 +11,7 @@ RSpec.describe Flipper::UI::Actions::BlockGroupsGate do
     { :csrf => token, 'csrf' => token, '_csrf_token' => token }
   end
 
-  describe 'POST /features/:feature/block_groups' do
+  describe 'POST /features/:feature/deny_groups' do
     let(:group_name) { 'admins' }
 
     before do
@@ -22,15 +22,15 @@ RSpec.describe Flipper::UI::Actions::BlockGroupsGate do
       Flipper.unregister_groups
     end
 
-    context 'blocking a group' do
+    context 'denying a group' do
       before do
-        post 'features/search/block_groups',
-             { 'value' => group_name, 'operation' => 'block', 'authenticity_token' => token },
+        post 'features/search/deny_groups',
+             { 'value' => group_name, 'operation' => 'deny', 'authenticity_token' => token },
              'rack.session' => session
       end
 
-      it 'adds item to blocked groups' do
-        expect(flipper[:search].block_groups_value).to include('admins')
+      it 'adds item to denied groups' do
+        expect(flipper[:search].deny_groups_value).to include('admins')
       end
 
       it 'redirects back to feature' do
@@ -40,13 +40,13 @@ RSpec.describe Flipper::UI::Actions::BlockGroupsGate do
 
       context 'feature name contains space' do
         before do
-          post 'features/sp+ace/block_groups',
-               { 'value' => group_name, 'operation' => 'block', 'authenticity_token' => token },
+          post 'features/sp+ace/deny_groups',
+               { 'value' => group_name, 'operation' => 'deny', 'authenticity_token' => token },
                'rack.session' => session
         end
 
-        it 'adds item to blocked groups' do
-          expect(flipper["sp ace"].block_groups_value).to include('admins')
+        it 'adds item to denied groups' do
+          expect(flipper["sp ace"].deny_groups_value).to include('admins')
         end
 
         it 'redirects back to feature' do
@@ -59,7 +59,7 @@ RSpec.describe Flipper::UI::Actions::BlockGroupsGate do
         let(:group_name) { '  admins  ' }
 
         it 'adds item without whitespace' do
-          expect(flipper[:search].block_groups_value).to include('admins')
+          expect(flipper[:search].deny_groups_value).to include('admins')
         end
       end
 
@@ -69,7 +69,7 @@ RSpec.describe Flipper::UI::Actions::BlockGroupsGate do
 
           it 'redirects back with error' do
             expect(last_response.status).to be(302)
-            expect(last_response.headers['location']).to eq('/features/search/block_groups?error=The+group+named+%22not_here%22+has+not+been+registered.')
+            expect(last_response.headers['location']).to eq('/features/search/deny_groups?error=The+group+named+%22not_here%22+has+not+been+registered.')
           end
         end
 
@@ -78,7 +78,7 @@ RSpec.describe Flipper::UI::Actions::BlockGroupsGate do
 
           it 'redirects back with error' do
             expect(last_response.status).to be(302)
-            expect(last_response.headers['location']).to eq('/features/search/block_groups?error=The+group+named+%22%22+has+not+been+registered.')
+            expect(last_response.headers['location']).to eq('/features/search/deny_groups?error=The+group+named+%22%22+has+not+been+registered.')
           end
         end
 
@@ -87,24 +87,24 @@ RSpec.describe Flipper::UI::Actions::BlockGroupsGate do
 
           it 'redirects back with error' do
             expect(last_response.status).to be(302)
-            expect(last_response.headers['location']).to eq('/features/search/block_groups?error=The+group+named+%22%22+has+not+been+registered.')
+            expect(last_response.headers['location']).to eq('/features/search/deny_groups?error=The+group+named+%22%22+has+not+been+registered.')
           end
         end
       end
     end
 
-    context 'unblocking a group' do
+    context 'permitting a group' do
       let(:group_name) { 'admins' }
 
       before do
-        flipper[:search].block_group :admins
-        post 'features/search/block_groups',
-             { 'value' => group_name, 'operation' => 'unblock', 'authenticity_token' => token },
+        flipper[:search].deny_group :admins
+        post 'features/search/deny_groups',
+             { 'value' => group_name, 'operation' => 'permit', 'authenticity_token' => token },
              'rack.session' => session
       end
 
-      it 'removes item from blocked groups' do
-        expect(flipper[:search].block_groups_value).not_to include('admins')
+      it 'removes item from denied groups' do
+        expect(flipper[:search].deny_groups_value).not_to include('admins')
       end
 
       it 'redirects back to feature' do
@@ -116,7 +116,7 @@ RSpec.describe Flipper::UI::Actions::BlockGroupsGate do
         let(:group_name) { '  admins  ' }
 
         it 'removes item without whitespace' do
-          expect(flipper[:search].block_groups_value).not_to include('admins')
+          expect(flipper[:search].deny_groups_value).not_to include('admins')
         end
       end
     end

@@ -34,6 +34,12 @@ module Flipper
       false
     end
 
+    # Internal: Whether this is a deny gate. Deny gate values are preserved
+    # when boolean enable/disable clears all gate values.
+    def deny?
+      false
+    end
+
     # Internal: Check if a gate is protects an actor. Implemented in subclass.
     #
     # Returns true if gate protects actor, false if not.
@@ -65,5 +71,5 @@ require 'flipper/gates/group'
 require 'flipper/gates/percentage_of_actors'
 require 'flipper/gates/percentage_of_time'
 require 'flipper/gates/expression'
-require 'flipper/gates/block_actor'
-require 'flipper/gates/block_group'
+require 'flipper/gates/deny_actor'
+require 'flipper/gates/deny_group'

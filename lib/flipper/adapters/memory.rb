@@ -65,7 +65,7 @@ module Flipper
 
           case gate.data_type
           when :boolean
-            @source[feature.key] = default_config
+            clear_allow_gates(feature)
             @source[feature.key][gate.key] = thing.value.to_s
           when :integer
             @source[feature.key][gate.key] = thing.value.to_s
@@ -88,7 +88,7 @@ module Flipper
 
           case gate.data_type
           when :boolean
-            @source[feature.key] = default_config
+            clear_allow_gates(feature)
           when :integer
             @source[feature.key][gate.key] = thing.value.to_s
           when :set
@@ -121,6 +121,13 @@ module Flipper
       end
 
       private
+
+      def clear_allow_gates(feature)
+        existing = @source[feature.key] || default_config
+        preserved = {}
+        deny_gate_keys.each { |k| preserved[k] = existing[k] }
+        @source[feature.key] = default_config.merge(preserved)
+      end
 
       def reset
         @pid = Process.pid

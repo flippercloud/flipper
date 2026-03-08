@@ -1,4 +1,4 @@
-RSpec.describe Flipper::Gates::BlockGroup do
+RSpec.describe Flipper::Gates::DenyGroup do
   let(:feature_name) { :search }
 
   subject do
@@ -8,7 +8,7 @@ RSpec.describe Flipper::Gates::BlockGroup do
   def context(set)
     Flipper::FeatureCheckContext.new(
       feature_name: feature_name,
-      values: Flipper::GateValues.new(block_groups: set),
+      values: Flipper::GateValues.new(deny_groups: set),
       actors: [Flipper::Types::Actor.new(Flipper::Actor.new('5'))]
     )
   end
@@ -19,7 +19,7 @@ RSpec.describe Flipper::Gates::BlockGroup do
         Flipper.register(:staff) { |actor| true }
       end
 
-      it 'returns true when actor matches blocked group' do
+      it 'returns true when actor matches denied group' do
         expect(subject.blocks?(context(Set[:staff]))).to be(true)
       end
     end
@@ -29,12 +29,12 @@ RSpec.describe Flipper::Gates::BlockGroup do
         Flipper.register(:staff) { |actor| false }
       end
 
-      it 'returns false when actor does not match blocked group' do
+      it 'returns false when actor does not match denied group' do
         expect(subject.blocks?(context(Set[:staff]))).to be(false)
       end
     end
 
-    it 'returns false when blocked set is empty' do
+    it 'returns false when denied set is empty' do
       expect(subject.blocks?(context(Set.new))).to be(false)
     end
 

@@ -181,20 +181,20 @@ module Flipper
       feature(name).disable_percentage_of_actors
     end
 
-    def block_actor(name, actor)
-      feature(name).block_actor(actor)
+    def deny_actor(name, actor)
+      feature(name).deny_actor(actor)
     end
 
-    def block_group(name, group)
-      feature(name).block_group(group)
+    def deny_group(name, group)
+      feature(name).deny_group(group)
     end
 
-    def unblock_actor(name, actor)
-      feature(name).unblock_actor(actor)
+    def permit_actor(name, actor)
+      feature(name).permit_actor(actor)
     end
 
-    def unblock_group(name, group)
-      feature(name).unblock_group(group)
+    def permit_group(name, group)
+      feature(name).permit_group(group)
     end
 
     # Public: Add a feature.

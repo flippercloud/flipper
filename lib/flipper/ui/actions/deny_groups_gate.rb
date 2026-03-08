@@ -4,10 +4,10 @@ require 'flipper/ui/decorators/feature'
 module Flipper
   module UI
     module Actions
-      class BlockGroupsGate < UI::Action
+      class DenyGroupsGate < UI::Action
         include FeatureNameFromRoute
 
-        route %r{\A/features/(?<feature_name>.*)/block_groups/?\Z}
+        route %r{\A/features/(?<feature_name>.*)/deny_groups/?\Z}
 
         def post
           render_read_only if read_only?
@@ -17,16 +17,16 @@ module Flipper
 
           if Flipper.group_exists?(value)
             case params['operation']
-            when 'block'
-              feature.block_group value
-            when 'unblock'
-              feature.unblock_group value
+            when 'deny'
+              feature.deny_group value
+            when 'permit'
+              feature.permit_group value
             end
 
             redirect_to("/features/#{Flipper::UI::Util.escape feature.key}")
           else
             error = "The group named #{value.inspect} has not been registered."
-            redirect_to("/features/#{Flipper::UI::Util.escape feature.key}/block_groups?error=#{Flipper::UI::Util.escape error}")
+            redirect_to("/features/#{Flipper::UI::Util.escape feature.key}/deny_groups?error=#{Flipper::UI::Util.escape error}")
           end
         end
       end

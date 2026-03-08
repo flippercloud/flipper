@@ -20,8 +20,8 @@ module Flipper
         @action_collection.add UI::Actions::AddFeature
         @action_collection.add UI::Actions::ActorsGate
         @action_collection.add UI::Actions::GroupsGate
-        @action_collection.add UI::Actions::BlockActorsGate
-        @action_collection.add UI::Actions::BlockGroupsGate
+        @action_collection.add UI::Actions::DenyActorsGate
+        @action_collection.add UI::Actions::DenyGroupsGate
         @action_collection.add UI::Actions::BooleanGate
         @action_collection.add UI::Actions::PercentageOfTimeGate
         @action_collection.add UI::Actions::PercentageOfActorsGate

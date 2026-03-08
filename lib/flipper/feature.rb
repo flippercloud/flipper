@@ -48,10 +48,7 @@ module Flipper
         payload[:gate_name] = gate.name
         payload[:thing] = wrapped_thing
 
-        saved_blocks = preserve_block_values if gate.data_type == :boolean
-        result = adapter.enable self, gate, wrapped_thing
-        restore_block_values(saved_blocks) if saved_blocks
-        result
+        adapter.enable self, gate, wrapped_thing
       end
     end
 
@@ -67,51 +64,48 @@ module Flipper
         payload[:gate_name] = gate.name
         payload[:thing] = wrapped_thing
 
-        saved_blocks = preserve_block_values if gate.data_type == :boolean
-        result = adapter.disable self, gate, wrapped_thing
-        restore_block_values(saved_blocks) if saved_blocks
-        result
+        adapter.disable self, gate, wrapped_thing
       end
     end
 
-    # Public: Block an actor from this feature.
+    # Public: Deny an actor from this feature.
     #
     # actor - a Flipper::Types::Actor instance or an object that responds
     #         to flipper_id.
     #
     # Returns result of Adapter#enable.
-    def block_actor(actor)
-      block gate(:block_actor), Types::Actor.wrap(actor)
+    def deny_actor(actor)
+      deny gate(:deny_actor), Types::Actor.wrap(actor)
     end
 
-    # Public: Block a group from this feature.
+    # Public: Deny a group from this feature.
     #
     # group - a Flipper::Types::Group instance or a String or Symbol name of a
     #         registered group.
     #
     # Returns result of Adapter#enable.
-    def block_group(group)
-      block gate(:block_group), Types::Group.wrap(group)
+    def deny_group(group)
+      deny gate(:deny_group), Types::Group.wrap(group)
     end
 
-    # Public: Unblock an actor from this feature.
+    # Public: Remove an actor from the deny list for this feature.
     #
     # actor - a Flipper::Types::Actor instance or an object that responds
     #         to flipper_id.
     #
     # Returns result of Adapter#disable.
-    def unblock_actor(actor)
-      unblock gate(:block_actor), Types::Actor.wrap(actor)
+    def permit_actor(actor)
+      permit gate(:deny_actor), Types::Actor.wrap(actor)
     end
 
-    # Public: Unblock a group from this feature.
+    # Public: Remove a group from the deny list for this feature.
     #
     # group - a Flipper::Types::Group instance or a String or Symbol name of a
     #         registered group.
     #
     # Returns result of Adapter#disable.
-    def unblock_group(group)
-      unblock gate(:block_group), Types::Group.wrap(group)
+    def permit_group(group)
+      permit gate(:deny_group), Types::Group.wrap(group)
     end
 
     # Public: Adds this feature.
@@ -303,7 +297,7 @@ module Flipper
     def state
       values = gate_values
       boolean = gate(:boolean)
-      non_boolean_gates = gates - [boolean]
+      non_boolean_gates = gates.reject { |gate| gate == boolean || gate.deny? }
 
       if values.boolean || values.percentage_of_time == 100
         :on
@@ -397,18 +391,18 @@ module Flipper
       gate_values.percentage_of_time
     end
 
-    # Public: Get the adapter value for the block actors gate.
+    # Public: Get the adapter value for the deny actors gate.
     #
     # Returns Set of String flipper_id's.
-    def block_actors_value
-      gate_values.block_actors
+    def deny_actors_value
+      gate_values.deny_actors
     end
 
-    # Public: Get the adapter value for the block groups gate.
+    # Public: Get the adapter value for the deny groups gate.
     #
     # Returns Set of String group names.
-    def block_groups_value
-      gate_values.block_groups
+    def deny_groups_value
+      gate_values.deny_groups
     end
 
     # Public: Get the gates that have been enabled for the feature.
@@ -476,8 +470,8 @@ module Flipper
         percentage_of_actors: Gates::PercentageOfActors.new,
         percentage_of_time: Gates::PercentageOfTime.new,
         group: Gates::Group.new,
-        block_actor: Gates::BlockActor.new,
-        block_group: Gates::BlockGroup.new,
+        deny_actor: Gates::DenyActor.new,
+        deny_group: Gates::DenyGroup.new,
       }.freeze
     end
 
@@ -500,8 +494,8 @@ module Flipper
 
     private
 
-    def block(gate, thing)
-      instrument(:block) do |payload|
+    def deny(gate, thing)
+      instrument(:deny) do |payload|
         adapter.add self
         payload[:gate_name] = gate.name
         payload[:thing] = thing
@@ -509,32 +503,12 @@ module Flipper
       end
     end
 
-    def unblock(gate, thing)
-      instrument(:unblock) do |payload|
+    def permit(gate, thing)
+      instrument(:permit) do |payload|
         adapter.add self
         payload[:gate_name] = gate.name
         payload[:thing] = thing
         adapter.disable self, gate, thing
-      end
-    end
-
-    def preserve_block_values
-      values = gate_values
-      block_actors = values.block_actors
-      block_groups = values.block_groups
-      return if block_actors.empty? && block_groups.empty?
-      { block_actors: block_actors, block_groups: block_groups }
-    end
-
-    def restore_block_values(saved)
-      block_actor_gate = gate(:block_actor)
-      saved[:block_actors].each do |flipper_id|
-        adapter.enable self, block_actor_gate, Types::Actor.wrap(Flipper::Actor.new(flipper_id))
-      end
-
-      block_group_gate = gate(:block_group)
-      saved[:block_groups].each do |group_name|
-        adapter.enable self, block_group_gate, Types::Group.wrap(group_name)
       end
     end
 

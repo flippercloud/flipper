@@ -54,7 +54,7 @@ module Flipper
       def enable(feature, gate, thing)
         case gate.data_type
         when :boolean
-          clear(feature)
+          clear_allow_gates(feature)
           result = get(feature)
           result[gate.key] = thing.value.to_s
           moneta[key(feature.key)] = result
@@ -84,7 +84,7 @@ module Flipper
       def disable(feature, gate, thing)
         case gate.data_type
         when :boolean
-          clear(feature)
+          clear_allow_gates(feature)
         when :integer
           result = get(feature)
           result[gate.key] = thing.value.to_s
@@ -102,6 +102,13 @@ module Flipper
       end
 
       private
+
+      def clear_allow_gates(feature)
+        existing = get(feature)
+        preserved = {}
+        deny_gate_keys.each { |k| preserved[k] = existing[k] }
+        moneta[key(feature.key)] = default_config.merge(preserved)
+      end
 
       def key(feature_key)
         "#{FEATURES_KEY}/#{feature_key}"

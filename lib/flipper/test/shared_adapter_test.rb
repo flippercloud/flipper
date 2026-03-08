@@ -11,8 +11,8 @@ module Flipper
         @actor_gate = @feature.gate(:actor)
         @actors_gate = @feature.gate(:percentage_of_actors)
         @time_gate = @feature.gate(:percentage_of_time)
-        @block_actor_gate = @feature.gate(:block_actor)
-        @block_group_gate = @feature.gate(:block_group)
+        @deny_actor_gate = @feature.gate(:deny_actor)
+        @deny_group_gate = @feature.gate(:deny_group)
 
         Flipper.register(:admins) do |actor|
           actor.respond_to?(:admin?) && actor.admin?
@@ -331,63 +331,63 @@ module Flipper
         assert_equal @adapter.default_config.merge(boolean: "true"), @adapter.get(@feature)
       end
 
-      def test_can_enable_disable_and_get_value_for_block_actor_gate
+      def test_can_enable_disable_and_get_value_for_deny_actor_gate
         actor22 = Flipper::Actor.new('22')
         actor_asdf = Flipper::Actor.new('asdf')
 
-        assert_equal true, @adapter.enable(@feature, @block_actor_gate, Flipper::Types::Actor.new(actor22))
-        assert_equal true, @adapter.enable(@feature, @block_actor_gate, Flipper::Types::Actor.new(actor_asdf))
+        assert_equal true, @adapter.enable(@feature, @deny_actor_gate, Flipper::Types::Actor.new(actor22))
+        assert_equal true, @adapter.enable(@feature, @deny_actor_gate, Flipper::Types::Actor.new(actor_asdf))
 
         result = @adapter.get(@feature)
-        assert_equal Set['22', 'asdf'], result[:block_actors]
+        assert_equal Set['22', 'asdf'], result[:deny_actors]
 
-        assert_equal true, @adapter.disable(@feature, @block_actor_gate, Flipper::Types::Actor.new(actor_asdf))
+        assert_equal true, @adapter.disable(@feature, @deny_actor_gate, Flipper::Types::Actor.new(actor_asdf))
         result = @adapter.get(@feature)
-        assert_equal Set['22'], result[:block_actors]
+        assert_equal Set['22'], result[:deny_actors]
 
-        assert_equal true, @adapter.disable(@feature, @block_actor_gate, Flipper::Types::Actor.new(actor22))
+        assert_equal true, @adapter.disable(@feature, @deny_actor_gate, Flipper::Types::Actor.new(actor22))
         result = @adapter.get(@feature)
-        assert_equal Set.new, result[:block_actors]
+        assert_equal Set.new, result[:deny_actors]
       end
 
-      def test_can_enable_disable_and_get_value_for_block_group_gate
-        assert_equal true, @adapter.enable(@feature, @block_group_gate, @flipper.group(:admins))
-        assert_equal true, @adapter.enable(@feature, @block_group_gate, @flipper.group(:early_access))
+      def test_can_enable_disable_and_get_value_for_deny_group_gate
+        assert_equal true, @adapter.enable(@feature, @deny_group_gate, @flipper.group(:admins))
+        assert_equal true, @adapter.enable(@feature, @deny_group_gate, @flipper.group(:early_access))
 
         result = @adapter.get(@feature)
-        assert_equal Set['admins', 'early_access'], result[:block_groups]
+        assert_equal Set['admins', 'early_access'], result[:deny_groups]
 
-        assert_equal true, @adapter.disable(@feature, @block_group_gate, @flipper.group(:early_access))
+        assert_equal true, @adapter.disable(@feature, @deny_group_gate, @flipper.group(:early_access))
         result = @adapter.get(@feature)
-        assert_equal Set['admins'], result[:block_groups]
+        assert_equal Set['admins'], result[:deny_groups]
 
-        assert_equal true, @adapter.disable(@feature, @block_group_gate, @flipper.group(:admins))
+        assert_equal true, @adapter.disable(@feature, @deny_group_gate, @flipper.group(:admins))
         result = @adapter.get(@feature)
-        assert_equal Set.new, result[:block_groups]
+        assert_equal Set.new, result[:deny_groups]
       end
 
-      def test_preserves_block_actors_and_groups_when_feature_is_enabled
+      def test_preserves_deny_actors_and_groups_when_feature_is_enabled
         actor = Flipper::Actor.new('blocked_user')
-        @feature.block_actor(actor)
-        @feature.block_group(:admins)
+        @feature.deny_actor(actor)
+        @feature.deny_group(:admins)
 
         @feature.enable
 
-        assert_equal Set['blocked_user'], @feature.block_actors_value
-        assert_equal Set['admins'], @feature.block_groups_value
+        assert_equal Set['blocked_user'], @feature.deny_actors_value
+        assert_equal Set['admins'], @feature.deny_groups_value
         refute @feature.enabled?(actor)
       end
 
-      def test_preserves_block_actors_and_groups_when_feature_is_disabled
+      def test_preserves_deny_actors_and_groups_when_feature_is_disabled
         actor = Flipper::Actor.new('blocked_user')
         @feature.enable_actor(actor)
-        @feature.block_actor(actor)
-        @feature.block_group(:admins)
+        @feature.deny_actor(actor)
+        @feature.deny_group(:admins)
 
         @feature.disable
 
-        assert_equal Set['blocked_user'], @feature.block_actors_value
-        assert_equal Set['admins'], @feature.block_groups_value
+        assert_equal Set['blocked_user'], @feature.deny_actors_value
+        assert_equal Set['admins'], @feature.deny_groups_value
       end
 
       def test_can_import_and_export
