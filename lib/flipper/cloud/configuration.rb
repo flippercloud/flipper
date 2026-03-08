@@ -1,7 +1,7 @@
 require "logger"
 require "socket"
 require "flipper/adapters/http"
-require "flipper/adapters/poll"
+require "flipper/adapters/cloud_poll"
 require "flipper/poller"
 require "flipper/adapters/dual_write"
 require "flipper/adapters/sync/synchronizer"
@@ -154,7 +154,7 @@ module Flipper
       end
 
       def poll_adapter
-        Flipper::Adapters::Poll.new(poller, local_adapter)
+        Flipper::Adapters::CloudPoll.new(poller, local_adapter)
       end
 
       def http_adapter
