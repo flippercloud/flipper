@@ -19,7 +19,7 @@ module Flipper
       def initialize(poller, adapter)
         @adapter = adapter
         @poller = poller
-        @last_synced_at = 0
+        @last_synced_at = Concurrent::AtomicReference.new(0.0)
 
         # If the adapter is empty, we need to sync before starting the poller.
         # Yes, this will block the main thread, but that's better than thinking
@@ -43,9 +43,9 @@ module Flipper
       def synced_adapter
         @poller.start
         poller_last_synced_at = @poller.last_synced_at.value
-        if poller_last_synced_at > @last_synced_at
+        if poller_last_synced_at > @last_synced_at.value
           Flipper::Adapters::Sync::Synchronizer.new(@adapter, @poller.adapter).call
-          @last_synced_at = poller_last_synced_at
+          @last_synced_at.set(poller_last_synced_at)
         end
         @adapter
       end

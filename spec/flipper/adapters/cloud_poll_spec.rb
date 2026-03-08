@@ -28,7 +28,7 @@ RSpec.describe Flipper::Adapters::CloudPoll do
     flipper.import(remote_adapter)
 
     # make a fake poller to verify calls
-    poller = double("Poller", last_synced_at: Concurrent::AtomicFixnum.new(0))
+    poller = double("Poller", last_synced_at: Concurrent::AtomicReference.new(0.0))
     expect(poller).to receive(:start).twice
     expect(poller).not_to receive(:sync)
 

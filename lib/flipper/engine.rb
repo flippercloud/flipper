@@ -82,6 +82,9 @@ module Flipper
       flipper = app.config.flipper
 
       if flipper.memoize == :poll
+        if flipper.preload
+          Rails.logger.info "Flipper: preload is unnecessary with memoize: :poll (all features are already in memory)"
+        end
         app.middleware.use Flipper::Middleware::Sync, {
           env_key: flipper.env_key,
         }

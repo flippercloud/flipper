@@ -1,4 +1,4 @@
-require 'concurrent/atomic/atomic_fixnum'
+require 'concurrent/atomic/atomic_reference'
 require 'flipper/poller'
 
 module Flipper
@@ -46,9 +46,9 @@ module Flipper
           shutdown_automatically: options.fetch(:shutdown_automatically, true),
         }
         @poller = Flipper::Poller.get(key, poller_options)
-        @local = Adapters::Memory.new
+        @local = Adapters::Memory.new(nil, threadsafe: true)
         @remote = source
-        @last_synced_at = Concurrent::AtomicFixnum.new(0)
+        @last_synced_at = Concurrent::AtomicReference.new(0.0)
         @sync_mutex = Mutex.new
 
         # Block the main thread for the initial sync so we don't serve
