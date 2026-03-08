@@ -3,6 +3,7 @@ require 'active_support/cache'
 require 'flipper/adapters/active_support_cache_store'
 require 'flipper/adapters/operation_logger'
 require 'flipper/adapters/actor_limit'
+require 'flipper/adapters/poll'
 require 'flipper/adapters/sync'
 
 RSpec.describe Flipper::Middleware::Memoizer do
@@ -481,6 +482,26 @@ RSpec.describe Flipper::Middleware::Memoizer do
       get '/', {}, 'flipper' => flipper
       expect(logged_cached.count(:get_all)).to be(3)
       expect(logged_memory.count(:get_all)).to be(1)
+    end
+  end
+
+  context 'when adapter is Poll (memoize: :poll)' do
+    let(:flipper) { Flipper.new(adapter, memoize: :poll) }
+
+    it 'skips memoization and delegates to app' do
+      app = lambda { |env| [200, {}, ['OK']] }
+      middleware = described_class.new(app)
+
+      expect(app).to receive(:call).and_call_original
+      status, _, _ = middleware.call('flipper' => flipper)
+      expect(status).to eq(200)
+    end
+
+    it 'does not raise NoMethodError for missing memoize=' do
+      app = lambda { |env| [200, {}, ['OK']] }
+      middleware = described_class.new(app)
+
+      expect { middleware.call('flipper' => flipper) }.not_to raise_error
     end
   end
 

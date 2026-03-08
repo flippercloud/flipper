@@ -19,7 +19,7 @@ module Flipper
     config.before_configuration do
       config.flipper = ActiveSupport::OrderedOptions.new.update(
         env_key: ENV.fetch('FLIPPER_ENV_KEY', 'flipper'),
-        memoize: ENV.fetch('FLIPPER_MEMOIZE', 'true').casecmp('true').zero?,
+        memoize: ENV.fetch('FLIPPER_MEMOIZE', 'true').then { |v| v == 'poll' ? :poll : v.casecmp('true').zero? },
         preload: ENV.fetch('FLIPPER_PRELOAD', 'true').casecmp('true').zero?,
         instrumenter: ENV.fetch('FLIPPER_INSTRUMENTER', 'ActiveSupport::Notifications').constantize,
         log: ENV.fetch('FLIPPER_LOG', 'true').casecmp('true').zero?,
@@ -52,7 +52,10 @@ module Flipper
               instrumenter: app.config.flipper.instrumenter
             )
           else
-            Flipper.new(config.adapter, instrumenter: app.config.flipper.instrumenter)
+            Flipper.new(config.adapter, {
+              instrumenter: app.config.flipper.instrumenter,
+              memoize: app.config.flipper.memoize,
+            })
           end
         end
       end
@@ -78,7 +81,14 @@ module Flipper
     initializer "flipper.memoizer", after: :load_config_initializers do |app|
       flipper = app.config.flipper
 
-      if flipper.memoize
+      if flipper.memoize == :poll
+        if flipper.preload
+          Rails.logger.info "Flipper: preload is unnecessary with memoize: :poll (all features are already in memory)"
+        end
+        app.middleware.use Flipper::Middleware::Sync, {
+          env_key: flipper.env_key,
+        }
+      elsif flipper.memoize
         app.middleware.use Flipper::Middleware::Memoizer, {
           env_key: flipper.env_key,
           preload: flipper.preload,

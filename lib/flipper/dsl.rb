@@ -10,7 +10,19 @@ module Flipper
     # Private: What is being used to instrument all the things.
     attr_reader :instrumenter
 
-    def_delegators :@adapter, :memoize=, :memoizing?, :import, :export, :adapter_stack
+    def_delegators :@adapter, :import, :export, :adapter_stack
+
+    # Public: Set memoization on/off. No-op if adapter doesn't support it
+    # (e.g., when using memoize: :poll).
+    def memoize=(value)
+      @adapter.memoize = value if @adapter.respond_to?(:memoize=)
+    end
+
+    # Public: Are we currently memoizing? Returns false if adapter doesn't
+    # support memoization (e.g., when using memoize: :poll).
+    def memoizing?
+      @adapter.respond_to?(:memoizing?) ? @adapter.memoizing? : false
+    end
 
     # Public: Returns a new instance of the DSL.
     #
@@ -21,8 +33,19 @@ module Flipper
     def initialize(adapter, options = {})
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
       memoize = options.fetch(:memoize, true)
-      adapter = Adapters::Memoizable.new(adapter) if memoize
-      @adapter = adapter
+
+      @adapter = if memoize == :poll
+        Adapters::Poll.new(adapter, {
+          key: "flipper_poll_#{object_id}",
+          interval: options.fetch(:poll_interval, 10),
+          instrumenter: @instrumenter,
+        })
+      elsif memoize
+        Adapters::Memoizable.new(adapter)
+      else
+        adapter
+      end
+
       @memoized_features = {}
     end
 
