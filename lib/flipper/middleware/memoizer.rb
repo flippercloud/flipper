@@ -63,9 +63,9 @@ module Flipper
       def memoized_call(request)
         flipper = request.env.fetch(@env_key) { Flipper }
 
-        # If the adapter is not Memoizable (e.g., using memoize: :poll),
+        # If the adapter doesn't support memoization (e.g., using memoize: :poll),
         # skip memoization and just call the app.
-        unless flipper.adapter.is_a?(Flipper::Adapters::Memoizable)
+        unless flipper.adapter.respond_to?(:memoize=)
           return @app.call(request.env)
         end
 

@@ -1,3 +1,4 @@
+require 'concurrent/atomic/atomic_fixnum'
 require 'flipper/poller'
 
 module Flipper
@@ -11,6 +12,8 @@ module Flipper
     # local memory adapter so other processes' writes are picked up.
     class Poll
       include ::Flipper::Adapter
+
+      SYNC_KEY = :flipper_poll_sync_suppressed
 
       # Public: The Poller instance used to sync in the background.
       attr_reader :poller
@@ -32,16 +35,26 @@ module Flipper
       #           :shutdown_automatically - Register at_exit handler (default: true).
       def initialize(source, options = {})
         key = options.fetch(:key, object_id.to_s)
-        @poller = Flipper::Poller.get(key, {
+        poller_options = {
           remote_adapter: source,
           interval: options.fetch(:interval, 10),
           instrumenter: options.fetch(:instrumenter, Instrumenters::Noop),
           start_automatically: options.fetch(:start_automatically, true),
           shutdown_automatically: options.fetch(:shutdown_automatically, true),
-        })
+        }
+        @poller = Flipper::Poller.get(key, poller_options)
         @local = Adapters::Memory.new
         @remote = source
-        @last_synced_at = 0
+        @last_synced_at = Concurrent::AtomicFixnum.new(0)
+
+        # Block the main thread for the initial sync so we don't serve
+        # empty/default values before the first poll completes.
+        begin
+          @poller.sync
+          sync
+        rescue
+          # Rescue to avoid source adapter being down causing processes to crash.
+        end
       end
 
       def adapter_stack
@@ -55,17 +68,18 @@ module Flipper
       # for the duration of the block (useful for per-request sync).
       def sync
         poller_last_synced_at = @poller.last_synced_at.value
-        if poller_last_synced_at > @last_synced_at
+        last = @last_synced_at.value
+        if poller_last_synced_at > last
           @local.import(@poller.adapter)
-          @last_synced_at = poller_last_synced_at
+          @last_synced_at.update { poller_last_synced_at }
         end
 
         if block_given?
           begin
-            @syncing = false
+            Thread.current[SYNC_KEY] = true
             yield
           ensure
-            @syncing = true
+            Thread.current[SYNC_KEY] = false
           end
         end
       end
@@ -121,7 +135,7 @@ module Flipper
       private
 
       def maybe_sync
-        sync if @syncing != false
+        sync unless Thread.current[SYNC_KEY]
       end
     end
   end
