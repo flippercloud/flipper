@@ -75,7 +75,7 @@
               <div class="col col-me-auto ps-md-5">
                 <h6 class="m-0">
                   <% if Flipper::UI::Util.present?(@feature.actor_names[item]) %>
-                    <%== Sanitize.fragment("#{@feature.actor_names[item]} (#{item})", Sanitize::Config::BASIC) %>
+                    <%== Sanitize.fragment("#{@feature.actor_names[item]}", Sanitize::Config::BASIC) %>
                   <% else %>
                     <%= item %>
                   <% end %>
