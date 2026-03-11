@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="<%= script_name %>/css/application.css">
   </head>
   <body class="py-4">
-    <div class="container mw-600">
+    <div class="container">
       <%- unless Flipper::UI.configuration.banner_text.nil? -%>
         <div class="alert alert-<%= Flipper::UI.configuration.banner_class %> text-center fw-bold">
           <%== Sanitize.fragment(Flipper::UI.configuration.banner_text, Sanitize::Config::BASIC) %>
