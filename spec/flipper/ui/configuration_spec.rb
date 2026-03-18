@@ -73,6 +73,17 @@ RSpec.describe Flipper::UI::Configuration do
     end
   end
 
+  describe "#version_check_enabled" do
+    it "has default value" do
+      expect(configuration.version_check_enabled).to eq(true)
+    end
+
+    it "can be updated" do
+      configuration.version_check_enabled = false
+      expect(configuration.version_check_enabled).to eq(false)
+    end
+  end
+
   describe "#feature_removal_enabled" do
     it "has default value" do
       expect(configuration.feature_removal_enabled).to eq(true)
