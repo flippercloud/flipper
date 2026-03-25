@@ -65,7 +65,7 @@ module Flipper
         path += "&_cb=#{Time.now.to_i}" if cache_bust
         etag = @get_all_mutex.synchronize { @last_get_all_etag }
 
-        if etag
+        if etag && !cache_bust
           options[:headers] = { if_none_match: etag }
         end
 

@@ -278,6 +278,95 @@ RSpec.describe Flipper::Adapters::Http do
       }.to raise_error(Flipper::Adapters::Http::Error)
     end
 
+    it "skips If-None-Match header when cache_bust is true" do
+      features_response = {
+        "features" => [
+          {
+            "key" => "search",
+            "gates" => [
+              {"key" => "boolean", "value" => true}
+            ]
+          }
+        ]
+      }
+
+      # First request - populate the ETag cache
+      stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
+        .to_return(
+          status: 200,
+          body: JSON.generate(features_response),
+          headers: { 'ETag' => '"abc123"' }
+        )
+
+      adapter = described_class.new(url: 'http://app.com/flipper')
+      adapter.get_all
+
+      # Second request with cache_bust - should NOT send If-None-Match
+      cache_bust_stub = stub_request(:get, %r{/flipper/features\?_cb=\d+&exclude_gate_names=true})
+        .to_return(
+          status: 200,
+          body: JSON.generate(features_response),
+          headers: { 'ETag' => '"def456"' }
+        )
+
+      adapter.get_all(cache_bust: true)
+
+      expect(cache_bust_stub).to have_been_requested.once
+      expect(
+        a_request(:get, %r{/flipper/features\?_cb=\d+&exclude_gate_names=true})
+        .with { |req| req.headers['If-None-Match'].nil? }
+      ).to have_been_made.once
+    end
+
+    it "returns fresh data on cache_bust even when ETag is cached" do
+      stale_response = {
+        "features" => [
+          {
+            "key" => "search",
+            "gates" => [
+              {"key" => "boolean", "value" => nil}
+            ]
+          }
+        ]
+      }
+
+      fresh_response = {
+        "features" => [
+          {
+            "key" => "search",
+            "gates" => [
+              {"key" => "boolean", "value" => true}
+            ]
+          }
+        ]
+      }
+
+      # First request - populate ETag cache with feature disabled
+      stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
+        .to_return(
+          status: 200,
+          body: JSON.generate(stale_response),
+          headers: { 'ETag' => '"abc123"' }
+        )
+
+      adapter = described_class.new(url: 'http://app.com/flipper')
+      stale_result = adapter.get_all
+
+      expect(stale_result["search"][:boolean]).to be_nil
+
+      # Cache bust request returns fresh data (feature now enabled)
+      stub_request(:get, %r{/flipper/features\?_cb=\d+&exclude_gate_names=true})
+        .to_return(
+          status: 200,
+          body: JSON.generate(fresh_response),
+          headers: { 'ETag' => '"def456"' }
+        )
+
+      fresh_result = adapter.get_all(cache_bust: true)
+
+      expect(fresh_result["search"][:boolean]).to eq("true")
+    end
+
     it "does not send If-None-Match for other endpoints" do
       stub_request(:get, "http://app.com/flipper/features/search")
         .to_return(status: 404)
