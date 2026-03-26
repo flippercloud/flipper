@@ -45,6 +45,11 @@ module Flipper
       # false and it will go away. Defaults to true.
       attr_accessor :cloud_recommendation
 
+      # Public: Set to false to disable the version check that fetches the
+      # latest release from flippercloud.io. Useful when a strict Content
+      # Security Policy is in place. Defaults to true.
+      attr_accessor :version_check_enabled
+
       # Public: What should show up in the form to add actors. This can be
       # different per application since flipper_id's can be whatever an
       # application needs. Defaults to "a flipper id".
@@ -114,6 +119,7 @@ module Flipper
         @feature_removal_enabled = true
         @fun = true
         @cloud_recommendation = true
+        @version_check_enabled = true
         @add_actor_placeholder = "a flipper id"
         @descriptions_source = DEFAULT_DESCRIPTIONS_SOURCE
         @actor_names_source = DEFAULT_ACTOR_NAMES_SOURCE
