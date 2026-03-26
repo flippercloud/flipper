@@ -37,5 +37,26 @@ RSpec.describe Flipper::UI::Actions::Import do
       expect(last_response.status).to be(302)
       expect(last_response.headers['location']).to eq('/features')
     end
+
+    context "when in read only mode" do
+      before do
+        allow(flipper).to receive(:read_only?) { true }
+
+        post '/settings/import',
+          {
+            'authenticity_token' => token,
+            'file' => Rack::Test::UploadedFile.new(path, "application/json"),
+          },
+          'rack.session' => session
+      end
+
+      it 'returns 403' do
+        expect(last_response.status).to be(403)
+      end
+
+      it 'renders read only template' do
+        expect(last_response.body).to include('read only')
+      end
+    end
   end
 end

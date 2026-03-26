@@ -2,6 +2,7 @@
   <div class="alert alert-danger"><%= params["error"] %></div>
 <% end %>
 
+<% if write_allowed? %>
 <div class="card mb-4">
   <div class="card-header">
     <h4 class="m-0">Migrate to Flipper Cloud</h4>
@@ -24,6 +25,7 @@
     </form>
   </div>
 </div>
+<% end %>
 
 <div class="card mb-4 ">
   <div class="card-header">
@@ -38,6 +40,7 @@
   </div>
 </div>
 
+<% if write_allowed? %>
 <div class="card">
   <div class="card-header">
     <h4 class="m-0">Import</h4>
@@ -51,3 +54,4 @@
     </form>
   </div>
 </div>
+<% end %>

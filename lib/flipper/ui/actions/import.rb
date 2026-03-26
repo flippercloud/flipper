@@ -8,6 +8,7 @@ module Flipper
         route %r{\A/settings\/import/?\Z}
 
         def post
+          render_read_only if read_only?
           contents = params['file'][:tempfile].read
           export = Flipper::Exporters::Json::Export.new(contents: contents)
           flipper.import(export)
