@@ -11,11 +11,12 @@ RSpec.describe Flipper::UI::Actions::Import do
     { :csrf => token, 'csrf' => token, '_csrf_token' => token }
   end
 
+  let(:path) { FlipperRoot.join("spec", "fixtures", "flipper_pstore_1679087600.json") }
+
   describe "POST /settings/import" do
     before do
       flipper.enable :plausible
       flipper.disable :google_analytics
-      path = FlipperRoot.join("spec", "fixtures", "flipper_pstore_1679087600.json")
 
       post '/settings/import',
         {
@@ -36,6 +37,27 @@ RSpec.describe Flipper::UI::Actions::Import do
     it 'responds with redirect to settings' do
       expect(last_response.status).to be(302)
       expect(last_response.headers['location']).to eq('/features')
+    end
+
+    context "when in read only mode" do
+      before do
+        allow(flipper).to receive(:read_only?) { true }
+
+        post '/settings/import',
+          {
+            'authenticity_token' => token,
+            'file' => Rack::Test::UploadedFile.new(path, "application/json"),
+          },
+          'rack.session' => session
+      end
+
+      it 'returns 403' do
+        expect(last_response.status).to be(403)
+      end
+
+      it 'renders read only template' do
+        expect(last_response.body).to include('read only')
+      end
     end
   end
 end

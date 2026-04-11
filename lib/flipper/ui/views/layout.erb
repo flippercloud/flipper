@@ -18,8 +18,10 @@
       <%- end -%>
 
       <div class="text-muted small text-end">
-        <a href="#" class="badge text-bg-warning ms-2 d-none" style="font-size:100%" id="new-version-badge" data-version="<%= Flipper::VERSION %>">
-        </a>
+        <% if Flipper::UI.configuration.version_check_enabled %>
+          <a href="#" class="badge text-bg-warning ms-2 d-none" style="font-size:100%" id="new-version-badge" data-version="<%= Flipper::VERSION %>">
+          </a>
+        <% end %>
 
         <% if Flipper.deprecated_ruby_version? %>
           <a href="https://github.com/flippercloud/flipper/pull/776" class="badge text-bg-danger ms-2" style="font-size:100%">
@@ -83,6 +85,8 @@
     <script src="<%= script_name + popper_js[:src] %>" integrity="<%= popper_js[:hash] %>" crossorigin="anonymous"></script>
     <script src="<%= script_name + bootstrap_js[:src] %>" integrity="<%= bootstrap_js[:hash] %>" crossorigin="anonymous"></script>
     <script src="<%= script_name %>/js/application.js?v=<%= Flipper::VERSION %>"></script>
-    <script src="<%= script_name %>/js/version.js?v=<%= Flipper::VERSION %>"></script>
+    <% if Flipper::UI.configuration.version_check_enabled %>
+      <script src="<%= script_name %>/js/version.js?v=<%= Flipper::VERSION %>"></script>
+    <% end %>
   </body>
 </html>
