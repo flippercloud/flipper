@@ -92,7 +92,7 @@ module Flipper
         feature_key = key_for(feature.key)
         case gate.data_type
         when :boolean
-          clear_allow_gates(feature)
+          clear_permit_gates(feature)
           with_connection { |conn| conn.hset feature_key, gate.key, thing.value.to_s }
         when :integer
           with_connection { |conn| conn.hset feature_key, gate.key, thing.value.to_s }
@@ -118,7 +118,7 @@ module Flipper
         feature_key = key_for(feature.key)
         case gate.data_type
         when :boolean
-          clear_allow_gates(feature)
+          clear_permit_gates(feature)
         when :integer
           with_connection { |conn| conn.hset feature_key, gate.key, thing.value.to_s }
         when :set
@@ -134,7 +134,7 @@ module Flipper
 
       private
 
-      def clear_allow_gates(feature)
+      def clear_permit_gates(feature)
         feature_key = key_for(feature.key)
         with_connection do |conn|
           all_fields = conn.hkeys(feature_key)

@@ -66,7 +66,7 @@ module Flipper
       def enable(feature, gate, thing)
         case gate.data_type
         when :boolean
-          clear_allow_gates(feature)
+          clear_permit_gates(feature)
           update feature.key, '$set' => {
             gate.key.to_s => thing.value.to_s,
           }
@@ -99,7 +99,7 @@ module Flipper
       def disable(feature, gate, thing)
         case gate.data_type
         when :boolean
-          clear_allow_gates(feature)
+          clear_permit_gates(feature)
         when :integer
           update feature.key, '$set' => {
             gate.key.to_s => thing.value.to_s,
@@ -121,7 +121,7 @@ module Flipper
 
       private
 
-      def clear_allow_gates(feature)
+      def clear_permit_gates(feature)
         doc = find(feature.key)
         return if doc.empty?
 
