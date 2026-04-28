@@ -175,6 +175,69 @@ RSpec.describe Flipper::Adapters::Http do
     end
   end
 
+  describe "#read_integer" do
+    it "returns nil before any get_all has happened" do
+      adapter = described_class.new(url: 'http://app.com/flipper')
+      expect(adapter.read_integer(:sync_version)).to be_nil
+    end
+
+    it "returns the version parsed from the most recent get_all response" do
+      features_response = {
+        "version" => 12345,
+        "features" => [],
+      }
+      stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
+        .to_return(status: 200, body: JSON.generate(features_response))
+
+      adapter = described_class.new(url: 'http://app.com/flipper')
+      adapter.get_all
+      expect(adapter.read_integer(:sync_version)).to eq(12345)
+    end
+
+    it "returns nil when the server response omits version (older server)" do
+      features_response = { "features" => [] }
+      stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
+        .to_return(status: 200, body: JSON.generate(features_response))
+
+      adapter = described_class.new(url: 'http://app.com/flipper')
+      adapter.get_all
+      expect(adapter.read_integer(:sync_version)).to be_nil
+    end
+
+    it "preserves the parsed version across 304 Not Modified responses" do
+      features_response = {
+        "version" => 12345,
+        "features" => [],
+      }
+
+      stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
+        .to_return(status: 200, body: JSON.generate(features_response), headers: { 'ETag' => '"abc"' })
+
+      adapter = described_class.new(url: 'http://app.com/flipper')
+      adapter.get_all
+      expect(adapter.read_integer(:sync_version)).to eq(12345)
+
+      stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
+        .with(headers: { 'If-None-Match' => '"abc"' })
+        .to_return(status: 304, headers: { 'ETag' => '"abc"' })
+
+      adapter.get_all
+      expect(adapter.read_integer(:sync_version)).to eq(12345)
+    end
+
+    it "returns nil for keys other than :sync_version" do
+      adapter = described_class.new(url: 'http://app.com/flipper')
+      expect(adapter.read_integer(:other_key)).to be_nil
+    end
+  end
+
+  describe "#set_integer_if_greater" do
+    it "returns false (writes never go server-side via this method)" do
+      adapter = described_class.new(url: 'http://app.com/flipper')
+      expect(adapter.set_integer_if_greater(:sync_version, 100)).to eq(false)
+    end
+  end
+
   describe "#get_all" do
     it "raises error when not successful response" do
       stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")

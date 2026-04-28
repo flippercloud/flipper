@@ -259,4 +259,55 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
       end
     end
   end
+
+  describe 'response_extensions' do
+    around do |example|
+      original = described_class.instance_variable_get(:@response_extensions)
+      described_class.instance_variable_set(:@response_extensions, [])
+      example.run
+      described_class.instance_variable_set(:@response_extensions, original)
+    end
+
+    it 'merges hashes returned by registered procs into the response' do
+      described_class.response_extensions << ->(action) { { version: 12345 } }
+
+      get '/features'
+
+      expect(last_response.status).to eq(200)
+      expect(json_response.fetch('version')).to eq(12345)
+      expect(json_response).to have_key('features')
+    end
+
+    it 'composes multiple extensions in registration order' do
+      described_class.response_extensions << ->(action) { { a: 1, b: 1 } }
+      described_class.response_extensions << ->(action) { { b: 2, c: 3 } }
+
+      get '/features'
+
+      expect(json_response.fetch('a')).to eq(1)
+      expect(json_response.fetch('b')).to eq(2)
+      expect(json_response.fetch('c')).to eq(3)
+    end
+
+    it 'passes the action instance so extensions can read request, params, and flipper' do
+      captured = nil
+      described_class.response_extensions << ->(action) {
+        captured = action
+        {}
+      }
+
+      get '/features'
+
+      expect(captured).to be_a(described_class)
+      expect(captured.request).to respond_to(:params)
+      expect(captured.flipper).to respond_to(:features)
+    end
+
+    it 'is a no-op when no extensions are registered' do
+      get '/features'
+
+      expect(last_response.status).to eq(200)
+      expect(json_response.keys).to eq(['features'])
+    end
+  end
 end

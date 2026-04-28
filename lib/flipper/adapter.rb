@@ -28,6 +28,21 @@ module Flipper
       false
     end
 
+    # Public: Read a named integer value from the adapter, or nil if absent.
+    # Adapters that support typed integer storage override this; the default
+    # is a no-op so unaware adapters degrade to today's behavior.
+    def read_integer(key)
+      nil
+    end
+
+    # Public: Atomically set a named integer to value if and only if the new
+    # value is strictly greater than the currently stored value. Returns true
+    # if the write happened, false if rejected or unsupported. Adapters that
+    # support typed integer storage override this.
+    def set_integer_if_greater(key, value)
+      false
+    end
+
     # Public: Get all features and gate values in one call. Defaults to one call
     # to features and another to get_multi. Feel free to override per adapter to
     # make this more efficient.

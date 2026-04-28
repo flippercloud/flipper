@@ -13,6 +13,53 @@ RSpec.describe Flipper::Adapters::Memory do
     it_should_behave_like 'a flipper adapter'
   end
 
+  describe 'read_integer / set_integer_if_greater' do
+    subject { described_class.new }
+
+    it 'returns nil for unknown keys' do
+      expect(subject.read_integer(:sync_version)).to be_nil
+    end
+
+    it 'sets a new value when none exists' do
+      expect(subject.set_integer_if_greater(:sync_version, 100)).to eq(true)
+      expect(subject.read_integer(:sync_version)).to eq(100)
+    end
+
+    it 'rejects a lower value' do
+      subject.set_integer_if_greater(:sync_version, 100)
+      expect(subject.set_integer_if_greater(:sync_version, 99)).to eq(false)
+      expect(subject.read_integer(:sync_version)).to eq(100)
+    end
+
+    it 'rejects an equal value' do
+      subject.set_integer_if_greater(:sync_version, 100)
+      expect(subject.set_integer_if_greater(:sync_version, 100)).to eq(false)
+      expect(subject.read_integer(:sync_version)).to eq(100)
+    end
+
+    it 'accepts a strictly greater value' do
+      subject.set_integer_if_greater(:sync_version, 100)
+      expect(subject.set_integer_if_greater(:sync_version, 200)).to eq(true)
+      expect(subject.read_integer(:sync_version)).to eq(200)
+    end
+
+    it 'tracks separate keys independently' do
+      subject.set_integer_if_greater(:foo, 100)
+      subject.set_integer_if_greater(:bar, 50)
+      expect(subject.read_integer(:foo)).to eq(100)
+      expect(subject.read_integer(:bar)).to eq(50)
+    end
+
+    it 'is isolated from get_all and clear' do
+      flipper = Flipper.new(subject)
+      flipper.enable(:my_feature)
+      subject.set_integer_if_greater(:sync_version, 100)
+
+      flipper[:my_feature].clear
+      expect(subject.read_integer(:sync_version)).to eq(100)
+    end
+  end
+
   it "can initialize from big hash" do
     flipper = Flipper.new(subject)
     flipper.enable :subscriptions

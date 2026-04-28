@@ -11,6 +11,7 @@ module Flipper
       # Public
       def initialize(source = nil, threadsafe: true)
         @source = Typecast.features_hash(source)
+        @integers = {}
         @lock = Mutex.new if threadsafe
         reset
       end
@@ -118,6 +119,23 @@ module Flipper
         get_all = Typecast.features_hash(adapter.get_all)
         synchronize { @source.replace(get_all) }
         true
+      end
+
+      def read_integer(key)
+        synchronize { @integers[key.to_s] }
+      end
+
+      def set_integer_if_greater(key, value)
+        value = value.to_i
+        synchronize do
+          current = @integers[key.to_s]
+          if current.nil? || value > current
+            @integers[key.to_s] = value
+            true
+          else
+            false
+          end
+        end
       end
 
       private

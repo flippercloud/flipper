@@ -78,6 +78,58 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
           flipper.preload([:foo])
         end
 
+        describe 'read_integer / set_integer_if_greater' do
+          it 'returns nil for unknown keys' do
+            expect(subject.read_integer(:sync_version)).to be_nil
+          end
+
+          it 'sets a new value when none exists' do
+            expect(subject.set_integer_if_greater(:sync_version, 100)).to eq(true)
+            expect(subject.read_integer(:sync_version)).to eq(100)
+          end
+
+          it 'rejects a lower value' do
+            subject.set_integer_if_greater(:sync_version, 100)
+            expect(subject.set_integer_if_greater(:sync_version, 99)).to eq(false)
+            expect(subject.read_integer(:sync_version)).to eq(100)
+          end
+
+          it 'rejects an equal value' do
+            subject.set_integer_if_greater(:sync_version, 100)
+            expect(subject.set_integer_if_greater(:sync_version, 100)).to eq(false)
+            expect(subject.read_integer(:sync_version)).to eq(100)
+          end
+
+          it 'accepts a strictly greater value' do
+            subject.set_integer_if_greater(:sync_version, 100)
+            expect(subject.set_integer_if_greater(:sync_version, 200)).to eq(true)
+            expect(subject.read_integer(:sync_version)).to eq(200)
+          end
+
+          it 'tracks separate keys independently' do
+            subject.set_integer_if_greater(:foo, 100)
+            subject.set_integer_if_greater(:bar, 50)
+            expect(subject.read_integer(:foo)).to eq(100)
+            expect(subject.read_integer(:bar)).to eq(50)
+          end
+
+          context 'when flipper_kv_integers table is missing' do
+            before do
+              silence { ActiveRecord::Base.connection.drop_table(:flipper_kv_integers) }
+            end
+
+            it 'read_integer returns nil' do
+              fresh = described_class.new
+              expect(fresh.read_integer(:sync_version)).to be_nil
+            end
+
+            it 'set_integer_if_greater returns false' do
+              fresh = described_class.new
+              expect(fresh.set_integer_if_greater(:sync_version, 100)).to eq(false)
+            end
+          end
+        end
+
         it 'should not poison wrapping transactions' do
           flipper = Flipper.new(subject)
 

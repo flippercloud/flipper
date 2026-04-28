@@ -11,12 +11,25 @@ module Flipper
 
       attr_reader :key_prefix
 
+      SET_INTEGER_IF_GREATER_LUA = <<~LUA.freeze
+        local current = redis.call('GET', KEYS[1])
+        if current == false or tonumber(ARGV[1]) > tonumber(current) then
+          redis.call('SET', KEYS[1], ARGV[1])
+          return 1
+        end
+        return 0
+      LUA
+
       def features_key
         "#{key_prefix}flipper_features"
       end
 
       def key_for(feature_name)
         "#{key_prefix}#{feature_name}"
+      end
+
+      def integer_key_for(key)
+        "#{key_prefix}flipper_int:#{key}"
       end
 
       # Public: Initializes a Redis flipper adapter.
@@ -130,6 +143,17 @@ module Flipper
         end
 
         true
+      end
+
+      def read_integer(key)
+        value = with_connection { |conn| conn.get(integer_key_for(key)) }
+        value && value.to_i
+      end
+
+      def set_integer_if_greater(key, value)
+        with_connection do |conn|
+          conn.public_send(:eval, SET_INTEGER_IF_GREATER_LUA, keys: [integer_key_for(key)], argv: [value.to_i]) == 1
+        end
       end
 
       private

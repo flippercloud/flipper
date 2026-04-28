@@ -10,6 +10,8 @@ module Flipper
       # Public: Given a local and remote adapter, it can update the local to
       # match the remote doing only the necessary enable/disable operations.
       class Synchronizer
+        SYNC_VERSION_KEY = :sync_version
+
         # Public: Initializes a new synchronizer.
         #
         # local - The Flipper adapter to get in sync with the remote.
@@ -42,6 +44,13 @@ module Flipper
           local_get_all = @local.get_all
           remote_get_all = @remote.get_all(cache_bust: @cache_bust)
 
+          remote_version = @remote.read_integer(SYNC_VERSION_KEY)
+          local_version = @local.read_integer(SYNC_VERSION_KEY)
+
+          if remote_version && local_version && remote_version.to_i <= local_version.to_i
+            return
+          end
+
           # Sync all the gate values.
           remote_get_all.each do |feature_key, remote_gates_hash|
             feature = Feature.new(feature_key, @local, instrumenter: @instrumenter)
@@ -59,6 +68,13 @@ module Flipper
           # Remove features that are present in local and missing in remote.
           features_to_remove = local_get_all.keys - remote_get_all.keys
           features_to_remove.each { |key| Feature.new(key, @local, instrumenter: @instrumenter).remove }
+
+          if remote_version
+            accepted = @local.set_integer_if_greater(SYNC_VERSION_KEY, remote_version)
+            unless accepted
+              @instrumenter.instrument("synchronizer_outvoted.flipper", remote_version: remote_version)
+            end
+          end
 
           nil
         rescue => exception

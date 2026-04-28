@@ -51,15 +51,18 @@ class ActiveRecordTest < MiniTest::Test
     Flipper::Adapters::ActiveRecord.send(:remove_const, :Model) if Flipper::Adapters::ActiveRecord.const_defined?(:Model)
     Flipper::Adapters::ActiveRecord.send(:remove_const, :Feature) if Flipper::Adapters::ActiveRecord.const_defined?(:Feature)
     Flipper::Adapters::ActiveRecord.send(:remove_const, :Gate) if Flipper::Adapters::ActiveRecord.const_defined?(:Gate)
+    Flipper::Adapters::ActiveRecord.send(:remove_const, :KvInteger) if Flipper::Adapters::ActiveRecord.const_defined?(:KvInteger)
     Flipper::Adapters.send(:remove_const, :ActiveRecord)
 
     load("flipper/adapters/active_record.rb")
     load("flipper/adapters/active_record/model.rb")
     load("flipper/adapters/active_record/feature.rb")
     load("flipper/adapters/active_record/gate.rb")
+    load("flipper/adapters/active_record/kv_integer.rb")
 
     assert_equal "foo_flipper_features_bar", Flipper::Adapters::ActiveRecord::Feature.table_name
     assert_equal "foo_flipper_gates_bar", Flipper::Adapters::ActiveRecord::Gate.table_name
+    assert_equal "foo_flipper_kv_integers_bar", Flipper::Adapters::ActiveRecord::KvInteger.table_name
 
   ensure
     ActiveRecord::Base.table_name_prefix = ""
@@ -69,11 +72,13 @@ class ActiveRecordTest < MiniTest::Test
     Flipper::Adapters::ActiveRecord.send(:remove_const, :Model) if Flipper::Adapters::ActiveRecord.const_defined?(:Model)
     Flipper::Adapters::ActiveRecord.send(:remove_const, :Feature) if Flipper::Adapters::ActiveRecord.const_defined?(:Feature)
     Flipper::Adapters::ActiveRecord.send(:remove_const, :Gate) if Flipper::Adapters::ActiveRecord.const_defined?(:Gate)
+    Flipper::Adapters::ActiveRecord.send(:remove_const, :KvInteger) if Flipper::Adapters::ActiveRecord.const_defined?(:KvInteger)
     Flipper::Adapters.send(:remove_const, :ActiveRecord)
 
     load("flipper/adapters/active_record.rb")
     load("flipper/adapters/active_record/model.rb")
     load("flipper/adapters/active_record/feature.rb")
     load("flipper/adapters/active_record/gate.rb")
+    load("flipper/adapters/active_record/kv_integer.rb")
   end
 end

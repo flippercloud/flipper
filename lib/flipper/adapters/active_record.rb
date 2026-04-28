@@ -5,6 +5,7 @@ require 'active_record'
 require_relative 'active_record/model'
 require_relative 'active_record/feature'
 require_relative 'active_record/gate'
+require_relative 'active_record/kv_integer'
 
 module Flipper
   module Adapters
@@ -32,6 +33,7 @@ module Flipper
         @name = options.fetch(:name, :active_record)
         @feature_class = options.fetch(:feature_class) { Flipper::Adapters::ActiveRecord::Feature }
         @gate_class = options.fetch(:gate_class) { Flipper::Adapters::ActiveRecord::Gate }
+        @kv_integer_class = options.fetch(:kv_integer_class) { Flipper::Adapters::ActiveRecord::KvInteger }
       end
 
       # Public: The set of known features.
@@ -180,12 +182,51 @@ module Flipper
         true
       end
 
+      def read_integer(key)
+        return nil unless kv_integer_table_present?
+        with_connection(@kv_integer_class) do
+          @kv_integer_class.where(key: key.to_s).pick(:value)
+        end
+      end
+
+      def set_integer_if_greater(key, value)
+        return false unless kv_integer_table_present?
+        value = value.to_i
+        key = key.to_s
+        with_write_connection(@kv_integer_class) do
+          # Two attempts: UPDATE-then-INSERT-on-miss, retry UPDATE once if a
+          # concurrent INSERT raced us. After two passes, stored is >= ours.
+          2.times do
+            updated = @kv_integer_class
+              .where(key: key)
+              .where("value < ?", value)
+              .update_all(value: value, updated_at: Time.current)
+            return true if updated > 0
+
+            begin
+              @kv_integer_class.create!(key: key, value: value)
+              return true
+            rescue ::ActiveRecord::RecordNotUnique
+              # Row exists; either stored >= ours, or someone race-inserted. Loop.
+            end
+          end
+          false
+        end
+      end
+
       # Private
       def unsupported_data_type(data_type)
         raise "#{data_type} is not supported by this adapter"
       end
 
       private
+
+      def kv_integer_table_present?
+        return @kv_integer_table_present if defined?(@kv_integer_table_present)
+        @kv_integer_table_present = with_connection(@kv_integer_class) { @kv_integer_class.table_exists? }
+      rescue ::ActiveRecord::StatementInvalid
+        @kv_integer_table_present = false
+      end
 
       def set(feature, gate, thing, options = {})
         clear_feature = options.fetch(:clear, false)

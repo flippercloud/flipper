@@ -25,6 +25,7 @@ module Flipper
         @last_get_all_etag = nil
         @last_get_all_result = nil
         @last_get_all_response = nil
+        @last_sync_version = nil
         @get_all_mutex = Mutex.new
       end
 
@@ -100,6 +101,7 @@ module Flipper
         @get_all_mutex.synchronize do
           @last_get_all_etag = response['etag'] if response['etag']
           @last_get_all_result = result
+          @last_sync_version = parsed_response['version']
         end
 
         result
@@ -107,6 +109,11 @@ module Flipper
 
       def last_get_all_response
         @get_all_mutex.synchronize { @last_get_all_response }
+      end
+
+      def read_integer(key)
+        return nil unless key.to_sym == :sync_version
+        @get_all_mutex.synchronize { @last_sync_version }
       end
 
       def features

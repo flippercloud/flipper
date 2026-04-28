@@ -14,11 +14,13 @@ RSpec.describe Flipper::Adapters::Sequel do
 
   let(:feature_class) { Flipper::Adapters::Sequel::Feature }
   let(:gate_class) { Flipper::Adapters::Sequel::Gate }
+  let(:kv_integer_class) { Flipper::Adapters::Sequel::KvInteger }
 
   before(:each) do
     CreateFlipperTablesSequel.new(Sequel::Model.db).up
     feature_class.dataset = feature_class.dataset
     gate_class.dataset = gate_class.dataset
+    kv_integer_class.dataset = kv_integer_class.dataset
   end
 
   after(:each) do
@@ -26,6 +28,42 @@ RSpec.describe Flipper::Adapters::Sequel do
   end
 
   it_should_behave_like 'a flipper adapter'
+
+  describe 'read_integer / set_integer_if_greater' do
+    it 'returns nil for unknown keys' do
+      expect(subject.read_integer(:sync_version)).to be_nil
+    end
+
+    it 'sets a new value when none exists' do
+      expect(subject.set_integer_if_greater(:sync_version, 100)).to eq(true)
+      expect(subject.read_integer(:sync_version)).to eq(100)
+    end
+
+    it 'rejects a lower value' do
+      subject.set_integer_if_greater(:sync_version, 100)
+      expect(subject.set_integer_if_greater(:sync_version, 99)).to eq(false)
+      expect(subject.read_integer(:sync_version)).to eq(100)
+    end
+
+    it 'rejects an equal value' do
+      subject.set_integer_if_greater(:sync_version, 100)
+      expect(subject.set_integer_if_greater(:sync_version, 100)).to eq(false)
+      expect(subject.read_integer(:sync_version)).to eq(100)
+    end
+
+    it 'accepts a strictly greater value' do
+      subject.set_integer_if_greater(:sync_version, 100)
+      expect(subject.set_integer_if_greater(:sync_version, 200)).to eq(true)
+      expect(subject.read_integer(:sync_version)).to eq(200)
+    end
+
+    it 'tracks separate keys independently' do
+      subject.set_integer_if_greater(:foo, 100)
+      subject.set_integer_if_greater(:bar, 50)
+      expect(subject.read_integer(:foo)).to eq(100)
+      expect(subject.read_integer(:bar)).to eq(50)
+    end
+  end
 
   context 'requiring "flipper-sequel"' do
     before do

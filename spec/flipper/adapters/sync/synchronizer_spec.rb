@@ -126,6 +126,70 @@ RSpec.describe Flipper::Adapters::Sync::Synchronizer do
     end
   end
 
+  describe 'sync_version gating' do
+    it 'skips sync when remote version is not strictly greater than local version' do
+      local.set_integer_if_greater(:sync_version, 100)
+      allow(remote).to receive(:read_integer).with(:sync_version).and_return(99)
+      remote_flipper.enable(:search)
+
+      subject.call
+
+      expect(local_flipper.features.map(&:key)).to eq([])
+    end
+
+    it 'skips sync when remote version equals local version' do
+      local.set_integer_if_greater(:sync_version, 100)
+      allow(remote).to receive(:read_integer).with(:sync_version).and_return(100)
+      remote_flipper.enable(:search)
+
+      subject.call
+
+      expect(local_flipper.features.map(&:key)).to eq([])
+    end
+
+    it 'syncs and bumps local version when remote version is strictly greater' do
+      local.set_integer_if_greater(:sync_version, 99)
+      allow(remote).to receive(:read_integer).with(:sync_version).and_return(100)
+      remote_flipper.enable(:search)
+
+      subject.call
+
+      expect(local_flipper.features.map(&:key)).to eq(["search"])
+      expect(local.read_integer(:sync_version)).to eq(100)
+    end
+
+    it 'syncs normally when remote returns nil version (older server)' do
+      allow(remote).to receive(:read_integer).with(:sync_version).and_return(nil)
+      remote_flipper.enable(:search)
+
+      subject.call
+
+      expect(local_flipper.features.map(&:key)).to eq(["search"])
+    end
+
+    it 'syncs normally when local has no stored version yet' do
+      allow(remote).to receive(:read_integer).with(:sync_version).and_return(100)
+      remote_flipper.enable(:search)
+
+      subject.call
+
+      expect(local_flipper.features.map(&:key)).to eq(["search"])
+      expect(local.read_integer(:sync_version)).to eq(100)
+    end
+
+    it 'instruments synchronizer_outvoted.flipper when bump_sync_version is rejected' do
+      allow(remote).to receive(:read_integer).with(:sync_version).and_return(100)
+      remote_flipper.enable(:search)
+      allow(local).to receive(:set_integer_if_greater).with(:sync_version, 100).and_return(false)
+
+      subject.call
+
+      events = instrumenter.events_by_name("synchronizer_outvoted.flipper")
+      expect(events.size).to eq(1)
+      expect(events.first.payload[:remote_version]).to eq(100)
+    end
+  end
+
   context 'with ActorLimit adapter wrapping local' do
     let(:limit) { 10 }
     let(:limited_local) { Flipper::Adapters::ActorLimit.new(local, limit) }

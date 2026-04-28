@@ -29,9 +29,17 @@ class FlipperActiveRecordGeneratorTest < Rails::Generators::TestCase
             t.timestamps null: false
           end
           add_index :flipper_gates, [:feature_key, :key, :value], unique: true, length: { value: 255 }
+
+          create_table :flipper_kv_integers do |t|
+            t.string :key, null: false
+            t.bigint :value, null: false, default: 0
+            t.timestamps null: false
+          end
+          add_index :flipper_kv_integers, :key, unique: true
         end
 
         def down
+          drop_table :flipper_kv_integers
           drop_table :flipper_gates
           drop_table :flipper_features
         end

@@ -14,9 +14,18 @@ class CreateFlipperTablesSequel < Sequel::Migration
       DateTime :updated_at, null: false
       primary_key [:feature_key, :key, :value]
     end
+
+    create_table :flipper_kv_integers do
+      primary_key :id
+      String :key, null: false, unique: true
+      Bignum :value, null: false, default: 0
+      DateTime :created_at, null: false
+      DateTime :updated_at, null: false
+    end
   end
 
   def down
+    drop_table :flipper_kv_integers
     drop_table :flipper_gates
     drop_table :flipper_features
   end
