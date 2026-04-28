@@ -63,6 +63,22 @@ RSpec.describe Flipper::Adapters::Sequel do
       expect(subject.read_integer(:foo)).to eq(100)
       expect(subject.read_integer(:bar)).to eq(50)
     end
+
+    it 'recovers from a transient DatabaseError on the table presence check' do
+      fresh = described_class.new(feature_class: feature_class, gate_class: gate_class)
+      kv_class = fresh.instance_variable_get(:@kv_integer_class)
+
+      call_count = 0
+      allow(kv_class.db).to receive(:table_exists?).and_wrap_original do |original, *args|
+        call_count += 1
+        raise ::Sequel::DatabaseError, 'transient blip' if call_count == 1
+        original.call(*args)
+      end
+
+      expect(fresh.read_integer(:sync_version)).to be_nil
+      expect(fresh.set_integer_if_greater(:sync_version, 100)).to eq(true)
+      expect(fresh.read_integer(:sync_version)).to eq(100)
+    end
   end
 
   context 'requiring "flipper-sequel"' do

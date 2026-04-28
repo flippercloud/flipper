@@ -128,6 +128,22 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
               expect(fresh.set_integer_if_greater(:sync_version, 100)).to eq(false)
             end
           end
+
+          it 'recovers from a transient StatementInvalid on the table presence check' do
+            fresh = described_class.new
+            kv_class = fresh.instance_variable_get(:@kv_integer_class)
+
+            call_count = 0
+            allow(kv_class).to receive(:table_exists?).and_wrap_original do |original, *args|
+              call_count += 1
+              raise ::ActiveRecord::StatementInvalid, 'transient blip' if call_count == 1
+              original.call(*args)
+            end
+
+            expect(fresh.read_integer(:sync_version)).to be_nil
+            expect(fresh.set_integer_if_greater(:sync_version, 100)).to eq(true)
+            expect(fresh.read_integer(:sync_version)).to eq(100)
+          end
         end
 
         it 'should not poison wrapping transactions' do

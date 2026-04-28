@@ -225,7 +225,7 @@ module Flipper
         return @kv_integer_table_present if defined?(@kv_integer_table_present)
         @kv_integer_table_present = with_connection(@kv_integer_class) { @kv_integer_class.table_exists? }
       rescue ::ActiveRecord::StatementInvalid
-        @kv_integer_table_present = false
+        false
       end
 
       def set(feature, gate, thing, options = {})

@@ -207,7 +207,7 @@ module Flipper
         return @kv_integer_table_present if defined?(@kv_integer_table_present)
         @kv_integer_table_present = @kv_integer_class.db.table_exists?(@kv_integer_class.table_name)
       rescue ::Sequel::DatabaseError
-        @kv_integer_table_present = false
+        false
       end
 
       def unsupported_data_type(data_type)
