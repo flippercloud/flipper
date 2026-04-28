@@ -262,10 +262,10 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
 
   describe 'response_extensions' do
     around do |example|
-      original = described_class.instance_variable_get(:@response_extensions)
-      described_class.instance_variable_set(:@response_extensions, [])
+      original = described_class.response_extensions.dup
+      described_class.response_extensions.clear
       example.run
-      described_class.instance_variable_set(:@response_extensions, original)
+      described_class.response_extensions.replace(original)
     end
 
     it 'merges hashes returned by registered procs into the response' do
@@ -308,6 +308,22 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
 
       expect(last_response.status).to eq(200)
       expect(json_response.keys).to eq(['features'])
+    end
+
+    it 'does not let extensions overwrite the built-in features key' do
+      flipper[:my_feature].enable
+      described_class.response_extensions << ->(action) { { features: 'clobbered' } }
+
+      get '/features'
+
+      expect(last_response.status).to eq(200)
+      features = json_response.fetch('features')
+      expect(features).to be_an(Array)
+      expect(features.first.fetch('key')).to eq('my_feature')
+    end
+
+    it 'is initialized eagerly at class load time' do
+      expect(described_class.instance_variable_defined?(:@response_extensions)).to be(true)
     end
   end
 end
