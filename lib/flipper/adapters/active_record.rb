@@ -185,7 +185,7 @@ module Flipper
       def read_integer(key)
         return nil unless kv_integer_table_present?
         with_connection(@kv_integer_class) do
-          @kv_integer_class.where(key: key.to_s).pick(:value)
+          @kv_integer_class.where(key: key.to_s).limit(1).pluck(:value).first
         end
       end
 
