@@ -164,4 +164,39 @@ RSpec.describe Flipper::Adapters::Instrumented do
       expect(event.payload[:result]).to be(result)
     end
   end
+
+  describe '#read_integer' do
+    it 'forwards to wrapped adapter and records instrumentation' do
+      adapter.set_integer_if_greater(:sync_version, 42)
+      result = subject.read_integer(:sync_version)
+
+      expect(result).to eq(42)
+
+      event = instrumenter.events.last
+      expect(event).not_to be_nil
+      expect(event.name).to eq('adapter_operation.flipper')
+      expect(event.payload[:operation]).to eq(:read_integer)
+      expect(event.payload[:adapter_name]).to eq(:memory)
+      expect(event.payload[:key]).to eq(:sync_version)
+      expect(event.payload[:result]).to eq(42)
+    end
+  end
+
+  describe '#set_integer_if_greater' do
+    it 'forwards to wrapped adapter and records instrumentation' do
+      result = subject.set_integer_if_greater(:sync_version, 100)
+
+      expect(result).to eq(true)
+      expect(adapter.read_integer(:sync_version)).to eq(100)
+
+      event = instrumenter.events.last
+      expect(event).not_to be_nil
+      expect(event.name).to eq('adapter_operation.flipper')
+      expect(event.payload[:operation]).to eq(:set_integer_if_greater)
+      expect(event.payload[:adapter_name]).to eq(:memory)
+      expect(event.payload[:key]).to eq(:sync_version)
+      expect(event.payload[:value]).to eq(100)
+      expect(event.payload[:result]).to eq(true)
+    end
+  end
 end

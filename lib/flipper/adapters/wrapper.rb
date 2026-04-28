@@ -18,6 +18,8 @@ module Flipper
         :get_all,
         :enable,
         :disable,
+        :read_integer,
+        :set_integer_if_greater,
       ].freeze
 
       attr_reader :adapter

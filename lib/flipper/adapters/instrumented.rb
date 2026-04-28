@@ -165,6 +165,31 @@ module Flipper
           payload[:result] = @adapter.export(format: format, version: version)
         end
       end
+
+      def read_integer(key)
+        default_payload = {
+          operation: :read_integer,
+          adapter_name: @adapter.name,
+          key: key,
+        }
+
+        @instrumenter.instrument(InstrumentationName, default_payload) do |payload|
+          payload[:result] = @adapter.read_integer(key)
+        end
+      end
+
+      def set_integer_if_greater(key, value)
+        default_payload = {
+          operation: :set_integer_if_greater,
+          adapter_name: @adapter.name,
+          key: key,
+          value: value,
+        }
+
+        @instrumenter.instrument(InstrumentationName, default_payload) do |payload|
+          payload[:result] = @adapter.set_integer_if_greater(key, value)
+        end
+      end
     end
   end
 end

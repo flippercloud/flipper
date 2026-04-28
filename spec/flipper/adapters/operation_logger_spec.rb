@@ -125,4 +125,24 @@ RSpec.describe Flipper::Adapters::OperationLogger do
       expect(@result).to eq(adapter.export(format: :json, version: 1))
     end
   end
+
+  describe '#read_integer' do
+    it 'forwards to wrapped adapter and logs operation' do
+      adapter.set_integer_if_greater(:sync_version, 42)
+      result = subject.read_integer(:sync_version)
+
+      expect(result).to eq(42)
+      expect(subject.count(:read_integer)).to be(1)
+    end
+  end
+
+  describe '#set_integer_if_greater' do
+    it 'forwards to wrapped adapter and logs operation' do
+      result = subject.set_integer_if_greater(:sync_version, 100)
+
+      expect(result).to eq(true)
+      expect(adapter.read_integer(:sync_version)).to eq(100)
+      expect(subject.count(:set_integer_if_greater)).to be(1)
+    end
+  end
 end
