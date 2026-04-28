@@ -188,6 +188,15 @@ RSpec.describe Flipper::Adapters::Sync::Synchronizer do
       expect(events.size).to eq(1)
       expect(events.first.payload[:remote_version]).to eq(100)
     end
+
+    it 'skips both get_all calls when versions indicate no sync is needed' do
+      local.set_integer_if_greater(:sync_version, 100)
+      allow(remote).to receive(:read_integer).with(:sync_version).and_return(100)
+      expect(local).not_to receive(:get_all)
+      expect(remote).not_to receive(:get_all)
+
+      subject.call
+    end
   end
 
   context 'with ActorLimit adapter wrapping local' do

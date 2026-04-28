@@ -41,15 +41,15 @@ module Flipper
         private
 
         def sync
-          local_get_all = @local.get_all
-          remote_get_all = @remote.get_all(cache_bust: @cache_bust)
-
           remote_version = @remote.read_integer(SYNC_VERSION_KEY)
           local_version = @local.read_integer(SYNC_VERSION_KEY)
 
           if remote_version && local_version && remote_version.to_i <= local_version.to_i
             return
           end
+
+          local_get_all = @local.get_all
+          remote_get_all = @remote.get_all(cache_bust: @cache_bust)
 
           # Sync all the gate values.
           remote_get_all.each do |feature_key, remote_gates_hash|
