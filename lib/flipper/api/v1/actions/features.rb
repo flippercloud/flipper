@@ -8,25 +8,6 @@ module Flipper
         class Features < Api::Action
           route %r{\A/features/?\Z}
 
-          # Eagerly initialized so multi-threaded boot can't race on lazy `||=`.
-          @response_extensions = []
-
-          # Public: Procs registered here are called per GET request. Each
-          # receives the action instance and should return a Hash; the hashes
-          # are merged into the response body in registration order. Built-in
-          # keys (like :features) always win over extension keys to prevent
-          # accidental clobbering. Use this to add fields like protocol
-          # versions, server capabilities, or feature counts without
-          # subclassing or monkey-patching.
-          #
-          # Example:
-          #   Flipper::Api::V1::Actions::Features.response_extensions << ->(action) {
-          #     { version: action.request.env["x-version"].to_i }
-          #   }
-          def self.response_extensions
-            @response_extensions
-          end
-
           def get
             keys = params['keys']
             exclude_gates = params['exclude_gates']&.downcase == "true"
@@ -54,10 +35,7 @@ module Flipper
               )
             end
 
-            extras = self.class.response_extensions.reduce({}) do |memo, ext|
-              memo.merge(ext.call(self))
-            end
-            json_response(extras.merge(features: decorated_features))
+            json_response(features: decorated_features)
           end
 
           def post

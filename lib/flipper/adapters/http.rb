@@ -98,10 +98,11 @@ module Flipper
           result[feature.key] = result_for_feature(feature, gates_by_key[feature.key])
         end
 
+        sync_version = response['flipper-sync-version']
         @get_all_mutex.synchronize do
           @last_get_all_etag = response['etag'] if response['etag']
           @last_get_all_result = result
-          @last_sync_version = parsed_response['version']
+          @last_sync_version = sync_version && sync_version.to_i
         end
 
         result

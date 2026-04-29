@@ -181,37 +181,28 @@ RSpec.describe Flipper::Adapters::Http do
       expect(adapter.read_integer(:sync_version)).to be_nil
     end
 
-    it "returns the version parsed from the most recent get_all response" do
-      features_response = {
-        "version" => 12345,
-        "features" => [],
-      }
+    it "returns the version from the flipper-sync-version response header" do
       stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
-        .to_return(status: 200, body: JSON.generate(features_response))
+        .to_return(status: 200, body: JSON.generate(features: []), headers: { 'Flipper-Sync-Version' => '12345' })
 
       adapter = described_class.new(url: 'http://app.com/flipper')
       adapter.get_all
       expect(adapter.read_integer(:sync_version)).to eq(12345)
     end
 
-    it "returns nil when the server response omits version (older server)" do
-      features_response = { "features" => [] }
+    it "returns nil when the server response omits the header (older server)" do
       stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
-        .to_return(status: 200, body: JSON.generate(features_response))
+        .to_return(status: 200, body: JSON.generate(features: []))
 
       adapter = described_class.new(url: 'http://app.com/flipper')
       adapter.get_all
       expect(adapter.read_integer(:sync_version)).to be_nil
     end
 
-    it "preserves the parsed version across 304 Not Modified responses" do
-      features_response = {
-        "version" => 12345,
-        "features" => [],
-      }
-
+    it "preserves the cached version across 304 Not Modified responses" do
       stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
-        .to_return(status: 200, body: JSON.generate(features_response), headers: { 'ETag' => '"abc"' })
+        .to_return(status: 200, body: JSON.generate(features: []),
+          headers: { 'ETag' => '"abc"', 'Flipper-Sync-Version' => '12345' })
 
       adapter = described_class.new(url: 'http://app.com/flipper')
       adapter.get_all
