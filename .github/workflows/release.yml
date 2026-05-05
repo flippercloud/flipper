@@ -29,7 +29,7 @@ jobs:
           ls -la pkg/
 
       - name: Configure RubyGems credentials
-        uses: rubygems/configure-rubygems-credentials@v1.0.0
+        uses: rubygems/configure-rubygems-credentials@v2.0.0
 
       - name: Publish all gems
         run: |
