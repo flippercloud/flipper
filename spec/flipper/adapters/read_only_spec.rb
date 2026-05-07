@@ -103,8 +103,9 @@ RSpec.describe Flipper::Adapters::ReadOnly do
     expect(subject.read_integer(:sync_version)).to eq(42)
   end
 
-  it 'forwards set_integer_if_greater to wrapped adapter' do
-    expect(subject.set_integer_if_greater(:sync_version, 100)).to eq(true)
-    expect(adapter.read_integer(:sync_version)).to eq(100)
+  it 'raises WriteAttempted on set_integer_if_greater' do
+    expect { subject.set_integer_if_greater(:sync_version, 100) }
+      .to raise_error(Flipper::Adapters::ReadOnly::WriteAttempted)
+    expect(adapter.read_integer(:sync_version)).to be_nil
   end
 end
