@@ -177,7 +177,8 @@ RSpec.describe Flipper::Adapters::Sync::Synchronizer do
       expect(local.read_integer(:sync_version)).to eq(100)
     end
 
-    it 'instruments synchronizer_outvoted.flipper when bump_sync_version is rejected' do
+    it 'instruments synchronizer_outvoted.flipper when bump is rejected and local already had a version' do
+      local.set_integer_if_greater(:sync_version, 50)
       allow(remote).to receive(:read_integer).with(:sync_version).and_return(100)
       remote_flipper.enable(:search)
       allow(local).to receive(:set_integer_if_greater).with(:sync_version, 100).and_return(false)
@@ -187,6 +188,16 @@ RSpec.describe Flipper::Adapters::Sync::Synchronizer do
       events = instrumenter.events_by_name("synchronizer_outvoted.flipper")
       expect(events.size).to eq(1)
       expect(events.first.payload[:remote_version]).to eq(100)
+    end
+
+    it 'does not instrument synchronizer_outvoted.flipper when local has no prior version' do
+      allow(remote).to receive(:read_integer).with(:sync_version).and_return(100)
+      remote_flipper.enable(:search)
+      allow(local).to receive(:set_integer_if_greater).with(:sync_version, 100).and_return(false)
+
+      subject.call
+
+      expect(instrumenter.events_by_name("synchronizer_outvoted.flipper")).to be_empty
     end
 
     it 'skips local get_all and writes when remote version is not newer' do
