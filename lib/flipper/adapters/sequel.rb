@@ -184,21 +184,25 @@ module Flipper
         return false unless kv_integer_table_present?
         incoming = incoming.to_i
         key = key.to_s
-        2.times do
-          updated = @kv_integer_class
-            .where(key: key)
-            .where { value < incoming }
-            .update(value: incoming, updated_at: Time.now)
-          return true if updated > 0
+        updated = @kv_integer_class
+          .where(key: key)
+          .where { value < incoming }
+          .update(value: incoming, updated_at: Time.now)
+        return true if updated > 0
 
-          begin
-            @kv_integer_class.insert(key: key, value: incoming, created_at: Time.now, updated_at: Time.now)
-            return true
-          rescue ::Sequel::UniqueConstraintViolation
-            # Row exists; either stored >= ours, or someone race-inserted. Loop.
-          end
+        begin
+          @kv_integer_class.insert(key: key, value: incoming, created_at: Time.now, updated_at: Time.now)
+          return true
+        rescue ::Sequel::UniqueConstraintViolation
+          # Row exists. Either stored >= ours (steady-state rejection) or a
+          # concurrent insert raced us with a lower value. Retry UPDATE once;
+          # if it still matches nothing, stored is provably >= ours.
         end
-        false
+
+        @kv_integer_class
+          .where(key: key)
+          .where { value < incoming }
+          .update(value: incoming, updated_at: Time.now) > 0
       end
 
       private
