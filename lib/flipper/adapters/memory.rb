@@ -117,7 +117,11 @@ module Flipper
       def import(source)
         adapter = self.class.from(source)
         get_all = Typecast.features_hash(adapter.get_all)
-        synchronize { @source.replace(get_all) }
+        sync_version = adapter.read_integer(:sync_version)
+        synchronize do
+          @source.replace(get_all)
+          @integers["sync_version"] = sync_version if sync_version
+        end
         true
       end
 

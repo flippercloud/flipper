@@ -58,6 +58,26 @@ RSpec.describe Flipper::Adapters::Memory do
       flipper[:my_feature].clear
       expect(subject.read_integer(:sync_version)).to eq(100)
     end
+
+    it 'imports sync_version from the source adapter' do
+      source = described_class.new
+      source.set_integer_if_greater(:sync_version, 42)
+      Flipper.new(source).enable(:search)
+
+      subject.import(source)
+
+      expect(subject.read_integer(:sync_version)).to eq(42)
+    end
+
+    it 'does not overwrite sync_version when the source has none' do
+      subject.set_integer_if_greater(:sync_version, 100)
+      source = described_class.new
+      Flipper.new(source).enable(:search)
+
+      subject.import(source)
+
+      expect(subject.read_integer(:sync_version)).to eq(100)
+    end
   end
 
   it "can initialize from big hash" do
