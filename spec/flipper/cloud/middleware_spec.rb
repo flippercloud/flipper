@@ -62,7 +62,7 @@ RSpec.describe Flipper::Cloud::Middleware do
           {"name" => "premium"},
         ],
       })
-      expect(stub).to have_been_made.at_least_once
+      expect(stub).to have_been_requested
     end
   end
 
@@ -72,17 +72,15 @@ RSpec.describe Flipper::Cloud::Middleware do
       Flipper::Cloud::MessageVerifier.new(secret: "nope").generate(request_body, timestamp)
     }
 
-    it 'does not perform webhook sync' do
-      webhook_regular_stub = stub_request_for_token('regular', from_webhook: true)
-      poll_regular_stub = stub_request_for_token('regular', from_webhook: false)
+    it 'uses instance to sync' do
+      stub = stub_request_for_token('regular')
       env = {
         "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
       }
       post '/', request_body, env
 
       expect(last_response.status).to eq(400)
-      expect(poll_regular_stub).to have_been_requested.at_least_once
-      expect(webhook_regular_stub).not_to have_been_requested
+      expect(stub).not_to have_been_requested
     end
   end
 
@@ -105,7 +103,7 @@ RSpec.describe Flipper::Cloud::Middleware do
       expect(last_response.status).to eq(402)
       expect(last_response.headers["flipper-cloud-response-error-class"]).to eq("Flipper::Adapters::Http::Error")
       expect(last_response.headers["flipper-cloud-response-error-message"]).to include("Failed with status: 402")
-      expect(stub).to have_been_made.at_least_once
+      expect(stub).to have_been_requested
     end
   end
 
@@ -128,7 +126,7 @@ RSpec.describe Flipper::Cloud::Middleware do
       expect(last_response.status).to eq(500)
       expect(last_response.headers["flipper-cloud-response-error-class"]).to eq("Flipper::Adapters::Http::Error")
       expect(last_response.headers["flipper-cloud-response-error-message"]).to include("Failed with status: 503")
-      expect(stub).to have_been_made.at_least_once
+      expect(stub).to have_been_requested
     end
   end
 
@@ -151,7 +149,7 @@ RSpec.describe Flipper::Cloud::Middleware do
       expect(last_response.status).to eq(500)
       expect(last_response.headers["flipper-cloud-response-error-class"]).to eq("Net::OpenTimeout")
       expect(last_response.headers["flipper-cloud-response-error-message"]).to eq("execution expired")
-      expect(stub).to have_been_made.at_least_once
+      expect(stub).to have_been_requested
     end
   end
 
@@ -162,8 +160,7 @@ RSpec.describe Flipper::Cloud::Middleware do
     }
 
     it 'uses env instance to sync' do
-      regular_stub = stub_request_for_token('regular')
-      env_stub = stub_request_for_token('env')
+      stub = stub_request_for_token('env')
       env = {
         "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
         'flipper' => env_flipper,
@@ -171,8 +168,7 @@ RSpec.describe Flipper::Cloud::Middleware do
       post '/', request_body, env
 
       expect(last_response.status).to eq(200)
-      expect(regular_stub).to have_been_made.at_least_once
-      expect(env_stub).to have_been_made.at_least_once
+      expect(stub).to have_been_requested
     end
   end
 
@@ -191,7 +187,7 @@ RSpec.describe Flipper::Cloud::Middleware do
       post '/', request_body, env
 
       expect(last_response.status).to eq(200)
-      expect(stub).to have_been_made.at_least_once
+      expect(stub).to have_been_requested
     end
   end
 
@@ -202,9 +198,7 @@ RSpec.describe Flipper::Cloud::Middleware do
     }
 
     it 'uses provided env key instead of default' do
-      regular_poll_stub = stub_request_for_token('regular')
-      env_poll_stub = stub_request_for_token('env')
-      env_webhook_stub = stub_request_for_token('env', from_webhook: true)
+      stub = stub_request_for_token('env')
       env = {
         "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
         'flipper' => flipper,
@@ -213,9 +207,7 @@ RSpec.describe Flipper::Cloud::Middleware do
       post '/', request_body, env
 
       expect(last_response.status).to eq(200)
-      expect(regular_poll_stub).to have_been_made.at_least_once
-      expect(env_poll_stub).to have_been_made.at_least_once
-      expect(env_webhook_stub).not_to have_been_requested
+      expect(stub).to have_been_requested
     end
   end
 
@@ -230,7 +222,7 @@ RSpec.describe Flipper::Cloud::Middleware do
       post '/', request_body, env
 
       expect(last_response.status).to eq(200)
-      expect(stub).to have_been_made.at_least_once
+      expect(stub).to have_been_requested
     end
   end
 
@@ -260,13 +252,12 @@ RSpec.describe Flipper::Cloud::Middleware do
           {"name" => "premium"},
         ],
       })
-      expect(stub).to have_been_made.at_least_once
+      expect(stub).to have_been_requested
     end
   end
 
   describe 'Request method unsupported' do
     it 'skips middleware' do
-      stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
       get '/'
       expect(last_response.status).to eq(404)
       expect(last_response.content_type).to eq("application/json")
@@ -276,23 +267,14 @@ RSpec.describe Flipper::Cloud::Middleware do
 
   describe 'Inspecting the built Rack app' do
     it 'returns a String' do
-      stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
       expect(Flipper::Cloud.app(flipper).inspect).to eq("Flipper::Cloud")
     end
   end
 
   private
 
-  def stub_request_for_token(token, status: 200, from_webhook: false)
-    if from_webhook
-      # Match URL with both exclude_gate_names=true and _cb=integer
-      url_pattern = %r{https://www\.flippercloud\.io/adapter/features\?.*exclude_gate_names=true.*&_cb=\d+}
-    else
-      # Match URL with just exclude_gate_names=true
-      url_pattern = %r{https://www\.flippercloud\.io/adapter/features\?.*exclude_gate_names=true}
-    end
-
-    stub = stub_request(:get, url_pattern).
+  def stub_request_for_token(token, status: 200)
+    stub = stub_request(:get, %r{https://www\.flippercloud\.io/adapter/features\?.*exclude_gate_names=true}).
       with({
         headers: {
           'flipper-cloud-token' => token,
