@@ -259,7 +259,7 @@ RSpec.describe Flipper do
       end
       described_class.sync
       expect(described_class.sync_secret).to eq("tasty")
-      expect(stub).to have_been_made.at_least_once
+      expect(stub).to have_been_requested
     end
   end
 

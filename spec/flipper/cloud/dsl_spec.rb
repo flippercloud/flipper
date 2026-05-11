@@ -5,9 +5,6 @@ require 'flipper/adapters/instrumented'
 
 RSpec.describe Flipper::Cloud::DSL do
   it 'delegates everything to flipper instance' do
-    # stub the initial sync of http to local
-    stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
-
     cloud_configuration = Flipper::Cloud::Configuration.new({
       token: "asdf",
       sync_secret: "tasty",
@@ -30,13 +27,10 @@ RSpec.describe Flipper::Cloud::DSL do
     })
     dsl = described_class.new(cloud_configuration)
     dsl.sync
-    expect(stub).to have_been_requested.at_least_once
+    expect(stub).to have_been_requested
   end
 
   it 'delegates sync_secret to cloud configuration' do
-    # stub the initial sync of http to local
-    stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
-
     cloud_configuration = Flipper::Cloud::Configuration.new({
       token: "asdf",
       sync_secret: "tasty",
@@ -59,15 +53,13 @@ RSpec.describe Flipper::Cloud::DSL do
     end
 
     subject do
-      # stub the initial sync of http to local
-      stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
       described_class.new(cloud_configuration)
     end
 
     it "sends reads to local adapter" do
       subject.features
       subject.enabled?(:foo)
-      expect(local_adapter.count(:features)).to be(2)
+      expect(local_adapter.count(:features)).to be(1)
       expect(local_adapter.count(:get)).to be(1)
     end
 
