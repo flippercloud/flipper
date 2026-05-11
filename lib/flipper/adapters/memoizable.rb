@@ -126,6 +126,21 @@ module Flipper
         @adapter.import(source).tap { cache.clear if memoizing? }
       end
 
+      def read_integer(key)
+        if memoizing?
+          cache_key = integer_key_for(key)
+          cache.fetch(cache_key) { cache[cache_key] = @adapter.read_integer(key) }
+        else
+          @adapter.read_integer(key)
+        end
+      end
+
+      def set_integer_if_greater(key, value)
+        @adapter.set_integer_if_greater(key, value).tap do
+          cache.delete(integer_key_for(key)) if memoizing?
+        end
+      end
+
       def export(format: :json, version: 1)
         @adapter.export(format: format, version: version)
       end
@@ -157,6 +172,10 @@ module Flipper
 
       def key_for(key)
         "feature/#{key}"
+      end
+
+      def integer_key_for(key)
+        "integer/#{key}"
       end
 
       def expire_feature(feature)

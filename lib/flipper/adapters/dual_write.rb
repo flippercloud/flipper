@@ -58,6 +58,16 @@ module Flipper
           @local.disable(feature, gate, thing)
         end
       end
+
+      def read_integer(key)
+        @local.read_integer(key)
+      end
+
+      def set_integer_if_greater(key, value)
+        @remote.set_integer_if_greater(key, value).tap do
+          @local.set_integer_if_greater(key, value)
+        end
+      end
     end
   end
 end

@@ -374,4 +374,45 @@ RSpec.describe Flipper::Adapters::Memoizable do
       end
     end
   end
+
+  describe '#read_integer / #set_integer_if_greater' do
+    it 'forwards to the wrapped adapter' do
+      expect(subject.set_integer_if_greater(:sync_version, 42)).to eq(true)
+      expect(subject.read_integer(:sync_version)).to eq(42)
+      expect(adapter.read_integer(:sync_version)).to eq(42)
+    end
+
+    context 'when memoizing' do
+      before { subject.memoize = true }
+
+      it 'memoizes reads and only hits the adapter once' do
+        adapter.set_integer_if_greater(:sync_version, 42)
+        logger = Flipper::Adapters::OperationLogger.new(adapter)
+        memoized = described_class.new(logger, cache)
+        memoized.memoize = true
+
+        3.times { memoized.read_integer(:sync_version) }
+        expect(logger.count(:read_integer)).to eq(1)
+      end
+
+      it 'invalidates the cached read after a write' do
+        adapter.set_integer_if_greater(:sync_version, 42)
+        expect(subject.read_integer(:sync_version)).to eq(42)
+
+        subject.set_integer_if_greater(:sync_version, 100)
+        expect(subject.read_integer(:sync_version)).to eq(100)
+      end
+
+      it 'invalidates the cached read even when the write is rejected' do
+        adapter.set_integer_if_greater(:sync_version, 100)
+        expect(subject.read_integer(:sync_version)).to eq(100)
+
+        # Simulate another process bumping above what's in cache. The cached
+        # value (100) is now stale relative to the underlying adapter (200).
+        adapter.set_integer_if_greater(:sync_version, 200)
+        expect(subject.set_integer_if_greater(:sync_version, 150)).to eq(false)
+        expect(subject.read_integer(:sync_version)).to eq(200)
+      end
+    end
+  end
 end

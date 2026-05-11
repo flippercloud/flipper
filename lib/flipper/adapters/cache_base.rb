@@ -112,11 +112,30 @@ module Flipper
         result
       end
 
+      # Public
+      def read_integer(key)
+        cache_fetch(integer_cache_key(key)) { @adapter.read_integer(key) }
+      end
+
+      # Public
+      def set_integer_if_greater(key, value)
+        @adapter.set_integer_if_greater(key, value).tap do
+          cache_delete(integer_cache_key(key))
+        end
+      end
+
       # Public: Generate the cache key for a given feature.
       #
       # key - The String or Symbol feature key.
       def feature_cache_key(key)
         "#{@namespace}/feature/#{key}"
+      end
+
+      # Public: Generate the cache key for a given integer.
+      #
+      # key - The String or Symbol integer key.
+      def integer_cache_key(key)
+        "#{@namespace}/integer/#{key}"
       end
 
       private

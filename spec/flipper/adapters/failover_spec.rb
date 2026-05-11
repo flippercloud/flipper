@@ -127,6 +127,33 @@ RSpec.describe Flipper::Adapters::Failover do
     end
   end
 
+  describe '#read_integer / #set_integer_if_greater' do
+    it 'reads from primary and writes only to primary by default' do
+      expect(subject.set_integer_if_greater(:sync_version, 42)).to eq(true)
+      expect(subject.read_integer(:sync_version)).to eq(42)
+      expect(primary.read_integer(:sync_version)).to eq(42)
+      expect(secondary.read_integer(:sync_version)).to be_nil
+    end
+
+    context 'with dual_write enabled' do
+      let(:options) { { dual_write: true } }
+
+      it 'writes to both primary and secondary' do
+        expect(subject.set_integer_if_greater(:sync_version, 42)).to eq(true)
+        expect(primary.read_integer(:sync_version)).to eq(42)
+        expect(secondary.read_integer(:sync_version)).to eq(42)
+      end
+    end
+
+    context 'when primary raises' do
+      it 'falls back to secondary for reads' do
+        secondary.set_integer_if_greater(:sync_version, 99)
+        allow(primary).to receive(:read_integer).and_raise(StandardError)
+        expect(subject.read_integer(:sync_version)).to eq(99)
+      end
+    end
+  end
+
   describe '#adapter_stack' do
     it 'returns the tree representation' do
       expect(subject.adapter_stack).to eq("failover(primary: memory, secondary: memory)")
