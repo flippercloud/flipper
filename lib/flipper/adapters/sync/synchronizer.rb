@@ -54,10 +54,13 @@ module Flipper
 
           if remote_version
             accepted = @local.set_integer_if_greater(SYNC_VERSION_KEY, remote_version)
-            # Only instrument when we know the local adapter persists versions
-            # (local_version was non-nil pre-sync). Otherwise a false return
-            # likely means the adapter has no typed-integer storage, not a race.
-            if !accepted && local_version
+            # A rejection only indicates an outvote when the local adapter actually
+            # stores a higher version. Adapters without typed-integer storage return
+            # false unconditionally, so guard on the post-write read to keep the
+            # event and repair scoped to real races (including cold-start interleaves
+            # where local_version was nil pre-sync).
+            current_version = @local.read_integer(SYNC_VERSION_KEY)
+            if !accepted && current_version && current_version.to_i > remote_version.to_i
               @instrumenter.instrument("synchronizer_outvoted.flipper", remote_version: remote_version)
               repair_after_outvote(remote_version)
             end
