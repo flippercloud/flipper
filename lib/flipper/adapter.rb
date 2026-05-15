@@ -51,6 +51,14 @@ module Flipper
       get_multi(instances)
     end
 
+    # Public: Get all features and the version that describes that exact result.
+    # Adapters with native snapshot/version support should override this. The
+    # default is intentionally unversioned because independent get_all and
+    # read_integer calls cannot prove the version describes the returned data.
+    def get_all_snapshot(**kwargs)
+      Flipper::Snapshot.new(features: get_all(**kwargs))
+    end
+
     # Public: Get multiple features in one call. Defaults to one get per
     # feature. Feel free to override per adapter to make this more efficient and
     # reduce network calls.
@@ -109,5 +117,6 @@ end
 
 require "set"
 require "flipper/exporter"
+require "flipper/snapshot"
 require "flipper/feature"
 require "flipper/adapters/sync/synchronizer"

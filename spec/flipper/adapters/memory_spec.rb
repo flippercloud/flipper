@@ -69,14 +69,14 @@ RSpec.describe Flipper::Adapters::Memory do
       expect(subject.read_integer(:sync_version)).to eq(42)
     end
 
-    it 'does not overwrite sync_version when the source has none' do
+    it 'clears sync_version when the source has none' do
       subject.set_integer_if_greater(:sync_version, 100)
       source = described_class.new
       Flipper.new(source).enable(:search)
 
       subject.import(source)
 
-      expect(subject.read_integer(:sync_version)).to eq(100)
+      expect(subject.read_integer(:sync_version)).to be_nil
     end
   end
 

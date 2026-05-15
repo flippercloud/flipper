@@ -42,8 +42,9 @@ module Flipper
         private
 
         def sync
-          remote_get_all = @remote.get_all(cache_bust: @cache_bust)
-          remote_version = @remote.read_integer(SYNC_VERSION_KEY)
+          remote_snapshot = @remote.get_all_snapshot(cache_bust: @cache_bust)
+          remote_get_all = remote_snapshot.features
+          remote_version = remote_snapshot.version
           local_version = @local.read_integer(SYNC_VERSION_KEY)
 
           if remote_version && local_version && remote_version.to_i <= local_version.to_i
@@ -99,14 +100,13 @@ module Flipper
           return unless current_version && current_version.to_i > outvoted_version.to_i
 
           MAX_OUTVOTE_REPAIRS.times do
-            remote_get_all = @remote.get_all(cache_bust: true)
-            remote_version = @remote.read_integer(SYNC_VERSION_KEY)
-            apply(remote_get_all)
+            remote_snapshot = @remote.get_all_snapshot(cache_bust: true)
+            apply(remote_snapshot.features)
 
-            @local.set_integer_if_greater(SYNC_VERSION_KEY, remote_version) if remote_version
+            @local.set_integer_if_greater(SYNC_VERSION_KEY, remote_snapshot.version) if remote_snapshot.version
 
             current_version = @local.read_integer(SYNC_VERSION_KEY)
-            break unless remote_version && current_version && current_version.to_i > remote_version.to_i
+            break unless remote_snapshot.version && current_version && current_version.to_i > remote_snapshot.version.to_i
           end
         end
       end

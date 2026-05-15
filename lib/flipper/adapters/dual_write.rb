@@ -64,9 +64,9 @@ module Flipper
       end
 
       def set_integer_if_greater(key, value)
-        @remote.set_integer_if_greater(key, value).tap do
-          @local.set_integer_if_greater(key, value)
-        end
+        accepted = @remote.set_integer_if_greater(key, value)
+        @local.set_integer_if_greater(key, value) if accepted
+        accepted
       end
     end
   end

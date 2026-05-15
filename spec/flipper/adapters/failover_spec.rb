@@ -143,6 +143,14 @@ RSpec.describe Flipper::Adapters::Failover do
         expect(primary.read_integer(:sync_version)).to eq(42)
         expect(secondary.read_integer(:sync_version)).to eq(42)
       end
+
+      it 'does not write a rejected primary version to secondary' do
+        primary.set_integer_if_greater(:sync_version, 200)
+
+        expect(subject.set_integer_if_greater(:sync_version, 100)).to eq(false)
+        expect(primary.read_integer(:sync_version)).to eq(200)
+        expect(secondary.read_integer(:sync_version)).to be_nil
+      end
     end
 
     context 'when primary raises' do

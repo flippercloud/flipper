@@ -59,6 +59,15 @@ module Flipper
         synchronize { Typecast.features_hash(@source) }
       end
 
+      def get_all_snapshot(**kwargs)
+        synchronize do
+          Flipper::Snapshot.new(
+            features: Typecast.features_hash(@source),
+            version: @integers["sync_version"]
+          )
+        end
+      end
+
       # Public
       def enable(feature, gate, thing)
         synchronize do
@@ -116,11 +125,15 @@ module Flipper
       # Public: a more efficient implementation of import for this adapter
       def import(source)
         adapter = self.class.from(source)
-        get_all = Typecast.features_hash(adapter.get_all)
-        sync_version = adapter.read_integer(:sync_version)
+        snapshot = adapter.get_all_snapshot
+        get_all = Typecast.features_hash(snapshot.features)
         synchronize do
           @source.replace(get_all)
-          @integers["sync_version"] = sync_version if sync_version
+          if snapshot.version
+            @integers["sync_version"] = snapshot.version
+          else
+            @integers.delete("sync_version")
+          end
         end
         true
       end

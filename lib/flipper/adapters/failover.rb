@@ -88,9 +88,9 @@ module Flipper
       end
 
       def set_integer_if_greater(key, value)
-        @primary.set_integer_if_greater(key, value).tap do
-          @secondary.set_integer_if_greater(key, value) if @dual_write
-        end
+        accepted = @primary.set_integer_if_greater(key, value)
+        @secondary.set_integer_if_greater(key, value) if accepted && @dual_write
+        accepted
       end
     end
   end

@@ -21,6 +21,7 @@ module Flipper
         @memoize = false
         @features_key = :flipper_features
         @get_all_key = :all_memoized
+        @get_all_snapshot_key = :all_snapshot_memoized
       end
 
       # Public
@@ -107,6 +108,27 @@ module Flipper
         end
       end
 
+      def get_all_snapshot(**kwargs)
+        if memoizing?
+          cache.fetch(@get_all_snapshot_key) do
+            snapshot = @adapter.get_all_snapshot(**kwargs)
+            snapshot.features.each do |key, value|
+              cache[key_for(key)] = value
+            end
+            cache[@features_key] = snapshot.features.keys.to_set
+            cache[@get_all_key] = true
+            if snapshot.version
+              cache[integer_key_for(:sync_version)] = snapshot.version
+            else
+              cache.delete(integer_key_for(:sync_version))
+            end
+            cache[@get_all_snapshot_key] = snapshot
+          end
+        else
+          @adapter.get_all_snapshot(**kwargs)
+        end
+      end
+
       # Public
       def enable(feature, gate, thing)
         @adapter.enable(feature, gate, thing).tap { expire_feature(feature) }
@@ -137,7 +159,10 @@ module Flipper
 
       def set_integer_if_greater(key, value)
         @adapter.set_integer_if_greater(key, value).tap do
-          cache.delete(integer_key_for(key)) if memoizing?
+          if memoizing?
+            cache.delete(integer_key_for(key))
+            cache.delete(@get_all_snapshot_key)
+          end
         end
       end
 
@@ -179,11 +204,17 @@ module Flipper
       end
 
       def expire_feature(feature)
-        cache.delete(key_for(feature.key)) if memoizing?
+        if memoizing?
+          cache.delete(key_for(feature.key))
+          cache.delete(@get_all_snapshot_key)
+        end
       end
 
       def expire_features_set
-        cache.delete(@features_key) if memoizing?
+        if memoizing?
+          cache.delete(@features_key)
+          cache.delete(@get_all_snapshot_key)
+        end
       end
     end
   end

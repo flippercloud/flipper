@@ -222,6 +222,37 @@ RSpec.describe Flipper::Adapters::Http do
     end
   end
 
+  describe "#get_all_snapshot" do
+    it "returns features and sync version from the same response" do
+      stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
+        .to_return(status: 200, body: JSON.generate(features: []), headers: { 'Flipper-Sync-Version' => '12345' })
+
+      adapter = described_class.new(url: 'http://app.com/flipper')
+      snapshot = adapter.get_all_snapshot
+
+      expect(snapshot.features).to eq({})
+      expect(snapshot.version).to eq(12345)
+      expect(adapter.read_integer(:sync_version)).to eq(12345)
+    end
+
+    it "reuses the cached features and version for 304 Not Modified responses" do
+      stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
+        .to_return(status: 200, body: JSON.generate(features: []),
+          headers: { 'ETag' => '"abc"', 'Flipper-Sync-Version' => '12345' })
+
+      adapter = described_class.new(url: 'http://app.com/flipper')
+      adapter.get_all_snapshot
+
+      stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
+        .with(headers: { 'If-None-Match' => '"abc"' })
+        .to_return(status: 304, headers: { 'ETag' => '"abc"', 'Flipper-Sync-Version' => '99999' })
+
+      snapshot = adapter.get_all_snapshot
+      expect(snapshot.features).to eq({})
+      expect(snapshot.version).to eq(12345)
+    end
+  end
+
   describe "#set_integer_if_greater" do
     it "returns false (writes never go server-side via this method)" do
       adapter = described_class.new(url: 'http://app.com/flipper')

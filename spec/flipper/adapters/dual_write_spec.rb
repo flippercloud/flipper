@@ -74,6 +74,14 @@ RSpec.describe Flipper::Adapters::DualWrite do
       expect(local_adapter.read_integer(:sync_version)).to eq(42)
       expect(remote_adapter.read_integer(:sync_version)).to eq(42)
     end
+
+    it 'does not write a rejected remote version to local' do
+      remote_adapter.set_integer_if_greater(:sync_version, 200)
+
+      expect(subject.set_integer_if_greater(:sync_version, 100)).to eq(false)
+      expect(local_adapter.read_integer(:sync_version)).to be_nil
+      expect(remote_adapter.read_integer(:sync_version)).to eq(200)
+    end
   end
 
   describe '#adapter_stack' do

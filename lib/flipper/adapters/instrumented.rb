@@ -112,6 +112,17 @@ module Flipper
         end
       end
 
+      def get_all_snapshot(**kwargs)
+        default_payload = {
+          operation: :get_all_snapshot,
+          adapter_name: @adapter.name,
+        }
+
+        @instrumenter.instrument(InstrumentationName, default_payload) do |payload|
+          payload[:result] = @adapter.get_all_snapshot(**kwargs)
+        end
+      end
+
       # Public
       def enable(feature, gate, thing)
         default_payload = {
