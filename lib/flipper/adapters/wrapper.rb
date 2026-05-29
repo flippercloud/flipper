@@ -16,8 +16,11 @@ module Flipper
         :get,
         :get_multi,
         :get_all,
+        :get_all_snapshot,
         :enable,
         :disable,
+        :read_integer,
+        :set_integer_if_greater,
       ].freeze
 
       attr_reader :adapter

@@ -259,4 +259,5 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
       end
     end
   end
+
 end

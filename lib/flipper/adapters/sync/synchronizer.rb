@@ -10,6 +10,9 @@ module Flipper
       # Public: Given a local and remote adapter, it can update the local to
       # match the remote doing only the necessary enable/disable operations.
       class Synchronizer
+        SYNC_VERSION_KEY = :sync_version
+        MAX_OUTVOTE_REPAIRS = 3
+
         # Public: Initializes a new synchronizer.
         #
         # local - The Flipper adapter to get in sync with the remote.
@@ -39,8 +42,39 @@ module Flipper
         private
 
         def sync
+          remote_snapshot = @remote.get_all_snapshot(cache_bust: @cache_bust)
+          remote_get_all = remote_snapshot.features
+          remote_version = remote_snapshot.version
+          local_version = @local.read_integer(SYNC_VERSION_KEY)
+
+          if remote_version && local_version && remote_version.to_i <= local_version.to_i
+            return
+          end
+
+          apply(remote_get_all)
+
+          if remote_version
+            accepted = @local.set_integer_if_greater(SYNC_VERSION_KEY, remote_version)
+            # A rejection only indicates an outvote when the local adapter actually
+            # stores a higher version. Adapters without typed-integer storage return
+            # false unconditionally, so guard on the post-write read to keep the
+            # event and repair scoped to real races (including cold-start interleaves
+            # where local_version was nil pre-sync).
+            current_version = @local.read_integer(SYNC_VERSION_KEY)
+            if !accepted && current_version && current_version.to_i > remote_version.to_i
+              @instrumenter.instrument("synchronizer_outvoted.flipper", remote_version: remote_version)
+              repair_after_outvote(remote_version)
+            end
+          end
+
+          nil
+        rescue => exception
+          @instrumenter.instrument("synchronizer_exception.flipper", exception: exception)
+          raise if @raise
+        end
+
+        def apply(remote_get_all)
           local_get_all = @local.get_all
-          remote_get_all = @remote.get_all(cache_bust: @cache_bust)
 
           # Sync all the gate values.
           remote_get_all.each do |feature_key, remote_gates_hash|
@@ -59,11 +93,21 @@ module Flipper
           # Remove features that are present in local and missing in remote.
           features_to_remove = local_get_all.keys - remote_get_all.keys
           features_to_remove.each { |key| Feature.new(key, @local, instrumenter: @instrumenter).remove }
+        end
 
-          nil
-        rescue => exception
-          @instrumenter.instrument("synchronizer_exception.flipper", exception: exception)
-          raise if @raise
+        def repair_after_outvote(outvoted_version)
+          current_version = @local.read_integer(SYNC_VERSION_KEY)
+          return unless current_version && current_version.to_i > outvoted_version.to_i
+
+          MAX_OUTVOTE_REPAIRS.times do
+            remote_snapshot = @remote.get_all_snapshot(cache_bust: true)
+            apply(remote_snapshot.features)
+
+            @local.set_integer_if_greater(SYNC_VERSION_KEY, remote_snapshot.version) if remote_snapshot.version
+
+            current_version = @local.read_integer(SYNC_VERSION_KEY)
+            break unless remote_snapshot.version && current_version && current_version.to_i > remote_snapshot.version.to_i
+          end
         end
       end
     end

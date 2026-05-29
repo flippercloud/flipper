@@ -81,6 +81,17 @@ module Flipper
         end
       end
 
+      def read_integer(key)
+        synchronize
+        @local.read_integer(key)
+      end
+
+      def set_integer_if_greater(key, value)
+        accepted = @remote.set_integer_if_greater(key, value)
+        @local.set_integer_if_greater(key, value) if accepted
+        accepted
+      end
+
       private
 
       def synchronize

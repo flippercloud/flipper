@@ -38,4 +38,13 @@ RSpec.describe Flipper::Adapters::Poll do
 
     expect(local_adapter.features).to eq(remote_adapter.features)
   end
+
+  describe '#read_integer / #set_integer_if_greater' do
+    it 'forwards through the synced local adapter' do
+      instance = described_class.new(poller, local_adapter)
+      expect(instance.set_integer_if_greater(:sync_version, 42)).to eq(true)
+      expect(instance.read_integer(:sync_version)).to eq(42)
+      expect(local_adapter.read_integer(:sync_version)).to eq(42)
+    end
+  end
 end

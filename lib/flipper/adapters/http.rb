@@ -25,6 +25,7 @@ module Flipper
         @last_get_all_etag = nil
         @last_get_all_result = nil
         @last_get_all_response = nil
+        @last_sync_version = nil
         @get_all_mutex = Mutex.new
       end
 
@@ -60,6 +61,10 @@ module Flipper
       end
 
       def get_all(cache_bust: false)
+        get_all_snapshot(cache_bust: cache_bust).features
+      end
+
+      def get_all_snapshot(cache_bust: false)
         options = {}
         path = "/features?exclude_gate_names=true"
         path += "&_cb=#{Time.now.to_i}" if cache_bust
@@ -73,10 +78,14 @@ module Flipper
         @get_all_mutex.synchronize { @last_get_all_response = response }
 
         if response.is_a?(Net::HTTPNotModified)
-          cached_result = @get_all_mutex.synchronize { @last_get_all_result }
+          cached_result, cached_version = @get_all_mutex.synchronize { [@last_get_all_result, @last_sync_version] }
 
           if cached_result
-            return cached_result
+            return Flipper::Snapshot.new(
+              features: cached_result,
+              version: cached_version,
+              metadata: { response: response }
+            )
           else
             raise Error, response
           end
@@ -97,16 +106,30 @@ module Flipper
           result[feature.key] = result_for_feature(feature, gates_by_key[feature.key])
         end
 
+        sync_version = sync_version_from(response)
         @get_all_mutex.synchronize do
           @last_get_all_etag = response['etag'] if response['etag']
           @last_get_all_result = result
+          @last_sync_version = sync_version
         end
 
-        result
+        Flipper::Snapshot.new(
+          features: result,
+          version: sync_version,
+          metadata: { response: response }
+        )
       end
 
       def last_get_all_response
         @get_all_mutex.synchronize { @last_get_all_response }
+      end
+
+      def read_integer(key)
+        return nil unless key.to_sym == :sync_version
+        # HTTP exposes sync_version as metadata on /features. This returns the
+        # last observed value from get_all_snapshot rather than making a second
+        # remote read that could race the feature snapshot.
+        @get_all_mutex.synchronize { @last_sync_version }
       end
 
       def features
@@ -166,6 +189,13 @@ module Flipper
       end
 
       private
+
+      def sync_version_from(response)
+        header = response['flipper-sync-version']
+        Integer(header) if header
+      rescue ArgumentError
+        nil
+      end
 
       def request_body_for_gate(gate, value)
         data = case gate.key

@@ -25,6 +25,11 @@ module Flipper
 
           plugin :timestamps, update_on_create: true
         end
+
+        # Private: Do not use outside of this adapter.
+        class KvInteger < ::Sequel::Model(:flipper_kv_integers)
+          plugin :timestamps, update_on_create: true
+        end
       ensure
         ::Sequel::Model.require_valid_table = old
       end
@@ -50,6 +55,7 @@ module Flipper
         @name = options.fetch(:name, :sequel)
         @feature_class = options.fetch(:feature_class) { Feature }
         @gate_class = options.fetch(:gate_class) { Gate }
+        @kv_integer_class = options.fetch(:kv_integer_class) { KvInteger }
 
         warn VALUE_TO_TEXT_WARNING if value_not_text?
       end
@@ -169,7 +175,44 @@ module Flipper
         true
       end
 
+      def read_integer(key)
+        return nil unless kv_integer_table_present?
+        @kv_integer_class.where(key: key.to_s).get(:value)
+      end
+
+      def set_integer_if_greater(key, incoming)
+        return false unless kv_integer_table_present?
+        incoming = incoming.to_i
+        key = key.to_s
+        updated = @kv_integer_class
+          .where(key: key)
+          .where { value < incoming }
+          .update(value: incoming, updated_at: Time.now)
+        return true if updated > 0
+
+        begin
+          @kv_integer_class.insert(key: key, value: incoming, created_at: Time.now, updated_at: Time.now)
+          return true
+        rescue ::Sequel::UniqueConstraintViolation
+          # Row exists. Either stored >= ours (steady-state rejection) or a
+          # concurrent insert raced us with a lower value. Retry UPDATE once;
+          # if it still matches nothing, stored is provably >= ours.
+        end
+
+        @kv_integer_class
+          .where(key: key)
+          .where { value < incoming }
+          .update(value: incoming, updated_at: Time.now) > 0
+      end
+
       private
+
+      def kv_integer_table_present?
+        return @kv_integer_table_present if defined?(@kv_integer_table_present)
+        @kv_integer_table_present = @kv_integer_class.db.table_exists?(@kv_integer_class.table_name)
+      rescue ::Sequel::DatabaseError
+        false
+      end
 
       def unsupported_data_type(data_type)
         raise "#{data_type} is not supported by this adapter"

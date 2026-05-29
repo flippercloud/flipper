@@ -22,7 +22,7 @@ RSpec.describe Flipper::Adapters::Sync::Synchronizer do
 
   it "raises errors by default" do
     exception = StandardError.new
-    expect(remote).to receive(:get_all).and_raise(exception)
+    expect(remote).to receive(:get_all_snapshot).and_raise(exception)
 
     expect { subject.call }.to raise_error(exception)
   end
@@ -38,7 +38,7 @@ RSpec.describe Flipper::Adapters::Sync::Synchronizer do
 
     it "does not raise, but instruments exceptions for visibility" do
       exception = StandardError.new
-      expect(remote).to receive(:get_all).and_raise(exception)
+      expect(remote).to receive(:get_all_snapshot).and_raise(exception)
 
       expect { subject.call }.not_to raise_error
 
@@ -123,6 +123,190 @@ RSpec.describe Flipper::Adapters::Sync::Synchronizer do
 
       feature_names = remove_events.map { |e| e.payload[:feature_name].to_s }
       expect(feature_names).to include("old_feature")
+    end
+  end
+
+  describe 'sync_version gating' do
+    it 'skips sync when remote version is not strictly greater than local version' do
+      local.set_integer_if_greater(:sync_version, 100)
+      remote.set_integer_if_greater(:sync_version, 99)
+      remote_flipper.enable(:search)
+
+      subject.call
+
+      expect(local_flipper.features.map(&:key)).to eq([])
+    end
+
+    it 'skips sync when remote version equals local version' do
+      local.set_integer_if_greater(:sync_version, 100)
+      remote.set_integer_if_greater(:sync_version, 100)
+      remote_flipper.enable(:search)
+
+      subject.call
+
+      expect(local_flipper.features.map(&:key)).to eq([])
+    end
+
+    it 'syncs and bumps local version when remote version is strictly greater' do
+      local.set_integer_if_greater(:sync_version, 99)
+      remote.set_integer_if_greater(:sync_version, 100)
+      remote_flipper.enable(:search)
+
+      subject.call
+
+      expect(local_flipper.features.map(&:key)).to eq(["search"])
+      expect(local.read_integer(:sync_version)).to eq(100)
+    end
+
+    it 'uses the snapshot version instead of a separate remote version read' do
+      stale_remote = Flipper::Adapters::Memory.new
+      Flipper.new(stale_remote).enable(:search)
+
+      local.set_integer_if_greater(:sync_version, 50)
+      allow(remote).to receive(:get_all_snapshot).and_return(
+        Flipper::Snapshot.new(features: stale_remote.get_all, version: 100)
+      )
+      expect(remote).not_to receive(:read_integer)
+
+      subject.call
+
+      expect(local_flipper[:search].boolean_value).to eq(true)
+      expect(local.read_integer(:sync_version)).to eq(100)
+    end
+
+    it 'syncs normally when remote returns nil version (older server)' do
+      remote_flipper.enable(:search)
+
+      subject.call
+
+      expect(local_flipper.features.map(&:key)).to eq(["search"])
+    end
+
+    it 'syncs normally when local has no stored version yet' do
+      remote.set_integer_if_greater(:sync_version, 100)
+      remote_flipper.enable(:search)
+
+      subject.call
+
+      expect(local_flipper.features.map(&:key)).to eq(["search"])
+      expect(local.read_integer(:sync_version)).to eq(100)
+    end
+
+    it 'instruments synchronizer_outvoted.flipper when a concurrent writer left local at a higher version' do
+      local.set_integer_if_greater(:sync_version, 50)
+      remote_flipper.enable(:search)
+      allow(remote).to receive(:get_all_snapshot).with(cache_bust: false).and_return(
+        Flipper::Snapshot.new(features: remote.get_all, version: 100)
+      )
+      allow(remote).to receive(:get_all_snapshot).with(cache_bust: true).and_return(
+        Flipper::Snapshot.new(features: {}, version: 200)
+      )
+      original_set_integer_if_greater = local.method(:set_integer_if_greater)
+      allow(local).to receive(:set_integer_if_greater) do |key, value|
+        if key == :sync_version && value == 100
+          original_set_integer_if_greater.call(:sync_version, 200)
+          false
+        else
+          original_set_integer_if_greater.call(key, value)
+        end
+      end
+
+      subject.call
+
+      events = instrumenter.events_by_name("synchronizer_outvoted.flipper")
+      expect(events.size).to eq(1)
+      expect(events.first.payload[:remote_version]).to eq(100)
+    end
+
+    it 'repairs local gates when an older sync is outvoted after applying its snapshot' do
+      old_remote = Flipper::Adapters::Memory.new
+      Flipper.new(old_remote).enable(:search)
+      old_snapshot = old_remote.get_all
+
+      new_remote = Flipper::Adapters::Memory.new
+      new_flipper = Flipper.new(new_remote)
+      new_flipper.add(:search)
+      new_flipper.disable(:search)
+      new_snapshot = new_remote.get_all
+
+      local.set_integer_if_greater(:sync_version, 50)
+      original_set_integer_if_greater = local.method(:set_integer_if_greater)
+
+      expect(remote).to receive(:get_all_snapshot).with(cache_bust: false).ordered.and_return(
+        Flipper::Snapshot.new(features: old_snapshot, version: 100)
+      )
+      expect(remote).to receive(:get_all_snapshot).with(cache_bust: true).ordered.and_return(
+        Flipper::Snapshot.new(features: new_snapshot, version: 200)
+      )
+      allow(local).to receive(:set_integer_if_greater) do |key, value|
+        if key == :sync_version && value == 100
+          original_set_integer_if_greater.call(:sync_version, 200)
+          false
+        else
+          original_set_integer_if_greater.call(key, value)
+        end
+      end
+
+      subject.call
+
+      expect(local_flipper[:search].boolean_value).to eq(false)
+      expect(local.read_integer(:sync_version)).to eq(200)
+    end
+
+    it 'does not instrument synchronizer_outvoted.flipper when local has no prior version' do
+      remote_flipper.enable(:search)
+      allow(remote).to receive(:get_all_snapshot).with(cache_bust: false).and_return(
+        Flipper::Snapshot.new(features: remote.get_all, version: 100)
+      )
+      allow(local).to receive(:set_integer_if_greater).with(:sync_version, 100).and_return(false)
+
+      subject.call
+
+      expect(instrumenter.events_by_name("synchronizer_outvoted.flipper")).to be_empty
+    end
+
+    it 'repairs local gates when a cold-start sync is outvoted by a concurrent newer sync' do
+      old_remote = Flipper::Adapters::Memory.new
+      Flipper.new(old_remote).enable(:search)
+      old_snapshot = old_remote.get_all
+
+      new_remote = Flipper::Adapters::Memory.new
+      new_flipper = Flipper.new(new_remote)
+      new_flipper.add(:search)
+      new_flipper.disable(:search)
+      new_snapshot = new_remote.get_all
+
+      original_set_integer_if_greater = local.method(:set_integer_if_greater)
+
+      expect(remote).to receive(:get_all_snapshot).with(cache_bust: false).ordered.and_return(
+        Flipper::Snapshot.new(features: old_snapshot, version: 100)
+      )
+      expect(remote).to receive(:get_all_snapshot).with(cache_bust: true).ordered.and_return(
+        Flipper::Snapshot.new(features: new_snapshot, version: 200)
+      )
+      allow(local).to receive(:set_integer_if_greater) do |key, value|
+        if key == :sync_version && value == 100
+          original_set_integer_if_greater.call(:sync_version, 200)
+          false
+        else
+          original_set_integer_if_greater.call(key, value)
+        end
+      end
+
+      subject.call
+
+      expect(local_flipper[:search].boolean_value).to eq(false)
+      expect(local.read_integer(:sync_version)).to eq(200)
+      expect(instrumenter.events_by_name("synchronizer_outvoted.flipper").size).to eq(1)
+    end
+
+    it 'skips local get_all and writes when remote version is not newer' do
+      local.set_integer_if_greater(:sync_version, 100)
+      remote.set_integer_if_greater(:sync_version, 100)
+      expect(local).not_to receive(:get_all)
+      expect(remote).to receive(:get_all_snapshot).and_call_original
+
+      subject.call
     end
   end
 

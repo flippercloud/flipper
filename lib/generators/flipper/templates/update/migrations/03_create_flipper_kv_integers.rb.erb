@@ -1,0 +1,18 @@
+# frozen_string_literal: true
+
+class CreateFlipperKvIntegers < ActiveRecord::Migration<%= migration_version %>
+  def up
+    return if table_exists? :flipper_kv_integers
+
+    create_table :flipper_kv_integers do |t|
+      t.string :key, null: false
+      t.bigint :value, null: false, default: 0
+      t.timestamps null: false
+    end
+    add_index :flipper_kv_integers, :key, unique: true
+  end
+
+  def down
+    drop_table :flipper_kv_integers
+  end
+end

@@ -270,4 +270,37 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
       expect(subject.name).to be(:active_support_cache_store)
     end
   end
+
+  describe '#read_integer / #set_integer_if_greater' do
+    it 'forwards to the wrapped adapter' do
+      expect(subject.set_integer_if_greater(:sync_version, 42)).to eq(true)
+      expect(subject.read_integer(:sync_version)).to eq(42)
+      expect(memory_adapter.read_integer(:sync_version)).to eq(42)
+    end
+
+    it 'caches reads and only hits the adapter once' do
+      memory_adapter.set_integer_if_greater(:sync_version, 42)
+      memory_adapter.reset
+
+      3.times { subject.read_integer(:sync_version) }
+      expect(memory_adapter.count(:read_integer)).to eq(1)
+    end
+
+    it 'invalidates the cached read after a write' do
+      memory_adapter.set_integer_if_greater(:sync_version, 42)
+      expect(subject.read_integer(:sync_version)).to eq(42)
+
+      subject.set_integer_if_greater(:sync_version, 100)
+      expect(subject.read_integer(:sync_version)).to eq(100)
+    end
+
+    it 'invalidates the cached read even when the write is rejected' do
+      memory_adapter.set_integer_if_greater(:sync_version, 100)
+      expect(subject.read_integer(:sync_version)).to eq(100)
+
+      memory_adapter.set_integer_if_greater(:sync_version, 200)
+      expect(subject.set_integer_if_greater(:sync_version, 150)).to eq(false)
+      expect(subject.read_integer(:sync_version)).to eq(200)
+    end
+  end
 end

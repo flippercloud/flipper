@@ -80,6 +80,18 @@ module Flipper
           @secondary.disable(feature, gate, thing) if @dual_write
         end
       end
+
+      def read_integer(key)
+        @primary.read_integer(key)
+      rescue *@errors
+        @secondary.read_integer(key)
+      end
+
+      def set_integer_if_greater(key, value)
+        accepted = @primary.set_integer_if_greater(key, value)
+        @secondary.set_integer_if_greater(key, value) if accepted && @dual_write
+        accepted
+      end
     end
   end
 end

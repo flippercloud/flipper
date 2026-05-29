@@ -67,6 +67,18 @@ module Flipper
       rescue *@errors
         false
       end
+
+      def read_integer(key)
+        @adapter.read_integer(key)
+      rescue *@errors
+        nil
+      end
+
+      def set_integer_if_greater(key, value)
+        @adapter.set_integer_if_greater(key, value)
+      rescue *@errors
+        false
+      end
     end
   end
 end

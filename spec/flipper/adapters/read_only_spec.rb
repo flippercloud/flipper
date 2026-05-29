@@ -97,4 +97,15 @@ RSpec.describe Flipper::Adapters::ReadOnly do
     expect { subject.disable(feature, boolean_gate, Flipper::Types::Boolean.new) }
       .to raise_error(Flipper::Adapters::ReadOnly::WriteAttempted)
   end
+
+  it 'forwards read_integer to wrapped adapter' do
+    adapter.set_integer_if_greater(:sync_version, 42)
+    expect(subject.read_integer(:sync_version)).to eq(42)
+  end
+
+  it 'raises WriteAttempted on set_integer_if_greater' do
+    expect { subject.set_integer_if_greater(:sync_version, 100) }
+      .to raise_error(Flipper::Adapters::ReadOnly::WriteAttempted)
+    expect(adapter.read_integer(:sync_version)).to be_nil
+  end
 end

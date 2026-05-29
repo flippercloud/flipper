@@ -11,6 +11,7 @@ module Flipper
       # Public
       def initialize(source = nil, threadsafe: true)
         @source = Typecast.features_hash(source)
+        @integers = {}
         @lock = Mutex.new if threadsafe
         reset
       end
@@ -56,6 +57,15 @@ module Flipper
 
       def get_all(**kwargs)
         synchronize { Typecast.features_hash(@source) }
+      end
+
+      def get_all_snapshot(**kwargs)
+        synchronize do
+          Flipper::Snapshot.new(
+            features: Typecast.features_hash(@source),
+            version: @integers["sync_version"]
+          )
+        end
       end
 
       # Public
@@ -115,9 +125,34 @@ module Flipper
       # Public: a more efficient implementation of import for this adapter
       def import(source)
         adapter = self.class.from(source)
-        get_all = Typecast.features_hash(adapter.get_all)
-        synchronize { @source.replace(get_all) }
+        snapshot = adapter.get_all_snapshot
+        get_all = Typecast.features_hash(snapshot.features)
+        synchronize do
+          @source.replace(get_all)
+          if snapshot.version
+            @integers["sync_version"] = snapshot.version
+          else
+            @integers.delete("sync_version")
+          end
+        end
         true
+      end
+
+      def read_integer(key)
+        synchronize { @integers[key.to_s] }
+      end
+
+      def set_integer_if_greater(key, value)
+        value = value.to_i
+        synchronize do
+          current = @integers[key.to_s]
+          if current.nil? || value > current
+            @integers[key.to_s] = value
+            true
+          else
+            false
+          end
+        end
       end
 
       private
