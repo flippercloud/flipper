@@ -239,6 +239,17 @@ RSpec.describe Flipper::Feature do
       expect(event.payload[:thing]).to eq(Flipper::Types::Actor.new(actor))
     end
 
+    it 'includes the feature instance in the payload' do
+      custom_flipper = Flipper.new(adapter, instrumenter: instrumenter)
+      custom_flipper.enable(:search)
+
+      event = instrumenter.events.last
+      expect(event).not_to be_nil
+      expect(event.name).to eq('feature_operation.flipper')
+      expect(event.payload[:feature]).to eq(custom_flipper[:search])
+      expect(event.payload[:feature].adapter).to eq(custom_flipper.adapter)
+    end
+
     it 'is recorded for disable' do
       thing = Flipper::Types::Boolean.new
 

@@ -438,6 +438,7 @@ module Flipper
     # Private: Instrument a feature operation.
     def instrument(operation, initial_payload = {})
       @instrumenter.instrument(InstrumentationName, initial_payload) do |payload|
+        payload[:feature] = self
         payload[:feature_name] = name
         payload[:operation] = operation
         payload[:result] = yield(payload) if block_given?
