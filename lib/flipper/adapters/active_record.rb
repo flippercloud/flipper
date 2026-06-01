@@ -2,9 +2,12 @@ require 'set'
 require 'securerandom'
 require 'flipper'
 require 'active_record'
-require_relative 'active_record/model'
-require_relative 'active_record/feature'
-require_relative 'active_record/gate'
+
+ActiveSupport.on_load(:active_record) do
+  require_relative 'active_record/model'
+  require_relative 'active_record/feature'
+  require_relative 'active_record/gate'
+end
 
 module Flipper
   module Adapters
