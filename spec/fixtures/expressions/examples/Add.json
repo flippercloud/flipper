@@ -1,0 +1,24 @@
+{
+  "valid": [
+    {
+      "expression": { "Add": [2, 2] },
+      "result": { "enum": [4] }
+    },
+    {
+      "expression": { "Add": ["a", "a"] },
+      "result": { "enum": ["aa"] }
+    },
+    {
+      "expression": { "Add": [{ "Property": "age" }, 3] },
+      "context": { "properties": { "age": 18 }},
+      "result": { "enum": [21] }
+    }
+  ],
+  "invalid": [
+    { "Add": [1, 2, 3] },
+    { "Add": [1] },
+    { "Add": 1 },
+    { "Add": null },
+    { "Add": [1, 2], "Any": [] }
+  ]
+}

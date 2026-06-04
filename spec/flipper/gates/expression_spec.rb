@@ -100,6 +100,23 @@ RSpec.describe Flipper::Gates::Expression do
       end
     end
 
+    context 'for properties with unsupported value types' do
+      it 'drops the value and warns instead of evaluating it' do
+        expression = Flipper.property(:tags).eq("a")
+        ctx = context(expression.value, properties: {tags: ["a", "b"]})
+        expect(subject).to receive(:warn).with(/Ignoring property "tags".*Array/)
+        expect(subject.open?(ctx)).to be(false)
+      end
+
+      it 'keeps supported scalar values alongside dropped ones' do
+        expression = Flipper.property(:plan).eq("pro")
+        ctx = context(expression.value, properties: {plan: "pro", meta: {"k" => 1}})
+        allow(subject).to receive(:warn)
+        expect(subject.open?(ctx)).to be(true)
+        expect(subject).to have_received(:warn).with(/Ignoring property "meta".*Hash/)
+      end
+    end
+
     context 'for time-based expressions' do
       it 'enables when now is past a scheduled epoch' do
         past_epoch = Time.now.to_i - 86_400

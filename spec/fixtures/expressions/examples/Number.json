@@ -1,0 +1,50 @@
+{
+  "valid": [
+    {
+      "expression": { "Number": 0 },
+      "result": { "enum": [0] }
+    },
+    {
+      "expression": { "Number": 1 },
+      "result": { "enum": [1] }
+    },
+    {
+      "expression": { "Number": 1.0 },
+      "result": { "enum": [1.0] }
+    },
+    {
+      "expression": { "Number": "0" },
+      "result": { "enum": [0] }
+    },
+    {
+      "expression": { "Number": "1" },
+      "result": { "enum": [1] }
+    },
+    {
+      "expression": { "Number": "1.0" },
+      "result": { "enum": [1.0] }
+    },
+    {
+      "expression": { "Number": [0] },
+      "result": { "enum": [0] }
+    },
+    {
+      "expression": { "Number": [1] },
+      "result": { "enum": [1] }
+    },
+    {
+      "expression": { "Number": [1.0] },
+      "result": { "enum": [1.0] }
+    },
+    {
+      "expression": { "Number": { "Property": "age" } },
+      "context": { "properties": { "age": 21 }},
+      "result": { "enum": [21] }
+    }
+  ],
+  "invalid": [
+    { "Number": null },
+    { "Number": [true, false] },
+    { "Number": true, "Any": [] }
+  ]
+}
