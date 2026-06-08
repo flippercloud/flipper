@@ -65,11 +65,6 @@
       },
       "additionalProperties": false
     },
-    "property": {
-      "title": "Property Value",
-      "description": "A value stored in context[properties]: a string, number, boolean, or null.",
-      "$ref": "#/definitions/constant"
-    },
     "string": {
       "title": "String",
       "description": "A constant string value or a function that returns a string",

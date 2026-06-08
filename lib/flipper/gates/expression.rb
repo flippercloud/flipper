@@ -52,8 +52,8 @@ module Flipper
       DEFAULT_PROPERTIES = {}.freeze
 
       # Internal: Property values are compared against constants in expressions,
-      # which are limited to these scalar types (see the schema's `property`
-      # definition). Values of any other type can't be meaningfully evaluated.
+      # which the schema limits to these scalar types (string, number, boolean,
+      # null). Values of any other type can't be meaningfully evaluated.
       ALLOWED_PROPERTY_TYPES = [String, Numeric, TrueClass, FalseClass, NilClass].freeze
 
       def properties(actor)
