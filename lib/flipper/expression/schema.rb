@@ -1,3 +1,5 @@
+require "flipper/typecast"
+
 module Flipper
   class Expression
     # Validates expression values against the JSON Schema vendored from

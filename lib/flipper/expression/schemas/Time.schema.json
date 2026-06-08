@@ -9,6 +9,7 @@
     "title": "Time",
     "anyOf": [
       { "type": "string", "format": "date-time" },
+      { "type": "number" },
       { "$ref": "schema.json#/definitions/function" }
     ]
   },

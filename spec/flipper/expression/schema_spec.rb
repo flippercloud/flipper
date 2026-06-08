@@ -11,6 +11,12 @@ RSpec.describe Flipper::Expression::Schema do
     end
   end
 
+  it "accepts numeric epoch time expressions supported by the Ruby DSL" do
+    expression = Flipper.time(123)
+
+    expect(expression.valid?).to be(true)
+  end
+
   # Shared examples vendored from flippercloud/expressions so Ruby and JS test the
   # exact same valid/invalid cases. Re-vendor with `rake expressions:vendor`.
   Dir[examples_glob].sort.each do |path|
