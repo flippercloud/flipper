@@ -13,6 +13,10 @@
       "result": { "enum": [1.5] }
     },
     {
+      "expression": { "Divide": [3, 0] },
+      "result": { "enum": [null] }
+    },
+    {
       "expression": { "Divide": [{ "Property": "age" }, 3] },
       "context": { "properties": { "age": 18 }},
       "result": { "enum": [6] }

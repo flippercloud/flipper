@@ -53,8 +53,8 @@ module Flipper
 
       # Internal: Property values are compared against constants in expressions,
       # which the schema limits to these scalar types (string, number, boolean,
-      # null). Values of any other type can't be meaningfully evaluated.
-      ALLOWED_PROPERTY_TYPES = [String, Numeric, TrueClass, FalseClass, NilClass].freeze
+      # null) plus Time values returned by model datetime attributes.
+      ALLOWED_PROPERTY_TYPES = [String, Numeric, TrueClass, FalseClass, NilClass, ::Time].freeze
 
       def properties(actor)
         return DEFAULT_PROPERTIES if actor.nil?

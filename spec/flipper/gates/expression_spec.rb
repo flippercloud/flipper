@@ -192,6 +192,12 @@ RSpec.describe Flipper::Gates::Expression do
         )
         expect(subject.open?(context(expression.value))).to be(false)
       end
+
+      it 'evaluates time properties from model attributes' do
+        created_at = Time.now.utc - 86_400
+        expression = Flipper.property(:created_at).lt(Flipper.now)
+        expect(subject.open?(context(expression.value, properties: {created_at: created_at}))).to be(true)
+      end
     end
   end
 
