@@ -63,6 +63,12 @@ module Flipper
       def memoized_call(request)
         flipper = request.env.fetch(@env_key) { Flipper }
 
+        # If the adapter doesn't support memoization (e.g., using memoize: :poll),
+        # skip memoization and just call the app.
+        unless flipper.adapter.respond_to?(:memoize=)
+          return @app.call(request.env)
+        end
+
         # Already memoizing. This instance does not need to do anything.
         if flipper.memoizing?
           warn "Flipper::Middleware::Memoizer appears to be running twice. Read how to resolve this at https://github.com/flippercloud/flipper/pull/523"

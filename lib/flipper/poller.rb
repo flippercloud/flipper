@@ -1,7 +1,7 @@
 require 'logger'
 require 'concurrent/utility/monotonic_time'
 require 'concurrent/map'
-require 'concurrent/atomic/atomic_fixnum'
+require 'concurrent/atomic/atomic_reference'
 require 'concurrent/atomic/atomic_boolean'
 
 module Flipper
@@ -32,7 +32,7 @@ module Flipper
       @mutex = Mutex.new
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
       @remote_adapter = options.fetch(:remote_adapter)
-      @last_synced_at = Concurrent::AtomicFixnum.new(0)
+      @last_synced_at = Concurrent::AtomicReference.new(0.0)
       @adapter = Adapters::Memory.new(nil, threadsafe: true)
       @shutdown_requested = Concurrent::AtomicBoolean.new(false)
 

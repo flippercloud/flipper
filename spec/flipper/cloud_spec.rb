@@ -28,7 +28,7 @@ RSpec.describe Flipper::Cloud do
       dual_write_adapter = memoized_adapter.adapter
       expect(dual_write_adapter).to be_instance_of(Flipper::Adapters::DualWrite)
       poll_adapter = dual_write_adapter.local
-      expect(poll_adapter).to be_instance_of(Flipper::Adapters::Poll)
+      expect(poll_adapter).to be_instance_of(Flipper::Adapters::CloudPoll)
 
       http_adapter = dual_write_adapter.remote
       client = http_adapter.client
