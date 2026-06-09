@@ -14,12 +14,8 @@ module Flipper
       def self.call(scalar, unit)
         unit = unit.to_s.downcase.chomp("s")
 
-        unless scalar.is_a?(Numeric)
-          raise ArgumentError, "Duration value must be a number but was #{scalar.inspect}"
-        end
-        unless SECONDS_PER[unit]
-          raise ArgumentError, "Duration unit #{unit.inspect} must be one of: #{SECONDS_PER.keys.join(', ')}"
-        end
+        return nil unless scalar.is_a?(Numeric)
+        return nil unless SECONDS_PER[unit]
 
         scalar * SECONDS_PER[unit]
       end

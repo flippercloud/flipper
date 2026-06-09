@@ -3,6 +3,8 @@ module Flipper
     class Min
       def self.call(*args)
         args.min
+      rescue ArgumentError
+        nil
       end
     end
   end

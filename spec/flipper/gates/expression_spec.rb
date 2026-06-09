@@ -117,6 +117,25 @@ RSpec.describe Flipper::Gates::Expression do
       end
     end
 
+    context 'for arithmetic expressions with missing properties' do
+      {
+        Add: {Add: [{Property: "age"}, 3]},
+        Subtract: {Subtract: [{Property: "age"}, 3]},
+        Multiply: {Multiply: [{Property: "age"}, 3]},
+        Divide: {Divide: [{Property: "age"}, 3]},
+        Min: {Min: [{Property: "age"}, 3]},
+        Max: {Max: [{Property: "age"}, 3]},
+        Duration: {Duration: [{Property: "age"}, "seconds"]},
+      }.each do |name, operand|
+        it "returns false instead of raising for #{name}" do
+          expression = Flipper::Expression.build(GreaterThan: [operand, 20])
+          ctx = context(expression.value, properties: {plan: "pro"})
+
+          expect(subject.open?(ctx)).to be(false)
+        end
+      end
+    end
+
     context 'for time-based expressions' do
       it 'enables when now is past a scheduled epoch' do
         past_epoch = Time.now.to_i - 86_400

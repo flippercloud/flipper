@@ -3,6 +3,8 @@ module Flipper
     class Max
       def self.call(*args)
         args.max
+      rescue ArgumentError
+        nil
       end
     end
   end
