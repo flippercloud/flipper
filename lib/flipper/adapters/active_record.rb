@@ -106,8 +106,8 @@ module Flipper
       def get_all(**kwargs)
         with_connection(@feature_class) do |connection|
           # query the gates from the db in a single query
-          features = ::Arel::Table.new(@feature_class.table_name.to_sym)
-          gates = ::Arel::Table.new(@gate_class.table_name.to_sym)
+          features = @feature_class.arel_table
+          gates = @gate_class.arel_table
           rows_query = features.join(gates, ::Arel::Nodes::OuterJoin)
             .on(features[:key].eq(gates[:feature_key]))
             .project(features[:key].as('feature_key'), gates[:key], gates[:value])
