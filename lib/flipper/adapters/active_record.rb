@@ -299,7 +299,9 @@ module Flipper
 
       def warned_about_value_not_text?
         return @warned_about_value_not_text if defined?(@warned_about_value_not_text)
+
         @warned_about_value_not_text = true
+        false
       end
     end
   end
