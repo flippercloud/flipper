@@ -103,7 +103,6 @@ module Flipper
             if result.url
               ui.info "Migrating to Flipper Cloud..."
               ui.info result.url
-              system("open", result.url)
             else
               message = "Migration failed (HTTP #{result.code})"
               message << ": #{result.message}" if result.message

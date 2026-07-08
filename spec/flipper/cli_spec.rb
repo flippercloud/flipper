@@ -176,11 +176,21 @@ RSpec.describe Flipper::CLI do
       allow(Flipper::Cloud).to receive(:migrate).and_return(
         Flipper::Cloud::MigrateResult.new(code: 200, url: "https://www.flippercloud.io/cloud/setup/abc123")
       )
-      allow(cli).to receive(:system)
     end
 
     it "prints the cloud URL" do
+      expect(cli).not_to receive(:system)
+
       expect(subject).to have_attributes(status: 0, stdout: /flippercloud\.io/)
+    end
+
+    it "does not open URLs returned by the migration API" do
+      allow(Flipper::Cloud).to receive(:migrate).and_return(
+        Flipper::Cloud::MigrateResult.new(code: 200, url: "file:///Applications/Calculator.app")
+      )
+      expect(cli).not_to receive(:system)
+
+      expect(subject).to have_attributes(status: 0, stdout: %r{file:///Applications/Calculator.app})
     end
   end
 
