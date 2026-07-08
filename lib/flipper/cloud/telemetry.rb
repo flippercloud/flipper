@@ -51,6 +51,7 @@ module Flipper
 
       def initialize(cloud_configuration)
         @pid = $$
+        @mutex = Mutex.new
         @cloud_configuration = cloud_configuration
         self.interval = ENV.fetch("FLIPPER_TELEMETRY_INTERVAL", 60).to_f
         self.shutdown_timeout = ENV.fetch("FLIPPER_TELEMETRY_SHUTDOWN_TIMEOUT", 5).to_f
@@ -66,11 +67,45 @@ module Flipper
         detect_forking
 
         metric = Metric.new(payload[:feature_name].to_s.freeze, payload[:result])
+        # @metric_storage is only swapped by start!/restart! (under @mutex); the
+        # ivar read here is atomic under MRI, so we never see a torn/nil storage.
         @metric_storage.increment metric
       end
 
       # Public: Start all the tasks and setup new metric storage.
       def start
+        @mutex.synchronize { start! }
+      end
+
+      # Public: Shuts down all the tasks and tries to flush any remaining info to Cloud.
+      def stop
+        @mutex.synchronize { stop! }
+      end
+
+      # Public: Restart all the tasks and reset the storage.
+      def restart
+        @mutex.synchronize { restart! }
+      end
+
+      # Internal: Sets the interval in seconds for how often telemetry should be sent to cloud.
+      def interval=(value)
+        new_interval = [Typecast.to_float(value), 10].max
+        timer = @timer
+        timer&.execution_interval = new_interval
+        @interval = new_interval
+      end
+
+      # Internal: Sets the timeout in seconds for how long to wait for the pool to shutdown.
+      def shutdown_timeout=(value)
+        new_shutdown_timeout = [Typecast.to_float(value), 0.1].max
+        @shutdown_timeout = new_shutdown_timeout
+      end
+
+      private
+
+      # Internal: Start all the tasks and setup new metric storage. Callers must
+      # hold @mutex.
+      def start!
         info "action=start"
 
         @metric_storage = MetricStorage.new
@@ -87,8 +122,9 @@ module Flipper
         }) { post_to_pool }
       end
 
-      # Public: Shuts down all the tasks and tries to flush any remaining info to Cloud.
-      def stop
+      # Internal: Shuts down all the tasks and tries to flush any remaining info
+      # to Cloud. Callers must hold @mutex.
+      def stop!
         info "action=stop"
 
         if @timer
@@ -111,41 +147,36 @@ module Flipper
         end
       end
 
-      # Public: Restart all the tasks and reset the storage.
-      def restart
-        stop
-        start
+      # Internal: Restart all the tasks and reset the storage. Callers must hold
+      # @mutex.
+      def restart!
+        stop!
+        start!
       end
-
-      # Internal: Sets the interval in seconds for how often telemetry should be sent to cloud.
-      def interval=(value)
-        new_interval = [Typecast.to_float(value), 10].max
-        @timer&.execution_interval = new_interval
-        @interval = new_interval
-      end
-
-      # Internal: Sets the timeout in seconds for how long to wait for the pool to shutdown.
-      def shutdown_timeout=(value)
-        new_shutdown_timeout = [Typecast.to_float(value), 0.1].max
-        @shutdown_timeout = new_shutdown_timeout
-      end
-
-      private
 
       def detect_forking
-        if @pid != $$
-          info "action=fork_detected pid_was#{@pid} pid_is=#{$$}"
-          restart
+        # Lock-free fast path: only contend for @mutex when a fork is actually
+        # detected. The inner check ensures just one thread performs the restart.
+        return if @pid == $$
+
+        @mutex.synchronize do
+          return if @pid == $$
+          info "action=fork_detected pid_was=#{@pid} pid_is=#{$$}"
+          restart!
           @pid = $$
         end
       end
 
       # Drains the metric storage and enqueues the metrics to be posted to cloud.
       def post_to_pool
-        drained = @metric_storage.drain
+        # Snapshot so a concurrent restart swapping these can't be observed as an
+        # inconsistent storage/pool pair.
+        storage = @metric_storage
+        pool = @pool
+        drained = storage.drain
         return if drained.empty?
         debug "action=post_to_pool metrics=#{drained.size}"
-        @pool.post { post_to_cloud(drained) }
+        pool.post { post_to_cloud(drained) }
       rescue => error
         error "action=post_to_pool error=#{error.inspect}"
       end
