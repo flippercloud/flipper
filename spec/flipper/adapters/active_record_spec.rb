@@ -92,6 +92,19 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
           end
         end
 
+        it "warns once if the gates value column is not text" do
+          allow(Flipper::Adapters::ActiveRecord::Gate).
+            to receive(:column_for_attribute).
+            with(:value).
+            and_return(double(type: :string))
+
+          output = capture_output do
+            2.times { subject.features }
+          end
+
+          expect(output.scan("Your database needs to be migrated").size).to eq(1)
+        end
+
         context "ActiveRecord connection_pool" do
           before do
             clear_active_connections!
