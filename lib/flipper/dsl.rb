@@ -1,4 +1,5 @@
 require 'forwardable'
+require 'concurrent/map'
 
 module Flipper
   class DSL
@@ -23,7 +24,10 @@ module Flipper
       memoize = options.fetch(:memoize, true)
       adapter = Adapters::Memoizable.new(adapter) if memoize
       @adapter = adapter
-      @memoized_features = {}
+      # Concurrent::Map so a single DSL instance shared across threads (e.g. a
+      # Flipper.new(adapter) or Flipper::Cloud.new held in a constant) can
+      # memoize features without a non-atomic Hash mutation racing.
+      @memoized_features = Concurrent::Map.new
     end
 
     # Public: Check if a feature is enabled.
@@ -218,7 +222,9 @@ module Flipper
         raise ArgumentError, "#{name} must be a String or Symbol"
       end
 
-      @memoized_features[name.to_sym] ||= Feature.new(name, @adapter, instrumenter: instrumenter)
+      @memoized_features.compute_if_absent(name.to_sym) do
+        Feature.new(name, @adapter, instrumenter: instrumenter)
+      end
     end
 
     # Public: Preload the features with the given names.

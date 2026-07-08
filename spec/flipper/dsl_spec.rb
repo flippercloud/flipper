@@ -43,6 +43,26 @@ RSpec.describe Flipper::DSL do
       let(:feature) { dsl.send(method_name, :stats) }
       let(:dsl) { described_class.new(adapter, instrumenter: instrumenter) }
     end
+
+    it 'returns the same memoized instance across concurrent threads' do
+      dsl = described_class.new(adapter)
+      names = 100.times.map { |n| :"feature_#{n}" }
+
+      results = Array.new(10) do
+        Thread.new do
+          Thread.pass
+          names.map { |name| dsl.feature(name) }
+        end
+      end.map(&:value)
+
+      # Every thread should observe the exact same Feature instance per name,
+      # and building the memo concurrently must not raise or drop keys.
+      results.each do |features|
+        features.each_with_index do |feature, index|
+          expect(feature).to equal(results.first[index])
+        end
+      end
+    end
   end
 
   describe '#preload' do
