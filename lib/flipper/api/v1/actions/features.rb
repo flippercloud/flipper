@@ -67,9 +67,9 @@ module Flipper
           end
 
           def raw_query_values(name)
-            request.query_string.to_s.split(/[&;]/).filter_map do |part|
+            request.query_string.to_s.split(/[&;]/).each_with_object([]) do |part, values|
               key, value = part.split('=', 2)
-              Rack::Utils.unescape(key) == name ? value.to_s : nil
+              values << value.to_s if Rack::Utils.unescape(key) == name
             end
           end
 
