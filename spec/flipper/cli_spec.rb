@@ -178,10 +178,13 @@ RSpec.describe Flipper::CLI do
       )
     end
 
-    it "prints the cloud URL" do
+    it "prints instructions and the cloud URL" do
       expect(cli).not_to receive(:system)
 
-      expect(subject).to have_attributes(status: 0, stdout: /flippercloud\.io/)
+      expect(subject).to have_attributes(
+        status: 0,
+        stdout: /Open this URL in your browser to finish migrating your features:\nhttps:\/\/www\.flippercloud\.io/
+      )
     end
 
     it "does not open URLs returned by the migration API" do

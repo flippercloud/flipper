@@ -102,6 +102,7 @@ module Flipper
             result = Flipper::Cloud.migrate(Flipper)
             if result.url
               ui.info "Migrating to Flipper Cloud..."
+              ui.info "Open this URL in your browser to finish migrating your features:"
               ui.info result.url
             else
               message = "Migration failed (HTTP #{result.code})"
