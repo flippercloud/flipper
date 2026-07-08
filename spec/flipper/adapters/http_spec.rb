@@ -163,14 +163,14 @@ RSpec.describe Flipper::Adapters::Http do
     end
 
     it "escapes special characters in the feature key" do
-      stub_request(:get, "http://app.com/flipper/features/a%2Fb+c")
+      stub_request(:get, "http://app.com/flipper/features/a%2Fb%20c")
         .to_return(status: 404)
 
       adapter = described_class.new(url: 'http://app.com/flipper')
       adapter.get(flipper["a/b c"])
 
       expect(
-        a_request(:get, "http://app.com/flipper/features/a%2Fb+c")
+        a_request(:get, "http://app.com/flipper/features/a%2Fb%20c")
       ).to have_been_made.once
     end
   end
