@@ -69,5 +69,33 @@ RSpec.describe Flipper::Api::V1::Actions::Import do
         expect(json_response).to eq(expected)
       end
     end
+
+    context 'body larger than the max import size' do
+      before do
+        stub_const("Flipper::Exporters::Json::Export::MAX_BYTES", 1)
+
+        source_flipper = build_flipper
+        source_flipper.enable(:search)
+
+        post '/import', source_flipper.export.contents, 'CONTENT_TYPE' => 'application/json'
+      end
+
+      it 'returns correct status code' do
+        expect(last_response.status).to eq(422)
+      end
+
+      it 'returns formatted error' do
+        expected = {
+          'code' => 6,
+          'message' => 'Import invalid.',
+          'more_info' => api_error_code_reference_url,
+        }
+        expect(json_response).to eq(expected)
+      end
+
+      it 'does not import the features' do
+        expect(flipper.features.map(&:key)).to eq([])
+      end
+    end
   end
 end
