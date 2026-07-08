@@ -80,7 +80,7 @@ module Flipper
       def write_options
         write_options = {}
         write_options[:expires_in] = @ttl if @ttl
-        write_options[:race_condition_ttl] if @race_condition_ttl
+        write_options[:race_condition_ttl] = @race_condition_ttl if @race_condition_ttl
         write_options
       end
     end
