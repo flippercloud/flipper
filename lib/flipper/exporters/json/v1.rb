@@ -8,15 +8,11 @@ module Flipper
         VERSION = 1
 
         def call(adapter)
-          features = adapter.get_all
-
-          # Convert sets to arrays for json
-          features.each do |feature_key, gates|
-            gates.each do |key, value|
-              case value
-              when Set
-                features[feature_key][key] = value.to_a
-              end
+          # Build a new structure rather than mutating the hash returned by
+          # the adapter, which may be a reference to the adapter's live data.
+          features = adapter.get_all.transform_values do |gates|
+            gates.transform_values do |value|
+              value.is_a?(Set) ? value.to_a : value
             end
           end
 
