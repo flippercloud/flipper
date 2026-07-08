@@ -32,6 +32,13 @@ module Flipper
       def open?(context)
         return false unless context.actors?
         id = "#{context.feature_name}#{context.actors.map(&:value).sort.join}"
+        # NOTE: `crc32 % 100_000` has a tiny modulo bias (2**32 is not a
+        # multiple of 100_000, so buckets 0..67_295 are ~0.0023% over-
+        # represented). This is intentionally left as-is: the bias is
+        # negligible, and any "fix" changes the hash-to-bucket mapping,
+        # which would re-bucket essentially every actor on upgrade and
+        # silently flip who is enabled. Stable, deterministic bucketing
+        # matters far more here than perfect uniformity. Do not change.
         Zlib.crc32(id) % (100 * SCALING_FACTOR) < context.values.percentage_of_actors * SCALING_FACTOR
       end
 
