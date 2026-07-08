@@ -42,8 +42,7 @@ module Flipper
       end
 
       def get_multi(features)
-        csv_keys = features.map { |feature| escape(feature.key) }.join(',')
-        response = @client.get("/features?keys=#{csv_keys}&exclude_gate_names=true")
+        response = @client.get("/features?#{query_for_features(features)}")
         raise Error, response unless response.is_a?(Net::HTTPOK)
 
         parsed_response = Typecast.from_json(response.body)
@@ -170,6 +169,15 @@ module Flipper
 
       def escape(key)
         URI.encode_www_form_component(key.to_s)
+      end
+
+      def query_for_features(features)
+        if features.any? { |feature| feature.key.to_s.include?(',') }
+          URI.encode_www_form(features.map { |feature| ["keys[]", feature.key] } + [["exclude_gate_names", "true"]])
+        else
+          csv_keys = features.map { |feature| escape(feature.key) }.join(',')
+          "keys=#{csv_keys}&exclude_gate_names=true"
+        end
       end
 
       def request_body_for_gate(gate, value)

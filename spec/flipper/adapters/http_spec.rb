@@ -187,14 +187,14 @@ RSpec.describe Flipper::Adapters::Http do
     end
 
     it "escapes special characters in the feature keys" do
-      stub_request(:get, "http://app.com/flipper/features?keys=a%26b,c%20d&exclude_gate_names=true")
+      stub_request(:get, "http://app.com/flipper/features?keys%5B%5D=a%26b&keys%5B%5D=c%2Cd&exclude_gate_names=true")
         .to_return(status: 200, body: JSON.generate("features" => []))
 
       adapter = described_class.new(url: 'http://app.com/flipper')
-      adapter.get_multi([flipper["a&b"], flipper["c d"]])
+      adapter.get_multi([flipper["a&b"], flipper["c,d"]])
 
       expect(
-        a_request(:get, "http://app.com/flipper/features?keys=a%26b,c%20d&exclude_gate_names=true")
+        a_request(:get, "http://app.com/flipper/features?keys%5B%5D=a%26b&keys%5B%5D=c%2Cd&exclude_gate_names=true")
       ).to have_been_made.once
     end
   end
