@@ -2,6 +2,18 @@ require 'moneta'
 
 module Flipper
   module Adapters
+    # Public: Adapter that stores features in any Moneta-backed store.
+    #
+    # WARNING: This adapter is NOT safe for concurrent writes to the same
+    # feature. Set-based gates (actors, groups, percentage of actors) are
+    # updated with a non-atomic read-modify-write: the current value is read
+    # from the store, mutated in Ruby, and written back with no lock or
+    # transaction. Two writers racing on the same feature (e.g. enabling two
+    # different actors) will each read the same set and the second write will
+    # clobber the first, silently dropping one of the changes. Unlike the
+    # Memory and PStore adapters, Moneta provides no portable atomic primitive
+    # to guard against this. If you need concurrent writes to a shared store,
+    # prefer a native adapter such as ActiveRecord or Redis.
     class Moneta
       include ::Flipper::Adapter
 
