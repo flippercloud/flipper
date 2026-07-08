@@ -21,22 +21,55 @@ module Flipper
           @interval = interval || DEFAULT_INTERVAL
           # TODO: add jitter to this so all processes booting at the same time
           # don't phone home at the same time.
+          @pid = Process.pid
           @last_sync_at = 0
+          @syncing = false
+          @sync_mutex = Mutex.new
         end
 
         def call
-          return unless time_to_sync?
+          reset_sync_state_if_forked
+          return unless sync_needed?
 
-          @last_sync_at = now
-          @synchronizer.call
+          begin
+            @synchronizer.call
+          ensure
+            complete_sync
+          end
 
           nil
         end
 
         private
 
-        def time_to_sync?
-          seconds_since_last_sync = now - @last_sync_at
+        def reset_sync_state_if_forked
+          return if @pid == Process.pid
+
+          @pid = Process.pid
+          @syncing = false
+          @sync_mutex = Mutex.new
+        end
+
+        def sync_needed?
+          @sync_mutex.synchronize do
+            current_time = now
+            return false unless time_to_sync?(current_time)
+            return false if @syncing
+
+            @last_sync_at = current_time
+            @syncing = true
+            true
+          end
+        end
+
+        def complete_sync
+          @sync_mutex.synchronize do
+            @syncing = false
+          end
+        end
+
+        def time_to_sync?(current_time)
+          seconds_since_last_sync = current_time - @last_sync_at
           seconds_since_last_sync >= @interval
         end
 
