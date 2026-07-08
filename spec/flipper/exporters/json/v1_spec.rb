@@ -30,4 +30,19 @@ RSpec.describe Flipper::Exporters::Json::V1 do
       "search" => {actors: Set["User;1", "User;100"], boolean: nil, expression: nil, groups: Set["admins", "employees"], percentage_of_actors: "10", percentage_of_time: "15"},
     })
   end
+
+  it "does not mutate adapter data while exporting" do
+    adapter = Flipper::Adapters::Memory.new
+    flipper = Flipper.new(adapter)
+    flipper.enable_actor :search, Flipper::Actor.new('User;1')
+    flipper.enable_group :search, :admins
+
+    before = adapter.get_all
+
+    subject.call(adapter)
+
+    expect(adapter.get_all).to eq(before)
+    expect(adapter.get_all.dig("search", :actors)).to be_a(Set)
+    expect(adapter.get_all.dig("search", :groups)).to be_a(Set)
+  end
 end
