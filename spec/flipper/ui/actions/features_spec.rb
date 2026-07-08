@@ -40,6 +40,15 @@ RSpec.describe Flipper::UI::Actions::Features do
       expect(last_response.body).to include("can_do_stuff%3F")
     end
 
+    it "escapes actor values in gate tooltip titles" do
+      flipper[:search].enable_actor Flipper::Actor.new('x" onmouseover="alert(document.domain)')
+
+      get '/features'
+
+      expect(last_response.body).to include('title="x&quot; onmouseover=&quot;alert(document.domain)"')
+      expect(last_response.body).not_to include('title="x" onmouseover="alert(document.domain)"')
+    end
+
     context "when there are no features to list" do
       before do
         @original_fun_enabled = Flipper::UI.configuration.fun
