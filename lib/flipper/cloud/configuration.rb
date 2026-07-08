@@ -1,5 +1,6 @@
 require "logger"
 require "socket"
+require "uri"
 require "flipper/adapters/http"
 require "flipper/adapters/poll"
 require "flipper/poller"
@@ -25,8 +26,9 @@ module Flipper
 
       # Public: The url for http adapter. Really should only be customized for
       #         development work if you are me and you are not me. Feel free to
-      #         forget you ever saw this.
-      attr_accessor :url
+      #         forget you ever saw this. Must be https so the cloud token is
+      #         never transmitted in cleartext (local development uses https too).
+      attr_reader :url
 
       # Public: net/http read timeout for all http requests (default: 5).
       attr_accessor :read_timeout
@@ -137,6 +139,16 @@ module Flipper
 
       def instrument(name, payload = {}, &block)
         instrumenter.instrument(name, payload, &block)
+      end
+
+      def url=(value)
+        unless URI(value.to_s).scheme == "https"
+          raise ArgumentError,
+            "Flipper::Cloud url must use https but was #{value.inspect}. " \
+            "https is required so your token is never sent in cleartext."
+        end
+
+        @url = value
       end
 
       private
