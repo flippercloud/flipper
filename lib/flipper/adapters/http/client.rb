@@ -81,7 +81,7 @@ module Flipper
           uri = @uri.dup
           path_uri = URI(path)
           uri.path += path_uri.path
-          uri.query = "#{uri.query}&#{path_uri.query}" if path_uri.query
+          uri.query = [uri.query, path_uri.query].compact.join('&') if path_uri.query
           uri
         end
 

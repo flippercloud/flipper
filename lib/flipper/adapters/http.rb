@@ -1,4 +1,5 @@
 require 'net/http'
+require 'uri'
 require 'json'
 require 'set'
 require 'flipper'
@@ -29,7 +30,7 @@ module Flipper
       end
 
       def get(feature)
-        response = @client.get("/features/#{feature.key}")
+        response = @client.get("/features/#{escape(feature.key)}")
         if response.is_a?(Net::HTTPOK)
           parsed_response = Typecast.from_json(response.body)
           result_for_feature(feature, parsed_response.fetch('gates'))
@@ -41,7 +42,7 @@ module Flipper
       end
 
       def get_multi(features)
-        csv_keys = features.map(&:key).join(',')
+        csv_keys = features.map { |feature| escape(feature.key) }.join(',')
         response = @client.get("/features?keys=#{csv_keys}&exclude_gate_names=true")
         raise Error, response unless response.is_a?(Net::HTTPOK)
 
@@ -125,7 +126,7 @@ module Flipper
       end
 
       def remove(feature)
-        response = @client.delete("/features/#{feature.key}")
+        response = @client.delete("/features/#{escape(feature.key)}")
         raise Error, response unless response.is_a?(Net::HTTPNoContent)
         true
       end
@@ -133,7 +134,7 @@ module Flipper
       def enable(feature, gate, thing)
         body = request_body_for_gate(gate, thing.value)
         query_string = gate.key == :groups ? "?allow_unregistered_groups=true" : ""
-        response = @client.post("/features/#{feature.key}/#{gate.key}#{query_string}", body)
+        response = @client.post("/features/#{escape(feature.key)}/#{escape(gate.key)}#{query_string}", body)
         raise Error, response unless response.is_a?(Net::HTTPOK)
         true
       end
@@ -143,16 +144,16 @@ module Flipper
         query_string = gate.key == :groups ? "?allow_unregistered_groups=true" : ""
         response = case gate.key
         when :percentage_of_actors, :percentage_of_time
-          @client.post("/features/#{feature.key}/#{gate.key}#{query_string}", body)
+          @client.post("/features/#{escape(feature.key)}/#{escape(gate.key)}#{query_string}", body)
         else
-          @client.delete("/features/#{feature.key}/#{gate.key}#{query_string}", body)
+          @client.delete("/features/#{escape(feature.key)}/#{escape(gate.key)}#{query_string}", body)
         end
         raise Error, response unless response.is_a?(Net::HTTPOK)
         true
       end
 
       def clear(feature)
-        response = @client.delete("/features/#{feature.key}/clear")
+        response = @client.delete("/features/#{escape(feature.key)}/clear")
         raise Error, response unless response.is_a?(Net::HTTPNoContent)
         true
       end
@@ -166,6 +167,10 @@ module Flipper
       end
 
       private
+
+      def escape(key)
+        URI.encode_www_form_component(key.to_s)
+      end
 
       def request_body_for_gate(gate, value)
         data = case gate.key
