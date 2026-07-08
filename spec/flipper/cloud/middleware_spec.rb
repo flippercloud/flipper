@@ -84,6 +84,38 @@ RSpec.describe Flipper::Cloud::Middleware do
     end
   end
 
+  context 'when signature timestamp is outside the tolerance' do
+    let(:app) { Flipper::Cloud.app(flipper) }
+    let(:timestamp) { Time.now - (60 * 60) }
+
+    it 'rejects the replayed webhook without syncing' do
+      stub = stub_request_for_token('regular')
+      env = {
+        "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
+      }
+      post '/', request_body, env
+
+      expect(last_response.status).to eq(400)
+      expect(stub).not_to have_been_requested
+    end
+  end
+
+  context 'when initialized with a custom signature tolerance' do
+    let(:app) { Flipper::Cloud.app(flipper, signature_tolerance: 60 * 60 * 2) }
+    let(:timestamp) { Time.now - (60 * 60) }
+
+    it 'uses the provided tolerance when verifying the webhook' do
+      stub = stub_request_for_token('regular')
+      env = {
+        "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
+      }
+      post '/', request_body, env
+
+      expect(last_response.status).to eq(200)
+      expect(stub).to have_been_requested
+    end
+  end
+
   context "when flipper cloud responds with 402" do
     let(:app) { Flipper::Cloud.app(flipper) }
 
