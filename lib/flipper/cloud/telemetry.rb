@@ -67,8 +67,6 @@ module Flipper
         detect_forking
 
         metric = Metric.new(payload[:feature_name].to_s.freeze, payload[:result])
-        # @metric_storage is only swapped by start!/restart! (under @mutex); the
-        # ivar read here is atomic under MRI, so we never see a torn/nil storage.
         @metric_storage.increment metric
       end
 
@@ -90,8 +88,7 @@ module Flipper
       # Internal: Sets the interval in seconds for how often telemetry should be sent to cloud.
       def interval=(value)
         new_interval = [Typecast.to_float(value), 10].max
-        timer = @timer
-        timer&.execution_interval = new_interval
+        @timer&.execution_interval = new_interval
         @interval = new_interval
       end
 
@@ -169,14 +166,10 @@ module Flipper
 
       # Drains the metric storage and enqueues the metrics to be posted to cloud.
       def post_to_pool
-        # Snapshot so a concurrent restart swapping these can't be observed as an
-        # inconsistent storage/pool pair.
-        storage = @metric_storage
-        pool = @pool
-        drained = storage.drain
+        drained = @metric_storage.drain
         return if drained.empty?
         debug "action=post_to_pool metrics=#{drained.size}"
-        pool.post { post_to_cloud(drained) }
+        @pool.post { post_to_cloud(drained) }
       rescue => error
         error "action=post_to_pool error=#{error.inspect}"
       end
