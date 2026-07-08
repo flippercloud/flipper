@@ -52,10 +52,15 @@ module Flipper
             return keys.map(&:to_s) if keys.is_a?(Array)
 
             raw_keys = raw_query_values("keys")
-            return decoded_feature_names if raw_keys.empty? || raw_keys.none? { |key| key.include?(',') }
+            return decoded_feature_names if raw_keys.empty?
 
             raw_keys.flat_map do |keys|
-              keys.split(',').map { |key| Rack::Utils.unescape(key) }
+              if keys.include?(',')
+                keys.split(',').map { |key| Rack::Utils.unescape(key) }
+              else
+                decoded_keys = Rack::Utils.unescape(keys)
+                feature_exists?(decoded_keys) ? decoded_keys : decoded_keys.split(',')
+              end
             end
           end
 

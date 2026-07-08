@@ -111,6 +111,19 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
       end
     end
 
+    context 'with a single encoded key containing a comma' do
+      before do
+        flipper["audit,log"].enable
+        get '/features?keys=audit%2Clog'
+      end
+
+      it 'treats the escaped comma as part of the feature key' do
+        expect(last_response.status).to eq(200)
+        keys = json_response.fetch('features').map { |feature| feature.fetch('key') }
+        expect(keys).to eq(["audit,log"])
+      end
+    end
+
     context 'with keys that are not existing features' do
       before do
         flipper[:search].disable
