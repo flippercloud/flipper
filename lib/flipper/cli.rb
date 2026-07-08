@@ -70,6 +70,42 @@ module Flipper
         end
       end
 
+      { 'deny' => 'deny', 'permit' => 'permit' }.each do |command_name, method_prefix|
+        command command_name do |c|
+          c.banner = "Usage: #{c.program_name} [options] <feature>"
+          c.description = "#{command_name.capitalize} actors or groups for a feature"
+
+          values = []
+
+          c.on('-a id', '--actor=id', "#{command_name} an actor") do |id|
+            values << Actor.new(id)
+          end
+          c.on('-g name', '--group=name', "#{command_name} a group") do |name|
+            values << Types::Group.new(name)
+          end
+
+          c.action do |feature|
+            f = Flipper.feature(feature)
+
+            if values.empty?
+              ui.error "#{command_name} requires at least one -a or -g option"
+              exit 1
+            end
+
+            values.each do |value|
+              case value
+              when Actor
+                f.send("#{method_prefix}_actor", value)
+              when Types::Group
+                f.send("#{method_prefix}_group", value)
+              end
+            end
+
+            ui.info feature_details(f)
+          end
+        end
+      end
+
       command 'list' do |c|
         c.description = "List defined features"
         c.action do
@@ -228,6 +264,11 @@ module Flipper
           end.join(', ')
         end
 
+        deny_parts = []
+        deny_parts << pluralize(feature.deny_actors_value.size, 'denied actor', 'denied actors') if feature.deny_actors_value.any?
+        deny_parts << pluralize(feature.deny_groups_value.size, 'denied group', 'denied groups') if feature.deny_groups_value.any?
+        summary += ", " + colorize(deny_parts.join(', '), [:RED]) if deny_parts.any?
+
         colorize("%-#{padding}s" % feature.key, [:BOLD, :WHITE]) + " is #{summary}"
       end.join("\n")
     end
@@ -259,6 +300,20 @@ module Flipper
 
         "#{colorize("◯ conditionally enabled", [:YELLOW])} for:\n" +
         indent(lines.flatten.join("\n"), 2)
+      end
+
+      deny_lines = []
+      if feature.deny_actors_value.any?
+        deny_lines << pluralize(feature.deny_actors_value.size, 'denied actor', 'denied actors')
+        feature.deny_actors_value.each { |actor| deny_lines << "  - #{actor}" }
+      end
+      if feature.deny_groups_value.any?
+        deny_lines << pluralize(feature.deny_groups_value.size, 'denied group', 'denied groups')
+        feature.deny_groups_value.each { |group| deny_lines << "  - #{group}" }
+      end
+
+      if deny_lines.any?
+        summary += "\n" + colorize("  deny list:", [:RED]) + "\n" + indent(deny_lines.join("\n"), 4)
       end
 
       "#{colorize(feature.key, [:BOLD, :WHITE])} is #{summary}"

@@ -36,3 +36,23 @@ html {
   border-radius: 50%;
   display: inline-block;
 }
+
+.deny-list-chevron {
+  display: inline-block;
+  font-size: 0.65rem;
+  color: #999;
+  transition: transform 0.2s ease;
+}
+
+[aria-expanded="true"] .deny-list-chevron {
+  transform: rotate(90deg);
+}
+
+.deny-list-toggle {
+  cursor: pointer;
+  user-select: none;
+}
+
+.deny-list-toggle:hover {
+  background: rgba(0, 0, 0, 0.02);
+}

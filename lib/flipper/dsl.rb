@@ -181,6 +181,22 @@ module Flipper
       feature(name).disable_percentage_of_actors
     end
 
+    def deny_actor(name, actor)
+      feature(name).deny_actor(actor)
+    end
+
+    def deny_group(name, group)
+      feature(name).deny_group(group)
+    end
+
+    def permit_actor(name, actor)
+      feature(name).permit_actor(actor)
+    end
+
+    def permit_group(name, group)
+      feature(name).permit_group(group)
+    end
+
     # Public: Add a feature.
     #
     # name - The String or Symbol name of the feature.

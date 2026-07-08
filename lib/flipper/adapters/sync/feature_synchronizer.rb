@@ -17,6 +17,8 @@ module Flipper
                       :local_percentage_of_actors
         def_delegator :@local_gate_values, :percentage_of_time,
                       :local_percentage_of_time
+        def_delegator :@local_gate_values, :deny_actors, :local_deny_actors
+        def_delegator :@local_gate_values, :deny_groups, :local_deny_groups
 
         def_delegator :@remote_gate_values, :expression, :remote_expression
         def_delegator :@remote_gate_values, :boolean, :remote_boolean
@@ -26,6 +28,8 @@ module Flipper
                       :remote_percentage_of_actors
         def_delegator :@remote_gate_values, :percentage_of_time,
                       :remote_percentage_of_time
+        def_delegator :@remote_gate_values, :deny_actors, :remote_deny_actors
+        def_delegator :@remote_gate_values, :deny_groups, :remote_deny_groups
 
         def initialize(feature, local_gate_values, remote_gate_values)
           @feature = feature
@@ -35,11 +39,16 @@ module Flipper
 
         def call
           if remote_disabled?
-            return if local_disabled?
-            @feature.disable
+            unless local_disabled?
+              @feature.disable
+              sync_deny_actors
+              sync_deny_groups
+            end
+            return
           elsif remote_boolean_enabled?
-            return if local_boolean_enabled?
-            @feature.enable
+            @feature.enable unless local_boolean_enabled?
+            sync_deny_actors
+            sync_deny_groups
           else
             @feature.disable if local_boolean_enabled?
             sync_groups
@@ -47,6 +56,8 @@ module Flipper
             sync_expression
             sync_percentage_of_actors
             sync_percentage_of_time
+            sync_deny_actors
+            sync_deny_groups
           end
         end
 
@@ -83,6 +94,30 @@ module Flipper
           remote_groups_removed = local_groups - remote_groups
           remote_groups_removed.each do |group_name|
             @feature.disable_group group_name
+          end
+        end
+
+        def sync_deny_actors
+          remote_deny_actors_added = remote_deny_actors - local_deny_actors
+          remote_deny_actors_added.each do |flipper_id|
+            @feature.deny_actor Actor.new(flipper_id)
+          end
+
+          remote_deny_actors_removed = local_deny_actors - remote_deny_actors
+          remote_deny_actors_removed.each do |flipper_id|
+            @feature.permit_actor Actor.new(flipper_id)
+          end
+        end
+
+        def sync_deny_groups
+          remote_deny_groups_added = remote_deny_groups - local_deny_groups
+          remote_deny_groups_added.each do |group_name|
+            @feature.deny_group group_name
+          end
+
+          remote_deny_groups_removed = local_deny_groups - remote_deny_groups
+          remote_deny_groups_removed.each do |group_name|
+            @feature.permit_group group_name
           end
         end
 

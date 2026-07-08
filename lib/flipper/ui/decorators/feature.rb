@@ -36,24 +36,34 @@ module Flipper
         end
 
         def gates_in_words
-          return "Fully Enabled" if feature.boolean_value
-
           statuses = []
 
-          if feature.actors_value.count > 0
-            statuses << %Q(<span data-toggle="tooltip" data-placement="bottom" title="#{Util.to_sentence(feature.actors_value.to_a)}">) + Util.pluralize(feature.actors_value.count, 'actor', 'actors') + "</span>"
+          if feature.boolean_value
+            statuses << "Fully Enabled"
+          else
+            if feature.actors_value.count > 0
+              statuses << %Q(<span data-toggle="tooltip" data-placement="bottom" title="#{Util.to_sentence(feature.actors_value.to_a)}">) + Util.pluralize(feature.actors_value.count, 'actor', 'actors') + "</span>"
+            end
+
+            if feature.groups_value.count > 0
+              statuses << %Q(<span data-toggle="tooltip" data-placement="bottom" title="#{Util.to_sentence(feature.groups_value.to_a)}">) + Util.pluralize(feature.groups_value.count, 'group', 'groups') + "</span>"
+            end
+
+            if feature.percentage_of_actors_value > 0
+              statuses << "#{feature.percentage_of_actors_value}% of actors"
+            end
+
+            if feature.percentage_of_time_value > 0
+              statuses << "#{feature.percentage_of_time_value}% of time"
+            end
           end
 
-          if feature.groups_value.count > 0
-            statuses << %Q(<span data-toggle="tooltip" data-placement="bottom" title="#{Util.to_sentence(feature.groups_value.to_a)}">) + Util.pluralize(feature.groups_value.count, 'group', 'groups') + "</span>"
+          if feature.deny_actors_value.count > 0
+            statuses << %Q(<span data-toggle="tooltip" data-placement="bottom" title="#{Util.to_sentence(feature.deny_actors_value.to_a)}">) + Util.pluralize(feature.deny_actors_value.count, 'denied actor', 'denied actors') + "</span>"
           end
 
-          if feature.percentage_of_actors_value > 0
-            statuses << "#{feature.percentage_of_actors_value}% of actors"
-          end
-
-          if feature.percentage_of_time_value > 0
-            statuses << "#{feature.percentage_of_time_value}% of time"
+          if feature.deny_groups_value.count > 0
+            statuses << %Q(<span data-toggle="tooltip" data-placement="bottom" title="#{Util.to_sentence(feature.deny_groups_value.to_a)}">) + Util.pluralize(feature.deny_groups_value.count, 'denied group', 'denied groups') + "</span>"
           end
 
           Util.to_sentence(statuses)

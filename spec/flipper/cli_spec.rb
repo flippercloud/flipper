@@ -111,6 +111,48 @@ RSpec.describe Flipper::CLI do
     end
   end
 
+  describe "deny" do
+    describe "-a User;1 feature" do
+      it do
+        expect(subject).to have_attributes(status: 0, stdout: /feature.*deny.*User;1/m)
+        expect(Flipper.feature('feature').deny_actors_value).to include("User;1")
+      end
+    end
+
+    describe "-g admins feature" do
+      it do
+        expect(subject).to have_attributes(status: 0, stdout: /feature.*deny.*admins/m)
+        expect(Flipper.feature('feature').deny_groups_value).to include("admins")
+      end
+    end
+
+    describe "feature" do
+      it "errors without -a or -g" do
+        expect(subject).to have_attributes(status: 1, stderr: /requires at least one -a or -g/)
+      end
+    end
+  end
+
+  describe "permit" do
+    describe "-a User;1 feature" do
+      before { Flipper.deny_actor(:feature, Flipper::Actor.new("User;1")) }
+
+      it do
+        expect(subject).to have_attributes(status: 0)
+        expect(Flipper.feature('feature').deny_actors_value).not_to include("User;1")
+      end
+    end
+
+    describe "-g admins feature" do
+      before { Flipper.deny_group(:feature, :admins) }
+
+      it do
+        expect(subject).to have_attributes(status: 0)
+        expect(Flipper.feature('feature').deny_groups_value).not_to include("admins")
+      end
+    end
+  end
+
   describe "list" do
     before do
       Flipper.enable :foo
@@ -128,7 +170,7 @@ RSpec.describe Flipper::CLI do
       it { should have_attributes(status: 0, stdout: /Usage: flipper/) }
 
       it "should list subcommands" do
-        %w(enable disable list).each do |subcommand|
+        %w(enable disable deny permit list).each do |subcommand|
           expect(subject.stdout).to match(/#{subcommand}/)
         end
       end
@@ -212,6 +254,16 @@ RSpec.describe Flipper::CLI do
     context "groups" do
       before { Flipper.enable_group :foo, :admins }
       it { should have_attributes(status: 0, stdout: /enabled.*admins/m) }
+    end
+
+    context "with denied actors" do
+      before { Flipper.deny_actor :foo, Flipper::Actor.new("User;1") }
+      it { should have_attributes(status: 0, stdout: /deny list.*User;1/m) }
+    end
+
+    context "with denied groups" do
+      before { Flipper.deny_group :foo, :admins }
+      it { should have_attributes(status: 0, stdout: /deny list.*admins/m) }
     end
   end
 end

@@ -68,6 +68,46 @@ module Flipper
       end
     end
 
+    # Public: Deny an actor from this feature.
+    #
+    # actor - a Flipper::Types::Actor instance or an object that responds
+    #         to flipper_id.
+    #
+    # Returns result of Adapter#enable.
+    def deny_actor(actor)
+      deny gate(:deny_actor), Types::Actor.wrap(actor)
+    end
+
+    # Public: Deny a group from this feature.
+    #
+    # group - a Flipper::Types::Group instance or a String or Symbol name of a
+    #         registered group.
+    #
+    # Returns result of Adapter#enable.
+    def deny_group(group)
+      deny gate(:deny_group), Types::Group.wrap(group)
+    end
+
+    # Public: Remove an actor from the deny list for this feature.
+    #
+    # actor - a Flipper::Types::Actor instance or an object that responds
+    #         to flipper_id.
+    #
+    # Returns result of Adapter#disable.
+    def permit_actor(actor)
+      permit gate(:deny_actor), Types::Actor.wrap(actor)
+    end
+
+    # Public: Remove a group from the deny list for this feature.
+    #
+    # group - a Flipper::Types::Group instance or a String or Symbol name of a
+    #         registered group.
+    #
+    # Returns result of Adapter#disable.
+    def permit_group(group)
+      permit gate(:deny_group), Types::Group.wrap(group)
+    end
+
     # Public: Adds this feature.
     #
     # Returns the result of Adapter#add.
@@ -118,7 +158,10 @@ module Flipper
           actors: actors
         )
 
-        if open_gate = gates.detect { |gate| gate.open?(context) }
+        if blocking_gate = gates.detect { |gate| gate.blocks?(context) }
+          payload[:gate_name] = blocking_gate.name
+          false
+        elsif open_gate = gates.detect { |gate| gate.open?(context) }
           payload[:gate_name] = open_gate.name
           true
         else
@@ -254,7 +297,7 @@ module Flipper
     def state
       values = gate_values
       boolean = gate(:boolean)
-      non_boolean_gates = gates - [boolean]
+      non_boolean_gates = gates.reject { |gate| gate == boolean || gate.deny? }
 
       if values.boolean || values.percentage_of_time == 100
         :on
@@ -348,6 +391,20 @@ module Flipper
       gate_values.percentage_of_time
     end
 
+    # Public: Get the adapter value for the deny actors gate.
+    #
+    # Returns Set of String flipper_id's.
+    def deny_actors_value
+      gate_values.deny_actors
+    end
+
+    # Public: Get the adapter value for the deny groups gate.
+    #
+    # Returns Set of String group names.
+    def deny_groups_value
+      gate_values.deny_groups
+    end
+
     # Public: Get the gates that have been enabled for the feature.
     #
     # Returns an Array of Flipper::Gate instances.
@@ -413,6 +470,8 @@ module Flipper
         percentage_of_actors: Gates::PercentageOfActors.new,
         percentage_of_time: Gates::PercentageOfTime.new,
         group: Gates::Group.new,
+        deny_actor: Gates::DenyActor.new,
+        deny_group: Gates::DenyGroup.new,
       }.freeze
     end
 
@@ -434,6 +493,24 @@ module Flipper
     end
 
     private
+
+    def deny(gate, thing)
+      instrument(:deny) do |payload|
+        adapter.add self
+        payload[:gate_name] = gate.name
+        payload[:thing] = thing
+        adapter.enable self, gate, thing
+      end
+    end
+
+    def permit(gate, thing)
+      instrument(:permit) do |payload|
+        adapter.add self
+        payload[:gate_name] = gate.name
+        payload[:thing] = thing
+        adapter.disable self, gate, thing
+      end
+    end
 
     # Private: Instrument a feature operation.
     def instrument(operation, initial_payload = {})
