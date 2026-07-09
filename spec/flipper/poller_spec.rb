@@ -32,6 +32,27 @@ RSpec.describe Flipper::Poller do
     end
   end
 
+  describe ".reset" do
+    it "keeps instances tracked when their worker thread is still running" do
+      poller = described_class.get("stuck", {
+        remote_adapter: remote_adapter,
+        start_automatically: false,
+        shutdown_automatically: false,
+      })
+      thread = instance_double(Thread, alive?: true)
+      poller.instance_variable_set(:@thread, thread)
+
+      expect(thread).to receive(:join).with(Flipper::Poller::STOP_JOIN_TIMEOUT)
+
+      described_class.reset
+
+      expect(described_class.get("stuck")).to be(poller)
+    ensure
+      poller&.instance_variable_set(:@thread, nil)
+      described_class.reset
+    end
+  end
+
   describe "#sync" do
     it "syncs remote adapter to local adapter" do
       stub_request(:get, "#{url}/features?exclude_gate_names=true")

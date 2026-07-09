@@ -18,9 +18,10 @@ module Flipper
     end
 
     def self.reset
-      instances.each do |_, instance|
+      instances.each do |key, instance|
         instance.stop
-      end.clear
+        instances.delete(key) unless instance.thread&.alive?
+      end
     end
 
     MINIMUM_POLL_INTERVAL = 10
