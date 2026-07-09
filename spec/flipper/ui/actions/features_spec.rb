@@ -77,6 +77,36 @@ RSpec.describe Flipper::UI::Actions::Features do
       end
     end
 
+    context "merch callout" do
+      before do
+        @original_fun_enabled = Flipper::UI.configuration.fun
+        Flipper::UI.configuration.fun = fun_mode
+        get '/features'
+      end
+
+      after do
+        Flipper::UI.configuration.fun = @original_fun_enabled
+      end
+
+      context "when fun mode is enabled" do
+        let(:fun_mode) { true }
+
+        it 'renders the tee link' do
+          expect(last_response.body).to include('Do you deploy on Fridays?')
+          expect(last_response.body).to include('i-deploy-on-fridays-tee')
+        end
+      end
+
+      context "when fun mode is disabled" do
+        let(:fun_mode) { false }
+
+        it 'does not render the tee link' do
+          expect(last_response.body).not_to include('Do you deploy on Fridays?')
+          expect(last_response.body).not_to include('i-deploy-on-fridays-tee')
+        end
+      end
+    end
+
     context "when in read-only mode" do
       before { allow(flipper).to receive(:read_only?) { true } }
 

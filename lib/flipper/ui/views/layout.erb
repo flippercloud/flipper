@@ -80,6 +80,12 @@
           </div>
         </div>
       <% end %>
+
+      <% if Flipper::UI.configuration.fun %>
+        <div class="text-center text-muted small mt-4">
+          👕 Do you deploy on Fridays? <a href="https://shop.verygoodsoftware.company/product/i-deploy-on-fridays-tee?utm_source=oss&utm_medium=ui&utm_campaign=merch">Get&nbsp;the&nbsp;tee</a>.
+        </div>
+      <% end %>
     </div>
 
     <script src="<%= script_name + popper_js[:src] %>" integrity="<%= popper_js[:hash] %>" crossorigin="anonymous"></script>
