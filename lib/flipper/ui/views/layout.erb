@@ -57,6 +57,10 @@
           <li class="nav-item ms-auto text-muted small">
             <a href="https://www.flippercloud.io/docs/ui?utm_source=oss&utm_medium=ui&utm_campaign=docs">Docs</a>
             &bull;
+            <% if Flipper::UI.configuration.fun %>
+              <a href="https://shop.verygoodsoftware.company/product/i-deploy-on-fridays-tee?utm_source=oss&utm_medium=ui&utm_campaign=merch" title="Do you deploy on Fridays?">Shirt</a>
+              &bull;
+            <% end %>
             Version: <%= Flipper::VERSION %>
           </li>
         </ul>
