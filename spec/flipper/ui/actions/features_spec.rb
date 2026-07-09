@@ -91,8 +91,8 @@ RSpec.describe Flipper::UI::Actions::Features do
       context "when fun mode is enabled" do
         let(:fun_mode) { true }
 
-        it 'renders the tee link' do
-          expect(last_response.body).to include('Do you deploy on Fridays?')
+        it 'renders the shirt link' do
+          expect(last_response.body).to include('>Shirt</a>')
           expect(last_response.body).to include('i-deploy-on-fridays-tee')
         end
       end
@@ -100,8 +100,8 @@ RSpec.describe Flipper::UI::Actions::Features do
       context "when fun mode is disabled" do
         let(:fun_mode) { false }
 
-        it 'does not render the tee link' do
-          expect(last_response.body).not_to include('Do you deploy on Fridays?')
+        it 'does not render the shirt link' do
+          expect(last_response.body).not_to include('>Shirt</a>')
           expect(last_response.body).not_to include('i-deploy-on-fridays-tee')
         end
       end
