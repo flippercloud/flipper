@@ -71,7 +71,7 @@ jobs:
         with:
           mongodb-version: 4.0
       - name: Check out repository code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Do some action caching
         uses: actions/cache@v5
         with:
