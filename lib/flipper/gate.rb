@@ -1,7 +1,10 @@
 module Flipper
   class Gate
+    attr_reader :blocking
+
     # Public
     def initialize(options = {})
+      @blocking = options.fetch(:blocking, false)
     end
 
     # Public: The name of the gate. Implemented in subclass.
@@ -27,6 +30,10 @@ module Flipper
     #
     # Returns true if gate open for any actor, false if not.
     def open?(context)
+      false
+    end
+
+    def blocks?(context)
       false
     end
 

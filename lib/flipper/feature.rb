@@ -68,6 +68,32 @@ module Flipper
       end
     end
 
+    def block(thing)
+      instrument(:block) do |payload|
+        adapter.add self
+
+        blocking_gate = gate_for(thing, blocking: true)
+        wrapped_thing = blocking_gate.wrap(thing)
+        payload[:gate_name] = blocking_gate.name
+        payload[:thing] = wrapped_thing
+
+        adapter.enable self, blocking_gate, wrapped_thing
+      end
+    end
+
+    def unblock(thing)
+      instrument(:unblock) do |payload|
+        adapter.add self
+
+        blocking_gate = gate_for(thing, blocking: true)
+        wrapped_thing = blocking_gate.wrap(thing)
+        payload[:gate_name] = blocking_gate.name
+        payload[:thing] = wrapped_thing
+
+        adapter.disable self, blocking_gate, wrapped_thing
+      end
+    end
+
     # Public: Adds this feature.
     #
     # Returns the result of Adapter#add.
@@ -118,7 +144,10 @@ module Flipper
           actors: actors
         )
 
-        if open_gate = gates.detect { |gate| gate.open?(context) }
+        if blocking_gate = gates.detect { |gate| gate.blocks?(context) }
+          payload[:gate_name] = blocking_gate.name
+          false
+        elsif open_gate = gates.detect { |gate| gate.open?(context) }
           payload[:gate_name] = open_gate.name
           true
         else
@@ -248,6 +277,22 @@ module Flipper
     # Returns result of disable.
     def disable_percentage_of_actors
       disable Types::PercentageOfActors.new(0)
+    end
+
+    def block_actor(actor)
+      block Types::Actor.wrap(actor)
+    end
+
+    def block_group(group)
+      block Types::Group.wrap(group)
+    end
+
+    def unblock_actor(actor)
+      unblock Types::Actor.wrap(actor)
+    end
+
+    def unblock_group(group)
+      unblock Types::Group.wrap(group)
     end
 
     # Public: Returns state for feature (:on, :off, or :conditional).
@@ -413,6 +458,8 @@ module Flipper
         percentage_of_actors: Gates::PercentageOfActors.new,
         percentage_of_time: Gates::PercentageOfTime.new,
         group: Gates::Group.new,
+        blocking_actor: Gates::Actor.new({ blocking: true }),
+        blocking_group: Gates::Group.new({ blocking: true }),
       }.freeze
     end
 
@@ -429,8 +476,8 @@ module Flipper
     #
     # Returns a Flipper::Gate.
     # Raises Flipper::GateNotFound if no gate found for actor
-    def gate_for(actor)
-      gates.detect { |gate| gate.protects?(actor) } || raise(GateNotFound, actor)
+    def gate_for(actor, blocking: false)
+      gates.detect { |gate| gate.protects?(actor) && gate.blocking == blocking } || raise(GateNotFound, actor)
     end
 
     private
