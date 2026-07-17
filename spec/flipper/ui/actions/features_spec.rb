@@ -224,9 +224,35 @@ RSpec.describe Flipper::UI::Actions::Features do
         end
       end
 
+      context 'feature name contains accented and invisible characters' do
+        let(:feature_name) { "f\u200Beá\u2060ture" }
+
+        it 'adds feature normalized to ascii' do
+          expect(flipper.features.map(&:key)).to include('feature')
+        end
+
+        it 'redirects to normalized feature' do
+          expect(last_response.status).to be(302)
+          expect(last_response.headers['location']).to eq('/features/feature')
+        end
+      end
+
       context 'for an invalid feature name' do
         context 'empty feature name' do
           let(:feature_name) { '' }
+
+          it 'does not add feature' do
+            expect(flipper.features.map(&:key)).to eq([])
+          end
+
+          it 'redirects back to feature' do
+            expect(last_response.status).to be(302)
+            expect(last_response.headers['location']).to eq('/features/new?error=%22%22+is+not+a+valid+feature+name.')
+          end
+        end
+
+        context 'feature name that normalizes to empty' do
+          let(:feature_name) { "\u200B\u2060" }
 
           it 'does not add feature' do
             expect(flipper.features.map(&:key)).to eq([])
