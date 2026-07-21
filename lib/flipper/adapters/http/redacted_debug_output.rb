@@ -17,13 +17,15 @@ module Flipper
 
         # Matches "<sensitive-header>: <value>" up to (but not including) the
         # next line terminator. Net::HTTP writes request headers via
-        # String#dump, so line breaks appear as the escaped "\r\n" sequence; the
-        # value char class excludes backslash and quote so it stops there. Raw
-        # CRLFs and a closing quote are handled too, just in case.
+        # String#dump, so the value may itself contain escape sequences (\t,
+        # \", \\, ...) and line breaks appear as the escaped "\r\n" sequence. The
+        # value alternation consumes escaped chars (other than \r/\n) and plain
+        # chars, stopping at the escaped or raw line terminator or the closing
+        # quote. Consuming escapes ensures a value that contains one is still
+        # fully redacted rather than leaking past the first backslash.
         PATTERN = Regexp.new(
           '((?:' + Regexp.union(SENSITIVE_HEADERS).source + '):[ \t]*)' +
-          '[^\r\n"\\\\]*' +
-          '(?=\\\\r|\r|\n|"|\z)',
+          '(?:\\\\[^rn]|[^\r\n"\\\\])*',
           Regexp::IGNORECASE
         )
 

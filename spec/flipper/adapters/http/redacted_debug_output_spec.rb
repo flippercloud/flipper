@@ -57,6 +57,16 @@ RSpec.describe Flipper::Adapters::Http::RedactedDebugOutput do
       expect(redacted).to include("Accept: */*")
     end
 
+    it "fully redacts values containing dump-escaped characters" do
+      # A token with a tab and a quote survives String#dump as escape
+      # sequences (\t, \") embedded in the value.
+      request = "Flipper-Cloud-Token: se\tcr\"et\r\nAccept: */*\r\n".dump
+      redacted = described_class.redact(request)
+      expect(redacted).to include("Flipper-Cloud-Token: [REDACTED]")
+      expect(redacted).not_to include("cr")
+      expect(redacted).to include("Accept: */*")
+    end
+
     it "returns non-string messages unchanged" do
       expect(described_class.redact(nil)).to be_nil
       expect(described_class.redact(42)).to eq(42)
