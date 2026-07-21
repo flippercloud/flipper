@@ -164,10 +164,17 @@ module Flipper
     def wait_for_stop(timeout)
       return true if stop_requested?
 
+      deadline = Concurrent.monotonic_time + timeout
       @stop_mutex.synchronize do
-        return true if stop_requested?
+        until stop_requested?
+          remaining = deadline - Concurrent.monotonic_time
+          break if remaining <= 0
 
-        @stop_condition.wait(@stop_mutex, timeout)
+          # ConditionVariable#wait can return early (spurious wakeups on
+          # JRuby/TruffleRuby), so keep waiting the remaining time until the
+          # deadline passes to preserve the configured poll spacing.
+          @stop_condition.wait(@stop_mutex, remaining)
+        end
         stop_requested?
       end
     end
