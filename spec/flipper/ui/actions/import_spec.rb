@@ -39,6 +39,53 @@ RSpec.describe Flipper::UI::Actions::Import do
       expect(last_response.headers['location']).to eq('/features')
     end
 
+    context "when no file is selected" do
+      before do
+        post '/settings/import',
+          { 'authenticity_token' => token },
+          'rack.session' => session
+      end
+
+      it 'redirects to settings with an error' do
+        expect(last_response.status).to be(302)
+        expect(last_response.headers['location']).to eq('/settings?error=You+must+select+a+file+to+import.')
+      end
+    end
+
+    context "when the file is too large" do
+      before do
+        stub_const("Flipper::Exporters::Json::Export::MAX_BYTES", 1)
+
+        post '/settings/import',
+          {
+            'authenticity_token' => token,
+            'file' => Rack::Test::UploadedFile.new(path, "application/json"),
+          },
+          'rack.session' => session
+      end
+
+      it 'redirects to settings with an error' do
+        expect(last_response.status).to be(302)
+        expect(last_response.headers['location']).to eq('/settings?error=The+import+file+is+too+large+to+import.')
+      end
+    end
+
+    context "when the file is invalid" do
+      before do
+        post '/settings/import',
+          {
+            'authenticity_token' => token,
+            'file' => Rack::Test::UploadedFile.new(StringIO.new("not json"), "flipper.json", original_filename: "flipper.json"),
+          },
+          'rack.session' => session
+      end
+
+      it 'redirects to settings with an error' do
+        expect(last_response.status).to be(302)
+        expect(last_response.headers['location']).to eq('/settings?error=The+import+file+is+invalid.')
+      end
+    end
+
     context "when in read only mode" do
       before do
         allow(flipper).to receive(:read_only?) { true }
