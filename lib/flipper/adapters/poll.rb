@@ -47,12 +47,12 @@ module Flipper
         @poller.start
         poller_last_synced_at = @poller.last_synced_at.value
         if claim_sync(poller_last_synced_at)
+          synced = false
           begin
             Flipper::Adapters::Sync::Synchronizer.new(@adapter, @poller.adapter).call
-            complete_sync(poller_last_synced_at)
-          rescue
-            release_sync
-            raise
+            synced = true
+          ensure
+            synced ? complete_sync(poller_last_synced_at) : release_sync
           end
         end
         @adapter
