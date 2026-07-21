@@ -161,6 +161,18 @@ RSpec.describe Flipper::Adapters::Http do
         adapter.get(flipper[:feature_panel])
       }.to raise_error(Flipper::Adapters::Http::Error)
     end
+
+    it "escapes special characters in the feature key" do
+      stub_request(:get, "http://app.com/flipper/features/a%2Fb%20c")
+        .to_return(status: 404)
+
+      adapter = described_class.new(url: 'http://app.com/flipper')
+      adapter.get(flipper["a/b c"])
+
+      expect(
+        a_request(:get, "http://app.com/flipper/features/a%2Fb%20c")
+      ).to have_been_made.once
+    end
   end
 
   describe "#get_multi" do
@@ -172,6 +184,18 @@ RSpec.describe Flipper::Adapters::Http do
       expect {
         adapter.get_multi([flipper[:feature_panel]])
       }.to raise_error(Flipper::Adapters::Http::Error)
+    end
+
+    it "escapes special characters in the feature keys" do
+      stub_request(:get, "http://app.com/flipper/features?keys%5B%5D=a%26b&keys%5B%5D=c%2Cd&exclude_gate_names=true")
+        .to_return(status: 200, body: JSON.generate("features" => []))
+
+      adapter = described_class.new(url: 'http://app.com/flipper')
+      adapter.get_multi([flipper["a&b"], flipper["c,d"]])
+
+      expect(
+        a_request(:get, "http://app.com/flipper/features?keys%5B%5D=a%26b&keys%5B%5D=c%2Cd&exclude_gate_names=true")
+      ).to have_been_made.once
     end
   end
 
