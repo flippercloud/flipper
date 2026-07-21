@@ -56,7 +56,7 @@ module Flipper
 
     # Private: Build an HTTP client for Cloud API requests.
     def self.build_client(path, headers: {})
-      base_url = https_cloud_url(ENV.fetch("FLIPPER_CLOUD_URL", DEFAULT_CLOUD_URL))
+      base_url = validate_cloud_url(ENV.fetch("FLIPPER_CLOUD_URL", DEFAULT_CLOUD_URL))
 
       Flipper::Adapters::Http::Client.new(
         url: "#{base_url}#{path}",
@@ -69,7 +69,7 @@ module Flipper
     end
     private_class_method :build_client
 
-    def self.https_cloud_url(value)
+    def self.validate_cloud_url(value)
       unless URI(value.to_s).scheme == "https"
         raise ArgumentError,
           "Flipper::Cloud url must use https but was #{value.inspect}. " \
@@ -78,6 +78,6 @@ module Flipper
 
       value
     end
-    private_class_method :https_cloud_url
+    private_class_method :validate_cloud_url
   end
 end
