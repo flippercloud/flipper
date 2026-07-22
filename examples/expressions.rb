@@ -155,6 +155,27 @@ assert Flipper.enabled?(:something, user) # plan is "basic"
 refute Flipper.enabled?(:something, other_user) # plan is "plus"
 reset
 
+puts "\n\nExclude Expression (array property does not include value)"
+exclude_expression = Flipper.property(:roles).exclude("admin")
+Flipper.enable :something, exclude_expression
+assert Flipper.enabled?(:something, user) # no roles property
+refute Flipper.enabled?(:something, admin_user) # roles includes "admin"
+reset
+
+puts "\n\nIn Expression (property value is one of a static list)"
+in_expression = Flipper.property(:plan).in(["basic", "premium"])
+Flipper.enable :something, in_expression
+assert Flipper.enabled?(:something, user) # plan is "basic"
+refute Flipper.enabled?(:something, other_user) # plan is "plus"
+reset
+
+puts "\n\nNotIn Expression (property value is not one of a static list)"
+not_in_expression = Flipper.property(:plan).not_in(["plus", "premium"])
+Flipper.enable :something, not_in_expression
+assert Flipper.enabled?(:something, user) # plan is "basic"
+refute Flipper.enabled?(:something, other_user) # plan is "plus"
+reset
+
 puts "\n\n% of Actors Expression"
 percentage_of_actors = Flipper.property(:flipper_id).percentage_of_actors(30)
 Flipper.enable :something, percentage_of_actors

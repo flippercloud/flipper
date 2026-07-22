@@ -22,6 +22,11 @@ module Flipper
         end
 
         new(name, Array(args).map { |o| build(o) })
+      when Array
+        # A literal list (e.g. the right side of In/NotIn) becomes a single
+        # constant holding the built element values. Building each element
+        # normalizes it the same way a scalar constant would (Symbol => String).
+        Expression::Constant.new(object.map { |element| build(element).value })
       when String, Numeric, FalseClass, TrueClass
         Expression::Constant.new(object)
       when Symbol
