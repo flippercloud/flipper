@@ -79,6 +79,19 @@ RSpec.describe Flipper::Expression do
       ])
     end
 
+    it "can build Include" do
+      expression = described_class.build({
+        "Inlcude" => [["hello"], "hello"]
+      })
+
+      expect(expression).to be_instance_of(Flipper::Expression)
+      expect(expression.function).to be(Flipper::Expressions::Include)
+      expect(expression.args).to eq([
+        Flipper.constant(["hello"]),
+        Flipper.constant("hello"),
+      ])
+    end
+
     it "can build NotEqual" do
       expression = described_class.build({
         "NotEqual" => [
