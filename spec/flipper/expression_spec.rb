@@ -50,6 +50,22 @@ RSpec.describe Flipper::Expression do
       ])
     end
 
+    it "can build Include" do
+      expression = described_class.build({
+        "Include" => [
+          {"Property" => ["roles"]},
+          "admin",
+        ]
+      })
+
+      expect(expression).to be_instance_of(Flipper::Expression)
+      expect(expression.function).to be(Flipper::Expressions::Include)
+      expect(expression.args).to eq([
+        described_class.build({"Property" => ["roles"]}),
+        Flipper.constant("admin"),
+      ])
+    end
+
     it "can build LessThanOrEqualTo" do
       expression = described_class.build({
         "LessThanOrEqualTo" => [
@@ -143,6 +159,26 @@ RSpec.describe Flipper::Expression do
       expect(expression).to be_instance_of(Flipper::Expression)
       expect(expression.function).to be(Flipper::Expressions::Property)
       expect(expression.args).to eq([Flipper.constant("flipper_id")])
+    end
+
+    it "raises UnknownExpression for unknown expression name" do
+      expect {
+        described_class.build({"Foo" => [1, 2]})
+      }.to raise_error(Flipper::Expression::UnknownExpression,
+        "uninitialized constant Flipper::Expressions::Foo")
+    end
+
+    it "raises UnknownExpression for top level constants" do
+      expect {
+        described_class.build({"Kernel" => []})
+      }.to raise_error(Flipper::Expression::UnknownExpression,
+        "uninitialized constant Flipper::Expressions::Kernel")
+    end
+
+    it "raises UnknownExpression that is rescuable as NameError" do
+      expect {
+        described_class.build({"Foo" => []})
+      }.to raise_error(NameError, /uninitialized constant Flipper::Expressions::Foo/)
     end
   end
 

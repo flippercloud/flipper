@@ -49,6 +49,7 @@ admin_user = User.new(2, {
   "id" => 2,
   "admin" => true,
   "team_user" => true,
+  "roles" => ["admin", "support"],
 })
 
 other_user = User.new(3, {
@@ -138,6 +139,20 @@ Flipper.enable :something, set_of_actors_expression
 assert Flipper.enabled?(:something, user)
 assert Flipper.enabled?(:something, other_user)
 refute Flipper.enabled?(:something, admin_user)
+reset
+
+puts "\n\nInclude Expression (array property includes value)"
+include_expression = Flipper.property(:roles).include("admin")
+Flipper.enable :something, include_expression
+assert Flipper.enabled?(:something, admin_user)
+refute Flipper.enabled?(:something, user) # no roles property
+reset
+
+puts "\n\nInclude Expression (string property includes substring)"
+substring_expression = Flipper.property(:plan).include("bas")
+Flipper.enable :something, substring_expression
+assert Flipper.enabled?(:something, user) # plan is "basic"
+refute Flipper.enabled?(:something, other_user) # plan is "plus"
 reset
 
 puts "\n\n% of Actors Expression"

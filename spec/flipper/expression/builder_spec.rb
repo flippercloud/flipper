@@ -160,6 +160,11 @@ RSpec.describe Flipper::Expression::Builder do
     expect(expression).to eq(build({ PercentageOfActors: [ "User;1", 40 ] }))
   end
 
+  it "can convert to Include" do
+    expression = Flipper.property(:roles).include("admin")
+    expect(expression).to eq(build({ Include: [{ Property: ["roles"] }, "admin"] }))
+  end
+
   context "All" do
     describe "#all" do
       it "returns self" do

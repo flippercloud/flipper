@@ -100,6 +100,45 @@ RSpec.describe Flipper::Gates::Expression do
       end
     end
 
+    context 'for include expression' do
+      it 'returns true when array property includes value' do
+        expression = Flipper.property(:roles).include("admin")
+        context = context(expression.value, properties: {"roles" => ["admin", "support"]})
+        expect(subject.open?(context)).to be(true)
+      end
+
+      it 'returns false when array property does not include value' do
+        expression = Flipper.property(:roles).include("admin")
+        context = context(expression.value, properties: {"roles" => ["support"]})
+        expect(subject.open?(context)).to be(false)
+      end
+
+      it 'returns true when string property includes substring' do
+        expression = Flipper.property(:email).include("@example.com")
+        context = context(expression.value, properties: {"email" => "user@example.com"})
+        expect(subject.open?(context)).to be(true)
+      end
+
+      it 'returns false when property is missing' do
+        expression = Flipper.property(:roles).include("admin")
+        context = context(expression.value, properties: {})
+        expect(subject.open?(context)).to be(false)
+      end
+    end
+
+    context 'for unknown expression name' do
+      it 'returns false and warns instead of raising' do
+        expect(subject).to receive(:warn).with(/uninitialized constant Flipper::Expressions::Foo/)
+        expect(subject.open?(context({"Foo" => [true]}))).to be(false)
+      end
+
+      it 'returns false and warns when nested inside known expression' do
+        expect(subject).to receive(:warn).with(/uninitialized constant Flipper::Expressions::Foo/)
+        data = {"Any" => [{"Foo" => [true]}]}
+        expect(subject.open?(context(data))).to be(false)
+      end
+    end
+
     context 'for time-based expressions' do
       it 'enables when now is past a scheduled epoch' do
         past_epoch = Time.now.to_i - 86_400

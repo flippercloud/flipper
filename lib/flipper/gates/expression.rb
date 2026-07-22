@@ -27,7 +27,13 @@ module Flipper
       def open?(context)
         data = context.values.expression
         return false if data.nil? || data.empty?
-        expression = Flipper::Expression.build(data)
+
+        begin
+          expression = Flipper::Expression.build(data)
+        rescue Flipper::Expression::UnknownExpression => e
+          warn "Feature #{context.feature_name.inspect} uses an expression this version of flipper doesn't know (#{e.message}). Treating the expression as disabled. Upgrade the flipper gem to evaluate it."
+          return false
+        end
 
         if context.actors.nil? || context.actors.empty?
           !!expression.evaluate(feature_name: context.feature_name, properties: DEFAULT_PROPERTIES, actor: nil)
