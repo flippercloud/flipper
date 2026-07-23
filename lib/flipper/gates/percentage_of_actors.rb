@@ -31,7 +31,17 @@ module Flipper
       # Returns true if gate open for any actors, false if not.
       def open?(context)
         return false unless context.actors?
-        id = "#{context.feature_name}#{context.actors.map(&:value).sort.join}"
+
+        percentage = context.values.percentage_of_actors
+        return false if percentage <= 0
+        return true if percentage >= 100
+
+        actors = context.actors
+        id = if actors.size == 1
+          "#{context.feature_name}#{actors.first.value}"
+        else
+          "#{context.feature_name}#{actors.map(&:value).sort.join}"
+        end
         # NOTE: `crc32 % 100_000` has a tiny modulo bias (2**32 is not a
         # multiple of 100_000, so buckets 0..67_295 are ~0.0023% over-
         # represented). This is intentionally left as-is: the bias is
@@ -39,7 +49,7 @@ module Flipper
         # which would re-bucket essentially every actor on upgrade and
         # silently flip who is enabled. Stable, deterministic bucketing
         # matters far more here than perfect uniformity. Do not change.
-        Zlib.crc32(id) % (100 * SCALING_FACTOR) < context.values.percentage_of_actors * SCALING_FACTOR
+        Zlib.crc32(id) % (100 * SCALING_FACTOR) < percentage * SCALING_FACTOR
       end
 
       def protects?(thing)
