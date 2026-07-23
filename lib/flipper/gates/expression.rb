@@ -51,6 +51,11 @@ module Flipper
       # Internal
       DEFAULT_PROPERTIES = {}.freeze
 
+      # Internal: Property values are compared against constants in expressions,
+      # which the schema limits to these scalar types (string, number, boolean,
+      # null) plus Time values returned by model datetime attributes.
+      ALLOWED_PROPERTY_TYPES = [String, Numeric, TrueClass, FalseClass, NilClass, ::Time].freeze
+
       def properties(actor)
         return DEFAULT_PROPERTIES if actor.nil?
 
@@ -68,7 +73,22 @@ module Flipper
           properties["flipper_id".freeze] = actor.flipper_id
         end
 
+        reject_invalid_properties(properties)
+
         properties
+      end
+
+      # Internal: Warn about and drop property values that aren't a type
+      # expressions can evaluate, rather than blowing up at evaluation time.
+      def reject_invalid_properties(properties)
+        properties.reject! do |key, value|
+          invalid = ALLOWED_PROPERTY_TYPES.none? { |type| value.is_a?(type) }
+          if invalid
+            warn "[Flipper] Ignoring property #{key.inspect} with unsupported value " \
+                 "type #{value.class} (expected String, Numeric, true, false, or nil)."
+          end
+          invalid
+        end
       end
     end
   end

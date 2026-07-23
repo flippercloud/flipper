@@ -1,0 +1,24 @@
+{
+  "valid": [
+    {
+      "expression": { "Multiply": [3, 2] },
+      "result": { "enum": [6] }
+    },
+    {
+      "expression": { "Multiply": ["foo", 2] },
+      "result": { "enum": ["foofoo"] }
+    },
+    {
+      "expression": { "Multiply": [{ "Property": "age" }, 3] },
+      "context": { "properties": { "age": 18 }},
+      "result": { "enum": [54] }
+    }
+  ],
+  "invalid": [
+    { "Multiply": [1, 2, 3] },
+    { "Multiply": [1] },
+    { "Multiply": 1 },
+    { "Multiply": null },
+    { "Multiply": [1, 2], "Any": [] }
+  ]
+}

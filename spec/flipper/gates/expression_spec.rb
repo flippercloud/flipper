@@ -100,6 +100,42 @@ RSpec.describe Flipper::Gates::Expression do
       end
     end
 
+    context 'for properties with unsupported value types' do
+      it 'drops the value and warns instead of evaluating it' do
+        expression = Flipper.property(:tags).eq("a")
+        ctx = context(expression.value, properties: {tags: ["a", "b"]})
+        expect(subject).to receive(:warn).with(/Ignoring property "tags".*Array/)
+        expect(subject.open?(ctx)).to be(false)
+      end
+
+      it 'keeps supported scalar values alongside dropped ones' do
+        expression = Flipper.property(:plan).eq("pro")
+        ctx = context(expression.value, properties: {plan: "pro", meta: {"k" => 1}})
+        allow(subject).to receive(:warn)
+        expect(subject.open?(ctx)).to be(true)
+        expect(subject).to have_received(:warn).with(/Ignoring property "meta".*Hash/)
+      end
+    end
+
+    context 'for arithmetic expressions with missing properties' do
+      {
+        Add: {Add: [{Property: "age"}, 3]},
+        Subtract: {Subtract: [{Property: "age"}, 3]},
+        Multiply: {Multiply: [{Property: "age"}, 3]},
+        Divide: {Divide: [{Property: "age"}, 3]},
+        Min: {Min: [{Property: "age"}, 3]},
+        Max: {Max: [{Property: "age"}, 3]},
+        Duration: {Duration: [{Property: "age"}, "seconds"]},
+      }.each do |name, operand|
+        it "returns false instead of raising for #{name}" do
+          expression = Flipper::Expression.build(GreaterThan: [operand, 20])
+          ctx = context(expression.value, properties: {plan: "pro"})
+
+          expect(subject.open?(ctx)).to be(false)
+        end
+      end
+    end
+
     context 'for time-based expressions' do
       it 'enables when now is past a scheduled epoch' do
         past_epoch = Time.now.to_i - 86_400
@@ -155,6 +191,12 @@ RSpec.describe Flipper::Gates::Expression do
           Flipper.now.lt(Flipper.time(end_time))
         )
         expect(subject.open?(context(expression.value))).to be(false)
+      end
+
+      it 'evaluates time properties from model attributes' do
+        created_at = Time.now.utc - 86_400
+        expression = Flipper.property(:created_at).lt(Flipper.now)
+        expect(subject.open?(context(expression.value, properties: {created_at: created_at}))).to be(true)
       end
     end
   end

@@ -1,5 +1,6 @@
 require "flipper/expression/builder"
 require "flipper/expression/constant"
+require "flipper/expression/schema"
 
 module Flipper
   class Expression
@@ -10,14 +11,19 @@ module Flipper
 
       case object
       when Hash
-        name = object.keys.first
-        args = object.values.first
-        unless name
+        unless object.size == 1
           raise ArgumentError, "#{object.inspect} cannot be converted into an expression"
         end
 
-        new(name, Array(args).map { |o| build(o) })
-      when String, Numeric, FalseClass, TrueClass
+        name = object.keys.first
+        args = object.values.first
+
+        # Ensure args are an array, but don't use Array() because it would turn a
+        # Hash (a nested expression) into an array of key/value pairs.
+        args = args.is_a?(Hash) ? [args] : Array(args)
+
+        new(name, args.map { |o| build(o) })
+      when String, Numeric, FalseClass, TrueClass, NilClass
         Expression::Constant.new(object)
       when Symbol
         Expression::Constant.new(object.to_s)
@@ -54,6 +60,17 @@ module Flipper
       {
         name => args.map(&:value)
       }
+    end
+
+    # Public: Validate this expression against the JSON Schema. Returns an
+    # Enumerable of validation errors (empty when valid). Requires json_schemer.
+    def validate
+      Schema.instance.validate(value)
+    end
+
+    # Public: Returns true if this expression is structurally valid.
+    def valid?
+      Schema.instance.valid?(value)
     end
 
     private
