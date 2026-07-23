@@ -30,4 +30,70 @@ RSpec.describe Flipper::Adapters::Sync::IntervalSynchronizer do
     subject.call
     expect(events.size).to be(1)
   end
+
+  it "does not synchronize again while a claimed interval sync is in flight" do
+    entered = Queue.new
+    release = Queue.new
+    synchronizer = -> do
+      events << now
+      entered << true
+      release.pop
+    end
+    instance = described_class.new(synchronizer, interval: interval)
+
+    allow(instance).to receive(:now).and_return(interval)
+
+    first_thread = Thread.new { instance.call }
+    entered.pop
+
+    threads = 10.times.map { Thread.new { instance.call } }
+    sleep 0.05
+
+    expect(events.size).to eq(1)
+
+    release << true
+    ([first_thread] + threads).each(&:join)
+
+    expect(events.size).to eq(1)
+  end
+
+  it "does not synchronize again when the interval passes during an in-flight sync" do
+    current_time = interval
+    entered = Queue.new
+    release = Queue.new
+    synchronizer = -> do
+      events << current_time
+      entered << true
+      release.pop
+    end
+    instance = described_class.new(synchronizer, interval: interval)
+
+    allow(instance).to receive(:now) { current_time }
+
+    first_thread = Thread.new { instance.call }
+    entered.pop
+
+    current_time += interval
+    second_thread = Thread.new { instance.call }
+    sleep 0.05
+
+    expect(events.size).to eq(1)
+
+    release << true
+    [first_thread, second_thread].each(&:join)
+
+    expect(events.size).to eq(1)
+  end
+
+  it "resets in-flight synchronization state after a fork" do
+    instance = described_class.new(synchronizer, interval: interval)
+    instance.instance_variable_set(:@syncing, true)
+
+    allow(instance).to receive(:now).and_return(interval)
+    allow(Process).to receive(:pid).and_return(instance.instance_variable_get(:@pid) + 1)
+
+    instance.call
+
+    expect(events.size).to eq(1)
+  end
 end
