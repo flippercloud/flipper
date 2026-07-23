@@ -220,4 +220,11 @@ require 'flipper/types/percentage_of_time'
 require 'flipper/typecast'
 require 'flipper/version'
 
+# Eagerly initialize memoized module state while loading is still
+# single-threaded (require/autoload hold a per-feature lock). This avoids a
+# check-then-set race on the `||=` memoization if two threads were to first
+# touch Flipper concurrently during a parallel boot.
+Flipper.configuration
+Flipper.groups_registry
+
 require "flipper/engine" if defined?(Rails)
