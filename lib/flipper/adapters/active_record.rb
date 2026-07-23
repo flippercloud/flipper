@@ -239,21 +239,28 @@ module Flipper
       end
 
       def result_for_gates(feature, gates)
+        # Bucket rows by gate key in one pass instead of re-scanning all rows
+        # for each of the feature's gates. Features with many enabled actors
+        # can have thousands of rows. Rows with a nil key come from the outer
+        # join in get_all for features with no gate values.
+        values_by_key = nil
+        gates&.each do |key, value|
+          next if key.nil?
+          values_by_key ||= {}
+          (values_by_key[key.to_sym] ||= []) << value
+        end
+
         result = {}
-        gates ||= []
         feature.gates.each do |gate|
+          values = values_by_key && values_by_key[gate.key]
           result[gate.key] =
             case gate.data_type
             when :boolean, :integer
-              if row = gates.detect { |key, value| !key.nil? && key.to_sym == gate.key }
-                row.last
-              end
+              values&.first
             when :json
-              if row = gates.detect { |key, value| !key.nil? && key.to_sym == gate.key }
-                Typecast.from_json(row.last)
-              end
+              Typecast.from_json(values.first) if values
             when :set
-              gates.select { |key, value| !key.nil? && key.to_sym == gate.key }.map(&:last).to_set
+              values ? values.to_set : Set.new
             else
               unsupported_data_type gate.data_type
             end
