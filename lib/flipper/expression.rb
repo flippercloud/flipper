@@ -3,6 +3,11 @@ require "flipper/expression/constant"
 
 module Flipper
   class Expression
+    # Raised when expression data references an expression name this version
+    # of flipper doesn't know (e.g. data written by a newer version). Inherits
+    # from NameError so existing rescues keep working.
+    UnknownExpression = Class.new(NameError)
+
     include Builder
 
     def self.build(object)
@@ -17,6 +22,11 @@ module Flipper
         end
 
         new(name, Array(args).map { |o| build(o) })
+      when Array
+        # A literal list (e.g. the right side of In/NotIn) becomes a single
+        # constant holding the built element values. Building each element
+        # normalizes it the same way a scalar constant would (Symbol => String).
+        Expression::Constant.new(object.map { |element| build(element).value })
       when String, Numeric, FalseClass, TrueClass
         Expression::Constant.new(object)
       when Symbol
@@ -33,7 +43,13 @@ module Flipper
 
     def initialize(name, args = [])
       @name = name.to_s
-      @function = Expressions.const_get(name)
+      @function = begin
+        # inherit: false so unknown names raise instead of resolving to
+        # top-level constants like ::Kernel or ::Array.
+        Expressions.const_get(@name, false)
+      rescue NameError
+        raise UnknownExpression, "uninitialized constant Flipper::Expressions::#{@name}"
+      end
       @args = args
     end
 

@@ -50,6 +50,77 @@ RSpec.describe Flipper::Expression do
       ])
     end
 
+    it "can build Include" do
+      expression = described_class.build({
+        "Include" => [
+          {"Property" => ["roles"]},
+          "admin",
+        ]
+      })
+
+      expect(expression).to be_instance_of(Flipper::Expression)
+      expect(expression.function).to be(Flipper::Expressions::Include)
+      expect(expression.args).to eq([
+        described_class.build({"Property" => ["roles"]}),
+        Flipper.constant("admin"),
+      ])
+    end
+
+    it "can build Exclude" do
+      expression = described_class.build({
+        "Exclude" => [
+          {"Property" => ["roles"]},
+          "admin",
+        ]
+      })
+
+      expect(expression).to be_instance_of(Flipper::Expression)
+      expect(expression.function).to be(Flipper::Expressions::Exclude)
+      expect(expression.args).to eq([
+        described_class.build({"Property" => ["roles"]}),
+        Flipper.constant("admin"),
+      ])
+    end
+
+    it "can build In with an array literal" do
+      expression = described_class.build({
+        "In" => [
+          {"Property" => ["role"]},
+          ["admin", "support"],
+        ]
+      })
+
+      expect(expression).to be_instance_of(Flipper::Expression)
+      expect(expression.function).to be(Flipper::Expressions::In)
+      expect(expression.args).to eq([
+        described_class.build({"Property" => ["role"]}),
+        Flipper.constant(["admin", "support"]),
+      ])
+    end
+
+    it "can build NotIn with an array literal" do
+      expression = described_class.build({
+        "NotIn" => [
+          {"Property" => ["role"]},
+          ["admin", "support"],
+        ]
+      })
+
+      expect(expression).to be_instance_of(Flipper::Expression)
+      expect(expression.function).to be(Flipper::Expressions::NotIn)
+      expect(expression.args).to eq([
+        described_class.build({"Property" => ["role"]}),
+        Flipper.constant(["admin", "support"]),
+      ])
+    end
+
+    it "builds an array literal into a constant holding the built values" do
+      expression = described_class.build([:admin, "support"])
+
+      expect(expression).to be_instance_of(Flipper::Expression::Constant)
+      expect(expression.value).to eq(["admin", "support"])
+    end
+
     it "can build LessThanOrEqualTo" do
       expression = described_class.build({
         "LessThanOrEqualTo" => [
@@ -143,6 +214,26 @@ RSpec.describe Flipper::Expression do
       expect(expression).to be_instance_of(Flipper::Expression)
       expect(expression.function).to be(Flipper::Expressions::Property)
       expect(expression.args).to eq([Flipper.constant("flipper_id")])
+    end
+
+    it "raises UnknownExpression for unknown expression name" do
+      expect {
+        described_class.build({"Foo" => [1, 2]})
+      }.to raise_error(Flipper::Expression::UnknownExpression,
+        "uninitialized constant Flipper::Expressions::Foo")
+    end
+
+    it "raises UnknownExpression for top level constants" do
+      expect {
+        described_class.build({"Kernel" => []})
+      }.to raise_error(Flipper::Expression::UnknownExpression,
+        "uninitialized constant Flipper::Expressions::Kernel")
+    end
+
+    it "raises UnknownExpression that is rescuable as NameError" do
+      expect {
+        described_class.build({"Foo" => []})
+      }.to raise_error(NameError, /uninitialized constant Flipper::Expressions::Foo/)
     end
   end
 
