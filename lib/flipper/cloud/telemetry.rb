@@ -51,6 +51,7 @@ module Flipper
 
       def initialize(cloud_configuration)
         @pid = $$
+        @mutex = Mutex.new
         @cloud_configuration = cloud_configuration
         self.interval = ENV.fetch("FLIPPER_TELEMETRY_INTERVAL", 60).to_f
         self.shutdown_timeout = ENV.fetch("FLIPPER_TELEMETRY_SHUTDOWN_TIMEOUT", 5).to_f
@@ -71,6 +72,37 @@ module Flipper
 
       # Public: Start all the tasks and setup new metric storage.
       def start
+        @mutex.synchronize { start! }
+      end
+
+      # Public: Shuts down all the tasks and tries to flush any remaining info to Cloud.
+      def stop
+        @mutex.synchronize { stop! }
+      end
+
+      # Public: Restart all the tasks and reset the storage.
+      def restart
+        @mutex.synchronize { restart! }
+      end
+
+      # Internal: Sets the interval in seconds for how often telemetry should be sent to cloud.
+      def interval=(value)
+        new_interval = [Typecast.to_float(value), 10].max
+        @timer&.execution_interval = new_interval
+        @interval = new_interval
+      end
+
+      # Internal: Sets the timeout in seconds for how long to wait for the pool to shutdown.
+      def shutdown_timeout=(value)
+        new_shutdown_timeout = [Typecast.to_float(value), 0.1].max
+        @shutdown_timeout = new_shutdown_timeout
+      end
+
+      private
+
+      # Internal: Start all the tasks and setup new metric storage. Callers must
+      # hold @mutex.
+      def start!
         info "action=start"
 
         @metric_storage = MetricStorage.new
@@ -87,8 +119,9 @@ module Flipper
         }) { post_to_pool }
       end
 
-      # Public: Shuts down all the tasks and tries to flush any remaining info to Cloud.
-      def stop
+      # Internal: Shuts down all the tasks and tries to flush any remaining info
+      # to Cloud. Callers must hold @mutex.
+      def stop!
         info "action=stop"
 
         if @timer
@@ -111,31 +144,22 @@ module Flipper
         end
       end
 
-      # Public: Restart all the tasks and reset the storage.
-      def restart
-        stop
-        start
+      # Internal: Restart all the tasks and reset the storage. Callers must hold
+      # @mutex.
+      def restart!
+        stop!
+        start!
       end
-
-      # Internal: Sets the interval in seconds for how often telemetry should be sent to cloud.
-      def interval=(value)
-        new_interval = [Typecast.to_float(value), 10].max
-        @timer&.execution_interval = new_interval
-        @interval = new_interval
-      end
-
-      # Internal: Sets the timeout in seconds for how long to wait for the pool to shutdown.
-      def shutdown_timeout=(value)
-        new_shutdown_timeout = [Typecast.to_float(value), 0.1].max
-        @shutdown_timeout = new_shutdown_timeout
-      end
-
-      private
 
       def detect_forking
-        if @pid != $$
-          info "action=fork_detected pid_was#{@pid} pid_is=#{$$}"
-          restart
+        # Lock-free fast path: only contend for @mutex when a fork is actually
+        # detected. The inner check ensures just one thread performs the restart.
+        return if @pid == $$
+
+        @mutex.synchronize do
+          return if @pid == $$
+          info "action=fork_detected pid_was=#{@pid} pid_is=#{$$}"
+          restart!
           @pid = $$
         end
       end
