@@ -267,6 +267,34 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
       end
     end
 
+    context 'feature name contains invisible characters' do
+      before do
+        post '/features', name: "my_\u200Bfeature\u2060"
+      end
+
+      it 'responds 200' do
+        expect(last_response.status).to eq(200)
+      end
+
+      it 'adds feature with invisible characters removed' do
+        expect(flipper.features.map(&:key)).to eq(['my_feature'])
+      end
+    end
+
+    context 'feature name normalizes to empty' do
+      before do
+        post '/features', name: "\u200B\u2060"
+      end
+
+      it 'returns correct status code' do
+        expect(last_response.status).to eq(422)
+      end
+
+      it 'does not add feature' do
+        expect(flipper.features).to be_empty
+      end
+    end
+
     context 'bad request' do
       before do
         post '/features'

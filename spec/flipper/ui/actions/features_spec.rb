@@ -225,15 +225,15 @@ RSpec.describe Flipper::UI::Actions::Features do
       end
 
       context 'feature name contains accented and invisible characters' do
-        let(:feature_name) { "f\u200Beá\u2060ture" }
+        let(:feature_name) { "f\u200Be\u00E1\u2060ture" }
 
-        it 'adds feature normalized to ascii' do
-          expect(flipper.features.map(&:key)).to include('feature')
+        it 'adds feature with invisible characters removed and accent kept' do
+          expect(flipper.features.map(&:key)).to include("fe\u00E1ture")
         end
 
         it 'redirects to normalized feature' do
           expect(last_response.status).to be(302)
-          expect(last_response.headers['location']).to eq('/features/feature')
+          expect(last_response.headers['location']).to eq('/features/fe%C3%A1ture')
         end
       end
 
