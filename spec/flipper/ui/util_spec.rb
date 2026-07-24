@@ -14,4 +14,22 @@ RSpec.describe Flipper::UI::Util do
       end
     end
   end
+
+  describe '#normalize_feature_name' do
+    it 'transliterates accented characters to ascii' do
+      expect(described_class.normalize_feature_name('café')).to eq('cafe')
+    end
+
+    it 'removes invisible characters' do
+      expect(described_class.normalize_feature_name("f\u200Beá\u2060ture")).to eq('feature')
+    end
+
+    it 'strips surrounding whitespace' do
+      expect(described_class.normalize_feature_name('  notifications_next  ')).to eq('notifications_next')
+    end
+
+    it 'returns empty string for nil' do
+      expect(described_class.normalize_feature_name(nil)).to eq('')
+    end
+  end
 end
