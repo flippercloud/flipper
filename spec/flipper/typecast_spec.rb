@@ -218,6 +218,33 @@ RSpec.describe Flipper::Typecast do
     end
   end
 
+
+  describe "to_feature_name" do
+    it "keeps accented and non-latin characters" do
+      expect(described_class.to_feature_name("caf\u00E9")).to eq("caf\u00E9")
+      expect(described_class.to_feature_name("\u65B0\u6A5F\u80FD")).to eq("\u65B0\u6A5F\u80FD")
+    end
+
+    it "removes invisible format and control characters" do
+      expect(described_class.to_feature_name("f\u200Bea\u2060ture")).to eq("feature")
+      expect(described_class.to_feature_name("\uFEFFfeat\u00ADure")).to eq("feature")
+      expect(described_class.to_feature_name("feat\u0000ure")).to eq("feature")
+    end
+
+    it "trims unicode whitespace" do
+      expect(described_class.to_feature_name("\u00A0feature\u3000")).to eq("feature")
+      expect(described_class.to_feature_name("  feature  ")).to eq("feature")
+    end
+
+    it "removes invalid utf-8 bytes" do
+      expect(described_class.to_feature_name("feature\xFF".dup.force_encoding(Encoding::UTF_8))).to eq("feature")
+    end
+
+    it "returns empty string for nil" do
+      expect(described_class.to_feature_name(nil)).to eq("")
+    end
+  end
+
   it "converts to and from json" do
     source = {"foo" => "bar"}
     output = described_class.to_json(source)

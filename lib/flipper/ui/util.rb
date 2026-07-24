@@ -1,4 +1,5 @@
 require "rack/utils"
+require "flipper/typecast"
 
 module Flipper
   module UI
@@ -14,14 +15,8 @@ module Flipper
         Rack::Utils.unescape(str)
       end
 
-      # NFKD decomposes accented/compatibility characters so their base
-      # characters survive the ASCII conversion; anything unmappable
-      # (including invisible characters like zero-width spaces) is dropped.
       def self.normalize_feature_name(str)
-        str.to_s
-           .unicode_normalize(:nfkd)
-           .encode(Encoding::US_ASCII, invalid: :replace, undef: :replace, replace: '')
-           .strip
+        Typecast.to_feature_name(str)
       end
 
       def self.blank?(str)

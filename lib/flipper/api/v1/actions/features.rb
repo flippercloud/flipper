@@ -38,7 +38,10 @@ module Flipper
           end
 
           def post
-            feature_name = params.fetch('name') { json_error_response(:name_invalid) }
+            feature_name = Typecast.to_feature_name(
+              params.fetch('name') { json_error_response(:name_invalid) }
+            )
+            json_error_response(:name_invalid) if feature_name.empty?
             feature = flipper[feature_name]
             feature.add
             decorated_feature = Decorators::Feature.new(feature)
