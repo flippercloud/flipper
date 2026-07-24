@@ -119,6 +119,13 @@ module Flipper
       end
     end
 
+    # Public: Check if a feature is disabled for zero or more actors.
+    #
+    # Returns true if disabled, false if not.
+    def disabled?(*actors)
+      !enabled?(*actors)
+    end
+
     # Public: Enables an expression_to_add for a feature.
     #
     # expression - an Expression or Hash that can be converted to an expression.
