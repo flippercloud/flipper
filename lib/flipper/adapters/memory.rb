@@ -8,6 +8,10 @@ module Flipper
     class Memory
       include ::Flipper::Adapter
 
+      # Private: Shared frozen config for unknown features. Gate values
+      # returned by get are treated as read-only.
+      DEFAULT_CONFIG = default_config.each_value(&:freeze).freeze
+
       # Public
       def initialize(source = nil, threadsafe: true)
         @source = Typecast.features_hash(source)
@@ -41,14 +45,14 @@ module Flipper
 
       # Public
       def get(feature)
-        synchronize { @source[feature.key] } || default_config
+        synchronize { @source[feature.key] } || DEFAULT_CONFIG
       end
 
       def get_multi(features)
         synchronize do
           result = {}
           features.each do |feature|
-            result[feature.key] = @source[feature.key] || default_config
+            result[feature.key] = @source[feature.key] || DEFAULT_CONFIG
           end
           result
         end
