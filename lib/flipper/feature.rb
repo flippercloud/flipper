@@ -100,15 +100,7 @@ module Flipper
     #
     # Returns true if enabled, false if not.
     def enabled?(*actors)
-      actors = Array(actors).
-        # Avoids to_ary warning that happens when passing DelegateClass of an 
-        # ActiveRecord object and using flatten here. This is tested in 
-        # spec/flipper/model/active_record_spec.rb.
-        flat_map { |actor| actor.is_a?(Array) ? actor : [actor] }. 
-        # Allows null object pattern. See PR for more. https://github.com/flippercloud/flipper/pull/887
-        reject(&:nil?). 
-        map { |actor| Types::Actor.wrap(actor) }
-      actors = nil if actors.empty?
+      actors = wrap_actors(actors)
 
       # thing is left for backwards compatibility
       instrument(:enabled?, thing: actors&.first, actors: actors) do |payload|
@@ -434,6 +426,31 @@ module Flipper
     end
 
     private
+
+    # Private: Wrap the actors passed to enabled? in a single pass to avoid
+    # intermediate array allocations on the hot path. Arrays are flattened one
+    # level; the explicit is_a?(Array) check (instead of flatten) avoids the
+    # to_ary warning that happens when passing a DelegateClass of an
+    # ActiveRecord object. This is tested in
+    # spec/flipper/model/active_record_spec.rb. Nils are dropped to allow the
+    # null object pattern. See https://github.com/flippercloud/flipper/pull/887
+    #
+    # Returns an Array of Types::Actor instances or nil if no actors.
+    def wrap_actors(actors)
+      return nil if actors.empty?
+
+      wrapped = []
+      actors.each do |actor|
+        if actor.is_a?(Array)
+          actor.each do |nested_actor|
+            wrapped << Types::Actor.wrap(nested_actor) unless nested_actor.nil?
+          end
+        elsif !actor.nil?
+          wrapped << Types::Actor.wrap(actor)
+        end
+      end
+      wrapped.empty? ? nil : wrapped
+    end
 
     # Private: Instrument a feature operation.
     def instrument(operation, initial_payload = {})

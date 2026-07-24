@@ -75,6 +75,12 @@ RSpec.describe Flipper::Feature do
         subject.disable
         expect(subject.enabled?(actors)).to be(false)
       end
+
+      it 'ignores nil actors in the array' do
+        subject.enable_actor actors.first
+        expect(subject.enabled?([actors.first, nil])).to be(true)
+        expect(subject.enabled?([nil])).to be(false)
+      end
     end
 
     context "for an object that implements .nil? == true" do
