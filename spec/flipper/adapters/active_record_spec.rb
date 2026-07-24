@@ -78,6 +78,23 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
           flipper.preload([:foo])
         end
 
+        it "ignores gate rows with unknown keys" do
+          flipper = Flipper.new(subject)
+          flipper.enable_actor(:foo, Flipper::Actor.new("User;1"))
+
+          Flipper::Adapters::ActiveRecord::Gate.create!(
+            feature_key: "foo",
+            key: "not_a_real_gate",
+            value: "junk",
+          )
+
+          expected = subject.default_config.merge(actors: Set["User;1"])
+          feature = flipper[:foo]
+          expect(subject.get(feature)).to eq(expected)
+          expect(subject.get_multi([feature])).to eq("foo" => expected)
+          expect(subject.get_all).to eq("foo" => expected)
+        end
+
         it 'should not poison wrapping transactions' do
           flipper = Flipper.new(subject)
 
