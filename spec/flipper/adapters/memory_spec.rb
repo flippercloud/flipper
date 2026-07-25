@@ -33,4 +33,27 @@ RSpec.describe Flipper::Adapters::Memory do
       "following" => subject.default_config.merge(actors: Set["1", "3"], groups: Set["staff"]),
     })
   end
+
+  it "synchronizes safely after a fork" do
+    adapter = described_class.new(source, threadsafe: true)
+    fork_safe_mutex = adapter.instance_variable_get(:@lock)
+    original = fork_safe_mutex.mutex
+    locked = Queue.new
+    release = Queue.new
+    thread = Thread.new do
+      original.lock
+      locked << true
+      release.pop
+      original.unlock
+    end
+
+    locked.pop
+    allow(Process).to receive(:pid).and_return(Process.pid + 1)
+
+    expect { adapter.features }.not_to raise_error
+    expect(fork_safe_mutex.mutex).not_to equal(original)
+  ensure
+    release << true if release
+    thread&.join
+  end
 end

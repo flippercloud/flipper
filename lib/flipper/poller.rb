@@ -3,10 +3,11 @@ require 'concurrent/utility/monotonic_time'
 require 'concurrent/map'
 require 'concurrent/atomic/atomic_fixnum'
 require 'concurrent/atomic/atomic_boolean'
+require 'flipper/fork_safe_mutex'
 
 module Flipper
   class Poller
-    attr_reader :adapter, :thread, :pid, :mutex, :interval, :last_synced_at
+    attr_reader :adapter, :thread, :interval, :last_synced_at
 
     def self.instances
       @instances ||= Concurrent::Map.new
@@ -28,8 +29,7 @@ module Flipper
 
     def initialize(options = {})
       @thread = nil
-      @pid = Process.pid
-      @mutex = Mutex.new
+      @mutex = ForkSafeMutex.new
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
       @remote_adapter = options.fetch(:remote_adapter)
       @last_synced_at = Concurrent::AtomicFixnum.new(0)
@@ -47,7 +47,7 @@ module Flipper
     end
 
     def start
-      reset if forked?
+      @shutdown_requested.make_false if @mutex.reset_if_forked
       return if @shutdown_requested.true?
       ensure_worker_running
     end
@@ -102,16 +102,13 @@ module Flipper
       rand
     end
 
-    def forked?
-      pid != Process.pid
-    end
-
     def ensure_worker_running
       # Return early if thread is alive and avoid the mutex lock and unlock.
       return if thread_alive?
 
       # If another thread is starting worker thread, then return early so this
       # thread can enqueue and move on with life.
+      mutex = @mutex.mutex
       return unless mutex.try_lock
 
       begin
@@ -128,12 +125,6 @@ module Flipper
 
     def thread_alive?
       @thread && @thread.alive?
-    end
-
-    def reset
-      @pid = Process.pid
-      @shutdown_requested.make_false
-      mutex.unlock if mutex.locked?
     end
 
     def apply_response_headers

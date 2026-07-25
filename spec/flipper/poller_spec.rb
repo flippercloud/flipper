@@ -356,6 +356,15 @@ RSpec.describe Flipper::Poller do
       subject.start
     end
 
+    it "swaps in a fresh mutex after a fork" do
+      fork_safe_mutex = subject.instance_variable_get(:@mutex)
+      original = fork_safe_mutex.mutex
+      allow(Process).to receive(:pid).and_return(Process.pid + 1)
+
+      expect { subject.start }.not_to raise_error
+      expect(fork_safe_mutex.mutex).not_to equal(original)
+    end
+
     context "after shutdown_requested" do
       before do
         stub_request(:get, "#{url}/features?exclude_gate_names=true")
@@ -377,7 +386,7 @@ RSpec.describe Flipper::Poller do
         subject.sync # This triggers shutdown
 
         # Simulate fork by changing PID
-        allow(Process).to receive(:pid).and_return(subject.instance_variable_get(:@pid) + 1)
+        allow(Process).to receive(:pid).and_return(Process.pid + 1)
 
         # After fork, start should work again
         expect(Thread).to receive(:new).and_yield
