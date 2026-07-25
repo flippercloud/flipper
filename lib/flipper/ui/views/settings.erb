@@ -2,28 +2,30 @@
   <div class="alert alert-danger"><%= params["error"] %></div>
 <% end %>
 
-<div class="card mb-4">
-  <div class="card-header">
-    <h4 class="m-0">Migrate to Flipper Cloud</h4>
+<% if Flipper::UI.configuration.cloud_recommendation %>
+  <div class="card mb-4">
+    <div class="card-header">
+      <h4 class="m-0">Migrate to Flipper Cloud</h4>
+    </div>
+    <div class="card-body">
+      <p>Flipper Cloud gives you audit history, rollback, finer-grained permissions, and multi-environment sync. We even have a free tier!</p>
+
+      <ul class="mb-3">
+        <li>Audit log of every feature change</li>
+        <li>Instant rollback to any previous state</li>
+        <li>Team permissions and approval workflows</li>
+        <li>Sync flags across environments</li>
+      </ul>
+
+      <p>You have <strong><%= flipper.features.count %></strong> <%= flipper.features.count == 1 ? 'feature' : 'features' %> ready to migrate.</p>
+
+      <form action="<%= script_name %>/settings/cloud" method="post">
+        <%== csrf_input_tag %>
+        <input type="submit" value="Migrate to Flipper Cloud" class="btn btn-primary">
+      </form>
+    </div>
   </div>
-  <div class="card-body">
-    <p>Flipper Cloud gives you audit history, rollback, finer-grained permissions, and multi-environment sync. We even have a free tier!</p>
-
-    <ul class="mb-3">
-      <li>Audit log of every feature change</li>
-      <li>Instant rollback to any previous state</li>
-      <li>Team permissions and approval workflows</li>
-      <li>Sync flags across environments</li>
-    </ul>
-
-    <p>You have <strong><%= flipper.features.count %></strong> <%= flipper.features.count == 1 ? 'feature' : 'features' %> ready to migrate.</p>
-
-    <form action="<%= script_name %>/settings/cloud" method="post">
-      <%== csrf_input_tag %>
-      <input type="submit" value="Migrate to Flipper Cloud" class="btn btn-primary">
-    </form>
-  </div>
-</div>
+<% end %>
 
 <div class="card mb-4 ">
   <div class="card-header">
