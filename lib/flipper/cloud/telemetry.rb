@@ -187,7 +187,11 @@ module Flipper
         if response
           if Flipper::Typecast.to_boolean(response["telemetry-shutdown"])
             debug "action=telemetry_shutdown message=The server has requested that telemetry be shut down."
-            stop
+            # Stop from a separate thread to avoid a deadlock: this code runs on
+            # the pool worker, and stop acquires @mutex and then waits for that
+            # same worker to terminate. Calling stop inline would block the
+            # worker on @mutex while the mutex holder waits on the worker.
+            Thread.new { stop }
             return
           end
 
