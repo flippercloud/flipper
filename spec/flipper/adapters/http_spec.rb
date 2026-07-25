@@ -608,8 +608,27 @@ RSpec.describe Flipper::Adapters::Http do
       user_agent = Net::HTTP.new("app.com")
       allow(Net::HTTP).to receive(:new).and_return(user_agent)
 
-      expect(user_agent).to receive(:set_debug_output).with(debug_output)
+      expect(user_agent).to receive(:set_debug_output).with(
+        an_instance_of(Flipper::Adapters::Http::RedactedDebugOutput)
+      )
       subject.get(feature)
+    end
+
+    it 'redacts sensitive headers from debug output' do
+      user_agent = Net::HTTP.new("app.com")
+      allow(Net::HTTP).to receive(:new).and_return(user_agent)
+
+      allow(debug_output).to receive(:<<)
+      redacted = nil
+      allow(user_agent).to receive(:set_debug_output) { |output| redacted = output }
+      subject.get(feature)
+
+      redacted << 'Flipper-Cloud-Token: super-secret'.dump
+      redacted << 'Authorization: Basic dXNlcjpwYXNz'.dump
+
+      expect(debug_output).to have_received(:<<).with(a_string_including('[REDACTED]')).twice
+      expect(debug_output).not_to have_received(:<<).with(a_string_including('super-secret'))
+      expect(debug_output).not_to have_received(:<<).with(a_string_including('dXNlcjpwYXNz'))
     end
   end
 
