@@ -6,6 +6,8 @@ jobs:
     name: Test on ruby ${{ matrix.ruby }} and rails ${{ matrix.rails }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # rails main is an early-warning canary; failures don't block the build
+    continue-on-error: ${{ matrix.rails == 'main' }}
     services:
       redis:
         image: redis
@@ -74,8 +76,11 @@ jobs:
             rails: "6.0.0"
           - ruby: "3.3"
             rails: "6.1.0"
+        include:
+          - ruby: "3.3"
+            rails: "main"
     env:
-      SQLITE3_VERSION: ${{ matrix.rails == '8.0.0' && '2.1.0' || '1.4.1' }}
+      SQLITE3_VERSION: ${{ (matrix.rails == '8.0.0' || matrix.rails == 'main') && '2.1.0' || '1.4.1' }}
       REDIS_URL: redis://localhost:6379/0
       CI: true
       RAILS_VERSION: ${{ matrix.rails }}

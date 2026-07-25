@@ -15,7 +15,11 @@ gem 'rspec', '~> 3.0'
 gem 'rack-test'
 gem 'rackup', '= 1.0.0'
 gem 'sqlite3', "~> #{ENV['SQLITE3_VERSION'] || '2.1.0'}"
-gem 'rails', "~> #{ENV['RAILS_VERSION'] || '8.0'}"
+if ENV['RAILS_VERSION'] == 'main'
+  gem 'rails', github: 'rails/rails', branch: 'main'
+else
+  gem 'rails', "~> #{ENV['RAILS_VERSION'] || '8.0'}"
+end
 gem 'minitest', '~> 5.18'
 gem 'minitest-documentation'
 gem 'pstore'
