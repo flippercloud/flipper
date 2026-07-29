@@ -911,6 +911,39 @@ RSpec.describe Flipper::Feature do
     end
   end
 
+  describe '#enable_expression with empty groups' do
+    it "raises for an empty root group" do
+      expect {
+        subject.enable_expression(Flipper.any)
+      }.to raise_error(ArgumentError, /empty Any\/All groups/)
+      expect(subject.expression).to be(nil)
+    end
+
+    it "raises for a nested empty group" do
+      expect {
+        subject.enable_expression({"Any" => [{"Equal" => [{"Property" => ["plan"]}, "basic"]}, {"All" => []}]})
+      }.to raise_error(ArgumentError, /empty Any\/All groups/)
+      expect(subject.expression).to be(nil)
+    end
+  end
+
+  describe '#add_expression with empty groups' do
+    it "raises when the added expression contains an empty group" do
+      expect {
+        subject.add_expression(Flipper.all)
+      }.to raise_error(ArgumentError, /empty Any\/All groups/)
+      expect(subject.expression).to be(nil)
+    end
+
+    it "raises when adding to an expression would keep an empty group" do
+      subject.enable_expression Flipper.property(:plan).eq("basic")
+
+      expect {
+        subject.add_expression(Flipper.any(Flipper.all))
+      }.to raise_error(ArgumentError, /empty Any\/All groups/)
+    end
+  end
+
   describe '#remove_expression' do
     context "when nothing enabled" do
       context "with Expression instance" do
@@ -946,10 +979,10 @@ RSpec.describe Flipper::Feature do
       end
 
       context "with Expression instance" do
-        it "changes expression to Any and removes Expression if it matches" do
+        it "disables the expression when removing the last condition" do
           new_expression = Flipper.property(:plan).eq("basic")
           subject.remove_expression new_expression
-          expect(subject.expression).to eq(Flipper.any)
+          expect(subject.expression).to be(nil)
         end
 
         it "changes expression to Any if Expression doesn't match" do
@@ -985,9 +1018,9 @@ RSpec.describe Flipper::Feature do
       end
 
       context "with Expression instance" do
-        it "removes Expression if it matches" do
+        it "disables the expression when removing the last condition" do
           subject.remove_expression condition
-          expect(subject.expression).to eq(Flipper.any)
+          expect(subject.expression).to be(nil)
         end
 
         it "does nothing if Expression does not match" do
@@ -1038,9 +1071,9 @@ RSpec.describe Flipper::Feature do
       end
 
       context "with Expression instance" do
-        it "removes Expression if it matches" do
+        it "disables the expression when removing the last condition" do
           subject.remove_expression condition
-          expect(subject.expression).to eq(Flipper.all)
+          expect(subject.expression).to be(nil)
         end
 
         it "does nothing if Expression does not match" do

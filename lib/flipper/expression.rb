@@ -50,10 +50,78 @@ module Flipper
     end
     alias_method :==, :eql?
 
+    # Public: Returns true if this expression contains an Any/All group with
+    # no arguments anywhere in its tree. An empty All evaluates to true for
+    # every actor and an empty Any to false for every actor, so persisting
+    # one is almost always a mistake.
+    def empty_groups?
+      return true if group? && args.empty?
+
+      args.any? { |arg| arg.is_a?(Expression) && arg.empty_groups? }
+    end
+
+    # Public: Returns a copy of this expression with empty Any/All groups
+    # removed wherever removal cannot broaden the expression, or nil when no
+    # conditions remain. An empty All can be removed from an All parent (it
+    # contributes a constant true) and an empty Any from an Any parent (a
+    # constant false), but an empty Any inside an All is kept because
+    # removing it would broaden the expression from never-true.
+    def prune_empty_groups
+      prune_empty_groups_with_identity.first
+    end
+
+    # Public: Returns true when this expression is guaranteed to match every
+    # actor, e.g. an empty All group reaches an Any group or the root.
+    def always_true?
+      constant_group_value == true
+    end
+
     def value
       {
         name => args.map(&:value)
       }
+    end
+
+    protected
+
+    def prune_empty_groups_with_identity
+      return [self, nil] unless group?
+      return [nil, all?] if args.empty?
+
+      pruned_args = args.map do |arg|
+        arg.is_a?(Expression) ? arg.prune_empty_groups_with_identity : [arg, nil]
+      end
+      kept = pruned_args.map(&:first).compact
+
+      # No condition remains. Preserve this group's constant value for an
+      # enclosing group, which lets an empty All disappear from All without
+      # treating it as the unsafe empty-Any-in-All case.
+      return [nil, constant_group_value] if kept.empty?
+
+      if all? && pruned_args.any? { |value, identity| value.nil? && identity == false }
+        return [self, nil]
+      end
+
+      [build(name => kept), nil]
+    end
+
+    def constant_group_value
+      return nil unless group?
+      return all? if args.empty?
+
+      values = args.map do |arg|
+        arg.is_a?(Expression) ? arg.constant_group_value : nil
+      end
+
+      if all?
+        return false if values.include?(false)
+        return true if values.all?(true)
+      else
+        return true if values.include?(true)
+        return false if values.all?(false)
+      end
+
+      nil
     end
 
     private

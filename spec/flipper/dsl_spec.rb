@@ -226,7 +226,7 @@ RSpec.describe Flipper::DSL do
       expect(subject[:stats].expression).to eq(any_expression)
 
       subject.remove_expression(:stats, expression)
-      expect(subject[:stats].expression).to eq(Flipper.any)
+      expect(subject[:stats].expression).to be(nil)
     end
   end
 

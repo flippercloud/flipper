@@ -124,8 +124,10 @@ module Flipper
     # expression - an Expression or Hash that can be converted to an expression.
     #
     # Returns result of enable.
+    # Raises ArgumentError if the expression contains empty Any/All groups,
+    # because an empty All matches every actor.
     def enable_expression(expression)
-      enable Expression.build(expression)
+      enable validate_expression!(Expression.build(expression))
     end
 
     # Public: Add an expression for a feature.
@@ -133,12 +135,18 @@ module Flipper
     # expression_to_add - an expression or Hash that can be converted to an expression.
     #
     # Returns result of enable.
+    # Raises ArgumentError if the resulting expression contains empty Any/All
+    # groups, because an empty All matches every actor.
     def add_expression(expression_to_add)
-      if (current_expression = expression)
-        enable current_expression.add(expression_to_add)
+      expression_to_add = Expression.build(expression_to_add)
+
+      new_expression = if (current_expression = expression)
+        current_expression.add(expression_to_add)
       else
-        enable expression_to_add
+        expression_to_add
       end
+
+      enable validate_expression!(new_expression)
     end
 
     # Public: Enables a feature for an actor.
@@ -191,14 +199,21 @@ module Flipper
     end
 
     # Public: Remove an expression from a feature. Does nothing if no expression is
-    # currently enabled.
+    # currently enabled. Removing the last condition disables the expression
+    # rather than persisting an empty group.
     #
     # expression - an Expression or Hash that can be converted to an expression.
     #
-    # Returns result of enable or nil (if no expression enabled).
+    # Returns result of enable or disable or nil (if no expression enabled).
     def remove_expression(expression_to_remove)
       if (current_expression = expression)
-        enable current_expression.remove(expression_to_remove)
+        remaining = current_expression.remove(expression_to_remove)
+
+        if remaining.group? && remaining.args.empty?
+          disable_expression
+        else
+          enable remaining
+        end
       end
     end
 
@@ -426,6 +441,19 @@ module Flipper
     end
 
     private
+
+    # Private: Raises if an expression about to be enabled contains empty
+    # Any/All groups. An empty All evaluates to true for every actor, so
+    # persisting one silently enables the feature for everyone.
+    #
+    # Returns the expression.
+    def validate_expression!(expression)
+      if expression.is_a?(Expression) && expression.empty_groups?
+        raise ArgumentError, "#{expression.value.inspect} contains empty Any/All groups and cannot be enabled (an empty All matches every actor). Remove the empty groups or add conditions to them."
+      end
+
+      expression
+    end
 
     # Private: Wrap the actors passed to enabled? in a single pass to avoid
     # intermediate array allocations on the hot path. Arrays are flattened one
