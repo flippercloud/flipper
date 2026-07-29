@@ -121,6 +121,32 @@ RSpec.describe Flipper::Api::V1::Actions::ExpressionGate do
     end
   end
 
+  describe 'enable with empty group' do
+    before do
+      data = {"Any" => []}
+      post '/features/my_feature/expression', JSON.dump(data),
+        "CONTENT_TYPE" => "application/json"
+    end
+
+    it 'returns correct error response' do
+      expect(last_response.status).to eq(422)
+      expect(json_response).to eq(api_expression_invalid_response)
+    end
+  end
+
+  describe 'enable with nested empty group' do
+    before do
+      data = {"All" => [{"All" => []}]}
+      post '/features/my_feature/expression', JSON.dump(data),
+        "CONTENT_TYPE" => "application/json"
+    end
+
+    it 'returns correct error response' do
+      expect(last_response.status).to eq(422)
+      expect(json_response).to eq(api_expression_invalid_response)
+    end
+  end
+
   describe 'enable missing feature' do
     before do
       post '/features/my_feature/expression', JSON.dump(expression.value), "CONTENT_TYPE" => "application/json"

@@ -207,7 +207,7 @@ module Flipper
     # Returns result of enable or disable or nil (if no expression enabled).
     def remove_expression(expression_to_remove)
       if (current_expression = expression)
-        remaining = current_expression.remove(expression_to_remove)
+        remaining = current_expression.remove(Expression.build(expression_to_remove))
 
         if remaining.group? && remaining.args.empty?
           disable_expression
@@ -449,7 +449,7 @@ module Flipper
     # Returns the expression.
     def validate_expression!(expression)
       if expression.is_a?(Expression) && expression.empty_groups?
-        raise ArgumentError, "#{expression.value.inspect} contains empty Any/All groups and cannot be enabled (an empty All matches every actor). Remove the empty groups or add conditions to them."
+        raise ArgumentError, "#{expression.value.inspect} contains empty Any/All groups and cannot be enabled (an empty All matches every actor, an empty Any matches none). Remove the empty groups or add conditions to them."
       end
 
       expression

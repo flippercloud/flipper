@@ -98,8 +98,13 @@ module Flipper
       # treating it as the unsafe empty-Any-in-All case.
       return [nil, constant_group_value] if kept.empty?
 
-      if all? && pruned_args.any? { |value, identity| value.nil? && identity == false }
-        return [self, nil]
+      # In an All parent a constant-false child (an empty Any) cannot be
+      # removed without broadening, so keep the original child while still
+      # using the pruned versions of its siblings.
+      if all?
+        kept = pruned_args.zip(args).map do |(value, identity), arg|
+          value.nil? && identity == false ? arg : value
+        end.compact
       end
 
       [build(name => kept), nil]

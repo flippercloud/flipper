@@ -58,7 +58,11 @@ module Flipper
           if remote_expression.nil?
             @feature.disable_expression
           else
-            @feature.enable_expression remote_expression
+            # Mirror remote state faithfully via the generic enable path.
+            # enable_expression validates against empty Any/All groups, but
+            # remote adapters can hold legacy empty-group expressions and a
+            # raise here would abort the sync for every remaining feature.
+            @feature.enable remote_expression
           end
         end
 

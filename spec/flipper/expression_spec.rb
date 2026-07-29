@@ -236,6 +236,21 @@ RSpec.describe Flipper::Expression do
       expect(expression.prune_empty_groups).to eq(expression)
     end
 
+    it "removes an empty All from an Any parent" do
+      expression = described_class.build({"Any" => [condition, {"All" => []}]})
+      expect(expression.prune_empty_groups).to eq(described_class.build({"Any" => [condition]}))
+    end
+
+    it "prunes removable groups even when a sibling cannot be removed" do
+      expression = described_class.build({
+        "All" => [{"All" => [condition, {"All" => []}]}, {"Any" => []}],
+      })
+      expected = described_class.build({
+        "All" => [{"All" => [condition]}, {"Any" => []}],
+      })
+      expect(expression.prune_empty_groups).to eq(expected)
+    end
+
     it "returns a condition untouched" do
       expression = described_class.build(condition)
       expect(expression.prune_empty_groups).to eq(expression)

@@ -1029,6 +1029,18 @@ RSpec.describe Flipper::Feature do
         end
       end
 
+      context "with Hash" do
+        it "disables the expression when removing the last condition" do
+          subject.remove_expression condition.value
+          expect(subject.expression).to be(nil)
+        end
+
+        it "does nothing if Hash does not match" do
+          subject.remove_expression({"Equal" => [{"Property" => ["plan"]}, "premium"]})
+          expect(subject.expression).to eq(expression)
+        end
+      end
+
       context "with Any instance" do
         it "removes Any if it matches" do
           new_expression = Flipper.any(Flipper.property(:plan).eq("premium"))
