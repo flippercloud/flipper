@@ -251,6 +251,16 @@ RSpec.describe Flipper::Expression do
       expect(expression.prune_empty_groups).to eq(expected)
     end
 
+    it "prunes a removable group nested inside a constant-false group" do
+      expression = described_class.build({
+        "All" => [condition, {"All" => [{"Any" => []}, {"All" => []}]}],
+      })
+      expected = described_class.build({
+        "All" => [condition, {"All" => [{"Any" => []}]}],
+      })
+      expect(expression.prune_empty_groups).to eq(expected)
+    end
+
     it "returns a condition untouched" do
       expression = described_class.build(condition)
       expect(expression.prune_empty_groups).to eq(expression)

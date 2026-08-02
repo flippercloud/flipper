@@ -40,16 +40,7 @@ module Flipper
     #
     # Returns the result of Adapter#enable.
     def enable(thing = true)
-      instrument(:enable) do |payload|
-        adapter.add self
-
-        gate = gate_for(thing)
-        wrapped_thing = gate.wrap(thing)
-        payload[:gate_name] = gate.name
-        payload[:thing] = wrapped_thing
-
-        adapter.enable self, gate, wrapped_thing
-      end
+      enable_thing(thing, validate_expression: true)
     end
 
     # Public: Disable this feature for something.
@@ -127,7 +118,7 @@ module Flipper
     # Raises ArgumentError if the expression contains empty Any/All groups,
     # because an empty All matches every actor.
     def enable_expression(expression)
-      enable validate_expression!(Expression.build(expression))
+      enable Expression.build(expression)
     end
 
     # Public: Add an expression for a feature.
@@ -146,7 +137,7 @@ module Flipper
         expression_to_add
       end
 
-      enable validate_expression!(new_expression)
+      enable new_expression
     end
 
     # Public: Enables a feature for an actor.
@@ -207,12 +198,18 @@ module Flipper
     # Returns result of enable or disable or nil (if no expression enabled).
     def remove_expression(expression_to_remove)
       if (current_expression = expression)
-        remaining = current_expression.remove(Expression.build(expression_to_remove))
+        remaining = current_expression
+          .remove(Expression.build(expression_to_remove))
+          .prune_empty_groups
 
-        if remaining.group? && remaining.args.empty?
+        if remaining.nil?
           disable_expression
         else
-          enable remaining
+          # remove and prune only delete nodes, so any empty group left in
+          # remaining was already stored (e.g. mirrored by sync). Persist it
+          # unvalidated: rejecting it here would block removing unrelated
+          # conditions from legacy data.
+          enable_thing(remaining, validate_expression: false)
         end
       end
     end
@@ -441,6 +438,29 @@ module Flipper
     end
 
     private
+
+    # Internal: Mirrors a trusted remote expression during adapter sync,
+    # including legacy expressions that predate empty-group validation.
+    #
+    # Returns the result of Adapter#enable.
+    def enable_expression_from_sync(expression)
+      enable_thing(Expression.build(expression), validate_expression: false)
+    end
+
+    def enable_thing(thing, validate_expression:)
+      instrument(:enable) do |payload|
+        gate = gate_for(thing)
+        wrapped_thing = gate.wrap(thing)
+        validate_expression!(wrapped_thing) if validate_expression
+
+        adapter.add self
+
+        payload[:gate_name] = gate.name
+        payload[:thing] = wrapped_thing
+
+        adapter.enable self, gate, wrapped_thing
+      end
+    end
 
     # Private: Raises if an expression about to be enabled contains empty
     # Any/All groups. An empty All evaluates to true for every actor, so

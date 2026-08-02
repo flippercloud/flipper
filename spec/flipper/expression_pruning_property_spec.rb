@@ -53,6 +53,13 @@ RSpec.describe Flipper::Expression do
     CONTEXTS.map { |context| !!expression.evaluate(context) }
   end
 
+  def surviving_empty_groups(expression, parent = nil)
+    return [] unless expression.is_a?(described_class)
+
+    found = expression.group? && expression.args.empty? ? [[expression, parent]] : []
+    found + expression.args.flat_map { |arg| surviving_empty_groups(arg, expression) }
+  end
+
   it "prunes without ever broadening the expression" do
     rng = Random.new(SEED)
 
@@ -78,6 +85,11 @@ RSpec.describe Flipper::Expression do
       else
         evaluate_all(pruned).zip(values).each do |after, before|
           expect(after && !before).to be(false), "#{failure} pruning broadened the expression"
+        end
+
+        surviving_empty_groups(pruned).each do |group, parent|
+          expect(group.any? && parent&.all?).to be(true),
+            "#{failure} retained a removable empty group"
         end
       end
     end

@@ -927,6 +927,20 @@ RSpec.describe Flipper::Feature do
     end
   end
 
+  describe '#enable with empty groups' do
+    it "raises instead of enabling an empty All for everyone" do
+      expect {
+        subject.enable(Flipper.all)
+      }.to raise_error(ArgumentError, /empty Any\/All groups/)
+      expect(subject.expression).to be(nil)
+      expect(subject.exist?).to be(false)
+    end
+
+    it "does not expose the trusted sync hook as public API" do
+      expect(described_class.public_method_defined?(:enable_expression_from_sync)).to be(false)
+    end
+  end
+
   describe '#add_expression with empty groups' do
     it "raises when the added expression contains an empty group" do
       expect {
@@ -945,6 +959,38 @@ RSpec.describe Flipper::Feature do
   end
 
   describe '#remove_expression' do
+    context "when a synced legacy expression contains an empty group" do
+      it "prunes the empty group and disables the expression when removing the last condition" do
+        condition = Flipper.property(:plan).eq("basic")
+        subject.__send__ :enable_expression_from_sync, Flipper.any(condition, Flipper.all)
+
+        expect {
+          subject.remove_expression condition
+        }.not_to raise_error
+        expect(subject.expression).to be(nil)
+      end
+
+      it "prunes the empty group when other conditions remain" do
+        condition = Flipper.property(:plan).eq("basic")
+        other = Flipper.property(:age).gte(21)
+        subject.__send__ :enable_expression_from_sync, Flipper.any(condition, other, Flipper.all)
+
+        subject.remove_expression condition
+        expect(subject.expression).to eq(Flipper.any(other))
+      end
+
+      it "keeps an unprunable empty Any when removing an unrelated condition" do
+        condition = Flipper.property(:plan).eq("basic")
+        other = Flipper.property(:age).gte(21)
+        subject.__send__ :enable_expression_from_sync, Flipper.all(condition, other, Flipper.any)
+
+        expect {
+          subject.remove_expression condition
+        }.not_to raise_error
+        expect(subject.expression).to eq(Flipper.all(other, Flipper.any))
+      end
+    end
+
     context "when nothing enabled" do
       context "with Expression instance" do
         it "does nothing" do

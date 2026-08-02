@@ -91,23 +91,22 @@ module Flipper
       pruned_args = args.map do |arg|
         arg.is_a?(Expression) ? arg.prune_empty_groups_with_identity : [arg, nil]
       end
-      kept = pruned_args.map(&:first).compact
+
+      kept = pruned_args.map do |value, constant|
+        if constant == false
+          value || build("Any" => []) if all?
+        elsif constant.nil?
+          value
+        end
+      end.compact
 
       # No condition remains. Preserve this group's constant value for an
       # enclosing group, which lets an empty All disappear from All without
       # treating it as the unsafe empty-Any-in-All case.
       return [nil, constant_group_value] if kept.empty?
 
-      # In an All parent a constant-false child (an empty Any) cannot be
-      # removed without broadening, so keep the original child while still
-      # using the pruned versions of its siblings.
-      if all?
-        kept = pruned_args.zip(args).map do |(value, identity), arg|
-          value.nil? && identity == false ? arg : value
-        end.compact
-      end
-
-      [build(name => kept), nil]
+      pruned = build(name => kept)
+      [pruned, pruned.constant_group_value]
     end
 
     def constant_group_value

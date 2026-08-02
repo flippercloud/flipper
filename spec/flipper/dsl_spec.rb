@@ -216,6 +216,15 @@ RSpec.describe Flipper::DSL do
     end
   end
 
+  describe '#enable with empty groups' do
+    it "raises instead of enabling an empty All for everyone" do
+      expect {
+        subject.enable(:stats, Flipper.all)
+      }.to raise_error(ArgumentError, /empty Any\/All groups/)
+      expect(subject[:stats].expression).to be(nil)
+    end
+  end
+
   describe '#add_expression/remove_expression' do
     it 'enables and disables the feature for the expression' do
       expression = Flipper.property(:plan).eq("basic")
