@@ -8,12 +8,22 @@ RSpec.describe Flipper::Engine do
       config.eager_load = false
       config.logger = ActiveSupport::Logger.new($stdout)
       config.active_support.remove_deprecated_time_with_zone_name = false
+
+      # These specs boot a new application for each example. Rails main's
+      # inflection freezer registers a global after_initialize hook on every
+      # boot, so exclude that unrelated initializer from these test apps.
+      def initializers
+        Rails::Initializable::Collection.new(
+          super.reject { |initializer| initializer.name == "active_support.freeze_inflections" }
+        )
+      end
     end.instance
   end
 
   before do
     stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
     Rails.application = nil
+    reset_frozen_inflections
     ActiveSupport::Dependencies.autoload_paths = ActiveSupport::Dependencies.autoload_paths.dup
     ActiveSupport::Dependencies.autoload_once_paths = ActiveSupport::Dependencies.autoload_once_paths.dup
   end
@@ -370,5 +380,22 @@ RSpec.describe Flipper::Engine do
     application.initializer 'spec', before: :load_config_initializers do
       block.call
     end
+  end
+
+  # Rails main freezes global inflection instances after an application boots.
+  # This spec boots a fresh application for each example, so give each one an
+  # unfrozen copy of the previous application's inflections.
+  def reset_frozen_inflections
+    inflections = ActiveSupport::Inflector::Inflections
+    return unless inflections.respond_to?(:all_instances)
+    return unless inflections.all_instances.compact.any?(&:frozen?)
+
+    english = inflections.instance_variable_get(:@__en_instance__)
+    instances = inflections.instance_variable_get(:@__instance__)
+    copied_instances = instances.dup
+    instances.each_pair { |locale, instance| copied_instances[locale] = instance.dup }
+
+    inflections.instance_variable_set(:@__en_instance__, english.dup) if english
+    inflections.instance_variable_set(:@__instance__, copied_instances)
   end
 end
