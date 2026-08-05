@@ -82,10 +82,38 @@ class UpdateGeneratorTest < Rails::Generators::TestCase
     assert ActiveRecord::Base.connection.column_exists?(:flipper_gates, :value, :text)
   end
 
+  test "generates migrations with a table prefix" do
+    run_generator ["--table-prefix=cross_product_"]
+
+    assert_migration "db/migrate/create_cross_product_flipper_tables.rb" do |migration|
+      assert_match(/class CreateCrossProductFlipperTables/, migration)
+      assert_match(/create_table :cross_product_flipper_features/, migration)
+      assert_match(/create_table :cross_product_flipper_gates/, migration)
+    end
+
+    assert_migration "db/migrate/change_cross_product_flipper_gates_value_to_text.rb" do |migration|
+      assert_match(/class ChangeCrossProductFlipperGatesValueToText/, migration)
+      assert_match(/column_exists\? :cross_product_flipper_gates/, migration)
+      assert_match(/change_column :cross_product_flipper_gates/, migration)
+    end
+
+    require_migrations
+
+    silence { CreateCrossProductFlipperTables.migrate(:up) }
+    assert ActiveRecord::Base.connection.table_exists?(:cross_product_flipper_features)
+    assert ActiveRecord::Base.connection.table_exists?(:cross_product_flipper_gates)
+    assert ActiveRecord::Base.connection.column_exists?(:cross_product_flipper_gates, :value, :string)
+
+    silence { ChangeCrossProductFlipperGatesValueToText.migrate(:up) }
+    assert ActiveRecord::Base.connection.column_exists?(:cross_product_flipper_gates, :value, :text)
+  end
+
   def require_migrations
     # If these are not reloaded, then test order can cause failures
     Object.send(:remove_const, :CreateFlipperTables) if defined?(::CreateFlipperTables)
     Object.send(:remove_const, :ChangeFlipperGatesValueToText) if defined?(::ChangeFlipperGatesValueToText)
+    Object.send(:remove_const, :CreateCrossProductFlipperTables) if defined?(::CreateCrossProductFlipperTables)
+    Object.send(:remove_const, :ChangeCrossProductFlipperGatesValueToText) if defined?(::ChangeCrossProductFlipperGatesValueToText)
 
     Dir.glob("#{ROOT}/db/migrate/*.rb").each do |file|
       assert_nothing_raised do
