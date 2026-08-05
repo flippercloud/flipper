@@ -9,9 +9,10 @@ gate_index = gate_index_name
     # Ensure this incremental update migration is idempotent
     return unless connection.column_exists? <%= gate_table.inspect %>, :value, :string
 
-    if index_exists? <%= gate_table.inspect %>, [:feature_key, :key, :value]<%= ", name: #{gate_index.inspect}" if gate_index %>
-      remove_index <%= gate_table.inspect %>, [:feature_key, :key, :value]<%= ", name: #{gate_index.inspect}" if gate_index %>
+    gate_index = connection.indexes(<%= gate_table.inspect %>).find do |index|
+      index.columns == %w[feature_key key value]
     end
+    remove_index <%= gate_table.inspect %>, name: gate_index.name if gate_index
     change_column <%= gate_table.inspect %>, :value, :text
     add_index <%= gate_table.inspect %>, [:feature_key, :key, :value], unique: true, length: { value: 255 }<%= ", name: #{gate_index.inspect}" if gate_index %>
   end
