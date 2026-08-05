@@ -16,6 +16,14 @@ RSpec.describe Flipper::Adapters::Failsafe do
     end
   end
 
+  describe '#get_all_snapshot' do
+    it 'forwards to the wrapped adapter and preserves the version' do
+      memory_adapter.set_integer_if_greater(:sync_version, 42)
+
+      expect(subject.get_all_snapshot.version).to eq(42)
+    end
+  end
+
   context 'when disaster strikes' do
     before do
       expect(flipper[feature.name].enable).to be(true)
@@ -34,6 +42,8 @@ RSpec.describe Flipper::Adapters::Failsafe do
     it { expect(subject.get(feature)).to eq({}) }
     it { expect(subject.get_multi([feature])).to eq({}) }
     it { expect(subject.get_all).to eq({}) }
+    it { expect(subject.get_all_snapshot.features).to eq({}) }
+    it { expect(subject.get_all_snapshot.version).to be_nil }
     it { expect(feature.enable).to eq(false) }
     it { expect(feature.disable).to eq(false) }
     it { expect(subject.read_integer(:sync_version)).to be_nil }

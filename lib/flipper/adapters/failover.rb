@@ -51,6 +51,16 @@ module Flipper
         @secondary.get_all(**kwargs)
       end
 
+      def get_all_snapshot(**kwargs)
+        @primary.get_all_snapshot(**kwargs)
+      rescue *@errors
+        @secondary.get_all_snapshot(**kwargs)
+      end
+
+      def supports?(feature)
+        @primary.supports?(feature)
+      end
+
       def add(feature)
         @primary.add(feature).tap do
           @secondary.add(feature) if @dual_write

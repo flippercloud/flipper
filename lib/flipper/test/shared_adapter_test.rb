@@ -319,6 +319,58 @@ module Flipper
         assert_equal expected, @adapter.get_all
       end
 
+      def test_returns_nil_for_unknown_versioned_integers_when_supported
+        assert_nil @adapter.read_integer(:sync_version)
+      end
+
+      def test_sets_a_versioned_integer_when_none_exists_if_supported
+        if @adapter.supports?(:versioned_integers)
+          assert_equal true, @adapter.set_integer_if_greater(:sync_version, 100)
+          assert_equal 100, @adapter.read_integer(:sync_version)
+        else
+          assert_equal false, @adapter.set_integer_if_greater(:sync_version, 100)
+          assert_nil @adapter.read_integer(:sync_version)
+        end
+      end
+
+      def test_rejects_equal_or_lower_versioned_integers_if_supported
+        if @adapter.supports?(:versioned_integers)
+          @adapter.set_integer_if_greater(:sync_version, 100)
+          assert_equal false, @adapter.set_integer_if_greater(:sync_version, 99)
+          assert_equal false, @adapter.set_integer_if_greater(:sync_version, 100)
+          assert_equal 100, @adapter.read_integer(:sync_version)
+        else
+          assert_equal false, @adapter.set_integer_if_greater(:sync_version, 99)
+          assert_equal false, @adapter.set_integer_if_greater(:sync_version, 100)
+          assert_nil @adapter.read_integer(:sync_version)
+        end
+      end
+
+      def test_accepts_strictly_greater_versioned_integers_if_supported
+        if @adapter.supports?(:versioned_integers)
+          @adapter.set_integer_if_greater(:sync_version, 100)
+          assert_equal true, @adapter.set_integer_if_greater(:sync_version, 200)
+          assert_equal 200, @adapter.read_integer(:sync_version)
+        else
+          assert_equal false, @adapter.set_integer_if_greater(:sync_version, 200)
+          assert_nil @adapter.read_integer(:sync_version)
+        end
+      end
+
+      def test_tracks_versioned_integer_keys_independently_if_supported
+        if @adapter.supports?(:versioned_integers)
+          @adapter.set_integer_if_greater(:foo, 100)
+          @adapter.set_integer_if_greater(:bar, 50)
+          assert_equal 100, @adapter.read_integer(:foo)
+          assert_equal 50, @adapter.read_integer(:bar)
+        else
+          assert_equal false, @adapter.set_integer_if_greater(:foo, 100)
+          assert_equal false, @adapter.set_integer_if_greater(:bar, 50)
+          assert_nil @adapter.read_integer(:foo)
+          assert_nil @adapter.read_integer(:bar)
+        end
+      end
+
       def test_clears_other_gate_values_on_enable
         actor = Flipper::Actor.new('Flipper::Actor;22')
         assert_equal true, @adapter.enable(@feature, @actors_gate, Flipper::Types::PercentageOfActors.new(25))

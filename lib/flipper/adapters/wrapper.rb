@@ -17,6 +17,7 @@ module Flipper
         :get_multi,
         :get_all,
         :get_all_snapshot,
+        :supports?,
         :enable,
         :disable,
         :read_integer,

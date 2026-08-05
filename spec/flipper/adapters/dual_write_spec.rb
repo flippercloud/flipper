@@ -35,6 +35,12 @@ RSpec.describe Flipper::Adapters::DualWrite do
     subject.get_all
   end
 
+  it 'uses local for #get_all_snapshot and preserves the version' do
+    local_adapter.set_integer_if_greater(:sync_version, 42)
+
+    expect(subject.get_all_snapshot.version).to eq(42)
+  end
+
   it 'updates remote and local for #add' do
     subject.add sync[:search]
     expect(remote_adapter.count(:add)).to be(1)

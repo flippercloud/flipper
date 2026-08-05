@@ -56,6 +56,18 @@ module Flipper
         {}
       end
 
+      def get_all_snapshot(**kwargs)
+        @adapter.get_all_snapshot(**kwargs)
+      rescue *@errors
+        Flipper::Snapshot.new(features: {})
+      end
+
+      def supports?(feature)
+        @adapter.supports?(feature)
+      rescue *@errors
+        false
+      end
+
       def enable(feature, gate, thing)
         @adapter.enable(feature, gate, thing)
       rescue *@errors

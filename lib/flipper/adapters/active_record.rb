@@ -189,6 +189,10 @@ module Flipper
         end
       end
 
+      def supports?(feature)
+        feature.to_sym == :versioned_integers ? kv_integer_table_present? : super
+      end
+
       def set_integer_if_greater(key, value)
         return false unless kv_integer_table_present?
         value = value.to_i

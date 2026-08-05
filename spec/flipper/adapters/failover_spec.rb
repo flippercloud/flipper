@@ -20,6 +20,12 @@ RSpec.describe Flipper::Adapters::Failover do
       subject.features
     end
 
+    it 'preserves primary snapshot versions' do
+      primary.set_integer_if_greater(:sync_version, 42)
+
+      expect(subject.get_all_snapshot.version).to eq(42)
+    end
+
     it 'should not write to secondary' do
       expect(secondary).not_to receive(:add)
       expect(secondary).not_to receive(:enable)
@@ -57,6 +63,13 @@ RSpec.describe Flipper::Adapters::Failover do
       flipper[:flag].enable
       expect(secondary).to receive(:get).and_call_original
       flipper[:flag].enabled?
+    end
+
+    it 'preserves secondary snapshot versions' do
+      secondary.set_integer_if_greater(:sync_version, 99)
+      allow(primary).to receive(:get_all_snapshot).and_raise(Redis::ConnectionError)
+
+      expect(subject.get_all_snapshot.version).to eq(99)
     end
 
     context 'when dual_write is enabled' do

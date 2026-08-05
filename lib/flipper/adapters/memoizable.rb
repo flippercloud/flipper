@@ -110,19 +110,14 @@ module Flipper
 
       def get_all_snapshot(**kwargs)
         if memoizing?
-          cache.fetch(@get_all_snapshot_key) do
+          if kwargs[:cache_bust]
             snapshot = @adapter.get_all_snapshot(**kwargs)
-            snapshot.features.each do |key, value|
-              cache[key_for(key)] = value
+            memoize_snapshot(snapshot)
+          else
+            cache.fetch(@get_all_snapshot_key) do
+              snapshot = @adapter.get_all_snapshot(**kwargs)
+              memoize_snapshot(snapshot)
             end
-            cache[@features_key] = snapshot.features.keys.to_set
-            cache[@get_all_key] = true
-            if snapshot.version
-              cache[integer_key_for(:sync_version)] = snapshot.version
-            else
-              cache.delete(integer_key_for(:sync_version))
-            end
-            cache[@get_all_snapshot_key] = snapshot
           end
         else
           @adapter.get_all_snapshot(**kwargs)
@@ -146,6 +141,10 @@ module Flipper
 
       def import(source)
         @adapter.import(source).tap { cache.clear if memoizing? }
+      end
+
+      def supports?(feature)
+        @adapter.supports?(feature)
       end
 
       def read_integer(key)
@@ -194,6 +193,20 @@ module Flipper
       end
 
       private
+
+      def memoize_snapshot(snapshot)
+        snapshot.features.each do |key, value|
+          cache[key_for(key)] = value
+        end
+        cache[@features_key] = snapshot.features.keys.to_set
+        cache[@get_all_key] = true
+        if snapshot.version
+          cache[integer_key_for(:sync_version)] = snapshot.version
+        else
+          cache.delete(integer_key_for(:sync_version))
+        end
+        cache[@get_all_snapshot_key] = snapshot
+      end
 
       def key_for(key)
         "feature/#{key}"

@@ -150,6 +150,10 @@ module Flipper
         value && value.to_i
       end
 
+      def supports?(feature)
+        feature.to_sym == :versioned_integers || super
+      end
+
       def set_integer_if_greater(key, value)
         with_connection do |conn|
           conn.public_send(:eval, SET_INTEGER_IF_GREATER_LUA, keys: [integer_key_for(key)], argv: [value.to_i]) == 1

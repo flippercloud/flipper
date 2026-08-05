@@ -101,18 +101,19 @@ module Flipper
       end
 
       def get_all_snapshot(**kwargs)
-        cache_fetch(@get_all_snapshot_cache_key) {
+        if kwargs[:cache_bust]
           snapshot = @adapter.get_all_snapshot(**kwargs)
-          cacheable_snapshot = Flipper::Snapshot.new(features: snapshot.features, version: snapshot.version)
-          cache_write @get_all_cache_key, snapshot.features
-          cache_write @features_cache_key, snapshot.features.keys.to_set
-          if snapshot.version
-            cache_write integer_cache_key(:sync_version), snapshot.version
-          else
-            cache_delete integer_cache_key(:sync_version)
-          end
-          cacheable_snapshot
-        }
+          write_snapshot_caches(snapshot)
+        else
+          cache_fetch(@get_all_snapshot_cache_key) {
+            snapshot = @adapter.get_all_snapshot(**kwargs)
+            write_snapshot_caches(snapshot)
+          }
+        end
+      end
+
+      def supports?(feature)
+        @adapter.supports?(feature)
       end
 
       # Public
@@ -157,6 +158,19 @@ module Flipper
       end
 
       private
+
+      def write_snapshot_caches(snapshot)
+        cacheable_snapshot = Flipper::Snapshot.new(features: snapshot.features, version: snapshot.version)
+        cache_write @get_all_snapshot_cache_key, cacheable_snapshot
+        cache_write @get_all_cache_key, snapshot.features
+        cache_write @features_cache_key, snapshot.features.keys.to_set
+        if snapshot.version
+          cache_write integer_cache_key(:sync_version), snapshot.version
+        else
+          cache_delete integer_cache_key(:sync_version)
+        end
+        cacheable_snapshot
+      end
 
       def read_all_features(**kwargs)
         @adapter.get_all(**kwargs)

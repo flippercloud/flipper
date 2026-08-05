@@ -35,6 +35,14 @@ module Flipper
         @local.get_all(**kwargs)
       end
 
+      def get_all_snapshot(**kwargs)
+        @local.get_all_snapshot(**kwargs)
+      end
+
+      def supports?(feature)
+        @local.supports?(feature) && @remote.supports?(feature)
+      end
+
       def add(feature)
         @remote.add(feature).tap { @local.add(feature) }
       end

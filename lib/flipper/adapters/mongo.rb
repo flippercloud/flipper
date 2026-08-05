@@ -94,6 +94,10 @@ module Flipper
         doc && doc['value']
       end
 
+      def supports?(feature)
+        feature.to_sym == :versioned_integers || super
+      end
+
       def set_integer_if_greater(key, value)
         result = @collection.find(_id: integer_id_for(key)).update_one(
           { '$max' => { 'value' => value.to_i } },

@@ -138,6 +138,10 @@ module Flipper
         true
       end
 
+      def supports?(feature)
+        feature.to_sym == :versioned_integers || super
+      end
+
       def read_integer(key)
         synchronize { @integers[key.to_s] }
       end

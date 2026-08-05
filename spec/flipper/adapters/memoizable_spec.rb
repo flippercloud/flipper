@@ -413,6 +413,16 @@ RSpec.describe Flipper::Adapters::Memoizable do
         expect(subject.set_integer_if_greater(:sync_version, 150)).to eq(false)
         expect(subject.read_integer(:sync_version)).to eq(200)
       end
+
+      it 'refreshes cached snapshots when cache_bust is true' do
+        adapter.set_integer_if_greater(:sync_version, 100)
+        expect(subject.get_all_snapshot.version).to eq(100)
+
+        adapter.set_integer_if_greater(:sync_version, 200)
+        expect(subject.get_all_snapshot.version).to eq(100)
+        expect(subject.get_all_snapshot(cache_bust: true).version).to eq(200)
+        expect(subject.get_all_snapshot.version).to eq(200)
+      end
     end
   end
 end

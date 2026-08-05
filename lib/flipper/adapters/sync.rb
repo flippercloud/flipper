@@ -81,6 +81,10 @@ module Flipper
         end
       end
 
+      def supports?(feature)
+        @local.supports?(feature) && @remote.supports?(feature)
+      end
+
       def read_integer(key)
         synchronize
         @local.read_integer(key)

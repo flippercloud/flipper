@@ -28,6 +28,11 @@ module Flipper
       false
     end
 
+    # Public: Whether this adapter supports an optional adapter capability.
+    def supports?(feature)
+      false
+    end
+
     # Public: Read a named integer value from the adapter, or nil if absent.
     # Adapters that support typed integer storage override this; the default
     # is a no-op so unaware adapters degrade to today's behavior.

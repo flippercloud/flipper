@@ -123,6 +123,18 @@ module Flipper
         end
       end
 
+      def supports?(feature)
+        default_payload = {
+          operation: :supports?,
+          adapter_name: @adapter.name,
+          feature: feature,
+        }
+
+        @instrumenter.instrument(InstrumentationName, default_payload) do |payload|
+          payload[:result] = @adapter.supports?(feature)
+        end
+      end
+
       # Public
       def enable(feature, gate, thing)
         default_payload = {
