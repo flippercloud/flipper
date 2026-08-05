@@ -24,6 +24,7 @@ module Flipper
       # name - The Symbol name for this adapter. Optional (default :active_record)
       # feature_class - The AR class responsible for the features table.
       # gate_class - The AR class responsible for the gates table.
+      # table_prefix - The prefix for the default features and gates tables.
       #
       # Allowing the overriding of name is so you can differentiate multiple
       # instances of this adapter from each other, if, for some reason, that is
@@ -33,8 +34,13 @@ module Flipper
       # can roll your own tables and what not, if you so desire.
       def initialize(options = {})
         @name = options.fetch(:name, :active_record)
-        @feature_class = options.fetch(:feature_class) { Flipper::Adapters::ActiveRecord::Feature }
-        @gate_class = options.fetch(:gate_class) { Flipper::Adapters::ActiveRecord::Gate }
+        table_prefix = options[:table_prefix]
+        @feature_class = options.fetch(:feature_class) do
+          model_class(Flipper::Adapters::ActiveRecord::Feature, table_prefix, "flipper_features")
+        end
+        @gate_class = options.fetch(:gate_class) do
+          model_class(Flipper::Adapters::ActiveRecord::Gate, table_prefix, "flipper_gates")
+        end
       end
 
       # Public: The set of known features.
@@ -189,6 +195,14 @@ module Flipper
       end
 
       private
+
+      def model_class(default_class, table_prefix, table_name)
+        return default_class if table_prefix.nil?
+
+        Class.new(default_class) do
+          self.table_name = "#{table_prefix}#{table_name}"
+        end
+      end
 
       def set(feature, gate, thing, options = {})
         clear_feature = options.fetch(:clear, false)
