@@ -1,4 +1,5 @@
 require 'logger'
+require 'monitor'
 require 'concurrent/utility/monotonic_time'
 require 'concurrent/map'
 require 'concurrent/atomic/atomic_fixnum'
@@ -31,6 +32,7 @@ module Flipper
       @thread = nil
       @pid = Process.pid
       @mutex = Mutex.new
+      @lifecycle_mutex = Monitor.new
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
       @remote_adapter = options.fetch(:remote_adapter)
       @last_synced_at = Concurrent::AtomicFixnum.new(0)
@@ -61,23 +63,24 @@ module Flipper
         operation: :stop,
       })
 
-      @stop_mutex.synchronize do
-        @stop_requested.make_true
-        @stop_condition.broadcast
+      thread_to_stop = @lifecycle_mutex.synchronize do
+        @stop_mutex.synchronize do
+          @stop_requested.make_true
+          @stop_condition.broadcast
+          if @thread
+            @thread
+          else
+            @stop_requested.make_false
+            nil
+          end
+        end
       end
 
-      thread_to_stop = @thread
-      unless thread_to_stop
-        @stop_requested.make_false
-        return
-      end
+      return unless thread_to_stop
       return if thread_to_stop.equal?(Thread.current)
 
       thread_to_stop.join(STOP_JOIN_TIMEOUT)
-      unless thread_to_stop.alive?
-        @thread = nil if @thread.equal?(thread_to_stop)
-        @stop_requested.make_false unless @shutdown_requested.true?
-      end
+      clear_thread_if_current(thread_to_stop) unless thread_to_stop.alive?
     end
 
     def run
@@ -96,8 +99,7 @@ module Flipper
         break if wait_for_stop(interval)
       end
     ensure
-      @thread = nil if @thread.equal?(Thread.current)
-      @stop_requested.make_false unless @shutdown_requested.true?
+      clear_thread_if_current(Thread.current)
     end
 
     def sync
@@ -143,8 +145,11 @@ module Flipper
 
       begin
         return if thread_alive?
-        @thread = Thread.new { run }
-        @thread&.report_on_exception = false
+        thread = @lifecycle_mutex.synchronize do
+          clear_thread_if_current(@thread) if @thread
+          @thread = Thread.new { run }
+        end
+        thread&.report_on_exception = false
         @instrumenter.instrument("poller.#{InstrumentationNamespace}", {
           operation: :thread_start,
         })
@@ -159,6 +164,17 @@ module Flipper
 
     def stop_requested?
       @stop_requested.true? || @shutdown_requested.true?
+    end
+
+    def clear_thread_if_current(thread)
+      @lifecycle_mutex.synchronize do
+        return unless @thread.equal?(thread)
+
+        @thread = nil
+        @stop_mutex.synchronize do
+          @stop_requested.make_false unless @shutdown_requested.true?
+        end
+      end
     end
 
     def wait_for_stop(timeout)

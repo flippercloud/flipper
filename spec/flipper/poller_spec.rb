@@ -20,7 +20,6 @@ RSpec.describe Flipper::Poller do
       .to_return(status: 200, body: JSON.generate(features: []))
 
     allow(subject).to receive(:loop).and_yield # Make loop just call once
-    allow(subject).to receive(:sleep)          # Disable sleep
     allow(subject).to receive(:wait_for_stop).and_return(false) # Disable condition waits
     allow(Thread).to receive(:new).and_yield   # Disable separate thread
   end
@@ -412,6 +411,42 @@ RSpec.describe Flipper::Poller do
 
       expect(subject.thread).to be(thread)
       expect(subject.instance_variable_get(:@stop_requested)).to be_true
+    end
+
+    it "does not clear a newer worker's stop request after an earlier worker exits" do
+      first_thread = instance_double(Thread, alive?: false)
+      second_thread = instance_double(Thread, alive?: true)
+      subject.instance_variable_set(:@thread, first_thread)
+
+      allow(Thread).to receive(:new).and_return(second_thread)
+      allow(second_thread).to receive(:report_on_exception=)
+      expect(second_thread).to receive(:join).with(Flipper::Poller::STOP_JOIN_TIMEOUT)
+      expect(first_thread).to receive(:join).with(Flipper::Poller::STOP_JOIN_TIMEOUT) do
+        subject.instance_variable_set(:@thread, nil)
+        subject.instance_variable_get(:@stop_requested).make_false
+        subject.start
+        subject.stop
+      end
+
+      subject.stop
+
+      expect(subject.thread).to be(second_thread)
+      expect(subject.instance_variable_get(:@stop_requested)).to be_true
+    end
+
+    it "clears a dead worker's stop request before starting a replacement" do
+      first_thread = instance_double(Thread, alive?: false)
+      second_thread = instance_double(Thread)
+      subject.instance_variable_set(:@thread, first_thread)
+      subject.instance_variable_get(:@stop_requested).make_true
+
+      allow(Thread).to receive(:new).and_return(second_thread)
+      allow(second_thread).to receive(:report_on_exception=)
+
+      subject.start
+
+      expect(subject.thread).to be(second_thread)
+      expect(subject.instance_variable_get(:@stop_requested)).to be_false
     end
 
     it "does not kill itself when shutdown is requested from the poller thread" do
