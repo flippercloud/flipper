@@ -73,7 +73,7 @@ RSpec.describe Flipper::Adapters::Poll do
     expect(get_all_calls.value).to eq(1)
   end
 
-  it "waits for an in-flight poller update before returning the adapter" do
+  it "does not wait for an in-flight poller update before returning the adapter" do
     flipper = Flipper.new(local_adapter)
     flipper.enable(:existing)
 
@@ -111,14 +111,14 @@ RSpec.describe Flipper::Adapters::Poll do
 
     completed = Queue.new
     second_thread = Thread.new { completed << instance.features }
-    sleep 0.05
+    second_thread.join(1)
 
-    expect(completed).to be_empty
+    # The second thread serves the local adapter as is rather than blocking on
+    # the sync the first thread is running.
+    expect(completed.pop(true)).to eq(Set["existing"])
 
     release << true
     expect(first_thread.value).to eq(Set["updated"])
-    expect(completed.pop).to eq(Set["updated"])
-    second_thread.join
   end
 
   it "retries a poller update after synchronization fails" do

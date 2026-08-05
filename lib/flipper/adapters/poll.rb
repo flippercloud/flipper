@@ -21,7 +21,6 @@ module Flipper
         @last_synced_at = 0
         @syncing = false
         @sync_mutex = Mutex.new
-        @sync_condition = ConditionVariable.new
 
         # If the adapter is empty, we need to sync before starting the poller.
         # Yes, this will block the main thread, but that's better than thinking
@@ -64,21 +63,20 @@ module Flipper
         @pid = Process.pid
         @syncing = false
         @sync_mutex = Mutex.new
-        @sync_condition = ConditionVariable.new
       end
 
+      # Internal: Attempts to claim the right to sync. Returns true if this
+      # caller should sync. Returns false if a sync is unnecessary or if
+      # another thread is already syncing. Never blocks. Callers that lose the
+      # claim serve the local adapter as is, which is at most one poll interval
+      # stale, rather than waiting on a sync in the middle of a request.
       def claim_sync(poller_last_synced_at)
         @sync_mutex.synchronize do
-          loop do
-            return false unless poller_last_synced_at > @last_synced_at
+          return false if @syncing
+          return false unless poller_last_synced_at > @last_synced_at
 
-            unless @syncing
-              @syncing = true
-              return true
-            end
-
-            @sync_condition.wait(@sync_mutex)
-          end
+          @syncing = true
+          true
         end
       end
 
@@ -86,15 +84,11 @@ module Flipper
         @sync_mutex.synchronize do
           @last_synced_at = poller_last_synced_at
           @syncing = false
-          @sync_condition.broadcast
         end
       end
 
       def release_sync
-        @sync_mutex.synchronize do
-          @syncing = false
-          @sync_condition.broadcast
-        end
+        @sync_mutex.synchronize { @syncing = false }
       end
     end
   end
