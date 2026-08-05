@@ -126,6 +126,72 @@ RSpec.describe Flipper::Gates::Expression do
       end
     end
 
+    context 'for exclude expression' do
+      it 'returns true when array property does not include value' do
+        expression = Flipper.property(:roles).exclude("admin")
+        context = context(expression.value, properties: {"roles" => ["support"]})
+        expect(subject.open?(context)).to be(true)
+      end
+
+      it 'returns false when array property includes value' do
+        expression = Flipper.property(:roles).exclude("admin")
+        context = context(expression.value, properties: {"roles" => ["admin", "support"]})
+        expect(subject.open?(context)).to be(false)
+      end
+
+      it 'returns false when string property includes substring' do
+        expression = Flipper.property(:email).exclude("@example.com")
+        context = context(expression.value, properties: {"email" => "user@example.com"})
+        expect(subject.open?(context)).to be(false)
+      end
+
+      it 'returns true when property is missing' do
+        expression = Flipper.property(:roles).exclude("admin")
+        context = context(expression.value, properties: {})
+        expect(subject.open?(context)).to be(true)
+      end
+    end
+
+    context 'for in expression' do
+      it 'returns true when property value is in the list' do
+        expression = Flipper.property(:plan).in(["basic", "premium"])
+        context = context(expression.value, properties: {"plan" => "basic"})
+        expect(subject.open?(context)).to be(true)
+      end
+
+      it 'returns false when property value is not in the list' do
+        expression = Flipper.property(:plan).in(["basic", "premium"])
+        context = context(expression.value, properties: {"plan" => "plus"})
+        expect(subject.open?(context)).to be(false)
+      end
+
+      it 'returns false when property is missing' do
+        expression = Flipper.property(:plan).in(["basic", "premium"])
+        context = context(expression.value, properties: {})
+        expect(subject.open?(context)).to be(false)
+      end
+    end
+
+    context 'for not_in expression' do
+      it 'returns true when property value is not in the list' do
+        expression = Flipper.property(:plan).not_in(["plus", "premium"])
+        context = context(expression.value, properties: {"plan" => "basic"})
+        expect(subject.open?(context)).to be(true)
+      end
+
+      it 'returns false when property value is in the list' do
+        expression = Flipper.property(:plan).not_in(["plus", "premium"])
+        context = context(expression.value, properties: {"plan" => "plus"})
+        expect(subject.open?(context)).to be(false)
+      end
+
+      it 'returns true when property is missing' do
+        expression = Flipper.property(:plan).not_in(["plus", "premium"])
+        context = context(expression.value, properties: {})
+        expect(subject.open?(context)).to be(true)
+      end
+    end
+
     context 'for unknown expression name' do
       it 'returns false and warns instead of raising' do
         expect(subject).to receive(:warn).with(/uninitialized constant Flipper::Expressions::Foo/)
