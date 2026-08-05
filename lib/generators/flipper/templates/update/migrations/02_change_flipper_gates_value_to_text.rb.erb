@@ -3,16 +3,17 @@
 <%
 migration_class = migration_class_name('ChangeFlipperGatesValueToText')
 gate_table = gate_table_name
+gate_index = gate_index_name
 %>class <%= migration_class %> < ActiveRecord::Migration<%= migration_version %>
   def up
     # Ensure this incremental update migration is idempotent
     return unless connection.column_exists? <%= gate_table.inspect %>, :value, :string
 
-    if index_exists? <%= gate_table.inspect %>, [:feature_key, :key, :value]
-      remove_index <%= gate_table.inspect %>, [:feature_key, :key, :value]
+    if index_exists? <%= gate_table.inspect %>, [:feature_key, :key, :value]<%= ", name: #{gate_index.inspect}" if gate_index %>
+      remove_index <%= gate_table.inspect %>, [:feature_key, :key, :value]<%= ", name: #{gate_index.inspect}" if gate_index %>
     end
     change_column <%= gate_table.inspect %>, :value, :text
-    add_index <%= gate_table.inspect %>, [:feature_key, :key, :value], unique: true, length: { value: 255 }
+    add_index <%= gate_table.inspect %>, [:feature_key, :key, :value], unique: true, length: { value: 255 }<%= ", name: #{gate_index.inspect}" if gate_index %>
   end
 
   def down

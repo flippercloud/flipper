@@ -28,6 +28,14 @@ module Flipper
         class_name.sub('Flipper', "#{table_prefix.camelize}Flipper")
       end
 
+      def feature_index_name
+        :"index_#{table_prefix}flipper_features_on_key" unless table_prefix.empty?
+      end
+
+      def gate_index_name
+        :"index_#{table_prefix}flipper_gates_on_keys" unless table_prefix.empty?
+      end
+
       def table_prefix
         options[:table_prefix].to_s
       end

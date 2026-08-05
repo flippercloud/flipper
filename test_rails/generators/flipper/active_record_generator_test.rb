@@ -53,7 +53,7 @@ class FlipperActiveRecordGeneratorTest < Rails::Generators::TestCase
             t.string :key, null: false
             t.timestamps null: false
           end
-          add_index :cross_product_flipper_features, :key, unique: true
+          add_index :cross_product_flipper_features, :key, unique: true, name: :index_cross_product_flipper_features_on_key
 
           create_table :cross_product_flipper_gates do |t|
             t.string :feature_key, null: false
@@ -61,7 +61,7 @@ class FlipperActiveRecordGeneratorTest < Rails::Generators::TestCase
             t.text :value
             t.timestamps null: false
           end
-          add_index :cross_product_flipper_gates, [:feature_key, :key, :value], unique: true, length: { value: 255 }
+          add_index :cross_product_flipper_gates, [:feature_key, :key, :value], unique: true, length: { value: 255 }, name: :index_cross_product_flipper_gates_on_keys
         end
 
         def down

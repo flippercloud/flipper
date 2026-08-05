@@ -89,12 +89,14 @@ class UpdateGeneratorTest < Rails::Generators::TestCase
       assert_match(/class CreateCrossProductFlipperTables/, migration)
       assert_match(/create_table :cross_product_flipper_features/, migration)
       assert_match(/create_table :cross_product_flipper_gates/, migration)
+      assert_match(/name: :index_cross_product_flipper_gates_on_keys/, migration)
     end
 
     assert_migration "db/migrate/change_cross_product_flipper_gates_value_to_text.rb" do |migration|
       assert_match(/class ChangeCrossProductFlipperGatesValueToText/, migration)
       assert_match(/column_exists\? :cross_product_flipper_gates/, migration)
       assert_match(/change_column :cross_product_flipper_gates/, migration)
+      assert_match(/name: :index_cross_product_flipper_gates_on_keys/, migration)
     end
 
     require_migrations
