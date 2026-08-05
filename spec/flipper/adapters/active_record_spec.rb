@@ -1,4 +1,5 @@
 SpecHelpers.silence { require 'flipper/adapters/active_record' }
+require 'active_record/connection_adapters/sqlite3_adapter'
 
 # Turn off migration logging for specs
 ActiveRecord::Migration.verbose = false
