@@ -5,6 +5,9 @@ module Flipper
   class Expression
     include Builder
 
+    PruneResult = Struct.new(:expression, :constant_value, keyword_init: true)
+    private_constant :PruneResult
+
     def self.build(object)
       return object if object.is_a?(self) || object.is_a?(Constant)
 
@@ -67,7 +70,7 @@ module Flipper
     # constant false), but an empty Any inside an All is kept because
     # removing it would broaden the expression from never-true.
     def prune_empty_groups
-      prune_empty_groups_with_identity.first
+      prune_empty_groups_with_identity.expression
     end
 
     # Public: Returns true when this expression is guaranteed to match every
@@ -85,28 +88,37 @@ module Flipper
     protected
 
     def prune_empty_groups_with_identity
-      return [self, nil] unless group?
-      return [nil, all?] if args.empty?
+      return PruneResult.new(expression: self) unless group?
+      return PruneResult.new(constant_value: all?) if args.empty?
 
       pruned_args = args.map do |arg|
-        arg.is_a?(Expression) ? arg.prune_empty_groups_with_identity : [arg, nil]
+        if arg.is_a?(Expression)
+          arg.prune_empty_groups_with_identity
+        else
+          PruneResult.new(expression: arg)
+        end
       end
 
-      kept = pruned_args.map do |value, constant|
-        if constant == false
-          value || build("Any" => []) if all?
-        elsif constant.nil?
-          value
+      kept = pruned_args.map do |result|
+        if result.constant_value == false
+          result.expression || build("Any" => []) if all?
+        elsif result.constant_value.nil?
+          result.expression
         end
       end.compact
 
       # No condition remains. Preserve this group's constant value for an
       # enclosing group, which lets an empty All disappear from All without
       # treating it as the unsafe empty-Any-in-All case.
-      return [nil, constant_group_value] if kept.empty?
+      if kept.empty?
+        return PruneResult.new(constant_value: constant_group_value)
+      end
 
       pruned = build(name => kept)
-      [pruned, pruned.constant_group_value]
+      PruneResult.new(
+        expression: pruned,
+        constant_value: pruned.constant_group_value
+      )
     end
 
     def constant_group_value
