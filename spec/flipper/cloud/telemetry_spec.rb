@@ -1,5 +1,6 @@
 require 'flipper/cloud/telemetry'
 require 'flipper/cloud/configuration'
+require 'timeout'
 
 RSpec.describe Flipper::Cloud::Telemetry do
   before do
@@ -190,11 +191,15 @@ RSpec.describe Flipper::Cloud::Telemetry do
           end
         end
 
-        # Wait until all threads are blocked waiting to acquire the mutex.
-        sleep 0.01 until threads.all? { |thread| thread.status == "sleep" }
-        mutex.unlock
-
-        threads.each(&:join)
+        begin
+          # Wait until all threads are blocked waiting to acquire the mutex.
+          Timeout.timeout(5) do
+            sleep 0.01 until threads.all? { |thread| thread.status == "sleep" }
+          end
+        ensure
+          mutex.unlock
+          Timeout.timeout(5) { threads.each(&:join) }
+        end
 
         expect(restarts.value).to eq(1)
       ensure
@@ -210,12 +215,13 @@ RSpec.describe Flipper::Cloud::Telemetry do
       telemetry = described_class.new(config)
 
       begin
-        restart_gap = Queue.new
+        restart_stopped = Queue.new
+        restart_resume = Queue.new
 
         telemetry.define_singleton_method(:restart!) do
           stop!
-          restart_gap << :stopped
-          sleep 0.05
+          restart_stopped << true
+          restart_resume.pop
           start!
         end
         telemetry.singleton_class.send(:private, :restart!)
@@ -230,15 +236,27 @@ RSpec.describe Flipper::Cloud::Telemetry do
           })
         end
 
-        restart_gap.pop
+        blocked_record_thread = nil
+        begin
+          Timeout.timeout(5) { restart_stopped.pop }
 
-        telemetry.record(Flipper::Feature::InstrumentationName, {
-          operation: :enabled?,
-          feature_name: :blocked_until_restarted,
-          result: true,
-        })
+          blocked_record_thread = Thread.new do
+            telemetry.record(Flipper::Feature::InstrumentationName, {
+              operation: :enabled?,
+              feature_name: :blocked_until_restarted,
+              result: true,
+            })
+          end
 
-        restarting_thread.join
+          Timeout.timeout(5) do
+            sleep 0.01 until blocked_record_thread.status == "sleep"
+          end
+        ensure
+          restart_resume << true
+          Timeout.timeout(5) do
+            [restarting_thread, blocked_record_thread].compact.each(&:join)
+          end
+        end
 
         metrics_by_key = telemetry.metric_storage.drain.keys.group_by(&:key)
         expect(metrics_by_key.keys).to contain_exactly("during_restart", "blocked_until_restarted")
