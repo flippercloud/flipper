@@ -198,6 +198,46 @@ RSpec.describe Flipper::Gates::Expression do
         expect(subject.open?(context({"Foo" => [true]}))).to be(false)
       end
 
+      it 'returns false and warns for absolute constant names' do
+        expect(subject).to receive(:warn).with(/uninitialized constant Flipper::Expressions::::Kernel/)
+        expect(subject.open?(context({"::Kernel" => []}))).to be(false)
+      end
+
+      it 'warns only once for repeated checks of the same feature and expression' do
+        allow(subject).to receive(:warn)
+
+        2.times do
+          expect(subject.open?(context({"Foo" => [true]}))).to be(false)
+        end
+
+        expect(subject).to have_received(:warn).
+          with(/Feature :search.*uninitialized constant Flipper::Expressions::Foo/).
+          once
+      end
+
+      it 'warns separately for different features and expression names' do
+        allow(subject).to receive(:warn)
+        other_feature_context = Flipper::FeatureCheckContext.new(
+          feature_name: :checkout,
+          values: Flipper::GateValues.new(expression: {"Foo" => [true]}),
+          actors: nil
+        )
+
+        subject.open?(context({"Foo" => [true]}))
+        subject.open?(other_feature_context)
+        subject.open?(context({"Bar" => [true]}))
+
+        expect(subject).to have_received(:warn).
+          with(/Feature :search.*uninitialized constant Flipper::Expressions::Foo/).
+          once
+        expect(subject).to have_received(:warn).
+          with(/Feature :checkout.*uninitialized constant Flipper::Expressions::Foo/).
+          once
+        expect(subject).to have_received(:warn).
+          with(/Feature :search.*uninitialized constant Flipper::Expressions::Bar/).
+          once
+      end
+
       it 'returns false and warns when nested inside known expression' do
         expect(subject).to receive(:warn).with(/uninitialized constant Flipper::Expressions::Foo/)
         data = {"Any" => [{"Foo" => [true]}]}

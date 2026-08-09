@@ -1,8 +1,14 @@
 require "flipper/expression"
+require "concurrent/map"
 
 module Flipper
   module Gates
     class Expression < Gate
+      def initialize(options = {})
+        super
+        @unknown_expression_warnings = Concurrent::Map.new
+      end
+
       # Internal: The name of the gate. Used for instrumentation, etc.
       def name
         :expression
@@ -31,7 +37,10 @@ module Flipper
         begin
           expression = Flipper::Expression.build(data)
         rescue Flipper::Expression::UnknownExpression => e
-          warn "Feature #{context.feature_name.inspect} uses an expression this version of flipper doesn't know (#{e.message}). Treating the expression as disabled. Upgrade the flipper gem to evaluate it."
+          warning_key = [context.feature_name.to_s, e.message]
+          if @unknown_expression_warnings.put_if_absent(warning_key, true).nil?
+            warn "Feature #{context.feature_name.inspect} uses an expression this version of flipper doesn't know (#{e.message}). Treating the expression as disabled. Upgrade the flipper gem to evaluate it."
+          end
           return false
         end
 

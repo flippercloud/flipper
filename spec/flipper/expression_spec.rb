@@ -230,6 +230,20 @@ RSpec.describe Flipper::Expression do
         "uninitialized constant Flipper::Expressions::Kernel")
     end
 
+    it "raises UnknownExpression for absolute constants" do
+      expect {
+        described_class.build({"::Kernel" => []})
+      }.to raise_error(Flipper::Expression::UnknownExpression,
+        "uninitialized constant Flipper::Expressions::::Kernel")
+    end
+
+    it "raises UnknownExpression for qualified expression constants" do
+      expect {
+        described_class.build({"::Flipper::Expressions::Equal" => [1, 1]})
+      }.to raise_error(Flipper::Expression::UnknownExpression,
+        "uninitialized constant Flipper::Expressions::::Flipper::Expressions::Equal")
+    end
+
     it "raises UnknownExpression that is rescuable as NameError" do
       expect {
         described_class.build({"Foo" => []})

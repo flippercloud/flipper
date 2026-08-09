@@ -44,9 +44,12 @@ module Flipper
     def initialize(name, args = [])
       @name = name.to_s
       @function = begin
-        # inherit: false so unknown names raise instead of resolving to
-        # top-level constants like ::Kernel or ::Array.
-        Expressions.const_get(@name, false)
+        # Only resolve constants defined directly on Expressions. const_get
+        # accepts absolute and qualified names even when inherit is false.
+        constant_name = @name.to_sym
+        raise NameError unless Expressions.constants(false).include?(constant_name)
+
+        Expressions.const_get(constant_name, false)
       rescue NameError
         raise UnknownExpression, "uninitialized constant Flipper::Expressions::#{@name}"
       end
