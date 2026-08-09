@@ -121,6 +121,89 @@ RSpec.describe Flipper::Adapters::Poll do
     expect(first_thread.value).to eq(Set["updated"])
   end
 
+  it "serves a coherent snapshot while a poller update is being applied" do
+    entered = Queue.new
+    release = Queue.new
+    pausing_local_adapter = Class.new(Flipper::Adapters::Memory) do
+      def initialize(entered, release)
+        super(nil, threadsafe: true)
+        @entered = entered
+        @release = release
+        @pause = true
+      end
+
+      def disable(feature, gate, thing)
+        result = super
+        if @pause
+          @pause = false
+          @entered << true
+          @release.pop
+        end
+        result
+      end
+    end.new(entered, release)
+    Flipper.new(pausing_local_adapter).enable(:existing)
+
+    remote = Flipper::Adapters::Memory.new(threadsafe: true)
+    Flipper.new(remote).disable(:existing)
+    Flipper.new(remote).enable(:updated)
+
+    fake_poller = Struct.new(:last_synced_at, :adapter) do
+      def start
+      end
+
+      def sync
+        raise "sync should not be called when the local adapter is not empty"
+      end
+    end.new(Concurrent::AtomicFixnum.new(1), remote)
+
+    instance = described_class.new(fake_poller, pausing_local_adapter)
+    first_thread = Thread.new { instance.features }
+    entered.pop
+
+    expect(Flipper.new(pausing_local_adapter).enabled?(:existing)).to be(false)
+    expect(Flipper.new(instance).enabled?(:existing)).to be(true)
+
+    release << true
+    expect(first_thread.value).to eq(Set["existing", "updated"])
+    expect(Flipper.new(instance).enabled?(:existing)).to be(false)
+  end
+
+  it "does not wait for the sync claim mutex" do
+    Flipper.new(local_adapter).enable(:existing)
+
+    fake_poller = Struct.new(:last_synced_at, :adapter) do
+      def start
+      end
+
+      def sync
+        raise "sync should not be called when the local adapter is not empty"
+      end
+    end.new(Concurrent::AtomicFixnum.new(1), remote_adapter)
+
+    instance = described_class.new(fake_poller, local_adapter)
+    state = instance.instance_variable_get(:@sync_state).get
+    locked = Queue.new
+    release = Queue.new
+    holder = Thread.new do
+      state.mutex.lock
+      locked << true
+      release.pop
+      state.mutex.unlock
+    end
+    locked.pop
+
+    completed = Queue.new
+    caller = Thread.new { completed << instance.features }
+    caller.join(1)
+
+    expect(completed.pop(true)).to eq(Set["existing"])
+  ensure
+    release << true if release
+    holder&.join
+    caller&.join
+  end
+
   it "retries a poller update after synchronization fails" do
     flipper = Flipper.new(local_adapter)
     flipper.enable(:existing)
@@ -186,11 +269,13 @@ RSpec.describe Flipper::Adapters::Poll do
     end.new(Concurrent::AtomicFixnum.new(1), counting_remote_adapter)
 
     instance = described_class.new(fake_poller, local_adapter)
-    instance.instance_variable_set(:@syncing, true)
+    stale_state = instance.instance_variable_get(:@sync_state).get
+    stale_state.syncing = true
 
-    allow(Process).to receive(:pid).and_return(instance.instance_variable_get(:@pid) + 1)
+    allow(Process).to receive(:pid).and_return(stale_state.pid + 1)
 
-    expect(instance.features).to eq(Set["updated"])
+    threads = 10.times.map { Thread.new { instance.features } }
+    expect(threads.map(&:value)).to all(eq(Set["updated"]))
     expect(get_all_calls.value).to eq(1)
   end
 end

@@ -85,14 +85,44 @@ RSpec.describe Flipper::Adapters::Sync::IntervalSynchronizer do
     expect(events.size).to eq(1)
   end
 
-  it "resets in-flight synchronization state after a fork" do
+  it "releases a failed sync for the next interval" do
+    current_time = interval
+    calls = 0
+    synchronizer = -> do
+      calls += 1
+      raise "transient failure" if calls == 1
+    end
     instance = described_class.new(synchronizer, interval: interval)
-    instance.instance_variable_set(:@syncing, true)
+    allow(instance).to receive(:now) { current_time }
+
+    expect { instance.call }.to raise_error("transient failure")
+    instance.call
+    expect(calls).to eq(1)
+
+    current_time += interval
+    instance.call
+    expect(calls).to eq(2)
+  end
+
+  it "resets in-flight synchronization state after a fork" do
+    entered = Queue.new
+    release = Queue.new
+    synchronizer = -> do
+      events << now
+      entered << true
+      release.pop
+    end
+    instance = described_class.new(synchronizer, interval: interval)
+    stale_state = instance.instance_variable_get(:@sync_state).get
+    stale_state.syncing = true
 
     allow(instance).to receive(:now).and_return(interval)
-    allow(Process).to receive(:pid).and_return(instance.instance_variable_get(:@pid) + 1)
+    allow(Process).to receive(:pid).and_return(stale_state.pid + 1)
 
-    instance.call
+    threads = 10.times.map { Thread.new { instance.call } }
+    entered.pop
+    release << true
+    threads.each(&:join)
 
     expect(events.size).to eq(1)
   end

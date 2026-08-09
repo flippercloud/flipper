@@ -1,11 +1,27 @@
 require 'flipper/adapters/sync/synchronizer'
+require 'flipper/adapters/memory'
 require 'flipper/poller'
+require 'concurrent/atomic/atomic_reference'
 
 module Flipper
   module Adapters
     class Poll
       extend Forwardable
       include ::Flipper::Adapter
+
+      SyncState = Struct.new(:pid, :mutex, :syncing, :last_synced_at, :snapshot)
+
+      class InFlightAdapter
+        extend Forwardable
+
+        def_delegators :@snapshot, :features, :get, :get_multi, :get_all
+        def_delegators :@adapter, :add, :remove, :clear, :enable, :disable
+
+        def initialize(snapshot, adapter)
+          @snapshot = snapshot
+          @adapter = adapter
+        end
+      end
 
       # Deprecated
       Poller = ::Flipper::Poller
@@ -17,10 +33,9 @@ module Flipper
       def initialize(poller, adapter)
         @adapter = adapter
         @poller = poller
-        @pid = Process.pid
-        @last_synced_at = 0
-        @syncing = false
-        @sync_mutex = Mutex.new
+        @sync_state = Concurrent::AtomicReference.new(
+          SyncState.new(Process.pid, Mutex.new, false, 0, nil)
+        )
 
         # If the adapter is empty, we need to sync before starting the poller.
         # Yes, this will block the main thread, but that's better than thinking
@@ -42,53 +57,71 @@ module Flipper
       private
 
       def synced_adapter
-        reset_sync_state_if_forked
+        state = sync_state
         @poller.start
         poller_last_synced_at = @poller.last_synced_at.value
-        if claim_sync(poller_last_synced_at)
+        case claim_sync(state, poller_last_synced_at)
+        when :claimed
           synced = false
           begin
             Flipper::Adapters::Sync::Synchronizer.new(@adapter, @poller.adapter).call
             synced = true
           ensure
-            synced ? complete_sync(poller_last_synced_at) : release_sync
+            synced ? complete_sync(state, poller_last_synced_at) : release_sync(state)
           end
-        end
-        @adapter
-      end
-
-      def reset_sync_state_if_forked
-        return if @pid == Process.pid
-
-        @pid = Process.pid
-        @syncing = false
-        @sync_mutex = Mutex.new
-      end
-
-      # Internal: Attempts to claim the right to sync. Returns true if this
-      # caller should sync. Returns false if a sync is unnecessary or if
-      # another thread is already syncing. Never blocks. Callers that lose the
-      # claim serve the local adapter as is, which is at most one poll interval
-      # stale, rather than waiting on a sync in the middle of a request.
-      def claim_sync(poller_last_synced_at)
-        @sync_mutex.synchronize do
-          return false if @syncing
-          return false unless poller_last_synced_at > @last_synced_at
-
-          @syncing = true
-          true
+          @adapter
+        when :syncing
+          state.snapshot
+        else
+          @adapter
         end
       end
 
-      def complete_sync(poller_last_synced_at)
-        @sync_mutex.synchronize do
-          @last_synced_at = poller_last_synced_at
-          @syncing = false
+      def sync_state
+        pid = Process.pid
+        loop do
+          state = @sync_state.get
+          return state if state.pid == pid
+
+          replacement = SyncState.new(pid, Mutex.new, false, state.last_synced_at, nil)
+          return replacement if @sync_state.compare_and_set(state, replacement)
         end
       end
 
-      def release_sync
-        @sync_mutex.synchronize { @syncing = false }
+      # Internal: Attempts to claim the right to sync. Returns :claimed if this
+      # caller should sync, :syncing if another caller owns the sync, or another
+      # status when no sync should run. Never blocks. Callers that lose an
+      # in-flight claim read from the coherent pre-sync snapshot rather than
+      # waiting on a sync in the middle of a request.
+      def claim_sync(state, poller_last_synced_at)
+        return :contended unless state.mutex.try_lock
+
+        begin
+          return :syncing if state.syncing
+          return :not_needed unless poller_last_synced_at > state.last_synced_at
+
+          snapshot = Flipper::Adapters::Memory.new(@adapter.get_all)
+          state.snapshot = InFlightAdapter.new(snapshot, @adapter)
+          state.syncing = true
+          :claimed
+        ensure
+          state.mutex.unlock
+        end
+      end
+
+      def complete_sync(state, poller_last_synced_at)
+        state.mutex.synchronize do
+          state.last_synced_at = poller_last_synced_at
+          state.syncing = false
+          state.snapshot = nil
+        end
+      end
+
+      def release_sync(state)
+        state.mutex.synchronize do
+          state.syncing = false
+          state.snapshot = nil
+        end
       end
     end
   end
