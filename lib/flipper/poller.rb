@@ -52,6 +52,12 @@ module Flipper
       ensure_worker_running
     end
 
+    # Public: The process id for the mutex currently used by this poller.
+    # Retained for compatibility with the previous Poller reader.
+    def pid
+      @mutex.pid
+    end
+
     def stop
       @instrumenter.instrument("poller.#{InstrumentationNamespace}", {
         operation: :stop,
@@ -108,18 +114,13 @@ module Flipper
 
       # If another thread is starting worker thread, then return early so this
       # thread can enqueue and move on with life.
-      mutex = @mutex.mutex
-      return unless mutex.try_lock
-
-      begin
+      @mutex.try_synchronize do
         return if thread_alive?
         @thread = Thread.new { run }
         @thread&.report_on_exception = false
         @instrumenter.instrument("poller.#{InstrumentationNamespace}", {
           operation: :thread_start,
         })
-      ensure
-        mutex.unlock
       end
     end
 

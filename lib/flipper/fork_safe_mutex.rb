@@ -9,48 +9,69 @@ module Flipper
     State = Struct.new(:pid, :mutex)
 
     def initialize
-      @state = Concurrent::AtomicReference.new(State.new(Process.pid, Mutex.new))
+      @current = State.new(Process.pid, Mutex.new)
+      @state = Concurrent::AtomicReference.new(@current)
     end
 
     def synchronize(&block)
-      mutex.synchronize(&block)
+      current.mutex.synchronize(&block)
     end
 
-    # Public: The mutex for the current process, swapping in a fresh one if forked.
-    def mutex
-      current.mutex
+    def try_synchronize
+      mutex = current.mutex
+      return false unless mutex.try_lock
+
+      begin
+        yield
+        true
+      ensure
+        mutex.unlock
+      end
+    end
+
+    def pid
+      @current.pid
     end
 
     def forked?
-      @state.get.pid != Process.pid
+      @current.pid != Process.pid
     end
 
     # Public: Swaps in a fresh mutex if forked. Returns true if this call
     # observed the fork, false otherwise.
     def reset_if_forked
-      forked = false
-      loop do
-        state = @state.get
-        return forked unless state.pid != Process.pid
+      return false unless forked?
 
-        forked = true
-        reset(state)
-      end
+      current
+      true
     end
 
     private
 
     def current
-      loop do
-        state = @state.get
-        return state unless state.pid != Process.pid
+      state = @current
+      pid = Process.pid
+      return state if state.pid == pid
 
-        reset(state)
-      end
+      reset(pid)
     end
 
-    def reset(expected)
-      @state.compare_and_set(expected, State.new(Process.pid, Mutex.new))
+    def reset(pid)
+      loop do
+        state = @state.get
+        if state.pid == pid
+          @current = state
+          return state
+        end
+
+        replacement = State.new(pid, Mutex.new)
+        if @state.compare_and_set(state, replacement)
+          @current = replacement
+          return replacement
+        end
+
+        # Another thread won the reset. Retry so this process uses its state.
+      end
     end
   end
 end

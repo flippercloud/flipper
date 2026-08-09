@@ -358,11 +358,25 @@ RSpec.describe Flipper::Poller do
 
     it "swaps in a fresh mutex after a fork" do
       fork_safe_mutex = subject.instance_variable_get(:@mutex)
-      original = fork_safe_mutex.mutex
+      original = fork_safe_mutex.instance_variable_get(:@current).mutex
       allow(Process).to receive(:pid).and_return(Process.pid + 1)
 
       expect { subject.start }.not_to raise_error
-      expect(fork_safe_mutex.mutex).not_to equal(original)
+      expect(fork_safe_mutex.instance_variable_get(:@current).mutex).not_to equal(original)
+    end
+
+    it "retains the pid reader across a fork reset" do
+      parent_pid = subject.pid
+      allow(Process).to receive(:pid).and_return(parent_pid + 1)
+      allow(subject).to receive(:ensure_worker_running)
+
+      expect(subject.pid).to eq(parent_pid)
+      subject.start
+      expect(subject.pid).to eq(parent_pid + 1)
+    end
+
+    it "does not expose the raw mutex" do
+      expect(subject).not_to respond_to(:mutex)
     end
 
     context "after shutdown_requested" do
