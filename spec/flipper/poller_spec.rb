@@ -1,5 +1,7 @@
 require "flipper/poller"
 require "flipper/adapters/http"
+require "open3"
+require "rbconfig"
 
 RSpec.describe Flipper::Poller do
   let(:url) { "http://app.com/flipper" }
@@ -407,6 +409,84 @@ RSpec.describe Flipper::Poller do
         expect(subject).to receive(:loop).and_yield
         expect(subject).to receive(:sync)
         subject.start
+      end
+
+      it "starts one fresh worker in a real forked child" do
+        skip "Process.fork is not supported" unless Process.respond_to?(:fork)
+        allow(Thread).to receive(:new).and_call_original
+
+        script = <<~'RUBY'
+          require "flipper"
+
+          class ForkTestPoller < Flipper::Poller
+            def run
+              sleep
+            end
+          end
+
+          poller = ForkTestPoller.new(
+            remote_adapter: Object.new,
+            start_automatically: false,
+            shutdown_automatically: false
+          )
+          poller.start
+          parent_worker = poller.thread
+          poller.instance_variable_get(:@shutdown_requested).make_true
+
+          child_pid = fork do
+            success = false
+
+            begin
+              inherited_worker = poller.thread
+              raise "inherited worker is unexpectedly alive" if inherited_worker.alive?
+
+              poller.start
+              child_worker = poller.thread
+              raise "worker was not replaced" if child_worker.equal?(inherited_worker)
+              raise "replacement worker is not alive" unless child_worker.alive?
+
+              poller.start
+              raise "second start created another worker" unless poller.thread.equal?(child_worker)
+              success = true
+            rescue => error
+              warn error.message
+            ensure
+              poller.stop
+              poller.thread&.join(1)
+            end
+
+            exit!(success ? 0 : 1)
+          end
+
+          deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 5
+          status = nil
+          until status
+            if result = Process.wait2(child_pid, Process::WNOHANG)
+              _, status = result
+            elsif Process.clock_gettime(Process::CLOCK_MONOTONIC) >= deadline
+              Process.kill("KILL", child_pid)
+              Process.wait(child_pid)
+              warn "forked child timed out"
+              exit 1
+            else
+              sleep 0.01
+            end
+          end
+
+          poller.stop
+          parent_worker.join(1)
+          exit(status.success? ? 0 : 1)
+        RUBY
+
+        _, stderr, status = Open3.capture3(
+          RbConfig.ruby,
+          "-Ilib",
+          "-e",
+          script,
+          chdir: File.expand_path("../..", __dir__)
+        )
+
+        expect(status).to be_success, stderr
       end
     end
   end
