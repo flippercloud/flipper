@@ -475,6 +475,49 @@ RSpec.describe Flipper::Poller do
 
       expect(Concurrent.monotonic_time - started_at).to be < 0.1
     end
+
+    it "keeps waiting until the deadline after a spurious wakeup" do
+      allow(subject).to receive(:wait_for_stop).and_call_original
+      allow(Concurrent).to receive(:monotonic_time).and_return(10.0, 10.0, 10.25, 11.0)
+
+      stop_mutex = subject.instance_variable_get(:@stop_mutex)
+      stop_condition = subject.instance_variable_get(:@stop_condition)
+      expect(stop_condition).to receive(:wait).with(stop_mutex, 1.0).ordered
+      expect(stop_condition).to receive(:wait).with(stop_mutex, 0.75).ordered
+
+      expect(subject.send(:wait_for_stop, 1)).to be(false)
+    end
+
+    it "wakes and joins a waiting worker, then starts a replacement" do
+      allow(Thread).to receive(:new).and_call_original
+      allow(subject).to receive(:loop).and_call_original
+      allow(subject).to receive(:wait_for_stop).and_call_original
+
+      waiting = Queue.new
+      stop_condition = subject.instance_variable_get(:@stop_condition)
+      allow(stop_condition).to receive(:wait).and_wrap_original do |original, *args|
+        waiting << true
+        original.call(*args)
+      end
+
+      subject.start
+      Timeout.timeout(5) { waiting.pop }
+      first_worker = subject.thread
+
+      subject.stop
+
+      expect(first_worker).not_to be_alive
+      expect(subject.thread).to be(nil)
+
+      subject.start
+      Timeout.timeout(5) { waiting.pop }
+      second_worker = subject.thread
+
+      expect(second_worker).not_to be(first_worker)
+      expect(second_worker).to be_alive
+    ensure
+      subject.stop
+    end
   end
 
   describe "#start" do
