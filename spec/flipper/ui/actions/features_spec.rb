@@ -40,6 +40,15 @@ RSpec.describe Flipper::UI::Actions::Features do
       expect(last_response.body).to include("can_do_stuff%3F")
     end
 
+    it "escapes actor values in gate tooltip titles" do
+      flipper[:search].enable_actor Flipper::Actor.new('x" onmouseover="alert(document.domain)')
+
+      get '/features'
+
+      expect(last_response.body).to include('title="x&quot; onmouseover=&quot;alert(document.domain)"')
+      expect(last_response.body).not_to include('title="x" onmouseover="alert(document.domain)"')
+    end
+
     context "when there are no features to list" do
       before do
         @original_fun_enabled = Flipper::UI.configuration.fun
@@ -73,6 +82,36 @@ RSpec.describe Flipper::UI::Actions::Features do
 
         it 'renders template' do
           expect(last_response.body).to include('You have not added any features to configure yet.')
+        end
+      end
+    end
+
+    context "merch callout" do
+      before do
+        @original_fun_enabled = Flipper::UI.configuration.fun
+        Flipper::UI.configuration.fun = fun_mode
+        get '/features'
+      end
+
+      after do
+        Flipper::UI.configuration.fun = @original_fun_enabled
+      end
+
+      context "when fun mode is enabled" do
+        let(:fun_mode) { true }
+
+        it 'renders the shirt link' do
+          expect(last_response.body).to include('>Shirt</a>')
+          expect(last_response.body).to include('i-deploy-on-fridays-tee')
+        end
+      end
+
+      context "when fun mode is disabled" do
+        let(:fun_mode) { false }
+
+        it 'does not render the shirt link' do
+          expect(last_response.body).not_to include('>Shirt</a>')
+          expect(last_response.body).not_to include('i-deploy-on-fridays-tee')
         end
       end
     end
@@ -185,9 +224,35 @@ RSpec.describe Flipper::UI::Actions::Features do
         end
       end
 
+      context 'feature name contains accented and invisible characters' do
+        let(:feature_name) { "f\u200Be\u00E1\u2060ture" }
+
+        it 'adds feature with invisible characters removed and accent kept' do
+          expect(flipper.features.map(&:key)).to include("fe\u00E1ture")
+        end
+
+        it 'redirects to normalized feature' do
+          expect(last_response.status).to be(302)
+          expect(last_response.headers['location']).to eq('/features/fe%C3%A1ture')
+        end
+      end
+
       context 'for an invalid feature name' do
         context 'empty feature name' do
           let(:feature_name) { '' }
+
+          it 'does not add feature' do
+            expect(flipper.features.map(&:key)).to eq([])
+          end
+
+          it 'redirects back to feature' do
+            expect(last_response.status).to be(302)
+            expect(last_response.headers['location']).to eq('/features/new?error=%22%22+is+not+a+valid+feature+name.')
+          end
+        end
+
+        context 'feature name that normalizes to empty' do
+          let(:feature_name) { "\u200B\u2060" }
 
           it 'does not add feature' do
             expect(flipper.features.map(&:key)).to eq([])

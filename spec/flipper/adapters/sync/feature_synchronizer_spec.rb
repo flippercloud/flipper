@@ -94,6 +94,17 @@ RSpec.describe Flipper::Adapters::Sync::FeatureSynchronizer do
       expect_only_enable
     end
 
+    it "mirrors a remote expression containing empty groups without raising" do
+      remote = Flipper::GateValues.new(expression: {"Any" => []})
+      feature.enable_expression(plan_expression)
+      adapter.reset
+
+      described_class.new(feature, feature.gate_values, remote).call
+
+      expect(feature.expression_value).to eq({"Any" => []})
+      expect_only_enable
+    end
+
     it "does nothing to expression if in sync" do
       remote = Flipper::GateValues.new(expression: plan_expression.value)
       feature.enable_expression(plan_expression)

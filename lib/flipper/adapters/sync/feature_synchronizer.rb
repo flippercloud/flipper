@@ -58,7 +58,9 @@ module Flipper
           if remote_expression.nil?
             @feature.disable_expression
           else
-            @feature.enable_expression remote_expression
+            # Remote adapters can hold legacy empty-group expressions, which
+            # must be mirrored faithfully without weakening public enables.
+            @feature.__send__ :enable_expression_from_sync, remote_expression
           end
         end
 

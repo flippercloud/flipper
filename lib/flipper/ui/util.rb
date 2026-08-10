@@ -1,4 +1,5 @@
 require "rack/utils"
+require "flipper/typecast"
 
 module Flipper
   module UI
@@ -12,6 +13,10 @@ module Flipper
 
       def self.unescape(str)
         Rack::Utils.unescape(str)
+      end
+
+      def self.normalize_feature_name(str)
+        Typecast.to_feature_name(str)
       end
 
       def self.blank?(str)

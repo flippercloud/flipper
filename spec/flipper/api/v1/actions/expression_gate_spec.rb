@@ -124,7 +124,7 @@ RSpec.describe Flipper::Api::V1::Actions::ExpressionGate do
   describe 'enable with schema-invalid expression' do
     before do
       data = {"Add" => [1]}
-      post '/features/my_feature/expression', JSON.dump(data),
+      post '/features/my_feature/expression', Flipper::Typecast.to_json(data),
         "CONTENT_TYPE" => "application/json"
     end
 
@@ -135,6 +135,34 @@ RSpec.describe Flipper::Api::V1::Actions::ExpressionGate do
 
     it 'does not enable the expression gate' do
       expect(flipper[:my_feature].expression).to be(nil)
+    end
+  end
+
+  describe 'enable with empty group' do
+    let(:data) { {"Any" => []} }
+
+    before do
+      post '/features/my_feature/expression', Flipper::Typecast.to_json(data),
+        "CONTENT_TYPE" => "application/json"
+    end
+
+    it 'rejects an expression that is structurally valid but unsafe to persist' do
+      expect(Flipper::Expression.build(data).valid?).to be(true)
+      expect(last_response.status).to eq(422)
+      expect(json_response).to eq(api_expression_invalid_response)
+    end
+  end
+
+  describe 'enable with nested empty group' do
+    before do
+      data = {"All" => [{"All" => []}]}
+      post '/features/my_feature/expression', Flipper::Typecast.to_json(data),
+        "CONTENT_TYPE" => "application/json"
+    end
+
+    it 'returns correct error response' do
+      expect(last_response.status).to eq(422)
+      expect(json_response).to eq(api_expression_invalid_response)
     end
   end
 
