@@ -233,6 +233,77 @@ RSpec.describe Flipper::Adapters::Poll do
     loser&.join
   end
 
+  it "keeps a coherent snapshot when the sync claim mutex is contended" do
+    get_all_entered = Queue.new
+    release_get_all = Queue.new
+    pausing_local_adapter = Class.new(Flipper::Adapters::Memory) do
+      def initialize(entered, release)
+        super(nil, threadsafe: true)
+        @entered = entered
+        @release = release
+        @pause_next_get_all = false
+      end
+
+      def pause_next_get_all
+        @pause_next_get_all = true
+      end
+
+      def get_all(**kwargs)
+        if @pause_next_get_all
+          @pause_next_get_all = false
+          @entered << true
+          @release.pop
+        end
+        super
+      end
+    end.new(get_all_entered, release_get_all)
+    Flipper.new(pausing_local_adapter).enable(:existing)
+
+    remote = Flipper::Adapters::Memory.new(threadsafe: true)
+    Flipper.new(remote).enable(:updated)
+    fake_poller = Struct.new(:last_synced_at, :adapter) do
+      def start
+      end
+
+      def sync
+        raise "sync should not be called when the local adapter is not empty"
+      end
+    end.new(Concurrent::AtomicFixnum.new(1), remote)
+
+    instance = described_class.new(fake_poller, pausing_local_adapter)
+    pausing_local_adapter.pause_next_get_all
+
+    loser_claimed = Queue.new
+    release_loser = Queue.new
+    allow(instance).to receive(:claim_sync).and_wrap_original do |method, *args|
+      result = method.call(*args)
+      if Thread.current[:poll_contender]
+        loser_claimed << true
+        release_loser.pop
+      end
+      result
+    end
+
+    winner = Thread.new { instance.features }
+    get_all_entered.pop
+    loser = Thread.new do
+      Thread.current[:poll_contender] = true
+      instance.features
+    end
+    loser_claimed.pop
+
+    release_get_all << true
+    expect(winner.value).to eq(Set["updated"])
+    release_loser << true
+
+    expect(loser.value).to eq(Set["existing"])
+  ensure
+    release_get_all << true if release_get_all
+    release_loser << true if release_loser
+    winner&.join
+    loser&.join
+  end
+
   it "reads the local adapter once for a claimed poller update" do
     Flipper.new(local_adapter).enable(:existing)
 

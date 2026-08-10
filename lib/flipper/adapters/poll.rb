@@ -33,10 +33,6 @@ module Flipper
       def initialize(poller, adapter)
         @adapter = adapter
         @poller = poller
-        @sync_state = Concurrent::AtomicReference.new(
-          SyncState.new(Process.pid, Mutex.new, false, 0, nil)
-        )
-
         # If the adapter is empty, we need to sync before starting the poller.
         # Yes, this will block the main thread, but that's better than thinking
         # nothing is enabled.
@@ -50,6 +46,11 @@ module Flipper
             # causing your processes to crash.
           end
         end
+
+        snapshot = InFlightAdapter.new(Flipper::Adapters::Memory.new(adapter.get_all), adapter)
+        @sync_state = Concurrent::AtomicReference.new(
+          SyncState.new(Process.pid, Mutex.new, false, 0, snapshot)
+        )
 
         @poller.start
       end
@@ -75,7 +76,7 @@ module Flipper
             synced ? complete_sync(state, poller_last_synced_at) : release_sync(state)
           end
           @adapter
-        when :syncing
+        when :syncing, :contended
           value
         else
           @adapter
@@ -88,18 +89,18 @@ module Flipper
           state = @sync_state.get
           return state if state.pid == pid
 
-          replacement = SyncState.new(pid, Mutex.new, false, state.last_synced_at, nil)
+          replacement = SyncState.new(pid, Mutex.new, false, state.last_synced_at, state.snapshot)
           return replacement if @sync_state.compare_and_set(state, replacement)
         end
       end
 
       # Internal: Attempts to claim the right to sync. Returns the status and
-      # the data captured while holding the mutex: the local state for :claimed
-      # or the coherent pre-sync adapter for :syncing. Never blocks. Callers
-      # that lose an in-flight claim read from the snapshot rather than waiting
-      # on a sync in the middle of a request.
+      # the data associated with that status: the local state for :claimed or
+      # the latest coherent adapter for :syncing and :contended. Never blocks.
+      # Callers that lose an in-flight claim read from the snapshot rather than
+      # waiting on a sync in the middle of a request.
       def claim_sync(state, poller_last_synced_at)
-        return [:contended, nil] unless state.mutex.try_lock
+        return [:contended, state.snapshot] unless state.mutex.try_lock
 
         begin
           return [:syncing, state.snapshot] if state.syncing
@@ -119,14 +120,12 @@ module Flipper
         state.mutex.synchronize do
           state.last_synced_at = poller_last_synced_at
           state.syncing = false
-          state.snapshot = nil
         end
       end
 
       def release_sync(state)
         state.mutex.synchronize do
           state.syncing = false
-          state.snapshot = nil
         end
       end
     end
