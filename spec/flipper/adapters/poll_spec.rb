@@ -668,4 +668,53 @@ RSpec.describe Flipper::Adapters::Poll do
     expect(threads.map(&:value)).to all(eq(Set["updated"]))
     expect(get_all_calls.value).to eq(1)
   end
+
+  it "retains the trusted snapshot after forking during a partial update" do
+    Flipper.new(local_adapter).enable(:existing)
+
+    remote = Flipper::Adapters::Memory.new(threadsafe: true)
+    Flipper.new(remote).disable(:existing)
+    Flipper.new(remote).enable(:updated)
+    retry_entered = Queue.new
+    release_retry = Queue.new
+    pausing_remote_adapter = Class.new do
+      def initialize(result, entered, release)
+        @result = result
+        @entered = entered
+        @release = release
+      end
+
+      def get_all(**kwargs)
+        @entered << true
+        @release.pop
+        @result
+      end
+    end.new(remote.get_all, retry_entered, release_retry)
+
+    fake_poller = Struct.new(:last_synced_at, :adapter) do
+      def start
+      end
+
+      def sync
+        raise "sync should not be called when the local adapter is not empty"
+      end
+    end.new(Concurrent::AtomicFixnum.new(1), pausing_remote_adapter)
+
+    instance = described_class.new(fake_poller, local_adapter)
+    stale_state = instance.instance_variable_get(:@sync_state).get
+    Flipper.new(local_adapter).disable(:existing)
+    stale_state.syncing = true
+    allow(Process).to receive(:pid).and_return(stale_state.pid + 1)
+
+    retrying = Thread.new { instance.features }
+    retry_entered.pop
+
+    expect(Flipper.new(instance).enabled?(:existing)).to be(true)
+    release_retry << true
+    expect(retrying.value).to eq(Set["existing", "updated"])
+    expect(Flipper.new(instance).enabled?(:existing)).to be(false)
+  ensure
+    release_retry << true if release_retry
+    retrying&.join
+  end
 end

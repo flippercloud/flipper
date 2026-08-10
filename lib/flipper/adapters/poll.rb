@@ -131,7 +131,7 @@ module Flipper
             false,
             state.last_synced_at,
             state.snapshot,
-            state.sync_failed
+            state.sync_failed || state.syncing
           )
           return replacement if @sync_state.compare_and_set(state, replacement)
         end
