@@ -2,7 +2,7 @@ require 'logger'
 require 'concurrent/utility/monotonic_time'
 require 'concurrent/map'
 require 'concurrent/atomic/atomic_fixnum'
-require 'concurrent/atomic/atomic_boolean'
+require 'concurrent/atomic/atomic_reference'
 require 'flipper/fork_safe_mutex'
 
 module Flipper
@@ -26,6 +26,7 @@ module Flipper
     end
 
     MINIMUM_POLL_INTERVAL = 10
+    ShutdownState = Struct.new(:pid, :requested)
 
     def initialize(options = {})
       @thread = nil
@@ -34,7 +35,9 @@ module Flipper
       @remote_adapter = options.fetch(:remote_adapter)
       @last_synced_at = Concurrent::AtomicFixnum.new(0)
       @adapter = Adapters::Memory.new(nil, threadsafe: true)
-      @shutdown_requested = Concurrent::AtomicBoolean.new(false)
+      @shutdown_state = Concurrent::AtomicReference.new(
+        ShutdownState.new(Process.pid, false)
+      )
 
       self.interval = options.fetch(:interval, 10)
       @initial_interval = @interval
@@ -47,8 +50,8 @@ module Flipper
     end
 
     def start
-      @shutdown_requested.make_false if @mutex.reset_if_forked
-      return if @shutdown_requested.true?
+      @mutex.reset_if_forked
+      return if shutdown_requested?
       ensure_worker_running
     end
 
@@ -128,13 +131,35 @@ module Flipper
       @thread && @thread.alive?
     end
 
+    def shutdown_requested?
+      pid = Process.pid
+
+      loop do
+        state = @shutdown_state.get
+        return state.requested if state.pid == pid
+
+        replacement = ShutdownState.new(pid, false)
+        return false if @shutdown_state.compare_and_set(state, replacement)
+      end
+    end
+
+    def request_shutdown
+      pid = Process.pid
+
+      loop do
+        state = @shutdown_state.get
+        return if state.pid == pid && state.requested
+        return if @shutdown_state.compare_and_set(state, ShutdownState.new(pid, true))
+      end
+    end
+
     def apply_response_headers
       return unless @remote_adapter.respond_to?(:last_get_all_response)
 
       if response = @remote_adapter.last_get_all_response
         # shutdown based on response header
         if Flipper::Typecast.to_boolean(response["poll-shutdown"])
-          @shutdown_requested.make_true
+          request_shutdown
           @instrumenter.instrument("poller.#{InstrumentationNamespace}", {
             operation: :shutdown_requested,
           })

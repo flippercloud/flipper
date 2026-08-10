@@ -411,6 +411,35 @@ RSpec.describe Flipper::Poller do
         subject.start
       end
 
+      it "does not clear a shutdown request that races with fork reset" do
+        allow(Thread).to receive(:new).and_call_original
+        allow(Process).to receive(:pid).and_return(Process.pid + 1)
+        allow(subject).to receive(:ensure_worker_running)
+        shutdown_state = subject.instance_variable_get(:@shutdown_state)
+        reset_started = Queue.new
+        release_reset = Queue.new
+
+        allow(shutdown_state).to receive(:compare_and_set).and_wrap_original do |original, state, replacement|
+          unless replacement.requested
+            reset_started << true
+            release_reset.pop
+          end
+          original.call(state, replacement)
+        end
+
+        thread = Thread.new { subject.start }
+        reset_started.pop
+        subject.send(:request_shutdown)
+        release_reset << true
+        thread.join
+
+        expect(shutdown_state.get.pid).to eq(Process.pid)
+        expect(shutdown_state.get.requested).to be(true)
+      ensure
+        release_reset << true if release_reset
+        thread&.join(1)
+      end
+
       it "starts one fresh worker in a real forked child" do
         skip "Process.fork is not supported" unless Process.respond_to?(:fork)
         allow(Thread).to receive(:new).and_call_original
@@ -431,50 +460,66 @@ RSpec.describe Flipper::Poller do
           )
           poller.start
           parent_worker = poller.thread
-          poller.instance_variable_get(:@shutdown_requested).make_true
+          poller.send(:request_shutdown)
+          inherited_mutex = poller.instance_variable_get(:@mutex).instance_variable_get(:@current).mutex
+          mutex_locked = Queue.new
+          release_mutex = Queue.new
+          mutex_holder = Thread.new do
+            inherited_mutex.lock
+            mutex_locked << true
+            release_mutex.pop
+            inherited_mutex.unlock
+          end
+          mutex_locked.pop
 
-          child_pid = fork do
-            success = false
+          begin
+            child_pid = fork do
+              success = false
 
-            begin
-              inherited_worker = poller.thread
-              raise "inherited worker is unexpectedly alive" if inherited_worker.alive?
+              begin
+                inherited_worker = poller.thread
+                raise "inherited worker is unexpectedly alive" if inherited_worker.alive?
 
-              poller.start
-              child_worker = poller.thread
-              raise "worker was not replaced" if child_worker.equal?(inherited_worker)
-              raise "replacement worker is not alive" unless child_worker.alive?
+                poller.start
+                child_mutex = poller.instance_variable_get(:@mutex).instance_variable_get(:@current).mutex
+                child_worker = poller.thread
+                raise "inherited mutex was not replaced" if child_mutex.equal?(inherited_mutex)
+                raise "worker was not replaced" if child_worker.equal?(inherited_worker)
+                raise "replacement worker is not alive" unless child_worker.alive?
 
-              poller.start
-              raise "second start created another worker" unless poller.thread.equal?(child_worker)
-              success = true
-            rescue => error
-              warn error.message
-            ensure
-              poller.stop
-              poller.thread&.join(1)
+                poller.start
+                raise "second start created another worker" unless poller.thread.equal?(child_worker)
+                success = true
+              rescue => error
+                warn error.message
+              ensure
+                poller.stop
+                poller.thread&.join(1)
+              end
+
+              exit!(success ? 0 : 1)
             end
 
-            exit!(success ? 0 : 1)
-          end
-
-          deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 5
-          status = nil
-          until status
-            if result = Process.wait2(child_pid, Process::WNOHANG)
-              _, status = result
-            elsif Process.clock_gettime(Process::CLOCK_MONOTONIC) >= deadline
-              Process.kill("KILL", child_pid)
-              Process.wait(child_pid)
-              warn "forked child timed out"
-              exit 1
-            else
-              sleep 0.01
+            deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 5
+            status = nil
+            until status
+              if result = Process.wait2(child_pid, Process::WNOHANG)
+                _, status = result
+              elsif Process.clock_gettime(Process::CLOCK_MONOTONIC) >= deadline
+                Process.kill("KILL", child_pid)
+                Process.wait(child_pid)
+                raise "forked child timed out"
+              else
+                sleep 0.01
+              end
             end
+          ensure
+            release_mutex << true
+            mutex_holder.join(1)
+            poller.stop
+            parent_worker.join(1)
           end
 
-          poller.stop
-          parent_worker.join(1)
           exit(status.success? ? 0 : 1)
         RUBY
 
