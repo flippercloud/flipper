@@ -125,10 +125,18 @@ RSpec.describe Flipper::Cloud, ".migrate" do
       expect(stub).to have_been_requested
     end
 
-    it "requires HTTPS when sending the token" do
-      ENV["FLIPPER_CLOUD_URL"] = "http://localhost:5555"
+    it "requires a valid HTTPS url when sending the token" do
+      invalid_urls = [
+        "http://localhost:5555",
+        "https://",
+        "https:localhost:5555",
+        "https://local host:5555",
+      ]
 
-      expect { Flipper::Cloud.push("test-token", flipper) }.to raise_error(ArgumentError, /must use https/)
+      invalid_urls.each do |url|
+        ENV["FLIPPER_CLOUD_URL"] = url
+        expect { Flipper::Cloud.push("test-token", flipper) }.to raise_error(ArgumentError, /must use https/)
+      end
     end
 
     it "sends gzip-compressed export contents as the body" do

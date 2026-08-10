@@ -1,11 +1,11 @@
 require "logger"
 require "socket"
-require "uri"
 require "flipper/adapters/http"
 require "flipper/adapters/poll"
 require "flipper/poller"
 require "flipper/adapters/dual_write"
 require "flipper/adapters/sync/synchronizer"
+require "flipper/cloud/url_validator"
 require "flipper/cloud/telemetry"
 require "flipper/cloud/telemetry/instrumenter"
 require "flipper/cloud/telemetry/submitter"
@@ -142,13 +142,7 @@ module Flipper
       end
 
       def url=(value)
-        unless URI(value.to_s).scheme == "https"
-          raise ArgumentError,
-            "Flipper::Cloud url must use https but was #{value.inspect}. " \
-            "https is required so your token is never sent in cleartext."
-        end
-
-        @url = value
+        @url = UrlValidator.validate(value)
       end
 
       private
