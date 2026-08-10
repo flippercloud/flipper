@@ -70,15 +70,24 @@ module Flipper
         case claim
         when :claimed
           synced = false
+          completed_snapshot = nil
           begin
             Flipper::Adapters::Sync::Synchronizer.new(
               @adapter,
               @poller.adapter,
               local_get_all: value
             ).call
+            completed_snapshot = InFlightAdapter.new(
+              Flipper::Adapters::Memory.new(@adapter.get_all),
+              @adapter
+            )
             synced = true
           ensure
-            synced ? complete_sync(state, poller_last_synced_at) : release_sync(state)
+            if synced
+              complete_sync(state, poller_last_synced_at, completed_snapshot)
+            else
+              release_sync(state)
+            end
           end
           @adapter
         when :syncing, :contended
@@ -127,9 +136,10 @@ module Flipper
         end
       end
 
-      def complete_sync(state, poller_last_synced_at)
+      def complete_sync(state, poller_last_synced_at, completed_snapshot)
         state.mutex.synchronize do
           state.last_synced_at = poller_last_synced_at
+          state.snapshot = completed_snapshot
           state.syncing = false
         end
       end

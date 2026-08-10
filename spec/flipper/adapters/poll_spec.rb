@@ -336,7 +336,64 @@ RSpec.describe Flipper::Adapters::Poll do
     loser&.join
   end
 
-  it "reads the local adapter once for a claimed poller update" do
+  it "retains the completed snapshot for contention during the next poll" do
+    get_all_entered = Queue.new
+    release_get_all = Queue.new
+    pausing_local_adapter = Class.new(Flipper::Adapters::Memory) do
+      def initialize(entered, release)
+        super(nil, threadsafe: true)
+        @entered = entered
+        @release = release
+        @pause_next_get_all = false
+      end
+
+      def pause_next_get_all
+        @pause_next_get_all = true
+      end
+
+      def get_all(**kwargs)
+        if @pause_next_get_all
+          @pause_next_get_all = false
+          @entered << true
+          @release.pop
+        end
+        super
+      end
+    end.new(get_all_entered, release_get_all)
+    Flipper.new(pausing_local_adapter).enable(:original)
+
+    remote = Flipper::Adapters::Memory.new(threadsafe: true)
+    Flipper.new(remote).enable(:first_update)
+    fake_poller = Struct.new(:last_synced_at, :adapter) do
+      def start
+      end
+
+      def sync
+        raise "sync should not be called when the local adapter is not empty"
+      end
+    end.new(Concurrent::AtomicFixnum.new(1), remote)
+
+    instance = described_class.new(fake_poller, pausing_local_adapter)
+    expect(instance.features).to eq(Set["first_update"])
+
+    Flipper.new(remote).enable(:second_update)
+    fake_poller.last_synced_at.value = 2
+    pausing_local_adapter.pause_next_get_all
+
+    winner = Thread.new { instance.features }
+    get_all_entered.pop
+    contender = Thread.new { instance.features }
+
+    expect(contender.value).to eq(Set["first_update"])
+    release_get_all << true
+    expect(winner.value).to eq(Set["first_update", "second_update"])
+  ensure
+    release_get_all << true if release_get_all
+    winner&.join
+    contender&.join
+  end
+
+  it "reads the local adapter before and after a claimed poller update" do
     Flipper.new(local_adapter).enable(:existing)
 
     fake_poller = Struct.new(:last_synced_at, :adapter) do
@@ -349,7 +406,7 @@ RSpec.describe Flipper::Adapters::Poll do
     end.new(Concurrent::AtomicFixnum.new(1), remote_adapter)
 
     instance = described_class.new(fake_poller, local_adapter)
-    expect(local_adapter).to receive(:get_all).once.and_call_original
+    expect(local_adapter).to receive(:get_all).twice.and_call_original
 
     instance.features
   end
