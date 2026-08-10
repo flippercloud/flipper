@@ -9,7 +9,7 @@ module Flipper
       extend Forwardable
       include ::Flipper::Adapter
 
-      SyncState = Struct.new(:pid, :mutex, :syncing, :last_synced_at, :snapshot)
+      SyncState = Struct.new(:pid, :mutex, :syncing, :last_synced_at, :snapshot, :sync_failed)
 
       class InFlightAdapter
         extend Forwardable
@@ -20,6 +20,24 @@ module Flipper
         def initialize(snapshot, adapter)
           @snapshot = snapshot
           @adapter = adapter
+        end
+      end
+
+      class PendingSnapshotAdapter
+        extend Forwardable
+
+        def_delegators :read_adapter, :features, :get, :get_multi, :get_all
+        def_delegators :@adapter, :add, :remove, :clear, :enable, :disable
+
+        def initialize(state, adapter)
+          @state = state
+          @adapter = adapter
+        end
+
+        private
+
+        def read_adapter
+          @state.snapshot || @adapter
         end
       end
 
@@ -54,7 +72,7 @@ module Flipper
           # successful request establishes the snapshot before a sync can run.
         end
         @sync_state = Concurrent::AtomicReference.new(
-          SyncState.new(Process.pid, Mutex.new, false, 0, snapshot)
+          SyncState.new(Process.pid, Mutex.new, false, 0, snapshot, false)
         )
 
         @poller.start
@@ -90,7 +108,7 @@ module Flipper
             end
           end
           @adapter
-        when :syncing, :contended
+        when :syncing, :contended, :snapshot_established
           value
         else
           @adapter
@@ -103,32 +121,45 @@ module Flipper
           state = @sync_state.get
           return state if state.pid == pid
 
-          replacement = SyncState.new(pid, Mutex.new, false, state.last_synced_at, state.snapshot)
+          replacement = SyncState.new(
+            pid,
+            Mutex.new,
+            false,
+            state.last_synced_at,
+            state.snapshot,
+            state.sync_failed
+          )
           return replacement if @sync_state.compare_and_set(state, replacement)
         end
       end
 
       # Internal: Attempts to claim the right to sync. Returns the status and
       # the data associated with that status: the local state for :claimed or
-      # the latest coherent adapter for :syncing and :contended. Never blocks.
+      # the latest coherent adapter for all other read statuses. Never blocks.
       # Callers that lose an in-flight claim read from the snapshot rather than
       # waiting on a sync in the middle of a request.
       def claim_sync(state, poller_last_synced_at)
-        return [:contended, state.snapshot || @adapter] unless state.mutex.try_lock
+        unless state.mutex.try_lock
+          adapter = state.snapshot || PendingSnapshotAdapter.new(state, @adapter)
+          return [:contended, adapter]
+        end
 
         begin
           return [:syncing, state.snapshot] if state.syncing
           unless state.snapshot
             local_get_all = @adapter.get_all
             snapshot = Flipper::Adapters::Memory.new(local_get_all)
-            state.snapshot = InFlightAdapter.new(snapshot, @adapter)
-            return [:snapshot_established, nil]
+            established_snapshot = InFlightAdapter.new(snapshot, @adapter)
+            state.snapshot = established_snapshot
+            return [:snapshot_established, established_snapshot]
           end
           return [:not_needed, nil] unless poller_last_synced_at > state.last_synced_at
 
           local_get_all = @adapter.get_all
-          snapshot = Flipper::Adapters::Memory.new(local_get_all)
-          state.snapshot = InFlightAdapter.new(snapshot, @adapter)
+          unless state.sync_failed
+            snapshot = Flipper::Adapters::Memory.new(local_get_all)
+            state.snapshot = InFlightAdapter.new(snapshot, @adapter)
+          end
           state.syncing = true
           [:claimed, local_get_all]
         ensure
@@ -140,12 +171,14 @@ module Flipper
         state.mutex.synchronize do
           state.last_synced_at = poller_last_synced_at
           state.snapshot = completed_snapshot
+          state.sync_failed = false
           state.syncing = false
         end
       end
 
       def release_sync(state)
         state.mutex.synchronize do
+          state.sync_failed = true
           state.syncing = false
         end
       end

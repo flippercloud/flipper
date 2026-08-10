@@ -71,6 +71,57 @@ RSpec.describe Flipper::Adapters::Poll do
     expect(instance.features).to eq(Set["analytics", "search"])
   end
 
+  it "serves the established snapshot when initialization recovery races with a sync" do
+    flaky_local_adapter = Class.new(Flipper::Adapters::Memory) do
+      def initialize
+        super
+        @get_all_calls = 0
+      end
+
+      def get_all(**kwargs)
+        @get_all_calls += 1
+        raise "transient local failure" if @get_all_calls == 1
+
+        super
+      end
+    end.new
+    Flipper.new(flaky_local_adapter).enable(:existing)
+
+    fake_poller = Struct.new(:last_synced_at, :adapter) do
+      def start
+      end
+
+      def sync
+        raise "sync should not be called when the local adapter is not empty"
+      end
+    end.new(Concurrent::AtomicFixnum.new(1), remote_adapter)
+
+    instance = described_class.new(fake_poller, flaky_local_adapter)
+    snapshot_established = Queue.new
+    release_recovery = Queue.new
+    allow(instance).to receive(:claim_sync).and_wrap_original do |method, *args|
+      result = method.call(*args)
+      if Thread.current[:poll_recovery]
+        snapshot_established << true
+        release_recovery.pop
+      end
+      result
+    end
+
+    recovery = Thread.new do
+      Thread.current[:poll_recovery] = true
+      instance.features
+    end
+    snapshot_established.pop
+
+    expect(instance.features).to eq(Set["analytics", "search"])
+    release_recovery << true
+    expect(recovery.value).to eq(Set["existing"])
+  ensure
+    release_recovery << true if release_recovery
+    recovery&.join
+  end
+
   it "only synchronizes once per poller update when called concurrently" do
     flipper = Flipper.new(local_adapter)
     flipper.enable(:existing)
@@ -479,6 +530,72 @@ RSpec.describe Flipper::Adapters::Poll do
     instance.features
 
     expect(get_all_calls.value).to eq(2)
+  end
+
+  it "retains the last trusted snapshot while retrying a partially failed update" do
+    failing_local_adapter = Class.new(Flipper::Adapters::Memory) do
+      def initialize
+        super(nil, threadsafe: true)
+        @fail_next_disable = true
+      end
+
+      def disable(feature, gate, thing)
+        result = super
+        if @fail_next_disable
+          @fail_next_disable = false
+          raise "partial local failure"
+        end
+        result
+      end
+    end.new
+    Flipper.new(failing_local_adapter).enable(:existing)
+
+    remote = Flipper::Adapters::Memory.new(threadsafe: true)
+    Flipper.new(remote).disable(:existing)
+    Flipper.new(remote).enable(:updated)
+    retry_entered = Queue.new
+    release_retry = Queue.new
+    pausing_remote_adapter = Class.new do
+      def initialize(result, entered, release)
+        @result = result
+        @entered = entered
+        @release = release
+        @get_all_calls = 0
+      end
+
+      def get_all(**kwargs)
+        @get_all_calls += 1
+        if @get_all_calls == 2
+          @entered << true
+          @release.pop
+        end
+        @result
+      end
+    end.new(remote.get_all, retry_entered, release_retry)
+
+    fake_poller = Struct.new(:last_synced_at, :adapter) do
+      def start
+      end
+
+      def sync
+        raise "sync should not be called when the local adapter is not empty"
+      end
+    end.new(Concurrent::AtomicFixnum.new(1), pausing_remote_adapter)
+
+    instance = described_class.new(fake_poller, failing_local_adapter)
+    expect { instance.features }.to raise_error("partial local failure")
+    expect(Flipper.new(failing_local_adapter).enabled?(:existing)).to be(false)
+
+    retrying = Thread.new { instance.features }
+    retry_entered.pop
+
+    expect(Flipper.new(instance).enabled?(:existing)).to be(true)
+    release_retry << true
+    expect(retrying.value).to eq(Set["existing", "updated"])
+    expect(Flipper.new(instance).enabled?(:existing)).to be(false)
+  ensure
+    release_retry << true if release_retry
+    retrying&.join
   end
 
   it "resets in-flight synchronization state after a fork" do
