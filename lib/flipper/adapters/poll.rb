@@ -87,7 +87,6 @@ module Flipper
         claim, value = claim_sync(state, poller_last_synced_at)
         case claim
         when :claimed
-          synced = false
           completed_snapshot = nil
           begin
             Flipper::Adapters::Sync::Synchronizer.new(
@@ -95,13 +94,18 @@ module Flipper
               @poller.adapter,
               local_get_all: value
             ).call
-            completed_snapshot = InFlightAdapter.new(
-              Flipper::Adapters::Memory.new(@adapter.get_all),
-              @adapter
-            )
-            synced = true
+            begin
+              completed_snapshot = InFlightAdapter.new(
+                Flipper::Adapters::Memory.new(@adapter.get_all),
+                @adapter
+              )
+            rescue
+              # The adapter is synchronized, but its completed state could not
+              # be captured. Keep serving the previous trusted snapshot to
+              # contenders and retry publication on the next request.
+            end
           ensure
-            if synced
+            if completed_snapshot
               complete_sync(state, poller_last_synced_at, completed_snapshot)
             else
               release_sync(state)

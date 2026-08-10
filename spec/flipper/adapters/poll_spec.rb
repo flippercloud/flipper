@@ -462,6 +462,37 @@ RSpec.describe Flipper::Adapters::Poll do
     instance.features
   end
 
+  it "does not fail a successful update when its completed snapshot cannot be captured" do
+    flaky_local_adapter = Class.new(Flipper::Adapters::Memory) do
+      def initialize
+        super
+        @get_all_calls = 0
+      end
+
+      def get_all(**kwargs)
+        @get_all_calls += 1
+        raise "completed snapshot failure" if @get_all_calls == 3
+
+        super
+      end
+    end.new
+    Flipper.new(flaky_local_adapter).enable(:existing)
+
+    fake_poller = Struct.new(:last_synced_at, :adapter) do
+      def start
+      end
+
+      def sync
+        raise "sync should not be called when the local adapter is not empty"
+      end
+    end.new(Concurrent::AtomicFixnum.new(1), remote_adapter)
+
+    instance = described_class.new(fake_poller, flaky_local_adapter)
+
+    expect { instance.features }.not_to raise_error
+    expect(instance.features).to eq(Set["analytics", "search"])
+  end
+
   it "does not wait for the sync claim mutex" do
     Flipper.new(local_adapter).enable(:existing)
 
