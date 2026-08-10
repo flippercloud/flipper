@@ -35,6 +35,24 @@ RSpec.describe Flipper::ForkSafeMutex do
     mutex&.unlock
   end
 
+  it "unlocks after the synchronized block raises" do
+    expect do
+      subject.try_synchronize { raise "boom" }
+    end.to raise_error(RuntimeError, "boom")
+
+    expect(subject.try_synchronize {}).to be(true)
+  end
+
+  it "unlocks after a non-local return from the synchronized block" do
+    call = lambda do
+      subject.try_synchronize { return :returned }
+      :not_returned
+    end
+
+    expect(call.call).to eq(:returned)
+    expect(subject.try_synchronize {}).to be(true)
+  end
+
   it "is not forked within the same process" do
     expect(subject.forked?).to be(false)
     expect(subject.reset_if_forked).to be(false)

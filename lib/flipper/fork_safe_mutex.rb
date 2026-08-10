@@ -14,11 +14,15 @@ module Flipper
     end
 
     def synchronize(&block)
-      current.mutex.synchronize(&block)
+      state = @current
+      state = reset(Process.pid) if state.pid != Process.pid
+      state.mutex.synchronize(&block)
     end
 
     def try_synchronize
-      mutex = current.mutex
+      state = @current
+      state = reset(Process.pid) if state.pid != Process.pid
+      mutex = state.mutex
       return false unless mutex.try_lock
 
       begin
@@ -42,19 +46,11 @@ module Flipper
     def reset_if_forked
       return false unless forked?
 
-      current
+      reset(Process.pid)
       true
     end
 
     private
-
-    def current
-      state = @current
-      pid = Process.pid
-      return state if state.pid == pid
-
-      reset(pid)
-    end
 
     def reset(pid)
       loop do
