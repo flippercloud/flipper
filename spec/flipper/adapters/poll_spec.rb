@@ -39,6 +39,38 @@ RSpec.describe Flipper::Adapters::Poll do
     expect(local_adapter.features).to eq(remote_adapter.features)
   end
 
+  it "establishes a snapshot after a local get_all initialization failure" do
+    flaky_local_adapter = Class.new(Flipper::Adapters::Memory) do
+      def initialize
+        super
+        @get_all_calls = 0
+      end
+
+      def get_all(**kwargs)
+        @get_all_calls += 1
+        raise "transient local failure" if @get_all_calls == 1
+
+        super
+      end
+    end.new
+    Flipper.new(flaky_local_adapter).enable(:existing)
+
+    fake_poller = Struct.new(:last_synced_at, :adapter) do
+      def start
+      end
+
+      def sync
+        raise "sync should not be called when the local adapter is not empty"
+      end
+    end.new(Concurrent::AtomicFixnum.new(1), remote_adapter)
+
+    instance = nil
+    expect { instance = described_class.new(fake_poller, flaky_local_adapter) }.not_to raise_error
+
+    expect(instance.features).to eq(Set["existing"])
+    expect(instance.features).to eq(Set["analytics", "search"])
+  end
+
   it "only synchronizes once per poller update when called concurrently" do
     flipper = Flipper.new(local_adapter)
     flipper.enable(:existing)

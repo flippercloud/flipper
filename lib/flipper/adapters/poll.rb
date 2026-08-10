@@ -47,7 +47,12 @@ module Flipper
           end
         end
 
-        snapshot = InFlightAdapter.new(Flipper::Adapters::Memory.new(adapter.get_all), adapter)
+        snapshot = begin
+          InFlightAdapter.new(Flipper::Adapters::Memory.new(adapter.get_all), adapter)
+        rescue
+          # Preserve the existing fail-open initialization behavior. The first
+          # successful request establishes the snapshot before a sync can run.
+        end
         @sync_state = Concurrent::AtomicReference.new(
           SyncState.new(Process.pid, Mutex.new, false, 0, snapshot)
         )
@@ -100,10 +105,16 @@ module Flipper
       # Callers that lose an in-flight claim read from the snapshot rather than
       # waiting on a sync in the middle of a request.
       def claim_sync(state, poller_last_synced_at)
-        return [:contended, state.snapshot] unless state.mutex.try_lock
+        return [:contended, state.snapshot || @adapter] unless state.mutex.try_lock
 
         begin
           return [:syncing, state.snapshot] if state.syncing
+          unless state.snapshot
+            local_get_all = @adapter.get_all
+            snapshot = Flipper::Adapters::Memory.new(local_get_all)
+            state.snapshot = InFlightAdapter.new(snapshot, @adapter)
+            return [:snapshot_established, nil]
+          end
           return [:not_needed, nil] unless poller_last_synced_at > state.last_synced_at
 
           local_get_all = @adapter.get_all
