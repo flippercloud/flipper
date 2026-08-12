@@ -25,6 +25,38 @@ task release: :build do
   sh "ls pkg/*.gem | xargs -n 1 gem push --otp #{otp_code}"
 end
 
+namespace :expressions do
+  desc 'Vendor JSON Schema files from the flippercloud/expressions repo ' \
+       '(defaults to a sibling ../expressions checkout; override with SOURCE=/path/to/expressions)'
+  task :vendor do
+    require 'fileutils'
+
+    source = ENV.fetch('SOURCE') { File.expand_path('../expressions', __dir__) }
+    schemas_source = File.join(source, 'schemas')
+
+    unless File.directory?(schemas_source)
+      abort "No schemas found at #{schemas_source}. Pass SOURCE=/path/to/expressions."
+    end
+
+    dest = File.expand_path('lib/flipper/expression/schemas', __dir__)
+    FileUtils.mkdir_p(dest)
+    FileUtils.rm(Dir[File.join(dest, '*.json')])
+    FileUtils.cp(Dir[File.join(schemas_source, '*.json')], dest)
+    puts "Vendored #{Dir[File.join(dest, '*.json')].size} schema(s) into #{dest}"
+
+    # Examples are shared test cases (valid/invalid + expected results) used by
+    # spec/flipper/expression/schema_spec.rb so Ruby and JS test the same cases.
+    examples_source = File.join(source, 'examples')
+    if File.directory?(examples_source)
+      examples_dest = File.expand_path('spec/fixtures/expressions/examples', __dir__)
+      FileUtils.mkdir_p(examples_dest)
+      FileUtils.rm(Dir[File.join(examples_dest, '*.json')])
+      FileUtils.cp(Dir[File.join(examples_source, '*.json')], examples_dest)
+      puts "Vendored #{Dir[File.join(examples_dest, '*.json')].size} example(s) into #{examples_dest}"
+    end
+  end
+end
+
 require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new(:spec) do |t|
   t.rspec_opts = %w(--color)

@@ -1,0 +1,57 @@
+{
+  "valid": [
+    {
+      "expression": { "String": true },
+      "result": { "enum": ["true"] }
+    },
+    {
+      "expression": { "String": false },
+      "result": { "enum": ["false"] }
+    },
+    {
+      "expression": { "String": "already a string" },
+      "result": { "enum": ["already a string"] }
+    },
+    {
+      "expression": { "String": 1 },
+      "result": { "enum": ["1"] }
+    },
+    {
+      "expression": { "String": 1.1 },
+      "result": { "enum": ["1.1"] }
+    },
+  {
+      "expression": { "String": [true] },
+      "result": { "enum": ["true"] }
+    },
+    {
+      "expression": { "String": [false] },
+      "result": { "enum": ["false"] }
+    },
+    {
+      "expression": { "String": ["already a string"] },
+      "result": { "enum": ["already a string"] }
+    },
+    {
+      "expression": { "String": [1] },
+      "result": { "enum": ["1"] }
+    },
+    {
+      "expression": { "String": [1.1] },
+      "result": { "enum": ["1.1"] }
+    },
+    {
+      "expression": { "String": { "All": [] } },
+      "result": { "enum": ["true"] }
+    },
+    {
+      "expression": { "String": [{ "Any": [] }] },
+      "result": { "enum": ["false"] }
+    }
+  ],
+  "invalid": [
+    { "String": null },
+    { "String": [true, false] },
+    { "String": true, "Any": [] }
+  ]
+}

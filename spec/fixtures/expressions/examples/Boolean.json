@@ -1,0 +1,65 @@
+{
+  "valid": [
+    {
+      "expression": { "Boolean": true },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "Boolean": "true" },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "Boolean": 1 },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "Boolean": [true] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "Boolean": ["true"] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "Boolean": [1] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "Boolean": { "All": [] } },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "Boolean": false },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "Boolean": "false" },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "Boolean": 0 },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "Boolean": [false] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "Boolean": ["false"] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "Boolean": [0] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "Boolean": [{ "Any": [] }] },
+      "result": { "enum": [false] }
+    }
+  ],
+  "invalid": [
+    { "Boolean": null },
+    { "Boolean": [true, false] },
+    { "Boolean": true, "Any": [] }
+  ]
+}

@@ -2,8 +2,7 @@ require 'flipper/expression'
 
 # Property-based check that empty group detection and pruning honor their
 # contracts, verified against the evaluator itself. For seeded random trees
-# (biased toward empty Any/All groups, including multi-key hashes where only
-# the first key counts):
+# (biased toward empty Any/All groups):
 #
 #   - expressions without empty groups prune to themselves
 #   - pruning never broadens: no context excluded by the original may be
@@ -37,16 +36,7 @@ RSpec.describe Flipper::Expression do
 
     operator = rng.rand < 0.5 ? "Any" : "All"
     children = Array.new(rng.rand(4)) { random_tree(rng, depth - 1) }
-    tree = {operator => children}
-
-    # Multi-key hashes must behave as if only the first key exists, matching
-    # Flipper::Expression.build.
-    if rng.rand < 0.05
-      other = operator == "Any" ? "All" : "Any"
-      tree[other] = Array.new(rng.rand(3)) { random_tree(rng, depth - 1) }
-    end
-
-    tree
+    {operator => children}
   end
 
   def evaluate_all(expression)

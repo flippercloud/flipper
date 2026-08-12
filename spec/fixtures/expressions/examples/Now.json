@@ -1,0 +1,20 @@
+{
+  "valid": [
+    {
+      "expression": { "Now": [] },
+      "result": { "format": "date-time" }
+    },
+    {
+      "expression": { "Now": null },
+      "result": { "format": "date-time" }
+    },
+    {
+      "expression": { "String": {"Now": []} },
+      "result": { "pattern": "UTC$" }
+    }
+  ],
+  "invalid": [
+    { "Now": [1] },
+    { "Now": 1 }
+  ]
+}

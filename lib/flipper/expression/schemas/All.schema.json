@@ -1,0 +1,9 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://www.flippercloud.io/expressions/All.schema.json",
+  "title": "All",
+  "description": "Returns true if all of the expressions return true.",
+  "category": "Group",
+  "symbol": "&",
+  "$ref": "schema.json#/definitions/arguments-n"
+}

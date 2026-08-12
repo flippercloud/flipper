@@ -21,4 +21,5 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency 'rack', '>= 1.4', '< 4'
   gem.add_dependency 'flipper', "~> #{Flipper::VERSION}"
+  gem.add_dependency 'json_schemer'
 end
