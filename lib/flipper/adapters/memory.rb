@@ -12,7 +12,6 @@ module Flipper
       def initialize(source = nil, threadsafe: true)
         @source = Typecast.features_hash(source)
         @lock = Mutex.new if threadsafe
-        reset
       end
 
       # Public: The set of known features.
@@ -122,18 +121,8 @@ module Flipper
 
       private
 
-      def reset
-        @pid = Process.pid
-        @lock&.unlock if @lock&.locked?
-      end
-
-      def forked?
-        @pid != Process.pid
-      end
-
       def synchronize(&block)
         if @lock
-          reset if forked?
           @lock.synchronize(&block)
         else
           block.call

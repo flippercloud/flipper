@@ -1,13 +1,9 @@
-require 'concurrent/atomic/atomic_reference'
-
 module Flipper
   module Adapters
     class Sync
       # Internal: Wraps a Synchronizer instance and only invokes it every
       # N seconds.
       class IntervalSynchronizer
-        SyncState = Struct.new(:pid, :mutex, :syncing, :last_sync_at)
-
         # Private: Number of seconds between syncs (default: 10).
         DEFAULT_INTERVAL = 10
 
@@ -25,19 +21,19 @@ module Flipper
           @interval = interval || DEFAULT_INTERVAL
           # TODO: add jitter to this so all processes booting at the same time
           # don't phone home at the same time.
-          @sync_state = Concurrent::AtomicReference.new(
-            SyncState.new(Process.pid, Mutex.new, false, 0)
-          )
+          @mutex = Mutex.new
+          @pid = Process.pid
+          @syncing = false
+          @last_sync_at = 0
         end
 
         def call
-          state = sync_state
-          return unless sync_needed?(state)
+          return unless sync_needed?
 
           begin
             @synchronizer.call
           ensure
-            complete_sync(state)
+            complete_sync
           end
 
           nil
@@ -45,38 +41,40 @@ module Flipper
 
         private
 
-        def sync_state
-          pid = Process.pid
-          loop do
-            state = @sync_state.get
-            return state if state.pid == pid
+        def sync_needed?
+          return false unless @mutex.try_lock
 
-            replacement = SyncState.new(pid, Mutex.new, false, state.last_sync_at)
-            return replacement if @sync_state.compare_and_set(state, replacement)
-          end
-        end
+          begin
+            reset_if_forked
+            return false if @syncing
 
-        def sync_needed?(state)
-          state.mutex.synchronize do
             current_time = now
-            return false unless time_to_sync?(state, current_time)
-            return false if state.syncing
+            return false unless time_to_sync?(current_time)
 
-            state.last_sync_at = current_time
-            state.syncing = true
+            @last_sync_at = current_time
+            @syncing = true
             true
+          ensure
+            @mutex.unlock
           end
         end
 
-        def complete_sync(state)
-          state.mutex.synchronize do
-            state.syncing = false
+        def complete_sync
+          @mutex.synchronize do
+            @syncing = false
           end
         end
 
-        def time_to_sync?(state, current_time)
-          seconds_since_last_sync = current_time - state.last_sync_at
+        def time_to_sync?(current_time)
+          seconds_since_last_sync = current_time - @last_sync_at
           seconds_since_last_sync >= @interval
+        end
+
+        def reset_if_forked
+          return if @pid == Process.pid
+
+          @pid = Process.pid
+          @syncing = false
         end
 
         def now

@@ -1,4 +1,6 @@
 require "flipper/adapters/sync/interval_synchronizer"
+require "open3"
+require "rbconfig"
 
 RSpec.describe Flipper::Adapters::Sync::IntervalSynchronizer do
   let(:events) { [] }
@@ -113,11 +115,12 @@ RSpec.describe Flipper::Adapters::Sync::IntervalSynchronizer do
       release.pop
     end
     instance = described_class.new(synchronizer, interval: interval)
-    stale_state = instance.instance_variable_get(:@sync_state).get
-    stale_state.syncing = true
+    mutex = instance.instance_variable_get(:@mutex)
+    parent_pid = instance.instance_variable_get(:@pid)
+    instance.instance_variable_set(:@syncing, true)
 
     allow(instance).to receive(:now).and_return(interval)
-    allow(Process).to receive(:pid).and_return(stale_state.pid + 1)
+    allow(Process).to receive(:pid).and_return(parent_pid + 1)
 
     threads = 10.times.map { Thread.new { instance.call } }
     entered.pop
@@ -125,5 +128,113 @@ RSpec.describe Flipper::Adapters::Sync::IntervalSynchronizer do
     threads.each(&:join)
 
     expect(events.size).to eq(1)
+    expect(instance.instance_variable_get(:@pid)).to eq(parent_pid + 1)
+    expect(instance.instance_variable_get(:@mutex)).to equal(mutex)
+  end
+
+  it "keeps its mutex and elects one winner in a real forked child" do
+    skip "Process.fork is not supported" unless Process.respond_to?(:fork)
+
+    script = <<~'RUBY'
+      require "flipper/adapters/sync/interval_synchronizer"
+
+      def wait_for(queue, timeout: 2)
+        deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + timeout
+        loop do
+          return queue.pop(true)
+        rescue ThreadError
+          raise "queue wait timed out" if Process.clock_gettime(Process::CLOCK_MONOTONIC) >= deadline
+          Thread.pass
+        end
+      end
+
+      def join_thread(thread, timeout: 2)
+        deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + timeout
+        until thread.join(0.01)
+          raise "thread join timed out" if Process.clock_gettime(Process::CLOCK_MONOTONIC) >= deadline
+        end
+      end
+
+      entered = Queue.new
+      release_sync = Queue.new
+      calls = [0]
+      synchronizer = lambda do
+        calls[0] += 1
+        entered << true
+        release_sync.pop
+      end
+      instance = Flipper::Adapters::Sync::IntervalSynchronizer.new(synchronizer, interval: 10)
+      mutex = instance.instance_variable_get(:@mutex)
+      raise "interval synchronizer does not use a stable Mutex" unless mutex.instance_of?(Mutex)
+      instance.instance_variable_set(:@syncing, true)
+
+      mutex_locked = Queue.new
+      release_mutex = Queue.new
+      holder = Thread.new do
+        mutex.lock
+        mutex_locked << true
+        release_mutex.pop
+        mutex.unlock
+      end
+      wait_for(mutex_locked)
+
+      begin
+        child_pid = fork do
+          success = false
+          winner = nil
+          losers = []
+          begin
+            winner = Thread.new { instance.call }
+            wait_for(entered)
+            losers = 8.times.map { Thread.new { instance.call } }
+            losers.each { |thread| join_thread(thread) }
+
+            raise "inherited mutex was replaced" unless instance.instance_variable_get(:@mutex).equal?(mutex)
+            raise "duplicate synchronization" unless calls[0] == 1
+
+            release_sync << true
+            join_thread(winner)
+            raise "inherited syncing was not cleared" if instance.instance_variable_get(:@syncing)
+            success = true
+          rescue => error
+            warn error.full_message
+          ensure
+            release_sync << true
+            winner&.join(1)
+            losers.each { |thread| thread.join(1) }
+          end
+          exit!(success ? 0 : 1)
+        end
+
+        deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 5
+        status = nil
+        until status
+          if result = Process.wait2(child_pid, Process::WNOHANG)
+            _, status = result
+          elsif Process.clock_gettime(Process::CLOCK_MONOTONIC) >= deadline
+            Process.kill("KILL", child_pid)
+            Process.wait(child_pid)
+            raise "forked child timed out"
+          else
+            sleep 0.01
+          end
+        end
+      ensure
+        release_mutex << true
+        holder.join(1)
+      end
+
+      exit(status.success? ? 0 : 1)
+    RUBY
+
+    _, stderr, status = Open3.capture3(
+      RbConfig.ruby,
+      "-Ilib",
+      "-e",
+      script,
+      chdir: File.expand_path("../../../..", __dir__)
+    )
+
+    expect(status).to be_success, stderr
   end
 end
