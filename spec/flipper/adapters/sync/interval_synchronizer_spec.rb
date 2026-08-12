@@ -3,6 +3,23 @@ require "open3"
 require "rbconfig"
 
 RSpec.describe Flipper::Adapters::Sync::IntervalSynchronizer do
+  def wait_for(queue, timeout: 2)
+    deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + timeout
+    loop do
+      return queue.pop(true)
+    rescue ThreadError
+      raise "queue wait timed out" if Process.clock_gettime(Process::CLOCK_MONOTONIC) >= deadline
+      Thread.pass
+    end
+  end
+
+  def join_thread(thread, timeout: 2)
+    deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + timeout
+    until thread.join(0.01)
+      raise "thread join timed out" if Process.clock_gettime(Process::CLOCK_MONOTONIC) >= deadline
+    end
+  end
+
   let(:events) { [] }
   let(:synchronizer) { -> { events << now } }
   let(:interval) { 10 }
@@ -48,15 +65,24 @@ RSpec.describe Flipper::Adapters::Sync::IntervalSynchronizer do
     first_thread = Thread.new { instance.call }
     entered.pop
 
-    threads = 10.times.map { Thread.new { instance.call } }
-    sleep 0.05
+    completed = Queue.new
+    threads = 10.times.map do
+      Thread.new do
+        instance.call
+        completed << true
+      end
+    end
+    threads.size.times { wait_for(completed) }
 
     expect(events.size).to eq(1)
 
     release << true
-    ([first_thread] + threads).each(&:join)
+    ([first_thread] + threads).each { |thread| join_thread(thread) }
 
     expect(events.size).to eq(1)
+  ensure
+    11.times { release << true } if release
+    ([first_thread] + Array(threads)).compact.each { |thread| thread.join(1) }
   end
 
   it "does not synchronize again when the interval passes during an in-flight sync" do
@@ -76,15 +102,22 @@ RSpec.describe Flipper::Adapters::Sync::IntervalSynchronizer do
     entered.pop
 
     current_time += interval
-    second_thread = Thread.new { instance.call }
-    sleep 0.05
+    completed = Queue.new
+    second_thread = Thread.new do
+      instance.call
+      completed << true
+    end
+    wait_for(completed)
 
     expect(events.size).to eq(1)
 
     release << true
-    [first_thread, second_thread].each(&:join)
+    [first_thread, second_thread].each { |thread| join_thread(thread) }
 
     expect(events.size).to eq(1)
+  ensure
+    2.times { release << true } if release
+    [first_thread, second_thread].compact.each { |thread| thread.join(1) }
   end
 
   it "releases a failed sync for the next interval" do
