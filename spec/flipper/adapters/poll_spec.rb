@@ -603,18 +603,24 @@ RSpec.describe Flipper::Adapters::Poll do
     remote = Flipper::Adapters::Memory.new(threadsafe: true)
     Flipper.new(remote).enable(:updated)
 
+    sync_entered = Queue.new
+    release_sync = Queue.new
     get_all_calls = Concurrent::AtomicFixnum.new(0)
     counting_remote_adapter = Class.new do
-      def initialize(result, get_all_calls)
+      def initialize(result, get_all_calls, sync_entered, release_sync)
         @result = result
         @get_all_calls = get_all_calls
+        @sync_entered = sync_entered
+        @release_sync = release_sync
       end
 
       def get_all(**kwargs)
         @get_all_calls.increment
+        @sync_entered << true
+        @release_sync.pop
         @result
       end
-    end.new(remote.get_all, get_all_calls)
+    end.new(remote.get_all, get_all_calls, sync_entered, release_sync)
 
     fake_poller = build_poller(counting_remote_adapter)
 
@@ -625,11 +631,22 @@ RSpec.describe Flipper::Adapters::Poll do
 
     allow(Process).to receive(:pid).and_return(parent_pid + 1)
 
-    threads = 10.times.map { Thread.new { instance.features } }
-    expect(threads.map(&:value)).to all(eq(Set["updated"]))
+    winner = Thread.new { instance.features }
+    sync_entered.pop
+
+    losers = 9.times.map { Thread.new { instance.features } }
+    losers.each { |thread| expect(thread.join(1)).to equal(thread) }
+    expect(losers.map(&:value)).to all(eq(Set["existing"]))
     expect(get_all_calls.value).to eq(1)
+
+    release_sync << true
+    expect(winner.value).to eq(Set["updated"])
     expect(instance.instance_variable_get(:@pid)).to eq(parent_pid + 1)
     expect(instance.instance_variable_get(:@mutex)).to equal(mutex)
+  ensure
+    release_sync << true if release_sync
+    winner&.join(1)
+    losers&.each { |thread| thread.join(1) }
   end
 
   it "keeps its mutex and trusted snapshot in a real forked child" do
