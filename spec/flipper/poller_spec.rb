@@ -2,6 +2,7 @@ require "flipper/poller"
 require "flipper/adapters/http"
 require "open3"
 require "rbconfig"
+require "timeout"
 
 RSpec.describe Flipper::Poller do
   let(:url) { "http://app.com/flipper" }
@@ -358,23 +359,21 @@ RSpec.describe Flipper::Poller do
       subject.start
     end
 
-    it "swaps in a fresh mutex after a fork" do
-      fork_safe_mutex = subject.instance_variable_get(:@mutex)
-      original = fork_safe_mutex.instance_variable_get(:@current).mutex
+    it "keeps using its Mutex after a fork" do
+      mutex = subject.instance_variable_get(:@mutex)
       allow(Process).to receive(:pid).and_return(Process.pid + 1)
 
+      expect(mutex).to be_instance_of(Mutex)
       expect { subject.start }.not_to raise_error
-      expect(fork_safe_mutex.instance_variable_get(:@current).mutex).not_to equal(original)
+      expect(subject.instance_variable_get(:@mutex)).to equal(mutex)
     end
 
-    it "retains the pid reader across a fork reset" do
-      parent_pid = subject.pid
+    it "updates its process state after a fork" do
+      parent_pid = subject.instance_variable_get(:@pid)
       allow(Process).to receive(:pid).and_return(parent_pid + 1)
-      allow(subject).to receive(:ensure_worker_running)
 
-      expect(subject.pid).to eq(parent_pid)
       subject.start
-      expect(subject.pid).to eq(parent_pid + 1)
+      expect(subject.instance_variable_get(:@pid)).to eq(parent_pid + 1)
     end
 
     it "does not expose the raw mutex" do
@@ -411,32 +410,31 @@ RSpec.describe Flipper::Poller do
         subject.start
       end
 
-      it "does not clear a shutdown request that races with fork reset" do
+      it "serializes a shutdown request with fork reset" do
         allow(Thread).to receive(:new).and_call_original
         allow(Process).to receive(:pid).and_return(Process.pid + 1)
-        allow(subject).to receive(:ensure_worker_running)
-        shutdown_state = subject.instance_variable_get(:@shutdown_state)
-        reset_started = Queue.new
-        release_reset = Queue.new
+        mutex = subject.instance_variable_get(:@mutex)
+        started = Queue.new
+        mutex.lock
 
-        allow(shutdown_state).to receive(:compare_and_set).and_wrap_original do |original, state, replacement|
-          unless replacement.requested
-            reset_started << true
-            release_reset.pop
-          end
-          original.call(state, replacement)
+        thread = Thread.new do
+          started << true
+          subject.send(:request_shutdown)
         end
+        started.pop
 
-        thread = Thread.new { subject.start }
-        reset_started.pop
-        subject.send(:request_shutdown)
-        release_reset << true
-        thread.join
+        Timeout.timeout(2) do
+          Thread.pass until thread.status == "sleep"
+        end
+        expect(thread).to be_alive
 
-        expect(shutdown_state.get.pid).to eq(Process.pid)
-        expect(shutdown_state.get.requested).to be(true)
+        mutex.unlock
+        thread.join(1)
+
+        expect(subject.instance_variable_get(:@pid)).to eq(Process.pid)
+        expect(subject.instance_variable_get(:@shutdown_requested)).to be(true)
       ensure
-        release_reset << true if release_reset
+        mutex&.unlock if mutex&.owned?
         thread&.join(1)
       end
 
@@ -451,6 +449,22 @@ RSpec.describe Flipper::Poller do
             def run
               sleep
             end
+
+            def pause_next_start(acquired, release)
+              @start_acquired = acquired
+              @release_start = release
+            end
+
+            private
+
+            def reset_if_forked
+              super
+              return unless start_acquired = @start_acquired
+
+              @start_acquired = nil
+              start_acquired << true
+              @release_start.pop
+            end
           end
 
           poller = ForkTestPoller.new(
@@ -461,7 +475,8 @@ RSpec.describe Flipper::Poller do
           poller.start
           parent_worker = poller.thread
           poller.send(:request_shutdown)
-          inherited_mutex = poller.instance_variable_get(:@mutex).instance_variable_get(:@current).mutex
+          inherited_mutex = poller.instance_variable_get(:@mutex)
+          raise "poller does not use Mutex" unless inherited_mutex.instance_of?(Mutex)
           mutex_locked = Queue.new
           release_mutex = Queue.new
           mutex_holder = Thread.new do
@@ -475,24 +490,37 @@ RSpec.describe Flipper::Poller do
           begin
             child_pid = fork do
               success = false
+              release_start = nil
+              first_start = nil
+              second_start = nil
 
               begin
                 inherited_worker = poller.thread
                 raise "inherited worker is unexpectedly alive" if inherited_worker.alive?
 
-                poller.start
-                child_mutex = poller.instance_variable_get(:@mutex).instance_variable_get(:@current).mutex
+                start_acquired = Queue.new
+                release_start = Queue.new
+                poller.pause_next_start(start_acquired, release_start)
+                first_start = Thread.new { poller.start }
+                start_acquired.pop
+
+                second_start = Thread.new { poller.start }
+                raise "competing start did not return" unless second_start.join(1)
+
+                release_start << true
+                raise "first start did not return" unless first_start.join(1)
+
                 child_worker = poller.thread
-                raise "inherited mutex was not replaced" if child_mutex.equal?(inherited_mutex)
+                raise "inherited mutex was replaced" unless poller.instance_variable_get(:@mutex).equal?(inherited_mutex)
                 raise "worker was not replaced" if child_worker.equal?(inherited_worker)
                 raise "replacement worker is not alive" unless child_worker.alive?
-
-                poller.start
-                raise "second start created another worker" unless poller.thread.equal?(child_worker)
                 success = true
               rescue => error
                 warn error.message
               ensure
+                release_start << true if release_start
+                first_start&.join(1)
+                second_start&.join(1)
                 poller.stop
                 poller.thread&.join(1)
               end

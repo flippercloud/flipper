@@ -1,3 +1,6 @@
+require "open3"
+require "rbconfig"
+
 RSpec.describe Flipper::Adapters::Memory do
   let(:source) { {} }
 
@@ -34,26 +37,66 @@ RSpec.describe Flipper::Adapters::Memory do
     })
   end
 
-  it "synchronizes safely after a fork" do
-    adapter = described_class.new(source, threadsafe: true)
-    fork_safe_mutex = adapter.instance_variable_get(:@lock)
-    original = fork_safe_mutex.instance_variable_get(:@current).mutex
-    locked = Queue.new
-    release = Queue.new
-    thread = Thread.new do
-      original.lock
-      locked << true
-      release.pop
-      original.unlock
-    end
+  it "uses its inherited Mutex safely after a fork" do
+    skip "Process.fork is not supported" unless Process.respond_to?(:fork)
 
-    locked.pop
-    allow(Process).to receive(:pid).and_return(Process.pid + 1)
+    script = <<~'RUBY'
+      require "flipper"
 
-    expect { adapter.features }.not_to raise_error
-    expect(fork_safe_mutex.instance_variable_get(:@current).mutex).not_to equal(original)
-  ensure
-    release << true if release
-    thread&.join
+      adapter = Flipper::Adapters::Memory.new({}, threadsafe: true)
+      mutex = adapter.instance_variable_get(:@lock)
+      raise "memory adapter does not use Mutex" unless mutex.instance_of?(Mutex)
+
+      locked = Queue.new
+      release = Queue.new
+      holder = Thread.new do
+        mutex.lock
+        locked << true
+        release.pop
+        mutex.unlock
+      end
+      locked.pop
+
+      begin
+        child_pid = fork do
+          begin
+            adapter.features
+            exit! 0
+          rescue => error
+            warn error.message
+            exit! 1
+          end
+        end
+
+        deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 2
+        status = nil
+        until status
+          if result = Process.wait2(child_pid, Process::WNOHANG)
+            _, status = result
+          elsif Process.clock_gettime(Process::CLOCK_MONOTONIC) >= deadline
+            Process.kill("KILL", child_pid)
+            Process.wait(child_pid)
+            raise "forked child timed out"
+          else
+            sleep 0.01
+          end
+        end
+      ensure
+        release << true
+        holder.join(1)
+      end
+
+      exit(status.success? ? 0 : 1)
+    RUBY
+
+    _, stderr, status = Open3.capture3(
+      RbConfig.ruby,
+      "-Ilib",
+      "-e",
+      script,
+      chdir: File.expand_path("../../..", __dir__)
+    )
+
+    expect(status).to be_success, stderr
   end
 end

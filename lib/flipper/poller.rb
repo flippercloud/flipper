@@ -2,8 +2,6 @@ require 'logger'
 require 'concurrent/utility/monotonic_time'
 require 'concurrent/map'
 require 'concurrent/atomic/atomic_fixnum'
-require 'concurrent/atomic/atomic_reference'
-require 'flipper/fork_safe_mutex'
 
 module Flipper
   class Poller
@@ -26,18 +24,16 @@ module Flipper
     end
 
     MINIMUM_POLL_INTERVAL = 10
-    ShutdownState = Struct.new(:pid, :requested)
 
     def initialize(options = {})
       @thread = nil
-      @mutex = ForkSafeMutex.new
+      @pid = Process.pid
+      @mutex = Mutex.new
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
       @remote_adapter = options.fetch(:remote_adapter)
       @last_synced_at = Concurrent::AtomicFixnum.new(0)
       @adapter = Adapters::Memory.new(nil, threadsafe: true)
-      @shutdown_state = Concurrent::AtomicReference.new(
-        ShutdownState.new(Process.pid, false)
-      )
+      @shutdown_requested = false
 
       self.interval = options.fetch(:interval, 10)
       @initial_interval = @interval
@@ -50,15 +46,7 @@ module Flipper
     end
 
     def start
-      @mutex.reset_if_forked
-      return if shutdown_requested?
       ensure_worker_running
-    end
-
-    # Public: The process id for the mutex currently used by this poller.
-    # Retained for compatibility with the previous Poller reader.
-    def pid
-      @mutex.pid
     end
 
     def stop
@@ -117,13 +105,19 @@ module Flipper
 
       # If another thread is starting worker thread, then return early so this
       # thread can enqueue and move on with life.
-      @mutex.try_synchronize do
+      return unless @mutex.try_lock
+
+      begin
+        reset_if_forked
+        return if @shutdown_requested
         return if thread_alive?
         @thread = Thread.new { run }
         @thread&.report_on_exception = false
         @instrumenter.instrument("poller.#{InstrumentationNamespace}", {
           operation: :thread_start,
         })
+      ensure
+        @mutex.unlock
       end
     end
 
@@ -131,25 +125,17 @@ module Flipper
       @thread && @thread.alive?
     end
 
-    def shutdown_requested?
-      pid = Process.pid
+    def reset_if_forked
+      return if @pid == Process.pid
 
-      loop do
-        state = @shutdown_state.get
-        return state.requested if state.pid == pid
-
-        replacement = ShutdownState.new(pid, false)
-        return false if @shutdown_state.compare_and_set(state, replacement)
-      end
+      @pid = Process.pid
+      @shutdown_requested = false
     end
 
     def request_shutdown
-      pid = Process.pid
-
-      loop do
-        state = @shutdown_state.get
-        return if state.pid == pid && state.requested
-        return if @shutdown_state.compare_and_set(state, ShutdownState.new(pid, true))
+      @mutex.synchronize do
+        reset_if_forked
+        @shutdown_requested = true
       end
     end
 

@@ -1,6 +1,5 @@
 require "flipper/adapter"
 require "flipper/typecast"
-require "flipper/fork_safe_mutex"
 
 module Flipper
   module Adapters
@@ -12,7 +11,7 @@ module Flipper
       # Public
       def initialize(source = nil, threadsafe: true)
         @source = Typecast.features_hash(source)
-        @lock = ForkSafeMutex.new if threadsafe
+        @lock = Mutex.new if threadsafe
       end
 
       # Public: The set of known features.
