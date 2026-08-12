@@ -99,8 +99,18 @@ RSpec.describe Flipper::ForkSafeMutex do
       locked.pop
 
       child_pid = fork do
-        fork_safe_mutex.synchronize {}
-        exit! 0
+        success = false
+
+        begin
+          fork_safe_mutex.synchronize {}
+          child_mutex = fork_safe_mutex.instance_variable_get(:@current).mutex
+          raise "inherited mutex was not replaced" if child_mutex.equal?(inherited_mutex)
+          success = true
+        rescue => error
+          warn error.message
+        end
+
+        exit!(success ? 0 : 1)
       end
       deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 2
       status = nil

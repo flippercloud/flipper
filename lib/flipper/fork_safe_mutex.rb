@@ -1,10 +1,10 @@
 require 'concurrent/atomic/atomic_reference'
 
 module Flipper
-  # A Mutex that is safe to use across forks. A forked child inherits a copy of
-  # the parent's mutex that may be locked by a thread which no longer exists;
-  # unlocking it would raise ThreadError. Instead of unlocking, the first use in
-  # a new process atomically swaps in a fresh mutex.
+  # A Mutex that is safe to use across forks. A naive PID-based reset is racy:
+  # concurrent first callers in a child can both observe the stale PID, causing
+  # one to unlock the mutex acquired by the other. Instead, callers atomically
+  # converge on a fresh mutex for the new process.
   class ForkSafeMutex
     State = Struct.new(:pid, :mutex)
 
