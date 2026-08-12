@@ -113,13 +113,42 @@ RSpec.describe Flipper::Cloud::Configuration do
   end
 
   it "can override url using options" do
-    options = required_options.merge(url: "http://localhost:5000/adapter")
+    options = required_options.merge(url: "https://localhost:5000/adapter")
     instance = described_class.new(options)
-    expect(instance.url).to eq("http://localhost:5000/adapter")
+    expect(instance.url).to eq("https://localhost:5000/adapter")
 
     instance = described_class.new(required_options)
-    instance.url = "http://localhost:5000/adapter"
-    expect(instance.url).to eq("http://localhost:5000/adapter")
+    instance.url = "https://localhost:5000/adapter"
+    expect(instance.url).to eq("https://localhost:5000/adapter")
+  end
+
+  it "requires https url" do
+    invalid_urls = [
+      "http://localhost:5000/adapter",
+      "https://",
+      "https:localhost:5000/adapter",
+      "https://local host:5000/adapter",
+    ]
+
+    invalid_urls.each do |url|
+      options = required_options.merge(url: url)
+      expect { described_class.new(options) }.to raise_error(ArgumentError, /must use https/)
+    end
+
+    instance = described_class.new(required_options)
+    expect { instance.url = "http://localhost:5000/adapter" }.to raise_error(ArgumentError, /must use https/)
+  end
+
+  it "keeps the validated url immutable" do
+    url = String.new("https://localhost:5000/adapter")
+    instance = described_class.new(required_options.merge(url: url))
+
+    url.replace("http://localhost:5000/adapter")
+
+    expect(instance.url).to eq("https://localhost:5000/adapter")
+    expect(instance.url).to be_frozen
+    expect { instance.url.replace("http://localhost:5000/adapter") }.to raise_error(FrozenError)
+    expect(instance.send(:http_adapter).client.uri.scheme).to eq("https")
   end
 
   it "can override URL using ENV var" do

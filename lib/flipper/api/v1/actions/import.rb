@@ -13,8 +13,12 @@ module Flipper
             # Rack 3 changed the requirement to rewind the body, so we can't assume it is rewound,
             # so rewind before under Rack 3+ and after under Rack 2.
             request.body.rewind if Gem::Version.new(Rack.release) >= Gem::Version.new('3.0.0')
-            body = request.body.read
+            max = Flipper::Exporters::Json::Export::MAX_BYTES
+            # Read at most one byte past the limit so an oversized body is caught
+            # without buffering the whole thing into memory.
+            body = request.body.read(max + 1) || ""
             request.body.rewind if Gem::Version.new(Rack.release) < Gem::Version.new('3.0.0')
+            raise Flipper::Exporters::Json::InvalidError if body.bytesize > max
             export = Flipper::Exporters::Json::Export.new(contents: body)
             flipper.import(export)
             json_response({}, 204)

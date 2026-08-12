@@ -401,7 +401,7 @@ RSpec.describe Flipper::Poller do
         subject.sync # This triggers shutdown
 
         # Simulate fork by changing PID
-        allow(Process).to receive(:pid).and_return(subject.instance_variable_get(:@pid) + 1)
+        allow(Process).to receive(:pid).and_return(Process.pid + 1)
 
         # After fork, start should work again
         expect(Thread).to receive(:new).and_yield

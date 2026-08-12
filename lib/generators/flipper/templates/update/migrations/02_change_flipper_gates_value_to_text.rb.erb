@@ -1,18 +1,23 @@
 # frozen_string_literal: true
 
-class ChangeFlipperGatesValueToText < ActiveRecord::Migration<%= migration_version %>
+<%
+migration_class = migration_class_name('ChangeFlipperGatesValueToText')
+gate_table = gate_table_name
+gate_index = gate_index_name
+%>class <%= migration_class %> < ActiveRecord::Migration<%= migration_version %>
   def up
     # Ensure this incremental update migration is idempotent
-    return unless connection.column_exists? :flipper_gates, :value, :string
+    return unless connection.column_exists? <%= gate_table.inspect %>, :value, :string
 
-    if index_exists? :flipper_gates, [:feature_key, :key, :value]
-      remove_index :flipper_gates, [:feature_key, :key, :value]
+    gate_index = connection.indexes(<%= gate_table.inspect %>).find do |index|
+      index.columns == %w[feature_key key value]
     end
-    change_column :flipper_gates, :value, :text
-    add_index :flipper_gates, [:feature_key, :key, :value], unique: true, length: { value: 255 }
+    remove_index <%= gate_table.inspect %>, name: gate_index.name if gate_index
+    change_column <%= gate_table.inspect %>, :value, :text
+    add_index <%= gate_table.inspect %>, [:feature_key, :key, :value], unique: true, length: { value: 255 }<%= ", name: #{gate_index.inspect}" if gate_index %>
   end
 
   def down
-    change_column :flipper_gates, :value, :string
+    change_column <%= gate_table.inspect %>, :value, :string
   end
 end

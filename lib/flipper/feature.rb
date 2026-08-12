@@ -40,16 +40,7 @@ module Flipper
     #
     # Returns the result of Adapter#enable.
     def enable(thing = true)
-      instrument(:enable) do |payload|
-        adapter.add self
-
-        gate = gate_for(thing)
-        wrapped_thing = gate.wrap(thing)
-        payload[:gate_name] = gate.name
-        payload[:thing] = wrapped_thing
-
-        adapter.enable self, gate, wrapped_thing
-      end
+      enable_thing(thing, validate_expression: true)
     end
 
     # Public: Disable this feature for something.
@@ -100,15 +91,7 @@ module Flipper
     #
     # Returns true if enabled, false if not.
     def enabled?(*actors)
-      actors = Array(actors).
-        # Avoids to_ary warning that happens when passing DelegateClass of an 
-        # ActiveRecord object and using flatten here. This is tested in 
-        # spec/flipper/model/active_record_spec.rb.
-        flat_map { |actor| actor.is_a?(Array) ? actor : [actor] }. 
-        # Allows null object pattern. See PR for more. https://github.com/flippercloud/flipper/pull/887
-        reject(&:nil?). 
-        map { |actor| Types::Actor.wrap(actor) }
-      actors = nil if actors.empty?
+      actors = wrap_actors(actors)
 
       # thing is left for backwards compatibility
       instrument(:enabled?, thing: actors&.first, actors: actors) do |payload|
@@ -132,6 +115,8 @@ module Flipper
     # expression - an Expression or Hash that can be converted to an expression.
     #
     # Returns result of enable.
+    # Raises ArgumentError if the expression contains empty Any/All groups,
+    # because an empty All matches every actor.
     def enable_expression(expression)
       enable Expression.build(expression)
     end
@@ -141,12 +126,18 @@ module Flipper
     # expression_to_add - an expression or Hash that can be converted to an expression.
     #
     # Returns result of enable.
+    # Raises ArgumentError if the resulting expression contains empty Any/All
+    # groups, because an empty All matches every actor.
     def add_expression(expression_to_add)
-      if (current_expression = expression)
-        enable current_expression.add(expression_to_add)
+      expression_to_add = Expression.build(expression_to_add)
+
+      new_expression = if (current_expression = expression)
+        current_expression.add(expression_to_add)
       else
-        enable expression_to_add
+        expression_to_add
       end
+
+      enable new_expression
     end
 
     # Public: Enables a feature for an actor.
@@ -199,14 +190,27 @@ module Flipper
     end
 
     # Public: Remove an expression from a feature. Does nothing if no expression is
-    # currently enabled.
+    # currently enabled. Removing the last condition disables the expression
+    # rather than persisting an empty group.
     #
     # expression - an Expression or Hash that can be converted to an expression.
     #
-    # Returns result of enable or nil (if no expression enabled).
+    # Returns result of enable or disable or nil (if no expression enabled).
     def remove_expression(expression_to_remove)
       if (current_expression = expression)
-        enable current_expression.remove(expression_to_remove)
+        remaining = current_expression
+          .remove(Expression.build(expression_to_remove))
+          .prune_empty_groups
+
+        if remaining.nil?
+          disable_expression
+        else
+          # remove and prune only delete nodes, so any empty group left in
+          # remaining was already stored (e.g. mirrored by sync). Persist it
+          # unvalidated: rejecting it here would block removing unrelated
+          # conditions from legacy data.
+          enable_thing(remaining, validate_expression: false)
+        end
       end
     end
 
@@ -434,6 +438,67 @@ module Flipper
     end
 
     private
+
+    # Internal: Mirrors a trusted remote expression during adapter sync,
+    # including legacy expressions that predate empty-group validation.
+    #
+    # Returns the result of Adapter#enable.
+    def enable_expression_from_sync(expression)
+      enable_thing(Expression.build(expression), validate_expression: false)
+    end
+
+    def enable_thing(thing, validate_expression:)
+      instrument(:enable) do |payload|
+        gate = gate_for(thing)
+        wrapped_thing = gate.wrap(thing)
+        validate_expression!(wrapped_thing) if validate_expression
+
+        adapter.add self
+
+        payload[:gate_name] = gate.name
+        payload[:thing] = wrapped_thing
+
+        adapter.enable self, gate, wrapped_thing
+      end
+    end
+
+    # Private: Raises if an expression about to be enabled contains empty
+    # Any/All groups. An empty All evaluates to true for every actor, so
+    # persisting one silently enables the feature for everyone.
+    #
+    # Returns the expression.
+    def validate_expression!(expression)
+      if expression.is_a?(Expression) && expression.empty_groups?
+        raise ArgumentError, "#{expression.value.inspect} contains empty Any/All groups and cannot be enabled (an empty All matches every actor, an empty Any matches none). Remove the empty groups or add conditions to them."
+      end
+
+      expression
+    end
+
+    # Private: Wrap the actors passed to enabled? in a single pass to avoid
+    # intermediate array allocations on the hot path. Arrays are flattened one
+    # level; the explicit is_a?(Array) check (instead of flatten) avoids the
+    # to_ary warning that happens when passing a DelegateClass of an
+    # ActiveRecord object. This is tested in
+    # spec/flipper/model/active_record_spec.rb. Nils are dropped to allow the
+    # null object pattern. See https://github.com/flippercloud/flipper/pull/887
+    #
+    # Returns an Array of Types::Actor instances or nil if no actors.
+    def wrap_actors(actors)
+      return nil if actors.empty?
+
+      wrapped = []
+      actors.each do |actor|
+        if actor.is_a?(Array)
+          actor.each do |nested_actor|
+            wrapped << Types::Actor.wrap(nested_actor) unless nested_actor.nil?
+          end
+        elsif !actor.nil?
+          wrapped << Types::Actor.wrap(actor)
+        end
+      end
+      wrapped.empty? ? nil : wrapped
+    end
 
     # Private: Instrument a feature operation.
     def instrument(operation, initial_payload = {})

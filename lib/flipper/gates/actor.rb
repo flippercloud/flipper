@@ -25,8 +25,11 @@ module Flipper
       def open?(context)
         return false unless context.actors?
 
+        enabled_actors = context.values.actors
+        return false if enabled_actors.empty?
+
         context.actors.any? do |actor|
-          context.values.actors.include?(actor.value)
+          enabled_actors.include?(actor.value)
         end
       end
 

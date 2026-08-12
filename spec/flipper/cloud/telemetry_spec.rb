@@ -1,5 +1,6 @@
 require 'flipper/cloud/telemetry'
 require 'flipper/cloud/configuration'
+require 'timeout'
 
 RSpec.describe Flipper::Cloud::Telemetry do
   before do
@@ -156,6 +157,114 @@ RSpec.describe Flipper::Cloud::Telemetry do
   end
 
   describe '#record' do
+    it "only restarts once when many threads detect the same fork" do
+      stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
+        to_return(status: 200, body: "{}")
+
+      config = Flipper::Cloud::Configuration.new(token: "test")
+      telemetry = described_class.new(config)
+
+      begin
+        thread_count = 10
+        restarts = Concurrent::AtomicFixnum.new(0)
+        allow(telemetry).to receive(:restart!).and_wrap_original do |method, *args|
+          restarts.increment
+          method.call(*args)
+        end
+
+        # Simulate a fork so detect_forking triggers on the next record.
+        telemetry.instance_variable_set(:@pid, -1)
+
+        # Hold the lifecycle mutex so every thread gets past the (stale-@pid)
+        # fork check and piles up waiting on the mutex before any restart runs.
+        # When released, the double-checked lock must let exactly one restart.
+        mutex = telemetry.instance_variable_get(:@mutex)
+        mutex.lock
+
+        threads = thread_count.times.map do
+          Thread.new do
+            telemetry.record(Flipper::Feature::InstrumentationName, {
+              operation: :enabled?,
+              feature_name: :foo,
+              result: true,
+            })
+          end
+        end
+
+        begin
+          # Wait until all threads are blocked waiting to acquire the mutex.
+          Timeout.timeout(5) do
+            sleep 0.01 until threads.all? { |thread| thread.status == "sleep" }
+          end
+        ensure
+          mutex.unlock
+          Timeout.timeout(5) { threads.each(&:join) }
+        end
+
+        expect(restarts.value).to eq(1)
+      ensure
+        telemetry.stop
+      end
+    end
+
+    it "blocks records from writing to old storage while fork restart is in progress" do
+      stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
+        to_return(status: 200, body: "{}")
+
+      config = Flipper::Cloud::Configuration.new(token: "test")
+      telemetry = described_class.new(config)
+
+      begin
+        restart_stopped = Queue.new
+        restart_resume = Queue.new
+
+        telemetry.define_singleton_method(:restart!) do
+          stop!
+          restart_stopped << true
+          restart_resume.pop
+          start!
+        end
+        telemetry.singleton_class.send(:private, :restart!)
+
+        telemetry.instance_variable_set(:@pid, -1)
+
+        restarting_thread = Thread.new do
+          telemetry.record(Flipper::Feature::InstrumentationName, {
+            operation: :enabled?,
+            feature_name: :during_restart,
+            result: true,
+          })
+        end
+
+        blocked_record_thread = nil
+        begin
+          Timeout.timeout(5) { restart_stopped.pop }
+
+          blocked_record_thread = Thread.new do
+            telemetry.record(Flipper::Feature::InstrumentationName, {
+              operation: :enabled?,
+              feature_name: :blocked_until_restarted,
+              result: true,
+            })
+          end
+
+          Timeout.timeout(5) do
+            sleep 0.01 until blocked_record_thread.status == "sleep"
+          end
+        ensure
+          restart_resume << true
+          Timeout.timeout(5) do
+            [restarting_thread, blocked_record_thread].compact.each(&:join)
+          end
+        end
+
+        metrics_by_key = telemetry.metric_storage.drain.keys.group_by(&:key)
+        expect(metrics_by_key.keys).to contain_exactly("during_restart", "blocked_until_restarted")
+      ensure
+        telemetry.stop
+      end
+    end
+
     it "increments in metric storage" do
       begin
         config = Flipper::Cloud::Configuration.new(token: "test")
