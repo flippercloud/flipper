@@ -2,6 +2,7 @@
 
 require 'rails/generators'
 require 'rails/generators/active_record'
+require 'generators/flipper/table_prefix'
 
 module Flipper
   module Generators
@@ -11,6 +12,7 @@ module Flipper
     #
     class UpdateGenerator < Rails::Generators::Base
       include ActiveRecord::Generators::Migration
+      include Flipper::Generators::TablePrefix
 
       TEMPLATES = File.join(File.dirname(__FILE__), 'templates/update')
       source_paths << TEMPLATES
@@ -21,6 +23,7 @@ module Flipper
         migration_templates = Dir.children(File.join(TEMPLATES, 'migrations')).sort
         migration_templates.each do |template_file|
           destination_file = template_file.match(/^\d*_(.*\.rb)/)[1] # 01_create_flipper_tables.rb.erb => create_flipper_tables.rb
+          destination_file = prefixed_migration_file_name(destination_file)
           migration_template "migrations/#{template_file}", File.join(db_migrate_path, destination_file), skip: true
         end
       end

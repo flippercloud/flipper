@@ -1,4 +1,5 @@
 SpecHelpers.silence { require 'flipper/adapters/active_record' }
+require 'active_record/connection_adapters/sqlite3_adapter'
 
 # Turn off migration logging for specs
 ActiveRecord::Migration.verbose = false
@@ -78,6 +79,23 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
           flipper.preload([:foo])
         end
 
+        it "ignores gate rows with unknown keys" do
+          flipper = Flipper.new(subject)
+          flipper.enable_actor(:foo, Flipper::Actor.new("User;1"))
+
+          Flipper::Adapters::ActiveRecord::Gate.create!(
+            feature_key: "foo",
+            key: "not_a_real_gate",
+            value: "junk",
+          )
+
+          expected = subject.default_config.merge(actors: Set["User;1"])
+          feature = flipper[:foo]
+          expect(subject.get(feature)).to eq(expected)
+          expect(subject.get_multi([feature])).to eq("foo" => expected)
+          expect(subject.get_all).to eq("foo" => expected)
+        end
+
         it 'should not poison wrapping transactions' do
           flipper = Flipper.new(subject)
 
@@ -90,6 +108,19 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
             # poisoned transaction isn't raised
             expect(Flipper::Adapters::ActiveRecord::Gate.count).to eq(1)
           end
+        end
+
+        it "warns once if the gates value column is not text" do
+          allow(Flipper::Adapters::ActiveRecord::Gate).
+            to receive(:column_for_attribute).
+            with(:value).
+            and_return(double(type: :string))
+
+          output = capture_output do
+            2.times { subject.features }
+          end
+
+          expect(output.scan("Your database needs to be migrated").size).to eq(1)
         end
 
         context "ActiveRecord connection_pool" do

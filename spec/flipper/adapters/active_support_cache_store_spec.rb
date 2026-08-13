@@ -52,6 +52,21 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
     expect(adapter.race_condition_ttl).to be(nil)
   end
 
+  it "passes race_condition_ttl to the cache when writing" do
+    expect(cache).to receive(:fetch)
+      .with(anything, hash_including(race_condition_ttl: race_condition_ttl))
+      .and_call_original
+    adapter.get(flipper[:stats])
+  end
+
+  it "does not pass race_condition_ttl to the cache when not configured" do
+    adapter = described_class.new(memory_adapter, cache, 10)
+    expect(cache).to receive(:fetch)
+      .with(anything, hash_excluding(:race_condition_ttl))
+      .and_call_original
+    adapter.get(flipper[:stats])
+  end
+
   it "knows features_cache_key" do
     expect(adapter.features_cache_key).to eq("flipper/v1/features")
   end

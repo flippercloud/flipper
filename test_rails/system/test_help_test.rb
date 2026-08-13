@@ -36,8 +36,10 @@ class TestHelpTest < ActionDispatch::SystemTestCase
     # Reconfigure Flipper since other tests change the adapter.
     flipper_configure
 
-    # Ensure this test uses this app instance
+    # Other Rails tests mutate Rails.application. start_application rebuilds
+    # Capybara.app from the restored app, so visit("/") hits this test app.
     Rails.application = TestApp.instance
+    ActionDispatch::SystemTestCase.start_application
   end
 
   test "configures a shared adapter between tests and app" do

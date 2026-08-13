@@ -11,6 +11,12 @@ module Flipper
       # Internal: JSON export class that knows how to build features hash
       # from data.
       class Export < ::Flipper::Export
+        # The maximum size, in bytes, of an import payload. A legitimate export
+        # is small: even 100k feature-heavy gates is only ~20 MB. Anything past
+        # this ceiling is almost certainly abuse, so import endpoints reject it
+        # before reading the whole body into memory.
+        MAX_BYTES = 50 * 1024 * 1024
+
         def initialize(contents:, version: 1)
           super contents: contents, version: version, format: :json
         end

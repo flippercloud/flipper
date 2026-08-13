@@ -41,6 +41,46 @@ class ActiveRecordTest < MiniTest::Test
   def teardown
     ActiveRecord::Base.connection.execute("DROP table IF EXISTS `flipper_features`")
     ActiveRecord::Base.connection.execute("DROP table IF EXISTS `flipper_gates`")
+    ActiveRecord::Base.connection.execute("DROP table IF EXISTS `cross_product_flipper_features`")
+    ActiveRecord::Base.connection.execute("DROP table IF EXISTS `cross_product_flipper_gates`")
+  end
+
+  def test_table_prefix_uses_internal_model_subclasses
+    ActiveRecord::Base.connection.execute <<-SQL
+      CREATE TABLE cross_product_flipper_features (
+        id integer PRIMARY KEY,
+        key text NOT NULL UNIQUE,
+        created_at datetime NOT NULL,
+        updated_at datetime NOT NULL
+      )
+    SQL
+
+    ActiveRecord::Base.connection.execute <<-SQL
+      CREATE TABLE cross_product_flipper_gates (
+        id integer PRIMARY KEY,
+        feature_key text NOT NULL,
+        key text NOT NULL,
+        value text DEFAULT NULL,
+        created_at datetime NOT NULL,
+        updated_at datetime NOT NULL
+      )
+    SQL
+
+    adapter = Flipper::Adapters::ActiveRecord.new(table_prefix: "cross_product_")
+    feature_class = adapter.instance_variable_get(:@feature_class)
+    gate_class = adapter.instance_variable_get(:@gate_class)
+
+    assert_operator feature_class, :<, Flipper::Adapters::ActiveRecord::Feature
+    assert_operator gate_class, :<, Flipper::Adapters::ActiveRecord::Gate
+    assert_equal "cross_product_flipper_features", feature_class.table_name
+    assert_equal "cross_product_flipper_gates", gate_class.table_name
+
+    flipper = Flipper.new(adapter)
+    flipper[:search].enable
+
+    assert flipper[:search].enabled?
+    assert_equal ["search"], feature_class.pluck(:key)
+    assert_equal [["search", "boolean", "true"]], gate_class.pluck(:feature_key, :key, :value)
   end
 
   def test_models_honor_table_name_prefixes_and_suffixes
