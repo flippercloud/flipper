@@ -270,7 +270,7 @@ RSpec.describe Flipper::Engine do
         Flipper::Cloud::MessageVerifier.new(secret: ENV["FLIPPER_CLOUD_SYNC_SECRET"]).generate(request_body, timestamp)
       }
       let(:signature_header_value) {
-        Flipper::Cloud::MessageVerifier.new(secret: "").header(signature, timestamp)
+        Flipper::Cloud::MessageVerifier.header(signature, timestamp)
       }
 
       it "configures webhook app and uses cache busting" do
@@ -288,6 +288,19 @@ RSpec.describe Flipper::Engine do
     end
 
     context "without CLOUD_SYNC_SECRET" do
+      it "does not configure webhook app" do
+        silence { application.initialize! }
+
+        post "/_flipper"
+        expect(last_response.status).to eq(404)
+      end
+    end
+
+    context "with empty CLOUD_SYNC_SECRET" do
+      before do
+        ENV["FLIPPER_CLOUD_SYNC_SECRET"] = ""
+      end
+
       it "does not configure webhook app" do
         silence { application.initialize! }
 

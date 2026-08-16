@@ -120,9 +120,9 @@ module Flipper
       end
 
       # Public: The method that will be used to synchronize local adapter with
-      # cloud. (default: :poll, will be :webhook if sync_secret is set).
+      # cloud. (default: :poll, will be :webhook if sync_secret is non-empty).
       def sync_method
-        sync_secret ? :webhook : :poll
+        (sync_secret && sync_secret != "") ? :webhook : :poll
       end
 
       # Internal: The http client used by the http adapter. Exposed so we can
