@@ -1,6 +1,6 @@
 # Default routes loaded by Flipper::Cloud::Engine
 Rails.application.routes.draw do
-  if ENV["FLIPPER_CLOUD_TOKEN"] && ENV["FLIPPER_CLOUD_SYNC_SECRET"]
+  if ENV["FLIPPER_CLOUD_TOKEN"] && !ENV.fetch("FLIPPER_CLOUD_SYNC_SECRET", "").empty?
     require 'flipper/cloud'
     config = Rails.application.config.flipper
 
