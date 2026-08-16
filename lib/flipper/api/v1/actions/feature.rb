@@ -21,12 +21,6 @@ module Flipper
             flipper.remove(feature_name)
             json_response({}, 204)
           end
-
-          private
-
-          def feature_exists?(feature_name)
-            flipper.features.map(&:key).include?(feature_name)
-          end
         end
       end
     end

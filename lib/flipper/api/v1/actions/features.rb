@@ -80,10 +80,6 @@ module Flipper
               values << value.to_s if Rack::Utils.unescape(key) == name
             end
           end
-
-          def feature_exists?(feature_name)
-            flipper.features.map(&:key).include?(feature_name)
-          end
         end
       end
     end
