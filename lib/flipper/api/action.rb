@@ -1,4 +1,5 @@
 require 'forwardable'
+require 'set'
 require 'flipper/api/error'
 require 'flipper/api/error_response'
 require 'json'
@@ -146,6 +147,21 @@ module Flipper
       end
 
       private
+
+      # Private: Does a feature with this key exist?
+      #
+      # Reads through the memoized key set below so that checking many names
+      # costs one adapter enumeration per request rather than one per name.
+      def feature_exists?(feature_name)
+        existing_feature_names.include?(feature_name)
+      end
+
+      # Private: The keys of every feature known to the adapter, read once per
+      # request. Actions are instantiated per request (see .run), so this is
+      # request scoped and cannot go stale across requests.
+      def existing_feature_names
+        @existing_feature_names ||= flipper.features.map(&:key).to_set
+      end
 
       # Private: Returns the request method converted to an action method.
       # Converts head to get.

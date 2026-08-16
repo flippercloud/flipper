@@ -138,6 +138,33 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
       end
     end
 
+    context 'with many requested keys' do
+      require 'flipper/adapters/operation_logger'
+
+      let(:adapter) { Flipper::Adapters::OperationLogger.new(build_memory_adapter) }
+      let(:flipper) { build_flipper(adapter) }
+
+      before do
+        flipper[:search].enable
+        flipper[:stats].enable
+        adapter.reset
+      end
+
+      it 'enumerates the feature set once regardless of how many keys are requested' do
+        get "/features?keys=#{(1..50).map { |i| "key_#{i}" }.join(',')}"
+
+        expect(last_response.status).to eq(200)
+        expect(adapter.count(:features)).to eq(1)
+      end
+
+      it 'enumerates the feature set once for repeated keys params' do
+        get "/features?#{(1..50).map { |i| "keys=key_#{i}" }.join('&')}"
+
+        expect(last_response.status).to eq(200)
+        expect(adapter.count(:features)).to eq(1)
+      end
+    end
+
     context 'with no flipper features' do
       before do
         get '/features'
