@@ -296,7 +296,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
 
     context 'feature name contains invisible characters' do
       before do
-        post '/features', name: "my_\u200Bfeature\u2060"
+        post '/features', name: "my_\u3164\u115Ffeature\u1160\uFFA0\u2800\u17B4"
       end
 
       it 'responds 200' do
@@ -310,7 +310,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
 
     context 'feature name normalizes to empty' do
       before do
-        post '/features', name: "\u200B\u2060"
+        post '/features', name: "\u3164\u115F\u1160\uFFA0\u2800\u17B4"
       end
 
       it 'returns correct status code' do
