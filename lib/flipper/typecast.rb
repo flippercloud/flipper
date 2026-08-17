@@ -81,9 +81,10 @@ module Flipper
     #
     # Returns a String.
     def self.to_feature_name(value)
+      # U+2800 renders as a fixed-width blank but is not default-ignorable or whitespace.
       value.to_s
            .scrub('')
-           .gsub(/[\p{Cf}\p{Cc}]/, '')
+           .gsub(/[\p{Default_Ignorable_Code_Point}\p{Cc}\u2800]/, '')
            .gsub(/\A[[:space:]]+|[[:space:]]+\z/, '')
     end
 

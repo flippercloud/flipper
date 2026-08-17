@@ -231,6 +231,25 @@ RSpec.describe Flipper::Typecast do
       expect(described_class.to_feature_name("feat\u0000ure")).to eq("feature")
     end
 
+    it "removes default-ignorable fillers and other blank characters" do
+      invisible_characters = {
+        "hangul filler" => "\u3164",
+        "hangul choseong filler" => "\u115F",
+        "hangul jungseong filler" => "\u1160",
+        "halfwidth hangul filler" => "\uFFA0",
+        "braille pattern blank" => "\u2800",
+        "khmer vowel inherent aq" => "\u17B4",
+      }
+
+      invisible_characters.each do |name, character|
+        expect(described_class.to_feature_name("fea#{character}ture")).to eq("feature"), name
+      end
+    end
+
+    it "keeps non-default-ignorable format characters" do
+      expect(described_class.to_feature_name("\u06DDfeature")).to eq("\u06DDfeature")
+    end
+
     it "trims unicode whitespace" do
       expect(described_class.to_feature_name("\u00A0feature\u3000")).to eq("feature")
       expect(described_class.to_feature_name("  feature  ")).to eq("feature")
