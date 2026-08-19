@@ -79,6 +79,26 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
         expect(last_response.status).to eq(200)
         expect(json_response).to eq(expected_response)
       end
+
+      it 'ignores a leading empty query segment' do
+        get '/features?exclude_gate_names=true'
+        expected_response = json_response
+
+        get '/features?&exclude_gate_names=true'
+
+        expect(last_response.status).to eq(200)
+        expect(json_response).to eq(expected_response)
+      end
+
+      it 'ignores consecutive and trailing empty query segments' do
+        get '/features?exclude_gate_names=true'
+        expected_response = json_response
+
+        get '/features?&&exclude_gate_names=true&&;'
+
+        expect(last_response.status).to eq(200)
+        expect(json_response).to eq(expected_response)
+      end
     end
 
     context 'with keys specified' do
