@@ -77,6 +77,21 @@ RSpec.describe Flipper::Cloud::Configuration do
     expect(poller.interval).to eq(20)
   end
 
+  it "does not add another memory layer to an adapter prepared by Cloud" do
+    memory = Flipper::Adapters::Memory.new
+    persistent = Flipper::Adapters::Memory.new
+    mirrored = Flipper::Adapters::DualWrite.new(memory, persistent)
+    adapter = Flipper::Adapters::Strict.new(mirrored, :warn)
+    instance = described_class.new(required_options.merge(
+      local_adapter: adapter,
+      local_adapter_memory_backed: true,
+    ))
+
+    expect(instance.send(:sync_adapter)).to be(adapter)
+    expect(instance).not_to respond_to(:local_memory)
+    expect(instance).not_to respond_to(:local_adapter_memory_backed)
+  end
+
   it "can set debug_output" do
     instance = described_class.new(required_options.merge(debug_output: STDOUT))
     expect(instance.debug_output).to eq(STDOUT)
@@ -298,5 +313,45 @@ RSpec.describe Flipper::Cloud::Configuration do
     expect(all.keys).to eq(["search", "history"])
     expect(all["search"][:boolean]).to eq("true")
     expect(all["history"][:boolean]).to eq(nil)
+  end
+
+  it "polls in the background and applies changes to local on the calling thread" do
+    local_adapter = Flipper::Adapters::OperationLogger.new(Flipper::Adapters::Memory.new)
+    Flipper.new(local_adapter).add(:search)
+
+    body = JSON.generate({
+      features: [
+        {
+          key: "search",
+          gates: [
+            {key: "boolean", value: true},
+          ],
+        },
+      ],
+    })
+    stub_request(:get, "https://www.flippercloud.io/adapter/features?exclude_gate_names=true").
+      to_return(status: 200, body: body)
+
+    configuration = described_class.new(required_options.merge(local_adapter: local_adapter))
+    flipper = Flipper::Cloud::DSL.new(configuration)
+    local_adapter.reset
+
+    polling_thread = Thread.new { configuration.send(:poller).sync }
+    polling_thread.join
+
+    expect(local_adapter.count).to be(0)
+
+    calling_thread = Thread.current
+    mutation_threads = []
+    allow(local_adapter).to receive(:enable).and_wrap_original do |original, *args|
+      mutation_threads << Thread.current
+      original.call(*args)
+    end
+
+    expect(flipper.enabled?(:search)).to be(true)
+    expect(local_adapter.count(:get_all)).to be(0)
+    expect(local_adapter.count(:get)).to be(0)
+    expect(local_adapter.count(:enable)).to be(1)
+    expect(mutation_threads).to contain_exactly(calling_thread)
   end
 end

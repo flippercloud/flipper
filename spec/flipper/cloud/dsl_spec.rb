@@ -56,11 +56,16 @@ RSpec.describe Flipper::Cloud::DSL do
       described_class.new(cloud_configuration)
     end
 
-    it "sends reads to local adapter" do
+    it "hydrates from local once and serves reads from memory" do
+      subject
+      expect(local_adapter.count(:get_all)).to be(1)
+      local_adapter.reset
+
       subject.features
       subject.enabled?(:foo)
-      expect(local_adapter.count(:features)).to be(1)
-      expect(local_adapter.count(:get)).to be(1)
+      expect(local_adapter.count(:features)).to be(0)
+      expect(local_adapter.count(:get)).to be(0)
+      expect(local_adapter.count(:get_all)).to be(0)
     end
 
     it "sends writes to cloud and local" do
@@ -71,12 +76,25 @@ RSpec.describe Flipper::Cloud::DSL do
         with(headers: {'flipper-cloud-token'=>'asdf'}).
         to_return(status: 200, body: '{}')
 
+      calling_thread = Thread.current
+      mutation_threads = []
+      allow(local_adapter).to receive(:enable).and_wrap_original do |original, *args|
+        mutation_threads << Thread.current
+        original.call(*args)
+      end
+
       subject.enable(:foo)
 
       expect(local_adapter.count(:add)).to be(1)
       expect(local_adapter.count(:enable)).to be(1)
+      expect(mutation_threads).to contain_exactly(calling_thread)
       expect(add_stub).to have_been_requested
       expect(enable_stub).to have_been_requested
+
+      local_adapter.reset
+      expect(subject.enabled?(:foo)).to be(true)
+      expect(local_adapter.count(:get)).to be(0)
+      expect(local_adapter.count(:get_all)).to be(0)
     end
   end
 end

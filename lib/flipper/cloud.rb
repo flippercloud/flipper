@@ -41,11 +41,31 @@ module Flipper
     end
 
     # Private: Configure Flipper to use Cloud by default
-    def self.set_default
+    def self.set_default(instrumenter: nil)
       if ENV["FLIPPER_CLOUD_TOKEN"]
+        local_memory = Flipper::Adapters::Memory.new(threadsafe: true)
+        local_memory_loaded = false
+        local_memory_lock = Mutex.new
         Flipper.configure do |config|
+          config.wrap_adapter_store(:flipper_cloud_memory) do |persistent_adapter|
+            local_memory_lock.synchronize do
+              unless local_memory_loaded
+                local_memory.import(persistent_adapter)
+                local_memory_loaded = true
+              end
+            end
+            Flipper::Adapters::DualWrite.new(
+              local_memory,
+              persistent_adapter,
+            )
+          end
           config.default do
-            self.new(local_adapter: config.adapter)
+            options = {
+              local_adapter: config.adapter,
+              local_adapter_memory_backed: true,
+            }
+            options[:instrumenter] = instrumenter if instrumenter
+            self.new(options)
           end
         end
       end

@@ -44,14 +44,11 @@ module Flipper
 
       require 'flipper/cloud' if cloud?
 
-      Flipper.configure do |config|
-        config.default do
-          if cloud?
-            Flipper::Cloud.new(
-              local_adapter: config.adapter,
-              instrumenter: app.config.flipper.instrumenter
-            )
-          else
+      if cloud?
+        Flipper::Cloud.set_default(instrumenter: app.config.flipper.instrumenter)
+      else
+        Flipper.configure do |config|
+          config.default do
             Flipper.new(config.adapter, instrumenter: app.config.flipper.instrumenter)
           end
         end

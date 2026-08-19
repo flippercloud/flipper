@@ -1,5 +1,6 @@
 require 'flipper/cloud'
 require 'flipper/adapters/instrumented'
+require 'flipper/adapters/operation_logger'
 require 'flipper/instrumenters/memory'
 
 RSpec.describe Flipper::Cloud do
@@ -66,6 +67,57 @@ RSpec.describe Flipper::Cloud do
     instance = described_class.new(token: 'asdf', instrumenter: instrumenter)
     expect(instance.instrumenter).to be_a(Flipper::Cloud::Telemetry::Instrumenter)
     expect(instance.instrumenter.instrumenter).to be(instrumenter)
+  end
+
+  it 'shares one hydrated memory snapshot across default Cloud instances' do
+    original_token = ENV['FLIPPER_CLOUD_TOKEN']
+    ENV['FLIPPER_CLOUD_TOKEN'] = 'asdf'
+
+    stores = Queue.new
+    Flipper.configure do |config|
+      config.adapter do
+        store = Flipper::Adapters::OperationLogger.new(Flipper::Adapters::Memory.new)
+        Flipper.new(store).enable(:search)
+        store.reset
+        stores << store
+        store
+      end
+    end
+    described_class.set_default
+
+    first, second = 2.times.map do
+      Thread.new { Flipper.instance }
+    end.map(&:value)
+    persistent_adapters = 2.times.map { stores.pop }
+
+    expect(persistent_adapters.sum { |adapter| adapter.count(:get_all) }).to be(1)
+    persistent_adapters.each(&:reset)
+    expect(first.enabled?(:search)).to be(true)
+    expect(second.enabled?(:search)).to be(true)
+    expect(persistent_adapters.sum { |adapter| adapter.count(:get) }).to be(0)
+    expect(persistent_adapters.sum { |adapter| adapter.count(:get_all) }).to be(0)
+    expect(first.cloud_configuration.local_adapter.local).
+      to be(second.cloud_configuration.local_adapter.local)
+  ensure
+    ENV['FLIPPER_CLOUD_TOKEN'] = original_token
+  end
+
+  it 'keeps configured behavioral adapters outside memory reads' do
+    original_token = ENV['FLIPPER_CLOUD_TOKEN']
+    ENV['FLIPPER_CLOUD_TOKEN'] = 'asdf'
+
+    Flipper.configure do |config|
+      config.adapter do
+        Flipper::Adapters::Memory.new.tap { |adapter| Flipper.new(adapter).add(:search) }
+      end
+      config.use Flipper::Adapters::Strict, :raise
+    end
+    described_class.set_default
+
+    expect { Flipper.configuration.default.enabled?(:typo) }.
+      to raise_error(Flipper::Adapters::Strict::NotFound)
+  ensure
+    ENV['FLIPPER_CLOUD_TOKEN'] = original_token
   end
 
   it 'allows wrapping adapter with another adapter like the instrumenter' do
