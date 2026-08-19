@@ -76,6 +76,8 @@ module Flipper
 
           def raw_query_values(name)
             request.query_string.to_s.split(/[&;]/).each_with_object([]) do |part, values|
+              next if part.empty?
+
               key, value = part.split('=', 2)
               values << value.to_s if Rack::Utils.unescape(key) == name
             end
