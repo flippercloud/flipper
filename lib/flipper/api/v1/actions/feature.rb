@@ -12,7 +12,7 @@ module Flipper
 
           def get
             return json_error_response(:feature_not_found) unless feature_exists?(feature_name)
-            exclude_gates = params['exclude_gates']&.downcase == "true"
+            exclude_gates = string_param('exclude_gates')&.downcase == "true"
             feature = Decorators::Feature.new(flipper[feature_name])
             json_response(feature.as_json(exclude_gates: exclude_gates))
           end

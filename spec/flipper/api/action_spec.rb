@@ -107,4 +107,22 @@ RSpec.describe Flipper::Api::Action do
       end
     end
   end
+
+  describe 'safe parameters' do
+    it 'does not classify unrelated application errors as parameter errors' do
+      request = double('Request', request_method: 'GET')
+      allow(request).to receive(:params).and_raise(ArgumentError, 'application failure')
+      action = action_subclass.new(flipper, request)
+
+      expect { action.send(:safe_params) }.to raise_error(ArgumentError, 'application failure')
+    end
+
+    it 'does not classify unrelated range errors on modern Rack as parameter errors' do
+      request = double('Request', request_method: 'GET')
+      allow(request).to receive(:params).and_raise(RangeError, 'application failure')
+      action = action_subclass.new(flipper, request)
+
+      expect { action.send(:safe_params) }.to raise_error(RangeError, 'application failure')
+    end
+  end
 end
