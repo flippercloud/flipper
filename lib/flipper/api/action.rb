@@ -163,6 +163,42 @@ module Flipper
         @existing_feature_names ||= flipper.features.map(&:key).to_set
       end
 
+      # Private: Returns request parameters, or an empty hash when Rack cannot
+      # parse client-controlled parameter syntax.
+      def safe_params
+        @safe_params ||= params
+      rescue *parameter_parser_errors
+        @params_parse_failed = true
+        @safe_params = {}
+      end
+
+      def params_parse_failed?
+        safe_params
+        @params_parse_failed == true
+      end
+
+      # Private: Returns a valid String parameter, ignoring other shapes and
+      # invalid encodings.
+      def string_param(name)
+        value = safe_params[name]
+        value if valid_param_string?(value)
+      end
+
+      def valid_param_string?(value)
+        value.is_a?(String) && value.valid_encoding?
+      end
+
+      def parameter_parser_errors
+        parsers = [Rack::Utils]
+        parsers << Rack.const_get(:QueryParser, false) if Rack.const_defined?(:QueryParser, false)
+        error_names = [:InvalidParameterError, :ParameterTypeError, :ParamsTooDeepError, :QueryLimitError]
+        parsers.each_with_object([]) do |parser, errors|
+          error_names.each do |name|
+            errors << parser.const_get(name, false) if parser.const_defined?(name, false)
+          end
+        end.uniq
+      end
+
       # Private: Returns the request method converted to an action method.
       # Converts head to get.
       def request_method_name
