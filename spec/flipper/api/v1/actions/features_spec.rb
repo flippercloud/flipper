@@ -84,6 +84,8 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
       'keys=my_feature&keys=other_feature' => %w[my_feature other_feature],
       'keys=&keys=my_feature' => %w[my_feature],
       '=&keys=my_feature&=value' => %w[my_feature],
+      'keys' => [],
+      'keys[]' => [],
       'keys=' => [],
     }.each do |query, expected_keys|
       it "preserves duplicate and blank parameter semantics for #{query.inspect}" do

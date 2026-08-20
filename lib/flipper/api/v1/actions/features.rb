@@ -51,10 +51,13 @@ module Flipper
           private
 
           def requested_feature_names
-            keys = safe_params['keys']
-            return nil unless keys
+            request_params = safe_params
+            return nil unless request_params.key?('keys')
+
+            keys = request_params['keys']
+            return [] if keys.nil?
             return nil unless valid_feature_keys?(keys)
-            return keys if keys.is_a?(Array)
+            return keys.map { |key| key || '' } if keys.is_a?(Array)
 
             raw_keys = raw_query_values("keys")
             return nil unless raw_keys
@@ -102,7 +105,7 @@ module Flipper
           def valid_feature_keys?(keys)
             return valid_param_string?(keys) unless keys.is_a?(Array)
 
-            keys.all? { |key| valid_param_string?(key) }
+            keys.all? { |key| key.nil? || valid_param_string?(key) }
           end
 
           def decoded_query_component(value)

@@ -192,11 +192,17 @@ module Flipper
         parsers = [Rack::Utils]
         parsers << Rack.const_get(:QueryParser, false) if Rack.const_defined?(:QueryParser, false)
         error_names = [:InvalidParameterError, :ParameterTypeError, :ParamsTooDeepError, :QueryLimitError]
-        parsers.each_with_object([]) do |parser, errors|
+        errors = parsers.each_with_object([]) do |parser, result|
           error_names.each do |name|
-            errors << parser.const_get(name, false) if parser.const_defined?(name, false)
+            result << parser.const_get(name, false) if parser.const_defined?(name, false)
           end
-        end.uniq
+        end
+        has_named_depth_error = parsers.any? do |parser|
+          parser.const_defined?(:ParamsTooDeepError, false)
+        end
+        # Rack 2.0 reports nesting and key-space limits as plain RangeError.
+        errors << RangeError unless has_named_depth_error
+        errors.uniq
       end
 
       # Private: Returns the request method converted to an action method.
