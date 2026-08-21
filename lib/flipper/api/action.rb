@@ -2,6 +2,7 @@ require 'forwardable'
 require 'set'
 require 'flipper/api/error'
 require 'flipper/api/error_response'
+require 'flipper/api/parameter_parsing'
 require 'json'
 
 module Flipper
@@ -11,8 +12,14 @@ module Flipper
         def feature_name
           @feature_name ||= begin
             match = request.path_info.match(self.class.route_regex)
-            match ? Rack::Utils.unescape(match[:feature_name]) : nil
+            if match
+              value = Rack::Utils.unescape(match[:feature_name])
+              json_error_response(:request_invalid) unless value.valid_encoding?
+              value
+            end
           end
+        rescue ArgumentError
+          json_error_response(:request_invalid)
         end
         private :feature_name
       end
@@ -26,6 +33,11 @@ module Flipper
                                              'put'.freeze,
                                              'delete'.freeze,
                                            ]).freeze
+      MUTATION_REQUEST_METHOD_NAMES = Set.new([
+                                                'post'.freeze,
+                                                'put'.freeze,
+                                                'delete'.freeze,
+                                              ]).freeze
 
       # Public: Call this in subclasses so the action knows its route.
       #
@@ -78,7 +90,12 @@ module Flipper
       # Returns whatever the request method returns in the action.
       def run
         if valid_request_method? && respond_to?(request_method_name)
-          catch(:halt) { send(request_method_name) }
+          catch(:halt) do
+            if mutation_request? && !json_request? && params_invalid?
+              json_error_response(:request_invalid)
+            end
+            send(request_method_name)
+          end
         else
           raise Api::RequestMethodNotSupported,
                 "#{self.class} does not support request method #{request_method_name.inspect}"
@@ -170,6 +187,11 @@ module Flipper
       rescue *parameter_parser_errors
         @params_parse_failed = true
         @safe_params = {}
+      rescue EOFError
+        raise unless multipart_request?
+
+        @params_parse_failed = true
+        @safe_params = {}
       end
 
       def params_parse_failed?
@@ -177,32 +199,51 @@ module Flipper
         @params_parse_failed == true
       end
 
+      def params_invalid?
+        params_parse_failed? || !ParameterParsing.valid_encoding?(safe_params)
+      end
+
       # Private: Returns a valid String parameter, ignoring other shapes and
       # invalid encodings.
       def string_param(name)
+        return if container_param?(name)
+
         value = safe_params[name]
         value if valid_param_string?(value)
+      end
+
+      # Private: Returns an optional String parameter. Nil retains the legacy
+      # meaning of an omitted parameter, while other non-String shapes are
+      # rejected before an action can mutate state.
+      def optional_string_param(name)
+        json_error_response(:request_invalid) if container_param?(name)
+
+        value = safe_params[name]
+        return if value.nil?
+        return value if valid_param_string?(value)
+
+        json_error_response(:request_invalid)
       end
 
       def valid_param_string?(value)
         value.is_a?(String) && value.valid_encoding?
       end
 
+      def container_param?(name)
+        body_params = request.env["parsed_request_body".freeze]
+        return false unless body_params.is_a?(Hash) && body_params.key?(name)
+
+        value = body_params[name]
+        value.is_a?(Array) || value.is_a?(Hash)
+      end
+
       def parameter_parser_errors
-        parsers = [Rack::Utils]
-        parsers << Rack.const_get(:QueryParser, false) if Rack.const_defined?(:QueryParser, false)
-        error_names = [:InvalidParameterError, :ParameterTypeError, :ParamsTooDeepError, :QueryLimitError]
-        errors = parsers.each_with_object([]) do |parser, result|
-          error_names.each do |name|
-            result << parser.const_get(name, false) if parser.const_defined?(name, false)
-          end
-        end
-        has_named_depth_error = parsers.any? do |parser|
-          parser.const_defined?(:ParamsTooDeepError, false)
-        end
-        # Rack 2.0 reports nesting and key-space limits as plain RangeError.
-        errors << RangeError unless has_named_depth_error
-        errors.uniq
+        # Rack 2.0 uses plain RangeError for query limits. JsonParams handles
+        # mutation query errors around the parser call itself before action
+        # dispatch. Keep the Phase 2 fail-open behavior for read queries, but
+        # do not hide body IO or application defects during mutations.
+        errors = ParameterParsing.errors
+        mutation_request? ? errors - [RangeError] : errors
       end
 
       # Private: Returns the request method converted to an action method.
@@ -222,6 +263,22 @@ module Flipper
 
       def valid_request_method?
         VALID_REQUEST_METHOD_NAMES.include?(request_method_name)
+      end
+
+      def mutation_request?
+        MUTATION_REQUEST_METHOD_NAMES.include?(request_method_name)
+      end
+
+      def json_request?
+        request_media_type.casecmp('application/json') == 0
+      end
+
+      def multipart_request?
+        request_media_type.casecmp('multipart/form-data') == 0
+      end
+
+      def request_media_type
+        request.env['CONTENT_TYPE'.freeze].to_s.split(';', 2).first.to_s.strip
       end
     end
   end

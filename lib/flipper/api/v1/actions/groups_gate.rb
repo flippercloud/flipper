@@ -40,7 +40,7 @@ module Flipper
           end
 
           def allow_unregistered_groups?
-            allow_unregistered_groups = params['allow_unregistered_groups']
+            allow_unregistered_groups = optional_string_param('allow_unregistered_groups')
             allow_unregistered_groups && allow_unregistered_groups == 'true'
           end
 
@@ -49,7 +49,7 @@ module Flipper
           end
 
           def group_name
-            @group_name ||= params['name']
+            @group_name ||= string_param('name')
           end
         end
       end
