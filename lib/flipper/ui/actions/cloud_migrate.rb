@@ -1,5 +1,6 @@
 require 'flipper/ui/action'
 require 'flipper/ui/util'
+require 'flipper/cloud/migrate'
 
 module Flipper
   module UI
