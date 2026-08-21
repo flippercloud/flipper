@@ -239,10 +239,11 @@ module Flipper
 
       def parameter_parser_errors
         # Rack 2.0 uses plain RangeError for query limits. JsonParams handles
-        # those errors around the parser call itself before action dispatch;
-        # rescuing RangeError around Rack::Request#params would also hide body
-        # IO and application defects.
-        ParameterParsing.errors - [RangeError]
+        # mutation query errors around the parser call itself before action
+        # dispatch. Keep the Phase 2 fail-open behavior for read queries, but
+        # do not hide body IO or application defects during mutations.
+        errors = ParameterParsing.errors
+        mutation_request? ? errors - [RangeError] : errors
       end
 
       # Private: Returns the request method converted to an action method.
