@@ -76,4 +76,14 @@ RSpec.describe Flipper::Api::JsonParams do
       expect(params).to eq('flipper_id' => 'User;2', 'language' => 'ruby', 'framework' => 'rails')
     end
   end
+
+  it 'does not classify downstream application failures as client input errors' do
+    downstream = lambda do |_env|
+      raise JSON::ParserError, 'application failure'
+    end
+    middleware = described_class.new(downstream)
+    env = Rack::MockRequest.env_for('/', method: 'POST', input: '')
+
+    expect { middleware.call(env) }.to raise_error(JSON::ParserError, 'application failure')
+  end
 end

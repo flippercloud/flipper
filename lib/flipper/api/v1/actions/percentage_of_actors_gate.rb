@@ -31,7 +31,7 @@ module Flipper
           private
 
           def percentage_param
-            @percentage_param ||= params['percentage'].to_s
+            @percentage_param ||= string_param('percentage') || ''
           end
 
           def percentage
