@@ -143,6 +143,59 @@ class MutationRackCompatibilityTest < Minitest::Test
     assert_includes @flipper.features.map(&:key), 'valid_multipart'
   end
 
+  def test_valid_multipart_framing_is_accepted
+    boundary = 'flipper-boundary'
+    body = "preamble\r\n--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"name\"\r\n\r\n" \
+      "framed_multipart\r\n" \
+      "--#{boundary}-- \t\r\nepilogue"
+    response = raw_request(
+      '/features',
+      method: 'POST',
+      input: body,
+      'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
+    )
+
+    assert_equal 200, response.first
+    assert_includes @flipper.features.map(&:key), 'framed_multipart'
+  end
+
+  def test_json_query_and_body_shape_conflicts_are_client_errors_without_mutation
+    assert_equal @baseline, adapter_state
+    response = raw_request(
+      '/features?name[]=query',
+      method: 'POST',
+      input: JSON.generate(name: 'created'),
+      'CONTENT_TYPE' => 'application/json'
+    )
+
+    assert_equal 400, response.first
+    assert_equal @baseline, adapter_state
+  end
+
+  def test_multipart_tempfile_factory_errors_remain_visible
+    boundary = 'Aa'
+    body = "--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"upload\"; filename=\"file.txt\"\r\n" \
+      "Content-Type: text/plain\r\n\r\ncontents\r\n" \
+      "--#{boundary}--\r\n"
+    env = Rack::MockRequest.env_for(
+      '/features',
+      method: 'POST',
+      input: body,
+      'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
+    )
+    env['rack.multipart.tempfile_factory'] = lambda do |*, **|
+      raise ArgumentError, 'tempfile failure'
+    end
+    assert_equal @baseline, adapter_state
+
+    error = assert_raises(ArgumentError) { @app.call(env) }
+
+    assert_equal 'tempfile failure', error.message
+    assert_equal @baseline, adapter_state
+  end
+
   def test_forward_only_input_works_without_rewindable_middleware
     app = Flipper::Api.app(@flipper, use_rewindable_middleware: false)
     body = JSON.generate(name: 'forward_only')

@@ -50,7 +50,7 @@ module Flipper
           update_params(env, body)
         end
         true
-      rescue JSON::ParserError, InvalidRequestBody
+      rescue InvalidRequestBody
         false
       end
 
@@ -104,27 +104,41 @@ module Flipper
         boundary = (match[1] || match[2]).to_s.strip
         raise InvalidRequestBody if boundary.empty?
 
-        closing_only = "--#{boundary}--"
-        if body == closing_only || body == "#{closing_only}\r\n"
-          return [body, nil, true]
+        delimiters = multipart_delimiters(body, boundary)
+        raise InvalidRequestBody if delimiters.empty?
+        raise InvalidRequestBody unless delimiters.last[2]
+        return [body, nil, true] if delimiters.first[2]
+
+        parts = delimiters.each_cons(2).map do |left, right|
+          body.byteslice(left[1], right[0] - left[1])
         end
-
-        opening = "--#{boundary}\r\n"
-        separator = "\r\n--#{boundary}\r\n"
-        closing = "\r\n--#{boundary}--"
-        trailer = body.end_with?("#{closing}\r\n") ? "#{closing}\r\n" : closing
-        raise InvalidRequestBody unless body.start_with?(opening) && body.end_with?(trailer)
-
-        contents_size = body.bytesize - opening.bytesize - trailer.bytesize
-        raise InvalidRequestBody if contents_size < 0
-        contents = body.byteslice(opening.bytesize, contents_size)
-        parts = contents.split(separator, -1)
         parts.each { |part| validate_multipart_part!(part) }
 
         reversed = if parts.length > 1
-          "#{opening}#{parts.reverse.join(separator)}#{trailer}"
+          preamble = body.byteslice(0, delimiters.first[0])
+          opening = body.byteslice(delimiters.first[0], delimiters.first[1] - delimiters.first[0])
+          closing = body.byteslice(delimiters.last[0], delimiters.last[1] - delimiters.last[0])
+          epilogue = body.byteslice(delimiters.last[1], body.bytesize - delimiters.last[1])
+          separator = "\r\n--#{boundary}\r\n"
+          "#{preamble}#{opening}#{parts.reverse.join(separator)}#{closing}#{epilogue}"
         end
         [body, reversed, false]
+      end
+
+      def multipart_delimiters(body, boundary)
+        pattern = Regexp.new(
+          "(?:\\A|\\r\\n)--#{Regexp.escape(boundary)}(--)?[ \\t]*(?:\\r\\n|\\z)",
+          Regexp::NOENCODING
+        )
+        delimiters = []
+        offset = 0
+        while (match = pattern.match(body, offset))
+          delimiters << [match.begin(0), match.end(0), !match[1].nil?]
+          break if match[1]
+
+          offset = match.end(0)
+        end
+        delimiters
       end
 
       def validate_multipart_part!(part)
@@ -138,6 +152,8 @@ module Flipper
         raise InvalidRequestBody unless names.length == 1
 
         quoted_name = names.first.first
+        parameter_name = (quoted_name || names.first.last).dup.force_encoding(Encoding::UTF_8)
+        raise InvalidRequestBody unless parameter_name.valid_encoding?
         if quoted_name && quoted_name.match?(/\\(?!["\\])/)
           raise InvalidRequestBody
         end
@@ -149,8 +165,6 @@ module Flipper
         request_env[REQUEST_BODY] = StringIO.new(body)
         request_env['CONTENT_LENGTH'.freeze] = body.bytesize.to_s
         Rack::Request.new(request_env).POST
-      rescue ArgumentError
-        raise InvalidRequestBody
       end
 
       def cache_multipart_params(env, params)
@@ -225,16 +239,28 @@ module Flipper
       # This method accomplishes similar functionality
       def update_params(env, data)
         return if data.empty?
-        parsed_request_body = Typecast.from_json(data)
+        parsed_request_body = parse_json_body(data)
         raise InvalidRequestBody unless parsed_request_body.is_a?(Hash)
         raise InvalidRequestBody unless ParameterParsing.valid_encoding?(parsed_request_body)
 
         env["parsed_request_body".freeze] = parsed_request_body
+        if mutation_request?(env)
+          parsed_query_shapes = ParameterParsing.parse_nested_query(env[QUERY_STRING].to_s)
+          unless compatible_parameter_shapes?(parsed_query_shapes, parsed_request_body)
+            raise InvalidRequestBody
+          end
+        end
         parsed_query_string = parse_query(env[QUERY_STRING].to_s)
         parsed_query_string.merge!(parsed_request_body)
         parameters = build_query(parsed_query_string)
         env[QUERY_STRING] = parameters
       rescue *ParameterParsing.errors
+        raise InvalidRequestBody
+      end
+
+      def parse_json_body(data)
+        Typecast.from_json(data)
+      rescue JSON::ParserError
         raise InvalidRequestBody
       end
     end

@@ -22,22 +22,31 @@ module Flipper
           ].freeze
 
           def post
+            body = read_import_body
+            export = build_import_export(body)
+            flipper.import(export)
+            json_response({}, 204)
+          end
+
+          private
+
+          def read_import_body
             request.body.rewind if request.body.respond_to?(:rewind)
             max = Flipper::Exporters::Json::Export::MAX_BYTES
             # Read at most one byte past the limit so an oversized body is caught
             # without buffering the whole thing into memory.
             body = request.body.read(max + 1) || ""
             request.body.rewind if request.body.respond_to?(:rewind)
-            raise Flipper::Exporters::Json::InvalidError if body.bytesize > max
+            json_error_response(:import_invalid) if body.bytesize > max
+            body
+          end
+
+          def build_import_export(body)
             validate_import_payload!(Typecast.from_json(body))
-            export = Flipper::Exporters::Json::Export.new(contents: body)
-            flipper.import(export)
-            json_response({}, 204)
+            Flipper::Exporters::Json::Export.new(contents: body)
           rescue JSON::ParserError, Flipper::Exporters::Json::InvalidError
             json_error_response(:import_invalid)
           end
-
-          private
 
           def validate_import_payload!(payload)
             invalid_import! unless payload.is_a?(Hash)

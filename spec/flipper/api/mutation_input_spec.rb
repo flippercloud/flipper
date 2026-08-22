@@ -245,6 +245,24 @@ RSpec.describe 'Flipper API mutation input handling' do
     end
   end
 
+  [
+    ['name[]=query', {'name' => 'created'}],
+    ['name[nested]=query', {'name' => 'created'}],
+    ['name=query', {'name' => ['created']}],
+    ['name=query', {'name' => {'nested' => 'created'}}],
+  ].each do |query, body|
+    it "rejects cross-source JSON conflicts in #{query.inspect} and #{body.inspect} before mutation" do
+      expect(adapter_state).to eq(baseline_state)
+
+      post "/features?#{query}",
+           JSON.generate(body),
+           'CONTENT_TYPE' => 'application/json'
+
+      expect(last_response.status).to eq(400)
+      expect(adapter_state).to eq(baseline_state)
+    end
+  end
+
   it 'rejects semicolon-separated conflicting form shapes on Rack 2 before mutation' do
     skip 'Rack 3 treats semicolons as form data, not separators' if Gem::Version.new(Rack.release) >= Gem::Version.new('3.0.0')
     expect(adapter_state).to eq(baseline_state)
@@ -330,7 +348,7 @@ RSpec.describe 'Flipper API mutation input handling' do
     ['multipart/form-data; boundary=', 'garbage'],
     ['multipart/form-data; boundary=Aa', "--Aa\r\nContent-Disposition: form-data; name=\"ignored\"\r\n\r\ntruncated"],
     ['multipart/form-data; boundary=Aa', "--Aa\r\nX-Test: bad\r\n\r\njunk\r\n--Aa--\r\n"],
-    ['multipart/form-data; boundary=Aa', "bad-opening\r\n--Aa--\r\n"],
+    ['multipart/form-data; boundary=Aa', "bad-opening--Aa--\r\n"],
     ['multipart/form-data; boundary=Aa', "--Aa\r\nContent-Disposition: form-data; name=\"ignored\"\r\n\r\nvalue--Aa--\r\n"],
     ['multipart/form-data; boundary=Aa', "--Aa\r\nContent-Disposition: form-data; filename=\"ignored\"\r\n\r\nvalue\r\n--Aa--\r\n"],
     ['multipart/form-data; boundary=Aa', "--Aa\r\nContent-Disposition: form-data; name=\"\xFF\"\r\n\r\nvalue\r\n--Aa--\r\n".b],
@@ -470,6 +488,21 @@ RSpec.describe 'Flipper API mutation input handling' do
       expect(last_response.status).to eq(200)
       expect(flipper.features.map(&:key)).to include(value)
     end
+  end
+
+  it 'continues to accept multipart preambles, epilogues, and closing transport padding' do
+    boundary = 'flipper-boundary'
+    body = "preamble\r\n--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"name\"\r\n\r\n" \
+      "framed_multipart\r\n" \
+      "--#{boundary}-- \t\r\nepilogue"
+
+    post '/features',
+         body,
+         'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
+
+    expect(last_response.status).to eq(200)
+    expect(flipper.features.map(&:key)).to include('framed_multipart')
   end
 
   it 'accepts an empty multipart body for a bodyless mutation' do

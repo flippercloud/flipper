@@ -115,5 +115,18 @@ RSpec.describe Flipper::Api::V1::Actions::Import do
         expect(adapter.features).to eq(Set['existing'])
       end
     end
+
+    it 'does not classify adapter JSON parser errors as invalid imports' do
+      flipper.enable(:existing)
+      baseline = flipper.features.map(&:key)
+      source_flipper = build_flipper
+      source_flipper.enable(:replacement)
+      allow(flipper).to receive(:import).and_raise(JSON::ParserError, 'adapter failure')
+
+      expect do
+        post '/import', source_flipper.export.contents, 'CONTENT_TYPE' => 'application/json'
+      end.to raise_error(JSON::ParserError, 'adapter failure')
+      expect(flipper.features.map(&:key)).to eq(baseline)
+    end
   end
 end
