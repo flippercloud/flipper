@@ -447,6 +447,9 @@ class MutationRackCompatibilityTest < Minitest::Test
     [
       {Random: [{PercentageOfActors: ['User;1', 50]}]},
       {Random: [{All: [{Property: ['plan']}]}]},
+      {Percentage: [{Boolean: [{Property: ['flag']}]}]},
+      {Number: [{Boolean: [{Property: ['flag']}]}]},
+      {Time: [{Boolean: [{Property: ['flag']}]}]},
     ].each do |expression|
       assert_equal @baseline, adapter_state, expression.inspect
 
@@ -491,7 +494,7 @@ class MutationRackCompatibilityTest < Minitest::Test
   end
 
   def test_numeric_import_percentage_strings_remain_accepted
-    {'0' => 0, '10' => 10, '10.5' => 10.5, '100' => 100}.each do |value, expected|
+    {'0' => 0, '10' => 10, '10.5' => 10.5, '1.0e-07' => 1e-7, '100' => 100}.each do |value, expected|
       body = JSON.generate(features: {replacement: {percentage_of_time: value}})
       response = raw_request(
         '/import',
@@ -503,6 +506,31 @@ class MutationRackCompatibilityTest < Minitest::Test
       assert_equal 204, response.first, value
       assert_equal expected, @flipper[:replacement].percentage_of_time_value, value
     end
+  end
+
+  def test_tiny_percentage_round_trips_through_export_and_json_mutation
+    source = Flipper.new(Flipper::Adapters::Memory.new)
+    source[:tiny].enable_percentage_of_time(1e-7)
+
+    import_response = raw_request(
+      '/import',
+      method: 'POST',
+      input: source.export.contents,
+      'CONTENT_TYPE' => 'application/json'
+    )
+
+    assert_equal 204, import_response.first
+    assert_equal 1e-7, @flipper[:tiny].percentage_of_time_value
+
+    direct_response = raw_request(
+      '/features/direct_tiny/percentage_of_time',
+      method: 'POST',
+      input: JSON.generate(percentage: 1e-7),
+      'CONTENT_TYPE' => 'application/json'
+    )
+
+    assert_equal 200, direct_response.first
+    assert_equal 1e-7, @flipper[:direct_tiny].percentage_of_time_value
   end
 
   def test_multipart_tempfile_factory_errors_remain_visible

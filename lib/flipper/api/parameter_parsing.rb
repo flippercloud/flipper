@@ -20,7 +20,7 @@ module Flipper
         :MultipartTotalPartLimitError,
       ].freeze
       JSON_WHITESPACE_BYTES = [9, 10, 13, 32].freeze
-      PERCENTAGE_STRING = /\A[+-]?(?:\d+(?:\.\d*)?|\.\d+)\z/
+      PERCENTAGE_STRING = /\A[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?\z/
       private_constant :JSON_WHITESPACE_BYTES
       private_constant :PERCENTAGE_STRING
 
@@ -101,6 +101,14 @@ module Flipper
 
       def self.valid_percentage_string?(value)
         value.is_a?(String) && PERCENTAGE_STRING.match?(value)
+      end
+
+      def self.normalize_percentage(value)
+        if value.is_a?(String) && value.match?(/[eE]/)
+          Float(value)
+        else
+          value
+        end
       end
 
       def self.parse_json(data)

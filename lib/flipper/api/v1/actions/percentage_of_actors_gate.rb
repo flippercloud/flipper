@@ -40,7 +40,8 @@ module Flipper
                 raise ArgumentError, "invalid numeric value: #{percentage_param}"
               end
 
-              Flipper::Types::Percentage.new(percentage_param).value
+              value = ParameterParsing.normalize_percentage(percentage_param)
+              Flipper::Types::Percentage.new(value).value
             rescue ArgumentError, TypeError
               -1
             end

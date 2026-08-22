@@ -43,6 +43,15 @@ RSpec.describe 'Flipper API mutation input handling' do
     'dynamic boolean expression used as a random maximum' => {
       Random: [{All: [{Property: ['plan']}]}],
     },
+    'dynamic boolean expression used as a percentage value' => {
+      Percentage: [{Boolean: [{Property: ['flag']}]}],
+    },
+    'dynamic boolean expression used as a number value' => {
+      Number: [{Boolean: [{Property: ['flag']}]}],
+    },
+    'dynamic boolean expression used as a time value' => {
+      Time: [{Boolean: [{Property: ['flag']}]}],
+    },
   }.freeze
 
   SCALAR_PARAMETER_SHAPES = [

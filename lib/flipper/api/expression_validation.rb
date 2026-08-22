@@ -88,6 +88,7 @@ module Flipper
         end
 
         results = expression.args.map { |argument| validate_domains(argument) }
+        validate_input_domains(expression.name, results)
         if expression.name == 'Random'
           maximum = results.first
           if maximum
@@ -142,6 +143,25 @@ module Flipper
         end
       end
       private_class_method :value_domain
+
+      def self.validate_input_domains(name, results)
+        case name
+        when 'Number', 'Percentage', 'Time'
+          validate_input_domain(results[0], [:numeric, :string])
+        when 'Random'
+          validate_input_domain(results[0], [:numeric])
+        when 'PercentageOfActors'
+          validate_input_domain(results[1], [:numeric])
+        end
+      end
+      private_class_method :validate_input_domains
+
+      def self.validate_input_domain(result, accepted)
+        if result && result.domain && !accepted.include?(result.domain)
+          raise ArgumentError
+        end
+      end
+      private_class_method :validate_input_domain
 
       def self.validate_percentage(result)
         return unless result

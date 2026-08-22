@@ -95,7 +95,7 @@ module Flipper
             if value.is_a?(String) && !ParameterParsing.valid_percentage_string?(value)
               invalid_import!
             end
-            type.new(value || 0)
+            type.new(ParameterParsing.normalize_percentage(value || 0))
           end
 
           def invalid_import!
