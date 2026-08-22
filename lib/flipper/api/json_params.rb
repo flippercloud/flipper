@@ -354,7 +354,9 @@ module Flipper
         registered_tempfiles = env['rack.tempfiles'.freeze]
         tempfiles.each do |tempfile|
           begin
-            if tempfile.respond_to?(:close!)
+            if tempfile.respond_to?(:closed?) && tempfile.closed?
+              tempfile.unlink if tempfile.respond_to?(:unlink)
+            elsif tempfile.respond_to?(:close!)
               tempfile.close!
             elsif tempfile.respond_to?(:close)
               tempfile.close

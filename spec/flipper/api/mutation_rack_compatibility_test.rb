@@ -121,6 +121,22 @@ class MutationRackCompatibilityTest < Minitest::Test
     end
   end
 
+  class NonIdempotentCloseIO < StringIO
+    attr_reader :close_calls
+
+    def initialize
+      super
+      @close_calls = 0
+    end
+
+    def close
+      @close_calls += 1
+      raise 'closed twice' if @close_calls > 1
+
+      super
+    end
+  end
+
   def setup
     @flipper = Flipper.new(Flipper::Adapters::Memory.new)
     @flipper[:existing].enable
@@ -494,8 +510,10 @@ class MutationRackCompatibilityTest < Minitest::Test
   end
 
   def test_numeric_import_percentage_strings_remain_accepted
-    {'0' => 0, '10' => 10, '10.5' => 10.5, '1.0e-07' => 1e-7, '100' => 100}.each do |value, expected|
-      body = JSON.generate(features: {replacement: {percentage_of_time: value}})
+    values = {'0' => 0, '10' => 10, '10.5' => 10.5, '1e-7' => 1e-7,
+              '1.0e-07' => 1e-7, '100e-2' => 1, '1e2' => 100, '100' => 100}
+    %w[percentage_of_actors percentage_of_time].product(values.to_a).each do |gate, (value, expected)|
+      body = JSON.generate(features: {replacement: {gate => value}})
       response = raw_request(
         '/import',
         method: 'POST',
@@ -503,8 +521,14 @@ class MutationRackCompatibilityTest < Minitest::Test
         'CONTENT_TYPE' => 'application/json'
       )
 
-      assert_equal 204, response.first, value
-      assert_equal expected, @flipper[:replacement].percentage_of_time_value, value
+      actual = if gate == 'percentage_of_actors'
+        @flipper[:replacement].percentage_of_actors_value
+      else
+        @flipper[:replacement].percentage_of_time_value
+      end
+      description = "#{gate}=#{value}"
+      assert_equal 204, response.first, description
+      assert_equal expected, actual, description
     end
   end
 
@@ -622,6 +646,39 @@ class MutationRackCompatibilityTest < Minitest::Test
       assert_equal 1, calls
       assert_equal @baseline, adapter_state
     end
+  end
+
+  def test_multipart_file_limit_does_not_close_application_io_twice
+    boundary = 'Aa'
+    body = "--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"one\"; filename=\"one.txt\"\r\n" \
+      "Content-Type: text/plain\r\n\r\none\r\n" \
+      "--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"two\"; filename=\"two.txt\"\r\n" \
+      "Content-Type: text/plain\r\n\r\ntwo\r\n" \
+      "--#{boundary}--\r\n"
+    env = Rack::MockRequest.env_for(
+      '/features/existing/boolean',
+      method: 'POST',
+      input: body,
+      'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
+    )
+    tempfiles = []
+    env['rack.multipart.tempfile_factory'] = lambda do |*, **|
+      NonIdempotentCloseIO.new.tap { |tempfile| tempfiles << tempfile }
+    end
+    original_limit = Rack::Utils.multipart_file_limit
+    Rack::Utils.multipart_file_limit = 1
+    assert_equal @baseline, adapter_state
+
+    status, = @app.call(env)
+
+    assert_equal 400, status
+    assert_equal [1], tempfiles.map(&:close_calls)
+    assert_equal @baseline, adapter_state
+  ensure
+    Rack::Utils.multipart_file_limit = original_limit
+    tempfiles.each { |tempfile| tempfile.close unless tempfile.closed? }
   end
 
   def test_multipart_tempfile_io_parser_shaped_errors_remain_visible

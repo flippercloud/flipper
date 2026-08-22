@@ -79,8 +79,14 @@ module Flipper
               invalid_import!
             end
 
-            validate_percentage!(gates['percentage_of_actors'], Flipper::Types::PercentageOfActors)
-            validate_percentage!(gates['percentage_of_time'], Flipper::Types::PercentageOfTime)
+            gates['percentage_of_actors'] = validate_percentage!(
+              gates['percentage_of_actors'],
+              Flipper::Types::PercentageOfActors
+            )
+            gates['percentage_of_time'] = validate_percentage!(
+              gates['percentage_of_time'],
+              Flipper::Types::PercentageOfTime
+            )
 
             expression = gates['expression']
             return if expression.nil?
@@ -95,7 +101,11 @@ module Flipper
             if value.is_a?(String) && !ParameterParsing.valid_percentage_string?(value)
               invalid_import!
             end
-            type.new(ParameterParsing.normalize_percentage(value || 0))
+            return if value.nil?
+
+            normalized = ParameterParsing.normalize_percentage(value)
+            type.new(normalized)
+            normalized
           end
 
           def invalid_import!
