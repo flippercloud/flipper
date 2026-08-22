@@ -160,6 +160,26 @@ RSpec.describe Flipper::Expression::Builder do
     expect(expression).to eq(build({ PercentageOfActors: [ "User;1", 40 ] }))
   end
 
+  it "can convert to Include" do
+    expression = Flipper.property(:roles).include("admin")
+    expect(expression).to eq(build({ Include: [{ Property: ["roles"] }, "admin"] }))
+  end
+
+  it "can convert to Exclude" do
+    expression = Flipper.property(:roles).exclude("admin")
+    expect(expression).to eq(build({ Exclude: [{ Property: ["roles"] }, "admin"] }))
+  end
+
+  it "can convert to In" do
+    expression = Flipper.property(:role).in(["admin", "support"])
+    expect(expression).to eq(build({ In: [{ Property: ["role"] }, ["admin", "support"]] }))
+  end
+
+  it "can convert to NotIn" do
+    expression = Flipper.property(:role).not_in(["admin", "support"])
+    expect(expression).to eq(build({ NotIn: [{ Property: ["role"] }, ["admin", "support"]] }))
+  end
+
   context "All" do
     describe "#all" do
       it "returns self" do
