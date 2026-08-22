@@ -81,7 +81,7 @@ Like Flipper and want more? Check out [Flipper Cloud](https://www.flippercloud.i
 - **permissions** &mdash; grant access to everyone in your organization or lockdown each project to particular people. You can even limit access to a particular environment (like production) to specific people.
 - **audit history** &mdash; every feature change and who made it.
 - **rollbacks** &mdash; enable or disable a feature accidentally? No problem. You can roll back to any point in the audit history with a single click.
-- **maintenance** &mdash; we'll keep the lights on for you. We also have handy webhooks and background polling for keeping your app in sync with Cloud, so **our availability won't affect yours**. All your feature flag reads are local to your app.
+- **maintenance** &mdash; we'll keep the lights on for you. We also have handy webhooks and background polling for keeping your app in sync with Cloud, so **our availability won't affect yours**. Feature flag reads are served from process-local memory while synchronization keeps your configured local adapter up to date.
 - **everything in one place** &mdash; no need to bounce around from different application UIs or IRB consoles.
 
 [![Flipper Cloud Screenshot](docs/images/flipper_cloud.png)](https://www.flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=screenshot)
