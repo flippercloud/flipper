@@ -703,6 +703,29 @@ RSpec.describe 'Flipper API mutation input handling' do
     expect(adapter_state).to eq(baseline_state)
   end
 
+  [
+    {features: {bad: {}}},
+    {features: {bad: {actors: nil, groups: []}}},
+    {features: {bad: {actors: [], groups: nil}}},
+  ].each do |payload|
+    it "normalizes sparse import set gates for #{payload.inspect}" do
+      post '/import', JSON.generate(payload), 'CONTENT_TYPE' => 'application/json'
+
+      expect(last_response.status).to eq(204)
+
+      post '/features/bad/actors',
+           JSON.generate(flipper_id: 'User;normalized'),
+           'CONTENT_TYPE' => 'application/json'
+      post '/features/bad/groups',
+           JSON.generate(name: 'admins'),
+           'CONTENT_TYPE' => 'application/json'
+
+      expect(last_response.status).to eq(200)
+      expect(flipper[:bad].actors_value).to include('User;normalized')
+      expect(flipper[:bad].groups_value).to include('admins')
+    end
+  end
+
   it 'continues to accept imported expressions with valid deterministic domains' do
     expression = {
       LessThan: [

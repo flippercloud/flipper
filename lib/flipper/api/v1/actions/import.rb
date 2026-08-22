@@ -35,15 +35,16 @@ module Flipper
             max = Flipper::Exporters::Json::Export::MAX_BYTES
             # Read at most one byte past the limit so an oversized body is caught
             # without buffering the whole thing into memory.
-            body = request.body.read(max + 1) || ""
+            body = ParameterParsing.read_bounded(request.body, max + 1)
             request.body.rewind if request.body.respond_to?(:rewind)
             json_error_response(:import_invalid) if body.bytesize > max
             body
           end
 
           def build_import_export(body)
-            validate_import_payload!(ParameterParsing.parse_json(body))
-            Flipper::Exporters::Json::Export.new(contents: body)
+            payload = ParameterParsing.parse_json(body)
+            validate_import_payload!(payload)
+            Flipper::Exporters::Json::Export.new(contents: Typecast.to_json(payload))
           rescue JSON::ParserError, Flipper::Exporters::Json::InvalidError
             json_error_response(:import_invalid)
           end
@@ -64,8 +65,7 @@ module Flipper
 
           def validate_gate_values!(gates)
             %w[actors groups].each do |gate|
-              value = gates[gate]
-              next if value.nil?
+              value = gates[gate] ||= []
               invalid_import! unless value.is_a?(Array)
               invalid_import! unless value.all? { |item| item.is_a?(String) }
             end
@@ -93,6 +93,10 @@ module Flipper
 
           def invalid_import!
             raise Flipper::Exporters::Json::InvalidError
+          end
+
+          def parse_request_params?
+            false
           end
         end
       end

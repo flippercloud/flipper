@@ -91,7 +91,7 @@ module Flipper
       def run
         if valid_request_method? && respond_to?(request_method_name)
           catch(:halt) do
-            if mutation_request? && !json_request? && params_invalid?
+            if mutation_request? && !json_request? && parse_request_params? && params_invalid?
               json_error_response(:request_invalid)
             end
             send(request_method_name)
@@ -201,6 +201,10 @@ module Flipper
 
       def params_invalid?
         params_parse_failed? || !ParameterParsing.valid_encoding?(safe_params)
+      end
+
+      def parse_request_params?
+        true
       end
 
       # Private: Returns a valid String parameter, ignoring other shapes and

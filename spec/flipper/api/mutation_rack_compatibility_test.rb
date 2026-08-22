@@ -25,7 +25,7 @@ class MutationRackCompatibilityTest < Minitest::Test
     end
   end
 
-  class SecondReadRangeErrorInput
+  class PostEOFRangeErrorInput
     attr_reader :reads
 
     def initialize(contents)
@@ -35,7 +35,8 @@ class MutationRackCompatibilityTest < Minitest::Test
 
     def read(*)
       @reads += 1
-      raise RangeError, 'second-read adapter failure' if @reads > 1
+      raise RangeError, 'post-EOF adapter failure' if @reads > 2
+      return if @reads == 2
 
       @contents
     end
@@ -44,10 +45,11 @@ class MutationRackCompatibilityTest < Minitest::Test
     end
   end
 
-  class SecondReadEOFInput < SecondReadRangeErrorInput
+  class PostEOFEOFInput < PostEOFRangeErrorInput
     def read(*)
       @reads += 1
-      raise EOFError, 'second-read adapter failure' if @reads > 1
+      raise EOFError, 'post-EOF adapter failure' if @reads > 2
+      return if @reads == 2
 
       @contents
     end
@@ -64,6 +66,29 @@ class MutationRackCompatibilityTest < Minitest::Test
 
       @read = true
       @contents
+    end
+  end
+
+  class ShortReadInput
+    attr_reader :reads
+
+    def initialize(*chunks)
+      @chunks = chunks
+      @index = 0
+      @reads = 0
+    end
+
+    def read(length = nil)
+      chunk = @chunks[@index]
+      @index += 1
+      @reads += 1
+      raise 'test chunk exceeds requested length' if chunk && length && chunk.bytesize > length
+
+      chunk
+    end
+
+    def rewind
+      @index = 0
     end
   end
 
@@ -290,19 +315,33 @@ class MutationRackCompatibilityTest < Minitest::Test
     assert_equal @baseline, adapter_state
   end
 
-  def test_multipart_labeled_import_is_rejected_without_mutation
-    body = JSON.generate(features: {created: {boolean: 'true'}})
-    assert_equal @baseline, adapter_state
+  def test_valid_import_remains_content_type_agnostic
+    gates = {
+      boolean: 'true',
+      groups: [],
+      actors: [],
+      expression: nil,
+      percentage_of_actors: nil,
+      percentage_of_time: nil,
+    }
+    body = JSON.generate(features: {'percent%FF' => gates})
 
-    response = raw_request(
-      '/import',
-      method: 'POST',
-      input: body,
-      'CONTENT_TYPE' => 'multipart/form-data; boundary=Aa'
-    )
+    [
+      'application/json',
+      'application/x-www-form-urlencoded',
+      'multipart/form-data; boundary=Aa',
+      'text/plain',
+    ].each do |content_type|
+      response = raw_request(
+        '/import',
+        method: 'POST',
+        input: body,
+        'CONTENT_TYPE' => content_type
+      )
 
-    assert_equal 400, response.first
-    assert_equal @baseline, adapter_state
+      assert_equal 204, response.first, content_type
+      assert_equal ['percent%FF'], @flipper.features.map(&:key), content_type
+    end
   end
 
   def test_form_values_preserve_literal_semicolons
@@ -647,6 +686,51 @@ class MutationRackCompatibilityTest < Minitest::Test
     assert_equal @baseline, adapter_state
   end
 
+  def test_short_reads_cannot_bypass_mutation_body_limit
+    body = JSON.generate(name: 'short_read_mutation')
+    input = ShortReadInput.new(body, 'x')
+    env = Rack::MockRequest.env_for(
+      '/features',
+      method: 'POST',
+      input: '',
+      'CONTENT_TYPE' => 'application/json'
+    )
+    env['rack.input'] = input
+    env['CONTENT_LENGTH'] = (body.bytesize + 1).to_s
+    assert_equal @baseline, adapter_state
+
+    with_replaced_constant(Flipper::Api::JsonParams, :MAX_MUTATION_BODY_BYTES, body.bytesize) do
+      status, = Flipper::Api.app(@flipper, use_rewindable_middleware: false).call(env)
+      assert_equal 400, status
+    end
+
+    assert_operator input.reads, :>, 1
+    assert_equal @baseline, adapter_state
+  end
+
+  def test_short_reads_cannot_bypass_import_body_limit
+    gates = {boolean: 'true', groups: [], actors: []}
+    body = JSON.generate(features: {replacement: gates})
+    input = ShortReadInput.new(body, 'x')
+    env = Rack::MockRequest.env_for(
+      '/import',
+      method: 'POST',
+      input: '',
+      'CONTENT_TYPE' => 'application/json'
+    )
+    env['rack.input'] = input
+    env['CONTENT_LENGTH'] = (body.bytesize + 1).to_s
+    assert_equal @baseline, adapter_state
+
+    with_replaced_constant(Flipper::Exporters::Json::Export, :MAX_BYTES, body.bytesize) do
+      status, = Flipper::Api.app(@flipper, use_rewindable_middleware: false).call(env)
+      assert_equal 422, status
+    end
+
+    assert_operator input.reads, :>, 1
+    assert_equal @baseline, adapter_state
+  end
+
   def test_body_io_range_errors_remain_visible
     assert_equal @baseline, adapter_state
     env = Rack::MockRequest.env_for(
@@ -663,8 +747,8 @@ class MutationRackCompatibilityTest < Minitest::Test
     assert_equal @baseline, adapter_state
   end
 
-  def test_validated_form_body_is_not_read_twice
-    [SecondReadEOFInput, SecondReadRangeErrorInput].each do |input_class|
+  def test_validated_form_body_is_not_read_after_eof
+    [PostEOFEOFInput, PostEOFRangeErrorInput].each do |input_class|
       app = Flipper::Api.app(@flipper, use_rewindable_middleware: false)
       body = "name=#{input_class.name.split('::').last}"
       input = input_class.new(body)
@@ -680,7 +764,7 @@ class MutationRackCompatibilityTest < Minitest::Test
       status, = app.call(env)
 
       assert_equal 200, status, input_class.name
-      assert_equal 1, input.reads, input_class.name
+      assert_equal 2, input.reads, input_class.name
       assert_includes @flipper.features.map(&:key), input_class.name.split('::').last
     end
   end
@@ -767,6 +851,16 @@ class MutationRackCompatibilityTest < Minitest::Test
   end
 
   private
+
+  def with_replaced_constant(owner, name, value)
+    original = owner.const_get(name)
+    owner.send(:remove_const, name)
+    owner.const_set(name, value)
+    yield
+  ensure
+    owner.send(:remove_const, name)
+    owner.const_set(name, original)
+  end
 
   def raw_request(path, options)
     env = Rack::MockRequest.env_for(path, options)

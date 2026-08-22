@@ -86,6 +86,17 @@ module Flipper
         true
       end
 
+      def self.read_bounded(input, limit)
+        body = ''.b
+        while body.bytesize < limit
+          chunk = input.read(limit - body.bytesize)
+          break if chunk.nil? || chunk.empty?
+
+          body << chunk
+        end
+        body
+      end
+
       def self.parse_json(data)
         parsed = JSON.parse(data, allow_duplicate_key: true)
         scan_json_value(data, skip_json_whitespace(data, 0))

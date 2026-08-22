@@ -111,10 +111,7 @@ module Flipper
       def prepare_mutation_body(env)
         content_encoding = env[CONTENT_ENCODING].to_s.strip.downcase
         raise InvalidRequestBody unless content_encoding.empty? || content_encoding == 'identity'
-        if import_request?(env)
-          raise InvalidRequestBody if multipart_request?(env)
-          return
-        end
+        return if import_request?(env)
 
         body = read_body(env, MAX_MUTATION_BODY_BYTES + 1)
         raise InvalidRequestBody if body.bytesize > MAX_MUTATION_BODY_BYTES
@@ -362,7 +359,7 @@ module Flipper
 
       def read_body(env, length = nil)
         input = env[REQUEST_BODY]
-        body = length ? input.read(length) : input.read
+        body = length ? ParameterParsing.read_bounded(input, length) : input.read
         body ||= ''
         if input.respond_to?(:rewind)
           input.rewind
