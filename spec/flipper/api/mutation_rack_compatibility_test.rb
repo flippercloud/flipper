@@ -137,6 +137,31 @@ class MutationRackCompatibilityTest < Minitest::Test
     end
   end
 
+  class NonIdempotentCloseIOWithoutClosed
+    attr_reader :close_calls
+
+    def initialize
+      @io = StringIO.new
+      @close_calls = 0
+    end
+
+    def <<(value)
+      @io << value
+      self
+    end
+
+    def rewind
+      @io.rewind
+    end
+
+    def close
+      @close_calls += 1
+      raise 'closed twice' if @close_calls > 1
+
+      @io.close
+    end
+  end
+
   def setup
     @flipper = Flipper.new(Flipper::Adapters::Memory.new)
     @flipper[:existing].enable
@@ -679,6 +704,38 @@ class MutationRackCompatibilityTest < Minitest::Test
   ensure
     Rack::Utils.multipart_file_limit = original_limit
     tempfiles.each { |tempfile| tempfile.close unless tempfile.closed? }
+  end
+
+  def test_multipart_file_limit_tracks_parser_close_without_closed_predicate
+    boundary = 'Aa'
+    body = "--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"one\"; filename=\"one.txt\"\r\n" \
+      "Content-Type: text/plain\r\n\r\none\r\n" \
+      "--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"two\"; filename=\"two.txt\"\r\n" \
+      "Content-Type: text/plain\r\n\r\ntwo\r\n" \
+      "--#{boundary}--\r\n"
+    env = Rack::MockRequest.env_for(
+      '/features/existing/boolean',
+      method: 'POST',
+      input: body,
+      'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
+    )
+    tempfiles = []
+    env['rack.multipart.tempfile_factory'] = lambda do |*, **|
+      NonIdempotentCloseIOWithoutClosed.new.tap { |tempfile| tempfiles << tempfile }
+    end
+    original_limit = Rack::Utils.multipart_file_limit
+    Rack::Utils.multipart_file_limit = 1
+    assert_equal @baseline, adapter_state
+
+    status, = @app.call(env)
+
+    assert_equal 400, status
+    assert_equal [1], tempfiles.map(&:close_calls)
+    assert_equal @baseline, adapter_state
+  ensure
+    Rack::Utils.multipart_file_limit = original_limit
   end
 
   def test_multipart_tempfile_io_parser_shaped_errors_remain_visible

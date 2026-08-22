@@ -43,6 +43,18 @@ module Flipper
 
         def initialize(original)
           @original = original
+          @close_called = false
+        end
+
+        def close(*args)
+          @close_called = true
+          original.public_send(:close, *args)
+        rescue StandardError => error
+          raise MultipartCallbackError.new(error)
+        end
+
+        def close_called?
+          @close_called
         end
 
         def respond_to_missing?(name, include_private = false)
@@ -330,9 +342,10 @@ module Flipper
 
           env['rack.multipart.tempfile_factory'.freeze] = lambda do |*args, **kwargs|
             io = factory.call(*args, **kwargs)
-            tempfiles << io
+            callback_io = MultipartCallbackIO.new(io)
+            tempfiles << callback_io
             registered_tempfiles << io unless registered_tempfiles.equal?(tempfiles)
-            MultipartCallbackIO.new(io)
+            callback_io
           rescue StandardError => error
             raise MultipartCallbackError.new(error)
           end
@@ -352,9 +365,10 @@ module Flipper
         active_error = $!
         cleanup_error = nil
         registered_tempfiles = env['rack.tempfiles'.freeze]
-        tempfiles.each do |tempfile|
+        tempfiles.each do |callback_io|
+          tempfile = callback_io.original
           begin
-            if tempfile.respond_to?(:closed?) && tempfile.closed?
+            if callback_io.close_called? || (tempfile.respond_to?(:closed?) && tempfile.closed?)
               tempfile.unlink if tempfile.respond_to?(:unlink)
             elsif tempfile.respond_to?(:close!)
               tempfile.close!
