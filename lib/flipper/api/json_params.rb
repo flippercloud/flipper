@@ -24,7 +24,37 @@ module Flipper
       MAX_MUTATION_BODY_BYTES = 1024 * 1024
       MUTATION_REQUEST_METHODS = ['POST'.freeze, 'PUT'.freeze, 'DELETE'.freeze].freeze
       InvalidRequestBody = Class.new(StandardError)
+      class MultipartCallbackError < StandardError
+        attr_reader :original
+
+        def initialize(original)
+          @original = original
+          super(original.message)
+          set_backtrace(original.backtrace)
+        end
+      end
+      class MultipartCallbackIO
+        attr_reader :original
+
+        def initialize(original)
+          @original = original
+        end
+
+        def respond_to_missing?(name, include_private = false)
+          original.respond_to?(name, include_private) || super
+        rescue StandardError => error
+          raise MultipartCallbackError.new(error)
+        end
+
+        def method_missing(name, *args, &block)
+          original.public_send(name, *args, &block)
+        rescue StandardError => error
+          raise MultipartCallbackError.new(error)
+        end
+      end
       private_constant :InvalidRequestBody
+      private_constant :MultipartCallbackError
+      private_constant :MultipartCallbackIO
 
       # Public: Merge request body params with query string params
       # This way can access all params with Rack::Request#params
@@ -68,7 +98,9 @@ module Flipper
 
         body = read_body(env, MAX_MUTATION_BODY_BYTES + 1)
         raise InvalidRequestBody if body.bytesize > MAX_MUTATION_BODY_BYTES
-        validate_form_params(env, body) if form_request?(env)
+        if form_request?(env)
+          cache_form_params(env, validate_form_params(env, body), form_vars: body)
+        end
         validate_multipart_params(env, body) if multipart_request?(env)
         body
       end
@@ -78,6 +110,8 @@ module Flipper
         combined = [query, body].reject(&:empty?).join('&')
         parsed = ParameterParsing.parse_nested_query(combined)
         raise InvalidRequestBody unless ParameterParsing.valid_encoding?(parsed)
+
+        ParameterParsing.parse_nested_query(body)
       rescue *ParameterParsing.errors
         raise InvalidRequestBody
       end
@@ -86,13 +120,15 @@ module Flipper
         return if body.empty?
 
         original, reversed, empty = normalized_multipart_bodies(env, body)
-        body_params = empty ? {} : parse_multipart(env, original)
-        parse_multipart(env, reversed) if reversed
+        body_params = empty ? {} : parse_multipart(env, original, use_application_factory: true)
+        parse_multipart(env, reversed, use_application_factory: false) if reversed
         query_params = ParameterParsing.parse_nested_query(env[QUERY_STRING].to_s)
 
         raise InvalidRequestBody unless ParameterParsing.valid_encoding?(body_params)
         raise InvalidRequestBody unless compatible_parameter_shapes?(query_params, body_params)
         cache_multipart_params(env, body_params)
+      rescue MultipartCallbackError => error
+        raise error.original
       rescue EOFError, *ParameterParsing.errors
         raise InvalidRequestBody
       end
@@ -114,15 +150,17 @@ module Flipper
         end
         parts.each { |part| validate_multipart_part!(part) }
 
+        preamble = body.byteslice(0, delimiters.first[0])
+        opening_prefix = body.byteslice(delimiters.first[0], 2) == "\r\n" ? "\r\n" : ""
+        epilogue = body.byteslice(delimiters.last[1], body.bytesize - delimiters.last[1])
+        separator = "\r\n--#{boundary}\r\n"
+        original = "#{preamble}#{opening_prefix}--#{boundary}\r\n" \
+          "#{parts.join(separator)}\r\n--#{boundary}--\r\n#{epilogue}"
         reversed = if parts.length > 1
-          preamble = body.byteslice(0, delimiters.first[0])
-          opening = body.byteslice(delimiters.first[0], delimiters.first[1] - delimiters.first[0])
-          closing = body.byteslice(delimiters.last[0], delimiters.last[1] - delimiters.last[0])
-          epilogue = body.byteslice(delimiters.last[1], body.bytesize - delimiters.last[1])
-          separator = "\r\n--#{boundary}\r\n"
-          "#{preamble}#{opening}#{parts.reverse.join(separator)}#{closing}#{epilogue}"
+          "#{preamble}#{opening_prefix}--#{boundary}\r\n" \
+            "#{parts.reverse.join(separator)}\r\n--#{boundary}--\r\n#{epilogue}"
         end
-        [body, reversed, false]
+        [original, reversed, false]
       end
 
       def multipart_delimiters(body, boundary)
@@ -159,17 +197,53 @@ module Flipper
         end
       end
 
-      def parse_multipart(env, body)
+      def parse_multipart(env, body, use_application_factory:)
         request_env = env.dup
         request_env.delete_if { |key, _| key.start_with?('rack.request.') }
         request_env[REQUEST_BODY] = StringIO.new(body)
         request_env['CONTENT_LENGTH'.freeze] = body.bytesize.to_s
-        Rack::Request.new(request_env).POST
+        prepare_multipart_factory(request_env, use_application_factory)
+        params = Rack::Request.new(request_env).POST
+        unwrap_multipart_callback_ios(params)
+      end
+
+      def prepare_multipart_factory(env, use_application_factory)
+        factory = env['rack.multipart.tempfile_factory'.freeze]
+        if use_application_factory
+          return unless factory
+
+          env['rack.multipart.tempfile_factory'.freeze] = lambda do |*args, **kwargs|
+            io = factory.call(*args, **kwargs)
+            MultipartCallbackIO.new(io)
+          rescue StandardError => error
+            raise MultipartCallbackError.new(error)
+          end
+        else
+          env['rack.multipart.tempfile_factory'.freeze] = lambda { |*, **| StringIO.new }
+        end
+      end
+
+      def unwrap_multipart_callback_ios(value)
+        case value
+        when Hash
+          value.each { |key, item| value[key] = unwrap_multipart_callback_ios(item) }
+        when Array
+          value.map! { |item| unwrap_multipart_callback_ios(item) }
+        when MultipartCallbackIO
+          value.original
+        else
+          value
+        end
       end
 
       def cache_multipart_params(env, params)
+        cache_form_params(env, params)
+      end
+
+      def cache_form_params(env, params, form_vars: nil)
         env['rack.request.form_hash'.freeze] = params
         env['rack.request.form_input'.freeze] = env[REQUEST_BODY]
+        env['rack.request.form_vars'.freeze] = form_vars unless form_vars.nil?
       end
 
       def compatible_parameter_shapes?(left, right)

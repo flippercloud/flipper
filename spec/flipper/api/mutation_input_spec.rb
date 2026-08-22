@@ -583,6 +583,19 @@ RSpec.describe 'Flipper API mutation input handling' do
     'percentage as a container' => {features: {bad: {percentage_of_time: []}}},
     'expression as an array' => {features: {bad: {expression: []}}},
     'unknown expression operator' => {features: {bad: {expression: {Unknown: []}}}},
+    'empty All expression' => {features: {bad: {expression: {All: []}}}},
+    'empty Any expression' => {features: {bad: {expression: {Any: []}}}},
+    'expression with too few arguments' => {features: {bad: {expression: {Equal: [1]}}}},
+    'expression with too many arguments' => {features: {bad: {expression: {Equal: [1, 1, 1]}}}},
+    'expression with multiple operators' => {
+      features: {bad: {expression: {Equal: [1, 1], Unknown: []}}},
+    },
+    'nested expression with multiple operators' => {
+      features: {bad: {expression: {All: [{Equal: [1, 1], Unknown: []}]}}},
+    },
+    'nested expression with the wrong arity' => {
+      features: {bad: {expression: {All: [{Equal: [1]}]}}},
+    },
     'unknown gate' => {features: {bad: {unknown: 'value'}}},
   }.each do |description, payload|
     it "rejects import #{description} before replacing adapter state" do

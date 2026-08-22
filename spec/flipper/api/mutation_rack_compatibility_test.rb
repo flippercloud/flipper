@@ -18,6 +18,8 @@ class MutationRackCompatibilityTest < Minitest::Test
   end
 
   class SecondReadRangeErrorInput
+    attr_reader :reads
+
     def initialize(contents)
       @contents = contents
       @reads = 0
@@ -34,6 +36,15 @@ class MutationRackCompatibilityTest < Minitest::Test
     end
   end
 
+  class SecondReadEOFInput < SecondReadRangeErrorInput
+    def read(*)
+      @reads += 1
+      raise EOFError, 'second-read adapter failure' if @reads > 1
+
+      @contents
+    end
+  end
+
   class ForwardOnlyInput
     def initialize(contents)
       @contents = contents
@@ -45,6 +56,17 @@ class MutationRackCompatibilityTest < Minitest::Test
 
       @read = true
       @contents
+    end
+  end
+
+  class FailingMultipartIO < StringIO
+    def initialize(error_class)
+      super()
+      @error_class = error_class
+    end
+
+    def <<(*)
+      raise @error_class, 'tempfile io failure'
     end
   end
 
@@ -160,6 +182,35 @@ class MutationRackCompatibilityTest < Minitest::Test
     assert_includes @flipper.features.map(&:key), 'framed_multipart'
   end
 
+  def test_valid_multipart_transport_padding_is_accepted
+    boundary = 'flipper-boundary'
+    bodies = {
+      'opening_padding' => "--#{boundary} \t\r\n" \
+        "Content-Disposition: form-data; name=\"name\"\r\n\r\n" \
+        "opening_padding\r\n" \
+        "--#{boundary}--\r\n",
+      'interpart_padding' => "--#{boundary}\r\n" \
+        "Content-Disposition: form-data; name=\"ignored\"\r\n\r\n" \
+        "value\r\n" \
+        "--#{boundary} \t\r\n" \
+        "Content-Disposition: form-data; name=\"name\"\r\n\r\n" \
+        "interpart_padding\r\n" \
+        "--#{boundary}--\r\n",
+    }
+
+    bodies.each do |name, body|
+      response = raw_request(
+        '/features',
+        method: 'POST',
+        input: body,
+        'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
+      )
+
+      assert_equal 200, response.first, name
+      assert_includes @flipper.features.map(&:key), name
+    end
+  end
+
   def test_json_query_and_body_shape_conflicts_are_client_errors_without_mutation
     assert_equal @baseline, adapter_state
     response = raw_request(
@@ -194,6 +245,78 @@ class MutationRackCompatibilityTest < Minitest::Test
 
     assert_equal 'tempfile failure', error.message
     assert_equal @baseline, adapter_state
+  end
+
+  def test_multipart_tempfile_factory_is_called_once
+    boundary = 'Aa'
+    body = multipart_with_file(boundary, 'factory_once')
+    env = Rack::MockRequest.env_for(
+      '/features',
+      method: 'POST',
+      input: body,
+      'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
+    )
+    calls = 0
+    env['rack.multipart.tempfile_factory'] = lambda do |*, **|
+      calls += 1
+      StringIO.new
+    end
+
+    status, = @app.call(env)
+
+    assert_equal 200, status
+    assert_equal 1, calls
+    assert_includes @flipper.features.map(&:key), 'factory_once'
+  end
+
+  def test_multipart_tempfile_factory_parser_shaped_errors_remain_visible
+    [EOFError, RangeError].each do |error_class|
+      boundary = 'Aa'
+      body = multipart_with_file(boundary, 'unreachable')
+      env = Rack::MockRequest.env_for(
+        '/features',
+        method: 'POST',
+        input: body,
+        'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
+      )
+      calls = 0
+      env['rack.multipart.tempfile_factory'] = lambda do |*, **|
+        calls += 1
+        raise error_class, 'tempfile failure'
+      end
+      assert_equal @baseline, adapter_state
+
+      error = assert_raises(error_class) { @app.call(env) }
+
+      assert_equal 'tempfile failure', error.message
+      assert_equal 1, calls
+      assert_equal @baseline, adapter_state
+    end
+  end
+
+  def test_multipart_tempfile_io_parser_shaped_errors_remain_visible
+    [EOFError, RangeError].each do |error_class|
+      boundary = 'Aa'
+      body = multipart_with_file(boundary, 'unreachable')
+      env = Rack::MockRequest.env_for(
+        '/features',
+        method: 'POST',
+        input: body,
+        'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
+      )
+      calls = 0
+      env['rack.multipart.tempfile_factory'] = lambda do |*, **|
+        calls += 1
+        FailingMultipartIO.new(error_class)
+      end
+      assert_equal @baseline, adapter_state
+
+      error = assert_raises(error_class) { @app.call(env) }
+
+      assert_equal 'tempfile io failure', error.message
+      assert_equal 1, calls
+      assert_equal @baseline, adapter_state
+    end
   end
 
   def test_forward_only_input_works_without_rewindable_middleware
@@ -249,21 +372,26 @@ class MutationRackCompatibilityTest < Minitest::Test
     assert_equal @baseline, adapter_state
   end
 
-  def test_range_errors_from_rack_input_during_parameter_access_remain_visible
-    assert_equal @baseline, adapter_state
-    env = Rack::MockRequest.env_for(
-      '/features',
-      method: 'POST',
-      input: '',
-      'CONTENT_TYPE' => 'application/x-www-form-urlencoded'
-    )
-    env['rack.input'] = SecondReadRangeErrorInput.new('name=new')
-    env['CONTENT_LENGTH'] = '8'
+  def test_validated_form_body_is_not_read_twice
+    [SecondReadEOFInput, SecondReadRangeErrorInput].each do |input_class|
+      app = Flipper::Api.app(@flipper, use_rewindable_middleware: false)
+      body = "name=#{input_class.name.split('::').last}"
+      input = input_class.new(body)
+      env = Rack::MockRequest.env_for(
+        '/features',
+        method: 'POST',
+        input: '',
+        'CONTENT_TYPE' => 'application/x-www-form-urlencoded'
+      )
+      env['rack.input'] = input
+      env['CONTENT_LENGTH'] = body.bytesize.to_s
 
-    error = assert_raises(RangeError) { @app.call(env) }
+      status, = app.call(env)
 
-    assert_equal 'second-read adapter failure', error.message
-    assert_equal @baseline, adapter_state
+      assert_equal 200, status, input_class.name
+      assert_equal 1, input.reads, input_class.name
+      assert_includes @flipper.features.map(&:key), input_class.name.split('::').last
+    end
   end
 
   def test_invalid_query_encoding_is_a_client_error_without_mutation
@@ -332,5 +460,15 @@ class MutationRackCompatibilityTest < Minitest::Test
 
   def adapter_state
     Marshal.load(Marshal.dump(@flipper.adapter.get_all))
+  end
+
+  def multipart_with_file(boundary, name)
+    "--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"name\"\r\n\r\n" \
+      "#{name}\r\n" \
+      "--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"upload\"; filename=\"file.txt\"\r\n" \
+      "Content-Type: text/plain\r\n\r\ncontents\r\n" \
+      "--#{boundary}--\r\n"
   end
 end
