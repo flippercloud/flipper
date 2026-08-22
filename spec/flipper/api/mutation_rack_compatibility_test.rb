@@ -443,6 +443,48 @@ class MutationRackCompatibilityTest < Minitest::Test
     end
   end
 
+  def test_boolean_expression_cannot_be_used_as_random_maximum
+    expression = {Random: [{PercentageOfActors: ['User;1', 50]}]}
+    assert_equal @baseline, adapter_state
+
+    direct_response = raw_request(
+      '/features/bad/expression',
+      method: 'POST',
+      input: JSON.generate(expression),
+      'CONTENT_TYPE' => 'application/json'
+    )
+
+    assert_equal 422, direct_response.first
+    assert_equal @baseline, adapter_state
+
+    import_response = raw_request(
+      '/import',
+      method: 'POST',
+      input: JSON.generate(features: {bad: {expression: expression}}),
+      'CONTENT_TYPE' => 'application/json'
+    )
+
+    assert_equal 422, import_response.first
+    assert_equal @baseline, adapter_state
+  end
+
+  def test_nonnumeric_import_percentages_do_not_replace_state
+    %w[percentage_of_actors percentage_of_time].each do |gate|
+      body = JSON.generate(features: {replacement: {gate => 'not-a-number'}})
+      assert_equal @baseline, adapter_state, gate
+
+      response = raw_request(
+        '/import',
+        method: 'POST',
+        input: body,
+        'CONTENT_TYPE' => 'application/json'
+      )
+
+      assert_equal 422, response.first, gate
+      assert_equal @baseline, adapter_state, gate
+    end
+  end
+
   def test_multipart_tempfile_factory_errors_remain_visible
     boundary = 'Aa'
     body = "--#{boundary}\r\n" \
@@ -464,6 +506,27 @@ class MutationRackCompatibilityTest < Minitest::Test
 
     assert_equal 'tempfile failure', error.message
     assert_equal @baseline, adapter_state
+  end
+
+  def test_multipart_filename_can_contain_parameter_looking_text
+    boundary = 'Aa'
+    body = "--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"name\"\r\n\r\n" \
+      "quoted_filename\r\n" \
+      "--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"upload\"; filename=\"a; name=fake\"\r\n" \
+      "Content-Type: text/plain\r\n\r\ncontents\r\n" \
+      "--#{boundary}--\r\n"
+
+    response = raw_request(
+      '/features',
+      method: 'POST',
+      input: body,
+      'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
+    )
+
+    assert_equal 200, response.first
+    assert_includes @flipper.features.map(&:key), 'quoted_filename'
   end
 
   def test_multipart_tempfile_factory_is_called_once

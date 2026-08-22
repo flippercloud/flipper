@@ -88,6 +88,7 @@ module Flipper
 
           def validate_percentage!(value, type)
             invalid_import! unless value.nil? || value.is_a?(String) || value.is_a?(Numeric)
+            invalid_import! if value.is_a?(String) && !value.match(/\d/)
             type.new(value || 0)
           end
 

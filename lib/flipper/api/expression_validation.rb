@@ -74,7 +74,7 @@ module Flipper
         end
         if expression.name == 'PercentageOfActors'
           validate_percentage(results[1])
-          return [false, nil]
+          return [true, false]
         end
         return [false, nil] unless VALIDATABLE_NAMES.include?(expression.name)
         return [false, nil] unless results.all?(&:first)

@@ -230,10 +230,27 @@ module Flipper
         raise InvalidRequestBody unless dispositions.length == 1
 
         disposition = dispositions.first.first
-        disposition_type = disposition.split(';', 2).first.to_s.strip
+        disposition_parts = split_multipart_header_parameters(disposition)
+        disposition_type = disposition_parts.shift.to_s.strip
         raise InvalidRequestBody unless disposition_type.casecmp('form-data') == 0
 
-        names = disposition.scan(/(?:\A|;)\s*name=(?:"((?:\\.|[^"])*)"|([^;\s]+))/i)
+        names = disposition_parts.each_with_object([]) do |part, result|
+          key, raw_value = part.split('=', 2)
+          next unless key.to_s.strip.casecmp('name') == 0
+
+          raise InvalidRequestBody if raw_value.nil?
+          value = raw_value.strip
+          if value.start_with?('"')
+            match = value.match(/\A"((?:\\.|[^"])*)"\z/m)
+            raise InvalidRequestBody unless match
+
+            result << [match[1], nil]
+          else
+            raise InvalidRequestBody unless value.match?(/\A[^;\s]+\z/)
+
+            result << [nil, value]
+          end
+        end
         raise InvalidRequestBody unless names.length == 1
 
         quoted_name = names.first.first
@@ -242,6 +259,34 @@ module Flipper
         if quoted_name && quoted_name.match?(/\\(?!["\\])/)
           raise InvalidRequestBody
         end
+      end
+
+      def split_multipart_header_parameters(value)
+        parts = []
+        current = +''
+        quoted = false
+        escaped = false
+        value.each_char do |character|
+          if escaped
+            current << character
+            escaped = false
+          elsif quoted && character == '\\'
+            current << character
+            escaped = true
+          elsif character == '"'
+            current << character
+            quoted = !quoted
+          elsif character == ';' && !quoted
+            parts << current
+            current = +''
+          else
+            current << character
+          end
+        end
+        raise InvalidRequestBody if quoted || escaped
+
+        parts << current
+        parts
       end
 
       def parse_multipart(env, body, boundary:, use_application_factory:)

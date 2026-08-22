@@ -37,6 +37,9 @@ RSpec.describe 'Flipper API mutation input handling' do
     'invalid percentage constant' => {Percentage: [false]},
     'invalid random maximum' => {Random: ['not-a-number']},
     'invalid actor percentage' => {PercentageOfActors: ['User;1', '40']},
+    'boolean expression used as a random maximum' => {
+      Random: [{PercentageOfActors: ['User;1', 50]}],
+    },
   }.freeze
 
   SCALAR_PARAMETER_SHAPES = [
@@ -665,6 +668,15 @@ RSpec.describe 'Flipper API mutation input handling' do
     },
     'expression with an invalid actor percentage' => {
       features: {bad: {expression: {PercentageOfActors: ['User;1', '40']}}},
+    },
+    'expression with a boolean random maximum' => {
+      features: {bad: {expression: {Random: [{PercentageOfActors: ['User;1', 50]}]}}},
+    },
+    'nonnumeric actor percentage' => {
+      features: {bad: {percentage_of_actors: 'not-a-number'}},
+    },
+    'nonnumeric time percentage' => {
+      features: {bad: {percentage_of_time: 'not-a-number'}},
     },
     'unknown gate' => {features: {bad: {unknown: 'value'}}},
   }.each do |description, payload|
