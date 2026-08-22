@@ -54,9 +54,9 @@ module Flipper
       #  configuration.instrumenter = ActiveSupport::Notifications
       attr_accessor :instrumenter
 
-      # Public: Local adapter that all reads should go to in order to ensure
-      # latency is low and resiliency is high. This adapter is automatically
-      # kept in sync with cloud.
+      # Public: Persistent local adapter that is automatically kept in sync
+      # with Cloud. Cloud hydrates a process-local Memory adapter from it once
+      # and mirrors writes to it while Memory serves feature reads.
       #
       #  # for example, to use active record you could do:
       #  configuration = Flipper::Cloud::Configuration.new
@@ -113,7 +113,7 @@ module Flipper
 
       # Public: Force a sync.
       def sync(cache_bust: false)
-        Flipper::Adapters::Sync::Synchronizer.new(local_adapter, http_adapter, {
+        Flipper::Adapters::Sync::Synchronizer.new(sync_adapter, http_adapter, {
           instrumenter: instrumenter,
           cache_bust: cache_bust,
         }).call
@@ -152,7 +152,7 @@ module Flipper
       private
 
       def app_adapter
-        read_adapter = sync_method == :webhook ? local_adapter : poll_adapter
+        read_adapter = sync_method == :webhook ? sync_adapter : poll_adapter
         Flipper::Adapters::DualWrite.new(read_adapter, http_adapter)
       end
 
@@ -165,7 +165,23 @@ module Flipper
       end
 
       def poll_adapter
-        Flipper::Adapters::Poll.new(poller, local_adapter)
+        Flipper::Adapters::Poll.new(poller, sync_adapter)
+      end
+
+      def sync_adapter
+        return @sync_adapter if @sync_adapter
+
+        @sync_adapter_lock.synchronize do
+          @sync_adapter ||= if @local_adapter_memory_backed || local_adapter.is_a?(Adapters::Memory)
+            local_adapter
+          else
+            @local_memory.import(local_adapter)
+            Flipper::Adapters::DualWrite.new(
+              @local_memory,
+              local_adapter,
+            )
+          end
+        end
       end
 
       def http_adapter
@@ -217,6 +233,9 @@ module Flipper
       end
 
       def setup_adapter(options)
+        @sync_adapter_lock = Mutex.new
+        @local_memory = Adapters::Memory.new(threadsafe: true)
+        @local_adapter_memory_backed = options.fetch(:local_adapter_memory_backed, false)
         set_option :local_adapter, options, default: -> { Adapters::Memory.new }, from_env: false
         @adapter_block = ->(adapter) { adapter }
       end
