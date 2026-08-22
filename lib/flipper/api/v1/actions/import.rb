@@ -1,5 +1,6 @@
 require 'flipper/exporters/json/export'
 require 'flipper/api/action'
+require 'flipper/api/expression_validation'
 require 'flipper/api/v1/decorators/feature'
 require 'flipper/expression'
 require 'flipper/types/percentage_of_actors'
@@ -20,7 +21,6 @@ module Flipper
             percentage_of_actors
             percentage_of_time
           ].freeze
-
           def post
             body = read_import_body
             export = build_import_export(body)
@@ -81,35 +81,9 @@ module Flipper
             expression = gates['expression']
             return if expression.nil?
             invalid_import! unless expression.is_a?(Hash)
-            validate_expression_shape!(expression)
-            built_expression = Flipper::Expression.build(expression)
-            invalid_import! if built_expression.empty_groups?
-            validate_expression_arity!(built_expression)
+            ExpressionValidation.build(expression)
           rescue ArgumentError, NameError
             invalid_import!
-          end
-
-          def validate_expression_shape!(node)
-            invalid_import! unless node.size == 1
-
-            arguments = node.values.first
-            Array(arguments).each do |argument|
-              validate_expression_shape!(argument) if argument.is_a?(Hash)
-            end
-          end
-
-          def validate_expression_arity!(expression)
-            parameters = expression.function.method(:call).parameters
-            required = parameters.count { |type, _| type == :req }
-            optional = parameters.count { |type, _| type == :opt }
-            has_rest = parameters.any? { |type, _| type == :rest }
-            argument_count = expression.args.length
-
-            invalid_import! if argument_count < required
-            invalid_import! if !has_rest && argument_count > required + optional
-            expression.args.each do |argument|
-              validate_expression_arity!(argument) if argument.is_a?(Flipper::Expression)
-            end
           end
 
           def validate_percentage!(value, type)

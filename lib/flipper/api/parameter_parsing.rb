@@ -65,10 +65,21 @@ module Flipper
       # Rack raises for scalar/container conflicts in one order but silently
       # accepts the reverse order. Parse both orderings so the result does not
       # depend on which client-controlled shape appeared last.
-      def self.parse_nested_query(data)
-        parsed = Rack::Utils.parse_nested_query(data)
-        parts = data.split(Rack::Utils::DEFAULT_SEP, -1)
-        Rack::Utils.parse_nested_query(parts.reverse.join('&')) if parts.length > 1
+      def self.parse_nested_query(data, separator = nil)
+        parsed = if separator
+          Rack::Utils.parse_nested_query(data, separator)
+        else
+          Rack::Utils.parse_nested_query(data)
+        end
+        parts = data.split(separator || Rack::Utils::DEFAULT_SEP, -1)
+        if parts.length > 1
+          reversed = parts.reverse.join('&')
+          if separator
+            Rack::Utils.parse_nested_query(reversed, separator)
+          else
+            Rack::Utils.parse_nested_query(reversed)
+          end
+        end
         parsed
       end
     end

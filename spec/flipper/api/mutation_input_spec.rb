@@ -28,6 +28,17 @@ RSpec.describe 'Flipper API mutation input handling' do
     'boolean' => 'true',
   }.freeze
 
+  INVALID_EXPRESSIONS = {
+    'multiple operators' => {Equal: [1, 1], Unknown: []},
+    'too few arguments' => {Equal: [1]},
+    'too many arguments' => {Equal: [1, 1, 1]},
+    'invalid time constant' => {Time: ['not-a-time']},
+    'invalid number constant' => {Number: [false]},
+    'invalid percentage constant' => {Percentage: [false]},
+    'invalid random maximum' => {Random: ['not-a-number']},
+    'invalid actor percentage' => {PercentageOfActors: ['User;1', '40']},
+  }.freeze
+
   SCALAR_PARAMETER_SHAPES = [
     ['/features', 'name'],
     ['/features/target/actors', 'flipper_id'],
@@ -130,6 +141,19 @@ RSpec.describe 'Flipper API mutation input handling' do
       post '/features/target/boolean', body, 'CONTENT_TYPE' => 'application/json'
 
       expect(last_response.status).to eq(400)
+      expect(adapter_state).to eq(baseline_state)
+    end
+  end
+
+  INVALID_EXPRESSIONS.each do |description, expression_payload|
+    it "rejects an expression with #{description} before direct mutation" do
+      expect(adapter_state).to eq(baseline_state)
+
+      post '/features/target/expression',
+           JSON.generate(expression_payload),
+           'CONTENT_TYPE' => 'application/json'
+
+      expect(last_response.status).to eq(422)
       expect(adapter_state).to eq(baseline_state)
     end
   end
@@ -263,16 +287,14 @@ RSpec.describe 'Flipper API mutation input handling' do
     end
   end
 
-  it 'rejects semicolon-separated conflicting form shapes on Rack 2 before mutation' do
-    skip 'Rack 3 treats semicolons as form data, not separators' if Gem::Version.new(Rack.release) >= Gem::Version.new('3.0.0')
-    expect(adapter_state).to eq(baseline_state)
-
-    post '/features/target/boolean',
-         'conflict[]=array;conflict=scalar',
+  it 'preserves semicolons inside form values' do
+    post '/features',
+         'name=semi;colon',
          'CONTENT_TYPE' => 'application/x-www-form-urlencoded'
 
-    expect(last_response.status).to eq(400)
-    expect(adapter_state).to eq(baseline_state)
+    expect(last_response.status).to eq(200)
+    expect(flipper.features.map(&:key)).to include('semi;colon')
+    expect(flipper.features.map(&:key)).not_to include('semi')
   end
 
   [
@@ -596,6 +618,21 @@ RSpec.describe 'Flipper API mutation input handling' do
     'nested expression with the wrong arity' => {
       features: {bad: {expression: {All: [{Equal: [1]}]}}},
     },
+    'expression with an invalid time constant' => {
+      features: {bad: {expression: {Time: ['not-a-time']}}},
+    },
+    'expression with an invalid number constant' => {
+      features: {bad: {expression: {Number: [false]}}},
+    },
+    'expression with an invalid percentage constant' => {
+      features: {bad: {expression: {Percentage: [false]}}},
+    },
+    'expression with an invalid random maximum' => {
+      features: {bad: {expression: {Random: ['not-a-number']}}},
+    },
+    'expression with an invalid actor percentage' => {
+      features: {bad: {expression: {PercentageOfActors: ['User;1', '40']}}},
+    },
     'unknown gate' => {features: {bad: {unknown: 'value'}}},
   }.each do |description, payload|
     it "rejects import #{description} before replacing adapter state" do
@@ -606,6 +643,22 @@ RSpec.describe 'Flipper API mutation input handling' do
       expect(last_response.status).to eq(422)
       expect(adapter_state).to eq(baseline_state)
     end
+  end
+
+  it 'continues to accept imported expressions with valid deterministic domains' do
+    expression = {
+      LessThan: [
+        {Time: ['2020-01-01T00:00:00Z']},
+        {Now: []},
+      ],
+    }
+    payload = {features: {valid_time: {expression: expression}}}
+
+    post '/import', JSON.generate(payload), 'CONTENT_TYPE' => 'application/json'
+
+    expect(last_response.status).to eq(204)
+    expect(flipper[:valid_time].expression_value).to eq(Flipper::Expression.build(expression).value)
+    expect(flipper[:valid_time].enabled?).to be(true)
   end
 
   class BoundedInput < StringIO

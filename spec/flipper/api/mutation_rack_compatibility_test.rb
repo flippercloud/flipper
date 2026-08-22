@@ -4,6 +4,8 @@ require 'json'
 require 'minitest/autorun'
 require 'pathname'
 require 'rack/mock'
+require 'rack/tempfile_reaper'
+require 'tempfile'
 require 'flipper'
 require 'flipper/api'
 
@@ -211,6 +213,36 @@ class MutationRackCompatibilityTest < Minitest::Test
     end
   end
 
+  def test_valid_quoted_multipart_boundary_preserves_leading_space
+    boundary = ' Aa'
+    body = "--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"name\"\r\n\r\n" \
+      "leading_space_boundary\r\n" \
+      "--#{boundary}--\r\n"
+    response = raw_request(
+      '/features',
+      method: 'POST',
+      input: body,
+      'CONTENT_TYPE' => "multipart/form-data; xboundary=wrong; boundary = \"#{boundary}\""
+    )
+
+    assert_equal 200, response.first
+    assert_includes @flipper.features.map(&:key), 'leading_space_boundary'
+  end
+
+  def test_form_values_preserve_literal_semicolons
+    response = raw_request(
+      '/features',
+      method: 'POST',
+      input: 'name=semi;colon',
+      'CONTENT_TYPE' => 'application/x-www-form-urlencoded'
+    )
+
+    assert_equal 200, response.first
+    assert_includes @flipper.features.map(&:key), 'semi;colon'
+    refute_includes @flipper.features.map(&:key), 'semi'
+  end
+
   def test_json_query_and_body_shape_conflicts_are_client_errors_without_mutation
     assert_equal @baseline, adapter_state
     response = raw_request(
@@ -317,6 +349,58 @@ class MutationRackCompatibilityTest < Minitest::Test
       assert_equal 1, calls
       assert_equal @baseline, adapter_state
     end
+  end
+
+  def test_multipart_tempfiles_close_with_the_response
+    boundary = 'Aa'
+    env = Rack::MockRequest.env_for(
+      '/features',
+      method: 'POST',
+      input: multipart_with_file(boundary, 'reaped_upload'),
+      'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
+    )
+    app = Rack::TempfileReaper.new(@app)
+
+    status, _, response_body = app.call(env)
+    tempfile = env.fetch('rack.request.form_hash').fetch('upload').fetch(:tempfile)
+
+    assert_equal 200, status
+    refute tempfile.closed?
+    response_body.close
+    assert tempfile.closed?
+  ensure
+    response_body.close if response_body && tempfile && !tempfile.closed?
+  end
+
+  def test_rejected_multipart_tempfiles_close_with_the_response
+    boundary = 'Aa'
+    body = multipart_with_file(boundary, 'unreachable')
+    env = Rack::MockRequest.env_for(
+      '/features/existing/boolean?upload=scalar',
+      method: 'POST',
+      input: body,
+      'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
+    )
+    tempfiles = []
+    env['rack.multipart.tempfile_factory'] = lambda do |*, **|
+      tempfile = Tempfile.new('flipper-upload')
+      tempfiles << tempfile
+      tempfile
+    end
+    app = Rack::TempfileReaper.new(@app)
+    assert_equal @baseline, adapter_state
+
+    status, _, response_body = app.call(env)
+
+    assert_equal 400, status
+    assert_equal 1, tempfiles.length
+    refute tempfiles.first.closed?
+    assert_equal @baseline, adapter_state
+    response_body.close
+    assert tempfiles.first.closed?
+  ensure
+    response_body.close if response_body && tempfiles.any? { |tempfile| !tempfile.closed? }
+    tempfiles.each { |tempfile| tempfile.close! unless tempfile.closed? }
   end
 
   def test_forward_only_input_works_without_rewindable_middleware

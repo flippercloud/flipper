@@ -106,12 +106,13 @@ module Flipper
       end
 
       def validate_form_params(env, body)
-        query = env[QUERY_STRING].to_s
-        combined = [query, body].reject(&:empty?).join('&')
-        parsed = ParameterParsing.parse_nested_query(combined)
-        raise InvalidRequestBody unless ParameterParsing.valid_encoding?(parsed)
+        query_params = ParameterParsing.parse_nested_query(env[QUERY_STRING].to_s)
+        body_params = ParameterParsing.parse_nested_query(body, '&')
+        raise InvalidRequestBody unless ParameterParsing.valid_encoding?(query_params)
+        raise InvalidRequestBody unless ParameterParsing.valid_encoding?(body_params)
+        raise InvalidRequestBody unless compatible_parameter_shapes?(query_params, body_params)
 
-        ParameterParsing.parse_nested_query(body)
+        body_params
       rescue *ParameterParsing.errors
         raise InvalidRequestBody
       end
@@ -119,9 +120,15 @@ module Flipper
       def validate_multipart_params(env, body)
         return if body.empty?
 
-        original, reversed, empty = normalized_multipart_bodies(env, body)
-        body_params = empty ? {} : parse_multipart(env, original, use_application_factory: true)
-        parse_multipart(env, reversed, use_application_factory: false) if reversed
+        original, reversed, empty, boundary = normalized_multipart_bodies(env, body)
+        body_params = if empty
+          {}
+        else
+          parse_multipart(env, original, boundary: boundary, use_application_factory: true)
+        end
+        if reversed
+          parse_multipart(env, reversed, boundary: boundary, use_application_factory: false)
+        end
         query_params = ParameterParsing.parse_nested_query(env[QUERY_STRING].to_s)
 
         raise InvalidRequestBody unless ParameterParsing.valid_encoding?(body_params)
@@ -134,16 +141,18 @@ module Flipper
       end
 
       def normalized_multipart_bodies(env, body)
-        match = env[CONTENT_TYPE].to_s.match(/boundary=(?:"([^"]*)"|([^;]*))/i)
+        match = env[CONTENT_TYPE].to_s.match(
+          /(?:\A|;)\s*boundary\s*=\s*(?:"([^"]*)"|([^;]*))/i
+        )
         raise InvalidRequestBody unless match
 
-        boundary = (match[1] || match[2]).to_s.strip
+        boundary = match[1] || match[2].to_s.strip
         raise InvalidRequestBody if boundary.empty?
 
         delimiters = multipart_delimiters(body, boundary)
         raise InvalidRequestBody if delimiters.empty?
         raise InvalidRequestBody unless delimiters.last[2]
-        return [body, nil, true] if delimiters.first[2]
+        return [body, nil, true, boundary] if delimiters.first[2]
 
         parts = delimiters.each_cons(2).map do |left, right|
           body.byteslice(left[1], right[0] - left[1])
@@ -160,7 +169,7 @@ module Flipper
           "#{preamble}#{opening_prefix}--#{boundary}\r\n" \
             "#{parts.reverse.join(separator)}\r\n--#{boundary}--\r\n#{epilogue}"
         end
-        [original, reversed, false]
+        [original, reversed, false, boundary]
       end
 
       def multipart_delimiters(body, boundary)
@@ -197,29 +206,38 @@ module Flipper
         end
       end
 
-      def parse_multipart(env, body, use_application_factory:)
+      def parse_multipart(env, body, boundary:, use_application_factory:)
         request_env = env.dup
         request_env.delete_if { |key, _| key.start_with?('rack.request.') }
         request_env[REQUEST_BODY] = StringIO.new(body)
+        request_env[CONTENT_TYPE] = "multipart/form-data; boundary=\"#{boundary}\""
         request_env['CONTENT_LENGTH'.freeze] = body.bytesize.to_s
-        prepare_multipart_factory(request_env, use_application_factory)
+        tempfiles = use_application_factory ? (env['rack.tempfiles'.freeze] ||= []) : []
+        prepare_multipart_factory(request_env, use_application_factory, tempfiles)
         params = Rack::Request.new(request_env).POST
         unwrap_multipart_callback_ios(params)
+      ensure
+        tempfiles.each(&:close) if tempfiles && !use_application_factory
       end
 
-      def prepare_multipart_factory(env, use_application_factory)
-        factory = env['rack.multipart.tempfile_factory'.freeze]
+      def prepare_multipart_factory(env, use_application_factory, tempfiles)
         if use_application_factory
-          return unless factory
+          factory = env['rack.multipart.tempfile_factory'.freeze] ||
+            Rack::Multipart::Parser::TEMPFILE_FACTORY
 
           env['rack.multipart.tempfile_factory'.freeze] = lambda do |*args, **kwargs|
             io = factory.call(*args, **kwargs)
+            tempfiles << io
             MultipartCallbackIO.new(io)
           rescue StandardError => error
             raise MultipartCallbackError.new(error)
           end
         else
-          env['rack.multipart.tempfile_factory'.freeze] = lambda { |*, **| StringIO.new }
+          env['rack.multipart.tempfile_factory'.freeze] = lambda do |*, **|
+            io = StringIO.new
+            tempfiles << io
+            io
+          end
         end
       end
 

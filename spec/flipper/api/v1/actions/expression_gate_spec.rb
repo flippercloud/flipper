@@ -121,6 +121,16 @@ RSpec.describe Flipper::Api::V1::Actions::ExpressionGate do
     end
   end
 
+  it 'does not classify adapter argument errors as invalid expressions' do
+    allow(flipper.adapter).to receive(:enable).and_raise(ArgumentError, 'adapter failure')
+
+    expect do
+      post '/features/my_feature/expression',
+           JSON.dump(expression.value),
+           'CONTENT_TYPE' => 'application/json'
+    end.to raise_error(ArgumentError, 'adapter failure')
+  end
+
   describe 'enable with empty group' do
     before do
       data = {"Any" => []}

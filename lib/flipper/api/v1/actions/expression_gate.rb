@@ -1,4 +1,5 @@
 require 'flipper/api/action'
+require 'flipper/api/expression_validation'
 require 'flipper/api/v1/decorators/feature'
 
 module Flipper
@@ -12,15 +13,10 @@ module Flipper
 
           def post
             feature = flipper[feature_name]
-
-            begin
-              expression = Flipper::Expression.build(expression_hash)
-              feature.enable_expression expression
-              decorated_feature = Decorators::Feature.new(feature)
-              json_response(decorated_feature.as_json, 200)
-            rescue NameError, ArgumentError
-              json_error_response(:expression_invalid)
-            end
+            expression = build_expression
+            feature.enable_expression expression
+            decorated_feature = Decorators::Feature.new(feature)
+            json_response(decorated_feature.as_json, 200)
           end
 
           def delete
@@ -32,6 +28,12 @@ module Flipper
           end
 
           private
+
+          def build_expression
+            ExpressionValidation.build(expression_hash)
+          rescue NameError, ArgumentError
+            json_error_response(:expression_invalid)
+          end
 
           def expression_hash
             @expression_hash ||= request.env["parsed_request_body".freeze] || {}.freeze
