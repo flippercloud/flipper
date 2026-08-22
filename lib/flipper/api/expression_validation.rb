@@ -1,4 +1,5 @@
 require 'flipper/expression'
+require 'flipper/types/percentage'
 
 module Flipper
   module Api
@@ -71,6 +72,10 @@ module Flipper
           end
           return [false, nil]
         end
+        if expression.name == 'PercentageOfActors'
+          validate_percentage(results[1])
+          return [false, nil]
+        end
         return [false, nil] unless VALIDATABLE_NAMES.include?(expression.name)
         return [false, nil] unless results.all?(&:first)
 
@@ -97,6 +102,16 @@ module Flipper
         end
       end
       private_class_method :validate_finite_number
+
+      def self.validate_percentage(result)
+        return unless result && result.first
+
+        value = result.last
+        raise ArgumentError unless value.is_a?(Numeric)
+
+        Flipper::Types::Percentage.new(value)
+      end
+      private_class_method :validate_percentage
     end
   end
 end

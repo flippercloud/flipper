@@ -42,7 +42,7 @@ module Flipper
           end
 
           def build_import_export(body)
-            validate_import_payload!(Typecast.from_json(body))
+            validate_import_payload!(ParameterParsing.parse_json(body))
             Flipper::Exporters::Json::Export.new(contents: body)
           rescue JSON::ParserError, Flipper::Exporters::Json::InvalidError
             json_error_response(:import_invalid)

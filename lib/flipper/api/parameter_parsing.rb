@@ -1,5 +1,6 @@
 require 'rack/utils'
 require 'rack/multipart'
+require 'json'
 
 module Flipper
   module Api
@@ -18,6 +19,8 @@ module Flipper
         :MultipartPartLimitError,
         :MultipartTotalPartLimitError,
       ].freeze
+      JSON_WHITESPACE_BYTES = [9, 10, 13, 32].freeze
+      private_constant :JSON_WHITESPACE_BYTES
 
       def self.errors
         parsers = [Rack::Utils]
@@ -82,6 +85,87 @@ module Flipper
         end
         true
       end
+
+      def self.parse_json(data)
+        parsed = JSON.parse(data, allow_duplicate_key: true)
+        scan_json_value(data, skip_json_whitespace(data, 0))
+        parsed
+      end
+
+      def self.scan_json_value(data, index)
+        index = skip_json_whitespace(data, index)
+        case data.getbyte(index)
+        when 123
+          scan_json_object(data, index + 1)
+        when 91
+          scan_json_array(data, index + 1)
+        when 34
+          scan_json_string(data, index)
+        else
+          index += 1 while index < data.bytesize && !JSON_WHITESPACE_BYTES.include?(data.getbyte(index)) &&
+            ![44, 93, 125].include?(data.getbyte(index))
+          index
+        end
+      end
+      private_class_method :scan_json_value
+
+      def self.scan_json_object(data, index)
+        keys = {}
+        index = skip_json_whitespace(data, index)
+        return index + 1 if data.getbyte(index) == 125
+
+        loop do
+          key_start = index
+          index = scan_json_string(data, index)
+          key = JSON.parse(data.byteslice(key_start, index - key_start))
+          raise JSON::ParserError, "duplicate key #{key.inspect}" if keys.key?(key)
+
+          keys[key] = true
+          index = skip_json_whitespace(data, index) + 1
+          index = scan_json_value(data, index)
+          index = skip_json_whitespace(data, index)
+          return index + 1 if data.getbyte(index) == 125
+
+          index = skip_json_whitespace(data, index + 1)
+        end
+      end
+      private_class_method :scan_json_object
+
+      def self.scan_json_array(data, index)
+        index = skip_json_whitespace(data, index)
+        return index + 1 if data.getbyte(index) == 93
+
+        loop do
+          index = scan_json_value(data, index)
+          index = skip_json_whitespace(data, index)
+          return index + 1 if data.getbyte(index) == 93
+
+          index = skip_json_whitespace(data, index + 1)
+        end
+      end
+      private_class_method :scan_json_array
+
+      def self.scan_json_string(data, index)
+        index += 1
+        while index < data.bytesize
+          case data.getbyte(index)
+          when 34
+            return index + 1
+          when 92
+            index += 2
+          else
+            index += 1
+          end
+        end
+        index
+      end
+      private_class_method :scan_json_string
+
+      def self.skip_json_whitespace(data, index)
+        index += 1 while JSON_WHITESPACE_BYTES.include?(data.getbyte(index))
+        index
+      end
+      private_class_method :skip_json_whitespace
 
       # Rack raises for scalar/container conflicts in one order but silently
       # accepts the reverse order. Parse both orderings so the result does not

@@ -111,7 +111,10 @@ module Flipper
       def prepare_mutation_body(env)
         content_encoding = env[CONTENT_ENCODING].to_s.strip.downcase
         raise InvalidRequestBody unless content_encoding.empty? || content_encoding == 'identity'
-        return if import_request?(env)
+        if import_request?(env)
+          raise InvalidRequestBody if multipart_request?(env)
+          return
+        end
 
         body = read_body(env, MAX_MUTATION_BODY_BYTES + 1)
         raise InvalidRequestBody if body.bytesize > MAX_MUTATION_BODY_BYTES
@@ -229,7 +232,11 @@ module Flipper
         dispositions = unfolded_headers.scan(/(?:\A|\r\n)Content-Disposition:([^\r\n]*)/i)
         raise InvalidRequestBody unless dispositions.length == 1
 
-        names = dispositions.first.first.scan(/(?:\A|;)\s*name=(?:"((?:\\.|[^"])*)"|([^;\s]+))/i)
+        disposition = dispositions.first.first
+        disposition_type = disposition.split(';', 2).first.to_s.strip
+        raise InvalidRequestBody unless disposition_type.casecmp('form-data') == 0
+
+        names = disposition.scan(/(?:\A|;)\s*name=(?:"((?:\\.|[^"])*)"|([^;\s]+))/i)
         raise InvalidRequestBody unless names.length == 1
 
         quoted_name = names.first.first
@@ -420,7 +427,7 @@ module Flipper
       end
 
       def parse_json_body(data)
-        Typecast.from_json(data)
+        ParameterParsing.parse_json(data)
       rescue JSON::ParserError
         raise InvalidRequestBody
       end

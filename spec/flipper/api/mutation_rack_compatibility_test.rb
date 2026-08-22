@@ -271,6 +271,40 @@ class MutationRackCompatibilityTest < Minitest::Test
     assert_includes @flipper.features.map(&:key), 'folded_disposition'
   end
 
+  def test_non_form_data_multipart_disposition_is_rejected_without_mutation
+    boundary = 'Aa'
+    body = "--#{boundary}\r\n" \
+      "Content-Disposition: attachment; name=\"name\"\r\n\r\n" \
+      "attached\r\n" \
+      "--#{boundary}--\r\n"
+    assert_equal @baseline, adapter_state
+
+    response = raw_request(
+      '/features',
+      method: 'POST',
+      input: body,
+      'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
+    )
+
+    assert_equal 400, response.first
+    assert_equal @baseline, adapter_state
+  end
+
+  def test_multipart_labeled_import_is_rejected_without_mutation
+    body = JSON.generate(features: {created: {boolean: 'true'}})
+    assert_equal @baseline, adapter_state
+
+    response = raw_request(
+      '/import',
+      method: 'POST',
+      input: body,
+      'CONTENT_TYPE' => 'multipart/form-data; boundary=Aa'
+    )
+
+    assert_equal 400, response.first
+    assert_equal @baseline, adapter_state
+  end
+
   def test_form_values_preserve_literal_semicolons
     response = raw_request(
       '/features',
@@ -308,6 +342,66 @@ class MutationRackCompatibilityTest < Minitest::Test
 
     assert_equal 400, response.first
     assert_equal @baseline, adapter_state
+  end
+
+  def test_duplicate_json_members_are_client_errors_without_mutation
+    [
+      '{"name":[],"name":"created"}',
+      '{"name":"created","name":[]}',
+    ].each do |body|
+      assert_equal @baseline, adapter_state, body
+      response = raw_request(
+        '/features',
+        method: 'POST',
+        input: body,
+        'CONTENT_TYPE' => 'application/json'
+      )
+
+      assert_equal 400, response.first, body
+      assert_equal @baseline, adapter_state, body
+    end
+  end
+
+  def test_duplicate_import_members_are_client_errors_without_mutation
+    [
+      '{"features":{"bad":{"boolean":[],"boolean":"true"}}}',
+      '{"features":{"bad":{"boolean":"true","boolean":[]}}}',
+    ].each do |body|
+      assert_equal @baseline, adapter_state, body
+      response = raw_request(
+        '/import',
+        method: 'POST',
+        input: body,
+        'CONTENT_TYPE' => 'application/json'
+      )
+
+      assert_equal 422, response.first, body
+      assert_equal @baseline, adapter_state, body
+    end
+  end
+
+  def test_invalid_actor_percentage_expressions_do_not_mutate_state
+    [-1, 200, 'not-a-number'].each do |percentage|
+      expression = {PercentageOfActors: [{Property: ['flipper_id']}, percentage]}
+      assert_equal @baseline, adapter_state, percentage.inspect
+
+      direct_response = raw_request(
+        '/features/bad/expression',
+        method: 'POST',
+        input: JSON.generate(expression),
+        'CONTENT_TYPE' => 'application/json'
+      )
+      import_response = raw_request(
+        '/import',
+        method: 'POST',
+        input: JSON.generate(features: {bad: {expression: expression}}),
+        'CONTENT_TYPE' => 'application/json'
+      )
+
+      assert_equal 422, direct_response.first, percentage.inspect
+      assert_equal 422, import_response.first, percentage.inspect
+      assert_equal @baseline, adapter_state, percentage.inspect
+    end
   end
 
   def test_multipart_tempfile_factory_errors_remain_visible
