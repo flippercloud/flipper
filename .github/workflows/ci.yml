@@ -2,6 +2,25 @@ name: CI
 on: [push]
 
 jobs:
+  rack-2-minimum:
+    name: Test flipper-api on Rack 2.0.9.4
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v7
+      - name: Set up Ruby 2.6
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '2.6'
+      - name: Install focused dependencies
+        run: |
+          gem install concurrent-ruby --version '< 2' --no-document
+          gem install minitest --version '5.15.0' --no-document
+          gem install rack --version '2.0.9.4' --no-document
+      - name: Run Rack 2.0.9.4 compatibility test
+        run: ruby -Ilib spec/flipper/api/rack_2_compatibility_test.rb
+
   test:
     name: Test on ruby ${{ matrix.ruby }} and rails ${{ matrix.rails }}
     runs-on: ubuntu-latest

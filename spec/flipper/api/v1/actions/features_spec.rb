@@ -4,6 +4,102 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
   let(:admin) { double 'Fake Fliper Thing', flipper_id: 10 }
 
   describe 'get' do
+    malformed_queries = {
+      'array-shaped exclude_gate_names' => 'exclude_gate_names[]=true',
+      'hash-shaped exclude_gates' => 'exclude_gates[a]=true',
+      'hash-shaped keys' => 'keys[a]=my_feature',
+      'nested array-shaped keys' => 'keys[][]=my_feature',
+      'a bare percent escape' => 'keys=%',
+      'a truncated percent escape' => 'keys=%2',
+      'an invalid percent escape in a value' => 'keys=%GG',
+      'an invalid percent escape in a key' => '%GG=value',
+      'invalid UTF-8 in a key' => '%FF=value&keys=my_feature',
+      'invalid UTF-8' => 'keys=%FF',
+      'conflicting parameter shapes' => 'a=1&a[]=2',
+      'excessive nesting' => "a#{'[a]' * 150}=1",
+      'excessive parameter count' => (1..5000).map { |index| "ignored#{index}=1" }.join('&'),
+    }
+
+    malformed_queries.each do |description, query|
+      it "fails open for #{description}" do
+        flipper[:my_feature].enable
+        expected_response = raw_api_get('/features', '')
+
+        response = raw_api_get('/features', query)
+
+        expect(response.first).to eq(200)
+        expect(response).to eq(expected_response)
+      end
+    end
+
+    it 'fully fails open when malformed syntax is combined with a valid option' do
+      flipper[:my_feature].enable
+      expected_response = raw_api_get('/features', '')
+
+      response = raw_api_get('/features', 'a=1&a[]=2&exclude_gate_names=true')
+
+      expect(response.first).to eq(200)
+      expect(response).to eq(expected_response)
+    end
+
+    separator_queries = [
+      '&exclude_gate_names=true',
+      '&&exclude_gate_names=true&&',
+      ';exclude_gate_names=true',
+      ';;exclude_gate_names=true;;',
+      'exclude_gate_names=true&&;;',
+    ]
+
+    separator_queries.each do |query|
+      it "preserves optional parameter semantics with empty query segments in #{query.inspect}" do
+        flipper[:my_feature].enable
+        expected_response = raw_api_get('/features', 'exclude_gate_names=true')
+
+        response = raw_api_get('/features', query)
+
+        expect(response.first).to eq(200)
+        expect(response).to eq(expected_response)
+      end
+    end
+
+    it 'fails open when decoding a raw query component raises ArgumentError' do
+      request = instance_double(Rack::Request, query_string: 'keys=%')
+      action = described_class.new(flipper, request)
+      allow(action).to receive(:safe_params).and_return('keys' => 'my_feature')
+      allow(Rack::Utils).to receive(:unescape).with('keys').and_return('keys')
+      allow(Rack::Utils).to receive(:unescape).with('%').and_raise(ArgumentError)
+
+      expect(action.send(:requested_feature_names)).to be_nil
+    end
+
+    it 'uses parsed keys when no raw keys parameter is present' do
+      request = instance_double(Rack::Request, query_string: 'other=value')
+      action = described_class.new(flipper, request)
+      allow(action).to receive(:safe_params).and_return('keys' => 'my_feature,other_feature')
+
+      expect(action.send(:requested_feature_names)).to eq(%w[my_feature other_feature])
+    end
+
+    {
+      'keys=my_feature&keys=other_feature' => %w[my_feature other_feature],
+      'keys=&keys=my_feature' => %w[my_feature],
+      '=&keys=my_feature&=value' => %w[my_feature],
+      'keys' => [],
+      'keys[]' => [],
+      'keys=' => [],
+    }.each do |query, expected_keys|
+      it "preserves duplicate and blank parameter semantics for #{query.inspect}" do
+        flipper[:my_feature].enable
+        flipper[:other_feature].disable
+
+        status, _, body = raw_api_get('/features', query)
+        keys = body.fetch('features').map { |feature| feature.fetch('key') }.sort
+
+        expect(status).to eq(200)
+        expect(keys).to eq(expected_keys.sort)
+      end
+    end
+
     context 'with flipper features' do
       before do
         flipper[:my_feature].enable
@@ -76,6 +172,40 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
         }
 
         get '/features', 'exclude_gate_names' => 'true'
+        expect(last_response.status).to eq(200)
+        expect(json_response).to eq(expected_response)
+      end
+
+      it 'responds without gates when instructed by param' do
+        get '/features', 'exclude_gates' => 'true'
+
+        expect(last_response.status).to eq(200)
+        expect(json_response).to eq(
+          'features' => [
+            {
+              'key' => 'my_feature',
+              'state' => 'on',
+            },
+          ]
+        )
+      end
+
+      it 'ignores a leading empty query segment' do
+        get '/features?exclude_gate_names=true'
+        expected_response = json_response
+
+        get '/features?&exclude_gate_names=true'
+
+        expect(last_response.status).to eq(200)
+        expect(json_response).to eq(expected_response)
+      end
+
+      it 'ignores consecutive and trailing empty query segments' do
+        get '/features?exclude_gate_names=true'
+        expected_response = json_response
+
+        get '/features?&&exclude_gate_names=true&&;'
+
         expect(last_response.status).to eq(200)
         expect(json_response).to eq(expected_response)
       end

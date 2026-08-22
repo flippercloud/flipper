@@ -10,8 +10,8 @@ module Flipper
 
           def get
             names = requested_feature_names
-            exclude_gates = params['exclude_gates']&.downcase == "true"
-            exclude_gate_names = params['exclude_gate_names']&.downcase == "true"
+            exclude_gates = query_string_param('exclude_gates')&.downcase == "true"
+            exclude_gate_names = query_string_param('exclude_gate_names')&.downcase == "true"
 
             features = if names
               if names.empty?
@@ -51,10 +51,16 @@ module Flipper
           private
 
           def requested_feature_names
-            keys = params['keys']
-            return keys.map(&:to_s) if keys.is_a?(Array)
+            request_params = safe_params
+            return nil unless request_params.key?('keys')
+
+            keys = request_params['keys']
+            return [] if keys.nil?
+            return nil unless valid_feature_keys?(keys)
+            return keys.map { |key| key || '' } if keys.is_a?(Array)
 
             raw_keys = raw_query_values("keys")
+            return nil unless raw_keys
             return decoded_feature_names if raw_keys.empty?
 
             raw_keys.flat_map do |keys|
@@ -68,17 +74,45 @@ module Flipper
           end
 
           def decoded_feature_names
-            keys = params['keys']
-            return nil unless keys
-
-            Array(keys).flat_map { |key| key.to_s.split(',') }
+            safe_params['keys'].split(',')
           end
 
           def raw_query_values(name)
-            request.query_string.to_s.split(/[&;]/).each_with_object([]) do |part, values|
+            values = []
+            request.query_string.to_s.split(/[&;]/).each do |part|
+              next if part.empty?
+
               key, value = part.split('=', 2)
-              values << value.to_s if Rack::Utils.unescape(key) == name
+              decoded_key = decoded_query_component(key)
+              return nil unless decoded_key
+              next unless decoded_key == name
+              return nil unless decoded_query_component(value.to_s)
+
+              values << value.to_s
             end
+            values
+          end
+
+          def query_string_param(name)
+            value = string_param(name)
+            return value if value || safe_params.key?(name)
+            return nil if params_parse_failed?
+
+            raw_values = raw_query_values(name)
+            Rack::Utils.unescape(raw_values.last) if raw_values && !raw_values.empty?
+          end
+
+          def valid_feature_keys?(keys)
+            return valid_param_string?(keys) unless keys.is_a?(Array)
+
+            keys.all? { |key| key.nil? || valid_param_string?(key) }
+          end
+
+          def decoded_query_component(value)
+            decoded = Rack::Utils.unescape(value)
+            decoded if decoded.valid_encoding?
+          rescue ArgumentError
+            nil
           end
         end
       end
