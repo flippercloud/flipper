@@ -158,6 +158,28 @@ RSpec.describe 'Flipper API mutation input handling' do
     end
   end
 
+  it 'rejects non-finite expression constants before direct mutation' do
+    expect(adapter_state).to eq(baseline_state)
+
+    post '/features/target/expression',
+         '{"Random":[1e10000]}',
+         'CONTENT_TYPE' => 'application/json'
+
+    expect([400, 422]).to include(last_response.status)
+    expect(adapter_state).to eq(baseline_state)
+  end
+
+  it 'rejects nested non-finite JSON numbers before a bodyless mutation' do
+    expect(adapter_state).to eq(baseline_state)
+
+    post '/features/target/boolean',
+         '{"ignored":{"value":1e10000}}',
+         'CONTENT_TYPE' => 'application/json'
+
+    expect(last_response.status).to eq(400)
+    expect(adapter_state).to eq(baseline_state)
+  end
+
   INVALID_FEATURE_NAME_MUTATIONS.each do |method, path, body, content_type|
     it "rejects invalid route encoding before #{method.to_s.upcase} #{path} mutates state" do
       expect(adapter_state).to eq(baseline_state)
@@ -643,6 +665,17 @@ RSpec.describe 'Flipper API mutation input handling' do
       expect(last_response.status).to eq(422)
       expect(adapter_state).to eq(baseline_state)
     end
+  end
+
+  it 'rejects import non-finite expression constants before replacing adapter state' do
+    expect(adapter_state).to eq(baseline_state)
+
+    post '/import',
+         '{"features":{"bad":{"expression":{"Random":[1e10000]}}}}',
+         'CONTENT_TYPE' => 'application/json'
+
+    expect(last_response.status).to eq(422)
+    expect(adapter_state).to eq(baseline_state)
   end
 
   it 'continues to accept imported expressions with valid deterministic domains' do

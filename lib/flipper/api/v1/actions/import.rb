@@ -50,7 +50,7 @@ module Flipper
 
           def validate_import_payload!(payload)
             invalid_import! unless payload.is_a?(Hash)
-            invalid_import! unless ParameterParsing.valid_encoding?(payload)
+            invalid_import! unless ParameterParsing.valid_json?(payload)
 
             features = payload['features']
             invalid_import! unless features.is_a?(Hash)

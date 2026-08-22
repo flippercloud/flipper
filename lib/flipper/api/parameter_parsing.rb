@@ -62,6 +62,27 @@ module Flipper
         true
       end
 
+      def self.valid_json?(object)
+        pending = [object]
+        until pending.empty?
+          value = pending.pop
+          case value
+          when String
+            return false unless value.valid_encoding?
+          when Float
+            return false unless value.finite?
+          when Array
+            pending.concat(value)
+          when Hash
+            value.each do |key, nested_value|
+              pending << key
+              pending << nested_value
+            end
+          end
+        end
+        true
+      end
+
       # Rack raises for scalar/container conflicts in one order but silently
       # accepts the reverse order. Parse both orderings so the result does not
       # depend on which client-controlled shape appeared last.

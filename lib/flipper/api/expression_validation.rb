@@ -58,6 +58,9 @@ module Flipper
 
       def self.validate_domains(expression)
         if expression.is_a?(Flipper::Expression::Constant)
+          value = expression.value
+          raise ArgumentError if value.is_a?(Float) && !value.finite?
+
           return [true, expression.value]
         end
 

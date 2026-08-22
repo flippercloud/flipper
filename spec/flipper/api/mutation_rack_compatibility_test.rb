@@ -10,6 +10,12 @@ require 'flipper'
 require 'flipper/api'
 
 class MutationRackCompatibilityTest < Minitest::Test
+  class FailingEnableAdapter < Flipper::Adapters::Memory
+    def enable(*)
+      raise 'adapter down'
+    end
+  end
+
   class RangeErrorInput
     def read(*)
       raise RangeError, 'adapter input failure'
@@ -243,6 +249,19 @@ class MutationRackCompatibilityTest < Minitest::Test
     refute_includes @flipper.features.map(&:key), 'semi'
   end
 
+  def test_form_values_apply_racks_terminal_nul_normalization
+    response = raw_request(
+      '/features/nul_actor/actors',
+      method: 'POST',
+      input: "flipper_id=User%3B123\0",
+      'CONTENT_TYPE' => 'application/x-www-form-urlencoded'
+    )
+
+    assert_equal 200, response.first
+    assert_includes @flipper[:nul_actor].actors_value, 'User;123'
+    refute_includes @flipper[:nul_actor].actors_value, "User;123\0"
+  end
+
   def test_json_query_and_body_shape_conflicts_are_client_errors_without_mutation
     assert_equal @baseline, adapter_state
     response = raw_request(
@@ -403,6 +422,33 @@ class MutationRackCompatibilityTest < Minitest::Test
     tempfiles.each { |tempfile| tempfile.close! unless tempfile.closed? }
   end
 
+  def test_multipart_tempfiles_close_when_the_adapter_raises
+    flipper = Flipper.new(FailingEnableAdapter.new)
+    app = Rack::TempfileReaper.new(Flipper::Api.app(flipper))
+    boundary = 'Aa'
+    env = Rack::MockRequest.env_for(
+      '/features/target/boolean',
+      method: 'POST',
+      input: multipart_with_file(boundary, 'ignored'),
+      'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
+    )
+    tempfiles = []
+    env['rack.multipart.tempfile_factory'] = lambda do |*, **|
+      tempfile = Tempfile.new('flipper-upload')
+      tempfiles << tempfile
+      tempfile
+    end
+
+    error = assert_raises(RuntimeError) { app.call(env) }
+
+    assert_equal 'adapter down', error.message
+    assert_equal 1, tempfiles.length
+    assert tempfiles.first.closed?
+    assert_empty env['rack.tempfiles']
+  ensure
+    tempfiles.each { |tempfile| tempfile.close! unless tempfile.closed? }
+  end
+
   def test_forward_only_input_works_without_rewindable_middleware
     app = Flipper::Api.app(@flipper, use_rewindable_middleware: false)
     body = JSON.generate(name: 'forward_only')
@@ -505,17 +551,25 @@ class MutationRackCompatibilityTest < Minitest::Test
   end
 
   def test_multipart_boundary_errors_are_client_errors_without_mutation
-    boundary = 'a' * 80
-    assert_equal @baseline, adapter_state
-    response = raw_request(
-      '/features',
-      method: 'POST',
-      input: "--#{boundary}--\r\n",
-      'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
-    )
+    {
+      'overlong' => ['a' * 71, nil],
+      'invalid character' => ['a@b', nil],
+      'trailing space' => ['Aa ', nil],
+      'duplicate parameter' => ['Aa', 'Bb'],
+    }.each do |description, (boundary, duplicate)|
+      content_type = "multipart/form-data; boundary=\"#{boundary}\""
+      content_type << "; boundary=#{duplicate}" if duplicate
+      assert_equal @baseline, adapter_state, description
+      response = raw_request(
+        '/features/existing/boolean',
+        method: 'POST',
+        input: "--#{boundary}--\r\n",
+        'CONTENT_TYPE' => content_type
+      )
 
-    assert_includes [400, 422], response.first
-    assert_equal @baseline, adapter_state
+      assert_equal 400, response.first, description
+      assert_equal @baseline, adapter_state, description
+    end
   end
 
   def test_truncated_multipart_is_a_client_error_without_mutation

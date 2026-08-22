@@ -23,6 +23,9 @@ module Flipper
       # Imports retain their separate 50 MiB streaming limit.
       MAX_MUTATION_BODY_BYTES = 1024 * 1024
       MUTATION_REQUEST_METHODS = ['POST'.freeze, 'PUT'.freeze, 'DELETE'.freeze].freeze
+      MULTIPART_TEMPFILES = 'flipper.api.multipart_tempfiles'.freeze
+      BOUNDARY_PARAMETER = /(?:\A|;)\s*boundary\s*=\s*(?:"([^"]*)"|([^;]*))/i
+      VALID_MULTIPART_BOUNDARY = /\A[-0-9A-Za-z'()+_,.\/:=? ]{0,69}[-0-9A-Za-z'()+_,.\/:=?]\z/n
       InvalidRequestBody = Class.new(StandardError)
       class MultipartCallbackError < StandardError
         attr_reader :original
@@ -55,6 +58,9 @@ module Flipper
       private_constant :InvalidRequestBody
       private_constant :MultipartCallbackError
       private_constant :MultipartCallbackIO
+      private_constant :MULTIPART_TEMPFILES
+      private_constant :BOUNDARY_PARAMETER
+      private_constant :VALID_MULTIPART_BOUNDARY
 
       # Public: Merge request body params with query string params
       # This way can access all params with Rack::Request#params
@@ -62,9 +68,16 @@ module Flipper
       # Allows app to handle x-www-url-form-encoded / application/json request
       # parameters the same way
       def call(env)
-        return invalid_request_response unless prepare_request(env)
-
-        @app.call(env)
+        response_returned = false
+        response = prepare_request(env) ? @app.call(env) : invalid_request_response
+        response_returned = true
+        response
+      ensure
+        begin
+          close_multipart_tempfiles(env) unless response_returned
+        ensure
+          env.delete(MULTIPART_TEMPFILES)
+        end
       end
 
       private
@@ -99,6 +112,7 @@ module Flipper
         body = read_body(env, MAX_MUTATION_BODY_BYTES + 1)
         raise InvalidRequestBody if body.bytesize > MAX_MUTATION_BODY_BYTES
         if form_request?(env)
+          body = normalize_form_body(body)
           cache_form_params(env, validate_form_params(env, body), form_vars: body)
         end
         validate_multipart_params(env, body) if multipart_request?(env)
@@ -115,6 +129,10 @@ module Flipper
         body_params
       rescue *ParameterParsing.errors
         raise InvalidRequestBody
+      end
+
+      def normalize_form_body(body)
+        body.end_with?("\0") ? body.byteslice(0, body.bytesize - 1) : body
       end
 
       def validate_multipart_params(env, body)
@@ -141,13 +159,14 @@ module Flipper
       end
 
       def normalized_multipart_bodies(env, body)
-        match = env[CONTENT_TYPE].to_s.match(
-          /(?:\A|;)\s*boundary\s*=\s*(?:"([^"]*)"|([^;]*))/i
-        )
-        raise InvalidRequestBody unless match
+        matches = env[CONTENT_TYPE].to_s.scan(BOUNDARY_PARAMETER)
+        raise InvalidRequestBody unless matches.length == 1
 
-        boundary = match[1] || match[2].to_s.strip
-        raise InvalidRequestBody if boundary.empty?
+        quoted, unquoted = matches.first
+        boundary = quoted || unquoted.to_s.strip
+        binary_boundary = boundary.dup.force_encoding(Encoding::BINARY)
+        raise InvalidRequestBody if boundary.bytesize > 70
+        raise InvalidRequestBody unless VALID_MULTIPART_BOUNDARY.match?(binary_boundary)
 
         delimiters = multipart_delimiters(body, boundary)
         raise InvalidRequestBody if delimiters.empty?
@@ -212,15 +231,26 @@ module Flipper
         request_env[REQUEST_BODY] = StringIO.new(body)
         request_env[CONTENT_TYPE] = "multipart/form-data; boundary=\"#{boundary}\""
         request_env['CONTENT_LENGTH'.freeze] = body.bytesize.to_s
-        tempfiles = use_application_factory ? (env['rack.tempfiles'.freeze] ||= []) : []
-        prepare_multipart_factory(request_env, use_application_factory, tempfiles)
+        if use_application_factory
+          tempfiles = env[MULTIPART_TEMPFILES] ||= []
+          registered_tempfiles = env['rack.tempfiles'.freeze] ||= []
+        else
+          tempfiles = []
+          registered_tempfiles = tempfiles
+        end
+        prepare_multipart_factory(
+          request_env,
+          use_application_factory,
+          tempfiles,
+          registered_tempfiles
+        )
         params = Rack::Request.new(request_env).POST
         unwrap_multipart_callback_ios(params)
       ensure
         tempfiles.each(&:close) if tempfiles && !use_application_factory
       end
 
-      def prepare_multipart_factory(env, use_application_factory, tempfiles)
+      def prepare_multipart_factory(env, use_application_factory, tempfiles, registered_tempfiles)
         if use_application_factory
           factory = env['rack.multipart.tempfile_factory'.freeze] ||
             Rack::Multipart::Parser::TEMPFILE_FACTORY
@@ -228,6 +258,7 @@ module Flipper
           env['rack.multipart.tempfile_factory'.freeze] = lambda do |*args, **kwargs|
             io = factory.call(*args, **kwargs)
             tempfiles << io
+            registered_tempfiles << io unless registered_tempfiles.equal?(tempfiles)
             MultipartCallbackIO.new(io)
           rescue StandardError => error
             raise MultipartCallbackError.new(error)
@@ -238,6 +269,21 @@ module Flipper
             tempfiles << io
             io
           end
+        end
+      end
+
+      def close_multipart_tempfiles(env)
+        tempfiles = env[MULTIPART_TEMPFILES]
+        return unless tempfiles
+
+        registered_tempfiles = env['rack.tempfiles'.freeze]
+        tempfiles.each do |tempfile|
+          if tempfile.respond_to?(:close!)
+            tempfile.close!
+          elsif tempfile.respond_to?(:close)
+            tempfile.close
+          end
+          registered_tempfiles.delete(tempfile) if registered_tempfiles
         end
       end
 
@@ -333,7 +379,7 @@ module Flipper
         return if data.empty?
         parsed_request_body = parse_json_body(data)
         raise InvalidRequestBody unless parsed_request_body.is_a?(Hash)
-        raise InvalidRequestBody unless ParameterParsing.valid_encoding?(parsed_request_body)
+        raise InvalidRequestBody unless ParameterParsing.valid_json?(parsed_request_body)
 
         env["parsed_request_body".freeze] = parsed_request_body
         if mutation_request?(env)
