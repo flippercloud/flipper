@@ -24,8 +24,10 @@ module Flipper
       MAX_MUTATION_BODY_BYTES = 1024 * 1024
       MUTATION_REQUEST_METHODS = ['POST'.freeze, 'PUT'.freeze, 'DELETE'.freeze].freeze
       MULTIPART_TEMPFILES = 'flipper.api.multipart_tempfiles'.freeze
-      BOUNDARY_PARAMETER = /(?:\A|;)\s*boundary\s*=\s*(?:"([^"]*)"|([^;]*))/i
+      BOUNDARY_ASSIGNMENT = /(?:\A|;)[ \t]*boundary[ \t]*=/i
+      BOUNDARY_PARAMETER = /(?:\A|;)[ \t]*boundary[ \t]*=[ \t]*(?:"([^"]*)"|([^; \t]+))[ \t]*(?=;|\z)/i
       VALID_MULTIPART_BOUNDARY = /\A[-0-9A-Za-z'()+_,.\/:=? ]{0,69}[-0-9A-Za-z'()+_,.\/:=?]\z/n
+      VALID_UNQUOTED_MULTIPART_BOUNDARY = /\A[!#$%&'*+\-.^_`|~0-9A-Za-z]+\z/n
       InvalidRequestBody = Class.new(StandardError)
       class MultipartCallbackError < StandardError
         attr_reader :original
@@ -59,8 +61,10 @@ module Flipper
       private_constant :MultipartCallbackError
       private_constant :MultipartCallbackIO
       private_constant :MULTIPART_TEMPFILES
+      private_constant :BOUNDARY_ASSIGNMENT
       private_constant :BOUNDARY_PARAMETER
       private_constant :VALID_MULTIPART_BOUNDARY
+      private_constant :VALID_UNQUOTED_MULTIPART_BOUNDARY
 
       # Public: Merge request body params with query string params
       # This way can access all params with Rack::Request#params
@@ -136,9 +140,10 @@ module Flipper
       end
 
       def validate_multipart_params(env, body)
+        boundary = multipart_boundary(env)
         return if body.empty?
 
-        original, reversed, empty, boundary = normalized_multipart_bodies(env, body)
+        original, reversed, empty = normalized_multipart_bodies(body, boundary)
         body_params = if empty
           {}
         else
@@ -158,20 +163,29 @@ module Flipper
         raise InvalidRequestBody
       end
 
-      def normalized_multipart_bodies(env, body)
-        matches = env[CONTENT_TYPE].to_s.scan(BOUNDARY_PARAMETER)
-        raise InvalidRequestBody unless matches.length == 1
+      def multipart_boundary(env)
+        content_type = env[CONTENT_TYPE].to_s
+        assignments = content_type.scan(BOUNDARY_ASSIGNMENT)
+        matches = content_type.scan(BOUNDARY_PARAMETER)
+        raise InvalidRequestBody unless assignments.length == 1 && matches.length == 1
 
         quoted, unquoted = matches.first
-        boundary = quoted || unquoted.to_s.strip
+        boundary = quoted || unquoted
         binary_boundary = boundary.dup.force_encoding(Encoding::BINARY)
+        if unquoted
+          raise InvalidRequestBody unless VALID_UNQUOTED_MULTIPART_BOUNDARY.match?(binary_boundary)
+        end
         raise InvalidRequestBody if boundary.bytesize > 70
         raise InvalidRequestBody unless VALID_MULTIPART_BOUNDARY.match?(binary_boundary)
 
+        boundary
+      end
+
+      def normalized_multipart_bodies(body, boundary)
         delimiters = multipart_delimiters(body, boundary)
         raise InvalidRequestBody if delimiters.empty?
         raise InvalidRequestBody unless delimiters.last[2]
-        return [body, nil, true, boundary] if delimiters.first[2]
+        return [body, nil, true] if delimiters.first[2]
 
         parts = delimiters.each_cons(2).map do |left, right|
           body.byteslice(left[1], right[0] - left[1])
@@ -188,7 +202,7 @@ module Flipper
           "#{preamble}#{opening_prefix}--#{boundary}\r\n" \
             "#{parts.reverse.join(separator)}\r\n--#{boundary}--\r\n#{epilogue}"
         end
-        [original, reversed, false, boundary]
+        [original, reversed, false]
       end
 
       def multipart_delimiters(body, boundary)
@@ -211,7 +225,8 @@ module Flipper
         headers, separator, = part.partition("\r\n\r\n")
         raise InvalidRequestBody if separator.empty?
 
-        dispositions = headers.scan(/(?:\A|\r\n)Content-Disposition:([^\r\n]*)/i)
+        unfolded_headers = headers.gsub(/\r\n[ \t]+/, ' ')
+        dispositions = unfolded_headers.scan(/(?:\A|\r\n)Content-Disposition:([^\r\n]*)/i)
         raise InvalidRequestBody unless dispositions.length == 1
 
         names = dispositions.first.first.scan(/(?:\A|;)\s*name=(?:"((?:\\.|[^"])*)"|([^;\s]+))/i)
@@ -276,15 +291,23 @@ module Flipper
         tempfiles = env[MULTIPART_TEMPFILES]
         return unless tempfiles
 
+        active_error = $!
+        cleanup_error = nil
         registered_tempfiles = env['rack.tempfiles'.freeze]
         tempfiles.each do |tempfile|
-          if tempfile.respond_to?(:close!)
-            tempfile.close!
-          elsif tempfile.respond_to?(:close)
-            tempfile.close
+          begin
+            if tempfile.respond_to?(:close!)
+              tempfile.close!
+            elsif tempfile.respond_to?(:close)
+              tempfile.close
+            end
+          rescue StandardError => error
+            cleanup_error ||= error
+          ensure
+            registered_tempfiles.delete(tempfile) if registered_tempfiles
           end
-          registered_tempfiles.delete(tempfile) if registered_tempfiles
         end
+        raise cleanup_error if cleanup_error && active_error.nil?
       end
 
       def unwrap_multipart_callback_ios(value)

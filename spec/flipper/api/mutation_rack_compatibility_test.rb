@@ -78,6 +78,24 @@ class MutationRackCompatibilityTest < Minitest::Test
     end
   end
 
+  class CloseFailingMultipartIO < StringIO
+    attr_reader :close_calls
+
+    def initialize
+      super
+      @close_calls = 0
+    end
+
+    def close
+      @close_calls += 1
+      raise 'close down'
+    end
+
+    def force_close
+      StringIO.instance_method(:close).bind(self).call
+    end
+  end
+
   def setup
     @flipper = Flipper.new(Flipper::Adapters::Memory.new)
     @flipper[:existing].enable
@@ -234,6 +252,23 @@ class MutationRackCompatibilityTest < Minitest::Test
 
     assert_equal 200, response.first
     assert_includes @flipper.features.map(&:key), 'leading_space_boundary'
+  end
+
+  def test_valid_folded_multipart_disposition_is_accepted
+    boundary = 'Aa'
+    body = "--#{boundary}\r\n" \
+      "Content-Disposition: form-data;\r\n name=\"name\"\r\n\r\n" \
+      "folded_disposition\r\n" \
+      "--#{boundary}--\r\n"
+    response = raw_request(
+      '/features',
+      method: 'POST',
+      input: body,
+      'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
+    )
+
+    assert_equal 200, response.first
+    assert_includes @flipper.features.map(&:key), 'folded_disposition'
   end
 
   def test_form_values_preserve_literal_semicolons
@@ -449,6 +484,38 @@ class MutationRackCompatibilityTest < Minitest::Test
     tempfiles.each { |tempfile| tempfile.close! unless tempfile.closed? }
   end
 
+  def test_multipart_cleanup_preserves_adapter_error_and_attempts_every_close
+    flipper = Flipper.new(FailingEnableAdapter.new)
+    app = Rack::TempfileReaper.new(Flipper::Api.app(flipper))
+    boundary = 'Aa'
+    body = "--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"upload_one\"; filename=\"one.txt\"\r\n" \
+      "Content-Type: text/plain\r\n\r\none\r\n" \
+      "--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"upload_two\"; filename=\"two.txt\"\r\n" \
+      "Content-Type: text/plain\r\n\r\ntwo\r\n" \
+      "--#{boundary}--\r\n"
+    env = Rack::MockRequest.env_for(
+      '/features/target/boolean',
+      method: 'POST',
+      input: body,
+      'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
+    )
+    tempfiles = []
+    env['rack.multipart.tempfile_factory'] = lambda do |*, **|
+      CloseFailingMultipartIO.new.tap { |tempfile| tempfiles << tempfile }
+    end
+
+    error = assert_raises(RuntimeError) { app.call(env) }
+
+    assert_equal 'adapter down', error.message
+    assert_equal 2, tempfiles.length
+    assert_equal [1, 1], tempfiles.map(&:close_calls)
+    assert_empty env['rack.tempfiles']
+  ensure
+    tempfiles.each(&:force_close)
+  end
+
   def test_forward_only_input_works_without_rewindable_middleware
     app = Flipper::Api.app(@flipper, use_rewindable_middleware: false)
     body = JSON.generate(name: 'forward_only')
@@ -564,6 +631,26 @@ class MutationRackCompatibilityTest < Minitest::Test
         '/features/existing/boolean',
         method: 'POST',
         input: "--#{boundary}--\r\n",
+        'CONTENT_TYPE' => content_type
+      )
+
+      assert_equal 400, response.first, description
+      assert_equal @baseline, adapter_state, description
+    end
+  end
+
+  def test_malformed_multipart_boundary_syntax_is_a_client_error_without_mutation
+    {
+      'quoted boundary suffix' => ['multipart/form-data; boundary="Aa"junk', "--Aa--\r\n"],
+      'missing empty-body boundary' => ['multipart/form-data', ''],
+      'empty empty-body boundary' => ['multipart/form-data; boundary=', ''],
+      'invalid empty-body boundary' => ['multipart/form-data; boundary=a@b', ''],
+    }.each do |description, (content_type, body)|
+      assert_equal @baseline, adapter_state, description
+      response = raw_request(
+        '/features/existing/boolean',
+        method: 'POST',
+        input: body,
         'CONTENT_TYPE' => content_type
       )
 

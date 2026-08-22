@@ -169,6 +169,17 @@ RSpec.describe 'Flipper API mutation input handling' do
     expect(adapter_state).to eq(baseline_state)
   end
 
+  it 'rejects expression conversions to non-finite numbers before direct mutation' do
+    expect(adapter_state).to eq(baseline_state)
+
+    post '/features/target/expression',
+         JSON.generate(Random: [{Number: ['1.0e10000']}]),
+         'CONTENT_TYPE' => 'application/json'
+
+    expect(last_response.status).to eq(422)
+    expect(adapter_state).to eq(baseline_state)
+  end
+
   it 'rejects nested non-finite JSON numbers before a bodyless mutation' do
     expect(adapter_state).to eq(baseline_state)
 
@@ -673,6 +684,20 @@ RSpec.describe 'Flipper API mutation input handling' do
     post '/import',
          '{"features":{"bad":{"expression":{"Random":[1e10000]}}}}',
          'CONTENT_TYPE' => 'application/json'
+
+    expect(last_response.status).to eq(422)
+    expect(adapter_state).to eq(baseline_state)
+  end
+
+  it 'rejects import expression conversions to non-finite numbers before replacing adapter state' do
+    payload = {
+      features: {
+        bad: {expression: {Random: [{Number: ['1.0e10000']}]}},
+      },
+    }
+    expect(adapter_state).to eq(baseline_state)
+
+    post '/import', JSON.generate(payload), 'CONTENT_TYPE' => 'application/json'
 
     expect(last_response.status).to eq(422)
     expect(adapter_state).to eq(baseline_state)

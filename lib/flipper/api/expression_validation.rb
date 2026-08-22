@@ -59,7 +59,7 @@ module Flipper
       def self.validate_domains(expression)
         if expression.is_a?(Flipper::Expression::Constant)
           value = expression.value
-          raise ArgumentError if value.is_a?(Float) && !value.finite?
+          validate_finite_number(value)
 
           return [true, expression.value]
         end
@@ -84,11 +84,19 @@ module Flipper
         else
           expression.function.call(*values)
         end
+        validate_finite_number(value)
         [true, value]
       rescue TypeError, NoMethodError, RangeError
         raise ArgumentError
       end
       private_class_method :validate_domains
+
+      def self.validate_finite_number(value)
+        if value.is_a?(Numeric) && value.respond_to?(:finite?) && !value.finite?
+          raise ArgumentError
+        end
+      end
+      private_class_method :validate_finite_number
     end
   end
 end
