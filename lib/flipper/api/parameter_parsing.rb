@@ -20,7 +20,9 @@ module Flipper
         :MultipartTotalPartLimitError,
       ].freeze
       JSON_WHITESPACE_BYTES = [9, 10, 13, 32].freeze
+      PERCENTAGE_STRING = /\A[+-]?(?:\d+(?:\.\d*)?|\.\d+)\z/
       private_constant :JSON_WHITESPACE_BYTES
+      private_constant :PERCENTAGE_STRING
 
       def self.errors
         parsers = [Rack::Utils]
@@ -95,6 +97,10 @@ module Flipper
           body << chunk
         end
         body
+      end
+
+      def self.valid_percentage_string?(value)
+        value.is_a?(String) && PERCENTAGE_STRING.match?(value)
       end
 
       def self.parse_json(data)

@@ -40,6 +40,9 @@ RSpec.describe 'Flipper API mutation input handling' do
     'boolean expression used as a random maximum' => {
       Random: [{PercentageOfActors: ['User;1', 50]}],
     },
+    'dynamic boolean expression used as a random maximum' => {
+      Random: [{All: [{Property: ['plan']}]}],
+    },
   }.freeze
 
   SCALAR_PARAMETER_SHAPES = [
@@ -636,6 +639,8 @@ RSpec.describe 'Flipper API mutation input handling' do
     'groups as a string' => {features: {bad: {groups: 'not-an-array'}}},
     'groups with a non-string member' => {features: {bad: {groups: [1]}}},
     'actors as a hash' => {features: {bad: {actors: {id: 'User;2'}}}},
+    'actors as false' => {features: {bad: {actors: false, groups: []}}},
+    'groups as false' => {features: {bad: {actors: [], groups: false}}},
     'actors with a non-string member' => {features: {bad: {actors: [1]}}},
     'boolean as a container' => {features: {bad: {boolean: []}}},
     'percentage as a container' => {features: {bad: {percentage_of_time: []}}},
@@ -677,6 +682,12 @@ RSpec.describe 'Flipper API mutation input handling' do
     },
     'nonnumeric time percentage' => {
       features: {bad: {percentage_of_time: 'not-a-number'}},
+    },
+    'partially numeric actor percentage' => {
+      features: {bad: {percentage_of_actors: 'oops1'}},
+    },
+    'partially numeric time percentage' => {
+      features: {bad: {percentage_of_time: 'oops1'}},
     },
     'unknown gate' => {features: {bad: {unknown: 'value'}}},
   }.each do |description, payload|

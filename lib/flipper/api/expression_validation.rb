@@ -21,7 +21,29 @@ module Flipper
         String
         Time
       ].freeze
+      OUTPUT_DOMAINS = {
+        'All' => :boolean,
+        'Any' => :boolean,
+        'Boolean' => :boolean,
+        'Equal' => :boolean,
+        'FeatureEnabled' => :boolean,
+        'GreaterThan' => :boolean,
+        'GreaterThanOrEqualTo' => :boolean,
+        'LessThan' => :boolean,
+        'LessThanOrEqualTo' => :boolean,
+        'NotEqual' => :boolean,
+        'Now' => :time,
+        'Number' => :numeric,
+        'Percentage' => :numeric,
+        'PercentageOfActors' => :boolean,
+        'Random' => :numeric,
+        'String' => :string,
+        'Time' => :time,
+      }.freeze
+      ValidationResult = Struct.new(:known, :value, :domain)
       private_constant :VALIDATABLE_NAMES
+      private_constant :OUTPUT_DOMAINS
+      private_constant :ValidationResult
 
       def self.build(object)
         validate_shape(object)
@@ -62,24 +84,28 @@ module Flipper
           value = expression.value
           validate_finite_number(value)
 
-          return [true, expression.value]
+          return ValidationResult.new(true, value, value_domain(value))
         end
 
         results = expression.args.map { |argument| validate_domains(argument) }
         if expression.name == 'Random'
-          if results.first && results.first.first && !results.first.last.is_a?(Numeric)
-            raise ArgumentError
+          maximum = results.first
+          if maximum
+            invalid_domain = maximum.domain && maximum.domain != :numeric
+            invalid_value = maximum.known && !maximum.value.is_a?(Numeric)
+            raise ArgumentError if invalid_domain || invalid_value
           end
-          return [false, nil]
+          return ValidationResult.new(false, nil, :numeric)
         end
         if expression.name == 'PercentageOfActors'
           validate_percentage(results[1])
-          return [true, false]
+          return ValidationResult.new(false, nil, :boolean)
         end
-        return [false, nil] unless VALIDATABLE_NAMES.include?(expression.name)
-        return [false, nil] unless results.all?(&:first)
+        domain = OUTPUT_DOMAINS[expression.name]
+        return ValidationResult.new(false, nil, domain) unless VALIDATABLE_NAMES.include?(expression.name)
+        return ValidationResult.new(false, nil, domain) unless results.all?(&:known)
 
-        values = results.map(&:last)
+        values = results.map(&:value)
         parameters = expression.function.method(:call).parameters
         context = parameters.any? do |type, name|
           [:key, :keyreq].include?(type) && name == :context
@@ -90,7 +116,7 @@ module Flipper
           expression.function.call(*values)
         end
         validate_finite_number(value)
-        [true, value]
+        ValidationResult.new(true, value, domain || value_domain(value))
       rescue TypeError, NoMethodError, RangeError
         raise ArgumentError
       end
@@ -103,10 +129,26 @@ module Flipper
       end
       private_class_method :validate_finite_number
 
-      def self.validate_percentage(result)
-        return unless result && result.first
+      def self.value_domain(value)
+        case value
+        when Numeric
+          :numeric
+        when String
+          :string
+        when TrueClass, FalseClass
+          :boolean
+        when ::Time
+          :time
+        end
+      end
+      private_class_method :value_domain
 
-        value = result.last
+      def self.validate_percentage(result)
+        return unless result
+        raise ArgumentError if result.domain && result.domain != :numeric
+        return unless result.known
+
+        value = result.value
         raise ArgumentError unless value.is_a?(Numeric)
 
         Flipper::Types::Percentage.new(value)

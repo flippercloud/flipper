@@ -37,7 +37,7 @@ module Flipper
 
           def percentage
             @percentage ||= begin
-              unless percentage_param.match(/\d/)
+              unless ParameterParsing.valid_percentage_string?(percentage_param)
                 raise ArgumentError, "invalid numeric value: #{percentage_param}"
               end
 

@@ -65,7 +65,11 @@ module Flipper
 
           def validate_gate_values!(gates)
             %w[actors groups].each do |gate|
-              value = gates[gate] ||= []
+              value = gates[gate]
+              if value.nil?
+                value = []
+                gates[gate] = value
+              end
               invalid_import! unless value.is_a?(Array)
               invalid_import! unless value.all? { |item| item.is_a?(String) }
             end
@@ -88,7 +92,9 @@ module Flipper
 
           def validate_percentage!(value, type)
             invalid_import! unless value.nil? || value.is_a?(String) || value.is_a?(Numeric)
-            invalid_import! if value.is_a?(String) && !value.match(/\d/)
+            if value.is_a?(String) && !ParameterParsing.valid_percentage_string?(value)
+              invalid_import!
+            end
             type.new(value || 0)
           end
 

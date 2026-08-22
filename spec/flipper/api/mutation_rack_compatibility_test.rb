@@ -444,34 +444,39 @@ class MutationRackCompatibilityTest < Minitest::Test
   end
 
   def test_boolean_expression_cannot_be_used_as_random_maximum
-    expression = {Random: [{PercentageOfActors: ['User;1', 50]}]}
-    assert_equal @baseline, adapter_state
+    [
+      {Random: [{PercentageOfActors: ['User;1', 50]}]},
+      {Random: [{All: [{Property: ['plan']}]}]},
+    ].each do |expression|
+      assert_equal @baseline, adapter_state, expression.inspect
 
-    direct_response = raw_request(
-      '/features/bad/expression',
-      method: 'POST',
-      input: JSON.generate(expression),
-      'CONTENT_TYPE' => 'application/json'
-    )
+      direct_response = raw_request(
+        '/features/bad/expression',
+        method: 'POST',
+        input: JSON.generate(expression),
+        'CONTENT_TYPE' => 'application/json'
+      )
 
-    assert_equal 422, direct_response.first
-    assert_equal @baseline, adapter_state
+      assert_equal 422, direct_response.first, expression.inspect
+      assert_equal @baseline, adapter_state, expression.inspect
 
-    import_response = raw_request(
-      '/import',
-      method: 'POST',
-      input: JSON.generate(features: {bad: {expression: expression}}),
-      'CONTENT_TYPE' => 'application/json'
-    )
+      import_response = raw_request(
+        '/import',
+        method: 'POST',
+        input: JSON.generate(features: {bad: {expression: expression}}),
+        'CONTENT_TYPE' => 'application/json'
+      )
 
-    assert_equal 422, import_response.first
-    assert_equal @baseline, adapter_state
+      assert_equal 422, import_response.first, expression.inspect
+      assert_equal @baseline, adapter_state, expression.inspect
+    end
   end
 
   def test_nonnumeric_import_percentages_do_not_replace_state
-    %w[percentage_of_actors percentage_of_time].each do |gate|
-      body = JSON.generate(features: {replacement: {gate => 'not-a-number'}})
-      assert_equal @baseline, adapter_state, gate
+    %w[percentage_of_actors percentage_of_time].product(['not-a-number', 'oops1']).each do |gate, value|
+      body = JSON.generate(features: {replacement: {gate => value}})
+      description = "#{gate}=#{value}"
+      assert_equal @baseline, adapter_state, description
 
       response = raw_request(
         '/import',
@@ -480,8 +485,23 @@ class MutationRackCompatibilityTest < Minitest::Test
         'CONTENT_TYPE' => 'application/json'
       )
 
-      assert_equal 422, response.first, gate
-      assert_equal @baseline, adapter_state, gate
+      assert_equal 422, response.first, description
+      assert_equal @baseline, adapter_state, description
+    end
+  end
+
+  def test_numeric_import_percentage_strings_remain_accepted
+    {'0' => 0, '10' => 10, '10.5' => 10.5, '100' => 100}.each do |value, expected|
+      body = JSON.generate(features: {replacement: {percentage_of_time: value}})
+      response = raw_request(
+        '/import',
+        method: 'POST',
+        input: body,
+        'CONTENT_TYPE' => 'application/json'
+      )
+
+      assert_equal 204, response.first, value
+      assert_equal expected, @flipper[:replacement].percentage_of_time_value, value
     end
   end
 
@@ -622,7 +642,7 @@ class MutationRackCompatibilityTest < Minitest::Test
     response_body.close if response_body && tempfile && !tempfile.closed?
   end
 
-  def test_rejected_multipart_tempfiles_close_with_the_response
+  def test_rejected_multipart_tempfiles_close_without_an_outer_reaper
     boundary = 'Aa'
     body = multipart_with_file(boundary, 'unreachable')
     env = Rack::MockRequest.env_for(
@@ -637,19 +657,16 @@ class MutationRackCompatibilityTest < Minitest::Test
       tempfiles << tempfile
       tempfile
     end
-    app = Rack::TempfileReaper.new(@app)
     assert_equal @baseline, adapter_state
 
-    status, _, response_body = app.call(env)
+    status, _, response_body = @app.call(env)
 
     assert_equal 400, status
     assert_equal 1, tempfiles.length
-    refute tempfiles.first.closed?
-    assert_equal @baseline, adapter_state
-    response_body.close
     assert tempfiles.first.closed?
+    assert_empty env['rack.tempfiles']
+    assert_equal @baseline, adapter_state
   ensure
-    response_body.close if response_body && tempfiles.any? { |tempfile| !tempfile.closed? }
     tempfiles.each { |tempfile| tempfile.close! unless tempfile.closed? }
   end
 

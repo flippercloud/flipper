@@ -73,7 +73,16 @@ module Flipper
       # parameters the same way
       def call(env)
         response_returned = false
-        response = prepare_request(env) ? @app.call(env) : invalid_request_response
+        response = if prepare_request(env)
+          @app.call(env)
+        else
+          begin
+            close_multipart_tempfiles(env)
+          ensure
+            env.delete(MULTIPART_TEMPFILES)
+          end
+          invalid_request_response
+        end
         response_returned = true
         response
       ensure
