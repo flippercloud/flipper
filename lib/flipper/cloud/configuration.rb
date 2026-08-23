@@ -169,19 +169,17 @@ module Flipper
       end
 
       def sync_adapter
-        return @sync_adapter if @sync_adapter
-
         @sync_adapter_lock.synchronize do
-          @sync_adapter ||= if @local_adapter_memory_backed || local_adapter.is_a?(Adapters::Memory)
-            local_adapter
-          else
-            @local_memory.import(local_adapter)
-            Flipper::Adapters::DualWrite.new(
-              @local_memory,
-              local_adapter,
-            )
-          end
+          @sync_adapter ||= build_sync_adapter
         end
+      end
+
+      def build_sync_adapter
+        return local_adapter if @local_adapter_memory_backed || local_adapter.is_a?(Adapters::Memory)
+
+        memory = Adapters::Memory.new(threadsafe: true)
+        memory.import(local_adapter)
+        Flipper::Adapters::DualWrite.new(memory, local_adapter)
       end
 
       def http_adapter
@@ -234,7 +232,6 @@ module Flipper
 
       def setup_adapter(options)
         @sync_adapter_lock = Mutex.new
-        @local_memory = Adapters::Memory.new(threadsafe: true)
         @local_adapter_memory_backed = options.fetch(:local_adapter_memory_backed, false)
         set_option :local_adapter, options, default: -> { Adapters::Memory.new }, from_env: false
         @adapter_block = ->(adapter) { adapter }
