@@ -492,13 +492,12 @@ module Flipper
           end
         end
         parsed_query_string = parse_query(env[QUERY_STRING].to_s)
-        normalized_request_body = query_parameter_value(parsed_request_body)
-        parsed_query_string.merge!(normalized_request_body)
-        parsed_query_params.merge!(normalized_request_body)
+        parsed_query_string.merge!(parsed_request_body)
         parameters = build_query(parsed_query_string)
+        cached_params = ParameterParsing.parse_generated_nested_query(parameters)
         env[QUERY_STRING] = parameters
         env['rack.request.query_string'.freeze] = parameters
-        env['rack.request.query_hash'.freeze] = parsed_query_params
+        env['rack.request.query_hash'.freeze] = cached_params
       rescue *ParameterParsing.errors
         raise InvalidRequestBody
       end
@@ -507,21 +506,6 @@ module Flipper
         ParameterParsing.parse_json(data)
       rescue JSON::ParserError
         raise InvalidRequestBody
-      end
-
-      def query_parameter_value(value)
-        case value
-        when Hash
-          value.each_with_object({}) do |(key, nested_value), result|
-            result[key] = query_parameter_value(nested_value)
-          end
-        when Array
-          value.map { |nested_value| query_parameter_value(nested_value) }
-        when NilClass
-          nil
-        else
-          value.to_s
-        end
       end
     end
   end

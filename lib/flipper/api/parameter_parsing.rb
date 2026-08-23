@@ -212,6 +212,32 @@ module Flipper
         end
         parsed
       end
+
+      # JsonParams only calls this for a query it generated from a mutation
+      # body already bounded to MAX_MUTATION_BODY_BYTES. Use that known bound
+      # instead of Rack's smaller public-query limits so the cached result is
+      # exactly what Rack would parse from the rewritten query string.
+      def self.parse_generated_nested_query(query)
+        parser_class = Rack::QueryParser
+        initializer = parser_class.instance_method(:initialize).parameters
+        positional = initializer.select { |type, _| [:req, :opt].include?(type) }
+        keywords = initializer.select { |type, _| [:key, :keyreq].include?(type) }.map(&:last)
+        limit = query.bytesize + 1
+        depth = Rack::Utils.default_query_parser.param_depth_limit
+        arguments = [parser_class::Params]
+        if positional[1]&.last == :_key_space_limit
+          arguments << depth
+        elsif positional.length >= 3
+          arguments.concat([limit, depth])
+        else
+          arguments << depth
+        end
+        options = {}
+        options[:bytesize_limit] = limit if keywords.include?(:bytesize_limit)
+        options[:params_limit] = query.count('&') + 2 if keywords.include?(:params_limit)
+
+        parser_class.new(*arguments, **options).parse_nested_query(query)
+      end
     end
   end
 end

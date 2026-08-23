@@ -493,6 +493,30 @@ class MutationRackCompatibilityTest < Minitest::Test
     assert_equal @baseline, adapter_state
   end
 
+  def test_json_query_cache_matches_rewritten_query_semantics
+    cached_params = nil
+    reparsed_params = nil
+    json_params = Flipper::Api::JsonParams.new(lambda do |env|
+      cached_params = Rack::Request.new(env).params
+      env.delete('rack.request.query_hash')
+      env.delete('rack.request.query_string')
+      reparsed_params = Rack::Request.new(env).params
+      [200, {}, []]
+    end)
+    env = Rack::MockRequest.env_for(
+      '/features?filter[name]=query',
+      method: 'POST',
+      input: JSON.generate(body: {nested: 'yes'}, values: ['a', 'b']),
+      'CONTENT_TYPE' => 'application/json'
+    )
+
+    status, = json_params.call(env)
+
+    assert_equal 200, status
+    assert_equal reparsed_params, cached_params
+    assert_equal @baseline, adapter_state
+  end
+
   def test_duplicate_json_members_are_client_errors_without_mutation
     [
       '{"name":[],"name":"created"}',
