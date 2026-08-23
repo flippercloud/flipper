@@ -25,7 +25,7 @@ module Flipper
       MUTATION_REQUEST_METHODS = ['POST'.freeze, 'PUT'.freeze, 'DELETE'.freeze].freeze
       MULTIPART_TEMPFILES = 'flipper.api.multipart_tempfiles'.freeze
       BOUNDARY_ASSIGNMENT = /(?:\A|;)[ \t]*boundary[ \t]*=/i
-      BOUNDARY_PARAMETER = /(?:\A|;)[ \t]*boundary[ \t]*=[ \t]*(?:"([^"]*)"|([^; \t]+))[ \t]*(?=;|\z)/i
+      BOUNDARY_PARAMETER = /(?:\A|;)[ \t]*boundary[ \t]*=[ \t]*(?:"((?:[^"\\]|\\[\t !-~\x80-\xff])*)"|([^; \t]+))[ \t]*(?=;|\z)/in
       VALID_MULTIPART_BOUNDARY = /\A[-0-9A-Za-z'()+_,.\/:=? ]{0,69}[-0-9A-Za-z'()+_,.\/:=?]\z/n
       VALID_UNQUOTED_MULTIPART_BOUNDARY = /\A[!#$%&'*+\-.^_`|~0-9A-Za-z]+\z/n
       InvalidRequestBody = Class.new(StandardError)
@@ -43,18 +43,18 @@ module Flipper
 
         def initialize(original)
           @original = original
-          @close_called = false
+          @close_succeeded = false
         end
 
         def close(*args)
-          @close_called = true
           original.public_send(:close, *args)
+          @close_succeeded = true
         rescue StandardError => error
           raise MultipartCallbackError.new(error)
         end
 
-        def close_called?
-          @close_called
+        def close_succeeded?
+          @close_succeeded
         end
 
         def respond_to_missing?(name, include_private = false)
@@ -191,7 +191,7 @@ module Flipper
         raise InvalidRequestBody unless assignments.length == 1 && matches.length == 1
 
         quoted, unquoted = matches.first
-        boundary = quoted || unquoted
+        boundary = quoted ? decode_quoted_parameter(quoted) : unquoted
         binary_boundary = boundary.dup.force_encoding(Encoding::BINARY)
         if unquoted
           raise InvalidRequestBody unless VALID_UNQUOTED_MULTIPART_BOUNDARY.match?(binary_boundary)
@@ -200,6 +200,10 @@ module Flipper
         raise InvalidRequestBody unless VALID_MULTIPART_BOUNDARY.match?(binary_boundary)
 
         boundary
+      end
+
+      def decode_quoted_parameter(value)
+        value.gsub(/\\([\t !-~\x80-\xff])/n, '\\1')
       end
 
       def normalized_multipart_bodies(body, boundary)
@@ -368,7 +372,7 @@ module Flipper
         tempfiles.each do |callback_io|
           tempfile = callback_io.original
           begin
-            if callback_io.close_called? || (tempfile.respond_to?(:closed?) && tempfile.closed?)
+            if callback_io.close_succeeded? || (tempfile.respond_to?(:closed?) && tempfile.closed?)
               tempfile.unlink if tempfile.respond_to?(:unlink)
             elsif tempfile.respond_to?(:close!)
               tempfile.close!
@@ -486,9 +490,11 @@ module Flipper
           end
         end
         parsed_query_string = parse_query(env[QUERY_STRING].to_s)
-        parsed_query_string.merge!(parsed_request_body)
+        parsed_query_string.merge!(query_parameter_value(parsed_request_body))
         parameters = build_query(parsed_query_string)
         env[QUERY_STRING] = parameters
+        env['rack.request.query_string'.freeze] = parameters
+        env['rack.request.query_hash'.freeze] = parsed_query_string
       rescue *ParameterParsing.errors
         raise InvalidRequestBody
       end
@@ -497,6 +503,21 @@ module Flipper
         ParameterParsing.parse_json(data)
       rescue JSON::ParserError
         raise InvalidRequestBody
+      end
+
+      def query_parameter_value(value)
+        case value
+        when Hash
+          value.each_with_object({}) do |(key, nested_value), result|
+            result[key] = query_parameter_value(nested_value)
+          end
+        when Array
+          value.map { |nested_value| query_parameter_value(nested_value) }
+        when NilClass
+          nil
+        else
+          value.to_s
+        end
       end
     end
   end

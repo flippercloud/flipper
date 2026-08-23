@@ -52,6 +52,9 @@ RSpec.describe 'Flipper API mutation input handling' do
     'dynamic boolean expression used as a time value' => {
       Time: [{Boolean: [{Property: ['flag']}]}],
     },
+    'numeric root' => {Number: [0]},
+    'numeric child used by All' => {All: [{Number: [0]}]},
+    'string child used by Any' => {Any: [{String: ['']}]},
   }.freeze
 
   SCALAR_PARAMETER_SHAPES = [
@@ -679,6 +682,15 @@ RSpec.describe 'Flipper API mutation input handling' do
     },
     'expression with an invalid random maximum' => {
       features: {bad: {expression: {Random: ['not-a-number']}}},
+    },
+    'expression with a numeric root' => {
+      features: {bad: {expression: {Number: [0]}}},
+    },
+    'All expression with a numeric child' => {
+      features: {bad: {expression: {All: [{Number: [0]}]}}},
+    },
+    'Any expression with a string child' => {
+      features: {bad: {expression: {Any: [{String: ['']}]}}},
     },
     'expression with an invalid actor percentage' => {
       features: {bad: {expression: {PercentageOfActors: ['User;1', '40']}}},

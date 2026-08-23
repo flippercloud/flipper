@@ -51,7 +51,9 @@ module Flipper
         raise ArgumentError if expression.empty_groups?
 
         validate_arity(expression)
-        validate_domains(expression)
+        result = validate_domains(expression)
+        raise ArgumentError if result.domain && result.domain != :boolean
+
         expression
       end
 
@@ -146,6 +148,8 @@ module Flipper
 
       def self.validate_input_domains(name, results)
         case name
+        when 'All', 'Any'
+          results.each { |result| validate_input_domain(result, [:boolean]) }
         when 'Number', 'Percentage', 'Time'
           validate_input_domain(results[0], [:numeric, :string])
         when 'Random'

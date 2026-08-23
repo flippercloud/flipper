@@ -162,6 +162,22 @@ class MutationRackCompatibilityTest < Minitest::Test
     end
   end
 
+  class FirstCloseFailingMultipartIO < StringIO
+    attr_reader :close_calls
+
+    def initialize
+      super
+      @close_calls = 0
+    end
+
+    def close
+      @close_calls += 1
+      raise 'first close failed' if @close_calls == 1
+
+      super
+    end
+  end
+
   def setup
     @flipper = Flipper.new(Flipper::Adapters::Memory.new)
     @flipper[:existing].enable
@@ -318,6 +334,23 @@ class MutationRackCompatibilityTest < Minitest::Test
 
     assert_equal 200, response.first
     assert_includes @flipper.features.map(&:key), 'leading_space_boundary'
+  end
+
+  def test_valid_quoted_pair_multipart_boundary_is_accepted
+    boundary = 'A?a'
+    body = "--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"name\"\r\n\r\n" \
+      "quoted_pair_boundary\r\n" \
+      "--#{boundary}--\r\n"
+    response = raw_request(
+      '/features',
+      method: 'POST',
+      input: body,
+      'CONTENT_TYPE' => 'multipart/form-data; boundary="A\\?a"'
+    )
+
+    assert_equal 200, response.first
+    assert_includes @flipper.features.map(&:key), 'quoted_pair_boundary'
   end
 
   def test_valid_folded_multipart_disposition_is_accepted
@@ -736,6 +769,59 @@ class MutationRackCompatibilityTest < Minitest::Test
     assert_equal @baseline, adapter_state
   ensure
     Rack::Utils.multipart_file_limit = original_limit
+  end
+
+  def test_multipart_file_limit_retries_a_failed_parser_close
+    boundary = 'Aa'
+    body = "--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"one\"; filename=\"one.txt\"\r\n" \
+      "Content-Type: text/plain\r\n\r\none\r\n" \
+      "--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"two\"; filename=\"two.txt\"\r\n" \
+      "Content-Type: text/plain\r\n\r\ntwo\r\n" \
+      "--#{boundary}--\r\n"
+    env = Rack::MockRequest.env_for(
+      '/features/existing/boolean',
+      method: 'POST',
+      input: body,
+      'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
+    )
+    tempfiles = []
+    env['rack.multipart.tempfile_factory'] = lambda do |*, **|
+      FirstCloseFailingMultipartIO.new.tap { |tempfile| tempfiles << tempfile }
+    end
+    original_limit = Rack::Utils.multipart_file_limit
+    Rack::Utils.multipart_file_limit = 1
+    assert_equal @baseline, adapter_state
+
+    error = assert_raises(RuntimeError) { @app.call(env) }
+
+    assert_equal 'first close failed', error.message
+    assert_equal [2], tempfiles.map(&:close_calls)
+    assert tempfiles.all?(&:closed?)
+    assert_equal @baseline, adapter_state
+  ensure
+    Rack::Utils.multipart_file_limit = original_limit
+    tempfiles.each { |tempfile| tempfile.close unless tempfile.closed? }
+  end
+
+  def test_large_valid_json_params_do_not_reparse_through_rack_query_limits
+    actor = Flipper::Actor.new('User;json-key-space')
+    payload = {'flipper_id' => actor.flipper_id}
+    10_000.times { |index| payload["ignored_#{index}"] = '' }
+    body = JSON.generate(payload)
+    assert_operator body.bytesize, :<, Flipper::Api::JsonParams::MAX_MUTATION_BODY_BYTES
+    refute @flipper[:json_key_space].enabled?(actor)
+
+    response = raw_request(
+      '/features/json_key_space/actors',
+      method: 'POST',
+      input: body,
+      'CONTENT_TYPE' => 'application/json'
+    )
+
+    assert_equal 200, response.first
+    assert @flipper[:json_key_space].enabled?(actor)
   end
 
   def test_multipart_tempfile_io_parser_shaped_errors_remain_visible
