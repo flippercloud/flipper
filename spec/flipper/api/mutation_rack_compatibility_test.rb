@@ -457,6 +457,42 @@ class MutationRackCompatibilityTest < Minitest::Test
     assert_equal @baseline, adapter_state
   end
 
+  def test_json_mutation_preserves_duplicate_query_scalar_semantics
+    refute_includes @flipper.features.map(&:key), 'first'
+    refute_includes @flipper.features.map(&:key), 'second'
+
+    response = raw_request(
+      '/features?name=first&name=second',
+      method: 'POST',
+      input: '{}',
+      'CONTENT_TYPE' => 'application/json'
+    )
+
+    assert_equal 200, response.first
+    refute_includes @flipper.features.map(&:key), 'first'
+    assert_includes @flipper.features.map(&:key), 'second'
+  end
+
+  def test_json_middleware_preserves_nested_query_params
+    captured_params = nil
+    json_params = Flipper::Api::JsonParams.new(lambda do |env|
+      captured_params = Rack::Request.new(env).params
+      [200, {}, []]
+    end)
+    env = Rack::MockRequest.env_for(
+      '/features?filter[name]=query',
+      method: 'POST',
+      input: '{}',
+      'CONTENT_TYPE' => 'application/json'
+    )
+
+    status, = json_params.call(env)
+
+    assert_equal 200, status
+    assert_equal({'name' => 'query'}, captured_params['filter'])
+    assert_equal @baseline, adapter_state
+  end
+
   def test_duplicate_json_members_are_client_errors_without_mutation
     [
       '{"name":[],"name":"created"}',
@@ -1123,6 +1159,19 @@ class MutationRackCompatibilityTest < Minitest::Test
       assert_equal 400, response.first, description
       assert_equal @baseline, adapter_state, description
     end
+  end
+
+  def test_non_ascii_multipart_content_type_is_a_client_error_without_mutation
+    assert_equal @baseline, adapter_state
+    response = raw_request(
+      '/features/existing/boolean',
+      method: 'POST',
+      input: "--Aa--\r\n",
+      'CONTENT_TYPE' => "multipart/form-data; boundary=Aa; note=é"
+    )
+
+    assert_equal 400, response.first
+    assert_equal @baseline, adapter_state
   end
 
   def test_malformed_multipart_boundary_syntax_is_a_client_error_without_mutation

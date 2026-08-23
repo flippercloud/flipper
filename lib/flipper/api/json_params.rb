@@ -185,7 +185,9 @@ module Flipper
       end
 
       def multipart_boundary(env)
-        content_type = env[CONTENT_TYPE].to_s
+        content_type = env[CONTENT_TYPE].to_s.dup.force_encoding(Encoding::BINARY)
+        raise InvalidRequestBody unless content_type.ascii_only?
+
         assignments = content_type.scan(BOUNDARY_ASSIGNMENT)
         matches = content_type.scan(BOUNDARY_PARAMETER)
         raise InvalidRequestBody unless assignments.length == 1 && matches.length == 1
@@ -483,18 +485,20 @@ module Flipper
         raise InvalidRequestBody unless ParameterParsing.valid_json?(parsed_request_body)
 
         env["parsed_request_body".freeze] = parsed_request_body
+        parsed_query_params = ParameterParsing.parse_nested_query(env[QUERY_STRING].to_s)
         if mutation_request?(env)
-          parsed_query_shapes = ParameterParsing.parse_nested_query(env[QUERY_STRING].to_s)
-          unless compatible_parameter_shapes?(parsed_query_shapes, parsed_request_body)
+          unless compatible_parameter_shapes?(parsed_query_params, parsed_request_body)
             raise InvalidRequestBody
           end
         end
         parsed_query_string = parse_query(env[QUERY_STRING].to_s)
-        parsed_query_string.merge!(query_parameter_value(parsed_request_body))
+        normalized_request_body = query_parameter_value(parsed_request_body)
+        parsed_query_string.merge!(normalized_request_body)
+        parsed_query_params.merge!(normalized_request_body)
         parameters = build_query(parsed_query_string)
         env[QUERY_STRING] = parameters
         env['rack.request.query_string'.freeze] = parameters
-        env['rack.request.query_hash'.freeze] = parsed_query_string
+        env['rack.request.query_hash'.freeze] = parsed_query_params
       rescue *ParameterParsing.errors
         raise InvalidRequestBody
       end
