@@ -236,7 +236,12 @@ module Flipper
         options[:bytesize_limit] = limit if keywords.include?(:bytesize_limit)
         options[:params_limit] = query.count('&') + 2 if keywords.include?(:params_limit)
 
-        parser_class.new(*arguments, **options).parse_nested_query(query)
+        parser = if options.empty?
+          parser_class.new(*arguments)
+        else
+          parser_class.new(*arguments, **options)
+        end
+        parser.parse_nested_query(query)
       end
     end
   end

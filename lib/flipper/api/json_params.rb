@@ -347,7 +347,11 @@ module Flipper
             Rack::Multipart::Parser::TEMPFILE_FACTORY
 
           env['rack.multipart.tempfile_factory'.freeze] = lambda do |*args, **kwargs|
-            io = factory.call(*args, **kwargs)
+            io = if kwargs.empty?
+              factory.call(*args)
+            else
+              factory.call(*args, **kwargs)
+            end
             callback_io = MultipartCallbackIO.new(io)
             tempfiles << callback_io
             registered_tempfiles << io unless registered_tempfiles.equal?(tempfiles)
