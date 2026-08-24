@@ -75,7 +75,7 @@ RSpec.describe 'Flipper API mutation transport handling' do
   end
 
   [:array, :hash].each do |shape|
-    it "rejects a JSON #{shape} for optional allow_unregistered_groups" do
+    it "rejects a JSON #{shape} for allow_unregistered_groups" do
       value = shape == :array ? ['true'] : {nested: 'true'}
       body = JSON.generate(name: 'unregistered', allow_unregistered_groups: value)
       invalid_mutation(:post, '/features/target/groups', body, 'application/json', status: 400)

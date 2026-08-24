@@ -40,7 +40,7 @@ module Flipper
           end
 
           def allow_unregistered_groups?
-            allow_unregistered_groups = optional_string_param('allow_unregistered_groups')
+            allow_unregistered_groups = string_param('allow_unregistered_groups')
             allow_unregistered_groups && allow_unregistered_groups == 'true'
           end
 

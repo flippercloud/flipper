@@ -229,23 +229,19 @@ module Flipper
         !compatible
       end
 
-      # Private: Returns a valid String parameter, ignoring other shapes and
-      # invalid encodings.
+      # Private: Returns a valid String parameter or nil when it is absent.
+      # Rejects malformed mutation values while preserving read-filter
+      # compatibility, where unsupported values have historically been ignored.
       def string_param(name)
-        return if container_param?(name)
-
-        value = safe_params[name]
-        value if valid_param_string?(value)
-      end
-
-      def optional_string_param(name)
-        json_error_response(:request_invalid) if container_param?(name)
+        if mutation_request? && container_param?(name)
+          json_error_response(:request_invalid)
+        end
 
         value = safe_params[name]
         return if value.nil?
         return value if valid_param_string?(value)
 
-        json_error_response(:request_invalid)
+        json_error_response(:request_invalid) if mutation_request?
       end
 
       def valid_param_string?(value)

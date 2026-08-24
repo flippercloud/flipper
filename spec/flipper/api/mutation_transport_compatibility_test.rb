@@ -59,7 +59,7 @@ class MutationTransportCompatibilityTest < Minitest::Test
       'CONTENT_TYPE' => 'application/json'
     )
 
-    assert_equal 422, response.first
+    assert_equal 400, response.first
     assert_equal @baseline, adapter_state
   end
 
