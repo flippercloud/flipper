@@ -1,29 +1,60 @@
 require 'rack/utils'
 require 'rack/multipart'
-require 'json'
 
 module Flipper
   module Api
     module ParameterParsing
+      InvalidParameterShape = Class.new(StandardError)
+
+      class RecordingQueryParser
+        attr_reader :fields
+
+        def initialize(parser)
+          @parser = parser
+          @fields = []
+        end
+
+        def make_params
+          @parser.make_params
+        end
+
+        def param_depth_limit
+          @parser.param_depth_limit
+        end
+
+        def normalize_params(params, name, value, *rest)
+          @fields << [name, rest]
+          @parser.normalize_params(params, name, value, *rest)
+        rescue *ParameterParsing.errors => error
+          raise InvalidParameterShape, error.message
+        end
+      end
+      private_constant :RecordingQueryParser
+
+      class DiscardIO
+        def <<(_content)
+          self
+        end
+
+        def binmode
+          self
+        end
+
+        def close
+        end
+
+        def rewind
+          self
+        end
+      end
+      private_constant :DiscardIO
+
       ERROR_NAMES = [
         :InvalidParameterError,
         :ParameterTypeError,
         :ParamsTooDeepError,
         :QueryLimitError,
       ].freeze
-      MULTIPART_ERROR_NAMES = [
-        :BoundaryTooLongError,
-        :EmptyContentError,
-        :Error,
-        :MissingInputError,
-        :MultipartPartLimitError,
-        :MultipartTotalPartLimitError,
-      ].freeze
-      JSON_WHITESPACE_BYTES = [9, 10, 13, 32].freeze
-      PERCENTAGE_STRING = /\A[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?\z/
-      private_constant :JSON_WHITESPACE_BYTES
-      private_constant :PERCENTAGE_STRING
-
       def self.errors
         parsers = [Rack::Utils]
         parsers << Rack.const_get(:QueryParser, false) if Rack.const_defined?(:QueryParser, false)
@@ -34,16 +65,9 @@ module Flipper
           end
         end
 
-        MULTIPART_ERROR_NAMES.each do |name|
-          if Rack::Multipart.const_defined?(name, false)
-            errors << Rack::Multipart.const_get(name, false)
-          end
-        end
-
         has_named_depth_error = parsers.any? do |parser|
           parser.const_defined?(:ParamsTooDeepError, false)
         end
-        # Rack 2.0 reports nesting and key-space limits as plain RangeError.
         errors << RangeError unless has_named_depth_error
         errors.uniq
       end
@@ -67,27 +91,6 @@ module Flipper
         true
       end
 
-      def self.valid_json?(object)
-        pending = [object]
-        until pending.empty?
-          value = pending.pop
-          case value
-          when String
-            return false unless value.valid_encoding?
-          when Float
-            return false unless value.finite?
-          when Array
-            pending.concat(value)
-          when Hash
-            value.each do |key, nested_value|
-              pending << key
-              pending << nested_value
-            end
-          end
-        end
-        true
-      end
-
       def self.read_bounded(input, limit)
         body = ''.b
         while body.bytesize < limit
@@ -99,149 +102,44 @@ module Flipper
         body
       end
 
-      def self.valid_percentage_string?(value)
-        value.is_a?(String) && PERCENTAGE_STRING.match?(value)
-      end
-
-      def self.normalize_percentage(value)
-        if value.is_a?(String) && value.match?(/[eE]/)
-          Float(value)
-        else
-          value
-        end
-      end
-
-      def self.parse_json(data)
-        parsed = JSON.parse(data, allow_duplicate_key: true)
-        scan_json_value(data, skip_json_whitespace(data, 0))
-        parsed
-      end
-
-      def self.scan_json_value(data, index)
-        index = skip_json_whitespace(data, index)
-        case data.getbyte(index)
-        when 123
-          scan_json_object(data, index + 1)
-        when 91
-          scan_json_array(data, index + 1)
-        when 34
-          scan_json_string(data, index)
-        else
-          index += 1 while index < data.bytesize && !JSON_WHITESPACE_BYTES.include?(data.getbyte(index)) &&
-            ![44, 93, 125].include?(data.getbyte(index))
-          index
-        end
-      end
-      private_class_method :scan_json_value
-
-      def self.scan_json_object(data, index)
-        keys = {}
-        index = skip_json_whitespace(data, index)
-        return index + 1 if data.getbyte(index) == 125
-
-        loop do
-          key_start = index
-          index = scan_json_string(data, index)
-          key = JSON.parse(data.byteslice(key_start, index - key_start))
-          raise JSON::ParserError, "duplicate key #{key.inspect}" if keys.key?(key)
-
-          keys[key] = true
-          index = skip_json_whitespace(data, index) + 1
-          index = scan_json_value(data, index)
-          index = skip_json_whitespace(data, index)
-          return index + 1 if data.getbyte(index) == 125
-
-          index = skip_json_whitespace(data, index + 1)
-        end
-      end
-      private_class_method :scan_json_object
-
-      def self.scan_json_array(data, index)
-        index = skip_json_whitespace(data, index)
-        return index + 1 if data.getbyte(index) == 93
-
-        loop do
-          index = scan_json_value(data, index)
-          index = skip_json_whitespace(data, index)
-          return index + 1 if data.getbyte(index) == 93
-
-          index = skip_json_whitespace(data, index + 1)
-        end
-      end
-      private_class_method :scan_json_array
-
-      def self.scan_json_string(data, index)
-        index += 1
-        while index < data.bytesize
-          case data.getbyte(index)
-          when 34
-            return index + 1
-          when 92
-            index += 2
-          else
-            index += 1
-          end
-        end
-        index
-      end
-      private_class_method :scan_json_string
-
-      def self.skip_json_whitespace(data, index)
-        index += 1 while JSON_WHITESPACE_BYTES.include?(data.getbyte(index))
-        index
-      end
-      private_class_method :skip_json_whitespace
-
-      # Rack raises for scalar/container conflicts in one order but silently
-      # accepts the reverse order. Parse both orderings so the result does not
-      # depend on which client-controlled shape appeared last.
-      def self.parse_nested_query(data, separator = nil)
-        parsed = if separator
-          Rack::Utils.parse_nested_query(data, separator)
-        else
-          Rack::Utils.parse_nested_query(data)
-        end
-        parts = data.split(separator || Rack::Utils::DEFAULT_SEP, -1)
+      # Rack raises for scalar/container conflicts in one order but accepts the
+      # reverse order. Parse both orderings so client-controlled ordering cannot
+      # decide whether a mutation is accepted.
+      def self.parse_nested_query(data)
+        parsed = Rack::Utils.parse_nested_query(data)
+        parts = data.split(Rack::Utils::DEFAULT_SEP, -1)
         if parts.length > 1
-          reversed = parts.reverse.join('&')
-          if separator
-            Rack::Utils.parse_nested_query(reversed, separator)
-          else
-            Rack::Utils.parse_nested_query(reversed)
-          end
+          Rack::Utils.parse_nested_query(parts.reverse.join('&'))
         end
         parsed
       end
 
-      # JsonParams only calls this for a query it generated from a mutation
-      # body already bounded to MAX_MUTATION_BODY_BYTES. Use that known bound
-      # instead of Rack's smaller public-query limits so the cached result is
-      # exactly what Rack would parse from the rewritten query string.
-      def self.parse_generated_nested_query(query)
-        parser_class = Rack::QueryParser
-        initializer = parser_class.instance_method(:initialize).parameters
-        positional = initializer.select { |type, _| [:req, :opt].include?(type) }
-        keywords = initializer.select { |type, _| [:key, :keyreq].include?(type) }.map(&:last)
-        limit = query.bytesize + 1
-        depth = Rack::Utils.default_query_parser.param_depth_limit
-        arguments = [parser_class::Params]
-        if positional[1]&.last == :_key_space_limit
-          arguments << depth
-        elsif positional.length >= 3
-          arguments.concat([limit, depth])
-        else
-          arguments << depth
+      # Rack's multipart parser accepts scalar/container conflicts in one field
+      # order. Record the fields during an otherwise normal parse, then replay
+      # them in reverse through Rack's own query parser. Uploaded bytes are
+      # discarded because only field names matter to this validation pass.
+      def self.validate_multipart_shapes(env)
+        input = env['rack.input'.freeze]
+        parser = RecordingQueryParser.new(Rack::Utils.default_query_parser)
+        validation_env = env.dup
+        validation_env.delete_if { |key, _| key.start_with?('rack.request.') }
+        validation_env['rack.multipart.tempfile_factory'.freeze] = lambda do |*|
+          DiscardIO.new
         end
-        options = {}
-        options[:bytesize_limit] = limit if keywords.include?(:bytesize_limit)
-        options[:params_limit] = query.count('&') + 2 if keywords.include?(:params_limit)
 
-        parser = if options.empty?
-          parser_class.new(*arguments)
-        else
-          parser_class.new(*arguments, **options)
+        input.rewind
+        Rack::Multipart.parse_multipart(validation_env, parser)
+        replay_parser = Rack::Utils.default_query_parser
+        replay_params = replay_parser.make_params
+        parser.fields.reverse_each do |name, rest|
+          begin
+            replay_parser.normalize_params(replay_params, name, ''.freeze, *rest)
+          rescue *errors => error
+            raise InvalidParameterShape, error.message
+          end
         end
-        parser.parse_nested_query(query)
+      ensure
+        input.rewind if input && input.respond_to?(:rewind)
       end
     end
   end

@@ -21,7 +21,7 @@ jobs:
       - name: Run Rack 2.0.9.4 compatibility test
         run: |
           ruby -Ilib spec/flipper/api/rack_2_compatibility_test.rb
-          ruby -Ilib spec/flipper/api/mutation_rack_compatibility_test.rb
+          ruby -Ilib spec/flipper/api/mutation_transport_compatibility_test.rb
 
   test:
     name: Test on ruby ${{ matrix.ruby }} and rails ${{ matrix.rails }}

@@ -76,44 +76,4 @@ RSpec.describe Flipper::Api::JsonParams do
       expect(params).to eq('flipper_id' => 'User;2', 'language' => 'ruby', 'framework' => 'rails')
     end
   end
-
-  it 'does not classify downstream application failures as client input errors' do
-    downstream = lambda do |_env|
-      raise JSON::ParserError, 'application failure'
-    end
-    middleware = described_class.new(downstream)
-    env = Rack::MockRequest.env_for('/', method: 'POST', input: '')
-
-    expect { middleware.call(env) }.to raise_error(JSON::ParserError, 'application failure')
-  end
-
-  it 'does not classify JSON parser errors from the input stream as client input errors' do
-    input = double('Input', read: nil, rewind: nil)
-    allow(input).to receive(:read).and_raise(JSON::ParserError, 'input failure')
-    middleware = described_class.new(lambda { |_| raise 'unreachable' })
-    env = Rack::MockRequest.env_for('/', method: 'POST', input: '', 'CONTENT_TYPE' => 'application/json')
-    env['rack.input'] = input
-
-    expect { middleware.call(env) }.to raise_error(JSON::ParserError, 'input failure')
-  end
-
-  it 'does not classify multipart tempfile factory errors as client input errors' do
-    boundary = 'Aa'
-    body = "--#{boundary}\r\n" \
-      "Content-Disposition: form-data; name=\"upload\"; filename=\"file.txt\"\r\n" \
-      "Content-Type: text/plain\r\n\r\ncontents\r\n" \
-      "--#{boundary}--\r\n"
-    middleware = described_class.new(lambda { |_| raise 'unreachable' })
-    env = Rack::MockRequest.env_for(
-      '/',
-      method: 'POST',
-      input: body,
-      'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
-    )
-    env['rack.multipart.tempfile_factory'] = lambda do |*, **|
-      raise ArgumentError, 'tempfile failure'
-    end
-
-    expect { middleware.call(env) }.to raise_error(ArgumentError, 'tempfile failure')
-  end
 end

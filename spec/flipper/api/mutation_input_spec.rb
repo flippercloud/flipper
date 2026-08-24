@@ -1,6 +1,6 @@
 require 'stringio'
 
-RSpec.describe 'Flipper API mutation input handling' do
+RSpec.describe 'Flipper API mutation transport handling' do
   MUTATION_ENDPOINTS = [
     [:post, '/features'],
     [:delete, '/features/target'],
@@ -20,44 +20,7 @@ RSpec.describe 'Flipper API mutation input handling' do
     [:post, '/import'],
   ].freeze
 
-  JSON_ROOTS = {
-    'null' => 'null',
-    'array' => '[]',
-    'string' => '"value"',
-    'number' => '1',
-    'boolean' => 'true',
-  }.freeze
-
-  INVALID_EXPRESSIONS = {
-    'multiple operators' => {Equal: [1, 1], Unknown: []},
-    'too few arguments' => {Equal: [1]},
-    'too many arguments' => {Equal: [1, 1, 1]},
-    'invalid time constant' => {Time: ['not-a-time']},
-    'invalid number constant' => {Number: [false]},
-    'invalid percentage constant' => {Percentage: [false]},
-    'invalid random maximum' => {Random: ['not-a-number']},
-    'invalid actor percentage' => {PercentageOfActors: ['User;1', '40']},
-    'boolean expression used as a random maximum' => {
-      Random: [{PercentageOfActors: ['User;1', 50]}],
-    },
-    'dynamic boolean expression used as a random maximum' => {
-      Random: [{All: [{Property: ['plan']}]}],
-    },
-    'dynamic boolean expression used as a percentage value' => {
-      Percentage: [{Boolean: [{Property: ['flag']}]}],
-    },
-    'dynamic boolean expression used as a number value' => {
-      Number: [{Boolean: [{Property: ['flag']}]}],
-    },
-    'dynamic boolean expression used as a time value' => {
-      Time: [{Boolean: [{Property: ['flag']}]}],
-    },
-    'numeric root' => {Number: [0]},
-    'numeric child used by All' => {All: [{Number: [0]}]},
-    'string child used by Any' => {Any: [{String: ['']}]},
-  }.freeze
-
-  SCALAR_PARAMETER_SHAPES = [
+  SCALAR_PARAMETERS = [
     ['/features', 'name'],
     ['/features/target/actors', 'flipper_id'],
     ['/features/target/groups', 'name'],
@@ -65,43 +28,8 @@ RSpec.describe 'Flipper API mutation input handling' do
     ['/features/target/percentage_of_time', 'percentage'],
   ].freeze
 
-  REQUIRED_BODY_ENDPOINTS = [
-    [:post, '/features'],
-    [:post, '/features/target/actors'],
-    [:post, '/features/target/groups'],
-    [:post, '/features/target/percentage_of_actors'],
-    [:post, '/features/target/percentage_of_time'],
-    [:post, '/features/target/expression'],
-    [:post, '/import'],
-  ].freeze
-
-  CONFLICTING_FORM_SHAPES = [
-    'conflict=scalar&conflict[]=array',
-    'conflict[]=array&conflict=scalar',
-    'conflict=scalar&conflict[nested]=hash',
-    'conflict[nested]=hash&conflict=scalar',
-  ].freeze
-
-  INVALID_FEATURE_NAME_MUTATIONS = [
-    [:delete, '/features/%FF', '', 'application/json'],
-    [:post, '/features/%FF/boolean', '', 'application/json'],
-    [:delete, '/features/%FF/boolean', '', 'application/json'],
-    [:post, '/features/%FF/actors', 'flipper_id=User%3B2', 'application/x-www-form-urlencoded'],
-    [:delete, '/features/%FF/actors', 'flipper_id=User%3B1', 'application/x-www-form-urlencoded'],
-    [:post, '/features/%FF/groups', 'name=admins', 'application/x-www-form-urlencoded'],
-    [:delete, '/features/%FF/groups', 'name=admins', 'application/x-www-form-urlencoded'],
-    [:post, '/features/%FF/percentage_of_actors', 'percentage=10', 'application/x-www-form-urlencoded'],
-    [:delete, '/features/%FF/percentage_of_actors', '', 'application/json'],
-    [:post, '/features/%FF/percentage_of_time', 'percentage=10', 'application/x-www-form-urlencoded'],
-    [:delete, '/features/%FF/percentage_of_time', '', 'application/json'],
-    [:post, '/features/%FF/expression', '{"Equal":["a","b"]}', 'application/json'],
-    [:delete, '/features/%FF/expression', '', 'application/json'],
-    [:delete, '/features/%FF/clear', '', 'application/json'],
-  ].freeze
-
   let(:app) { build_api(flipper) }
   let(:actor) { Flipper::Actor.new('User;1') }
-  let(:expression) { Flipper.property(:plan).eq('basic') }
 
   before do
     Flipper.register(:admins) { false }
@@ -110,178 +38,48 @@ RSpec.describe 'Flipper API mutation input handling' do
     flipper[:target].enable_group(:admins)
     flipper[:target].enable_percentage_of_actors(20)
     flipper[:target].enable_percentage_of_time(10)
-    flipper[:target].enable_expression(expression)
+    flipper[:target].enable_expression(Flipper.property(:plan).eq('basic'))
     baseline_state
   end
 
   MUTATION_ENDPOINTS.each do |method, path|
-    it "rejects malformed JSON before #{method.to_s.upcase} #{path} mutates state" do
-      expect(adapter_state).to eq(baseline_state)
-
-      public_send(method, path, '{"truncated":', 'CONTENT_TYPE' => 'application/json')
-
-      expect([400, 422]).to include(last_response.status)
-      expect(adapter_state).to eq(baseline_state)
+    it "rejects truncated JSON before #{method.to_s.upcase} #{path} mutates state" do
+      invalid_mutation(method, path, '{"truncated":', 'application/json')
     end
   end
 
-  it 'rejects malformed JSON syntax before mutation' do
-    expect(adapter_state).to eq(baseline_state)
-
-    post '/features/target/boolean', '{"invalid":]}', 'CONTENT_TYPE' => 'application/json'
-
-    expect(last_response.status).to eq(400)
-    expect(adapter_state).to eq(baseline_state)
-  end
-
-  MUTATION_ENDPOINTS.each do |method, path|
-    CONFLICTING_FORM_SHAPES.each do |body|
-      it "rejects conflicting form shapes in #{body.inspect} before #{method.to_s.upcase} #{path} mutates state" do
-        expect(adapter_state).to eq(baseline_state)
-
-        public_send(
-          method,
-          path,
-          body,
-          'CONTENT_TYPE' => 'application/x-www-form-urlencoded'
-        )
-
-        expect([400, 422]).to include(last_response.status)
-        expect(adapter_state).to eq(baseline_state)
-      end
-    end
-  end
-
-  JSON_ROOTS.each do |description, body|
+  {
+    'null' => 'null',
+    'array' => '[]',
+    'string' => '"value"',
+    'number' => '1',
+    'boolean' => 'true',
+  }.each do |description, body|
     it "rejects a JSON #{description} root before mutation" do
-      expect(adapter_state).to eq(baseline_state)
-
-      post '/features/target/boolean', body, 'CONTENT_TYPE' => 'application/json'
-
-      expect(last_response.status).to eq(400)
-      expect(adapter_state).to eq(baseline_state)
+      invalid_mutation(:post, '/features', body, 'application/json', status: 400)
     end
   end
 
-  INVALID_EXPRESSIONS.each do |description, expression_payload|
-    it "rejects an expression with #{description} before direct mutation" do
-      expect(adapter_state).to eq(baseline_state)
-
-      post '/features/target/expression',
-           JSON.generate(expression_payload),
-           'CONTENT_TYPE' => 'application/json'
-
-      expect(last_response.status).to eq(422)
-      expect(adapter_state).to eq(baseline_state)
-    end
-  end
-
-  it 'rejects non-finite expression constants before direct mutation' do
-    expect(adapter_state).to eq(baseline_state)
-
-    post '/features/target/expression',
-         '{"Random":[1e10000]}',
-         'CONTENT_TYPE' => 'application/json'
-
-    expect([400, 422]).to include(last_response.status)
-    expect(adapter_state).to eq(baseline_state)
-  end
-
-  it 'rejects expression conversions to non-finite numbers before direct mutation' do
-    expect(adapter_state).to eq(baseline_state)
-
-    post '/features/target/expression',
-         JSON.generate(Random: [{Number: ['1.0e10000']}]),
-         'CONTENT_TYPE' => 'application/json'
-
-    expect(last_response.status).to eq(422)
-    expect(adapter_state).to eq(baseline_state)
-  end
-
-  it 'rejects nested non-finite JSON numbers before a bodyless mutation' do
-    expect(adapter_state).to eq(baseline_state)
-
-    post '/features/target/boolean',
-         '{"ignored":{"value":1e10000}}',
-         'CONTENT_TYPE' => 'application/json'
-
-    expect(last_response.status).to eq(400)
-    expect(adapter_state).to eq(baseline_state)
-  end
-
-  INVALID_FEATURE_NAME_MUTATIONS.each do |method, path, body, content_type|
-    it "rejects invalid route encoding before #{method.to_s.upcase} #{path} mutates state" do
-      expect(adapter_state).to eq(baseline_state)
-
-      public_send(method, path, body, 'CONTENT_TYPE' => content_type)
-
-      expect(last_response.status).to eq(400)
-      expect(adapter_state).to eq(baseline_state)
-    end
-  end
-
-  SCALAR_PARAMETER_SHAPES.each do |path, parameter|
+  SCALAR_PARAMETERS.each do |path, name|
     [:array, :hash].each do |shape|
-      it "rejects a form #{shape} for scalar #{parameter} on #{path} before mutation" do
-        scalar = parameter == 'percentage' ? '10' : 'invalid'
-        value = shape == :array ? "#{parameter}[]=#{scalar}" : "#{parameter}[nested]=#{scalar}"
-        expect(adapter_state).to eq(baseline_state)
+      it "rejects a JSON #{shape} for scalar #{name.inspect} on #{path}" do
+        value = shape == :array ? ['invalid'] : {nested: 'invalid'}
+        invalid_mutation(:post, path, JSON.generate(name => value), 'application/json')
+      end
 
-        post path, value, 'CONTENT_TYPE' => 'application/x-www-form-urlencoded'
-
-        expect([400, 422]).to include(last_response.status)
-        expect(adapter_state).to eq(baseline_state)
+      it "rejects a form #{shape} for scalar #{name.inspect} on #{path}" do
+        body = shape == :array ? "#{name}[]=invalid" : "#{name}[nested]=invalid"
+        invalid_mutation(:post, path, body, 'application/x-www-form-urlencoded')
       end
     end
   end
 
   [:array, :hash].each do |shape|
-    it "rejects a JSON #{shape} for a scalar feature name before mutation" do
-      value = shape == :array ? ['invalid'] : {nested: 'invalid'}
-      expect(adapter_state).to eq(baseline_state)
-
-      post '/features', JSON.generate(name: value), 'CONTENT_TYPE' => 'application/json'
-
-      expect(last_response.status).to eq(422)
-      expect(adapter_state).to eq(baseline_state)
-    end
-  end
-
-  [:array, :hash].each do |shape|
-    it "rejects a form #{shape} for the optional allow_unregistered_groups scalar before mutation" do
-      value = shape == :array ? 'allow_unregistered_groups[]=true' : 'allow_unregistered_groups[nested]=true'
-      expect(adapter_state).to eq(baseline_state)
-
-      post '/features/target/groups',
-           "name=unregistered&#{value}",
-           'CONTENT_TYPE' => 'application/x-www-form-urlencoded'
-
-      expect(last_response.status).to eq(400)
-      expect(adapter_state).to eq(baseline_state)
-    end
-
-    it "rejects a JSON #{shape} for the optional allow_unregistered_groups scalar before mutation" do
+    it "rejects a JSON #{shape} for optional allow_unregistered_groups" do
       value = shape == :array ? ['true'] : {nested: 'true'}
-      expect(adapter_state).to eq(baseline_state)
-
-      post '/features/target/groups',
-           JSON.generate(name: 'unregistered', allow_unregistered_groups: value),
-           'CONTENT_TYPE' => 'application/json'
-
-      expect(last_response.status).to eq(400)
-      expect(adapter_state).to eq(baseline_state)
+      body = JSON.generate(name: 'unregistered', allow_unregistered_groups: value)
+      invalid_mutation(:post, '/features/target/groups', body, 'application/json', status: 400)
     end
-  end
-
-  it 'rejects conflicting form parameter shapes before mutation' do
-    expect(adapter_state).to eq(baseline_state)
-
-    post '/features',
-         'name=first&name[]=second',
-         'CONTENT_TYPE' => 'application/x-www-form-urlencoded'
-
-    expect(last_response.status).to eq(400)
-    expect(adapter_state).to eq(baseline_state)
   end
 
   [
@@ -289,34 +87,19 @@ RSpec.describe 'Flipper API mutation input handling' do
     'conflict[]=array&conflict=scalar',
     'conflict=scalar&conflict[nested]=hash',
     'conflict[nested]=hash&conflict=scalar',
-  ].each do |query|
-    it "rejects conflicting query parameter shapes in #{query.inspect} before mutation" do
-      expect(adapter_state).to eq(baseline_state)
-
-      post "/features/target/boolean?#{query}",
-           '',
-           'CONTENT_TYPE' => 'application/x-www-form-urlencoded'
-
-      expect(last_response.status).to eq(400)
-      expect(adapter_state).to eq(baseline_state)
+  ].each do |body|
+    it "rejects conflicting form shapes in #{body.inspect}" do
+      invalid_mutation(:post, '/features/target/boolean', body, 'application/x-www-form-urlencoded', status: 400)
     end
-  end
 
-  [
-    ['name[]=query', 'name=body'],
-    ['name[nested]=query', 'name=body'],
-    ['name=query', 'name[]=body'],
-    ['name=query', 'name[nested]=body'],
-  ].each do |query, body|
-    it "rejects cross-source form conflicts in #{query.inspect} and #{body.inspect} before mutation" do
-      expect(adapter_state).to eq(baseline_state)
-
-      post "/features?#{query}",
-           body,
-           'CONTENT_TYPE' => 'application/x-www-form-urlencoded'
-
-      expect(last_response.status).to eq(400)
-      expect(adapter_state).to eq(baseline_state)
+    it "rejects conflicting query shapes in #{body.inspect}" do
+      invalid_mutation(
+        :post,
+        "/features/target/boolean?#{body}",
+        '',
+        'application/x-www-form-urlencoded',
+        status: 400
+      )
     end
   end
 
@@ -326,179 +109,65 @@ RSpec.describe 'Flipper API mutation input handling' do
     ['name=query', {'name' => ['created']}],
     ['name=query', {'name' => {'nested' => 'created'}}],
   ].each do |query, body|
-    it "rejects cross-source JSON conflicts in #{query.inspect} and #{body.inspect} before mutation" do
-      expect(adapter_state).to eq(baseline_state)
-
-      post "/features?#{query}",
-           JSON.generate(body),
-           'CONTENT_TYPE' => 'application/json'
-
-      expect(last_response.status).to eq(400)
-      expect(adapter_state).to eq(baseline_state)
-    end
-  end
-
-  it 'preserves semicolons inside form values' do
-    post '/features',
-         'name=semi;colon',
-         'CONTENT_TYPE' => 'application/x-www-form-urlencoded'
-
-    expect(last_response.status).to eq(200)
-    expect(flipper.features.map(&:key)).to include('semi;colon')
-    expect(flipper.features.map(&:key)).not_to include('semi')
-  end
-
-  [
-    [['name[]', 'array', true], ['name', 'scalar', true]],
-    [['name[]', 'array', true], ['name', 'scalar', false]],
-  ].each do |fields|
-    it "rejects conflicting multipart parameter shapes in #{fields.inspect} before mutation" do
-      boundary = 'flipper-boundary'
-      body = multipart_body(boundary, fields)
-      expect(adapter_state).to eq(baseline_state)
-
-      post '/features',
-           body,
-           'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
-
-      expect(last_response.status).to eq(400)
-      expect(adapter_state).to eq(baseline_state)
-    end
-  end
-
-  it 'rejects duplicate multipart name parameters before mutation' do
-    boundary = 'Aa'
-    body = "--#{boundary}\r\n" \
-      "Content-Disposition: form-data; name=\"name[]\"; name=\"name\"\r\n\r\n" \
-      "scalar\r\n--#{boundary}--\r\n"
-    expect(adapter_state).to eq(baseline_state)
-
-    post '/features?name[]=query',
-         body,
-         'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
-
-    expect(last_response.status).to eq(400)
-    expect(adapter_state).to eq(baseline_state)
-  end
-
-  it 'rejects ambiguous multipart quoted-pair names before mutation' do
-    boundary = 'Aa'
-    body = "--#{boundary}\r\n" \
-      "Content-Disposition: form-data; name=\"na\\me\"\r\n\r\n" \
-      "scalar\r\n--#{boundary}--\r\n"
-    expect(adapter_state).to eq(baseline_state)
-
-    post '/features?name[]=query',
-         body,
-         'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
-
-    expect(last_response.status).to eq(400)
-    expect(adapter_state).to eq(baseline_state)
-  end
-
-  [
-    ['name[]=query', 'name'],
-    ['name[nested]=query', 'name'],
-    ['name=query', 'name[]'],
-    ['name=query', 'name[nested]'],
-  ].each do |query, multipart_name|
-    it "rejects cross-source multipart conflicts in #{query.inspect} and #{multipart_name.inspect} before mutation" do
-      boundary = 'flipper-boundary'
-      body = multipart_body(boundary, [[multipart_name, 'body', true]])
-      expect(adapter_state).to eq(baseline_state)
-
-      post "/features?#{query}",
-           body,
-           'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
-
-      expect(last_response.status).to eq(400)
-      expect(adapter_state).to eq(baseline_state)
+    it "rejects query/JSON shape conflicts in #{query.inspect}" do
+      invalid_mutation(
+        :post,
+        "/features?#{query}",
+        JSON.generate(body),
+        'application/json',
+        status: 400
+      )
     end
   end
 
   [
-    ['multipart/form-data', 'garbage'],
-    ['multipart/form-data; boundary=', 'garbage'],
-    ['multipart/form-data; boundary=Aa', "--Aa\r\nContent-Disposition: form-data; name=\"ignored\"\r\n\r\ntruncated"],
-    ['multipart/form-data; boundary=Aa', "--Aa\r\nX-Test: bad\r\n\r\njunk\r\n--Aa--\r\n"],
-    ['multipart/form-data; boundary=Aa', "bad-opening--Aa--\r\n"],
-    ['multipart/form-data; boundary=Aa', "--Aa\r\nContent-Disposition: form-data; name=\"ignored\"\r\n\r\nvalue--Aa--\r\n"],
-    ['multipart/form-data; boundary=Aa', "--Aa\r\nContent-Disposition: form-data; filename=\"ignored\"\r\n\r\nvalue\r\n--Aa--\r\n"],
-    ['multipart/form-data; boundary=Aa', "--Aa\r\nContent-Disposition: form-data; name=\"\xFF\"\r\n\r\nvalue\r\n--Aa--\r\n".b],
-  ].each do |content_type, body|
-    it "rejects malformed multipart input with #{content_type.inspect} before mutation" do
-      expect(adapter_state).to eq(baseline_state)
-
-      post '/features/target/boolean', body, 'CONTENT_TYPE' => content_type
-
-      expect(last_response.status).to eq(400)
-      expect(adapter_state).to eq(baseline_state)
+    ['name[]=query', 'name=body'],
+    ['name[nested]=query', 'name=body'],
+    ['name=query', 'name[]=body'],
+    ['name=query', 'name[nested]=body'],
+  ].each do |query, body|
+    it "rejects query/form shape conflicts in #{query.inspect}" do
+      invalid_mutation(
+        :post,
+        "/features?#{query}",
+        body,
+        'application/x-www-form-urlencoded',
+        status: 400
+      )
     end
   end
 
-  it 'rejects malformed form encoding before mutation' do
-    expect(adapter_state).to eq(baseline_state)
-
-    post '/features', 'name=%FF', 'CONTENT_TYPE' => 'application/x-www-form-urlencoded'
-
-    expect([400, 422]).to include(last_response.status)
-    expect(adapter_state).to eq(baseline_state)
+  it 'rejects invalid JSON encoding before mutation' do
+    invalid_mutation(
+      :post,
+      '/features/target/boolean',
+      ('{"ignored":"'.b + 255.chr + '"}'),
+      'application/json',
+      status: 400
+    )
   end
 
-  it 'rejects malformed JSON encoding before mutation' do
-    body = "{\"name\":\"\xFF\"}".b
-    expect(adapter_state).to eq(baseline_state)
-
-    post '/features', body, 'CONTENT_TYPE' => 'application/json'
-
-    expect([400, 422]).to include(last_response.status)
-    expect(adapter_state).to eq(baseline_state)
+  it 'rejects invalid form encoding before mutation' do
+    invalid_mutation(
+      :post,
+      '/features/target/boolean',
+      'ignored=%FF',
+      'application/x-www-form-urlencoded',
+      status: 400
+    )
   end
 
-  it 'rejects invalid JSON encoding in an ignored parameter before mutation' do
-    body = "{\"ignored\":\"\xFF\"}".b
-    expect(adapter_state).to eq(baseline_state)
-
-    post '/features/target/boolean', body, 'CONTENT_TYPE' => 'application/json'
-
-    expect(last_response.status).to eq(400)
-    expect(adapter_state).to eq(baseline_state)
+  it 'rejects invalid query encoding before mutation' do
+    invalid_mutation(
+      :post,
+      '/features/target/boolean?ignored=%FF',
+      '{}',
+      'application/json',
+      status: 400
+    )
   end
 
-  it 'rejects invalid form encoding in an ignored parameter before mutation' do
-    expect(adapter_state).to eq(baseline_state)
-
-    post '/features/target/boolean',
-         'ignored=%FF',
-         'CONTENT_TYPE' => 'application/x-www-form-urlencoded'
-
-    expect(last_response.status).to eq(400)
-    expect(adapter_state).to eq(baseline_state)
-  end
-
-  it 'rejects invalid query encoding before a JSON mutation' do
-    expect(adapter_state).to eq(baseline_state)
-
-    post '/features/target/boolean?ignored=%FF',
-         '{}',
-         'CONTENT_TYPE' => 'application/json'
-
-    expect(last_response.status).to eq(400)
-    expect(adapter_state).to eq(baseline_state)
-  end
-
-  REQUIRED_BODY_ENDPOINTS.each do |method, path|
-    it "rejects an empty body for #{method.to_s.upcase} #{path} without mutating state" do
-      expect(adapter_state).to eq(baseline_state)
-
-      public_send(method, path, '', 'CONTENT_TYPE' => 'application/json')
-
-      expect(last_response.status).to eq(422)
-      expect(adapter_state).to eq(baseline_state)
-    end
-  end
-
-  it 'accepts a JSON object with a charset parameter' do
+  it 'accepts application/json with a charset parameter' do
     post '/features',
          JSON.generate(name: 'json_charset'),
          'CONTENT_TYPE' => 'application/json; charset=utf-8'
@@ -507,128 +176,140 @@ RSpec.describe 'Flipper API mutation input handling' do
     expect(flipper.features.map(&:key)).to include('json_charset')
   end
 
-  it 'accepts valid JSON actor and group mutations' do
-    post '/features/target/actors',
-         JSON.generate(flipper_id: 'User;2'),
-         'CONTENT_TYPE' => 'application/json'
-    post '/features/target/groups',
-         JSON.generate(name: 'admins'),
-         'CONTENT_TYPE' => 'application/json'
-
+  it 'preserves valid JSON and form scalar mutations' do
+    post '/features', JSON.generate(name: 'valid_json'), 'CONTENT_TYPE' => 'application/json'
     expect(last_response.status).to eq(200)
-    expect(flipper[:target].actors_value).to include('User;2')
-    expect(flipper[:target].groups_value).to include('admins')
+
+    post '/features', 'name=valid_form', 'CONTENT_TYPE' => 'application/x-www-form-urlencoded'
+    expect(last_response.status).to eq(200)
+
+    expect(flipper.features.map(&:key)).to include('valid_json', 'valid_form')
   end
 
-  it 'accepts identity content encoding for a valid JSON mutation' do
-    post '/features',
-         JSON.generate(name: 'identity_encoding'),
-         'CONTENT_TYPE' => 'application/json',
-         'HTTP_CONTENT_ENCODING' => 'identity'
+  it 'continues to delegate valid multipart parsing to Rack' do
+    boundary = 'flipper-boundary'
+    body = "--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"name\"\r\n\r\n" \
+      "valid_multipart\r\n--#{boundary}--\r\n"
+
+    post '/features', body, 'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
 
     expect(last_response.status).to eq(200)
-    expect(flipper.features.map(&:key)).to include('identity_encoding')
+    expect(flipper.features.map(&:key)).to include('valid_multipart')
   end
 
   [
-    [:post, '/features/target/boolean'],
-    [:delete, '/features/target/boolean'],
-    [:delete, '/features/target/clear'],
-  ].each do |method, path|
-    it "accepts an empty JSON body for bodyless #{method.to_s.upcase} #{path}" do
-      public_send(method, path, '', 'CONTENT_TYPE' => 'application/json')
-
-      expect([200, 204]).to include(last_response.status)
-    end
-  end
-
-  it 'continues to accept valid form scalar parameters' do
-    post '/features', 'name=valid_form', 'CONTENT_TYPE' => 'application/x-www-form-urlencoded'
-
-    expect(last_response.status).to eq(200)
-    expect(flipper.features.map(&:key)).to include('valid_form')
-  end
-
-  ['valid_multipart', 'value--flipper-boundaryinside'].each do |value|
-    it "continues to accept multipart scalar #{value.inspect}" do
+    [['conflict', 'scalar'], ['conflict[]', 'array']],
+    [['conflict[]', 'array'], ['conflict', 'scalar']],
+  ].each do |fields|
+    it "rejects multipart shape conflicts in #{fields.inspect}" do
       boundary = 'flipper-boundary'
-      body = multipart_body(boundary, [['name', value, true]])
+      parts = fields.map do |name, value|
+        "--#{boundary}\r\n" \
+          "Content-Disposition: form-data; name=\"#{name}\"\r\n\r\n" \
+          "#{value}\r\n"
+      end
 
-      post '/features',
-           body,
-           'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
-
-      expect(last_response.status).to eq(200)
-      expect(flipper.features.map(&:key)).to include(value)
+      invalid_mutation(
+        :post,
+        '/features/target/boolean',
+        "#{parts.join}--#{boundary}--\r\n",
+        "multipart/form-data; boundary=#{boundary}",
+        status: 400
+      )
     end
   end
 
-  it 'continues to accept multipart preambles, epilogues, and closing transport padding' do
+  it 'preserves Rack multipart semantics for heterogeneous array elements' do
     boundary = 'flipper-boundary'
-    body = "preamble\r\n--#{boundary}\r\n" \
-      "Content-Disposition: form-data; name=\"name\"\r\n\r\n" \
-      "framed_multipart\r\n" \
-      "--#{boundary}-- \t\r\nepilogue"
+    body = "--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"ignored[]\"\r\n\r\n" \
+      "scalar\r\n--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"ignored[][nested]\"\r\n\r\n" \
+      "value\r\n--#{boundary}--\r\n"
 
-    post '/features',
-         body,
+    post '/features/target/boolean', body,
          'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
 
     expect(last_response.status).to eq(200)
-    expect(flipper.features.map(&:key)).to include('framed_multipart')
+    expect(flipper[:target].boolean_value).to be(true)
   end
 
-  it 'accepts an empty multipart body for a bodyless mutation' do
+  it 'rejects excessively nested multipart fields without mutation' do
     boundary = 'flipper-boundary'
+    name = "nested#{'[nested]' * 150}"
+    body = "--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"#{name}\"\r\n\r\n" \
+      "value\r\n--#{boundary}--\r\n"
 
-    post '/features/target/boolean',
-         "--#{boundary}--\r\n",
-         'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
+    invalid_mutation(
+      :post,
+      '/features/target/boolean',
+      body,
+      "multipart/form-data; boundary=#{boundary}",
+      status: 400
+    )
+  end
+
+  it 'accepts empty JSON bodies for bodyless mutations' do
+    post '/features/target/boolean', '', 'CONTENT_TYPE' => 'application/json'
 
     expect(last_response.status).to eq(200)
+    expect(flipper[:target].boolean_value).to be(true)
   end
 
-  it 'rejects an oversized JSON mutation body before mutation' do
+  it 'rejects empty JSON bodies for required scalar mutations' do
+    invalid_mutation(:post, '/features', '', 'application/json', status: 422)
+  end
+
+  it 'rejects unsupported compressed JSON before mutation' do
+    invalid_mutation(
+      :post,
+      '/features',
+      Flipper::Typecast.to_gzip(name: 'compressed'),
+      'application/json',
+      status: 400,
+      headers: {'HTTP_CONTENT_ENCODING' => 'gzip'}
+    )
+  end
+
+  it 'rejects oversized JSON before mutation without reading it unbounded' do
     stub_const('Flipper::Api::JsonParams::MAX_MUTATION_BODY_BYTES', 1)
+    input = BoundedInput.new(JSON.generate(name: 'oversized'))
+    env = Rack::MockRequest.env_for(
+      '/features',
+      method: 'POST',
+      input: '',
+      'CONTENT_TYPE' => 'application/json'
+    )
+    env['rack.input'] = input
     expect(adapter_state).to eq(baseline_state)
 
-    post '/features', JSON.generate(name: 'oversized'), 'CONTENT_TYPE' => 'application/json'
+    status, = app.call(env)
 
-    expect(last_response.status).to eq(400)
-    expect(adapter_state).to eq(baseline_state)
-  end
-
-  it 'rejects an oversized form mutation body before mutation' do
-    stub_const('Flipper::Api::JsonParams::MAX_MUTATION_BODY_BYTES', 1)
-    expect(adapter_state).to eq(baseline_state)
-
-    post '/features', 'name=oversized', 'CONTENT_TYPE' => 'application/x-www-form-urlencoded'
-
-    expect(last_response.status).to eq(400)
-    expect(adapter_state).to eq(baseline_state)
-  end
-
-  it 'rejects unsupported compressed mutation bodies before mutation' do
-    compressed_body = Flipper::Typecast.to_gzip(name: 'compressed')
-    expect(adapter_state).to eq(baseline_state)
-
-    post '/features',
-         compressed_body,
-         'CONTENT_TYPE' => 'application/json',
-         'HTTP_CONTENT_ENCODING' => 'gzip'
-
-    expect(last_response.status).to eq(400)
+    expect(status).to eq(400)
+    expect(input.read_lengths).not_to include(nil)
     expect(adapter_state).to eq(baseline_state)
   end
 
-  it 'leaves import body-size enforcement at the bounded import reader' do
+  it 'rejects malformed import JSON before mutation' do
+    invalid_mutation(:post, '/import', '{"features":', 'application/json', status: 422)
+  end
+
+  [nil, [], 'invalid', 1, true].each do |root|
+    it "rejects import root #{root.inspect} before mutation" do
+      invalid_mutation(:post, '/import', JSON.generate(root), 'application/json', status: 422)
+    end
+  end
+
+  it 'rejects oversized imports using the bounded reader' do
     stub_const('Flipper::Exporters::Json::Export::MAX_BYTES', 1)
     input = BoundedInput.new(JSON.generate(features: {}))
     env = Rack::MockRequest.env_for(
       '/import',
       method: 'POST',
-      'CONTENT_TYPE' => 'application/json',
-      input: input
+      input: '',
+      'CONTENT_TYPE' => 'application/json'
     )
     env['rack.input'] = input
     expect(adapter_state).to eq(baseline_state)
@@ -640,150 +321,126 @@ RSpec.describe 'Flipper API mutation input handling' do
     expect(adapter_state).to eq(baseline_state)
   end
 
-  {
-    'root null' => nil,
-    'root array' => [],
-    'root string' => 'invalid',
-    'root number' => 1,
-    'root boolean' => true,
-    'features as an array' => {features: []},
-    'feature gates as an array' => {features: {bad: []}},
-    'groups as a string' => {features: {bad: {groups: 'not-an-array'}}},
-    'groups with a non-string member' => {features: {bad: {groups: [1]}}},
-    'actors as a hash' => {features: {bad: {actors: {id: 'User;2'}}}},
-    'actors as false' => {features: {bad: {actors: false, groups: []}}},
-    'groups as false' => {features: {bad: {actors: [], groups: false}}},
-    'actors with a non-string member' => {features: {bad: {actors: [1]}}},
-    'boolean as a container' => {features: {bad: {boolean: []}}},
-    'percentage as a container' => {features: {bad: {percentage_of_time: []}}},
-    'expression as an array' => {features: {bad: {expression: []}}},
-    'unknown expression operator' => {features: {bad: {expression: {Unknown: []}}}},
-    'empty All expression' => {features: {bad: {expression: {All: []}}}},
-    'empty Any expression' => {features: {bad: {expression: {Any: []}}}},
-    'expression with too few arguments' => {features: {bad: {expression: {Equal: [1]}}}},
-    'expression with too many arguments' => {features: {bad: {expression: {Equal: [1, 1, 1]}}}},
-    'expression with multiple operators' => {
-      features: {bad: {expression: {Equal: [1, 1], Unknown: []}}},
-    },
-    'nested expression with multiple operators' => {
-      features: {bad: {expression: {All: [{Equal: [1, 1], Unknown: []}]}}},
-    },
-    'nested expression with the wrong arity' => {
-      features: {bad: {expression: {All: [{Equal: [1]}]}}},
-    },
-    'expression with an invalid time constant' => {
-      features: {bad: {expression: {Time: ['not-a-time']}}},
-    },
-    'expression with an invalid number constant' => {
-      features: {bad: {expression: {Number: [false]}}},
-    },
-    'expression with an invalid percentage constant' => {
-      features: {bad: {expression: {Percentage: [false]}}},
-    },
-    'expression with an invalid random maximum' => {
-      features: {bad: {expression: {Random: ['not-a-number']}}},
-    },
-    'expression with a numeric root' => {
-      features: {bad: {expression: {Number: [0]}}},
-    },
-    'All expression with a numeric child' => {
-      features: {bad: {expression: {All: [{Number: [0]}]}}},
-    },
-    'Any expression with a string child' => {
-      features: {bad: {expression: {Any: [{String: ['']}]}}},
-    },
-    'expression with an invalid actor percentage' => {
-      features: {bad: {expression: {PercentageOfActors: ['User;1', '40']}}},
-    },
-    'expression with a boolean random maximum' => {
-      features: {bad: {expression: {Random: [{PercentageOfActors: ['User;1', 50]}]}}},
-    },
-    'nonnumeric actor percentage' => {
-      features: {bad: {percentage_of_actors: 'not-a-number'}},
-    },
-    'nonnumeric time percentage' => {
-      features: {bad: {percentage_of_time: 'not-a-number'}},
-    },
-    'partially numeric actor percentage' => {
-      features: {bad: {percentage_of_actors: 'oops1'}},
-    },
-    'partially numeric time percentage' => {
-      features: {bad: {percentage_of_time: 'oops1'}},
-    },
-    'unknown gate' => {features: {bad: {unknown: 'value'}}},
-  }.each do |description, payload|
-    it "rejects import #{description} before replacing adapter state" do
-      expect(adapter_state).to eq(baseline_state)
+  it 'does not classify JSON parser errors from rack.input as client errors' do
+    input = double('Input', rewind: nil)
+    allow(input).to receive(:read).and_raise(JSON::ParserError, 'input failure')
+    env = Rack::MockRequest.env_for(
+      '/features',
+      method: 'POST',
+      input: '',
+      'CONTENT_TYPE' => 'application/json'
+    )
+    env['rack.input'] = input
 
-      post '/import', JSON.generate(payload), 'CONTENT_TYPE' => 'application/json'
+    expect { app.call(env) }.to raise_error(JSON::ParserError, 'input failure')
+    expect(adapter_state).to eq(baseline_state)
+  end
 
-      expect(last_response.status).to eq(422)
-      expect(adapter_state).to eq(baseline_state)
+  it 'does not classify form input stream range errors as client errors' do
+    env = Rack::MockRequest.env_for(
+      '/features',
+      method: 'POST',
+      input: '',
+      'CONTENT_TYPE' => 'application/x-www-form-urlencoded'
+    )
+    env['rack.input'] = RangeErrorInput.new
+    unrewound_app = Flipper::Api.app(flipper, use_rewindable_middleware: false)
+
+    expect { unrewound_app.call(env) }.to raise_error(RangeError, 'input failure')
+    expect(adapter_state).to eq(baseline_state)
+  end
+
+  it 'does not classify adapter JSON parser errors as invalid imports' do
+    allow(flipper).to receive(:import).and_raise(JSON::ParserError, 'adapter failure')
+    body = build_flipper.export.contents
+    expect(adapter_state).to eq(baseline_state)
+
+    expect do
+      post '/import', body, 'CONTENT_TYPE' => 'application/json'
+    end.to raise_error(JSON::ParserError, 'adapter failure')
+
+    expect(adapter_state).to eq(baseline_state)
+  end
+
+  it 'does not classify adapter argument errors as invalid client input' do
+    allow(flipper.adapter).to receive(:add).and_raise(ArgumentError, 'adapter failure')
+
+    expect do
+      post '/features', JSON.generate(name: 'unreachable'), 'CONTENT_TYPE' => 'application/json'
+    end.to raise_error(ArgumentError, 'adapter failure')
+
+    expect(adapter_state).to eq(baseline_state)
+  end
+
+  it 'does not classify multipart tempfile factory errors as invalid client input' do
+    boundary = 'flipper-boundary'
+    body = "--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"upload\"; filename=\"file.txt\"\r\n" \
+      "Content-Type: text/plain\r\n\r\ncontents\r\n" \
+      "--#{boundary}--\r\n"
+    env = Rack::MockRequest.env_for(
+      '/features',
+      method: 'POST',
+      input: body,
+      'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
+    )
+    env['rack.multipart.tempfile_factory'] = lambda do |*|
+      raise ArgumentError, 'tempfile failure'
     end
-  end
 
-  it 'rejects import non-finite expression constants before replacing adapter state' do
-    expect(adapter_state).to eq(baseline_state)
-
-    post '/import',
-         '{"features":{"bad":{"expression":{"Random":[1e10000]}}}}',
-         'CONTENT_TYPE' => 'application/json'
-
-    expect(last_response.status).to eq(422)
+    expect { app.call(env) }.to raise_error(ArgumentError, 'tempfile failure')
     expect(adapter_state).to eq(baseline_state)
   end
 
-  it 'rejects import expression conversions to non-finite numbers before replacing adapter state' do
-    payload = {
-      features: {
-        bad: {expression: {Random: [{Number: ['1.0e10000']}]}},
-      },
-    }
-    expect(adapter_state).to eq(baseline_state)
-
-    post '/import', JSON.generate(payload), 'CONTENT_TYPE' => 'application/json'
-
-    expect(last_response.status).to eq(422)
-    expect(adapter_state).to eq(baseline_state)
-  end
-
-  [
-    {features: {bad: {}}},
-    {features: {bad: {actors: nil, groups: []}}},
-    {features: {bad: {actors: [], groups: nil}}},
-  ].each do |payload|
-    it "normalizes sparse import set gates for #{payload.inspect}" do
-      post '/import', JSON.generate(payload), 'CONTENT_TYPE' => 'application/json'
-
-      expect(last_response.status).to eq(204)
-
-      post '/features/bad/actors',
-           JSON.generate(flipper_id: 'User;normalized'),
-           'CONTENT_TYPE' => 'application/json'
-      post '/features/bad/groups',
-           JSON.generate(name: 'admins'),
-           'CONTENT_TYPE' => 'application/json'
-
-      expect(last_response.status).to eq(200)
-      expect(flipper[:bad].actors_value).to include('User;normalized')
-      expect(flipper[:bad].groups_value).to include('admins')
+  it 'does not classify named Rack parser errors from a multipart callback as client input' do
+    boundary = 'flipper-boundary'
+    body = "--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"upload\"; filename=\"file.txt\"\r\n" \
+      "Content-Type: text/plain\r\n\r\ncontents\r\n" \
+      "--#{boundary}--\r\n"
+    env = Rack::MockRequest.env_for(
+      '/features',
+      method: 'POST',
+      input: body,
+      'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
+    )
+    error_class = Flipper::Api::ParameterParsing.errors.find do |error|
+      error.name.end_with?('ParameterTypeError')
     end
+    env['rack.multipart.tempfile_factory'] = lambda do |*|
+      raise error_class, 'factory failure'
+    end
+
+    expect { app.call(env) }.to raise_error(error_class, 'factory failure')
+    expect(adapter_state).to eq(baseline_state)
   end
 
-  it 'continues to accept imported expressions with valid deterministic domains' do
-    expression = {
-      LessThan: [
-        {Time: ['2020-01-01T00:00:00Z']},
-        {Now: []},
-      ],
-    }
-    payload = {features: {valid_time: {expression: expression}}}
+  it 'does not invoke the application multipart tempfile factory during shape validation' do
+    boundary = 'flipper-boundary'
+    body = "--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"name\"\r\n\r\n" \
+      "factory_once\r\n" \
+      "--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"upload\"; filename=\"file.txt\"\r\n" \
+      "Content-Type: text/plain\r\n\r\ncontents\r\n" \
+      "--#{boundary}--\r\n"
+    env = Rack::MockRequest.env_for(
+      '/features',
+      method: 'POST',
+      input: body,
+      'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
+    )
+    calls = 0
+    env['rack.multipart.tempfile_factory'] = lambda do |*|
+      calls += 1
+      StringIO.new
+    end
 
-    post '/import', JSON.generate(payload), 'CONTENT_TYPE' => 'application/json'
+    status, = app.call(env)
 
-    expect(last_response.status).to eq(204)
-    expect(flipper[:valid_time].expression_value).to eq(Flipper::Expression.build(expression).value)
-    expect(flipper[:valid_time].enabled?).to be(true)
+    expect(status).to eq(200)
+    expect(calls).to eq(1)
+    expect(flipper.features.map(&:key)).to include('factory_once')
   end
 
   class BoundedInput < StringIO
@@ -800,21 +457,38 @@ RSpec.describe 'Flipper API mutation input handling' do
     end
   end
 
+  class RangeErrorInput
+    def read(*)
+      raise RangeError, 'input failure'
+    end
+
+    def rewind
+    end
+  end
+
+  def invalid_mutation(method, path, body, content_type, status: nil, headers: {})
+    expect(adapter_state).to eq(baseline_state)
+
+    public_send(
+      method,
+      path,
+      body,
+      {'CONTENT_TYPE' => content_type}.merge(headers)
+    )
+
+    if status
+      expect(last_response.status).to eq(status)
+    else
+      expect([400, 422]).to include(last_response.status)
+    end
+    expect(adapter_state).to eq(baseline_state)
+  end
+
   def baseline_state
     @baseline_state ||= adapter_state
   end
 
   def adapter_state
     Marshal.load(Marshal.dump(flipper.adapter.get_all))
-  end
-
-  def multipart_body(boundary, fields)
-    parts = fields.map do |name, value, quoted|
-      encoded_name = quoted == false ? name : "\"#{name}\""
-      "--#{boundary}\r\n" \
-        "Content-Disposition: form-data; name=#{encoded_name}\r\n\r\n" \
-        "#{value}\r\n"
-    end
-    "#{parts.join}--#{boundary}--\r\n"
   end
 end

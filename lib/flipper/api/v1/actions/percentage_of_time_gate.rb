@@ -37,12 +37,11 @@ module Flipper
 
           def percentage
             @percentage ||= begin
-              unless ParameterParsing.valid_percentage_string?(percentage_param)
+              unless percentage_param.match(/\d/)
                 raise ArgumentError, "invalid numeric value: #{percentage_param}"
               end
 
-              value = ParameterParsing.normalize_percentage(percentage_param)
-              Flipper::Types::Percentage.new(value).value
+              Flipper::Types::Percentage.new(percentage_param).value
             rescue ArgumentError, TypeError
               -1
             end

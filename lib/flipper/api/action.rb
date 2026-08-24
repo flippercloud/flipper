@@ -91,7 +91,7 @@ module Flipper
       def run
         if valid_request_method? && respond_to?(request_method_name)
           catch(:halt) do
-            if mutation_request? && !json_request? && parse_request_params? && params_invalid?
+            if mutation_request? && params_invalid?
               json_error_response(:request_invalid)
             end
             send(request_method_name)
@@ -185,10 +185,12 @@ module Flipper
       def safe_params
         @safe_params ||= params
       rescue *parameter_parser_errors
+        raise if @multipart_prevalidated
+
         @params_parse_failed = true
         @safe_params = {}
-      rescue EOFError
-        raise unless multipart_request?
+      rescue RangeError
+        raise unless mutation_request? && request.env['rack.request.form_vars'.freeze].is_a?(String)
 
         @params_parse_failed = true
         @safe_params = {}
@@ -200,11 +202,31 @@ module Flipper
       end
 
       def params_invalid?
-        params_parse_failed? || !ParameterParsing.valid_encoding?(safe_params)
-      end
+        if multipart_request?
+          begin
+            ParameterParsing.validate_multipart_shapes(request.env)
+            @multipart_prevalidated = true
+          rescue ParameterParsing::InvalidParameterShape
+            return true
+          end
+        end
 
-      def parse_request_params?
-        true
+        return true if params_parse_failed?
+        return true unless ParameterParsing.valid_encoding?(safe_params)
+
+        form_vars = request.env['rack.request.form_vars'.freeze]
+        if form_vars.is_a?(String)
+          begin
+            ParameterParsing.parse_nested_query(form_vars)
+          rescue *parameter_parser_errors
+            return true
+          rescue RangeError
+            return true
+          end
+        end
+
+        compatible = compatible_parameter_shapes?(request.GET, request.POST)
+        !compatible
       end
 
       # Private: Returns a valid String parameter, ignoring other shapes and
@@ -216,9 +238,6 @@ module Flipper
         value if valid_param_string?(value)
       end
 
-      # Private: Returns an optional String parameter. Nil retains the legacy
-      # meaning of an omitted parameter, while other non-String shapes are
-      # rejected before an action can mutate state.
       def optional_string_param(name)
         json_error_response(:request_invalid) if container_param?(name)
 
@@ -242,12 +261,27 @@ module Flipper
       end
 
       def parameter_parser_errors
-        # Rack 2.0 uses plain RangeError for query limits. JsonParams handles
-        # mutation query errors around the parser call itself before action
-        # dispatch. Keep the Phase 2 fail-open behavior for read queries, but
-        # do not hide body IO or application defects during mutations.
         errors = ParameterParsing.errors
         mutation_request? ? errors - [RangeError] : errors
+      end
+
+      def compatible_parameter_shapes?(left, right)
+        (left.keys & right.keys).all? do |key|
+          left_value = left[key]
+          right_value = right[key]
+          left_shape = parameter_shape(left_value)
+          right_shape = parameter_shape(right_value)
+
+          left_shape == right_shape &&
+            (left_shape != Hash || compatible_parameter_shapes?(left_value, right_value))
+        end
+      end
+
+      def parameter_shape(value)
+        return Hash if value.is_a?(Hash)
+        return Array if value.is_a?(Array)
+
+        String
       end
 
       # Private: Returns the request method converted to an action method.
@@ -273,10 +307,6 @@ module Flipper
         MUTATION_REQUEST_METHOD_NAMES.include?(request_method_name)
       end
 
-      def json_request?
-        request_media_type.casecmp('application/json') == 0
-      end
-
       def multipart_request?
         request_media_type.casecmp('multipart/form-data') == 0
       end
@@ -284,6 +314,7 @@ module Flipper
       def request_media_type
         request.env['CONTENT_TYPE'.freeze].to_s.split(';', 2).first.to_s.strip
       end
+
     end
   end
 end
