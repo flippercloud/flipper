@@ -359,6 +359,16 @@ RSpec.describe 'Flipper API mutation transport handling' do
     expect(adapter_state).to eq(baseline_state)
   end
 
+  it 'does not classify JSON decoder range errors as client errors' do
+    allow(Flipper::Typecast).to receive(:from_json).and_raise(RangeError, 'decoder failure')
+
+    expect do
+      post '/features', JSON.generate(name: 'unreachable'), 'CONTENT_TYPE' => 'application/json'
+    end.to raise_error(RangeError, 'decoder failure')
+
+    expect(adapter_state).to eq(baseline_state)
+  end
+
   it 'does not classify form input stream range errors as client errors' do
     env = Rack::MockRequest.env_for(
       '/features',
