@@ -38,9 +38,9 @@ module Flipper
           end
 
           def post
-            feature_name = Typecast.to_feature_name(
-              params.fetch('name') { json_error_response(:name_invalid) }
-            )
+            name = string_param('name')
+            json_error_response(:name_invalid) if name.nil?
+            feature_name = Typecast.to_feature_name(name)
             json_error_response(:name_invalid) if feature_name.empty?
             feature = flipper[feature_name]
             feature.add
