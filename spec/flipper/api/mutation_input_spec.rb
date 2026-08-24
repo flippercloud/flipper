@@ -167,6 +167,16 @@ RSpec.describe 'Flipper API mutation transport handling' do
     )
   end
 
+  it 'rejects invalid route encoding before mutation' do
+    invalid_mutation(
+      :post,
+      '/features/%FF/boolean',
+      '',
+      'application/x-www-form-urlencoded',
+      status: 400
+    )
+  end
+
   it 'accepts application/json with a charset parameter' do
     post '/features',
          JSON.generate(name: 'json_charset'),
@@ -196,6 +206,19 @@ RSpec.describe 'Flipper API mutation transport handling' do
 
     expect(last_response.status).to eq(200)
     expect(flipper.features.map(&:key)).to include('valid_multipart')
+  end
+
+  it 'preserves Rack multipart preamble, epilogue, and transport-padding support' do
+    boundary = 'flipper-boundary'
+    body = "multipart preamble\r\n--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"name\"\r\n\r\n" \
+      "framed_multipart\r\n--#{boundary}-- \t\r\n" \
+      "multipart epilogue"
+
+    post '/features', body, 'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
+
+    expect(last_response.status).to eq(200)
+    expect(flipper.features.map(&:key)).to include('framed_multipart')
   end
 
   [

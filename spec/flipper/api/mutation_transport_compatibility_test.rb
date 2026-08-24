@@ -151,6 +151,35 @@ class MutationTransportCompatibilityTest < Minitest::Test
     assert_equal @baseline, adapter_state
   end
 
+  def test_valid_multipart_framing_extensions_remain_supported
+    boundary = 'flipper-boundary'
+    body = "multipart preamble\r\n--#{boundary}\r\n" \
+      "Content-Disposition: form-data; name=\"name\"\r\n\r\n" \
+      "framed_multipart\r\n--#{boundary}-- \t\r\n" \
+      "multipart epilogue"
+    response = request(
+      '/features',
+      method: 'POST',
+      input: body,
+      'CONTENT_TYPE' => "multipart/form-data; boundary=#{boundary}"
+    )
+
+    assert_equal 200, response.first
+    assert_includes @flipper.features.map(&:key), 'framed_multipart'
+  end
+
+  def test_invalid_route_encoding_is_rejected_without_mutation
+    response = request(
+      '/features/%FF/boolean',
+      method: 'POST',
+      input: '',
+      'CONTENT_TYPE' => 'application/x-www-form-urlencoded'
+    )
+
+    assert_equal 400, response.first
+    assert_equal @baseline, adapter_state
+  end
+
   def test_json_with_charset_remains_valid
     response = request(
       '/features',
