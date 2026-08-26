@@ -104,6 +104,47 @@ RSpec.describe Flipper::Feature do
     end
   end
 
+  describe "#disabled?" do
+    context "for an actor" do
+      let(:actor) { Flipper::Actor.new("User;1") }
+
+      it 'returns false if feature is enabled' do
+        subject.enable
+        expect(subject.disabled?(actor)).to be(false)
+      end
+
+      it 'returns true if feature is disabled' do
+        subject.disable
+        expect(subject.disabled?(actor)).to be(true)
+      end
+    end
+
+    context "for multiple actors" do
+      let(:actors) {
+        [
+          Flipper::Actor.new("User;1"),
+          Flipper::Actor.new("User;2"),
+          Flipper::Actor.new("User;3"),
+        ]
+      }
+
+      it 'returns false if feature is enabled' do
+        subject.enable
+        expect(subject.disabled?(actors)).to be(false)
+      end
+
+      it 'returns false if feature is enabled for any actor' do
+        subject.enable_actor actors.first
+        expect(subject.disabled?(actors)).to be(false)
+      end
+
+      it 'returns true if feature is disabled for all actors' do
+        subject.disable
+        expect(subject.disabled?(actors)).to be(true)
+      end
+    end
+  end
+
   describe '#to_s' do
     it 'returns name as string' do
       feature = described_class.new(:search, adapter)
