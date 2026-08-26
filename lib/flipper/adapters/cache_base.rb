@@ -99,6 +99,19 @@ module Flipper
       end
 
       # Public
+      def import(source)
+        feature_keys = @adapter.features
+        result = @adapter.import(source)
+        return result unless result
+
+        feature_keys |= @adapter.features
+
+        feature_keys.each { |key| cache_delete feature_cache_key(key) }
+        expire_features_cache
+        result
+      end
+
+      # Public
       def enable(feature, gate, thing)
         result = @adapter.enable(feature, gate, thing)
         expire_feature_cache(feature.key)
