@@ -20,6 +20,17 @@ module Flipper
         other.is_a?(self.class) && other.value == value
       end
       alias_method :==, :eql?
+
+      # Public: Validate this constant against the JSON Schema. Returns an
+      # Enumerable of validation errors (empty when valid). Requires json_schemer.
+      def validate
+        Schema.instance.validate(value)
+      end
+
+      # Public: Returns true if this constant is a structurally valid expression.
+      def valid?
+        Schema.instance.valid?(value)
+      end
     end
   end
 end

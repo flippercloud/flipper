@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://www.flippercloud.io/expressions/PercentageOfActors.schema.json",
+  "title": "PercentageOfActors",
+  "description": "Returns true when the actor falls within the given percentage for the feature.",
+  "category": "Condition",
+  "type": "array",
+  "items": [
+    { "$ref": "schema.json#/definitions/string" },
+    { "$ref": "schema.json#/definitions/number" }
+  ],
+  "minItems": 2,
+  "maxItems": 2
+}

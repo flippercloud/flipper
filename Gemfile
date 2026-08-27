@@ -12,6 +12,7 @@ gem 'debug'
 gem 'rake'
 gem 'statsd-ruby', '~> 1.2.1'
 gem 'rspec', '~> 3.0'
+gem 'json_schemer' # optional; enables Flipper::Expression validation
 gem 'rack-test'
 gem 'rackup', '= 1.0.0'
 gem 'sqlite3', "~> #{ENV['SQLITE3_VERSION'] || '2.1.0'}"

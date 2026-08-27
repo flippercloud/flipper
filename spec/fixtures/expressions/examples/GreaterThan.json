@@ -1,0 +1,36 @@
+{
+  "valid": [
+    {
+      "expression": { "GreaterThan": [1, 1] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "GreaterThan": ["a", "a"] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "GreaterThan": [2, 1] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "GreaterThan": ["b", "a"] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "GreaterThan": ["a", "b"] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "GreaterThan": [{ "Property": "age" }, 18] },
+      "context": { "properties": { "age": 21 }},
+      "result": { "enum": [true] }
+    }
+  ],
+  "invalid": [
+    { "GreaterThan": [1, 2, 3] },
+    { "GreaterThan": [1] },
+    { "GreaterThan": 1 },
+    { "GreaterThan": null },
+    { "GreaterThan": [1, 2], "Any": [] }
+  ]
+}
