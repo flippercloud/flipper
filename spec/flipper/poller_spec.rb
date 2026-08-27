@@ -13,6 +13,7 @@ RSpec.describe Flipper::Poller do
     described_class.new(
       remote_adapter: remote_adapter,
       start_automatically: false,
+      shutdown_automatically: false,
       interval: 3600 # 1 hour
     )
   end
@@ -22,7 +23,7 @@ RSpec.describe Flipper::Poller do
       .to_return(status: 200, body: JSON.generate(features: []))
 
     allow(subject).to receive(:loop).and_yield # Make loop just call once
-    allow(subject).to receive(:sleep)          # Disable sleep
+    allow(subject).to receive(:wait_for_stop).and_return(false) # Disable condition waits
     allow(Thread).to receive(:new).and_yield   # Disable separate thread
   end
 
@@ -30,6 +31,27 @@ RSpec.describe Flipper::Poller do
     it "always returns same memory adapter instance" do
       expect(subject.adapter).to be_a(Flipper::Adapters::Memory)
       expect(subject.adapter.object_id).to eq(subject.adapter.object_id)
+    end
+  end
+
+  describe ".reset" do
+    it "keeps instances tracked when their worker thread is still running" do
+      poller = described_class.get("stuck", {
+        remote_adapter: remote_adapter,
+        start_automatically: false,
+        shutdown_automatically: false,
+      })
+      thread = instance_double(Thread, alive?: true)
+      poller.instance_variable_set(:@thread, thread)
+
+      expect(thread).to receive(:join).with(Flipper::Poller::STOP_JOIN_TIMEOUT)
+
+      described_class.reset
+
+      expect(described_class.get("stuck")).to be(poller)
+    ensure
+      poller&.instance_variable_set(:@thread, nil)
+      described_class.reset
     end
   end
 
@@ -348,6 +370,156 @@ RSpec.describe Flipper::Poller do
         subject.sync
         expect(subject.interval).to eq(original_interval)
       end
+    end
+  end
+
+  describe "#stop" do
+    it "requests stop, joins the worker thread, and clears the thread reference" do
+      thread = instance_double(Thread)
+      subject.instance_variable_set(:@thread, thread)
+
+      expect(thread).not_to receive(:kill)
+      expect(thread).to receive(:alive?).and_return(false)
+      expect(thread).to receive(:join).with(Flipper::Poller::STOP_JOIN_TIMEOUT)
+
+      subject.stop
+
+      expect(subject.thread).to be(nil)
+      expect(subject.instance_variable_get(:@shutdown_requested)).to be(false)
+      expect(subject.instance_variable_get(:@stop_requested)).to be_false
+    end
+
+    it "allows the poller to start again after a normal stop" do
+      thread = instance_double(Thread)
+      subject.instance_variable_set(:@thread, thread)
+
+      allow(thread).to receive(:alive?).and_return(false)
+      allow(thread).to receive(:join).with(Flipper::Poller::STOP_JOIN_TIMEOUT)
+
+      subject.stop
+
+      expect(Thread).to receive(:new).and_yield
+      expect(subject).to receive(:loop).and_yield
+      expect(subject).to receive(:sync)
+      subject.start
+    end
+
+    it "does not wait indefinitely for a worker that has not stopped yet" do
+      thread = instance_double(Thread, alive?: true)
+      subject.instance_variable_set(:@thread, thread)
+
+      expect(thread).to receive(:join).with(Flipper::Poller::STOP_JOIN_TIMEOUT)
+
+      subject.stop
+
+      expect(subject.thread).to be(thread)
+      expect(subject.instance_variable_get(:@stop_requested)).to be_true
+    end
+
+    it "does not clear a newer worker's stop request after an earlier worker exits" do
+      first_thread = instance_double(Thread, alive?: false)
+      second_thread = instance_double(Thread, alive?: true)
+      subject.instance_variable_set(:@thread, first_thread)
+
+      allow(Thread).to receive(:new).and_return(second_thread)
+      allow(second_thread).to receive(:report_on_exception=)
+      expect(second_thread).to receive(:join).with(Flipper::Poller::STOP_JOIN_TIMEOUT)
+      expect(first_thread).to receive(:join).with(Flipper::Poller::STOP_JOIN_TIMEOUT) do
+        subject.instance_variable_set(:@thread, nil)
+        subject.instance_variable_get(:@stop_requested).make_false
+        subject.start
+        subject.stop
+      end
+
+      subject.stop
+
+      expect(subject.thread).to be(second_thread)
+      expect(subject.instance_variable_get(:@stop_requested)).to be_true
+    end
+
+    it "clears a dead worker's stop request before starting a replacement" do
+      first_thread = instance_double(Thread, alive?: false)
+      second_thread = instance_double(Thread)
+      subject.instance_variable_set(:@thread, first_thread)
+      subject.instance_variable_get(:@stop_requested).make_true
+
+      allow(Thread).to receive(:new).and_return(second_thread)
+      allow(second_thread).to receive(:report_on_exception=)
+
+      subject.start
+
+      expect(subject.thread).to be(second_thread)
+      expect(subject.instance_variable_get(:@stop_requested)).to be_false
+    end
+
+    it "does not kill itself when shutdown is requested from the poller thread" do
+      stub_request(:get, "#{url}/features?exclude_gate_names=true")
+        .to_return(
+          status: 200,
+          body: JSON.generate(features: []),
+          headers: { "poll-shutdown" => "true" }
+        )
+
+      subject.instance_variable_set(:@thread, Thread.current)
+
+      expect(Thread.current).not_to receive(:kill)
+
+      subject.run
+
+      expect(subject.thread).to be(nil)
+    end
+
+    it "does not wait for the interval if stop was requested before the wait begins" do
+      allow(subject).to receive(:wait_for_stop).and_call_original
+      subject.instance_variable_get(:@stop_requested).make_true
+
+      started_at = Concurrent.monotonic_time
+      expect(subject.send(:wait_for_stop, 3600)).to be(true)
+
+      expect(Concurrent.monotonic_time - started_at).to be < 0.1
+    end
+
+    it "keeps waiting until the deadline after a spurious wakeup" do
+      allow(subject).to receive(:wait_for_stop).and_call_original
+      allow(Concurrent).to receive(:monotonic_time).and_return(10.0, 10.0, 10.25, 11.0)
+
+      stop_mutex = subject.instance_variable_get(:@stop_mutex)
+      stop_condition = subject.instance_variable_get(:@stop_condition)
+      expect(stop_condition).to receive(:wait).with(stop_mutex, 1.0).ordered
+      expect(stop_condition).to receive(:wait).with(stop_mutex, 0.75).ordered
+
+      expect(subject.send(:wait_for_stop, 1)).to be(false)
+    end
+
+    it "wakes and joins a waiting worker, then starts a replacement" do
+      allow(Thread).to receive(:new).and_call_original
+      allow(subject).to receive(:loop).and_call_original
+      allow(subject).to receive(:wait_for_stop).and_call_original
+
+      waiting = Queue.new
+      stop_condition = subject.instance_variable_get(:@stop_condition)
+      allow(stop_condition).to receive(:wait).and_wrap_original do |original, *args|
+        waiting << true
+        original.call(*args)
+      end
+
+      subject.start
+      Timeout.timeout(5) { waiting.pop }
+      first_worker = subject.thread
+
+      subject.stop
+
+      expect(first_worker).not_to be_alive
+      expect(subject.thread).to be(nil)
+
+      subject.start
+      Timeout.timeout(5) { waiting.pop }
+      second_worker = subject.thread
+
+      expect(second_worker).not_to be(first_worker)
+      expect(second_worker).to be_alive
+    ensure
+      subject.stop
     end
   end
 
