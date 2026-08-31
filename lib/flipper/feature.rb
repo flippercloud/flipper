@@ -50,6 +50,9 @@ module Flipper
       @key = name.to_s
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
       @adapter = adapter
+      @group_resolver = options.fetch(:group_resolver, Flipper)
+      @feature_resolver = options.fetch(:feature_resolver, Flipper)
+      @instance_key = options[:instance_key]
     end
 
     # Public: Enable this feature for something.
@@ -117,7 +120,9 @@ module Flipper
         context = FeatureCheckContext.new(
           feature_name: @name,
           values: gate_values,
-          actors: actors
+          actors: actors,
+          feature_resolver: @feature_resolver,
+          instance_key: @instance_key
         )
 
         if open_gate = gates.detect { |gate| gate.open?(context) }
@@ -176,7 +181,7 @@ module Flipper
     #
     # Returns result of enable.
     def enable_group(group)
-      enable Types::Group.wrap(group)
+      enable wrap_group(group)
     end
 
     # Public: Enables a feature a percentage of time.
@@ -250,7 +255,7 @@ module Flipper
     #
     # Returns result of disable.
     def disable_group(group)
-      disable Types::Group.wrap(group)
+      disable wrap_group(group)
     end
 
     # Public: Disables a feature a percentage of time.
@@ -314,7 +319,7 @@ module Flipper
     #
     # Returns Set of Flipper::Types::Group instances.
     def enabled_groups
-      groups_value.map { |name| Flipper.group(name) }.to_set
+      groups_value.map { |name| @group_resolver.group(name) }.to_set
     end
     alias_method :groups, :enabled_groups
 
@@ -322,7 +327,7 @@ module Flipper
     #
     # Returns Set of Flipper::Types::Group instances.
     def disabled_groups
-      Flipper.groups - enabled_groups
+      @group_resolver.groups - enabled_groups
     end
 
     def expression
@@ -425,11 +430,19 @@ module Flipper
     #
     # Returns an array of gates
     def gates
-      GATES
+      return GATES if @group_resolver.equal?(Flipper)
+
+      @gates ||= gates_hash.values.freeze
     end
 
     def gates_hash
-      GATES_HASH
+      return GATES_HASH if @group_resolver.equal?(Flipper)
+
+      # Named instances resolve groups through their own registry, so the
+      # group gate can't be shared. The other gates are stateless.
+      @gates_hash ||= GATES_HASH.merge(
+        group: Gates::Group.new(group_resolver: @group_resolver)
+      ).freeze
     end
 
     # Public: Find a gate by name.
@@ -450,6 +463,12 @@ module Flipper
     end
 
     private
+
+    def wrap_group(group)
+      return group if group.is_a?(Types::Group)
+
+      @group_resolver.group(group)
+    end
 
     # Internal: Mirrors a trusted remote expression during adapter sync,
     # including legacy expressions that predate empty-group validation.

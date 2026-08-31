@@ -75,12 +75,19 @@ class ActiveRecordTest < MiniTest::Test
     assert_equal "cross_product_flipper_features", feature_class.table_name
     assert_equal "cross_product_flipper_gates", gate_class.table_name
 
-    flipper = Flipper.new(adapter)
-    flipper[:search].enable
+    regular_flipper = Flipper.new(@adapter)
+    cross_product_flipper = Flipper.new(adapter)
 
-    assert flipper[:search].enabled?
-    assert_equal ["search"], feature_class.pluck(:key)
-    assert_equal [["search", "boolean", "true"]], gate_class.pluck(:feature_key, :key, :value)
+    regular_flipper[:product_only].enable
+    cross_product_flipper[:cross_product_only].enable
+
+    assert regular_flipper[:product_only].enabled?
+    refute regular_flipper[:cross_product_only].enabled?
+    assert cross_product_flipper[:cross_product_only].enabled?
+    refute cross_product_flipper[:product_only].enabled?
+    assert_equal ["product_only"], Flipper::Adapters::ActiveRecord::Feature.pluck(:key)
+    assert_equal ["cross_product_only"], feature_class.pluck(:key)
+    assert_equal [["cross_product_only", "boolean", "true"]], gate_class.pluck(:feature_key, :key, :value)
   end
 
   def test_models_honor_table_name_prefixes_and_suffixes
