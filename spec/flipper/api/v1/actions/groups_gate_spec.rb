@@ -176,7 +176,6 @@ RSpec.describe Flipper::Api::V1::Actions::GroupsGate do
     end
   end
 
-
   context "with a named Flipper instance" do
     let(:app) { build_api(Flipper.cross_app, env_key: "flipper_cross_app") }
 

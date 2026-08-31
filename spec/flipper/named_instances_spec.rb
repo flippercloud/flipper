@@ -172,6 +172,29 @@ RSpec.describe "named Flipper instances" do
       to raise_error(Flipper::NamedInstanceNotFound)
   end
 
+  it "keeps accessors consistent when configuration raises after registration" do
+    expect do
+      Flipper.configure do |config|
+        config.named(:cross_app)
+        raise "configuration failed"
+      end
+    end.to raise_error("configuration failed")
+
+    expect(Flipper.configuration.named_instance_names).to include(:cross_app)
+    expect(Flipper.cross_app).to be(Flipper.named(:cross_app))
+  end
+
+  it "rolls back a named registration when its configuration block raises" do
+    expect do
+      Flipper.configure do |config|
+        config.named(:cross_app) { raise "named configuration failed" }
+      end
+    end.to raise_error("named configuration failed")
+
+    expect(Flipper.configuration.named_instance_names).not_to include(:cross_app)
+    expect(Flipper).not_to respond_to(:cross_app)
+  end
+
   it "rejects duplicate names" do
     expect do
       Flipper.configure do |config|

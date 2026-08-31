@@ -23,9 +23,11 @@ module Flipper
   def configure
     return unless block_given?
 
-    result = yield configuration
-    refresh_named_instance_accessors
-    result
+    begin
+      yield configuration
+    ensure
+      refresh_named_instance_accessors
+    end
   end
 
   # Public: Returns Flipper::Configuration instance.
