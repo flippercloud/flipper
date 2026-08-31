@@ -21,7 +21,11 @@ module Flipper
   #
   # Yields Flipper::Configuration instance.
   def configure
-    yield configuration if block_given?
+    return unless block_given?
+
+    result = yield configuration
+    refresh_named_instance_accessors
+    result
   end
 
   # Public: Returns Flipper::Configuration instance.
@@ -33,7 +37,11 @@ module Flipper
   def configuration=(configuration)
     # need to reset flipper instance if configuration changes
     self.instance = nil
+    Thread.current[:__flipper_named_instances__] = nil
+    remove_named_instance_accessors
     @configuration = configuration
+    refresh_named_instance_accessors
+    configuration
   end
 
   # Public: Default per thread flipper instance if configured. You should not
@@ -52,6 +60,84 @@ module Flipper
   def instance=(flipper)
     Thread.current[:flipper_instance] = flipper
   end
+
+  # Public: Returns a stable proxy for a configured named instance.
+  def named(name)
+    name = normalize_named_instance_name(name)
+    named_configuration(name)
+    named_instance_proxies_mutex.synchronize do
+      named_instance_proxies[name] ||= NamedProxy.new(name)
+    end
+  end
+
+  # Internal: Returns the current named configuration or raises if missing.
+  def named_configuration(name)
+    name = normalize_named_instance_name(name)
+    configured = configuration.respond_to?(:named_configuration) && configuration.named_configuration(name)
+    return configured if configured
+
+    raise NamedInstanceNotFound, "Named instance #{name.inspect} has not been configured"
+  end
+
+  # Internal: Returns the per-thread DSL for a configured named instance.
+  def named_instance(name)
+    configured = named_configuration(name)
+    instances = Thread.current[:__flipper_named_instances__] ||= {}
+    cached = instances[name]
+
+    if cached && cached[:configuration].equal?(configured) && cached[:version] == configured.version
+      cached[:instance]
+    else
+      loop do
+        version = configured.version
+        instance = configured.default
+        next unless version == configured.version
+
+        instances[name] = {
+          configuration: configured,
+          version: version,
+          instance: instance,
+        }
+        return instance
+      end
+    end
+  end
+
+  # Internal: Reset named DSL caches for the current thread.
+  def reset_named_instances
+    Thread.current[:__flipper_named_instances__] = nil
+  end
+
+  # Internal: Normalize and validate a named instance name.
+  def normalize_named_instance_name(name)
+    unless name.is_a?(String) || name.is_a?(Symbol)
+      raise InvalidNamedInstanceName, "Named instance name must be a String or Symbol"
+    end
+
+    normalized = name.to_s
+    unless normalized.match?(/\A[a-z_][a-z0-9_]*\z/)
+      raise InvalidNamedInstanceName, "Named instance #{name.inspect} must use lowercase snake case"
+    end
+
+    normalized.to_sym
+  end
+
+  # Internal: Reject names that would replace Flipper's existing API.
+  def validate_named_instance_name!(name)
+    name = normalize_named_instance_name(name)
+    return name if named_instance_accessor_names.include?(name)
+
+    if singleton_class.public_method_defined?(name) ||
+        singleton_class.protected_method_defined?(name) ||
+        singleton_class.private_method_defined?(name)
+      raise InvalidNamedInstanceName, "Named instance #{name.inspect} conflicts with an existing Flipper method"
+    end
+
+    name
+  end
+
+  private :named_configuration, :named_instance, :reset_named_instances,
+          :normalize_named_instance_name, :validate_named_instance_name!
 
   # Public: All the methods delegated to instance. These should match the
   # interface of Flipper::DSL.
@@ -197,7 +283,10 @@ require 'flipper/adapters/memoizable'
 require 'flipper/adapters/memory'
 require 'flipper/adapters/strict'
 require 'flipper/adapter_builder'
+require 'flipper/registry'
 require 'flipper/configuration'
+require 'flipper/named_configuration'
+require 'flipper/named_proxy'
 require 'flipper/dsl'
 require 'flipper/errors'
 require 'flipper/feature'
@@ -208,7 +297,6 @@ require 'flipper/identifier'
 require 'flipper/middleware/memoizer'
 require 'flipper/middleware/setup_env'
 require 'flipper/poller'
-require 'flipper/registry'
 require 'flipper/expression'
 require 'flipper/type'
 require 'flipper/types/actor'
@@ -226,5 +314,52 @@ require 'flipper/version'
 # touch Flipper concurrently during a parallel boot.
 Flipper.configuration
 Flipper.groups_registry
+
+module Flipper
+  class << self
+    private
+
+    def named_instance_proxies
+      @named_instance_proxies ||= {}
+    end
+
+    def named_instance_proxies_mutex
+      @named_instance_proxies_mutex ||= Mutex.new
+    end
+
+    def named_instance_accessor_names
+      @named_instance_accessor_names ||= Set.new
+    end
+
+    def refresh_named_instance_accessors
+      return unless @configuration.respond_to?(:named_instance_names)
+
+      @configuration.named_instance_names.each do |name|
+        next if named_instance_accessor_names.include?(name)
+
+        validate_named_instance_name!(name)
+        define_singleton_method(name) { named(name) }
+        named_instance_accessor_names.add(name)
+        named_instance_accessor_methods[name] = method(name)
+      end
+    end
+
+    def remove_named_instance_accessors
+      named_instance_accessor_names.each do |name|
+        generated_method = named_instance_accessor_methods[name]
+        current_method = method(name) if respond_to?(name, true)
+        if current_method == generated_method && singleton_class.instance_methods(false).include?(name)
+          singleton_class.send(:remove_method, name)
+        end
+      end
+      named_instance_accessor_names.clear
+      named_instance_accessor_methods.clear
+    end
+
+    def named_instance_accessor_methods
+      @named_instance_accessor_methods ||= {}
+    end
+  end
+end
 
 require "flipper/engine" if defined?(Rails)

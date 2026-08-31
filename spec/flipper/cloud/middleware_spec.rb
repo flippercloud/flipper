@@ -66,6 +66,35 @@ RSpec.describe Flipper::Cloud::Middleware do
     end
   end
 
+  context "with a named Flipper instance" do
+    let(:app) { Flipper::Cloud.app(Flipper.cross_app, env_key: "flipper_cross_app") }
+    let(:signature) {
+      Flipper::Cloud::MessageVerifier.new(secret: "regular_tasty").generate(request_body, timestamp)
+    }
+
+    before do
+      Flipper.register(:default_group) { false }
+      Flipper.configure do |config|
+        config.named(:cross_app).default { flipper }
+      end
+      Flipper.cross_app.register(:cross_app_group) { true }
+    end
+
+    it "reports groups owned by the named instance" do
+      stub = stub_request_for_token("regular")
+
+      post "/", request_body, {
+        "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
+      }
+
+      expect(last_response.status).to eq(200)
+      expect(JSON.parse(last_response.body)).to eq({
+        "groups" => [{"name" => "cross_app_group"}],
+      })
+      expect(stub).to have_been_requested
+    end
+  end
+
   context 'when signature is invalid' do
     let(:app) { Flipper::Cloud.app(flipper) }
     let(:signature) {

@@ -72,6 +72,57 @@ Flipper.enable_percentage_of_actors :search, 2
 
 Read more about [getting started with Flipper](https://flippercloud.io/docs?utm_source=oss&utm_medium=readme&utm_campaign=getting_started) and [enabling features](https://flippercloud.io/docs/features?utm_source=oss&utm_medium=readme&utm_campaign=enabling_features).
 
+## Named Instances
+
+Applications that need independent sets of feature flags can configure named
+instances. Each name has its own adapter stack, features, groups, request cache, and
+preload behavior, while the existing top-level `Flipper` instance is unchanged.
+
+```ruby
+Flipper.configure do |config|
+  config.named(:cross_app) do |cross_app|
+    cross_app.adapter do
+      Flipper::Adapters::ActiveRecord.new(table_prefix: "cross_app_")
+    end
+  end
+end
+
+Flipper.cross_app.register(:beta_organizations) do |actor|
+  actor.respond_to?(:beta_organization?) && actor.beta_organization?
+end
+
+Flipper.enabled?(:product_feature, current_user)
+Flipper.cross_app.enabled?(:shared_feature, current_user)
+Flipper.named(:cross_app).enabled?(:shared_feature, current_user)
+```
+
+Named instances work with any adapter and do not require Flipper Cloud. When using
+Active Record, generate and update the prefixed tables separately:
+
+```shell
+bin/rails generate flipper:active_record --table-prefix=cross_app_
+bin/rails generate flipper:update --table-prefix=cross_app_
+```
+
+A named instance can optionally use a separate Cloud project and webhook:
+
+```ruby
+Flipper.configure do |config|
+  config.named(:cross_app) do |cross_app|
+    cross_app.adapter do
+      Flipper::Adapters::ActiveRecord.new(table_prefix: "cross_app_")
+    end
+    cross_app.cloud(path: "_flipper/cross_app")
+  end
+end
+```
+
+For that example, Rails credentials can be stored under
+`flipper.cross_app.cloud_token` and `flipper.cross_app.cloud_sync_secret`, or provided
+through `FLIPPER_CLOUD_CROSS_APP_TOKEN` and
+`FLIPPER_CLOUD_CROSS_APP_SYNC_SECRET`. Named instances never inherit the default
+`FLIPPER_CLOUD_TOKEN` or `FLIPPER_CLOUD_SYNC_SECRET`.
+
 ## Flipper Cloud
 
 Like Flipper and want more? Check out [Flipper Cloud](https://www.flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=check_out), which comes with:
