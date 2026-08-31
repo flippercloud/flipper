@@ -22,7 +22,7 @@ module Flipper
           feature = flipper[feature_name]
           value = params['value'].to_s.strip
 
-          if Flipper.group_exists?(value)
+          if flipper.group_exists?(value)
             case params['operation']
             when 'enable'
               feature.enable_group value

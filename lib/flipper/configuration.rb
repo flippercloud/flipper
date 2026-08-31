@@ -3,6 +3,8 @@ module Flipper
     def initialize(options = {})
       @builder = AdapterBuilder.new { store Flipper::Adapters::Memory }
       @default = -> { Flipper.new(@builder.to_adapter) }
+      @named_configurations = {}
+      @named_configurations_mutex = Mutex.new
     end
 
     # The default adapter to use.
@@ -64,6 +66,49 @@ module Flipper
       else
         @default.call
       end
+    end
+
+    # Public: Configure a named Flipper instance.
+    #
+    # name - Lowercase snake-case name used by Flipper.named and the generated
+    #        convenience method (for example, Flipper.cross_app).
+    # block - Configuration block yielded a Flipper::NamedConfiguration.
+    #
+    # Returns the newly created named configuration.
+    def named(name)
+      name = Flipper.send(:normalize_named_instance_name, name)
+      Flipper.send(:validate_named_instance_name!, name)
+
+      named_configuration = @named_configurations_mutex.synchronize do
+        if @named_configurations.key?(name)
+          raise DuplicateNamedInstance, "Named instance #{name.inspect} has already been configured"
+        end
+
+        @named_configurations[name] = NamedConfiguration.new(name)
+      end
+
+      if block_given?
+        begin
+          yield named_configuration
+        rescue
+          @named_configurations_mutex.synchronize do
+            @named_configurations.delete(name) if @named_configurations[name].equal?(named_configuration)
+          end
+          raise
+        end
+      end
+      named_configuration
+    end
+
+    # Public: Returns a configured named child without creating it.
+    def named_configuration(name)
+      name = Flipper.send(:normalize_named_instance_name, name)
+      @named_configurations_mutex.synchronize { @named_configurations[name] }
+    end
+
+    # Public: Returns the configured named instance names.
+    def named_instance_names
+      @named_configurations_mutex.synchronize { @named_configurations.keys.dup }
     end
 
     def statsd
