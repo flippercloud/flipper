@@ -26,6 +26,20 @@ RSpec.describe Flipper::TestHelp do
     expect(a_request(:any, /flippercloud/)).not_to have_been_made
   end
 
+  it "replaces a named polling Cloud instance added after test setup" do
+    described_class.flipper_configure
+    Flipper.configure do |config|
+      config.named(:cross_app) do |named|
+        named.cloud(token: "cloud-token", sync_secret: "")
+      end
+    end
+
+    described_class.flipper_reset
+
+    expect(Flipper.cross_app.instance.class).to be(Flipper::DSL)
+    expect(a_request(:any, /flippercloud/)).not_to have_been_made
+  end
+
   it "clears named features while preserving registered groups" do
     Flipper.configure do |config|
       config.named(:cross_app)

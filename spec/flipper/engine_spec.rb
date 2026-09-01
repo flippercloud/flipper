@@ -318,6 +318,7 @@ RSpec.describe Flipper::Engine do
     context "with named Cloud" do
       let(:app) { application.routes }
       let(:named_cloud_path) { "_cross_app" }
+      let(:named_sync_secret) { "named-secret" }
       let(:request_body) do
         JSON.generate({
           "environment_id" => 1,
@@ -331,12 +332,12 @@ RSpec.describe Flipper::Engine do
         Flipper::Cloud::MessageVerifier.new(secret: "named-secret").generate(request_body, timestamp)
       end
       let(:signature_header_value) do
-        Flipper::Cloud::MessageVerifier.new(secret: "").header(signature, timestamp)
+        Flipper::Cloud::MessageVerifier.new(secret: "header-secret").header(signature, timestamp)
       end
 
       before do
         ENV["FLIPPER_CLOUD_CROSS_APP_TOKEN"] = "named-token"
-        ENV["FLIPPER_CLOUD_CROSS_APP_SYNC_SECRET"] = "named-secret"
+        ENV["FLIPPER_CLOUD_CROSS_APP_SYNC_SECRET"] = named_sync_secret
         initializer do
           Flipper.configure do |flipper_config|
             flipper_config.named(:cross_app) do |named|
@@ -383,6 +384,20 @@ RSpec.describe Flipper::Engine do
         ensure
           ENV.delete("FLIPPER_CLOUD_TOKEN")
           ENV.delete("FLIPPER_CLOUD_SYNC_SECRET")
+        end
+      end
+
+      context "with an empty sync secret" do
+        let(:named_sync_secret) { "" }
+
+        it "does not mount a webhook" do
+          silence { application.initialize! }
+
+          post "/_cross_app", request_body, {
+            "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
+          }
+
+          expect(last_response.status).to eq(404)
         end
       end
     end

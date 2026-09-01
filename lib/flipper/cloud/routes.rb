@@ -18,7 +18,7 @@ Rails.application.routes.draw do
       next unless named.cloud? && named.cloud_path
 
       cloud_options = named.resolve_cloud_credentials
-      next unless cloud_options[:sync_secret]
+      next if !cloud_options[:sync_secret] || cloud_options[:sync_secret].empty?
 
       require "flipper/cloud"
       cloud_app = Flipper::Cloud.app(Flipper.named(name),
