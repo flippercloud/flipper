@@ -131,9 +131,12 @@ module Flipper
 
       named_paths = Flipper.configuration.named_instance_names.map do |name|
         named = Flipper.configuration.named_configuration(name)
-        named.cloud_path if named.cloud? && named.cloud_path && named.resolve_cloud_credentials[:sync_secret]
+        next unless named.cloud? && named.cloud_path
+
+        sync_secret = named.resolve_cloud_credentials[:sync_secret]
+        named.cloud_path if sync_secret && !sync_secret.empty?
       end.compact
-      default_paths = if cloud? && ENV["FLIPPER_CLOUD_SYNC_SECRET"]
+      default_paths = if cloud? && !ENV.fetch("FLIPPER_CLOUD_SYNC_SECRET", "").empty?
         [app.config.flipper.cloud_path]
       else
         []
