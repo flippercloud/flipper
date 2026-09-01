@@ -1,3 +1,5 @@
+require 'flipper/adapters/read_only'
+
 RSpec.describe Flipper::Api::V1::Actions::Import do
   let(:app) { build_api(flipper) }
 
@@ -95,6 +97,22 @@ RSpec.describe Flipper::Api::V1::Actions::Import do
 
       it 'does not import the features' do
         expect(flipper.features.map(&:key)).to eq([])
+      end
+    end
+
+    context 'with a read-only adapter' do
+      let(:adapter) { build_memory_adapter }
+      let(:flipper) { build_flipper(Flipper::Adapters::ReadOnly.new(adapter)) }
+
+      it 'rejects the import without changing the wrapped adapter' do
+        adapter.add(Flipper::Feature.new(:existing, adapter))
+        source_flipper = build_flipper
+        source_flipper.enable(:replacement)
+
+        expect do
+          post '/import', source_flipper.export.contents, 'CONTENT_TYPE' => 'application/json'
+        end.to raise_error(Flipper::Adapters::ReadOnly::WriteAttempted)
+        expect(adapter.features).to eq(Set['existing'])
       end
     end
   end

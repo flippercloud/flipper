@@ -5,6 +5,12 @@ RSpec.describe Flipper::Cloud::MessageVerifier do
   let(:secret) { "secret" }
   let(:timestamp) { Time.now }
 
+  it "rejects an empty secret" do
+    expect {
+      described_class.new(secret: "")
+    }.to raise_error(ArgumentError, "secret should not be empty")
+  end
+
   describe "#generate" do
     it "generates signature that can be verified" do
       message_verifier = Flipper::Cloud::MessageVerifier.new(secret: secret)

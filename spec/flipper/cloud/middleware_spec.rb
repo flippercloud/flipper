@@ -33,7 +33,7 @@ RSpec.describe Flipper::Cloud::Middleware do
     Flipper::Cloud::MessageVerifier.new(secret: flipper.sync_secret).generate(request_body, timestamp)
   }
   let(:signature_header_value) {
-    Flipper::Cloud::MessageVerifier.new(secret: "").header(signature, timestamp)
+    Flipper::Cloud::MessageVerifier.header(signature, timestamp)
   }
 
   context 'when initializing middleware with flipper instance' do

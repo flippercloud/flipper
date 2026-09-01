@@ -2,11 +2,10 @@ require 'logger'
 require 'concurrent/utility/monotonic_time'
 require 'concurrent/map'
 require 'concurrent/atomic/atomic_fixnum'
-require 'concurrent/atomic/atomic_boolean'
 
 module Flipper
   class Poller
-    attr_reader :adapter, :thread, :pid, :mutex, :interval, :last_synced_at
+    attr_reader :adapter, :thread, :interval, :last_synced_at
 
     def self.instances
       @instances ||= Concurrent::Map.new
@@ -34,7 +33,7 @@ module Flipper
       @remote_adapter = options.fetch(:remote_adapter)
       @last_synced_at = Concurrent::AtomicFixnum.new(0)
       @adapter = Adapters::Memory.new(nil, threadsafe: true)
-      @shutdown_requested = Concurrent::AtomicBoolean.new(false)
+      @shutdown_requested = false
 
       self.interval = options.fetch(:interval, 10)
       @initial_interval = @interval
@@ -47,8 +46,6 @@ module Flipper
     end
 
     def start
-      reset if forked?
-      return if @shutdown_requested.true?
       ensure_worker_running
     end
 
@@ -102,19 +99,17 @@ module Flipper
       rand
     end
 
-    def forked?
-      pid != Process.pid
-    end
-
     def ensure_worker_running
       # Return early if thread is alive and avoid the mutex lock and unlock.
       return if thread_alive?
 
       # If another thread is starting worker thread, then return early so this
       # thread can enqueue and move on with life.
-      return unless mutex.try_lock
+      return unless @mutex.try_lock
 
       begin
+        reset_if_forked
+        return if @shutdown_requested
         return if thread_alive?
         @thread = Thread.new { run }
         @thread&.report_on_exception = false
@@ -122,7 +117,7 @@ module Flipper
           operation: :thread_start,
         })
       ensure
-        mutex.unlock
+        @mutex.unlock
       end
     end
 
@@ -130,10 +125,18 @@ module Flipper
       @thread && @thread.alive?
     end
 
-    def reset
+    def reset_if_forked
+      return if @pid == Process.pid
+
       @pid = Process.pid
-      @shutdown_requested.make_false
-      mutex.unlock if mutex.locked?
+      @shutdown_requested = false
+    end
+
+    def request_shutdown
+      @mutex.synchronize do
+        reset_if_forked
+        @shutdown_requested = true
+      end
     end
 
     def apply_response_headers
@@ -142,7 +145,7 @@ module Flipper
       if response = @remote_adapter.last_get_all_response
         # shutdown based on response header
         if Flipper::Typecast.to_boolean(response["poll-shutdown"])
-          @shutdown_requested.make_true
+          request_shutdown
           @instrumenter.instrument("poller.#{InstrumentationNamespace}", {
             operation: :shutdown_requested,
           })

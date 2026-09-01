@@ -172,12 +172,34 @@ RSpec.describe Flipper::Cloud::Configuration do
     expect(instance.adapter).to be_instance_of(Flipper::Adapters::DualWrite)
   end
 
+  it "sets sync_method to :poll if sync_secret is empty" do
+    instance = described_class.new(required_options.merge({
+      sync_secret: "",
+    }))
+
+    expect(instance.sync_method).to eq(:poll)
+  end
+
+  it "does not treat a whitespace sync_secret as empty" do
+    instance = described_class.new(required_options.merge(sync_secret: " "))
+
+    expect(instance.sync_secret).to eq(" ")
+    expect(instance.sync_method).to eq(:webhook)
+  end
+
   it "sets sync_method to :webhook if FLIPPER_CLOUD_SYNC_SECRET set" do
     ENV["FLIPPER_CLOUD_SYNC_SECRET"] = "abc"
     instance = described_class.new(required_options)
 
     expect(instance.sync_method).to eq(:webhook)
     expect(instance.adapter).to be_instance_of(Flipper::Adapters::DualWrite)
+  end
+
+  it "sets sync_method to :poll if FLIPPER_CLOUD_SYNC_SECRET is empty" do
+    ENV["FLIPPER_CLOUD_SYNC_SECRET"] = ""
+    instance = described_class.new(required_options)
+
+    expect(instance.sync_method).to eq(:poll)
   end
 
   it "can set sync_secret" do

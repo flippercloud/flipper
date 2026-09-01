@@ -97,4 +97,14 @@ RSpec.describe Flipper::Adapters::ReadOnly do
     expect { subject.disable(feature, boolean_gate, Flipper::Types::Boolean.new) }
       .to raise_error(Flipper::Adapters::ReadOnly::WriteAttempted)
   end
+
+  it 'raises error on import without changing the wrapped adapter' do
+    adapter.add(feature)
+    source = Flipper::Adapters::Memory.new
+    source.add(Flipper::Feature.new(:replacement, source))
+
+    expect { subject.import(source) }
+      .to raise_error(Flipper::Adapters::ReadOnly::WriteAttempted)
+    expect(adapter.features).to eq(Set['stats'])
+  end
 end

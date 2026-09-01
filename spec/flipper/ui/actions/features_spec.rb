@@ -225,7 +225,7 @@ RSpec.describe Flipper::UI::Actions::Features do
       end
 
       context 'feature name contains accented and invisible characters' do
-        let(:feature_name) { "f\u200Be\u00E1\u2060ture" }
+        let(:feature_name) { "f\u3164e\u115F\u00E1\u1160t\uFFA0u\u2800r\u17B4e" }
 
         it 'adds feature with invisible characters removed and accent kept' do
           expect(flipper.features.map(&:key)).to include("fe\u00E1ture")
@@ -252,7 +252,7 @@ RSpec.describe Flipper::UI::Actions::Features do
         end
 
         context 'feature name that normalizes to empty' do
-          let(:feature_name) { "\u200B\u2060" }
+          let(:feature_name) { "\u3164\u115F\u1160\uFFA0\u2800\u17B4" }
 
           it 'does not add feature' do
             expect(flipper.features.map(&:key)).to eq([])

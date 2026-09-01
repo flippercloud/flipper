@@ -128,9 +128,10 @@ RSpec.describe Flipper::Cloud::Telemetry do
 
   it "doesn't try to update telemetry interval from error if not response error" do
     stub = stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
+      with(headers: {"flipper-cloud-token" => "non-response-error-test"}).
       to_raise(Net::OpenTimeout)
 
-    cloud_configuration = Flipper::Cloud::Configuration.new(token: "test")
+    cloud_configuration = Flipper::Cloud::Configuration.new(token: "non-response-error-test")
     telemetry = described_class.new(cloud_configuration)
 
     # Override the submitter to use back off policy that doesn't actually

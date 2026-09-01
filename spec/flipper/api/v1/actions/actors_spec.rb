@@ -9,6 +9,27 @@ RSpec.describe Flipper::Api::V1::Actions::Actors do
       flipper[:my_feature_3].enable_actor(actor)
     end
 
+    malformed_queries = {
+      'array-shaped keys' => 'keys[]=my_feature_1',
+      'hash-shaped keys' => 'keys[a]=my_feature_1',
+      'a bare percent escape' => 'keys=%',
+      'an invalid percent escape' => 'keys=%GG',
+      'invalid UTF-8' => 'keys=%FF',
+      'conflicting parameter shapes' => 'a=1&a[]=2',
+      'excessive nesting' => "a#{'[a]' * 150}=1",
+    }
+
+    malformed_queries.each do |description, query|
+      it "ignores #{description}" do
+        expected_response = raw_api_get("/actors/#{actor.flipper_id}", '')
+
+        response = raw_api_get("/actors/#{actor.flipper_id}", query)
+
+        expect(response.first).to eq(200)
+        expect(response).to eq(expected_response)
+      end
+    end
+
     context 'when no feature is specified' do
       before do
         get "/actors/#{actor.flipper_id}"
