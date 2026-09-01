@@ -28,6 +28,12 @@ module Flipper
 
       if Flipper.configuration.respond_to?(:named_instance_names)
         Flipper.configuration.named_instance_names.each do |name|
+          named = Flipper.configuration.named_configuration(name)
+          if named.cloud?
+            named_adapter = Flipper::Adapters::Memory.new
+            named.adapter { named_adapter }
+            named.default { Flipper.new(named.adapter) }
+          end
           Flipper.named(name).features.each(&:remove) rescue nil
         end
       end
