@@ -5,6 +5,7 @@ require "flipper/cloud/configuration"
 require "flipper/cloud/dsl"
 require "flipper/cloud/middleware"
 require "flipper/cloud/migrate"
+require "flipper/adapters/sync"
 
 module Flipper
   module Cloud
@@ -46,23 +47,38 @@ module Flipper
         local_memory = Flipper::Adapters::Memory.new(threadsafe: true)
         local_memory_loaded = false
         local_memory_lock = Mutex.new
+        webhook_sync = !ENV.fetch("FLIPPER_CLOUD_SYNC_SECRET", "").empty?
+        sync_interval = [
+          Flipper::Typecast.to_float(ENV.fetch("FLIPPER_CLOUD_SYNC_INTERVAL", 10)),
+          Flipper::Poller::MINIMUM_POLL_INTERVAL,
+        ].max
+        interval_state = nil
         Flipper.configure do |config|
           config.wrap_adapter_store(:flipper_cloud_memory) do |persistent_adapter|
             local_memory_lock.synchronize do
               unless local_memory_loaded
                 local_memory.import(persistent_adapter)
                 local_memory_loaded = true
+                interval_state = Flipper::Adapters::Sync::IntervalSynchronizer::State.new(synced: true)
               end
             end
-            Flipper::Adapters::DualWrite.new(
-              local_memory,
-              persistent_adapter,
-            )
+            if webhook_sync
+              Flipper::Adapters::Sync.new(
+                local_memory,
+                persistent_adapter,
+                interval: sync_interval,
+                interval_state: interval_state,
+              )
+            else
+              Flipper::Adapters::DualWrite.new(
+                local_memory,
+                persistent_adapter,
+              )
+            end
           end
           config.default do
             options = {
               local_adapter: config.adapter,
-              local_adapter_memory_backed: true,
             }
             options[:instrumenter] = instrumenter if instrumenter
             self.new(options)

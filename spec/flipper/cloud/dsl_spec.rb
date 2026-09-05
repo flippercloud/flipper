@@ -56,16 +56,29 @@ RSpec.describe Flipper::Cloud::DSL do
       described_class.new(cloud_configuration)
     end
 
-    it "hydrates from local once and serves reads from memory" do
+    it "preserves reads through the supplied local adapter" do
       subject
-      expect(local_adapter.count(:get_all)).to be(1)
+      expect(local_adapter.count).to be(0)
       local_adapter.reset
 
       subject.features
       subject.enabled?(:foo)
-      expect(local_adapter.count(:features)).to be(0)
-      expect(local_adapter.count(:get)).to be(0)
+      expect(local_adapter.count(:features)).to be(1)
+      expect(local_adapter.count(:get)).to be(1)
       expect(local_adapter.count(:get_all)).to be(0)
+    end
+
+    it "preserves behavioral wrappers on the supplied local adapter" do
+      adapter = Flipper::Adapters::Strict.new(Flipper::Adapters::Memory.new, :raise)
+      configuration = Flipper::Cloud::Configuration.new({
+        token: "asdf",
+        sync_secret: "tasty",
+        local_adapter: adapter,
+      })
+      flipper = described_class.new(configuration)
+
+      expect { flipper.enabled?(:typo) }.
+        to raise_error(Flipper::Adapters::Strict::NotFound)
     end
 
     it "sends writes to cloud and local" do
@@ -93,7 +106,7 @@ RSpec.describe Flipper::Cloud::DSL do
 
       local_adapter.reset
       expect(subject.enabled?(:foo)).to be(true)
-      expect(local_adapter.count(:get)).to be(0)
+      expect(local_adapter.count(:get)).to be(1)
       expect(local_adapter.count(:get_all)).to be(0)
     end
   end

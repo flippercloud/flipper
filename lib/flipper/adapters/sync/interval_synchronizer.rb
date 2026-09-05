@@ -4,6 +4,32 @@ module Flipper
       # Internal: Wraps a Synchronizer instance and only invokes it every
       # N seconds.
       class IntervalSynchronizer
+        class State
+          attr_accessor :last_sync_at
+          attr_reader :lock
+
+          def initialize(synced: false)
+            @lock = Mutex.new
+            @last_sync_at = synced ? now : 0
+            @synced = synced
+          end
+
+          def synced?
+            @synced
+          end
+
+          def synced_at=(time)
+            @last_sync_at = time
+            @synced = true
+          end
+
+          private
+
+          def now
+            Process.clock_gettime(Process::CLOCK_MONOTONIC, :second)
+          end
+        end
+
         # Private: Number of seconds between syncs (default: 10).
         DEFAULT_INTERVAL = 10
 
@@ -16,27 +42,38 @@ module Flipper
         # synchronizer - The Synchronizer to call when the interval has passed.
         # interval - The Integer number of seconds between invocations of
         #            the wrapped synchronizer.
-        def initialize(synchronizer, interval: nil)
+        def initialize(synchronizer, interval: nil, state: nil)
           @synchronizer = synchronizer
           @interval = interval || DEFAULT_INTERVAL
+          @state = state || State.new
           # TODO: add jitter to this so all processes booting at the same time
           # don't phone home at the same time.
-          @last_sync_at = 0
         end
 
         def call
           return unless time_to_sync?
+          unless @state.lock.try_lock
+            @state.lock.synchronize {} unless @state.synced?
+            return
+          end
 
-          @last_sync_at = now
-          @synchronizer.call
+          begin
+            return unless time_to_sync?
 
-          nil
+            @synchronizer.call
+            @state.synced_at = now
+            nil
+          ensure
+            @state.lock.unlock
+          end
         end
 
         private
 
         def time_to_sync?
-          seconds_since_last_sync = now - @last_sync_at
+          return true unless @state.synced?
+
+          seconds_since_last_sync = now - @state.last_sync_at
           seconds_since_last_sync >= @interval
         end
 

@@ -77,15 +77,12 @@ RSpec.describe Flipper::Cloud::Configuration do
     expect(poller.interval).to eq(20)
   end
 
-  it "does not add another memory layer to an adapter prepared by Cloud" do
+  it "uses the supplied local adapter without changing its composition" do
     memory = Flipper::Adapters::Memory.new
     persistent = Flipper::Adapters::Memory.new
     mirrored = Flipper::Adapters::DualWrite.new(memory, persistent)
     adapter = Flipper::Adapters::Strict.new(mirrored, :warn)
-    instance = described_class.new(required_options.merge(
-      local_adapter: adapter,
-      local_adapter_memory_backed: true,
-    ))
+    instance = described_class.new(required_options.merge(local_adapter: adapter))
 
     expect(instance.send(:sync_adapter)).to be(adapter)
     expect(instance).not_to respond_to(:local_memory)
@@ -349,8 +346,8 @@ RSpec.describe Flipper::Cloud::Configuration do
     end
 
     expect(flipper.enabled?(:search)).to be(true)
-    expect(local_adapter.count(:get_all)).to be(0)
-    expect(local_adapter.count(:get)).to be(0)
+    expect(local_adapter.count(:get_all)).to be(1)
+    expect(local_adapter.count(:get)).to be(1)
     expect(local_adapter.count(:enable)).to be(1)
     expect(mutation_threads).to contain_exactly(calling_thread)
   end

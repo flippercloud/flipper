@@ -54,9 +54,9 @@ module Flipper
       #  configuration.instrumenter = ActiveSupport::Notifications
       attr_accessor :instrumenter
 
-      # Public: Persistent local adapter that is automatically kept in sync
-      # with Cloud. Cloud hydrates a process-local Memory adapter from it once
-      # and mirrors writes to it while Memory serves feature reads.
+      # Public: Local adapter that is automatically kept in sync with Cloud.
+      # When Cloud is configured as Flipper's default, its storage adapter is
+      # wrapped so reads are served from process-local Memory.
       #
       #  # for example, to use active record you could do:
       #  configuration = Flipper::Cloud::Configuration.new
@@ -169,17 +169,7 @@ module Flipper
       end
 
       def sync_adapter
-        @sync_adapter_lock.synchronize do
-          @sync_adapter ||= build_sync_adapter
-        end
-      end
-
-      def build_sync_adapter
-        return local_adapter if @local_adapter_memory_backed || local_adapter.is_a?(Adapters::Memory)
-
-        memory = Adapters::Memory.new(threadsafe: true)
-        memory.import(local_adapter)
-        Flipper::Adapters::DualWrite.new(memory, local_adapter)
+        local_adapter
       end
 
       def http_adapter
@@ -231,8 +221,6 @@ module Flipper
       end
 
       def setup_adapter(options)
-        @sync_adapter_lock = Mutex.new
-        @local_adapter_memory_backed = options.fetch(:local_adapter_memory_backed, false)
         set_option :local_adapter, options, default: -> { Adapters::Memory.new }, from_env: false
         @adapter_block = ->(adapter) { adapter }
       end

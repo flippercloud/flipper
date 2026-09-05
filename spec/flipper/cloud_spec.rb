@@ -102,6 +102,60 @@ RSpec.describe Flipper::Cloud do
     ENV['FLIPPER_CLOUD_TOKEN'] = original_token
   end
 
+  it 'refreshes shared memory from persistence on the calling thread for webhooks' do
+    original_token = ENV['FLIPPER_CLOUD_TOKEN']
+    original_secret = ENV['FLIPPER_CLOUD_SYNC_SECRET']
+    original_interval = ENV['FLIPPER_CLOUD_SYNC_INTERVAL']
+    ENV['FLIPPER_CLOUD_TOKEN'] = 'asdf'
+    ENV['FLIPPER_CLOUD_SYNC_SECRET'] = 'secret'
+    ENV['FLIPPER_CLOUD_SYNC_INTERVAL'] = '15'
+
+    persistent = Flipper::Adapters::Memory.new
+    Flipper.new(persistent).disable(:search)
+    stores = Queue.new
+    Flipper.configure do |config|
+      config.adapter do
+        store = Flipper::Adapters::OperationLogger.new(persistent)
+        stores << store
+        store
+      end
+    end
+    expect(Flipper::Poller).not_to receive(:get)
+    described_class.set_default
+
+    first, second = 2.times.map do
+      Thread.new { Flipper.instance }
+    end.map(&:value)
+    persistent_adapters = 2.times.map { stores.pop }
+    sync_adapters = [first, second].map(&:cloud_configuration).map(&:local_adapter)
+
+    expect(sync_adapters).to all(be_instance_of(Flipper::Adapters::Sync))
+    expect(sync_adapters.map(&:local).uniq.size).to be(1)
+    expect(sync_adapters.map { |adapter| adapter.synchronizer.interval }.uniq).to eq([15])
+    expect(persistent_adapters.sum { |adapter| adapter.count(:get_all) }).to be(1)
+
+    persistent_adapters.each(&:reset)
+    Flipper.new(persistent).enable(:search)
+    refresh_threads = []
+    allow(persistent).to receive(:get_all).and_wrap_original do |original, *args, **kwargs|
+      refresh_threads << Thread.current
+      original.call(*args, **kwargs)
+    end
+    future = Process.clock_gettime(Process::CLOCK_MONOTONIC, :second) + 16
+    sync_adapters.each do |adapter|
+      allow(adapter.synchronizer).to receive(:now).and_return(future)
+    end
+
+    expect(first.enabled?(:search)).to be(true)
+    expect(second.enabled?(:search)).to be(true)
+    expect(persistent_adapters.sum { |adapter| adapter.count(:get_all) }).to be(1)
+    expect(refresh_threads).to contain_exactly(Thread.current)
+  ensure
+    ENV['FLIPPER_CLOUD_TOKEN'] = original_token
+    ENV['FLIPPER_CLOUD_SYNC_SECRET'] = original_secret
+    ENV['FLIPPER_CLOUD_SYNC_INTERVAL'] = original_interval
+  end
+
   it 'keeps configured behavioral adapters outside memory reads' do
     original_token = ENV['FLIPPER_CLOUD_TOKEN']
     ENV['FLIPPER_CLOUD_TOKEN'] = 'asdf'
