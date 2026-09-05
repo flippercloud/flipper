@@ -2,10 +2,33 @@ name: CI
 on: [push]
 
 jobs:
+  rack-2-minimum:
+    name: Test flipper-api on Rack 2.0.9.4
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v7
+      - name: Set up Ruby 2.6
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '2.6'
+      - name: Install focused dependencies
+        run: |
+          gem install concurrent-ruby --version '< 2' --no-document
+          gem install minitest --version '5.15.0' --no-document
+          gem install rack --version '2.0.9.4' --no-document
+      - name: Run Rack 2.0.9.4 compatibility test
+        run: |
+          ruby -Ilib spec/flipper/api/rack_2_compatibility_test.rb
+          ruby -Ilib spec/flipper/api/mutation_transport_compatibility_test.rb
+
   test:
     name: Test on ruby ${{ matrix.ruby }} and rails ${{ matrix.rails }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # rails main is an early-warning canary; failures don't block the build
+    continue-on-error: ${{ matrix.rails == 'main' }}
     services:
       redis:
         image: redis
@@ -74,8 +97,11 @@ jobs:
             rails: "6.0.0"
           - ruby: "3.3"
             rails: "6.1.0"
+        include:
+          - ruby: "3.3"
+            rails: "main"
     env:
-      SQLITE3_VERSION: ${{ matrix.rails == '8.0.0' && '2.1.0' || '1.4.1' }}
+      SQLITE3_VERSION: ${{ (matrix.rails == '8.0.0' || matrix.rails == 'main') && '2.1.0' || '1.4.1' }}
       REDIS_URL: redis://localhost:6379/0
       CI: true
       RAILS_VERSION: ${{ matrix.rails }}
@@ -91,9 +117,9 @@ jobs:
         with:
           mongodb-version: 4.0
       - name: Check out repository code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Do some action caching
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: vendor/bundle
           key: ${{ runner.os }}-gems-${{ matrix.ruby }}-${{ matrix.rails }}-${{ hashFiles('**/Gemfile.lock') }}

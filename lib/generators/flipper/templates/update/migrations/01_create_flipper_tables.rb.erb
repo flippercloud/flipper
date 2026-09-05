@@ -1,22 +1,28 @@
-class CreateFlipperTables < ActiveRecord::Migration<%= migration_version %>
+<%
+migration_class = migration_class_name('CreateFlipperTables')
+feature_table = feature_table_name
+gate_table = gate_table_name
+feature_index = feature_index_name
+gate_index = gate_index_name
+%>class <%= migration_class %> < ActiveRecord::Migration<%= migration_version %>
   def up
-    create_table :flipper_features do |t|
+    create_table <%= feature_table.inspect %> do |t|
       t.string :key, null: false
       t.timestamps null: false
     end
-    add_index :flipper_features, :key, unique: true
+    add_index <%= feature_table.inspect %>, :key, unique: true<%= ", name: #{feature_index.inspect}" if feature_index %>
 
-    create_table :flipper_gates do |t|
+    create_table <%= gate_table.inspect %> do |t|
       t.string :feature_key, null: false
       t.string :key, null: false
       t.string :value
       t.timestamps null: false
     end
-    add_index :flipper_gates, [:feature_key, :key, :value], unique: true
+    add_index <%= gate_table.inspect %>, [:feature_key, :key, :value], unique: true<%= ", name: #{gate_index.inspect}" if gate_index %>
   end
 
   def down
-    drop_table :flipper_gates
-    drop_table :flipper_features
+    drop_table <%= gate_table.inspect %>
+    drop_table <%= feature_table.inspect %>
   end
 end

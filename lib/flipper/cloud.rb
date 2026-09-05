@@ -24,13 +24,15 @@ module Flipper
     def self.app(flipper = nil, options = {})
       env_key = options.fetch(:env_key, 'flipper')
       memoizer_options = options.fetch(:memoizer_options, {})
+      middleware_options = {env_key: env_key}
+      middleware_options[:signature_tolerance] = options[:signature_tolerance] if options.key?(:signature_tolerance)
 
       app = ->(_) { [404, { Rack::CONTENT_TYPE => 'application/json'.freeze }, ['{}'.freeze]] }
       builder = Rack::Builder.new
       yield builder if block_given?
       builder.use Flipper::Middleware::SetupEnv, flipper, env_key: env_key
       builder.use Flipper::Middleware::Memoizer, memoizer_options.merge(env_key: env_key)
-      builder.use Flipper::Cloud::Middleware, env_key: env_key
+      builder.use Flipper::Cloud::Middleware, middleware_options
       builder.run app
       klass = self
       app = builder.to_app

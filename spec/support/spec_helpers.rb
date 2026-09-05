@@ -37,6 +37,15 @@ module SpecHelpers
     JSON.parse(body)
   end
 
+  def raw_api_get(path, query_string)
+    env = Rack::MockRequest.env_for(path, 'QUERY_STRING' => query_string)
+    status, headers, body = app.call(env)
+    response_body = body.each_with_object(+'') { |part, buffer| buffer << part }
+    [status, headers, JSON.parse(response_body)]
+  ensure
+    body.close if body.respond_to?(:close)
+  end
+
   def api_error_code_reference_url
     'https://flippercloud.io/docs/api#error-code-reference'
   end

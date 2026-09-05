@@ -9,7 +9,7 @@ module Flipper
           route %r{\A/actors/(?<flipper_id>.*)/?\Z}
 
           def get
-            keys = params['keys']
+            keys = string_param('keys')
             features = if keys
                          names = keys.split(',')
                          if names.empty?

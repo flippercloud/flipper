@@ -43,6 +43,26 @@ RSpec.describe Flipper::DSL do
       let(:feature) { dsl.send(method_name, :stats) }
       let(:dsl) { described_class.new(adapter, instrumenter: instrumenter) }
     end
+
+    it 'returns the same memoized instance across concurrent threads' do
+      dsl = described_class.new(adapter)
+      names = 100.times.map { |n| :"feature_#{n}" }
+
+      results = Array.new(10) do
+        Thread.new do
+          Thread.pass
+          names.map { |name| dsl.feature(name) }
+        end
+      end.map(&:value)
+
+      # Every thread should observe the exact same Feature instance per name,
+      # and building the memo concurrently must not raise or drop keys.
+      results.each do |features|
+        features.each_with_index do |feature, index|
+          expect(feature).to equal(results.first[index])
+        end
+      end
+    end
   end
 
   describe '#preload' do
@@ -196,6 +216,15 @@ RSpec.describe Flipper::DSL do
     end
   end
 
+  describe '#enable with empty groups' do
+    it "raises instead of enabling an empty All for everyone" do
+      expect {
+        subject.enable(:stats, Flipper.all)
+      }.to raise_error(ArgumentError, /empty Any\/All groups/)
+      expect(subject[:stats].expression).to be(nil)
+    end
+  end
+
   describe '#add_expression/remove_expression' do
     it 'enables and disables the feature for the expression' do
       expression = Flipper.property(:plan).eq("basic")
@@ -206,7 +235,7 @@ RSpec.describe Flipper::DSL do
       expect(subject[:stats].expression).to eq(any_expression)
 
       subject.remove_expression(:stats, expression)
-      expect(subject[:stats].expression).to eq(Flipper.any)
+      expect(subject[:stats].expression).to be(nil)
     end
   end
 

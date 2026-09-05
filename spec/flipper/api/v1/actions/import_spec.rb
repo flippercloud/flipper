@@ -1,3 +1,5 @@
+require 'flipper/adapters/read_only'
+
 RSpec.describe Flipper::Api::V1::Actions::Import do
   let(:app) { build_api(flipper) }
 
@@ -67,6 +69,50 @@ RSpec.describe Flipper::Api::V1::Actions::Import do
           'more_info' => api_error_code_reference_url,
         }
         expect(json_response).to eq(expected)
+      end
+    end
+
+    context 'body larger than the max import size' do
+      before do
+        stub_const("Flipper::Exporters::Json::Export::MAX_BYTES", 1)
+
+        source_flipper = build_flipper
+        source_flipper.enable(:search)
+
+        post '/import', source_flipper.export.contents, 'CONTENT_TYPE' => 'application/json'
+      end
+
+      it 'returns correct status code' do
+        expect(last_response.status).to eq(422)
+      end
+
+      it 'returns formatted error' do
+        expected = {
+          'code' => 6,
+          'message' => 'Import invalid.',
+          'more_info' => api_error_code_reference_url,
+        }
+        expect(json_response).to eq(expected)
+      end
+
+      it 'does not import the features' do
+        expect(flipper.features.map(&:key)).to eq([])
+      end
+    end
+
+    context 'with a read-only adapter' do
+      let(:adapter) { build_memory_adapter }
+      let(:flipper) { build_flipper(Flipper::Adapters::ReadOnly.new(adapter)) }
+
+      it 'rejects the import without changing the wrapped adapter' do
+        adapter.add(Flipper::Feature.new(:existing, adapter))
+        source_flipper = build_flipper
+        source_flipper.enable(:replacement)
+
+        expect do
+          post '/import', source_flipper.export.contents, 'CONTENT_TYPE' => 'application/json'
+        end.to raise_error(Flipper::Adapters::ReadOnly::WriteAttempted)
+        expect(adapter.features).to eq(Set['existing'])
       end
     end
   end

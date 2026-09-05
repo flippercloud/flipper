@@ -1,6 +1,7 @@
 require 'uri'
 require 'openssl'
 require 'flipper/version'
+require 'flipper/adapters/http/redacted_debug_output'
 
 module Flipper
   module Adapters
@@ -81,7 +82,7 @@ module Flipper
           uri = @uri.dup
           path_uri = URI(path)
           uri.path += path_uri.path
-          uri.query = "#{uri.query}&#{path_uri.query}" if path_uri.query
+          uri.query = [uri.query, path_uri.query].compact.join('&') if path_uri.query
           uri
         end
 
@@ -91,7 +92,7 @@ module Flipper
           http.open_timeout = @open_timeout if @open_timeout
           http.max_retries = @max_retries if @max_retries
           http.write_timeout = @write_timeout if @write_timeout
-          http.set_debug_output(@debug_output) if @debug_output
+          http.set_debug_output(RedactedDebugOutput.wrap(@debug_output)) if @debug_output
 
           if uri.scheme == HTTPS_SCHEME
             http.use_ssl = true

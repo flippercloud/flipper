@@ -1,5 +1,8 @@
 require "flipper/poller"
 require "flipper/adapters/http"
+require "open3"
+require "rbconfig"
+require "timeout"
 
 RSpec.describe Flipper::Poller do
   let(:url) { "http://app.com/flipper" }
@@ -356,6 +359,27 @@ RSpec.describe Flipper::Poller do
       subject.start
     end
 
+    it "keeps using its Mutex after a fork" do
+      mutex = subject.instance_variable_get(:@mutex)
+      allow(Process).to receive(:pid).and_return(Process.pid + 1)
+
+      expect(mutex).to be_instance_of(Mutex)
+      expect { subject.start }.not_to raise_error
+      expect(subject.instance_variable_get(:@mutex)).to equal(mutex)
+    end
+
+    it "updates its process state after a fork" do
+      parent_pid = subject.instance_variable_get(:@pid)
+      allow(Process).to receive(:pid).and_return(parent_pid + 1)
+
+      subject.start
+      expect(subject.instance_variable_get(:@pid)).to eq(parent_pid + 1)
+    end
+
+    it "does not expose the raw mutex" do
+      expect(subject).not_to respond_to(:mutex)
+    end
+
     context "after shutdown_requested" do
       before do
         stub_request(:get, "#{url}/features?exclude_gate_names=true")
@@ -377,13 +401,165 @@ RSpec.describe Flipper::Poller do
         subject.sync # This triggers shutdown
 
         # Simulate fork by changing PID
-        allow(Process).to receive(:pid).and_return(subject.instance_variable_get(:@pid) + 1)
+        allow(Process).to receive(:pid).and_return(Process.pid + 1)
 
         # After fork, start should work again
         expect(Thread).to receive(:new).and_yield
         expect(subject).to receive(:loop).and_yield
         expect(subject).to receive(:sync)
         subject.start
+      end
+
+      it "serializes a shutdown request with fork reset" do
+        allow(Thread).to receive(:new).and_call_original
+        allow(Process).to receive(:pid).and_return(Process.pid + 1)
+        mutex = subject.instance_variable_get(:@mutex)
+        started = Queue.new
+        mutex.lock
+
+        thread = Thread.new do
+          started << true
+          subject.send(:request_shutdown)
+        end
+        started.pop
+
+        Timeout.timeout(2) do
+          Thread.pass until thread.status == "sleep"
+        end
+        expect(thread).to be_alive
+
+        mutex.unlock
+        thread.join(1)
+
+        expect(subject.instance_variable_get(:@pid)).to eq(Process.pid)
+        expect(subject.instance_variable_get(:@shutdown_requested)).to be(true)
+      ensure
+        mutex&.unlock if mutex&.owned?
+        thread&.join(1)
+      end
+
+      it "starts one fresh worker in a real forked child" do
+        skip "Process.fork is not supported" unless Process.respond_to?(:fork)
+        allow(Thread).to receive(:new).and_call_original
+
+        script = <<~'RUBY'
+          require "flipper"
+
+          class ForkTestPoller < Flipper::Poller
+            def run
+              sleep
+            end
+
+            def pause_next_start(acquired, release)
+              @start_acquired = acquired
+              @release_start = release
+            end
+
+            private
+
+            def reset_if_forked
+              super
+              return unless start_acquired = @start_acquired
+
+              @start_acquired = nil
+              start_acquired << true
+              @release_start.pop
+            end
+          end
+
+          poller = ForkTestPoller.new(
+            remote_adapter: Object.new,
+            start_automatically: false,
+            shutdown_automatically: false
+          )
+          poller.start
+          parent_worker = poller.thread
+          poller.send(:request_shutdown)
+          inherited_mutex = poller.instance_variable_get(:@mutex)
+          raise "poller does not use Mutex" unless inherited_mutex.instance_of?(Mutex)
+          mutex_locked = Queue.new
+          release_mutex = Queue.new
+          mutex_holder = Thread.new do
+            inherited_mutex.lock
+            mutex_locked << true
+            release_mutex.pop
+            inherited_mutex.unlock
+          end
+          mutex_locked.pop
+
+          begin
+            child_pid = fork do
+              success = false
+              release_start = nil
+              first_start = nil
+              second_start = nil
+
+              begin
+                inherited_worker = poller.thread
+                raise "inherited worker is unexpectedly alive" if inherited_worker.alive?
+
+                start_acquired = Queue.new
+                release_start = Queue.new
+                poller.pause_next_start(start_acquired, release_start)
+                first_start = Thread.new { poller.start }
+                start_acquired.pop
+
+                second_start = Thread.new { poller.start }
+                raise "competing start did not return" unless second_start.join(1)
+
+                release_start << true
+                raise "first start did not return" unless first_start.join(1)
+
+                child_worker = poller.thread
+                raise "inherited mutex was replaced" unless poller.instance_variable_get(:@mutex).equal?(inherited_mutex)
+                raise "worker was not replaced" if child_worker.equal?(inherited_worker)
+                raise "replacement worker is not alive" unless child_worker.alive?
+                success = true
+              rescue => error
+                warn error.message
+              ensure
+                release_start << true if release_start
+                first_start&.join(1)
+                second_start&.join(1)
+                poller.stop
+                poller.thread&.join(1)
+              end
+
+              exit!(success ? 0 : 1)
+            end
+
+            deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 5
+            status = nil
+            until status
+              if result = Process.wait2(child_pid, Process::WNOHANG)
+                _, status = result
+              elsif Process.clock_gettime(Process::CLOCK_MONOTONIC) >= deadline
+                Process.kill("KILL", child_pid)
+                Process.wait(child_pid)
+                raise "forked child timed out"
+              else
+                sleep 0.01
+              end
+            end
+          ensure
+            release_mutex << true
+            mutex_holder.join(1)
+            poller.stop
+            parent_worker.join(1)
+          end
+
+          exit(status.success? ? 0 : 1)
+        RUBY
+
+        _, stderr, status = Open3.capture3(
+          RbConfig.ruby,
+          "-Ilib",
+          "-e",
+          script,
+          chdir: File.expand_path("../..", __dir__)
+        )
+
+        expect(status).to be_success, stderr
       end
     end
   end

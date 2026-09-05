@@ -1,4 +1,5 @@
 require "flipper/adapters/http/client"
+require "flipper/cloud/url_validator"
 require "flipper/typecast"
 
 module Flipper
@@ -55,7 +56,7 @@ module Flipper
 
     # Private: Build an HTTP client for Cloud API requests.
     def self.build_client(path, headers: {})
-      base_url = ENV.fetch("FLIPPER_CLOUD_URL", DEFAULT_CLOUD_URL)
+      base_url = UrlValidator.validate(ENV.fetch("FLIPPER_CLOUD_URL", DEFAULT_CLOUD_URL))
 
       Flipper::Adapters::Http::Client.new(
         url: "#{base_url}#{path}",
@@ -67,5 +68,6 @@ module Flipper
       )
     end
     private_class_method :build_client
+
   end
 end

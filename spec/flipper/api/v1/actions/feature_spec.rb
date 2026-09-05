@@ -4,6 +4,40 @@ RSpec.describe Flipper::Api::V1::Actions::Feature do
   let(:gate) { feature.gate(:boolean) }
 
   describe 'get' do
+    malformed_queries = {
+      'array-shaped exclude_gates' => 'exclude_gates[]=true',
+      'hash-shaped exclude_gates' => 'exclude_gates[a]=true',
+      'a bare percent escape' => 'exclude_gates=%',
+      'an invalid percent escape' => 'exclude_gates=%GG',
+      'invalid UTF-8' => 'exclude_gates=%FF',
+      'conflicting parameter shapes' => 'a=1&a[]=2',
+      'excessive nesting' => "a#{'[a]' * 150}=1",
+    }
+
+    malformed_queries.each do |description, query|
+      it "ignores #{description}" do
+        flipper[:my_feature].enable
+        expected_response = raw_api_get('/features/my_feature', '')
+
+        response = raw_api_get('/features/my_feature', query)
+
+        expect(response.first).to eq(200)
+        expect(response).to eq(expected_response)
+      end
+    end
+
+    it 'responds without gates when instructed by param' do
+      flipper[:my_feature].enable
+
+      status, _, body = raw_api_get('/features/my_feature', 'exclude_gates=true')
+
+      expect(status).to eq(200)
+      expect(body).to eq(
+        'key' => 'my_feature',
+        'state' => 'on'
+      )
+    end
+
     context 'enabled feature' do
       before do
         flipper[:my_feature].enable

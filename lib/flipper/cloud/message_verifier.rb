@@ -19,6 +19,7 @@ module Flipper
         @version = version || DEFAULT_VERSION
 
         raise ArgumentError, "secret should be a string" unless @secret.is_a?(String)
+        raise ArgumentError, "secret should not be empty" if @secret.empty?
         raise ArgumentError, "version should be a string" unless @version.is_a?(String)
       end
 

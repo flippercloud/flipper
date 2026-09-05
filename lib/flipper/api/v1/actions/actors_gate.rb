@@ -35,7 +35,7 @@ module Flipper
           end
 
           def flipper_id
-            @flipper_id ||= params['flipper_id']
+            @flipper_id ||= string_param('flipper_id')
           end
         end
       end

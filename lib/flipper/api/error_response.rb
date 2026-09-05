@@ -29,6 +29,7 @@ module Flipper
         name_invalid: Error.new(5, 'Required parameter name is missing.', 422),
         import_invalid: Error.new(6, 'Import invalid.', 422),
         expression_invalid: Error.new(7, 'The provided expression was not valid.', 422),
+        request_invalid: Error.new(8, 'Request invalid.', 400),
       }.freeze
     end
   end

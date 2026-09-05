@@ -14,6 +14,45 @@ RSpec.describe Flipper::Gates::PercentageOfActors do
   end
 
   describe '#open?' do
+    context 'when percentage is 0' do
+      it 'returns false for every actor' do
+        actors = (1..100).map { |n| Flipper::Types::Actor.new(Flipper::Actor.new(n.to_s)) }
+        results = actors.map { |actor| subject.open?(context(0, feature_name, actor)) }
+        expect(results.uniq).to eq([false])
+      end
+    end
+
+    context 'when percentage is 100' do
+      it 'returns true for every actor' do
+        actors = (1..100).map { |n| Flipper::Types::Actor.new(Flipper::Actor.new(n.to_s)) }
+        results = actors.map { |actor| subject.open?(context(100, feature_name, actor)) }
+        expect(results.uniq).to eq([true])
+      end
+    end
+
+    context 'bucketing stability' do
+      # These pin the exact id format fed to the crc so refactors (like the
+      # single-actor fast path) cannot silently re-bucket actors on upgrade.
+      it 'buckets a single actor by crc32 of feature name plus actor value' do
+        (1..100).each do |n|
+          actor = Flipper::Types::Actor.new(Flipper::Actor.new("User;#{n}"))
+          expected = Zlib.crc32("#{feature_name}#{actor.value}") % 100_000 < 25 * 1_000
+          expect(subject.open?(context(25, feature_name, actor))).to be(expected)
+        end
+      end
+
+      it 'buckets multiple actors by crc32 of feature name plus sorted joined actor values' do
+        actors = [
+          Flipper::Types::Actor.new(Flipper::Actor.new('User;2')),
+          Flipper::Types::Actor.new(Flipper::Actor.new('User;1')),
+          Flipper::Types::Actor.new(Flipper::Actor.new('Org;3')),
+        ]
+        id = "#{feature_name}#{actors.map(&:value).sort.join}"
+        expected = Zlib.crc32(id) % 100_000 < 25 * 1_000
+        expect(subject.open?(context(25, feature_name, actors))).to be(expected)
+      end
+    end
+
     context 'when compared against two features' do
       let(:percentage) { 0.05 }
       let(:percentage_as_integer) { percentage * 100 }

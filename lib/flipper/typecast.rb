@@ -73,6 +73,21 @@ module Flipper
       end
     end
 
+    # Internal: Convert value to a feature name usable as a feature key.
+    # Removes invisible format/control characters (zero-width spaces,
+    # joiners, BOM, etc.) that make visually identical but distinct names,
+    # and trims unicode whitespace (e.g. non-breaking space) that
+    # String#strip misses. Visible characters are left untouched.
+    #
+    # Returns a String.
+    def self.to_feature_name(value)
+      # U+2800 renders as a fixed-width blank but is not default-ignorable or whitespace.
+      value.to_s
+           .scrub('')
+           .gsub(/[\p{Default_Ignorable_Code_Point}\p{Cc}\u2800]/, '')
+           .gsub(/\A[[:space:]]+|[[:space:]]+\z/, '')
+    end
+
     def self.features_hash(source)
       normalized_source = {}
       (source || {}).each do |feature_key, gates|

@@ -14,6 +14,16 @@ RSpec.describe Flipper::Gates::PercentageOfTime do
   end
 
   describe '#open?' do
+    it 'always returns false when percentage of time is 0' do
+      results = 1_000.times.map { subject.open?(context(0)) }
+      expect(results.uniq).to eq([false])
+    end
+
+    it 'always returns true when percentage of time is 100' do
+      results = 1_000.times.map { subject.open?(context(100)) }
+      expect(results.uniq).to eq([true])
+    end
+
     context 'for fractional percentage' do
       let(:decimal) { 0.001 }
       let(:percentage) { decimal * 100 }

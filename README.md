@@ -37,6 +37,10 @@ Or install it yourself with:
 
 [💌 &nbsp;Subscribe](https://blog.flippercloud.io/#/portal/signup) - we'll send you short and sweet emails when we release new versions ([examples](https://blog.flippercloud.io/tag/releases/)).
 
+## Merch
+
+Do you deploy on Fridays? [👕 Get the tee](https://shop.verygoodsoftware.company/product/i-deploy-on-fridays-tee?utm_source=oss&utm_medium=readme&utm_campaign=merch).
+
 ## Getting Started
 
 Use `Flipper#enabled?` in your app to check if a feature is enabled.

@@ -108,4 +108,14 @@ RSpec.describe Flipper::Adapters::ReadOnly do
       .to raise_error(Flipper::Adapters::ReadOnly::WriteAttempted)
     expect(adapter.read_integer(:sync_version)).to be_nil
   end
+
+  it 'raises error on import without changing the wrapped adapter' do
+    adapter.add(feature)
+    source = Flipper::Adapters::Memory.new
+    source.add(Flipper::Feature.new(:replacement, source))
+
+    expect { subject.import(source) }
+      .to raise_error(Flipper::Adapters::ReadOnly::WriteAttempted)
+    expect(adapter.features).to eq(Set['stats'])
+  end
 end

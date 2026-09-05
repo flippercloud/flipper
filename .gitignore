@@ -25,3 +25,4 @@ bin
 tags
 node_modules
 .claude
+.worktrees/

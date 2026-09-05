@@ -20,6 +20,16 @@ RSpec.describe Flipper::UI::Decorators::Feature do
     end
   end
 
+  describe '#gates_in_words' do
+    it 'escapes actor values in the tooltip title' do
+      feature.enable_actor Flipper::Actor.new('x" onmouseover="alert(document.domain)')
+
+      expect(subject.gates_in_words).to include('title="x&quot; onmouseover=&quot;alert(document.domain)"')
+      expect(subject.gates_in_words).to include('>1 actor</span>')
+      expect(subject.gates_in_words).not_to include('title="x" onmouseover="alert(document.domain)"')
+    end
+  end
+
   describe '#<=>' do
     let(:on) do
       flipper.enable(:on_a)

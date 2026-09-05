@@ -1,5 +1,3 @@
-require 'flipper/cloud/migrate'
-
 RSpec.describe Flipper::UI::Actions::CloudMigrate do
   let(:token) do
     if Rack::Protection::AuthenticityToken.respond_to?(:random_token)

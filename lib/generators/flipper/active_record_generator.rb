@@ -1,9 +1,11 @@
 require 'rails/generators/active_record'
+require 'generators/flipper/table_prefix'
 
 module Flipper
   module Generators
     class ActiveRecordGenerator < ::Rails::Generators::Base
       include ::Rails::Generators::Migration
+      include Flipper::Generators::TablePrefix
       desc 'Generates migration for flipper tables'
 
       source_paths << File.join(File.dirname(__FILE__), 'templates')
@@ -24,7 +26,8 @@ module Flipper
         options = {
           migration_version: migration_version,
         }
-        migration_template 'migration.erb', 'db/migrate/create_flipper_tables.rb', options
+        destination = File.join('db/migrate', prefixed_migration_file_name('create_flipper_tables.rb'))
+        migration_template 'migration.erb', destination, options
       end
 
       def migration_version

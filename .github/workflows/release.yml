@@ -12,7 +12,7 @@ jobs:
       id-token: write   # RubyGems trusted publishing (OIDC)
       contents: write   # Create GitHub Releases
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: ruby/setup-ruby@v1
         with:
@@ -29,7 +29,7 @@ jobs:
           ls -la pkg/
 
       - name: Configure RubyGems credentials
-        uses: rubygems/configure-rubygems-credentials@v1.0.0
+        uses: rubygems/configure-rubygems-credentials@v2.1.0
 
       - name: Publish all gems
         run: |
@@ -47,7 +47,7 @@ jobs:
           done
 
       - name: Create draft GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           draft: true
           generate_release_notes: true

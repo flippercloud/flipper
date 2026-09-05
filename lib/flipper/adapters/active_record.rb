@@ -2,10 +2,13 @@ require 'set'
 require 'securerandom'
 require 'flipper'
 require 'active_record'
-require_relative 'active_record/model'
-require_relative 'active_record/feature'
-require_relative 'active_record/gate'
-require_relative 'active_record/kv_integer'
+
+ActiveSupport.on_load(:active_record) do
+  require_relative 'active_record/model'
+  require_relative 'active_record/feature'
+  require_relative 'active_record/gate'
+  require_relative 'active_record/kv_integer'
+end
 
 module Flipper
   module Adapters
@@ -22,6 +25,7 @@ module Flipper
       # name - The Symbol name for this adapter. Optional (default :active_record)
       # feature_class - The AR class responsible for the features table.
       # gate_class - The AR class responsible for the gates table.
+      # table_prefix - The prefix for the default features and gates tables.
       #
       # Allowing the overriding of name is so you can differentiate multiple
       # instances of this adapter from each other, if, for some reason, that is
@@ -31,9 +35,16 @@ module Flipper
       # can roll your own tables and what not, if you so desire.
       def initialize(options = {})
         @name = options.fetch(:name, :active_record)
-        @feature_class = options.fetch(:feature_class) { Flipper::Adapters::ActiveRecord::Feature }
-        @gate_class = options.fetch(:gate_class) { Flipper::Adapters::ActiveRecord::Gate }
-        @kv_integer_class = options.fetch(:kv_integer_class) { Flipper::Adapters::ActiveRecord::KvInteger }
+        table_prefix = options[:table_prefix]
+        @feature_class = options.fetch(:feature_class) do
+          model_class(Flipper::Adapters::ActiveRecord::Feature, table_prefix, "flipper_features")
+        end
+        @gate_class = options.fetch(:gate_class) do
+          model_class(Flipper::Adapters::ActiveRecord::Gate, table_prefix, "flipper_gates")
+        end
+        @kv_integer_class = options.fetch(:kv_integer_class) do
+          model_class(Flipper::Adapters::ActiveRecord::KvInteger, table_prefix, "flipper_kv_integers")
+        end
       end
 
       # Public: The set of known features.
@@ -105,8 +116,8 @@ module Flipper
       def get_all(**kwargs)
         with_connection(@feature_class) do |connection|
           # query the gates from the db in a single query
-          features = ::Arel::Table.new(@feature_class.table_name.to_sym)
-          gates = ::Arel::Table.new(@gate_class.table_name.to_sym)
+          features = @feature_class.arel_table
+          gates = @gate_class.arel_table
           rows_query = features.join(gates, ::Arel::Nodes::OuterJoin)
             .on(features[:key].eq(gates[:feature_key]))
             .project(features[:key].as('feature_key'), gates[:key], gates[:value])
@@ -234,6 +245,14 @@ module Flipper
         false
       end
 
+      def model_class(default_class, table_prefix, table_name)
+        return default_class if table_prefix.nil?
+
+        Class.new(default_class) do
+          self.table_name = "#{table_prefix}#{table_name}"
+        end
+      end
+
       def set(feature, gate, thing, options = {})
         clear_feature = options.fetch(:clear, false)
         json_feature = options.fetch(:json, false)
@@ -283,21 +302,28 @@ module Flipper
       end
 
       def result_for_gates(feature, gates)
+        # Bucket rows by gate key in one pass instead of re-scanning all rows
+        # for each of the feature's gates. Features with many enabled actors
+        # can have thousands of rows. Rows with a nil key come from the outer
+        # join in get_all for features with no gate values.
+        values_by_key = nil
+        gates&.each do |key, value|
+          next if key.nil?
+          values_by_key ||= {}
+          (values_by_key[key.to_sym] ||= []) << value
+        end
+
         result = {}
-        gates ||= []
         feature.gates.each do |gate|
+          values = values_by_key && values_by_key[gate.key]
           result[gate.key] =
             case gate.data_type
             when :boolean, :integer
-              if row = gates.detect { |key, value| !key.nil? && key.to_sym == gate.key }
-                row.last
-              end
+              values&.first
             when :json
-              if row = gates.detect { |key, value| !key.nil? && key.to_sym == gate.key }
-                Typecast.from_json(row.last)
-              end
+              Typecast.from_json(values.first) if values
             when :set
-              gates.select { |key, value| !key.nil? && key.to_sym == gate.key }.map(&:last).to_set
+              values ? values.to_set : Set.new
             else
               unsupported_data_type gate.data_type
             end
@@ -343,7 +369,9 @@ module Flipper
 
       def warned_about_value_not_text?
         return @warned_about_value_not_text if defined?(@warned_about_value_not_text)
+
         @warned_about_value_not_text = true
+        false
       end
     end
   end

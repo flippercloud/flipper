@@ -5,6 +5,7 @@ require "flipper/adapters/poll"
 require "flipper/poller"
 require "flipper/adapters/dual_write"
 require "flipper/adapters/sync/synchronizer"
+require "flipper/cloud/url_validator"
 require "flipper/cloud/telemetry"
 require "flipper/cloud/telemetry/instrumenter"
 require "flipper/cloud/telemetry/submitter"
@@ -25,8 +26,9 @@ module Flipper
 
       # Public: The url for http adapter. Really should only be customized for
       #         development work if you are me and you are not me. Feel free to
-      #         forget you ever saw this.
-      attr_accessor :url
+      #         forget you ever saw this. Must be https so the cloud token is
+      #         never transmitted in cleartext (local development uses https too).
+      attr_reader :url
 
       # Public: net/http read timeout for all http requests (default: 5).
       attr_accessor :read_timeout
@@ -118,9 +120,13 @@ module Flipper
       end
 
       # Public: The method that will be used to synchronize local adapter with
-      # cloud. (default: :poll, will be :webhook if sync_secret is set).
+      # cloud. (default: :poll, will be :webhook if sync_secret is non-empty).
       def sync_method
-        sync_secret ? :webhook : :poll
+        if !sync_secret || sync_secret.empty?
+          :poll
+        else
+          :webhook
+        end
       end
 
       # Internal: The http client used by the http adapter. Exposed so we can
@@ -137,6 +143,10 @@ module Flipper
 
       def instrument(name, payload = {}, &block)
         instrumenter.instrument(name, payload, &block)
+      end
+
+      def url=(value)
+        @url = UrlValidator.validate(value)
       end
 
       private
