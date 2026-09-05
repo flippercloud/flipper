@@ -47,11 +47,6 @@ module Flipper
         configuration = Flipper.configuration
         context = default_context(configuration)
         local_memory = context.fetch(:memory)
-        webhook_sync = !ENV.fetch("FLIPPER_CLOUD_SYNC_SECRET", "").empty?
-        sync_interval = [
-          Flipper::Typecast.to_float(ENV.fetch("FLIPPER_CLOUD_SYNC_INTERVAL", 10)),
-          Flipper::Poller::MINIMUM_POLL_INTERVAL,
-        ].max
         Flipper.configure do |config|
           config.wrap_adapter_store(:flipper_cloud_memory) do |persistent_adapter|
             context.fetch(:state).lock.synchronize do
@@ -60,7 +55,11 @@ module Flipper
                 context[:loaded] = true
               end
             end
-            if webhook_sync && !memory_store?(persistent_adapter)
+            if !ENV.fetch("FLIPPER_CLOUD_SYNC_SECRET", "").empty? && !memory_store?(persistent_adapter)
+              sync_interval = [
+                Flipper::Typecast.to_float(ENV.fetch("FLIPPER_CLOUD_SYNC_INTERVAL", 10)),
+                Flipper::Poller::MINIMUM_POLL_INTERVAL,
+              ].max
               Flipper::Adapters::Sync.new(
                 local_memory,
                 persistent_adapter,

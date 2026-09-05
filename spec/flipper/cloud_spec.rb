@@ -251,6 +251,41 @@ RSpec.describe Flipper::Cloud do
     persistent_file&.unlink
   end
 
+  it 'refreshes persistence when Rails loads the webhook secret after initial setup' do
+    original_token = ENV['FLIPPER_CLOUD_TOKEN']
+    original_secret = ENV['FLIPPER_CLOUD_SYNC_SECRET']
+    original_interval = ENV['FLIPPER_CLOUD_SYNC_INTERVAL']
+    ENV['FLIPPER_CLOUD_TOKEN'] = 'asdf'
+    ENV.delete('FLIPPER_CLOUD_SYNC_SECRET')
+    ENV['FLIPPER_CLOUD_SYNC_INTERVAL'] = '10'
+    persistent_file = Tempfile.new("flipper-cloud")
+    persistent_file.close
+    persistent = Flipper::Adapters::PStore.new(persistent_file.path)
+    Flipper.new(persistent).disable(:search)
+    Flipper.configure { |config| config.adapter { persistent } }
+
+    described_class.set_default
+    ENV['FLIPPER_CLOUD_SYNC_SECRET'] = 'secret'
+    ENV['FLIPPER_CLOUD_SYNC_INTERVAL'] = '30'
+    described_class.set_default(instrumenter: Flipper::Instrumenters::Memory.new)
+    expect(Flipper::Poller).not_to receive(:get)
+    instance = Flipper.configuration.default
+    expect(instance.enabled?(:search)).to be(false)
+    Flipper.new(persistent).enable(:search)
+
+    now = Process.clock_gettime(Process::CLOCK_MONOTONIC, :second)
+    allow(Process).to receive(:clock_gettime).and_call_original
+    allow(Process).to receive(:clock_gettime).with(Process::CLOCK_MONOTONIC, :second).and_return(now + 20)
+    expect(instance.enabled?(:search)).to be(false)
+    allow(Process).to receive(:clock_gettime).with(Process::CLOCK_MONOTONIC, :second).and_return(now + 31)
+    expect(instance.enabled?(:search)).to be(true)
+  ensure
+    ENV['FLIPPER_CLOUD_TOKEN'] = original_token
+    ENV['FLIPPER_CLOUD_SYNC_SECRET'] = original_secret
+    ENV['FLIPPER_CLOUD_SYNC_INTERVAL'] = original_interval
+    persistent_file&.unlink
+  end
+
   it 'keeps configured behavioral adapters outside memory reads' do
     original_token = ENV['FLIPPER_CLOUD_TOKEN']
     ENV['FLIPPER_CLOUD_TOKEN'] = 'asdf'
