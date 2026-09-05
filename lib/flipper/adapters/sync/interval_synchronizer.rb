@@ -13,17 +13,27 @@ module Flipper
           def initialize(synced: false)
             @lock = Monitor.new
             @last_poll_at = 0
-            @last_sync_at = synced ? now : 0
-            @synced = synced
+            @poll_generation = 0
+            @last_sync_at = synced ? now : nil
           end
 
           def synced?
-            @synced
+            !@last_sync_at.nil?
           end
 
-          def synced_at=(time)
-            @last_sync_at = time
-            @synced = true
+          def poll_started
+            @lock.synchronize { @poll_generation += 1 }
+          end
+
+          def synchronize_write
+            @lock.synchronize do
+              consume_pending_polls
+              yield
+            end
+          end
+
+          def consume_pending_polls
+            @last_poll_at = @poll_generation
           end
 
           private
@@ -64,7 +74,7 @@ module Flipper
             return unless time_to_sync?
 
             @synchronizer.call
-            @state.synced_at = now
+            @state.last_sync_at = now
             nil
           ensure
             @state.lock.exit

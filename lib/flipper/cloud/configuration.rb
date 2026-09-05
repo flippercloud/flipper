@@ -155,31 +155,36 @@ module Flipper
       private
 
       def sync_with_cloud(cache_bust: false)
-        Flipper::Adapters::Sync::Synchronizer.new(sync_adapter, http_adapter, {
+        result = Flipper::Adapters::Sync::Synchronizer.new(local_adapter, http_adapter, {
           instrumenter: instrumenter,
           cache_bust: cache_bust,
         }).call
+        @synchronization_state.consume_pending_polls if @synchronization_state && sync_method == :poll
+        result
       end
 
       def app_adapter
-        read_adapter = sync_method == :webhook ? sync_adapter : poll_adapter
-        Flipper::Adapters::DualWrite.new(read_adapter, http_adapter)
+        read_adapter = sync_method == :webhook ? local_adapter : poll_adapter
+        Flipper::Adapters::DualWrite.new(
+          read_adapter,
+          http_adapter,
+          synchronization_state: @synchronization_state,
+        )
       end
 
       def poller
-        Flipper::Poller.get(@url + @token, {
+        key = @url + @token
+        key = [key, @synchronization_state.object_id] if @synchronization_state
+        Flipper::Poller.get(key, {
           interval: sync_interval,
           remote_adapter: http_adapter,
           instrumenter: instrumenter,
+          synchronization_state: @synchronization_state,
         }).tap(&:start)
       end
 
       def poll_adapter
-        Flipper::Adapters::Poll.new(poller, sync_adapter, state: @synchronization_state)
-      end
-
-      def sync_adapter
-        local_adapter
+        Flipper::Adapters::Poll.new(poller, local_adapter, state: @synchronization_state)
       end
 
       def http_adapter

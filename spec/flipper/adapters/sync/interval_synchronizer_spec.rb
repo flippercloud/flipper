@@ -1,4 +1,5 @@
 require "flipper/adapters/sync/interval_synchronizer"
+require "timeout"
 
 RSpec.describe Flipper::Adapters::Sync::IntervalSynchronizer do
   let(:events) { [] }
@@ -12,6 +13,29 @@ RSpec.describe Flipper::Adapters::Sync::IntervalSynchronizer do
     expect(events.size).to be(0)
     subject.call
     expect(events.size).to be(1)
+  end
+
+  it "retries a failed initial synchronization" do
+    attempts = 0
+    instance = described_class.new(-> {
+      attempts += 1
+      raise "unavailable" if attempts == 1
+    }, interval: interval)
+
+    expect { instance.call }.to raise_error("unavailable")
+    instance.call
+    instance.call
+
+    expect(attempts).to eq(2)
+  end
+
+  it "recognizes a successful synchronization at time zero" do
+    allow(subject).to receive(:now).and_return(0)
+
+    subject.call
+    subject.call
+
+    expect(events).to eq([0])
   end
 
   it "only invokes wrapped synchronizer every interval seconds" do
@@ -53,7 +77,7 @@ RSpec.describe Flipper::Adapters::Sync::IntervalSynchronizer do
     allow(second).to receive(:now).and_return(future)
 
     refreshing_thread = Thread.new { first.call }
-    started.pop
+    Timeout.timeout(1) { started.pop }
     reading_thread = Thread.new { second.call }
 
     expect(reading_thread.join(1)).to be(reading_thread)
@@ -61,5 +85,14 @@ RSpec.describe Flipper::Adapters::Sync::IntervalSynchronizer do
   ensure
     release << true if refreshing_thread
     refreshing_thread&.join(1)
+  end
+
+  it "consumes polls that started before a coordinated write" do
+    state = described_class::State.new(synced: true)
+    generation = state.poll_started
+
+    state.synchronize_write { :result }
+
+    expect(state.last_poll_at).to eq(generation)
   end
 end

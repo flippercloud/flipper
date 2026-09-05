@@ -44,30 +44,28 @@ module Flipper
     # Private: Configure Flipper to use Cloud by default
     def self.set_default(instrumenter: nil)
       if ENV["FLIPPER_CLOUD_TOKEN"]
-        local_memory = Flipper::Adapters::Memory.new(threadsafe: true)
-        local_memory_loaded = false
-        local_memory_lock = Mutex.new
+        configuration = Flipper.configuration
+        context = default_context(configuration)
+        local_memory = context.fetch(:memory)
         webhook_sync = !ENV.fetch("FLIPPER_CLOUD_SYNC_SECRET", "").empty?
         sync_interval = [
           Flipper::Typecast.to_float(ENV.fetch("FLIPPER_CLOUD_SYNC_INTERVAL", 10)),
           Flipper::Poller::MINIMUM_POLL_INTERVAL,
         ].max
-        interval_state = nil
         Flipper.configure do |config|
           config.wrap_adapter_store(:flipper_cloud_memory) do |persistent_adapter|
-            local_memory_lock.synchronize do
-              unless local_memory_loaded
+            context.fetch(:state).lock.synchronize do
+              unless context[:loaded]
                 local_memory.import(persistent_adapter)
-                local_memory_loaded = true
-                interval_state = Flipper::Adapters::Sync::IntervalSynchronizer::State.new(synced: true)
+                context[:loaded] = true
               end
             end
-            if webhook_sync
+            if webhook_sync && !memory_store?(persistent_adapter)
               Flipper::Adapters::Sync.new(
                 local_memory,
                 persistent_adapter,
                 interval: sync_interval,
-                interval_state: interval_state,
+                interval_state: context.fetch(:state),
               )
             else
               Flipper::Adapters::DualWrite.new(
@@ -79,7 +77,7 @@ module Flipper
           config.default do
             options = {
               local_adapter: config.adapter,
-              synchronization_state: interval_state,
+              synchronization_state: context.fetch(:state),
             }
             options[:instrumenter] = instrumenter if instrumenter
             self.new(options)
@@ -87,6 +85,30 @@ module Flipper
         end
       end
     end
+
+    def self.default_context(configuration)
+      context = configuration.instance_variable_get(:@flipper_cloud_default_context)
+      return context if context
+
+      context = {
+        memory: Flipper::Adapters::Memory.new(threadsafe: true),
+        loaded: false,
+        state: Flipper::Adapters::Sync::IntervalSynchronizer::State.new(synced: true),
+      }
+      configuration.instance_variable_set(:@flipper_cloud_default_context, context)
+      context
+    end
+    private_class_method :default_context
+
+    def self.memory_store?(adapter)
+      until adapter.is_a?(Flipper::Adapters::Memory) || !adapter.respond_to?(:adapter)
+        nested_adapter = adapter.adapter
+        break if nested_adapter.equal?(adapter)
+        adapter = nested_adapter
+      end
+      adapter.is_a?(Flipper::Adapters::Memory)
+    end
+    private_class_method :memory_store?
   end
 end
 
