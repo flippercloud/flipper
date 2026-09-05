@@ -351,4 +351,52 @@ RSpec.describe Flipper::Cloud::Configuration do
     expect(local_adapter.count(:enable)).to be(1)
     expect(mutation_threads).to contain_exactly(calling_thread)
   end
+
+  it "does not let an older persistence refresh overwrite a forced sync" do
+    memory = Flipper::Adapters::Memory.new(threadsafe: true)
+    persistent = Flipper::Adapters::Memory.new(threadsafe: true)
+    Flipper.new(memory).disable(:search)
+    Flipper.new(persistent).disable(:search)
+    state = Flipper::Adapters::Sync::IntervalSynchronizer::State.new(synced: true)
+    local_adapter = Flipper::Adapters::DualWrite.new(memory, persistent)
+    configuration = described_class.new(required_options.merge(
+      local_adapter: local_adapter,
+      synchronization_state: state,
+    ))
+    body = Flipper::Typecast.to_json({
+      features: [
+        {
+          key: "search",
+          gates: [
+            {key: "boolean", value: true},
+          ],
+        },
+      ],
+    })
+    stub_request(:get, %r{\Ahttps://www\.flippercloud\.io/adapter/features\?}).
+      to_return(status: 200, body: body)
+    refresh_started = Queue.new
+    release_refresh = Queue.new
+    refresh = Flipper::Adapters::Sync::IntervalSynchronizer.new(-> {
+      old_snapshot = Flipper::Adapters::Memory.new(persistent.get_all)
+      refresh_started << true
+      release_refresh.pop
+      memory.import(old_snapshot)
+    }, interval: 10, state: state)
+    allow(refresh).to receive(:now).and_return(Process.clock_gettime(Process::CLOCK_MONOTONIC, :second) + 11)
+
+    refresh_thread = Thread.new { refresh.call }
+    refresh_started.pop
+    webhook_thread = Thread.new { configuration.sync(cache_bust: true) }
+    release_refresh << true
+    refresh_thread.join
+    webhook_thread.join
+
+    expect(Flipper.new(memory).enabled?(:search)).to be(true)
+    expect(Flipper.new(persistent).enabled?(:search)).to be(true)
+  ensure
+    release_refresh << true if refresh_thread&.alive?
+    refresh_thread&.join(1)
+    webhook_thread&.join(1)
+  end
 end

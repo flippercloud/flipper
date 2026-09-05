@@ -1,3 +1,5 @@
+require "monitor"
+
 module Flipper
   module Adapters
     class Sync
@@ -5,11 +7,12 @@ module Flipper
       # N seconds.
       class IntervalSynchronizer
         class State
-          attr_accessor :last_sync_at
+          attr_accessor :last_poll_at, :last_sync_at
           attr_reader :lock
 
           def initialize(synced: false)
-            @lock = Mutex.new
+            @lock = Monitor.new
+            @last_poll_at = 0
             @last_sync_at = synced ? now : 0
             @synced = synced
           end
@@ -52,7 +55,7 @@ module Flipper
 
         def call
           return unless time_to_sync?
-          unless @state.lock.try_lock
+          unless @state.lock.try_enter
             @state.lock.synchronize {} unless @state.synced?
             return
           end
@@ -64,7 +67,7 @@ module Flipper
             @state.synced_at = now
             nil
           ensure
-            @state.lock.unlock
+            @state.lock.exit
           end
         end
 

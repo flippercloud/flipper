@@ -79,6 +79,7 @@ module Flipper
           config.default do
             options = {
               local_adapter: config.adapter,
+              synchronization_state: interval_state,
             }
             options[:instrumenter] = instrumenter if instrumenter
             self.new(options)

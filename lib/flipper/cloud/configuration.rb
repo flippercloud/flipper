@@ -113,10 +113,13 @@ module Flipper
 
       # Public: Force a sync.
       def sync(cache_bust: false)
-        Flipper::Adapters::Sync::Synchronizer.new(sync_adapter, http_adapter, {
-          instrumenter: instrumenter,
-          cache_bust: cache_bust,
-        }).call
+        if @synchronization_state
+          @synchronization_state.lock.synchronize do
+            sync_with_cloud(cache_bust: cache_bust)
+          end
+        else
+          sync_with_cloud(cache_bust: cache_bust)
+        end
       end
 
       # Public: The method that will be used to synchronize local adapter with
@@ -151,6 +154,13 @@ module Flipper
 
       private
 
+      def sync_with_cloud(cache_bust: false)
+        Flipper::Adapters::Sync::Synchronizer.new(sync_adapter, http_adapter, {
+          instrumenter: instrumenter,
+          cache_bust: cache_bust,
+        }).call
+      end
+
       def app_adapter
         read_adapter = sync_method == :webhook ? sync_adapter : poll_adapter
         Flipper::Adapters::DualWrite.new(read_adapter, http_adapter)
@@ -165,7 +175,7 @@ module Flipper
       end
 
       def poll_adapter
-        Flipper::Adapters::Poll.new(poller, sync_adapter)
+        Flipper::Adapters::Poll.new(poller, sync_adapter, state: @synchronization_state)
       end
 
       def sync_adapter
@@ -218,6 +228,7 @@ module Flipper
       def setup_sync(options)
         set_option :sync_interval, options, default: 10, typecast: :float, minimum: 10
         set_option :sync_secret, options
+        @synchronization_state = options[:synchronization_state]
       end
 
       def setup_adapter(options)

@@ -14,9 +14,10 @@ module Flipper
 
       def_delegators :synced_adapter, :features, :get, :get_multi, :get_all, :add, :remove, :clear, :enable, :disable
 
-      def initialize(poller, adapter)
+      def initialize(poller, adapter, options = {})
         @adapter = adapter
         @poller = poller
+        @state = options[:state]
         @last_synced_at = 0
 
         # If the adapter is empty, we need to sync before starting the poller.
@@ -40,12 +41,29 @@ module Flipper
 
       def synced_adapter
         @poller.start
-        poller_last_synced_at = @poller.last_synced_at.value
-        if poller_last_synced_at > @last_synced_at
-          Flipper::Adapters::Sync::Synchronizer.new(@adapter, @poller.adapter).call
-          @last_synced_at = poller_last_synced_at
+        if @state
+          return @adapter unless @state.lock.try_enter
+        end
+
+        begin
+          synchronize
+        ensure
+          @state.lock.exit if @state
         end
         @adapter
+      end
+
+      def synchronize
+        poller_last_synced_at = @poller.last_synced_at.value
+        last_synced_at = @state ? @state.last_poll_at : @last_synced_at
+        if poller_last_synced_at > last_synced_at
+          Flipper::Adapters::Sync::Synchronizer.new(@adapter, @poller.adapter).call
+          if @state
+            @state.last_poll_at = poller_last_synced_at
+          else
+            @last_synced_at = poller_last_synced_at
+          end
+        end
       end
     end
   end
