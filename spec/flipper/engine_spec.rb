@@ -183,6 +183,325 @@ RSpec.describe Flipper::Engine do
       })
     end
 
+    it "configures independent middleware and inherited defaults for a named instance" do
+      initializer do
+        Flipper.configure do |flipper_config|
+          flipper_config.named(:cross_app) do |named|
+            named.preload = [:chat]
+          end
+        end
+      end
+
+      middleware = subject.middleware
+      named = Flipper.configuration.named_configuration(:cross_app)
+      setup = middleware.detect do |entry|
+        entry.klass == Flipper::Middleware::SetupEnv && entry.args.last[:env_key] == "flipper_cross_app"
+      end
+      memoizer = middleware.detect do |entry|
+        entry.klass == Flipper::Middleware::Memoizer && entry.args.first[:env_key] == "flipper_cross_app"
+      end
+
+      expect(named.instrumenter).to be(ActiveSupport::Notifications)
+      expect(named.memoize).to be(true)
+      expect(named.preload).to eq([:chat])
+      expect(named.actor_limit).to eq(100)
+      expect(setup.args.first).to be(Flipper.cross_app)
+      expect(memoizer.args.first).to eq({
+        env_key: "flipper_cross_app",
+        preload: [:chat],
+        if: nil,
+      })
+      expect(Flipper.cross_app.instance.instrumenter).to be(ActiveSupport::Notifications)
+      expect(Flipper.cross_app.adapter_stack).to include("actor_limit")
+    end
+
+    it "memoizes and preloads the default and named instances during the same request" do
+      adapter_class = Class.new(Flipper::Adapters::Memory) do
+        attr_reader :get_all_calls
+
+        def initialize
+          super
+          @get_all_calls = 0
+        end
+
+        def get_all(**_kwargs)
+          @get_all_calls += 1
+          super
+        end
+      end
+      regular_adapter = adapter_class.new
+      cross_app_adapter = adapter_class.new
+
+      initializer do
+        config.preload = true
+        Flipper.configure do |flipper_config|
+          flipper_config.adapter { regular_adapter }
+          flipper_config.named(:cross_app) do |named|
+            named.adapter { cross_app_adapter }
+            named.preload = true
+          end
+        end
+      end
+
+      silence { application.initialize! }
+      endpoint = ->(env) {
+        body = JSON.generate({
+          regular: Flipper.memoizing?,
+          cross_app: Flipper.cross_app.memoizing?,
+          named_env: env["flipper_cross_app"].equal?(Flipper.cross_app),
+        })
+        [200, {Rack::CONTENT_TYPE => "application/json"}, [body]]
+      }
+      middleware = application.middleware.select do |entry|
+        [Flipper::Middleware::SetupEnv, Flipper::Middleware::Memoizer].include?(entry.klass)
+      end
+      rack_app = middleware.reverse.inject(endpoint) { |app, entry| entry.build(app) }
+      response = Rack::MockRequest.new(rack_app).get("/memoization")
+
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)).to eq({
+        "regular" => true,
+        "cross_app" => true,
+        "named_env" => true,
+      })
+      expect(regular_adapter.get_all_calls).to eq(1)
+      expect(cross_app_adapter.get_all_calls).to eq(1)
+      expect(Flipper.memoizing?).to be(false)
+      expect(Flipper.cross_app.memoizing?).to be(false)
+    end
+
+    it "stops memoizing default and named instances when a request raises" do
+      initializer do
+        Flipper.configure do |flipper_config|
+          flipper_config.named(:cross_app)
+        end
+      end
+
+      silence { application.initialize! }
+      endpoint = ->(_env) { raise "request failed" }
+      middleware = application.middleware.select do |entry|
+        [Flipper::Middleware::SetupEnv, Flipper::Middleware::Memoizer].include?(entry.klass)
+      end
+      rack_app = middleware.reverse.inject(endpoint) { |app, entry| entry.build(app) }
+
+      expect { Rack::MockRequest.new(rack_app).get("/memoization") }.
+        to raise_error("request failed")
+      expect(Flipper.memoizing?).to be(false)
+      expect(Flipper.cross_app.memoizing?).to be(false)
+    end
+
+    it "allows a named instance to opt out of inherited memoization" do
+      initializer do
+        Flipper.configure do |flipper_config|
+          flipper_config.named(:cross_app) { |named| named.memoize = false }
+        end
+      end
+
+      middleware = subject.middleware
+
+      expect(middleware.none? do |entry|
+        entry.klass == Flipper::Middleware::SetupEnv && entry.args.last[:env_key] == "flipper_cross_app"
+      end).to be(true)
+    end
+
+    it "does not construct a named adapter while Rails boots" do
+      constructions = 0
+      initializer do
+        Flipper.configure do |flipper_config|
+          flipper_config.named(:cross_app) do |named|
+            named.adapter do
+              constructions += 1
+              Flipper::Adapters::Memory.new
+            end
+          end
+        end
+      end
+
+      subject
+
+      expect(constructions).to eq(0)
+      Flipper.cross_app.instance
+      expect(constructions).to eq(1)
+    end
+
+    it "rejects duplicate Rack environment keys" do
+      initializer do
+        Flipper.configure do |flipper_config|
+          flipper_config.named(:cross_app) { |named| named.env_key = "flipper" }
+        end
+      end
+
+      expect { subject }.
+        to raise_error(Flipper::InvalidConfigurationValue, /environment keys must be unique/)
+    end
+
+    it "boots test apps with named Cloud configured and no credentials" do
+      Rails.env = "test"
+      initializer do
+        Flipper.configure do |flipper_config|
+          flipper_config.named(:cross_app) do |named|
+            named.cloud(path: "_cross_app")
+          end
+        end
+      end
+
+      expect { subject }.not_to raise_error
+      expect(Flipper.cross_app.instance).to be_instance_of(Flipper::DSL)
+      expect(Flipper.cross_app.enabled?(:chat)).to be(false)
+    end
+
+    context "with named Cloud" do
+      let(:app) { application.routes }
+      let(:named_cloud_path) { "_cross_app" }
+      let(:named_sync_secret) { "named-secret" }
+      let(:named_cloud_options) { {path: named_cloud_path} }
+      let(:request_body) do
+        JSON.generate({
+          "environment_id" => 1,
+          "webhook_id" => 1,
+          "delivery_id" => SecureRandom.uuid,
+          "action" => "sync",
+        })
+      end
+      let(:timestamp) { Time.now }
+      let(:signature) do
+        Flipper::Cloud::MessageVerifier.new(secret: "named-secret").generate(request_body, timestamp)
+      end
+      let(:signature_header_value) do
+        Flipper::Cloud::MessageVerifier.new(secret: "header-secret").header(signature, timestamp)
+      end
+
+      before do
+        ENV["FLIPPER_CLOUD_CROSS_APP_TOKEN"] = "named-token"
+        ENV["FLIPPER_CLOUD_CROSS_APP_SYNC_SECRET"] = named_sync_secret
+        initializer do
+          Flipper.configure do |flipper_config|
+            flipper_config.named(:cross_app) do |named|
+              named.cloud(named_cloud_options)
+              named.register(:cross_app_group) { true }
+            end
+          end
+        end
+      end
+
+      after do
+        ENV.delete("FLIPPER_CLOUD_CROSS_APP_TOKEN")
+        ENV.delete("FLIPPER_CLOUD_CROSS_APP_SYNC_SECRET")
+      end
+
+      it "mounts a separate webhook using the named credentials and groups" do
+        silence { application.initialize! }
+        stub = stub_request(:get, /features\?_cb=\d+&exclude_gate_names=true/).with({
+          headers: { "flipper-cloud-token" => "named-token" },
+        }).to_return(status: 200, body: JSON.generate({features: {}}), headers: {})
+
+        post "/_cross_app", request_body, {
+          "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
+        }
+
+        expect(last_response.status).to eq(200)
+        expect(JSON.parse(last_response.body)).to eq({
+          "groups" => [{"name" => "cross_app_group"}],
+        })
+        expect(stub).to have_been_requested
+        expect(Flipper.instance).to be_a(Flipper::DSL)
+        expect(Flipper.cross_app.instance).to be_a(Flipper::Cloud::DSL)
+      end
+
+      context "when nested under the default Cloud path" do
+        let(:named_cloud_path) { "_flipper/cross_app" }
+
+        before do
+          ENV["FLIPPER_CLOUD_TOKEN"] = "default-token"
+          ENV["FLIPPER_CLOUD_SYNC_SECRET"] = "default-secret"
+        end
+
+        after do
+          ENV.delete("FLIPPER_CLOUD_TOKEN")
+          ENV.delete("FLIPPER_CLOUD_SYNC_SECRET")
+        end
+
+        it "routes the more specific named webhook first" do
+          silence { application.initialize! }
+          stub = stub_request(:get, /features\?_cb=\d+&exclude_gate_names=true/).with({
+            headers: { "flipper-cloud-token" => "named-token" },
+          }).to_return(status: 200, body: JSON.generate({features: {}}), headers: {})
+
+          post "/_flipper/cross_app", request_body, {
+            "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
+          }
+
+          expect(last_response.status).to eq(200)
+          expect(stub).to have_been_requested
+        end
+      end
+
+      context "when the path matches the default" do
+        let(:named_cloud_path) { "/_flipper/" }
+
+        it "normalizes paths before checking uniqueness" do
+          ENV["FLIPPER_CLOUD_TOKEN"] = "default-token"
+          ENV["FLIPPER_CLOUD_SYNC_SECRET"] = "default-secret"
+
+          expect { silence { application.initialize! } }.
+            to raise_error(Flipper::InvalidConfigurationValue, /webhook paths must be unique/)
+        ensure
+          ENV.delete("FLIPPER_CLOUD_TOKEN")
+          ENV.delete("FLIPPER_CLOUD_SYNC_SECRET")
+        end
+      end
+
+      context "with an empty sync secret" do
+        let(:named_sync_secret) { "" }
+
+        it "does not mount a webhook" do
+          silence { application.initialize! }
+
+          post "/_cross_app", request_body, {
+            "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
+          }
+
+          expect(last_response.status).to eq(404)
+        end
+      end
+
+      context "with a false sync secret" do
+        let(:named_cloud_options) { {path: named_cloud_path, sync_secret: false} }
+
+        it "does not mount a webhook" do
+          silence { application.initialize! }
+
+          post "/_cross_app", request_body, {
+            "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
+          }
+
+          expect(last_response.status).to eq(404)
+        end
+      end
+    end
+
+    it "loads named Cloud credentials from the matching Rails credential scope" do
+      allow(application).to receive(:credentials).and_return({
+        flipper: {
+          cross_app: {
+            cloud_token: "credentials-token",
+            cloud_sync_secret: "credentials-secret",
+          },
+        },
+      })
+      initializer do
+        Flipper.configure do |flipper_config|
+          flipper_config.named(:cross_app) { |named| named.cloud }
+        end
+      end
+
+      silence { application.initialize! }
+      cloud = Flipper.cross_app.instance.cloud_configuration
+
+      expect(cloud.token).to eq("credentials-token")
+      expect(cloud.sync_secret).to eq("credentials-secret")
+    end
+
     context "test_help" do
       it "is loaded if RAILS_ENV=test" do
         Rails.env = "test"

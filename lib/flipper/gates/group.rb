@@ -1,6 +1,10 @@
 module Flipper
   module Gates
     class Group < Gate
+      def initialize(group_resolver: Flipper)
+        @group_resolver = group_resolver
+      end
+
       # Internal: The name of the gate. Used for instrumentation, etc.
       def name
         :group
@@ -27,13 +31,15 @@ module Flipper
 
         context.values.groups.any? do |name|
           context.actors.any? do |actor|
-            Flipper.group(name).match?(actor, context)
+            @group_resolver.group(name).match?(actor, context)
           end
         end
       end
 
       def wrap(thing)
-        Types::Group.wrap(thing)
+        return thing if thing.is_a?(Types::Group)
+
+        @group_resolver.group(thing)
       end
 
       def protects?(thing)

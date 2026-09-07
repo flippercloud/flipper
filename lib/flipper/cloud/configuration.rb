@@ -149,6 +149,11 @@ module Flipper
         @url = UrlValidator.validate(value)
       end
 
+      # Internal: Immutable identity for registries shared by Cloud endpoints.
+      def endpoint_key
+        [url.dup.freeze, token.dup.freeze].freeze
+      end
+
       private
 
       def app_adapter
@@ -157,7 +162,7 @@ module Flipper
       end
 
       def poller
-        Flipper::Poller.get(@url + @token, {
+        Flipper::Poller.get(endpoint_key, {
           interval: sync_interval,
           remote_adapter: http_adapter,
           instrumenter: instrumenter,
