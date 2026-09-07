@@ -106,7 +106,7 @@ module Flipper
 
     # Internal: Resolve named credentials with explicit isolation from the
     # existing default Cloud environment variables.
-    def resolve_cloud_credentials(credentials = {}, env: ENV)
+    def resolve_cloud_credentials(credentials = {}, env = ENV)
       return @resolved_cloud_options if @resolved_cloud_options
 
       prefix = "FLIPPER_CLOUD_#{name.to_s.upcase}"
