@@ -224,7 +224,7 @@ RSpec.describe Flipper::Engine do
           @get_all_calls = 0
         end
 
-        def get_all
+        def get_all(**_kwargs)
           @get_all_calls += 1
           super
         end
