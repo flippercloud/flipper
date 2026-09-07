@@ -40,6 +40,12 @@ RSpec.describe "named Flipper instances" do
     expect(Flipper.cross_app.instance).to be_a(Flipper::DSL)
   end
 
+  it "exposes direct access when registered on the active configuration" do
+    Flipper.configuration.named(:cross_app)
+
+    expect(Flipper.cross_app).to be(Flipper.named(:cross_app))
+  end
+
   it "isolates feature state from the default instance" do
     configure_named
 
@@ -146,6 +152,55 @@ RSpec.describe "named Flipper instances" do
     expect(current).to be(replacement)
   end
 
+  it "does not publish a named instance until configuration finishes" do
+    adapter = Flipper::Adapters::Memory.new
+    configuring = Queue.new
+    continue = Queue.new
+    thread = Thread.new do
+      Flipper.configure do |config|
+        config.named(:cross_app) do |named|
+          configuring << true
+          continue.pop
+          named.adapter { adapter }
+        end
+      end
+    end
+
+    configuring.pop
+    expect { Flipper.named(:cross_app) }.
+      to raise_error(Flipper::NamedInstanceNotFound)
+
+    continue << true
+    thread.value
+
+    expect(Flipper.cross_app.instance.adapter.adapter).to be(adapter)
+  ensure
+    continue << true if thread&.alive?
+    thread&.join
+  end
+
+  it "releases a pending name when configuration is cancelled" do
+    configuring = Queue.new
+    continue = Queue.new
+    thread = Thread.new do
+      Flipper.configuration.named(:cross_app) do
+        configuring << true
+        continue.pop
+      end
+    end
+
+    configuring.pop
+    thread.kill
+    thread.join
+
+    expect { Flipper.configuration.named(:cross_app) }.not_to raise_error
+    expect(Flipper.cross_app).to be(Flipper.named(:cross_app))
+  ensure
+    thread&.kill
+    continue << true if thread&.alive?
+    thread&.join
+  end
+
   it "keeps retained proxies current when configuration is replaced" do
     configure_named
     retained = Flipper.cross_app
@@ -238,6 +293,56 @@ RSpec.describe "named Flipper instances" do
     expect(Flipper.cross_app.instance.class).to be(Flipper::DSL)
   end
 
+  it "clears Cloud metadata when a custom default replaces Cloud" do
+    named = Flipper.configuration.named(:cross_app)
+    named.cloud(token: "cloud-token", sync_secret: "cloud-secret", path: "_cross_app")
+    replacement = Flipper.new(Flipper::Adapters::Memory.new)
+
+    named.default { replacement }
+
+    expect(named.cloud?).to be(false)
+    expect(named.cloud_path).to be(nil)
+    expect(Flipper.cross_app.instance).to be(replacement)
+  end
+
+  it "honors an instrumenter configured through named Cloud options" do
+    instrumenter = Object.new
+    Flipper.configure do |config|
+      config.named(:cross_app) do |named|
+        named.cloud(token: "cloud-token", sync_secret: "cloud-secret", instrumenter: instrumenter)
+      end
+    end
+
+    cloud_instrumenter = Flipper.cross_app.instance.cloud_configuration.instrumenter
+
+    expect(cloud_instrumenter.instrumenter).to be(instrumenter)
+  end
+
+  it "isolates Cloud workers when endpoint strings overlap" do
+    stub_request(:get, %r{\Ahttps://example\.test/a(?:b)?/features}).
+      to_return(status: 200, body: JSON.generate({features: {}}))
+    Flipper.configure do |config|
+      config.named(:people) do |named|
+        named.cloud(token: "bc", url: "https://example.test/a")
+      end
+      config.named(:cross_app) do |named|
+        named.cloud(token: "c", url: "https://example.test/ab")
+      end
+      config.named(:people_copy) do |named|
+        named.cloud(token: "bc", url: "https://example.test/a")
+      end
+    end
+
+    people = Flipper.people.instance.cloud_configuration
+    cross_app = Flipper.cross_app.instance.cloud_configuration
+    people_copy = Flipper.people_copy.instance.cloud_configuration
+
+    expect(people.send(:poller)).not_to be(cross_app.send(:poller))
+    expect(people.telemetry).not_to be(cross_app.telemetry)
+    expect(people.send(:poller)).to be(people_copy.send(:poller))
+    expect(people.telemetry).to be(people_copy.telemetry)
+  end
+
   it "uses only name-scoped environment credentials for named Cloud" do
     with_env(
       "FLIPPER_CLOUD_TOKEN" => "default-token",
@@ -305,6 +410,23 @@ RSpec.describe "named Flipper instances" do
 
       expect(resolved[:token]).to eq("credentials-token")
       expect(resolved[:sync_secret]).to eq("credentials-secret")
+    end
+  end
+
+  it "preserves a false named Rails-style sync secret" do
+    with_env(
+      "FLIPPER_CLOUD_CROSS_APP_TOKEN" => "environment-token",
+      "FLIPPER_CLOUD_CROSS_APP_SYNC_SECRET" => "environment-secret"
+    ) do
+      named = Flipper.configuration.named(:cross_app)
+      named.cloud
+
+      resolved = named.resolve_cloud_credentials({
+        token: "credentials-token",
+        sync_secret: false,
+      })
+
+      expect(resolved[:sync_secret]).to be(false)
     end
   end
 end

@@ -51,6 +51,10 @@ module Flipper
 
     def default(&block)
       if block_given?
+        @cloud = false
+        @cloud_options = {}
+        @resolved_cloud_options = nil
+        self.cloud_path = nil
         result = super
         changed!
         result
@@ -85,6 +89,7 @@ module Flipper
       end
 
       self.cloud_path = options.delete(:path) if options.key?(:path)
+      self.instrumenter = options.delete(:instrumenter) if options.key?(:instrumenter)
       @cloud = true
       @cloud_options = options
       @resolved_cloud_options = nil
@@ -170,7 +175,10 @@ module Flipper
     def cloud_value(key, credentials, env_value)
       return @cloud_options[key] if @cloud_options.key?(key)
 
-      credentials[key] || env_value
+      credential_value = credentials[key]
+      return credential_value unless credential_value.nil?
+
+      env_value
     end
 
     def changed!
