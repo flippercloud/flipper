@@ -315,10 +315,26 @@ RSpec.describe Flipper::Engine do
         to raise_error(Flipper::InvalidConfigurationValue, /environment keys must be unique/)
     end
 
+    it "boots test apps with named Cloud configured and no credentials" do
+      Rails.env = "test"
+      initializer do
+        Flipper.configure do |flipper_config|
+          flipper_config.named(:cross_app) do |named|
+            named.cloud(path: "_cross_app")
+          end
+        end
+      end
+
+      expect { subject }.not_to raise_error
+      expect(Flipper.cross_app.enabled?(:chat)).to be(false)
+      expect(a_request(:any, /flippercloud/)).not_to have_been_made
+    end
+
     context "with named Cloud" do
       let(:app) { application.routes }
       let(:named_cloud_path) { "_cross_app" }
       let(:named_sync_secret) { "named-secret" }
+      let(:named_cloud_options) { {path: named_cloud_path} }
       let(:request_body) do
         JSON.generate({
           "environment_id" => 1,
@@ -341,7 +357,7 @@ RSpec.describe Flipper::Engine do
         initializer do
           Flipper.configure do |flipper_config|
             flipper_config.named(:cross_app) do |named|
-              named.cloud(path: named_cloud_path)
+              named.cloud(named_cloud_options)
               named.register(:cross_app_group) { true }
             end
           end
@@ -372,6 +388,34 @@ RSpec.describe Flipper::Engine do
         expect(Flipper.cross_app.instance).to be_a(Flipper::Cloud::DSL)
       end
 
+      context "when nested under the default Cloud path" do
+        let(:named_cloud_path) { "_flipper/cross_app" }
+
+        before do
+          ENV["FLIPPER_CLOUD_TOKEN"] = "default-token"
+          ENV["FLIPPER_CLOUD_SYNC_SECRET"] = "default-secret"
+        end
+
+        after do
+          ENV.delete("FLIPPER_CLOUD_TOKEN")
+          ENV.delete("FLIPPER_CLOUD_SYNC_SECRET")
+        end
+
+        it "routes the more specific named webhook first" do
+          silence { application.initialize! }
+          stub = stub_request(:get, /features\?_cb=\d+&exclude_gate_names=true/).with({
+            headers: { "flipper-cloud-token" => "named-token" },
+          }).to_return(status: 200, body: JSON.generate({features: {}}), headers: {})
+
+          post "/_flipper/cross_app", request_body, {
+            "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
+          }
+
+          expect(last_response.status).to eq(200)
+          expect(stub).to have_been_requested
+        end
+      end
+
       context "when the path matches the default" do
         let(:named_cloud_path) { "/_flipper/" }
 
@@ -389,6 +433,20 @@ RSpec.describe Flipper::Engine do
 
       context "with an empty sync secret" do
         let(:named_sync_secret) { "" }
+
+        it "does not mount a webhook" do
+          silence { application.initialize! }
+
+          post "/_cross_app", request_body, {
+            "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
+          }
+
+          expect(last_response.status).to eq(404)
+        end
+      end
+
+      context "with a false sync secret" do
+        let(:named_cloud_options) { {path: named_cloud_path, sync_secret: false} }
 
         it "does not mount a webhook" do
           silence { application.initialize! }

@@ -40,6 +40,16 @@ RSpec.describe Flipper::TestHelp do
     expect(a_request(:any, /flippercloud/)).not_to have_been_made
   end
 
+  it "shares Memory for a non-Cloud named instance added after test setup" do
+    described_class.flipper_configure
+    Flipper.configure { |config| config.named(:cross_app) }
+
+    described_class.flipper_reset
+    Flipper.cross_app.enable(:chat)
+
+    expect(Thread.new { Flipper.cross_app.enabled?(:chat) }.value).to be(true)
+  end
+
   it "clears named features while preserving registered groups" do
     Flipper.configure do |config|
       config.named(:cross_app)
