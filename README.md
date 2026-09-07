@@ -123,6 +123,10 @@ through `FLIPPER_CLOUD_CROSS_APP_TOKEN` and
 `FLIPPER_CLOUD_CROSS_APP_SYNC_SECRET`. Named instances never inherit the default
 `FLIPPER_CLOUD_TOKEN` or `FLIPPER_CLOUD_SYNC_SECRET`.
 
+Applications sharing a Cloud project must register the same named group predicates
+and return the same `flipper_id` for shared actors. Cloud synchronizes group names and
+actor identifiers, not Ruby group definitions or application identity mappings.
+
 ## Flipper Cloud
 
 Like Flipper and want more? Check out [Flipper Cloud](https://www.flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=check_out), which comes with:

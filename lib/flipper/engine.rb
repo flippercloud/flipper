@@ -74,11 +74,16 @@ module Flipper
         config.use Flipper::Adapters::ActorLimit, flipper.actor_limit if flipper.actor_limit
       end
 
+      if flipper.test_help
+        require "flipper/test_help"
+        Flipper::TestHelp.flipper_configure_named_instances
+      end
+
       if Flipper.configuration.respond_to?(:named_instance_names)
         Flipper.configuration.named_instance_names.each do |name|
           named = Flipper.configuration.named_configuration(name)
           named.inherit_rails_configuration(flipper)
-          if named.cloud?
+          if named.cloud? && !flipper.test_help
             named.resolve_cloud_credentials({
               token: app.credentials.dig(:flipper, name, :cloud_token),
               sync_secret: app.credentials.dig(:flipper, name, :cloud_sync_secret),
@@ -127,6 +132,7 @@ module Flipper
     end
 
     initializer "flipper.named_cloud_paths", after: :load_config_initializers do |app|
+      next if app.config.flipper.test_help
       next unless Flipper.configuration.respond_to?(:named_instance_names)
 
       named_paths = Flipper.configuration.named_instance_names.map do |name|

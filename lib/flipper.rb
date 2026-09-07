@@ -340,7 +340,8 @@ module Flipper
         next if named_instance_accessor_names.include?(name)
 
         validate_named_instance_name!(name)
-        define_singleton_method(name) { named(name) }
+        proxy = named(name)
+        define_singleton_method(name) { proxy }
         named_instance_accessor_names.add(name)
         named_instance_accessor_methods[name] = method(name)
       end
