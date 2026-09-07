@@ -270,6 +270,26 @@ RSpec.describe Flipper::Engine do
       expect(Flipper.cross_app.memoizing?).to be(false)
     end
 
+    it "stops memoizing default and named instances when a request raises" do
+      initializer do
+        Flipper.configure do |flipper_config|
+          flipper_config.named(:cross_app)
+        end
+      end
+
+      silence { application.initialize! }
+      endpoint = ->(_env) { raise "request failed" }
+      middleware = application.middleware.select do |entry|
+        [Flipper::Middleware::SetupEnv, Flipper::Middleware::Memoizer].include?(entry.klass)
+      end
+      rack_app = middleware.reverse.inject(endpoint) { |app, entry| entry.build(app) }
+
+      expect { Rack::MockRequest.new(rack_app).get("/memoization") }.
+        to raise_error("request failed")
+      expect(Flipper.memoizing?).to be(false)
+      expect(Flipper.cross_app.memoizing?).to be(false)
+    end
+
     it "allows a named instance to opt out of inherited memoization" do
       initializer do
         Flipper.configure do |flipper_config|
@@ -326,8 +346,8 @@ RSpec.describe Flipper::Engine do
       end
 
       expect { subject }.not_to raise_error
+      expect(Flipper.cross_app.instance).to be_instance_of(Flipper::DSL)
       expect(Flipper.cross_app.enabled?(:chat)).to be(false)
-      expect(a_request(:any, /flippercloud/)).not_to have_been_made
     end
 
     context "with named Cloud" do

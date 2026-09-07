@@ -4,6 +4,7 @@ module Flipper
       @builder = AdapterBuilder.new { store Flipper::Adapters::Memory }
       @default = -> { Flipper.new(@builder.to_adapter) }
       @named_configurations = {}
+      @pending_named_instance_names = Set.new
       @named_configurations_mutex = Mutex.new
     end
 
@@ -79,24 +80,24 @@ module Flipper
       name = Flipper.send(:normalize_named_instance_name, name)
       Flipper.send(:validate_named_instance_name!, name)
 
-      named_configuration = @named_configurations_mutex.synchronize do
-        if @named_configurations.key?(name)
+      @named_configurations_mutex.synchronize do
+        if @named_configurations.key?(name) || @pending_named_instance_names.include?(name)
           raise DuplicateNamedInstance, "Named instance #{name.inspect} has already been configured"
         end
 
-        @named_configurations[name] = NamedConfiguration.new(name)
+        @pending_named_instance_names.add(name)
       end
 
-      if block_given?
-        begin
-          yield named_configuration
-        rescue
-          @named_configurations_mutex.synchronize do
-            @named_configurations.delete(name) if @named_configurations[name].equal?(named_configuration)
-          end
-          raise
+      begin
+        named_configuration = NamedConfiguration.new(name)
+        yield named_configuration if block_given?
+        @named_configurations_mutex.synchronize do
+          @named_configurations[name] = named_configuration
         end
+      ensure
+        @named_configurations_mutex.synchronize { @pending_named_instance_names.delete(name) }
       end
+      Flipper.send(:refresh_named_instance_accessors) if Flipper.configuration.equal?(self)
       named_configuration
     end
 
