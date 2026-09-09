@@ -280,6 +280,70 @@ RSpec.describe Flipper::Adapters::ActiveSupportCacheStore do
     end
   end
 
+  describe '#import' do
+    it "delegates to the wrapped adapter's import" do
+      source = Flipper::Adapters::Memory.new
+      result = Object.new
+      expect(memory_adapter).to receive(:import).with(source).and_return(result)
+
+      expect(adapter.import(source)).to be(result)
+    end
+
+    it 'expires caches for changed, added, and removed features' do
+      flipper[:changed].add
+      flipper[:removed].enable
+
+      source_adapter = Flipper::Adapters::Memory.new
+      source_flipper = Flipper.new(source_adapter)
+      source_flipper[:changed].enable
+      source_flipper[:added].enable
+
+      [:changed, :added, :removed].each { |key| adapter.get(flipper[key]) }
+      adapter.features
+      adapter.get_all
+
+      expect(adapter.import(source_adapter)).to be(true)
+      expect(cache.read('flipper/v1/feature/changed')).to be_nil
+      expect(cache.read('flipper/v1/feature/added')).to be_nil
+      expect(cache.read('flipper/v1/feature/removed')).to be_nil
+      expect(cache.read('flipper/v1/features')).to be_nil
+      expect(cache.read('flipper/v1/get_all')).to be_nil
+      expect(flipper[:changed]).to be_enabled
+      expect(flipper[:added]).to be_enabled
+      expect(flipper[:removed]).not_to be_enabled
+    end
+
+    it 'preserves import errors without expiring caches' do
+      flipper[:existing].enable
+      adapter.get(flipper[:existing])
+      adapter.features
+      adapter.get_all
+
+      cached_feature = cache.read('flipper/v1/feature/existing')
+      cached_features = cache.read('flipper/v1/features')
+      cached_get_all = cache.read('flipper/v1/get_all')
+      error = Class.new(StandardError).new('import failed')
+      allow(memory_adapter).to receive(:import).and_raise(error)
+      expect(cache).not_to receive(:delete)
+
+      expect { adapter.import(Flipper::Adapters::Memory.new) }
+        .to raise_error { |raised| expect(raised).to be(error) }
+      expect(cache.read('flipper/v1/feature/existing')).to eq(cached_feature)
+      expect(cache.read('flipper/v1/features')).to eq(cached_features)
+      expect(cache.read('flipper/v1/get_all')).to eq(cached_get_all)
+    end
+
+    it 'does not expire caches when the wrapped adapter declines the import' do
+      flipper[:existing].enable
+      adapter.get(flipper[:existing])
+      allow(memory_adapter).to receive(:import).and_return(false)
+      expect(cache).not_to receive(:delete)
+
+      expect(adapter.import(Flipper::Adapters::Memory.new)).to be(false)
+      expect(cache.read('flipper/v1/feature/existing')).not_to be_nil
+    end
+  end
+
   describe '#name' do
     it 'is active_support_cache_store' do
       expect(subject.name).to be(:active_support_cache_store)

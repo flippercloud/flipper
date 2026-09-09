@@ -2,6 +2,7 @@ require 'forwardable'
 require 'set'
 require 'flipper/api/error'
 require 'flipper/api/error_response'
+require 'flipper/api/parameter_parsing'
 require 'json'
 
 module Flipper
@@ -11,8 +12,14 @@ module Flipper
         def feature_name
           @feature_name ||= begin
             match = request.path_info.match(self.class.route_regex)
-            match ? Rack::Utils.unescape(match[:feature_name]) : nil
+            if match
+              value = Rack::Utils.unescape(match[:feature_name])
+              json_error_response(:request_invalid) unless value.valid_encoding?
+              value
+            end
           end
+        rescue ArgumentError
+          json_error_response(:request_invalid)
         end
         private :feature_name
       end
@@ -26,6 +33,11 @@ module Flipper
                                              'put'.freeze,
                                              'delete'.freeze,
                                            ]).freeze
+      MUTATION_REQUEST_METHOD_NAMES = Set.new([
+                                                'post'.freeze,
+                                                'put'.freeze,
+                                                'delete'.freeze,
+                                              ]).freeze
 
       # Public: Call this in subclasses so the action knows its route.
       #
@@ -78,7 +90,12 @@ module Flipper
       # Returns whatever the request method returns in the action.
       def run
         if valid_request_method? && respond_to?(request_method_name)
-          catch(:halt) { send(request_method_name) }
+          catch(:halt) do
+            if mutation_request? && params_invalid?
+              json_error_response(:request_invalid)
+            end
+            send(request_method_name)
+          end
         else
           raise Api::RequestMethodNotSupported,
                 "#{self.class} does not support request method #{request_method_name.inspect}"
@@ -168,6 +185,13 @@ module Flipper
       def safe_params
         @safe_params ||= params
       rescue *parameter_parser_errors
+        raise if @multipart_prevalidated
+
+        @params_parse_failed = true
+        @safe_params = {}
+      rescue RangeError
+        raise unless mutation_request? && request.env['rack.request.form_vars'.freeze].is_a?(String)
+
         @params_parse_failed = true
         @safe_params = {}
       end
@@ -177,32 +201,83 @@ module Flipper
         @params_parse_failed == true
       end
 
-      # Private: Returns a valid String parameter, ignoring other shapes and
-      # invalid encodings.
+      def params_invalid?
+        if multipart_request?
+          begin
+            ParameterParsing.validate_multipart_shapes(request.env)
+            @multipart_prevalidated = true
+          rescue ParameterParsing::InvalidParameterShape
+            return true
+          end
+        end
+
+        return true if params_parse_failed?
+        return true unless ParameterParsing.valid_encoding?(safe_params)
+
+        form_vars = request.env['rack.request.form_vars'.freeze]
+        if form_vars.is_a?(String)
+          begin
+            ParameterParsing.parse_nested_query(form_vars)
+          rescue *parameter_parser_errors
+            return true
+          rescue RangeError
+            return true
+          end
+        end
+
+        compatible = compatible_parameter_shapes?(request.GET, request.POST)
+        !compatible
+      end
+
+      # Private: Returns a valid String parameter or nil when it is absent.
+      # Rejects malformed mutation values while preserving read-filter
+      # compatibility, where unsupported values have historically been ignored.
       def string_param(name)
+        if mutation_request? && container_param?(name)
+          json_error_response(:request_invalid)
+        end
+
         value = safe_params[name]
-        value if valid_param_string?(value)
+        return if value.nil?
+        return value if valid_param_string?(value)
+
+        json_error_response(:request_invalid) if mutation_request?
       end
 
       def valid_param_string?(value)
         value.is_a?(String) && value.valid_encoding?
       end
 
+      def container_param?(name)
+        body_params = request.env["parsed_request_body".freeze]
+        return false unless body_params.is_a?(Hash) && body_params.key?(name)
+
+        value = body_params[name]
+        value.is_a?(Array) || value.is_a?(Hash)
+      end
+
       def parameter_parser_errors
-        parsers = [Rack::Utils]
-        parsers << Rack.const_get(:QueryParser, false) if Rack.const_defined?(:QueryParser, false)
-        error_names = [:InvalidParameterError, :ParameterTypeError, :ParamsTooDeepError, :QueryLimitError]
-        errors = parsers.each_with_object([]) do |parser, result|
-          error_names.each do |name|
-            result << parser.const_get(name, false) if parser.const_defined?(name, false)
-          end
+        errors = ParameterParsing.errors
+        mutation_request? ? errors - [RangeError] : errors
+      end
+
+      def compatible_parameter_shapes?(left, right)
+        (left.keys & right.keys).all? do |key|
+          left_value = left[key]
+          right_value = right[key]
+          left_shape = parameter_shape(left_value)
+          right_shape = parameter_shape(right_value)
+
+          left_shape == right_shape &&
+            (left_shape != Hash || compatible_parameter_shapes?(left_value, right_value))
         end
-        has_named_depth_error = parsers.any? do |parser|
-          parser.const_defined?(:ParamsTooDeepError, false)
-        end
-        # Rack 2.0 reports nesting and key-space limits as plain RangeError.
-        errors << RangeError unless has_named_depth_error
-        errors.uniq
+      end
+
+      def parameter_shape(value)
+        return Hash if value.is_a?(Hash)
+        return Array if value.is_a?(Array)
+
+        String
       end
 
       # Private: Returns the request method converted to an action method.
@@ -223,6 +298,19 @@ module Flipper
       def valid_request_method?
         VALID_REQUEST_METHOD_NAMES.include?(request_method_name)
       end
+
+      def mutation_request?
+        MUTATION_REQUEST_METHOD_NAMES.include?(request_method_name)
+      end
+
+      def multipart_request?
+        request_media_type.casecmp('multipart/form-data') == 0
+      end
+
+      def request_media_type
+        request.env['CONTENT_TYPE'.freeze].to_s.split(';', 2).first.to_s.strip
+      end
+
     end
   end
 end

@@ -29,7 +29,7 @@ RSpec.describe Flipper::Api::Action do
 
   describe 'https verbs' do
     it "won't run method that isn't whitelisted" do
-      fake_request = Struct.new(:request_method, :env, :session).new('NOOOOPE', {}, {})
+      fake_request = Rack::Request.new(Rack::MockRequest.env_for('/', method: 'NOOOOPE'))
       action = action_subclass.new(flipper, fake_request)
       expect do
         action.run
@@ -37,31 +37,31 @@ RSpec.describe Flipper::Api::Action do
     end
 
     it 'will run get' do
-      fake_request = Struct.new(:request_method, :env, :session).new('GET', {}, {})
+      fake_request = Rack::Request.new(Rack::MockRequest.env_for('/', method: 'GET'))
       action = action_subclass.new(flipper, fake_request)
       expect(action.run).to eq([200, {}, 'get'])
     end
 
     it 'will run head' do
-      fake_request = Struct.new(:request_method, :env, :session).new('HEAD', {}, {})
+      fake_request = Rack::Request.new(Rack::MockRequest.env_for('/', method: 'HEAD'))
       action = action_subclass.new(flipper, fake_request)
       expect(action.run).to eq([200, {}, 'get'])
     end
 
     it 'will run post' do
-      fake_request = Struct.new(:request_method, :env, :session).new('POST', {}, {})
+      fake_request = Rack::Request.new(Rack::MockRequest.env_for('/', method: 'POST'))
       action = action_subclass.new(flipper, fake_request)
       expect(action.run).to eq([200, {}, 'post'])
     end
 
     it 'will run put' do
-      fake_request = Struct.new(:request_method, :env, :session).new('PUT', {}, {})
+      fake_request = Rack::Request.new(Rack::MockRequest.env_for('/', method: 'PUT'))
       action = action_subclass.new(flipper, fake_request)
       expect(action.run).to eq([200, {}, 'put'])
     end
 
     it 'will run delete' do
-      fake_request = Struct.new(:request_method, :env, :session).new('DELETE', {}, {})
+      fake_request = Rack::Request.new(Rack::MockRequest.env_for('/', method: 'DELETE'))
       action = action_subclass.new(flipper, fake_request)
       expect(action.run).to eq([200, {}, 'delete'])
     end
