@@ -84,6 +84,12 @@ Like Flipper and want more? Check out [Flipper Cloud](https://www.flippercloud.i
 - **maintenance** &mdash; we'll keep the lights on for you. We also have handy webhooks and background polling for keeping your app in sync with Cloud, so **our availability won't affect yours**. When Cloud is configured as your default, feature flag reads are served from process-local memory while synchronization keeps your configured local adapter up to date.
 - **everything in one place** &mdash; no need to bounce around from different application UIs or IRB consoles.
 
+Once initialized, default Cloud reads remain available from memory when automatic
+refresh fails; explicit writes and syncs still raise on failure. Refreshes can
+apply partially and retry on the configured interval. With polling, an intervening
+write—even a failed one—supersedes older snapshots to avoid undoing newer changes.
+Catching up then requires a new successful Cloud poll and local reconciliation.
+
 [![Flipper Cloud Screenshot](docs/images/flipper_cloud.png)](https://www.flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=screenshot)
 
 Cloud is super simple to integrate with Rails ([demo app](https://github.com/fewerandfaster/flipper-rails-demo)), Sinatra or any other framework.
