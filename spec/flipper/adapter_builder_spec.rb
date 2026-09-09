@@ -69,4 +69,43 @@ RSpec.describe Flipper::AdapterBuilder do
       expect(subject.to_adapter).to be_instance_of(Flipper::Adapters::Memory)
     end
   end
+
+  describe "#wrap_store" do
+    it "wraps storage beneath adapters added with use" do
+      subject.use(Flipper::Adapters::Strict, :warn)
+      subject.wrap_store(:example) do |adapter|
+        Flipper::Adapters::Memoizable.new(adapter)
+      end
+
+      strict = subject.to_adapter
+      expect(strict).to be_instance_of(Flipper::Adapters::Strict)
+      expect(strict.adapter).to be_instance_of(Flipper::Adapters::Memoizable)
+      expect(strict.adapter.adapter).to be_instance_of(Flipper::Adapters::Memory)
+    end
+
+    it "continues wrapping when the store is reconfigured" do
+      require "flipper/adapters/pstore"
+      subject.wrap_store(:example) do |adapter|
+        Flipper::Adapters::Memoizable.new(adapter)
+      end
+      subject.store(Flipper::Adapters::PStore)
+
+      wrapped = subject.to_adapter
+      expect(wrapped).to be_instance_of(Flipper::Adapters::Memoizable)
+      expect(wrapped.adapter).to be_instance_of(Flipper::Adapters::PStore)
+    end
+
+    it "only adds a keyed wrapper once" do
+      subject.wrap_store(:example) do |adapter|
+        Flipper::Adapters::Memoizable.new(adapter)
+      end
+      subject.wrap_store(:example) do |adapter|
+        Flipper::Adapters::Strict.new(adapter, :warn)
+      end
+
+      wrapped = subject.to_adapter
+      expect(wrapped).to be_instance_of(Flipper::Adapters::Memoizable)
+      expect(wrapped.adapter).to be_instance_of(Flipper::Adapters::Memory)
+    end
+  end
 end

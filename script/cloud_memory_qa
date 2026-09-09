@@ -1,0 +1,376 @@
+#!/usr/bin/env ruby
+# Run with: bundle exec ruby script/cloud_memory_qa
+# Isolated local API fixture, not the full Flipper Cloud Rails application.
+require "bundler/setup"
+require "flipper"
+require "flipper/adapters/active_record"
+require "active_record/connection_adapters/sqlite3_adapter"
+require "flipper/typecast"
+require "rack/mock"
+require "timeout"
+require "open3"
+require "tmpdir"
+
+def assert(value, message)
+  raise message unless value
+end
+
+def connect(database)
+  ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: database, pool: 12, timeout: 5000)
+end
+
+if ARGV.first == "consumer"
+  require "flipper/cloud"
+  connect(ARGV.fetch(1))
+  Flipper.configuration = nil
+  Flipper.configure { |config| config.adapter { Flipper::Adapters::ActiveRecord.new } }
+  Flipper::Cloud.set_default
+  counts = Hash.new(0)
+  lock = Mutex.new
+  ActiveSupport::Notifications.subscribe("sql.active_record") do |*args|
+    payload = args.last
+    next if payload[:name] == "SCHEMA"
+    lock.synchronize do
+      counts[:sql] += 1
+      counts[:background_sql] += 1 unless Thread.current[:qa_request]
+    end
+  end
+  if ENV["LOCAL_CLOUD_QA_URL"] && !ENV.fetch("FLIPPER_CLOUD_SYNC_SECRET", "").empty?
+    require "webrick"
+    require "webrick/https"
+    certificate_path = ENV.fetch("SSL_CERT_FILE")
+    webhook_app = Flipper::Cloud.app
+    webhook_server = WEBrick::HTTPServer.new(BindAddress: "127.0.0.1", Port: 0,
+      SSLEnable: true,
+      SSLCertificate: OpenSSL::X509::Certificate.new(File.read(certificate_path)),
+      SSLPrivateKey: OpenSSL::PKey.read(File.read(File.join(File.dirname(certificate_path), "key.pem"))),
+      Logger: WEBrick::Log.new(File::NULL), AccessLog: [])
+    webhook_server.mount_proc("/") do |request, response|
+      Thread.current[:qa_request] = true
+      env = Rack::MockRequest.env_for(request.path, method: request.request_method, input: request.body.to_s,
+        "HTTP_FLIPPER_CLOUD_SIGNATURE" => request["flipper-cloud-signature"])
+      status, headers, body = webhook_app.call(env)
+      response.status = status
+      headers.each { |name, value| response[name] = value }
+      response.body = body.each.to_a.join
+      body.close if body.respond_to?(:close)
+    end
+    webhook_thread = Thread.new { webhook_server.start }
+    at_exit { webhook_server.shutdown; webhook_thread.join(5) }
+  end
+  STDOUT.sync = true
+  STDIN.each_line do |line|
+    command = Flipper::Typecast.from_json(line)
+    Thread.current[:qa_request] = true
+    started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    allocated_before = GC.stat(:total_allocated_objects)
+    before = lock.synchronize { counts.dup }
+    result = case command.fetch("operation")
+    when "read"
+      Flipper.enabled?(:qa_flag)
+    when "write"
+      command.fetch("enabled") ? Flipper.enable(:qa_flag) : Flipper.disable(:qa_flag)
+    when "webhook"
+      payload = "{}"
+      timestamp = Time.now
+      verifier = Flipper::Cloud::MessageVerifier.new(secret: ENV.fetch("FLIPPER_CLOUD_SYNC_SECRET"))
+      signature = verifier.header(verifier.generate(payload, timestamp), timestamp)
+      status = if webhook_server
+        client = Flipper::Adapters::Http::Client.new(url: "https://localhost:#{webhook_server.config.fetch(:Port)}",
+          read_timeout: 10, open_timeout: 2, headers: {"flipper-cloud-signature" => signature})
+        client.post("/webhooks", payload).code.to_i
+      else
+        Rack::MockRequest.new(Flipper::Cloud.app).post("/webhooks", input: payload,
+          "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature).status
+      end
+      assert(status == command.fetch("status", 200), "webhook status #{status}")
+      status
+    when "strain"
+      threads = Array.new(8) do
+        Thread.new do
+          Thread.current[:qa_request] = true
+          20_000.times do
+            assert(Flipper.enabled?(:qa_flag) == command.fetch("expected"), "incorrect flag during strain")
+          end
+        end
+      end
+      threads.each(&:value)
+      160_000
+    else
+      raise "unknown command"
+    end
+    GC.start
+    rss, rss_status = Open3.capture2("ps", "-o", "rss=", "-p", Process.pid.to_s)
+    puts Flipper::Typecast.to_json(result: result, sql: counts[:sql] - before[:sql],
+      background_sql: counts[:background_sql], heap_live_slots: GC.stat(:heap_live_slots),
+      allocated_objects: GC.stat(:total_allocated_objects) - allocated_before,
+      rss_kb: rss_status.success? ? Integer(rss.strip) : nil,
+      connections: ActiveRecord::Base.connection_pool.stat,
+      threads: Thread.list.count(&:alive?), seconds: Process.clock_gettime(Process::CLOCK_MONOTONIC) - started)
+  end
+  Flipper::Poller.reset
+  exit
+end
+
+require "flipper/api"
+require "webrick"
+require "webrick/https"
+require "openssl"
+
+# WEBrick's ProcHandler only supports GET and POST; the adapter also uses DELETE.
+class ApiServlet < WEBrick::HTTPServlet::AbstractServlet
+  def initialize(server, handler)
+    super(server)
+    @handler = handler
+  end
+
+  def service(request, response)
+    @handler.call(request, response)
+  end
+end
+
+class Consumer
+  def initialize(database, url, certificate, mode)
+    overrides = {
+      "FLIPPER_CLOUD_TOKEN" => "local-qa-only", "FLIPPER_CLOUD_URL" => url,
+      "FLIPPER_CLOUD_SYNC_SECRET" => mode == :webhook ? "local-qa-only-secret" : "",
+      "FLIPPER_CLOUD_SYNC_INTERVAL" => "10", "FLIPPER_CLOUD_TELEMETRY_ENABLED" => "false",
+      "FLIPPER_CLOUD_DEBUG_OUTPUT_STDOUT" => "false", "FLIPPER_CLOUD_LOGGING_ENABLED" => "false",
+      "SSL_CERT_FILE" => certificate,
+    }
+    @input, @output, @wait = Open3.popen2(overrides, RbConfig.ruby, __FILE__, "consumer", database)
+  end
+
+  def call(operation, **options)
+    @input.puts Flipper::Typecast.to_json(options.merge(operation: operation))
+    line = Timeout.timeout(45) { @output.gets }
+    raise "consumer exited without response" unless line
+    Flipper::Typecast.from_json(line)
+  end
+
+  def close
+    return if @closed
+    @closed = true
+    @input.close
+    status = Timeout.timeout(10) { @wait.value }
+    assert(status.success?, "consumer exited unsuccessfully")
+  rescue Timeout::Error
+    Process.kill("TERM", @wait.pid)
+    begin
+      Timeout.timeout(5) { @wait.value }
+    rescue Timeout::Error
+      Process.kill("KILL", @wait.pid)
+      @wait.value
+    end
+    raise "consumer shutdown timed out"
+  ensure
+    @output.close unless @output.closed?
+  end
+end
+
+def converge(consumers, expected)
+  Timeout.timeout(25) do
+    loop do
+      results = consumers.map { |consumer| consumer.call("read") }
+      results.each { |result| assert(result.fetch("background_sql").zero?, "SQL on background thread") }
+      return if results.all? { |result| result.fetch("result") == expected }
+      sleep 0.2
+    end
+  end
+end
+
+def create_database(database)
+  connect(database)
+  ActiveRecord::Schema.verbose = false
+  ActiveRecord::Schema.define do
+    create_table(:flipper_features) { |table| table.string :key, null: false; table.timestamps null: false }
+    add_index :flipper_features, :key, unique: true
+    create_table(:flipper_gates) do |table|
+      table.string :feature_key, null: false
+      table.string :key, null: false
+      table.text :value
+      table.timestamps null: false
+    end
+    add_index :flipper_gates, [:feature_key, :key, :value], unique: true
+  end
+  Flipper.new(Flipper::Adapters::ActiveRecord.new).disable(:qa_flag)
+  ActiveRecord::Base.connection_pool.disconnect!
+end
+
+if ENV["LOCAL_CLOUD_QA_URL"]
+  require "flipper/adapters/http"
+  url = ENV.fetch("LOCAL_CLOUD_QA_URL")
+  uri = URI(url)
+  assert(uri.scheme == "https" && uri.host == "localhost", "full Cloud QA requires loopback HTTPS")
+  certificate = ENV.fetch("SSL_CERT_FILE")
+  duration = Integer(ENV.fetch("LOCAL_CLOUD_QA_SECONDS", "300"))
+  assert(duration.positive?, "duration must be positive")
+  remote = Flipper.new(Flipper::Adapters::Http.new(url: url, headers: {"flipper-cloud-token" => "local-qa-only"}))
+  STDOUT.sync = true
+  Dir.mktmpdir("flipper-real-cloud-qa-") do |directory|
+    [:poll, :webhook].each do |mode|
+      consumers = []
+      begin
+        database = File.join(directory, "#{mode}.sqlite3")
+        create_database(database)
+        remote.disable(:qa_flag)
+        consumers = Array.new(2) { Consumer.new(database, url, certificate, mode) }
+        converge(consumers, false)
+        started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        evaluations = 0
+        cycles = 0
+        sql = 0
+        samples = []
+        while Process.clock_gettime(Process::CLOCK_MONOTONIC) - started < duration
+          expected = cycles.even?
+          remote[:qa_flag].send(expected ? :enable : :disable)
+          consumers.first.call("webhook") if mode == :webhook
+          converge(consumers, expected)
+          # Keep evaluations running across actual refresh intervals. SQL is
+          # permitted for webhook refresh, but must not scale with read volume.
+          phase_end = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 30
+          phase_sql = 0
+          loop do
+            batch = consumers.map do |consumer|
+              Thread.new { consumer.call("strain", expected: expected) }
+            end.map(&:value)
+            batch.each do |sample|
+              assert(sample.fetch("background_sql").zero?, "background SQL during soak")
+              assert(sample.fetch("connections").fetch("waiting").zero?, "connection pool waiting")
+              phase_sql += sample.fetch("sql")
+              evaluations += sample.fetch("result")
+            end
+            samples = batch
+            break if Process.clock_gettime(Process::CLOCK_MONOTONIC) >= phase_end
+            sleep 0.5
+          end
+          assert(phase_sql <= 12, "SQL scaled beyond periodic refresh: #{phase_sql}")
+          sql += phase_sql
+          cycles += 1
+          puts Flipper::Typecast.to_json(mode: mode, phase: "soak", cycles: cycles,
+            evaluations: evaluations, measured_sql: sql, samples: samples)
+          # Exercise app writes as well as Cloud-originated changes.
+          consumers.first.call("write", enabled: !expected)
+          assert(remote.enabled?(:qa_flag) == !expected, "app write missing in Cloud")
+          converge(consumers, !expected)
+        end
+        consumers.last.close
+        consumers[-1] = Consumer.new(database, url, certificate, mode)
+        converge(consumers, remote.enabled?(:qa_flag))
+        puts Flipper::Typecast.to_json(mode: mode, status: "passed", cycles: cycles,
+          evaluations: evaluations, measured_sql: sql,
+          seconds: Process.clock_gettime(Process::CLOCK_MONOTONIC) - started, samples: samples)
+      ensure
+        consumers.each(&:close)
+      end
+    end
+  end
+  exit
+end
+
+Dir.mktmpdir("flipper-cloud-memory-qa-") do |directory|
+  certificate, key = WEBrick::Utils.create_self_signed_cert(2048, [["CN", "localhost"]], "local QA")
+  certificate_path = File.join(directory, "localhost.pem")
+  File.write(certificate_path, certificate.to_pem)
+  remote = Flipper.new(Flipper::Adapters::Memory.new(threadsafe: true))
+  app = Flipper::Api.app(remote)
+  unavailable = false
+  server = WEBrick::HTTPServer.new(BindAddress: "127.0.0.1", Port: 0,
+    SSLEnable: true, SSLCertificate: certificate, SSLPrivateKey: key,
+    Logger: WEBrick::Log.new(File::NULL), AccessLog: [])
+  delayed = Queue.new
+  release = Queue.new
+  delay_count = 0
+  failures_served = 0
+  delay_lock = Mutex.new
+  handler = proc do |request, response|
+    if unavailable
+      delay_lock.synchronize { failures_served += 1 }
+      response.status = 503
+      response.body = "{}"
+    else
+      env = Rack::MockRequest.env_for(request.request_uri.to_s, method: request.request_method, input: request.body.to_s)
+      env["CONTENT_TYPE"] = request.content_type if request.content_type
+      status, headers, body = app.call(env)
+      response.status = status
+      headers.each { |name, value| response[name] = value }
+      response.body = body.each.to_a.join
+      body.close if body.respond_to?(:close)
+      hold = delay_lock.synchronize do
+        if request.request_method == "GET" && delay_count.positive?
+          delay_count -= 1
+          true
+        end
+      end
+      if hold
+        delayed << true
+        release.pop
+      end
+    end
+  end
+  server.mount("/", ApiServlet, handler)
+  server_thread = Thread.new { server.start }
+  url = "https://localhost:#{server.config.fetch(:Port)}"
+  consumers = []
+  begin
+    [:poll, :webhook].each do |mode|
+      database = File.join(directory, "#{mode}.sqlite3")
+      create_database(database)
+      remote.disable(:qa_flag)
+      consumers = Array.new(2) { Consumer.new(database, url, certificate_path, mode) }
+      converge(consumers, false)
+      remote.enable(:qa_flag)
+      consumers.first.call("webhook") if mode == :webhook
+      converge(consumers, true)
+      samples = 3.times.flat_map do |round|
+        consumers.each_with_index.map do |consumer, worker|
+          consumer.call("strain", expected: true).merge("round" => round + 1, "worker" => worker + 1)
+        end
+      end
+      samples.each do |sample|
+        assert(sample.fetch("sql").zero?, "steady-state reads queried persistence")
+        assert(sample.fetch("background_sql").zero?, "background SQL")
+      end
+      if mode == :poll
+        delay_lock.synchronize { delay_count = 2 }
+        Timeout.timeout(20) { 2.times { delayed.pop } }
+      end
+      consumers.first.call("write", enabled: false)
+      assert(!remote.enabled?(:qa_flag), "app write did not reach API")
+      if mode == :poll
+        2.times { release << true }
+        10.times do
+          sleep 0.1
+          assert(!consumers.first.call("read").fetch("result"), "old poll overwrote foreground write")
+        end
+      end
+      converge(consumers, false)
+      failures_before = delay_lock.synchronize { failures_served }
+      unavailable = true
+      sleep 11 if mode == :poll
+      consumers.first.call("webhook", status: 500) if mode == :webhook
+      assert(delay_lock.synchronize { failures_served > failures_before }, "outage was not exercised")
+      converge(consumers, false)
+      unavailable = false
+      remote.enable(:qa_flag)
+      consumers.first.call("webhook") if mode == :webhook
+      converge(consumers, true)
+      consumers.last.close
+      unavailable = true
+      consumers[-1] = Consumer.new(database, url, certificate_path, mode)
+      assert(consumers.last.call("read").fetch("result"), "restart failed to hydrate persistence")
+      unavailable = false
+      scenarios = ["cross_process_convergence", "memory_reads", "foreground_persistence",
+        "app_write", "API_outage_recovery", "restart_hydration"]
+      scenarios << "delayed_poll_across_write" if mode == :poll
+      puts Flipper::Typecast.to_json(mode: mode, status: "passed", scenarios: scenarios, samples: samples)
+      consumers.each(&:close)
+      consumers = []
+    end
+  ensure
+    2.times { release << true }
+    consumers.each(&:close)
+    server.shutdown
+    server_thread.join(5)
+  end
+end
