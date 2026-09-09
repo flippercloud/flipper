@@ -18,6 +18,7 @@ module Flipper
         @adapter = adapter
         @poller = poller
         @state = options[:state]
+        @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
         @last_synced_at = 0
 
         # If the adapter is empty, we need to sync before starting the poller.
@@ -54,12 +55,27 @@ module Flipper
       end
 
       def synchronize
+        if @state&.last_poll_failed_at
+          elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - @state.last_poll_failed_at
+          return if elapsed < @poller.interval
+        end
+
         poller_last_synced_at = @poller.last_synced_at.value
         last_synced_at = @state ? @state.last_poll_at : @last_synced_at
         if poller_last_synced_at > last_synced_at
-          Flipper::Adapters::Sync::Synchronizer.new(@adapter, @poller.adapter).call
+          begin
+            Flipper::Adapters::Sync::Synchronizer.new(@adapter, @poller.adapter, instrumenter: @instrumenter).call
+          rescue StandardError
+            raise unless @state
+
+            # Keep the snapshot pending, but share the retry limit across callers.
+            # Explicit adapter writes happen outside this rescue and still raise.
+            @state.last_poll_failed_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+            return
+          end
           if @state
             @state.last_poll_at = poller_last_synced_at
+            @state.last_poll_failed_at = nil
           else
             @last_synced_at = poller_last_synced_at
           end

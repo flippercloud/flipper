@@ -184,7 +184,7 @@ module Flipper
       end
 
       def poll_adapter
-        Flipper::Adapters::Poll.new(poller, local_adapter, state: @synchronization_state)
+        Flipper::Adapters::Poll.new(poller, local_adapter, state: @synchronization_state, instrumenter: instrumenter)
       end
 
       def http_adapter

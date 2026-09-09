@@ -1,5 +1,8 @@
 require 'flipper/cloud/configuration'
+require 'flipper/cloud/dsl'
 require 'flipper/adapters/instrumented'
+require 'flipper/adapters/sync/interval_synchronizer'
+require 'flipper/instrumenters/memory'
 require 'timeout'
 
 RSpec.describe Flipper::Cloud::Configuration do
@@ -355,6 +358,33 @@ RSpec.describe Flipper::Cloud::Configuration do
     expect(local_adapter.count(:get)).to be(1)
     expect(local_adapter.count(:enable)).to be(1)
     expect(mutation_threads).to contain_exactly(calling_thread)
+  end
+
+  it "reports polling persistence failures while keeping reads available and explicit sync strict" do
+    memory = Flipper::Adapters::Memory.new(threadsafe: true)
+    persistent = Flipper::Adapters::Memory.new(threadsafe: true)
+    local = Flipper::Adapters::DualWrite.new(memory, persistent)
+    Flipper.new(local).disable(:search)
+    instrumenter = Flipper::Instrumenters::Memory.new
+    state = Flipper::Adapters::Sync::IntervalSynchronizer::State.new(synced: true)
+    configuration = described_class.new(required_options.merge(
+      local_adapter: local,
+      synchronization_state: state,
+      instrumenter: instrumenter,
+    ))
+    body = Flipper::Typecast.to_json(features: [{key: "search", gates: [{key: "boolean", value: true}]}])
+    stub_request(:get, %r{\Ahttps://www\.flippercloud\.io/adapter/features\?}).
+      to_return(status: 200, body: body)
+    poller = configuration.send(:poller)
+    allow(poller).to receive(:start)
+    poller.sync
+    failure = StandardError.new("database unavailable")
+    allow(persistent).to receive(:enable).and_raise(failure)
+
+    expect(Flipper::Cloud::DSL.new(configuration).enabled?(:search)).to be(false)
+    expect(instrumenter.events_by_name("synchronizer_exception.flipper").size).to eq(1)
+    expect { configuration.sync(cache_bust: true) }.to raise_error(failure)
+    expect(state.last_poll_at).to eq(0)
   end
 
   it "does not let an older persistence refresh overwrite a forced sync" do

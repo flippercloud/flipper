@@ -2,6 +2,7 @@ require 'flipper/adapters/poll'
 require 'flipper/adapters/dual_write'
 require 'flipper/adapters/operation_logger'
 require 'flipper/adapters/sync/interval_synchronizer'
+require 'flipper/instrumenters/memory'
 require 'timeout'
 
 RSpec.describe Flipper::Adapters::Poll do
@@ -57,6 +58,95 @@ RSpec.describe Flipper::Adapters::Poll do
     expect(Flipper.new(first).enabled?(:search)).to be(true)
     expect(Flipper.new(second).enabled?(:search)).to be(true)
     expect(local.count(:get_all)).to be(1)
+  end
+
+  context "when persistence fails during a Cloud refresh" do
+    let(:state) { Flipper::Adapters::Sync::IntervalSynchronizer::State.new(synced: true) }
+    let(:persistent) { Flipper::Adapters::Memory.new(threadsafe: true) }
+    let(:local) { Flipper::Adapters::DualWrite.new(local_adapter, persistent) }
+    let(:instrumenter) { Flipper::Instrumenters::Memory.new }
+    let(:generation) { Concurrent::AtomicFixnum.new(1) }
+    let(:poller) { double("Poller", adapter: remote_adapter, last_synced_at: generation, interval: 10, start: nil) }
+    let(:instance) { described_class.new(poller, local, state: state, instrumenter: instrumenter) }
+    let(:failure) { StandardError.new("database unavailable") }
+    let(:clock) { 100.0 }
+
+    before do
+      Flipper.new(local).disable(:search)
+      allow(Process).to receive(:clock_gettime).and_call_original
+      allow(Process).to receive(:clock_gettime).with(Process::CLOCK_MONOTONIC) { clock }
+      allow(persistent).to receive(:enable).and_raise(failure)
+    end
+
+    it "serves stale reads and reports the failure without consuming the snapshot" do
+      expect(Flipper.new(instance).enabled?(:search)).to be(false)
+      expect(state.last_poll_at).to eq(0)
+      expect(instrumenter.events_by_name("synchronizer_exception.flipper").size).to eq(1)
+    end
+
+    it "shares the retry limit across threads and newer snapshots" do
+      expect(persistent).to receive(:enable).once.and_raise(failure)
+      expect(Flipper.new(instance).enabled?(:search)).to be(false)
+      generation.value = 2
+      second = described_class.new(poller, local, state: state)
+      allow(self).to receive(:clock).and_return(109.9)
+
+      threads = 8.times.map { Thread.new { Flipper.new(second).enabled?(:search) } }
+      expect(threads.map(&:value)).to eq([false] * 8)
+    end
+
+    it "retries the same snapshot after the interval without another Cloud fetch" do
+      expect(Flipper.new(instance).enabled?(:search)).to be(false)
+      allow(persistent).to receive(:enable).and_call_original
+      allow(self).to receive(:clock).and_return(110.0)
+      expect(poller).not_to receive(:sync)
+
+      expect(Flipper.new(instance).enabled?(:search)).to be(true)
+      expect(Flipper.new(persistent).enabled?(:search)).to be(true)
+      expect(state.last_poll_at).to eq(1)
+      expect(state.last_poll_failed_at).to be_nil
+    end
+
+    it "honors a longer interval supplied by the poller" do
+      expect(Flipper.new(instance).enabled?(:search)).to be(false)
+      allow(poller).to receive(:interval).and_return(30)
+      allow(self).to receive(:clock).and_return(110.0)
+      expect(persistent).not_to receive(:enable)
+      expect(Flipper.new(instance).enabled?(:search)).to be(false)
+    end
+
+    it "limits repeated failures to one attempt per interval" do
+      expect(persistent).to receive(:enable).exactly(3).times.and_raise(failure)
+      [100.0, 109.9, 110.0, 110.1, 119.9, 120.0].each do |time|
+        allow(self).to receive(:clock).and_return(time)
+        expect(Flipper.new(instance).enabled?(:search)).to be(false)
+      end
+      expect(state.last_poll_at).to eq(0)
+    end
+
+    it "does not retry a pending snapshot superseded by a foreground write" do
+      state.poll_started
+      expect(Flipper.new(instance).enabled?(:search)).to be(false)
+      cloud = Flipper::Adapters::DualWrite.new(instance, Flipper::Adapters::Memory.new, synchronization_state: state)
+      Flipper.new(cloud).disable(:search)
+      allow(persistent).to receive(:enable).and_call_original
+      allow(self).to receive(:clock).and_return(110.0)
+
+      expect(Flipper.new(instance).enabled?(:search)).to be(false)
+      expect(Flipper.new(persistent).enabled?(:search)).to be(false)
+      expect(state.last_poll_at).to eq(1)
+    end
+
+    it "continues failing explicit writes during the retry interval" do
+      expect(Flipper.new(instance).enabled?(:search)).to be(false)
+      expect { Flipper.new(instance).enable(:search) }.to raise_error(failure)
+      expect(Flipper.new(local_adapter).enabled?(:search)).to be(false)
+    end
+
+    it "preserves reconciliation errors for standalone Poll adapters" do
+      standalone = described_class.new(poller, local)
+      expect { standalone.get_all }.to raise_error(failure)
+    end
   end
 
   it "serves memory reads while another adapter applies a poll" do

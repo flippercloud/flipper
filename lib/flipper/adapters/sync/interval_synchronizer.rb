@@ -7,7 +7,7 @@ module Flipper
       # N seconds.
       class IntervalSynchronizer
         class State
-          attr_accessor :last_poll_at, :last_sync_at
+          attr_accessor :last_poll_at, :last_sync_at, :last_poll_failed_at
           attr_reader :lock
 
           def initialize(synced: false)
