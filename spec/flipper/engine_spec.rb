@@ -45,7 +45,8 @@ RSpec.describe Flipper::Engine do
 
   it "preserves the Rails belongs_to required default when Flipper is required" do
     script = <<~'RUBY'
-      require "rails/all"
+      require "rails"
+      require "active_record/railtie"
       active_record_base_loaded = $LOADED_FEATURES.any? { |path| path.end_with?("active_record/base.rb") }
 
       require "flipper"
