@@ -58,7 +58,6 @@ poller = Flipper::Poller.new(
   remote_adapter: http_adapter,
   interval: 5,  # Start with 5 second interval (will be enforced to 10 minimum)
   instrumenter: instrumenter,
-  start_automatically: false,
   shutdown_automatically: false
 )
 

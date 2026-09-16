@@ -13,6 +13,7 @@ module Flipper
       def initialize(local, remote, options = {})
         @local = local
         @remote = remote
+        @synchronization_state = options[:synchronization_state]
       end
 
       def adapter_stack
@@ -36,26 +37,40 @@ module Flipper
       end
 
       def add(feature)
-        @remote.add(feature).tap { @local.add(feature) }
+        synchronize { @remote.add(feature).tap { @local.add(feature) } }
       end
 
       def remove(feature)
-        @remote.remove(feature).tap { @local.remove(feature) }
+        synchronize { @remote.remove(feature).tap { @local.remove(feature) } }
       end
 
       def clear(feature)
-        @remote.clear(feature).tap { @local.clear(feature) }
+        synchronize { @remote.clear(feature).tap { @local.clear(feature) } }
       end
 
       def enable(feature, gate, thing)
-        @remote.enable(feature, gate, thing).tap do
-          @local.enable(feature, gate, thing)
+        synchronize do
+          @remote.enable(feature, gate, thing).tap do
+            @local.enable(feature, gate, thing)
+          end
         end
       end
 
       def disable(feature, gate, thing)
-        @remote.disable(feature, gate, thing).tap do
-          @local.disable(feature, gate, thing)
+        synchronize do
+          @remote.disable(feature, gate, thing).tap do
+            @local.disable(feature, gate, thing)
+          end
+        end
+      end
+
+      private
+
+      def synchronize(&block)
+        if @synchronization_state
+          @synchronization_state.synchronize_write(&block)
+        else
+          yield
         end
       end
     end

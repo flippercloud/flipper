@@ -67,6 +67,19 @@ RSpec.describe Flipper::Adapters::DualWrite do
     expect(local_adapter.count(:disable)).to be(1)
   end
 
+  it 'coordinates every write with synchronization state' do
+    state = double("SynchronizationState")
+    expect(state).to receive(:synchronize_write).exactly(5).times.and_yield
+    adapter = described_class.new(local_adapter, remote_adapter, synchronization_state: state)
+    feature = Flipper.new(adapter)[:search]
+
+    adapter.add(feature)
+    adapter.clear(feature)
+    adapter.enable(feature, feature.gate(:boolean), Flipper::Types::Boolean.new(true))
+    adapter.disable(feature, feature.gate(:boolean), Flipper::Types::Boolean.new(false))
+    adapter.remove(feature)
+  end
+
   describe '#adapter_stack' do
     it 'returns the tree representation' do
       expect(subject.adapter_stack).to eq("dual_write(local: operation_logger -> memory, remote: operation_logger -> memory)")

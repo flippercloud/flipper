@@ -1,0 +1,1936 @@
+{
+  "date": "2026-09-07",
+  "client_commit": "e5841c5e",
+  "notes": "Completed measured phases, including repeated polling passes while correcting local test configuration. Telemetry 402 responses preceded the synthetic subscription fixture; final accepted-telemetry runs asserted no new rejections. No production traffic.",
+  "runs": {
+    "poll": [
+      {
+        "phase": "converged",
+        "seconds": 0.9605169999413192,
+        "mode": "poll"
+      },
+      {
+        "phase": "steady_0",
+        "counts": {
+          "http_200": 18030,
+          "evaluations": 1803000
+        },
+        "pids": [
+          96483,
+          96484
+        ],
+        "p95_ms": 10.91199996881187,
+        "p99_ms": 15.26200002990663,
+        "workers": {
+          "96483": {
+            "requests": 9006,
+            "request_sql": 9,
+            "pid": 96483,
+            "rss_kb": 109888,
+            "live_objects": 278379,
+            "threads": 17,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "96484": {
+            "requests": 9037,
+            "request_sql": 8,
+            "pid": 96484,
+            "rss_kb": 108384,
+            "live_objects": 278366,
+            "threads": 17,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "poll"
+      },
+      {
+        "phase": "converged",
+        "seconds": 2.2607009999919683,
+        "mode": "poll"
+      },
+      {
+        "phase": "steady_1",
+        "counts": {
+          "http_200": 17891,
+          "evaluations": 1789100
+        },
+        "pids": [
+          96484,
+          96483
+        ],
+        "p95_ms": 11.309999972581863,
+        "p99_ms": 15.567000024020672,
+        "workers": {
+          "96483": {
+            "requests": 17916,
+            "request_sql": 13,
+            "pid": 96483,
+            "rss_kb": 110128,
+            "live_objects": 278486,
+            "threads": 17,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "96484": {
+            "requests": 18054,
+            "request_sql": 15,
+            "pid": 96484,
+            "rss_kb": 109472,
+            "live_objects": 278489,
+            "threads": 17,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "poll"
+      },
+      {
+        "phase": "converged",
+        "seconds": 0.8579619999509305,
+        "mode": "poll"
+      },
+      {
+        "phase": "steady_2",
+        "counts": {
+          "http_200": 17897,
+          "evaluations": 1789700
+        },
+        "pids": [
+          96483,
+          96484
+        ],
+        "p95_ms": 11.240999912843108,
+        "p99_ms": 15.202999813482165,
+        "workers": {
+          "96483": {
+            "requests": 26895,
+            "request_sql": 22,
+            "pid": 96483,
+            "rss_kb": 110688,
+            "live_objects": 278563,
+            "threads": 17,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "96484": {
+            "requests": 26986,
+            "request_sql": 23,
+            "pid": 96484,
+            "rss_kb": 110224,
+            "live_objects": 278702,
+            "threads": 17,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "poll"
+      },
+      {
+        "phase": "converged",
+        "seconds": 1.1914790000300854,
+        "mode": "poll"
+      },
+      {
+        "phase": "steady_3",
+        "counts": {
+          "http_200": 17359,
+          "evaluations": 1735900
+        },
+        "pids": [
+          96483,
+          96484
+        ],
+        "p95_ms": 12.334000086411834,
+        "p99_ms": 17.41299987770617,
+        "workers": {
+          "96483": {
+            "requests": 35592,
+            "request_sql": 26,
+            "pid": 96483,
+            "rss_kb": 111312,
+            "live_objects": 278766,
+            "threads": 17,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "96484": {
+            "requests": 35667,
+            "request_sql": 30,
+            "pid": 96484,
+            "rss_kb": 110656,
+            "live_objects": 278692,
+            "threads": 17,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "poll"
+      },
+      {
+        "phase": "simultaneous_writes",
+        "statuses": [
+          200,
+          200,
+          200,
+          200,
+          200,
+          200,
+          200,
+          200
+        ],
+        "mode": "poll"
+      },
+      {
+        "phase": "after_simultaneous_writes",
+        "counts": {
+          "http_200": 17555,
+          "evaluations": 1755500
+        },
+        "pids": [
+          96483,
+          96484
+        ],
+        "p95_ms": 11.861000210046768,
+        "p99_ms": 16.08299999497831,
+        "workers": {
+          "96483": {
+            "requests": 44341,
+            "request_sql": 62,
+            "pid": 96483,
+            "rss_kb": 112112,
+            "live_objects": 279134,
+            "threads": 17,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "96484": {
+            "requests": 44483,
+            "request_sql": 52,
+            "pid": 96484,
+            "rss_kb": 111120,
+            "live_objects": 279046,
+            "threads": 17,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "poll"
+      },
+      {
+        "phase": "after_worker_restart",
+        "counts": {
+          "http_200": 18188,
+          "evaluations": 1818800
+        },
+        "pids": [
+          97613,
+          96484
+        ],
+        "p95_ms": 10.757999960333109,
+        "p99_ms": 14.579999959096313,
+        "workers": {
+          "96484": {
+            "requests": 53480,
+            "request_sql": 52,
+            "pid": 96484,
+            "rss_kb": 111216,
+            "live_objects": 279250,
+            "threads": 17,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "97613": {
+            "requests": 9198,
+            "pid": 97613,
+            "rss_kb": 105728,
+            "live_objects": 274959,
+            "threads": 17,
+            "pool": {
+              "size": 5,
+              "connections": 0,
+              "busy": 0,
+              "dead": 0,
+              "idle": 0,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "poll"
+      },
+      {
+        "phase": "after_preloaded_cluster_restart",
+        "counts": {
+          "http_200": 17834,
+          "evaluations": 1783400
+        },
+        "pids": [
+          97871,
+          97872
+        ],
+        "p95_ms": 11.298999888822436,
+        "p99_ms": 16.513000009581447,
+        "workers": {
+          "97871": {
+            "requests": 8934,
+            "pid": 97871,
+            "rss_kb": 108752,
+            "live_objects": 269560,
+            "threads": 17,
+            "telemetry_completed": 3,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 0,
+              "busy": 0,
+              "dead": 0,
+              "idle": 0,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "97872": {
+            "requests": 8906,
+            "pid": 97872,
+            "rss_kb": 107584,
+            "live_objects": 269585,
+            "threads": 17,
+            "telemetry_completed": 3,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 0,
+              "busy": 0,
+              "dead": 0,
+              "idle": 0,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "poll"
+      },
+      {
+        "phase": "cloud_unavailable",
+        "counts": {
+          "http_200": 15297,
+          "evaluations": 1529700
+        },
+        "pids": [
+          97872,
+          97871
+        ],
+        "p95_ms": 10.123000014573336,
+        "p99_ms": 13.873999938368797,
+        "workers": {
+          "97871": {
+            "requests": 16581,
+            "telemetry_retry.flipper": 1,
+            "pid": 97871,
+            "rss_kb": 109328,
+            "live_objects": 269818,
+            "threads": 17,
+            "telemetry_completed": 3,
+            "telemetry_queue": 1,
+            "pool": {
+              "size": 5,
+              "connections": 0,
+              "busy": 0,
+              "dead": 0,
+              "idle": 0,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "97872": {
+            "requests": 16556,
+            "telemetry_retry.flipper": 1,
+            "pid": 97872,
+            "rss_kb": 108848,
+            "live_objects": 269631,
+            "threads": 17,
+            "telemetry_completed": 3,
+            "telemetry_queue": 1,
+            "pool": {
+              "size": 5,
+              "connections": 0,
+              "busy": 0,
+              "dead": 0,
+              "idle": 0,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "poll"
+      },
+      {
+        "phase": "cloud_recovered",
+        "counts": {
+          "http_200": 18667,
+          "evaluations": 1866700
+        },
+        "pids": [
+          97872,
+          97871
+        ],
+        "p95_ms": 9.705000091344118,
+        "p99_ms": 13.389999978244305,
+        "workers": {
+          "97871": {
+            "requests": 25893,
+            "telemetry_retry.flipper": 1,
+            "request_sql": 9,
+            "pid": 97871,
+            "rss_kb": 110592,
+            "live_objects": 273265,
+            "threads": 17,
+            "telemetry_completed": 8,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "97872": {
+            "requests": 25977,
+            "telemetry_retry.flipper": 1,
+            "request_sql": 8,
+            "pid": 97872,
+            "rss_kb": 110320,
+            "live_objects": 273309,
+            "threads": 17,
+            "telemetry_completed": 8,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "poll"
+      },
+      {
+        "phase": "database_unavailable",
+        "counts": {
+          "http_200": 12276,
+          "evaluations": 1227600
+        },
+        "pids": [
+          97871,
+          97872
+        ],
+        "p95_ms": 10.118999984115362,
+        "p99_ms": 15.037999954074621,
+        "workers": {
+          "97871": {
+            "requests": 32056,
+            "telemetry_retry.flipper": 1,
+            "request_sql": 9,
+            "pid": 97871,
+            "rss_kb": 110704,
+            "live_objects": 273359,
+            "threads": 17,
+            "telemetry_completed": 10,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "97872": {
+            "requests": 32090,
+            "telemetry_retry.flipper": 1,
+            "request_sql": 8,
+            "pid": 97872,
+            "rss_kb": 110432,
+            "live_objects": 273733,
+            "threads": 17,
+            "telemetry_completed": 10,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "poll"
+      },
+      {
+        "phase": "write_during_database_outage",
+        "status": 500,
+        "mode": "poll"
+      },
+      {
+        "phase": "database_recovery",
+        "seconds": 0.30423799995332956,
+        "mode": "poll"
+      },
+      {
+        "phase": "database_recovered",
+        "counts": {
+          "http_200": 17956,
+          "evaluations": 1795600
+        },
+        "pids": [
+          97871,
+          97872
+        ],
+        "p95_ms": 10.851999977603555,
+        "p99_ms": 16.234999988228083,
+        "workers": {
+          "97871": {
+            "requests": 41094,
+            "telemetry_retry.flipper": 1,
+            "request_sql": 11,
+            "error_ActiveRecord::DatabaseConnectionError": 1,
+            "pid": 97871,
+            "rss_kb": 110960,
+            "live_objects": 274116,
+            "threads": 17,
+            "telemetry_completed": 14,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "97872": {
+            "requests": 41014,
+            "telemetry_retry.flipper": 1,
+            "request_sql": 8,
+            "pid": 97872,
+            "rss_kb": 110592,
+            "live_objects": 273288,
+            "threads": 17,
+            "telemetry_completed": 14,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "poll"
+      },
+      {
+        "phase": "telemetry_delivery",
+        "counts": {
+          "http_200": 21849,
+          "evaluations": 2184900
+        },
+        "pids": [
+          97871,
+          97872
+        ],
+        "p95_ms": 9.380999952554703,
+        "p99_ms": 12.583000119775534,
+        "workers": {
+          "97871": {
+            "requests": 52016,
+            "telemetry_retry.flipper": 1,
+            "request_sql": 11,
+            "error_ActiveRecord::DatabaseConnectionError": 1,
+            "pid": 97871,
+            "rss_kb": 111376,
+            "live_objects": 273928,
+            "threads": 16,
+            "telemetry_completed": 17,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "97872": {
+            "requests": 51952,
+            "telemetry_retry.flipper": 1,
+            "request_sql": 8,
+            "pid": 97872,
+            "rss_kb": 111120,
+            "live_objects": 273538,
+            "threads": 16,
+            "telemetry_completed": 17,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "poll"
+      },
+      {
+        "phase": "telemetry_delivery",
+        "counts": {
+          "http_200": 22236,
+          "evaluations": 2223600
+        },
+        "pids": [
+          1809,
+          1810
+        ],
+        "p95_ms": 8.92499997280538,
+        "p99_ms": 11.755999876186252,
+        "workers": {
+          "1809": {
+            "requests": 11130,
+            "pid": 1809,
+            "rss_kb": 106832,
+            "live_objects": 269516,
+            "threads": 17,
+            "telemetry_completed": 3,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 0,
+              "busy": 0,
+              "dead": 0,
+              "idle": 0,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "1810": {
+            "requests": 11113,
+            "pid": 1810,
+            "rss_kb": 107488,
+            "live_objects": 269554,
+            "threads": 17,
+            "telemetry_completed": 3,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 0,
+              "busy": 0,
+              "dead": 0,
+              "idle": 0,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "poll"
+      },
+      {
+        "status": "telemetry_passed",
+        "telemetry": {
+          "telemetry_402": 4,
+          "telemetry_202": 10
+        },
+        "workers": {
+          "1809": {
+            "requests": 11130,
+            "pid": 1809,
+            "rss_kb": 106832,
+            "live_objects": 269517,
+            "threads": 17,
+            "telemetry_completed": 3,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 0,
+              "busy": 0,
+              "dead": 0,
+              "idle": 0,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "1810": {
+            "requests": 11113,
+            "pid": 1810,
+            "rss_kb": 107488,
+            "live_objects": 269400,
+            "threads": 17,
+            "telemetry_completed": 3,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 0,
+              "busy": 0,
+              "dead": 0,
+              "idle": 0,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "poll"
+      },
+      {
+        "phase": "after_preloaded_cluster_restart",
+        "counts": {
+          "http_200": 19262,
+          "evaluations": 1926200
+        },
+        "pids": [
+          1810,
+          1809
+        ],
+        "p95_ms": 8.689000038430095,
+        "p99_ms": 11.412000050768256,
+        "workers": {
+          "1809": {
+            "requests": 20758,
+            "pid": 1809,
+            "rss_kb": 107664,
+            "live_objects": 269658,
+            "threads": 17,
+            "telemetry_completed": 7,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 0,
+              "busy": 0,
+              "dead": 0,
+              "idle": 0,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "1810": {
+            "requests": 20760,
+            "pid": 1810,
+            "rss_kb": 108096,
+            "live_objects": 269715,
+            "threads": 17,
+            "telemetry_completed": 7,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 0,
+              "busy": 0,
+              "dead": 0,
+              "idle": 0,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "poll"
+      },
+      {
+        "phase": "cloud_unavailable",
+        "counts": {
+          "http_200": 15719,
+          "evaluations": 1571900
+        },
+        "pids": [
+          1809,
+          1810
+        ],
+        "p95_ms": 9.175000013783574,
+        "p99_ms": 11.645999969914556,
+        "workers": {
+          "1809": {
+            "requests": 28630,
+            "telemetry_retry.flipper": 1,
+            "pid": 1809,
+            "rss_kb": 108048,
+            "live_objects": 269908,
+            "threads": 17,
+            "telemetry_completed": 7,
+            "telemetry_queue": 1,
+            "pool": {
+              "size": 5,
+              "connections": 0,
+              "busy": 0,
+              "dead": 0,
+              "idle": 0,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "1810": {
+            "requests": 28607,
+            "telemetry_retry.flipper": 1,
+            "pid": 1810,
+            "rss_kb": 108608,
+            "live_objects": 269790,
+            "threads": 17,
+            "telemetry_completed": 7,
+            "telemetry_queue": 1,
+            "pool": {
+              "size": 5,
+              "connections": 0,
+              "busy": 0,
+              "dead": 0,
+              "idle": 0,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "poll"
+      },
+      {
+        "phase": "cloud_recovered",
+        "counts": {
+          "http_200": 18402,
+          "evaluations": 1840200
+        },
+        "pids": [
+          1810,
+          1809
+        ],
+        "p95_ms": 9.987999917939305,
+        "p99_ms": 13.137999922037125,
+        "workers": {
+          "1809": {
+            "requests": 37839,
+            "telemetry_retry.flipper": 1,
+            "request_sql": 7,
+            "pid": 1809,
+            "rss_kb": 109024,
+            "live_objects": 273203,
+            "threads": 17,
+            "telemetry_completed": 13,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "1810": {
+            "requests": 37849,
+            "telemetry_retry.flipper": 1,
+            "request_sql": 4,
+            "pid": 1810,
+            "rss_kb": 110160,
+            "live_objects": 271894,
+            "threads": 17,
+            "telemetry_completed": 13,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "poll"
+      },
+      {
+        "phase": "database_unavailable",
+        "counts": {
+          "http_200": 12380,
+          "evaluations": 1238000
+        },
+        "pids": [
+          1810,
+          1809
+        ],
+        "p95_ms": 9.68199991621077,
+        "p99_ms": 12.46899995021522,
+        "workers": {
+          "1809": {
+            "requests": 44000,
+            "telemetry_retry.flipper": 1,
+            "request_sql": 7,
+            "pid": 1809,
+            "rss_kb": 109120,
+            "live_objects": 273124,
+            "threads": 17,
+            "telemetry_completed": 15,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "1810": {
+            "requests": 44068,
+            "telemetry_retry.flipper": 1,
+            "request_sql": 4,
+            "pid": 1810,
+            "rss_kb": 110480,
+            "live_objects": 271820,
+            "threads": 17,
+            "telemetry_completed": 15,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "poll"
+      },
+      {
+        "phase": "database_unavailable_changed_cloud",
+        "counts": {
+          "http_200": 9800,
+          "evaluations": 980000,
+          "http_500": 332,
+          "ActiveRecord::DatabaseConnectionError": 332
+        },
+        "pids": [
+          1809,
+          1810
+        ],
+        "p95_ms": 9.952000109478831,
+        "p99_ms": 116.68199999257922,
+        "workers": {
+          "1809": {
+            "requests": 49044,
+            "telemetry_retry.flipper": 1,
+            "request_sql": 178,
+            "error_ActiveRecord::DatabaseConnectionError": 170,
+            "pid": 1809,
+            "rss_kb": 109776,
+            "live_objects": 273821,
+            "threads": 17,
+            "telemetry_completed": 17,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "1810": {
+            "requests": 49156,
+            "telemetry_retry.flipper": 1,
+            "request_sql": 167,
+            "error_ActiveRecord::DatabaseConnectionError": 162,
+            "pid": 1810,
+            "rss_kb": 110784,
+            "live_objects": 272399,
+            "threads": 17,
+            "telemetry_completed": 17,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "poll"
+      },
+      {
+        "phase": "write_during_database_outage",
+        "status": 500,
+        "mode": "poll"
+      },
+      {
+        "phase": "database_recovery",
+        "seconds": 0.5957569999154657,
+        "mode": "poll"
+      },
+      {
+        "phase": "database_recovered",
+        "counts": {
+          "http_200": 18637,
+          "evaluations": 1863700
+        },
+        "pids": [
+          1809,
+          1810
+        ],
+        "p95_ms": 9.691999992355704,
+        "p99_ms": 13.009000103920698,
+        "workers": {
+          "1809": {
+            "requests": 58334,
+            "telemetry_retry.flipper": 1,
+            "request_sql": 187,
+            "error_ActiveRecord::DatabaseConnectionError": 170,
+            "pid": 1809,
+            "rss_kb": 110000,
+            "live_objects": 273922,
+            "threads": 17,
+            "telemetry_completed": 20,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "1810": {
+            "requests": 58513,
+            "telemetry_retry.flipper": 1,
+            "request_sql": 176,
+            "error_ActiveRecord::DatabaseConnectionError": 163,
+            "pid": 1810,
+            "rss_kb": 111696,
+            "live_objects": 273833,
+            "threads": 17,
+            "telemetry_completed": 20,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "poll"
+      },
+      {
+        "status": "completed",
+        "telemetry": {
+          "telemetry_402": 4,
+          "telemetry_202": 44
+        },
+        "workers": {
+          "1809": {
+            "requests": 58334,
+            "telemetry_retry.flipper": 1,
+            "request_sql": 187,
+            "error_ActiveRecord::DatabaseConnectionError": 170,
+            "pid": 1809,
+            "rss_kb": 110016,
+            "live_objects": 273835,
+            "threads": 17,
+            "telemetry_completed": 20,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "1810": {
+            "requests": 58513,
+            "telemetry_retry.flipper": 1,
+            "request_sql": 176,
+            "error_ActiveRecord::DatabaseConnectionError": 163,
+            "pid": 1810,
+            "rss_kb": 111696,
+            "live_objects": 273615,
+            "threads": 17,
+            "telemetry_completed": 20,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "poll"
+      }
+    ],
+    "webhook": [
+      {
+        "phase": "converged",
+        "seconds": 0.20502799982205033,
+        "mode": "webhook"
+      },
+      {
+        "phase": "steady_0",
+        "counts": {
+          "http_200": 19004,
+          "evaluations": 1900400
+        },
+        "pids": [
+          4128,
+          4129
+        ],
+        "p95_ms": 8.932000026106834,
+        "p99_ms": 11.651000007987022,
+        "workers": {
+          "4128": {
+            "requests": 9515,
+            "request_sql": 4,
+            "pid": 4128,
+            "rss_kb": 109488,
+            "live_objects": 275275,
+            "threads": 16,
+            "telemetry_completed": 3,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "4129": {
+            "requests": 9492,
+            "request_sql": 4,
+            "pid": 4129,
+            "rss_kb": 109728,
+            "live_objects": 275745,
+            "threads": 16,
+            "telemetry_completed": 3,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "webhook"
+      },
+      {
+        "phase": "converged",
+        "seconds": 9.271458999952301,
+        "mode": "webhook"
+      },
+      {
+        "phase": "steady_1",
+        "counts": {
+          "http_200": 18781,
+          "evaluations": 1878100
+        },
+        "pids": [
+          4128,
+          4129
+        ],
+        "p95_ms": 9.368000086396933,
+        "p99_ms": 12.106999987736344,
+        "workers": {
+          "4128": {
+            "requests": 18997,
+            "request_sql": 15,
+            "pid": 4128,
+            "rss_kb": 110848,
+            "live_objects": 278008,
+            "threads": 16,
+            "telemetry_completed": 6,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "4129": {
+            "requests": 18940,
+            "request_sql": 8,
+            "pid": 4129,
+            "rss_kb": 110432,
+            "live_objects": 275875,
+            "threads": 16,
+            "telemetry_completed": 6,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "webhook"
+      },
+      {
+        "phase": "converged",
+        "seconds": 10.434111000038683,
+        "mode": "webhook"
+      },
+      {
+        "phase": "steady_2",
+        "counts": {
+          "http_200": 18989,
+          "evaluations": 1898900
+        },
+        "pids": [
+          4129,
+          4128
+        ],
+        "p95_ms": 9.464999893680215,
+        "p99_ms": 12.356000021100044,
+        "workers": {
+          "4128": {
+            "requests": 28595,
+            "request_sql": 19,
+            "pid": 4128,
+            "rss_kb": 111152,
+            "live_objects": 278271,
+            "threads": 16,
+            "telemetry_completed": 11,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "4129": {
+            "requests": 28498,
+            "request_sql": 20,
+            "pid": 4129,
+            "rss_kb": 111120,
+            "live_objects": 278491,
+            "threads": 16,
+            "telemetry_completed": 10,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "webhook"
+      },
+      {
+        "phase": "converged",
+        "seconds": 9.341105999890715,
+        "mode": "webhook"
+      },
+      {
+        "phase": "steady_3",
+        "counts": {
+          "http_200": 18734,
+          "evaluations": 1873400
+        },
+        "pids": [
+          4128,
+          4129
+        ],
+        "p95_ms": 9.63500002399087,
+        "p99_ms": 12.187999906018376,
+        "workers": {
+          "4128": {
+            "requests": 38053,
+            "request_sql": 23,
+            "pid": 4128,
+            "rss_kb": 111952,
+            "live_objects": 278344,
+            "threads": 16,
+            "telemetry_completed": 14,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "4129": {
+            "requests": 37926,
+            "request_sql": 31,
+            "pid": 4129,
+            "rss_kb": 112048,
+            "live_objects": 278914,
+            "threads": 16,
+            "telemetry_completed": 14,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "webhook"
+      },
+      {
+        "phase": "simultaneous_writes",
+        "statuses": [
+          200,
+          200,
+          200,
+          200,
+          200,
+          200,
+          200,
+          200
+        ],
+        "mode": "webhook"
+      },
+      {
+        "phase": "after_simultaneous_writes",
+        "counts": {
+          "http_200": 18676,
+          "evaluations": 1867600
+        },
+        "pids": [
+          4128,
+          4129
+        ],
+        "p95_ms": 9.736000094562769,
+        "p99_ms": 12.657999992370605,
+        "workers": {
+          "4128": {
+            "requests": 47441,
+            "request_sql": 60,
+            "pid": 4128,
+            "rss_kb": 112688,
+            "live_objects": 279330,
+            "threads": 16,
+            "telemetry_completed": 18,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "4129": {
+            "requests": 47234,
+            "request_sql": 66,
+            "pid": 4129,
+            "rss_kb": 112752,
+            "live_objects": 279237,
+            "threads": 16,
+            "telemetry_completed": 18,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "webhook"
+      },
+      {
+        "phase": "after_worker_restart",
+        "counts": {
+          "http_200": 15587,
+          "evaluations": 1558700
+        },
+        "pids": [
+          5506,
+          4128
+        ],
+        "p95_ms": 12.916000094264746,
+        "p99_ms": 48.15799999050796,
+        "workers": {
+          "4128": {
+            "requests": 55189,
+            "request_sql": 63,
+            "pid": 4128,
+            "rss_kb": 113376,
+            "live_objects": 279405,
+            "threads": 16,
+            "telemetry_completed": 21,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "5506": {
+            "requests": 7845,
+            "request_sql": 4,
+            "pid": 5506,
+            "rss_kb": 106144,
+            "live_objects": 275394,
+            "threads": 16,
+            "telemetry_completed": 3,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "webhook"
+      },
+      {
+        "phase": "after_preloaded_cluster_restart",
+        "counts": {
+          "http_200": 18667,
+          "evaluations": 1866700
+        },
+        "pids": [
+          5718,
+          5719
+        ],
+        "p95_ms": 9.835999924689531,
+        "p99_ms": 13.19199986755848,
+        "workers": {
+          "5718": {
+            "requests": 9399,
+            "request_sql": 3,
+            "pid": 5718,
+            "rss_kb": 107296,
+            "live_objects": 270145,
+            "threads": 16,
+            "telemetry_completed": 3,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "5719": {
+            "requests": 9273,
+            "request_sql": 3,
+            "pid": 5719,
+            "rss_kb": 106704,
+            "live_objects": 269972,
+            "threads": 16,
+            "telemetry_completed": 3,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "webhook"
+      },
+      {
+        "phase": "cloud_unavailable",
+        "counts": {
+          "http_200": 15730,
+          "evaluations": 1573000
+        },
+        "pids": [
+          5718,
+          5719
+        ],
+        "p95_ms": 9.452000027522445,
+        "p99_ms": 12.001999886706471,
+        "workers": {
+          "5718": {
+            "requests": 17294,
+            "request_sql": 5,
+            "telemetry_retry.flipper": 1,
+            "pid": 5718,
+            "rss_kb": 108080,
+            "live_objects": 270242,
+            "threads": 16,
+            "telemetry_completed": 3,
+            "telemetry_queue": 1,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "5719": {
+            "requests": 17108,
+            "request_sql": 5,
+            "telemetry_retry.flipper": 1,
+            "pid": 5719,
+            "rss_kb": 107680,
+            "live_objects": 270286,
+            "threads": 16,
+            "telemetry_completed": 3,
+            "telemetry_queue": 1,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "webhook"
+      },
+      {
+        "phase": "cloud_recovered",
+        "counts": {
+          "http_200": 18689,
+          "evaluations": 1868900
+        },
+        "pids": [
+          5718,
+          5719
+        ],
+        "p95_ms": 9.734000079333782,
+        "p99_ms": 13.054999988526106,
+        "workers": {
+          "5718": {
+            "requests": 26684,
+            "request_sql": 9,
+            "telemetry_retry.flipper": 1,
+            "pid": 5718,
+            "rss_kb": 109296,
+            "live_objects": 270354,
+            "threads": 16,
+            "telemetry_completed": 8,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "5719": {
+            "requests": 26473,
+            "request_sql": 16,
+            "telemetry_retry.flipper": 1,
+            "pid": 5719,
+            "rss_kb": 108464,
+            "live_objects": 273049,
+            "threads": 16,
+            "telemetry_completed": 8,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "webhook"
+      },
+      {
+        "phase": "database_unavailable",
+        "counts": {
+          "http_200": 12410,
+          "evaluations": 1241000
+        },
+        "pids": [
+          5718,
+          5719
+        ],
+        "p95_ms": 9.871999965980649,
+        "p99_ms": 13.829000061377883,
+        "workers": {
+          "5718": {
+            "requests": 32928,
+            "request_sql": 11,
+            "telemetry_retry.flipper": 1,
+            "pid": 5718,
+            "rss_kb": 109456,
+            "live_objects": 270704,
+            "threads": 16,
+            "telemetry_completed": 10,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "5719": {
+            "requests": 32639,
+            "request_sql": 18,
+            "telemetry_retry.flipper": 1,
+            "pid": 5719,
+            "rss_kb": 108720,
+            "live_objects": 273136,
+            "threads": 16,
+            "telemetry_completed": 10,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "webhook"
+      },
+      {
+        "phase": "database_unavailable_changed_cloud",
+        "counts": {
+          "http_200": 12365,
+          "evaluations": 1236500
+        },
+        "pids": [
+          5719,
+          5718
+        ],
+        "p95_ms": 9.89000010304153,
+        "p99_ms": 14.146000146865845,
+        "workers": {
+          "5718": {
+            "requests": 39152,
+            "request_sql": 13,
+            "telemetry_retry.flipper": 1,
+            "pid": 5718,
+            "rss_kb": 109648,
+            "live_objects": 270876,
+            "threads": 16,
+            "telemetry_completed": 12,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "5719": {
+            "requests": 38781,
+            "request_sql": 21,
+            "telemetry_retry.flipper": 1,
+            "pid": 5719,
+            "rss_kb": 108848,
+            "live_objects": 273254,
+            "threads": 16,
+            "telemetry_completed": 12,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "webhook"
+      },
+      {
+        "phase": "write_during_database_outage",
+        "status": 500,
+        "mode": "webhook"
+      },
+      {
+        "phase": "database_recovery",
+        "seconds": 9.283843999961391,
+        "mode": "webhook"
+      },
+      {
+        "phase": "database_recovered",
+        "counts": {
+          "http_200": 18014,
+          "evaluations": 1801400
+        },
+        "pids": [
+          5718,
+          5719
+        ],
+        "p95_ms": 11.178999906405807,
+        "p99_ms": 18.980999942868948,
+        "workers": {
+          "5718": {
+            "requests": 48268,
+            "request_sql": 17,
+            "telemetry_retry.flipper": 1,
+            "error_ActiveRecord::DatabaseConnectionError": 1,
+            "pid": 5718,
+            "rss_kb": 111008,
+            "live_objects": 271443,
+            "threads": 16,
+            "telemetry_completed": 16,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "5719": {
+            "requests": 47829,
+            "request_sql": 33,
+            "telemetry_retry.flipper": 1,
+            "pid": 5719,
+            "rss_kb": 110704,
+            "live_objects": 273626,
+            "threads": 16,
+            "telemetry_completed": 16,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "webhook"
+      },
+      {
+        "status": "completed",
+        "telemetry": {
+          "telemetry_402": 4,
+          "telemetry_202": 129
+        },
+        "workers": {
+          "5718": {
+            "requests": 48268,
+            "request_sql": 17,
+            "telemetry_retry.flipper": 1,
+            "error_ActiveRecord::DatabaseConnectionError": 1,
+            "pid": 5718,
+            "rss_kb": 111008,
+            "live_objects": 271356,
+            "threads": 16,
+            "telemetry_completed": 16,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          },
+          "5719": {
+            "requests": 47829,
+            "request_sql": 33,
+            "telemetry_retry.flipper": 1,
+            "pid": 5719,
+            "rss_kb": 110704,
+            "live_objects": 273626,
+            "threads": 16,
+            "telemetry_completed": 16,
+            "telemetry_queue": 0,
+            "pool": {
+              "size": 5,
+              "connections": 1,
+              "busy": 0,
+              "dead": 0,
+              "idle": 1,
+              "waiting": 0,
+              "checkout_timeout": 2
+            }
+          }
+        },
+        "mode": "webhook"
+      }
+    ]
+  }
+}

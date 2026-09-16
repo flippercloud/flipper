@@ -3,8 +3,8 @@ require "flipper/adapters/sync/interval_synchronizer"
 
 module Flipper
   module Adapters
-    # TODO: Syncing should happen in a background thread on a regular interval
-    # rather than in the main thread only when reads happen.
+    # Synchronizes remote changes on the calling thread so adapters that are
+    # not safe to use from background threads remain supported.
     class Sync
       include ::Flipper::Adapter
 
@@ -18,6 +18,8 @@ module Flipper
       #          the local on an interval.
       # interval - The Float or Integer number of seconds between syncs from
       # remote to local. Default value is set in IntervalSynchronizer.
+      # interval_state - Internal shared state for coordinating the interval
+      # across multiple Sync instances.
       def initialize(local, remote, options = {})
         @local = local
         @remote = remote
@@ -28,7 +30,11 @@ module Flipper
           instrumenter = options[:instrumenter]
           sync_options[:instrumenter] = instrumenter if instrumenter
           synchronizer = Synchronizer.new(@local, @remote, sync_options)
-          IntervalSynchronizer.new(synchronizer, interval: options[:interval])
+          IntervalSynchronizer.new(
+            synchronizer,
+            interval: options[:interval],
+            state: options[:interval_state],
+          )
         end
         synchronize
       end

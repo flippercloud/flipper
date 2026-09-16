@@ -30,6 +30,12 @@ module Flipper
       end
     end
 
+    # Internal: Wraps the storage adapter while preserving the position of
+    # behavioral adapters configured with #use.
+    def wrap_adapter_store(key, &block)
+      @builder.wrap_store(key, &block)
+    end
+
     # An adapter to use to augment the primary storage adapter. See `AdapterBuilder#use`
     if RUBY_VERSION >= '3.0'
       def use(klass, *args, **kwargs, &block)
