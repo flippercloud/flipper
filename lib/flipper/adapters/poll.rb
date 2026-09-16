@@ -42,9 +42,7 @@ module Flipper
 
       def synced_adapter
         @poller.start
-        if @state
-          return @adapter unless @state.lock.try_enter
-        end
+        return @adapter if @state && !@state.lock.try_enter
 
         begin
           synchronize
@@ -62,23 +60,24 @@ module Flipper
 
         poller_last_synced_at = @poller.last_synced_at.value
         last_synced_at = @state ? @state.last_poll_at : @last_synced_at
-        if poller_last_synced_at > last_synced_at
-          begin
-            Flipper::Adapters::Sync::Synchronizer.new(@adapter, @poller.adapter, instrumenter: @instrumenter).call
-          rescue StandardError
-            raise unless @state
+        return unless poller_last_synced_at > last_synced_at
 
-            # Keep the snapshot pending, but share the retry limit across callers.
-            # Explicit adapter writes happen outside this rescue and still raise.
-            @state.last_poll_failed_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-            return
-          end
-          if @state
-            @state.last_poll_at = poller_last_synced_at
-            @state.last_poll_failed_at = nil
-          else
-            @last_synced_at = poller_last_synced_at
-          end
+        begin
+          Flipper::Adapters::Sync::Synchronizer.new(@adapter, @poller.adapter, instrumenter: @instrumenter).call
+        rescue StandardError
+          raise unless @state
+
+          # Keep the snapshot pending, but share the retry limit across callers.
+          # Explicit adapter writes happen outside this rescue and still raise.
+          @state.last_poll_failed_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+          return
+        end
+
+        if @state
+          @state.last_poll_at = poller_last_synced_at
+          @state.last_poll_failed_at = nil
+        else
+          @last_synced_at = poller_last_synced_at
         end
       end
     end
