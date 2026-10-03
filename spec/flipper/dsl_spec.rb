@@ -309,6 +309,19 @@ RSpec.describe Flipper::DSL do
       subject.add(:stats)
       expect(subject.features).to eq(Set[subject[:stats]])
     end
+
+    context 'with a strict adapter' do
+      let(:adapter) { Flipper::Adapters::Strict.new(Flipper::Adapters::Memory.new, :raise) }
+
+      it 'adds a new feature without triggering a strict check' do
+        expect { subject.add(:stats) }.not_to raise_error
+        expect(subject.exist?(:stats)).to be(true)
+      end
+
+      it 'continues enforcing strict checks outside of explicit adds' do
+        expect { subject.enable(:stats) }.to raise_error(Flipper::Adapters::Strict::NotFound)
+      end
+    end
   end
 
   describe '#exist?' do

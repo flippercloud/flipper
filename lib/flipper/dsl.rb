@@ -191,7 +191,7 @@ module Flipper
     #
     # Returns result of add.
     def add(name)
-      feature(name).add
+      Adapters::Strict.with_sync_mode { feature(name).add }
     end
 
     # Public: Has a feature been added in the adapter.
