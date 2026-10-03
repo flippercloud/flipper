@@ -26,7 +26,6 @@ def silence
   # Return output
   output.string
 ensure
-  # Restore even on failure, or later tests inherit the StringIO
   $stderr = original_stderr
   $stdout = original_stdout
 end
