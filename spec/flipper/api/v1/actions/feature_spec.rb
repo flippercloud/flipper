@@ -1,7 +1,5 @@
 RSpec.describe Flipper::Api::V1::Actions::Feature do
   let(:app) { build_api(flipper) }
-  let(:feature) { build_feature }
-  let(:gate) { feature.gate(:boolean) }
 
   describe 'get' do
     malformed_queries = {

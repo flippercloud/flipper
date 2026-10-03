@@ -1,8 +1,6 @@
 require 'flipper/ui/decorators/gate'
 
 RSpec.describe Flipper::UI::Decorators::Gate do
-  let(:source)  { {} }
-  let(:adapter) { Flipper::Adapters::Memory.new(source) }
   let(:flipper) { build_flipper }
   let(:feature) { flipper[:some_awesome_feature] }
   let(:gate) { feature.gate(:boolean) }

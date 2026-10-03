@@ -1,6 +1,5 @@
 RSpec.describe Flipper::Api::V1::Actions::Features do
   let(:app) { build_api(flipper) }
-  let(:feature) { build_feature }
   let(:admin) { double 'Fake Fliper Thing', flipper_id: 10 }
 
   describe 'get' do

@@ -128,18 +128,4 @@ RSpec.describe Flipper::Cloud::Telemetry::Submitter do
       expect(subject.backoff_policy.retries).to eq(3)
     end
   end
-
-  def with_telemetry_debug_logging(&block)
-    output = StringIO.new
-    original_logger = cloud_configuration.logger
-
-    begin
-      cloud_configuration.logger = Logger.new(output)
-      block.call
-    ensure
-      cloud_configuration.logger = original_logger
-    end
-
-    output.string
-  end
 end
