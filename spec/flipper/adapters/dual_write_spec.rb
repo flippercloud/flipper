@@ -9,8 +9,6 @@ RSpec.describe Flipper::Adapters::DualWrite do
   let(:remote_adapter) do
     Flipper::Adapters::OperationLogger.new Flipper::Adapters::Memory.new
   end
-  let(:local) { Flipper.new(local_adapter) }
-  let(:remote) { Flipper.new(remote_adapter) }
   let(:sync) { Flipper.new(subject) }
 
   subject do
