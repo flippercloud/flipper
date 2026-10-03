@@ -12,7 +12,7 @@ class UpdateGeneratorTest < Rails::Generators::TestCase
   end
 
   teardown do
-    ActiveRecord::Base.connection.close
+    ActiveRecord::Base.remove_connection
   end
 
   test "generates migrations" do

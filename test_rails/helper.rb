@@ -23,9 +23,9 @@ def silence
 
   yield
 
-  $stderr = original_stderr
-  $stdout = original_stdout
-
   # Return output
   output.string
+ensure
+  $stderr = original_stderr
+  $stdout = original_stdout
 end
