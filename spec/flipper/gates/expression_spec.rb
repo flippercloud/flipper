@@ -100,6 +100,151 @@ RSpec.describe Flipper::Gates::Expression do
       end
     end
 
+    context 'for include expression' do
+      it 'returns true when array property includes value' do
+        expression = Flipper.property(:roles).include("admin")
+        context = context(expression.value, properties: {"roles" => ["admin", "support"]})
+        expect(subject.open?(context)).to be(true)
+      end
+
+      it 'returns false when array property does not include value' do
+        expression = Flipper.property(:roles).include("admin")
+        context = context(expression.value, properties: {"roles" => ["support"]})
+        expect(subject.open?(context)).to be(false)
+      end
+
+      it 'returns true when string property includes substring' do
+        expression = Flipper.property(:email).include("@example.com")
+        context = context(expression.value, properties: {"email" => "user@example.com"})
+        expect(subject.open?(context)).to be(true)
+      end
+
+      it 'returns false when property is missing' do
+        expression = Flipper.property(:roles).include("admin")
+        context = context(expression.value, properties: {})
+        expect(subject.open?(context)).to be(false)
+      end
+    end
+
+    context 'for exclude expression' do
+      it 'returns true when array property does not include value' do
+        expression = Flipper.property(:roles).exclude("admin")
+        context = context(expression.value, properties: {"roles" => ["support"]})
+        expect(subject.open?(context)).to be(true)
+      end
+
+      it 'returns false when array property includes value' do
+        expression = Flipper.property(:roles).exclude("admin")
+        context = context(expression.value, properties: {"roles" => ["admin", "support"]})
+        expect(subject.open?(context)).to be(false)
+      end
+
+      it 'returns false when string property includes substring' do
+        expression = Flipper.property(:email).exclude("@example.com")
+        context = context(expression.value, properties: {"email" => "user@example.com"})
+        expect(subject.open?(context)).to be(false)
+      end
+
+      it 'returns true when property is missing' do
+        expression = Flipper.property(:roles).exclude("admin")
+        context = context(expression.value, properties: {})
+        expect(subject.open?(context)).to be(true)
+      end
+    end
+
+    context 'for in expression' do
+      it 'returns true when property value is in the list' do
+        expression = Flipper.property(:plan).in(["basic", "premium"])
+        context = context(expression.value, properties: {"plan" => "basic"})
+        expect(subject.open?(context)).to be(true)
+      end
+
+      it 'returns false when property value is not in the list' do
+        expression = Flipper.property(:plan).in(["basic", "premium"])
+        context = context(expression.value, properties: {"plan" => "plus"})
+        expect(subject.open?(context)).to be(false)
+      end
+
+      it 'returns false when property is missing' do
+        expression = Flipper.property(:plan).in(["basic", "premium"])
+        context = context(expression.value, properties: {})
+        expect(subject.open?(context)).to be(false)
+      end
+    end
+
+    context 'for not_in expression' do
+      it 'returns true when property value is not in the list' do
+        expression = Flipper.property(:plan).not_in(["plus", "premium"])
+        context = context(expression.value, properties: {"plan" => "basic"})
+        expect(subject.open?(context)).to be(true)
+      end
+
+      it 'returns false when property value is in the list' do
+        expression = Flipper.property(:plan).not_in(["plus", "premium"])
+        context = context(expression.value, properties: {"plan" => "plus"})
+        expect(subject.open?(context)).to be(false)
+      end
+
+      it 'returns true when property is missing' do
+        expression = Flipper.property(:plan).not_in(["plus", "premium"])
+        context = context(expression.value, properties: {})
+        expect(subject.open?(context)).to be(true)
+      end
+    end
+
+    context 'for unknown expression name' do
+      it 'returns false and warns instead of raising' do
+        expect(subject).to receive(:warn).with(/uninitialized constant Flipper::Expressions::Foo/)
+        expect(subject.open?(context({"Foo" => [true]}))).to be(false)
+      end
+
+      it 'returns false and warns for absolute constant names' do
+        expect(subject).to receive(:warn).with(/uninitialized constant Flipper::Expressions::::Kernel/)
+        expect(subject.open?(context({"::Kernel" => []}))).to be(false)
+      end
+
+      it 'warns only once for repeated checks of the same feature and expression' do
+        allow(subject).to receive(:warn)
+
+        2.times do
+          expect(subject.open?(context({"Foo" => [true]}))).to be(false)
+        end
+
+        expect(subject).to have_received(:warn).
+          with(/Feature :search.*uninitialized constant Flipper::Expressions::Foo/).
+          once
+      end
+
+      it 'warns separately for different features and expression names' do
+        allow(subject).to receive(:warn)
+        other_feature_context = Flipper::FeatureCheckContext.new(
+          feature_name: :checkout,
+          values: Flipper::GateValues.new(expression: {"Foo" => [true]}),
+          actors: nil
+        )
+
+        subject.open?(context({"Foo" => [true]}))
+        subject.open?(other_feature_context)
+        subject.open?(context({"Bar" => [true]}))
+
+        expect(subject).to have_received(:warn).
+          with(/Feature :search.*uninitialized constant Flipper::Expressions::Foo/).
+          once
+        expect(subject).to have_received(:warn).
+          with(/Feature :checkout.*uninitialized constant Flipper::Expressions::Foo/).
+          once
+        expect(subject).to have_received(:warn).
+          with(/Feature :search.*uninitialized constant Flipper::Expressions::Bar/).
+          once
+      end
+
+      it 'returns false and warns when nested inside known expression' do
+        expect(subject).to receive(:warn).with(/uninitialized constant Flipper::Expressions::Foo/)
+        data = {"Any" => [{"Foo" => [true]}]}
+        expect(subject.open?(context(data))).to be(false)
+      end
+    end
+
     context 'for time-based expressions' do
       it 'enables when now is past a scheduled epoch' do
         past_epoch = Time.now.to_i - 86_400
