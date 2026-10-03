@@ -12,7 +12,9 @@ class UpdateGeneratorTest < Rails::Generators::TestCase
   end
 
   teardown do
-    ActiveRecord::Base.connection.close
+    # Drop the pool, not just the connection: Rails reuses a pool for an
+    # identical config, which would keep this :memory: db alive across tests.
+    ActiveRecord::Base.remove_connection
   end
 
   test "generates migrations" do
