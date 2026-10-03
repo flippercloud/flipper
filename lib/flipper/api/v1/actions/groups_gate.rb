@@ -44,10 +44,6 @@ module Flipper
             allow_unregistered_groups && allow_unregistered_groups == 'true'
           end
 
-          def disallow_unregistered_groups?
-            !allow_unregistered_groups?
-          end
-
           def group_name
             @group_name ||= string_param('name')
           end
