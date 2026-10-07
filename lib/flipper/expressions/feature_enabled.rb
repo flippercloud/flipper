@@ -9,24 +9,28 @@ module Flipper
         evaluating = Thread.current[EVALUATING_KEY] ||= Set.new
         feature_name = feature_name.to_s
         current_feature = context[:feature_name].to_s
+        instance_key = context[:flipper_instance_key]
+        feature_identity = instance_key ? [instance_key, feature_name] : feature_name
+        current_identity = instance_key ? [instance_key, current_feature] : current_feature
 
         # Track the current feature so A -> B -> A is caught
-        added_current = evaluating.add?(current_feature)
+        added_current = evaluating.add?(current_identity)
 
         begin
           # Circular dependency: return false to break the cycle
-          return false if evaluating.include?(feature_name)
+          return false if evaluating.include?(feature_identity)
 
-          evaluating.add(feature_name)
+          evaluating.add(feature_identity)
           actor = context[:actor]
+          feature_resolver = context.fetch(:feature_resolver, Flipper)
           if actor
-            Flipper.enabled?(feature_name, actor)
+            feature_resolver.enabled?(feature_name, actor)
           else
-            Flipper.enabled?(feature_name)
+            feature_resolver.enabled?(feature_name)
           end
         ensure
-          evaluating.delete(feature_name)
-          evaluating.delete(current_feature) if added_current
+          evaluating.delete(feature_identity)
+          evaluating.delete(current_identity) if added_current
         end
       end
     end
