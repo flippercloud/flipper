@@ -56,6 +56,17 @@ RSpec.describe Flipper::Adapters::Sync::Synchronizer do
       expect(instrumenter.events_by_name("synchronizer_exception.flipper").size).to be(0)
     end
 
+    it 'uses pre-fetched local adapter state when provided' do
+      local_flipper.enable(:existing)
+      prefetched = local.get_all
+      remote_flipper.enable(:updated)
+      expect(local).not_to receive(:get_all)
+
+      described_class.new(local, remote, local_get_all: prefetched).call
+
+      expect(local_flipper.features.map(&:key)).to eq(["updated"])
+    end
+
     it 'syncs each remote feature to local' do
       remote_flipper.enable(:search)
       remote_flipper.enable_percentage_of_time(:logging, 10)
