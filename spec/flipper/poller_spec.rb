@@ -12,7 +12,6 @@ RSpec.describe Flipper::Poller do
   subject do
     described_class.new(
       remote_adapter: remote_adapter,
-      start_automatically: false,
       interval: 3600 # 1 hour
     )
   end
@@ -50,6 +49,55 @@ RSpec.describe Flipper::Poller do
       expect(local.enabled?(:polling)).to be(false)
       subject.sync
       expect(local.enabled?(:polling)).to be(true)
+    end
+
+    it "publishes overlapping syncs in request order" do
+      allow(Thread).to receive(:new).and_call_original
+      remote = Flipper::Adapters::Memory.new(threadsafe: true)
+      poller = described_class.new(
+        remote_adapter: remote,
+        interval: 3600,
+      )
+      polled = Flipper.new(poller.adapter)
+      first_started = Queue.new
+      release_first = Queue.new
+      calls = 0
+      allow(remote).to receive(:get_all).and_wrap_original do |original, *args, **kwargs|
+        snapshot = original.call(*args, **kwargs)
+        calls += 1
+        if calls == 1
+          first_started << true
+          release_first.pop
+        end
+        snapshot
+      end
+      Flipper.new(remote).enable(:polling)
+
+      first_thread = Thread.new { poller.sync }
+      Timeout.timeout(1) { first_started.pop }
+      Flipper.new(remote).disable(:polling)
+      second_started = Queue.new
+      second_thread = Thread.new do
+        second_started << true
+        poller.sync
+      end
+      Timeout.timeout(1) { second_started.pop }
+      Timeout.timeout(1) do
+        loop do
+          break if second_thread.status == "sleep"
+          raise "second poll completed before first poll released" unless second_thread.alive?
+          Thread.pass
+        end
+      end
+      release_first << true
+      expect(first_thread.join(1)).to be(first_thread)
+      expect(second_thread.join(1)).to be(second_thread)
+
+      expect(polled.enabled?(:polling)).to be(false)
+    ensure
+      release_first << true if first_thread&.alive?
+      first_thread&.join(1)
+      second_thread&.join(1)
     end
 
     context "when poll-shutdown header is present" do
@@ -205,7 +253,6 @@ RSpec.describe Flipper::Poller do
       subject do
         described_class.new(
           remote_adapter: remote_adapter,
-          start_automatically: false,
           interval: 10 # Set initial to minimum
         )
       end
@@ -240,7 +287,6 @@ RSpec.describe Flipper::Poller do
       subject do
         described_class.new(
           remote_adapter: remote_adapter,
-          start_automatically: false,
           interval: 20
         )
       end
@@ -274,7 +320,6 @@ RSpec.describe Flipper::Poller do
       subject do
         described_class.new(
           remote_adapter: remote_adapter,
-          start_automatically: false,
           interval: 10
         )
       end
@@ -469,7 +514,6 @@ RSpec.describe Flipper::Poller do
 
           poller = ForkTestPoller.new(
             remote_adapter: Object.new,
-            start_automatically: false,
             shutdown_automatically: false
           )
           poller.start

@@ -37,6 +37,11 @@ module Flipper
       end
     end
 
+    initializer "flipper.module_state", before: "flipper.default" do
+      Flipper.configuration
+      Flipper.groups_registry
+    end
+
     initializer "flipper.default", before: :load_config_initializers do |app|
       # Load cloud secrets from Rails credentials
       ENV["FLIPPER_CLOUD_TOKEN"] ||= app.credentials.dig(:flipper, :cloud_token)
@@ -44,14 +49,11 @@ module Flipper
 
       require 'flipper/cloud' if cloud?
 
-      Flipper.configure do |config|
-        config.default do
-          if cloud?
-            Flipper::Cloud.new(
-              local_adapter: config.adapter,
-              instrumenter: app.config.flipper.instrumenter
-            )
-          else
+      if cloud?
+        Flipper::Cloud.set_default(instrumenter: app.config.flipper.instrumenter)
+      else
+        Flipper.configure do |config|
+          config.default do
             Flipper.new(config.adapter, instrumenter: app.config.flipper.instrumenter)
           end
         end

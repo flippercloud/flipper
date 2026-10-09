@@ -10,11 +10,19 @@ module Flipper
   class AdapterBuilder
     def initialize(&block)
       @stack = []
+      @store_wrappers = {}
 
       # Default to memory adapter
       store Flipper::Adapters::Memory
 
       block.arity == 0 ? instance_eval(&block) : block.call(self) if block
+    end
+
+    # Internal: Wraps the configured storage adapter before the adapters added
+    # with #use. A key ensures framework integrations can safely configure the
+    # same wrapper more than once during initialization.
+    def wrap_store(key, &block)
+      @store_wrappers[key] ||= block
     end
 
     if RUBY_VERSION >= '3.0'
@@ -38,7 +46,10 @@ module Flipper
     end
 
     def to_adapter
-      @stack.reverse.inject(@store.call) { |adapter, wrapper| wrapper.call(adapter) }
+      store = @store_wrappers.each_value.inject(@store.call) do |adapter, wrapper|
+        wrapper.call(adapter)
+      end
+      @stack.reverse.inject(store) { |adapter, wrapper| wrapper.call(adapter) }
     end
   end
 end

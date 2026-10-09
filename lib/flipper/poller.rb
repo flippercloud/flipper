@@ -29,16 +29,16 @@ module Flipper
       @thread = nil
       @pid = Process.pid
       @mutex = Mutex.new
+      @sync_mutex = Mutex.new
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
       @remote_adapter = options.fetch(:remote_adapter)
+      @synchronization_state = options[:synchronization_state]
       @last_synced_at = Concurrent::AtomicFixnum.new(0)
       @adapter = Adapters::Memory.new(nil, threadsafe: true)
       @shutdown_requested = false
 
       self.interval = options.fetch(:interval, 10)
       @initial_interval = @interval
-
-      @start_automatically = options.fetch(:start_automatically, true)
 
       if options.fetch(:shutdown_automatically, true)
         at_exit { stop }
@@ -71,12 +71,15 @@ module Flipper
     end
 
     def sync
-      @instrumenter.instrument("poller.#{InstrumentationNamespace}", operation: :poll) do
-        begin
-          @adapter.import @remote_adapter
-          @last_synced_at.update { |time| Concurrent.monotonic_time }
-        ensure
-          apply_response_headers
+      @sync_mutex.synchronize do
+        @instrumenter.instrument("poller.#{InstrumentationNamespace}", operation: :poll) do
+          begin
+            generation = @synchronization_state&.poll_started
+            @adapter.import @remote_adapter
+            @last_synced_at.update { generation || Concurrent.monotonic_time }
+          ensure
+            apply_response_headers
+          end
         end
       end
     end

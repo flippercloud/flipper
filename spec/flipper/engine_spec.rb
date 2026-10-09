@@ -1,3 +1,4 @@
+require 'open3'
 require 'rails'
 require 'flipper/engine'
 
@@ -41,6 +42,52 @@ RSpec.describe Flipper::Engine do
   let(:config) { application.config.flipper }
 
   subject { SpecHelpers.silence { application.initialize! } }
+
+  it "preserves the Rails belongs_to required default when Flipper is required" do
+    script = <<~'RUBY'
+      require "rails"
+      require "active_record/railtie"
+      active_record_base_loaded = $LOADED_FEATURES.any? { |path| path.end_with?("active_record/base.rb") }
+
+      require "flipper"
+      active_record_base_loaded_after_flipper = $LOADED_FEATURES.any? { |path| path.end_with?("active_record/base.rb") }
+      abort "Flipper changed the ActiveRecord::Base load state" unless active_record_base_loaded_after_flipper == active_record_base_loaded
+      abort "Flipper initialized configuration before Rails" if Flipper.instance_variable_get(:@configuration)
+      abort "Flipper initialized groups registry before Rails" if Flipper.instance_variable_get(:@groups_registry)
+
+      class FlipperRegressionApplication < Rails::Application
+        config.load_defaults Rails::VERSION::STRING.to_f
+        config.eager_load = false
+        config.logger = ActiveSupport::Logger.new(nil)
+      end
+
+      FlipperRegressionApplication.initialize!
+      abort "Flipper configuration was not initialized by Rails" unless Flipper.instance_variable_get(:@configuration)
+      abort "Flipper groups registry was not initialized by Rails" unless Flipper.instance_variable_get(:@groups_registry)
+      abort "belongs_to_required_by_default was not applied" unless ActiveRecord::Base.belongs_to_required_by_default
+    RUBY
+
+    _, stderr, status = Open3.capture3(
+      { "DATABASE_URL" => "sqlite3::memory:" },
+      RbConfig.ruby,
+      "-Ilib",
+      "-e",
+      script,
+      chdir: File.expand_path("../..", __dir__)
+    )
+
+    expect(status).to be_success, stderr
+  end
+
+  it "initializes module state before configuring the default instance" do
+    Flipper.configuration = nil
+    Flipper.groups_registry = nil
+
+    subject
+
+    expect(Flipper.instance_variable_get(:@configuration)).to be_a(Flipper::Configuration)
+    expect(Flipper.instance_variable_get(:@groups_registry)).to be_a(Flipper::Registry)
+  end
 
   shared_examples 'config.strict' do
     let(:adapter) { Flipper.adapter.adapter }

@@ -1,6 +1,10 @@
 require 'flipper/cloud'
 require 'flipper/adapters/instrumented'
+require 'flipper/adapters/operation_logger'
+require 'flipper/adapters/pstore'
 require 'flipper/instrumenters/memory'
+require 'timeout'
+require 'tempfile'
 
 RSpec.describe Flipper::Cloud do
   before do
@@ -66,6 +70,238 @@ RSpec.describe Flipper::Cloud do
     instance = described_class.new(token: 'asdf', instrumenter: instrumenter)
     expect(instance.instrumenter).to be_a(Flipper::Cloud::Telemetry::Instrumenter)
     expect(instance.instrumenter.instrumenter).to be(instrumenter)
+  end
+
+  it 'shares one hydrated memory snapshot across default Cloud instances' do
+    original_token = ENV['FLIPPER_CLOUD_TOKEN']
+    ENV['FLIPPER_CLOUD_TOKEN'] = 'asdf'
+
+    stores = Queue.new
+    Flipper.configure do |config|
+      config.adapter do
+        store = Flipper::Adapters::OperationLogger.new(Flipper::Adapters::Memory.new)
+        Flipper.new(store).enable(:search)
+        store.reset
+        stores << store
+        store
+      end
+    end
+    described_class.set_default
+
+    threads = 2.times.map do
+      Thread.new { Flipper.instance }
+    end
+    threads.each { |thread| expect(thread.join(1)).to be(thread) }
+    first, second = threads.map(&:value)
+    persistent_adapters = 2.times.map { Timeout.timeout(1) { stores.pop } }
+
+    expect(persistent_adapters.sum { |adapter| adapter.count(:get_all) }).to be(1)
+    persistent_adapters.each(&:reset)
+    expect(first.enabled?(:search)).to be(true)
+    expect(second.enabled?(:search)).to be(true)
+    expect(persistent_adapters.sum { |adapter| adapter.count(:get) }).to be(0)
+    expect(persistent_adapters.sum { |adapter| adapter.count(:get_all) }).to be(0)
+    expect(first.cloud_configuration.local_adapter.local).
+      to be(second.cloud_configuration.local_adapter.local)
+  ensure
+    ENV['FLIPPER_CLOUD_TOKEN'] = original_token
+  end
+
+  it 'keeps existing instances aligned when default setup runs twice' do
+    original_token = ENV['FLIPPER_CLOUD_TOKEN']
+    ENV['FLIPPER_CLOUD_TOKEN'] = 'asdf'
+    Flipper.configure do |config|
+      config.adapter do
+        Flipper::Adapters::Memory.new.tap { |adapter| Flipper.new(adapter).add(:search) }
+      end
+    end
+    buffered = Flipper::Adapters::Memory.new(threadsafe: true)
+    Flipper.new(buffered).disable(:search)
+    poller = double(
+      "Poller",
+      adapter: buffered,
+      last_synced_at: Concurrent::AtomicFixnum.new(1),
+    )
+    allow(poller).to receive(:start)
+    allow(Flipper::Poller).to receive(:get).and_return(poller)
+    body = Flipper::Typecast.to_json({
+      features: [
+        {
+          key: "search",
+          gates: [
+            {key: "boolean", value: true},
+          ],
+        },
+      ],
+    })
+    stub_request(:get, %r{\Ahttps://www\.flippercloud\.io/adapter/features\?}).
+      to_return(status: 200, body: body)
+
+    described_class.set_default
+    first_thread = Thread.new { Flipper.instance }
+    expect(first_thread.join(1)).to be(first_thread)
+    first = first_thread.value
+    first.cloud_configuration.instance_variable_get(:@synchronization_state).poll_started
+    described_class.set_default(instrumenter: Flipper::Instrumenters::Memory.new)
+    second_thread = Thread.new { Flipper.instance }
+    expect(second_thread.join(1)).to be(second_thread)
+    second = second_thread.value
+    second.sync(cache_bust: true)
+
+    expect(second.enabled?(:search)).to be(true)
+  ensure
+    ENV['FLIPPER_CLOUD_TOKEN'] = original_token
+  end
+
+  it 'uses shared memory directly when webhook mode has no persistent store' do
+    original_token = ENV['FLIPPER_CLOUD_TOKEN']
+    original_secret = ENV['FLIPPER_CLOUD_SYNC_SECRET']
+    ENV['FLIPPER_CLOUD_TOKEN'] = 'asdf'
+    ENV['FLIPPER_CLOUD_SYNC_SECRET'] = 'secret'
+    Flipper.configure do |config|
+      config.adapter do
+        Flipper::Adapters::OperationLogger.new(Flipper::Adapters::Memory.new)
+      end
+    end
+    body = Flipper::Typecast.to_json({
+      features: [
+        {
+          key: "search",
+          gates: [
+            {key: "boolean", value: true},
+          ],
+        },
+      ],
+    })
+    stub_request(:get, %r{\Ahttps://www\.flippercloud\.io/adapter/features\?}).
+      to_return(status: 200, body: body)
+    described_class.set_default
+
+    threads = 2.times.map do
+      Thread.new { Flipper.instance }
+    end
+    threads.each { |thread| expect(thread.join(1)).to be(thread) }
+    first, second = threads.map(&:value)
+    first.sync(cache_bust: true)
+    state = second.cloud_configuration.instance_variable_get(:@synchronization_state)
+    state.last_sync_at = 0
+
+    expect(second.enabled?(:search)).to be(true)
+  ensure
+    ENV['FLIPPER_CLOUD_TOKEN'] = original_token
+    ENV['FLIPPER_CLOUD_SYNC_SECRET'] = original_secret
+  end
+
+  it 'refreshes shared memory from persistence on the calling thread for webhooks' do
+    original_token = ENV['FLIPPER_CLOUD_TOKEN']
+    original_secret = ENV['FLIPPER_CLOUD_SYNC_SECRET']
+    original_interval = ENV['FLIPPER_CLOUD_SYNC_INTERVAL']
+    ENV['FLIPPER_CLOUD_TOKEN'] = 'asdf'
+    ENV['FLIPPER_CLOUD_SYNC_SECRET'] = 'secret'
+    ENV['FLIPPER_CLOUD_SYNC_INTERVAL'] = '15'
+
+    persistent_file = Tempfile.new("flipper-cloud")
+    persistent_file.close
+    persistent = Flipper::Adapters::PStore.new(persistent_file.path)
+    Flipper.new(persistent).disable(:search)
+    stores = Queue.new
+    Flipper.configure do |config|
+      config.adapter do
+        store = Flipper::Adapters::OperationLogger.new(persistent)
+        stores << store
+        store
+      end
+    end
+    expect(Flipper::Poller).not_to receive(:get)
+    described_class.set_default
+
+    threads = 2.times.map do
+      Thread.new { Flipper.instance }
+    end
+    threads.each { |thread| expect(thread.join(1)).to be(thread) }
+    first, second = threads.map(&:value)
+    persistent_adapters = 2.times.map { Timeout.timeout(1) { stores.pop } }
+    sync_adapters = [first, second].map(&:cloud_configuration).map(&:local_adapter)
+
+    expect(sync_adapters).to all(be_instance_of(Flipper::Adapters::Sync))
+    expect(sync_adapters.map(&:local).uniq.size).to be(1)
+    expect(sync_adapters.map { |adapter| adapter.synchronizer.interval }.uniq).to eq([15])
+    expect(persistent_adapters.sum { |adapter| adapter.count(:get_all) }).to be(1)
+
+    persistent_adapters.each(&:reset)
+    Flipper.new(persistent).enable(:search)
+    refresh_threads = []
+    allow(persistent).to receive(:get_all).and_wrap_original do |original, *args, **kwargs|
+      refresh_threads << Thread.current
+      original.call(*args, **kwargs)
+    end
+    future = Process.clock_gettime(Process::CLOCK_MONOTONIC, :second) + 16
+    sync_adapters.each do |adapter|
+      allow(adapter.synchronizer).to receive(:now).and_return(future)
+    end
+
+    expect(first.enabled?(:search)).to be(true)
+    expect(second.enabled?(:search)).to be(true)
+    expect(persistent_adapters.sum { |adapter| adapter.count(:get_all) }).to be(1)
+    expect(refresh_threads).to contain_exactly(Thread.current)
+  ensure
+    ENV['FLIPPER_CLOUD_TOKEN'] = original_token
+    ENV['FLIPPER_CLOUD_SYNC_SECRET'] = original_secret
+    ENV['FLIPPER_CLOUD_SYNC_INTERVAL'] = original_interval
+    persistent_file&.unlink
+  end
+
+  it 'refreshes persistence when Rails loads the webhook secret after initial setup' do
+    original_token = ENV['FLIPPER_CLOUD_TOKEN']
+    original_secret = ENV['FLIPPER_CLOUD_SYNC_SECRET']
+    original_interval = ENV['FLIPPER_CLOUD_SYNC_INTERVAL']
+    ENV['FLIPPER_CLOUD_TOKEN'] = 'asdf'
+    ENV.delete('FLIPPER_CLOUD_SYNC_SECRET')
+    ENV['FLIPPER_CLOUD_SYNC_INTERVAL'] = '10'
+    persistent_file = Tempfile.new("flipper-cloud")
+    persistent_file.close
+    persistent = Flipper::Adapters::PStore.new(persistent_file.path)
+    Flipper.new(persistent).disable(:search)
+    Flipper.configure { |config| config.adapter { persistent } }
+
+    described_class.set_default
+    ENV['FLIPPER_CLOUD_SYNC_SECRET'] = 'secret'
+    ENV['FLIPPER_CLOUD_SYNC_INTERVAL'] = '30'
+    described_class.set_default(instrumenter: Flipper::Instrumenters::Memory.new)
+    expect(Flipper::Poller).not_to receive(:get)
+    instance = Flipper.configuration.default
+    expect(instance.enabled?(:search)).to be(false)
+    Flipper.new(persistent).enable(:search)
+
+    now = Process.clock_gettime(Process::CLOCK_MONOTONIC, :second)
+    allow(Process).to receive(:clock_gettime).and_call_original
+    allow(Process).to receive(:clock_gettime).with(Process::CLOCK_MONOTONIC, :second).and_return(now + 20)
+    expect(instance.enabled?(:search)).to be(false)
+    allow(Process).to receive(:clock_gettime).with(Process::CLOCK_MONOTONIC, :second).and_return(now + 31)
+    expect(instance.enabled?(:search)).to be(true)
+  ensure
+    ENV['FLIPPER_CLOUD_TOKEN'] = original_token
+    ENV['FLIPPER_CLOUD_SYNC_SECRET'] = original_secret
+    ENV['FLIPPER_CLOUD_SYNC_INTERVAL'] = original_interval
+    persistent_file&.unlink
+  end
+
+  it 'keeps configured behavioral adapters outside memory reads' do
+    original_token = ENV['FLIPPER_CLOUD_TOKEN']
+    ENV['FLIPPER_CLOUD_TOKEN'] = 'asdf'
+
+    Flipper.configure do |config|
+      config.adapter do
+        Flipper::Adapters::Memory.new.tap { |adapter| Flipper.new(adapter).add(:search) }
+      end
+      config.use Flipper::Adapters::Strict, :raise
+    end
+    described_class.set_default
+
+    expect { Flipper.configuration.default.enabled?(:typo) }.
+      to raise_error(Flipper::Adapters::Strict::NotFound)
+  ensure
+    ENV['FLIPPER_CLOUD_TOKEN'] = original_token
   end
 
   it 'allows wrapping adapter with another adapter like the instrumenter' do
