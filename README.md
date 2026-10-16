@@ -35,7 +35,7 @@ Or install it yourself with:
 
 ## Subscribe &amp; Ship
 
-[💌 &nbsp;Subscribe](https://blog.flippercloud.io/#/portal/signup) - we'll send you short and sweet emails when we release new versions ([examples](https://blog.flippercloud.io/tag/releases/)).
+[💌 &nbsp;Subscribe](https://www.flippercloud.io/newsletter) - we'll send you short and sweet emails when we release new versions ([examples](https://blog.flippercloud.io/tag/releases/)).
 
 ## Merch
 
