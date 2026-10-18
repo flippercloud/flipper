@@ -76,7 +76,7 @@ Read more about [getting started with Flipper](https://flippercloud.io/docs?utm_
 
 Like Flipper and want more? Check out [Flipper Cloud](https://www.flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=check_out), which comes with:
 
-- **multiple environments** &mdash; production, staging, per continent, whatever you need. Every environment inherits from production by default and every project comes with a [project overview page](https://blog.flippercloud.io/project-overview/) that shows each feature and its status in each environment.
+- **multiple environments** &mdash; production, staging, per continent, whatever you need. Every environment inherits from production by default and every project comes with a [project overview page](https://www.flippercloud.io/blog/project-overview) that shows each feature and its status in each environment.
 - **personal environments** &mdash; everyone on your team gets a personal environment (that inherits from production) which they can modify however they want without stepping on anyone else's toes.
 - **permissions** &mdash; grant access to everyone in your organization or lockdown each project to particular people. You can even limit access to a particular environment (like production) to specific people.
 - **audit history** &mdash; every feature change and who made it.
