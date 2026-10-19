@@ -26,6 +26,8 @@ module Flipper
       def show_cloud_upgrade
         return if options[:token] || ENV["FLIPPER_CLOUD_TOKEN"] || behavior == :revoke
 
+        migrate_db = "  bin/rails db:migrate\n" if defined?(Flipper::Adapters::ActiveRecord)
+
         say <<~MSG
 
           Flipper is installed and self-hosted: your app stores its own features.
@@ -33,7 +35,7 @@ module Flipper
           For a hosted dashboard with audit history, environments, and teammates, try
           Flipper Cloud (free plan, no token needed to start):
 
-            bundle exec flipper cloud migrate
+          #{migrate_db}  bundle exec flipper cloud migrate
 
           https://www.flippercloud.io/docs/guides/migration
         MSG

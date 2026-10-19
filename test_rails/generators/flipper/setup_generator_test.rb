@@ -10,8 +10,9 @@ class SetupGeneratorTest < Rails::Generators::TestCase
   test "invokes flipper:active_record generator if ActiveRecord adapter defined" do
     begin
       load 'flipper/adapters/active_record.rb'
-      run_generator
+      output = run_generator
       assert_migration "db/migrate/create_flipper_tables.rb"
+      assert_match(/bin\/rails db:migrate\n  bundle exec flipper cloud migrate/, output)
     ensure
       Flipper::Adapters.send(:remove_const, :ActiveRecord)
     end
@@ -20,6 +21,7 @@ class SetupGeneratorTest < Rails::Generators::TestCase
   test "generates an initializer and points to Flipper Cloud" do
     output = run_generator
     assert_match(/flipper cloud migrate/, output)
+    assert_no_match(/db:migrate/, output)
     assert_file 'config/initializers/flipper.rb' do |content|
       assert_match(/Flipper\.configure/, content)
       assert_match(/FLIPPER_CLOUD_TOKEN/, content)
