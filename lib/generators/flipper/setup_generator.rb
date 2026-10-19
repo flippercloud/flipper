@@ -23,6 +23,22 @@ module Flipper
         configure_with_dotenv || configure_with_credentials
       end
 
+      def show_cloud_upgrade
+        return if options[:token]
+
+        say <<~MSG
+
+          Flipper is installed and self-hosted: your app stores its own features.
+
+          For a hosted dashboard with audit history, environments, and teammates,
+          move your features to Flipper Cloud (free plan available, no token needed to start):
+
+            bundle exec flipper cloud migrate
+
+          https://www.flippercloud.io/docs/guides/migration
+        MSG
+      end
+
       private
 
       def configure_with_dotenv
