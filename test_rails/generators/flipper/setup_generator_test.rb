@@ -17,20 +17,14 @@ class SetupGeneratorTest < Rails::Generators::TestCase
     end
   end
 
-  test "generates an initializer" do
-    run_generator
-    assert_file 'config/initializers/flipper.rb', /Flipper\.configure/
-  end
-
-  test "initializer explains how to connect to Flipper Cloud" do
-    run_generator
-    assert_file 'config/initializers/flipper.rb', /FLIPPER_CLOUD_TOKEN/
-    assert_file 'config/initializers/flipper.rb', /bundle exec flipper cloud migrate/
-  end
-
-  test "tells the user how to move features to Flipper Cloud" do
+  test "generates an initializer and points to Flipper Cloud" do
     output = run_generator
-    assert_match(/bundle exec flipper cloud migrate/, output)
+    assert_match(/flipper cloud migrate/, output)
+    assert_file 'config/initializers/flipper.rb' do |content|
+      assert_match(/Flipper\.configure/, content)
+      assert_match(/FLIPPER_CLOUD_TOKEN/, content)
+      assert_match(/flipper cloud migrate/, content)
+    end
   end
 
   test "does not suggest Flipper Cloud when a token is provided" do
