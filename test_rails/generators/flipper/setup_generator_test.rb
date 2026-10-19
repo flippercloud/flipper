@@ -32,6 +32,14 @@ class SetupGeneratorTest < Rails::Generators::TestCase
     assert_no_match(/flipper cloud migrate/, output)
   end
 
+  test "does not suggest Flipper Cloud when FLIPPER_CLOUD_TOKEN is already set" do
+    ENV["FLIPPER_CLOUD_TOKEN"] = "abc123"
+    output = run_generator
+    assert_no_match(/flipper cloud migrate/, output)
+  ensure
+    ENV.delete("FLIPPER_CLOUD_TOKEN")
+  end
+
   # Regression: ISSUE-001 — `rails destroy flipper:setup` said Flipper was installed
   # Found by /qa on 2026-10-19
   test "does not suggest Flipper Cloud when destroying" do

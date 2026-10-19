@@ -24,14 +24,14 @@ module Flipper
       end
 
       def show_cloud_upgrade
-        return if options[:token] || behavior == :revoke
+        return if options[:token] || ENV["FLIPPER_CLOUD_TOKEN"] || behavior == :revoke
 
         say <<~MSG
 
           Flipper is installed and self-hosted: your app stores its own features.
 
-          For a hosted dashboard with audit history, environments, and teammates, move
-          your features to Flipper Cloud (free plan, no token needed to start):
+          For a hosted dashboard with audit history, environments, and teammates, try
+          Flipper Cloud (free plan, no token needed to start):
 
             bundle exec flipper cloud migrate
 
