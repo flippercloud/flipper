@@ -32,6 +32,14 @@ class SetupGeneratorTest < Rails::Generators::TestCase
     assert_no_match(/flipper cloud migrate/, output)
   end
 
+  # Regression: ISSUE-001 — `rails destroy flipper:setup` said Flipper was installed
+  # Found by /qa on 2026-10-19
+  test "does not suggest Flipper Cloud when destroying" do
+    run_generator
+    output = run_generator [], behavior: :revoke
+    assert_no_match(/flipper cloud migrate/, output)
+  end
+
   test "does not invoke flipper:active_record generator if ActiveRecord adapter not defined" do
     # Ensure adapter not defined
     Flipper::Adapters.send(:remove_const, :ActiveRecord) rescue nil

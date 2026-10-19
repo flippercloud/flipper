@@ -24,7 +24,7 @@ module Flipper
       end
 
       def show_cloud_upgrade
-        return if options[:token]
+        return if options[:token] || behavior == :revoke
 
         say <<~MSG
 
