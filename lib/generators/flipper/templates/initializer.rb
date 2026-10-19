@@ -23,7 +23,9 @@ Rails.application.configure do
 
   ## Flipper Cloud is built into this gem. Set FLIPPER_CLOUD_TOKEN (or
   ## `flipper: cloud_token:` in credentials) and Flipper syncs with Cloud.
-  ## Move your existing features to Cloud with `bundle exec flipper cloud migrate`.
+  ## New to Cloud? `bundle exec flipper cloud migrate` uploads your features and
+  ## gives you a link to sign up. Already have a Cloud project? Use
+  ## `bundle exec flipper cloud push <token>` to import them there instead.
   ## For more info, see https://www.flippercloud.io/docs/guides/migration
   ##
   ## The path that Flipper Cloud will use to sync features
