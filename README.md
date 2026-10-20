@@ -17,13 +17,33 @@ Control your software &mdash; don't let it control you.
 
 ## Installation
 
+### Rails
+
+```
+bundle add flipper-active_record
+bin/rails g flipper:setup
+bin/rails db:migrate
+```
+
+`flipper-active_record` brings in `flipper` and stores your features in your database. `flipper:setup` creates `config/initializers/flipper.rb` and the migration. Prefer Redis, Sequel, or something else? Pick another [adapter](https://flippercloud.io/docs/adapters). Want a web UI? Add [`flipper-ui`](https://flippercloud.io/docs/ui).
+
+To move your features to [Flipper Cloud](#flipper-cloud) later (free plan, no token needed to start):
+
+```
+bundle exec flipper cloud migrate
+```
+
+Cloud support is built into the `flipper` gem. The separate `flipper-cloud` gem is deprecated, so you don't need to add it.
+
+### Other Ruby apps
+
 Add this line to your application's Gemfile:
 
     gem 'flipper'
 
 You'll also want to pick a storage [adapter](https://flippercloud.io/docs/adapters), for example:
 
-    gem 'flipper-active_record'
+    gem 'flipper-redis'
 
 And then execute:
 
@@ -86,7 +106,7 @@ Like Flipper and want more? Check out [Flipper Cloud](https://www.flippercloud.i
 
 [![Flipper Cloud Screenshot](docs/images/flipper_cloud.png)](https://www.flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=screenshot)
 
-Cloud is super simple to integrate with Rails ([demo app](https://github.com/fewerandfaster/flipper-rails-demo)), Sinatra or any other framework.
+Cloud is super simple to integrate with Rails ([demo app](https://github.com/flippercloud/flipper-rails-demo)), Sinatra or any other framework.
 
 We also have a [free plan](https://www.flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=free_plan) that you can use forever.
 
