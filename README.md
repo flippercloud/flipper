@@ -25,7 +25,7 @@ bin/rails g flipper:setup
 bin/rails db:migrate
 ```
 
-`flipper-active_record` brings in `flipper` and stores your features in your database. `flipper:setup` creates `config/initializers/flipper.rb` and the migration. Prefer Redis, Sequel, or something else? Pick another [adapter](https://flippercloud.io/docs/adapters). Want a web UI? Add [`flipper-ui`](https://flippercloud.io/docs/ui).
+`flipper-active_record` brings in `flipper` and stores your features in your database. `flipper:setup` creates `config/initializers/flipper.rb` and the migration. Prefer Redis, Sequel, or something else? Pick another [adapter](https://flippercloud.io/docs/adapters). Add [`flipper-ui`](https://flippercloud.io/docs/ui) for a web UI.
 
 To move your features to [Flipper Cloud](#flipper-cloud) later (free plan, no token needed to start):
 
@@ -33,7 +33,7 @@ To move your features to [Flipper Cloud](#flipper-cloud) later (free plan, no to
 bundle exec flipper cloud migrate
 ```
 
-Cloud support is built into the `flipper` gem. The separate `flipper-cloud` gem is deprecated, so you don't need to add it.
+Cloud support is built into the `flipper` gem; the separate `flipper-cloud` gem is deprecated.
 
 ### Other Ruby apps
 
