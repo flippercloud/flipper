@@ -20,6 +20,7 @@ Gem::Specification.new do |gem|
   gem.post_install_message = <<~MSG
     flipper-cloud is deprecated. Flipper Cloud is built into the flipper gem,
     so replace gem 'flipper-cloud' with gem 'flipper' in your Gemfile.
+    Rails apps load Cloud automatically; other apps need require 'flipper/cloud'.
     https://www.flippercloud.io/docs/cloud
   MSG
 end
