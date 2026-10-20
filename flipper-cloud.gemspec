@@ -16,4 +16,10 @@ Gem::Specification.new do |gem|
   gem.metadata      = Flipper::METADATA
 
   gem.add_dependency 'flipper', "~> #{Flipper::VERSION}"
+
+  gem.post_install_message = <<~MSG
+    flipper-cloud is deprecated. Flipper Cloud is built into the flipper gem,
+    so replace gem 'flipper-cloud' with gem 'flipper' in your Gemfile.
+    https://www.flippercloud.io/docs/cloud
+  MSG
 end
