@@ -289,12 +289,6 @@ module Flipper
         end
       end
 
-      # Private: split request path by "/"
-      # Example: "features/feature_name" => ['features', 'feature_name']
-      def path_parts
-        @request.path.split('/')
-      end
-
       def valid_request_method?
         VALID_REQUEST_METHOD_NAMES.include?(request_method_name)
       end
