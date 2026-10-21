@@ -27,10 +27,6 @@ module Flipper
         !blank?(str)
       end
 
-      def self.titleize(str)
-        str.to_s.split('_').map(&:capitalize).join(' ')
-      end
-
       def self.truncate(str, length: 30)
         if str.length > length
           str[0..length]

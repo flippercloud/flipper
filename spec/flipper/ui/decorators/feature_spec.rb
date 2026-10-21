@@ -12,12 +12,6 @@ RSpec.describe Flipper::UI::Decorators::Feature do
     end
   end
 
-  describe '#pretty_name' do
-    it 'capitalizes each word separated by underscores' do
-      expect(subject.pretty_name).to eq('Some Awesome Feature')
-    end
-  end
-
   describe '#gates_in_words' do
     it 'escapes actor values in the tooltip title' do
       feature.enable_actor Flipper::Actor.new('x" onmouseover="alert(document.domain)')

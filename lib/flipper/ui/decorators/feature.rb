@@ -1,5 +1,4 @@
 require 'delegate'
-require 'flipper/ui/decorators/gate'
 require 'flipper/ui/util'
 
 module Flipper
@@ -18,11 +17,6 @@ module Flipper
         # Internal: Used to preload actor names if actor_names_source is
         # configured for Flipper::UI.
         attr_accessor :actor_names
-
-        # Public: Returns name titleized.
-        def pretty_name
-          @pretty_name ||= Util.titleize(name)
-        end
 
         def color_class
           case feature.state
@@ -70,10 +64,6 @@ module Flipper
           else
             "Disabled"
           end
-        end
-
-        def pretty_enabled_gate_names
-          enabled_gates.map { |gate| Util.titleize(gate.key) }.sort.join(', ')
         end
 
         StateSortMap = {
