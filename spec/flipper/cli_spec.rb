@@ -137,10 +137,25 @@ RSpec.describe Flipper::CLI do
 
   describe "help enable" do
     it { should have_attributes(status: 0, stdout: /Usage: flipper enable \[options\] <feature>/) }
+    it { should have_attributes(stdout: /--expression=JSON/) }
   end
 
   describe "nope" do
     it { should have_attributes(status: 1, stderr: /Unknown command: nope/) }
+  end
+
+  describe "help nope" do
+    it { should have_attributes(status: 1, stdout: /Usage: flipper/, stderr: /Unknown command: nope/) }
+  end
+
+  %w[enable disable show].each do |command|
+    describe command do
+      it { should have_attributes(status: 1, stdout: /Usage: flipper #{command} \[options\] <feature>/, stderr: /Missing feature name/) }
+    end
+  end
+
+  describe "cloud nope" do
+    it { should have_attributes(status: 1, stdout: /Usage: flipper cloud/, stderr: /Unknown command: cloud nope/) }
   end
 
   describe "--nope" do
