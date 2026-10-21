@@ -150,7 +150,7 @@ RSpec.describe Flipper::CLI do
 
   %w[enable disable show].each do |command|
     describe command do
-      it { should have_attributes(status: 1, stdout: /Usage: flipper #{command}/, stderr: /Missing feature name/) }
+      it { should have_attributes(status: 1, stdout: /Usage: flipper #{command} \[options\] <feature>/, stderr: /Missing feature name/) }
     end
   end
 

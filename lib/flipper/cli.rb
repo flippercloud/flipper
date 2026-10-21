@@ -79,6 +79,7 @@ module Flipper
       end
 
       command 'show' do |c|
+        c.banner = "Usage: #{c.program_name} [options] <feature>"
         c.description = "Show a defined feature"
         c.action do |feature|
           usage_error!(c.help, "Missing feature name") unless feature
