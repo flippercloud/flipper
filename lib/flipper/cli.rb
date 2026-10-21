@@ -57,7 +57,7 @@ module Flipper
           end
 
           c.action do |feature|
-            missing_feature!(c) unless feature
+            usage_error!(c.help, "Missing feature name") unless feature
             f = Flipper.feature(feature)
 
             if values.empty?
@@ -81,7 +81,7 @@ module Flipper
       command 'show' do |c|
         c.description = "Show a defined feature"
         c.action do |feature|
-          missing_feature!(c) unless feature
+          usage_error!(c.help, "Missing feature name") unless feature
           ui.info feature_details(Flipper.feature(feature))
         end
       end
@@ -145,13 +145,8 @@ module Flipper
       command 'help' do |c|
         c.load_environment = false
         c.action do |command = nil|
-          if command.nil? || @commands[command]
-            ui.info command ? @commands[command].help : help
-          else
-            ui.info help
-            ui.error "Unknown command: #{command}"
-            exit 1
-          end
+          usage_error!(help, "Unknown command: #{command}") if command && !@commands[command]
+          ui.info command ? @commands[command].help : help
         end
       end
 
@@ -185,13 +180,10 @@ module Flipper
       if @commands[command]
         load_environment! if @commands[command].load_environment
         @commands[command].run(args)
+      elsif command
+        usage_error!(help, "Unknown command: #{command}")
       else
         ui.info help
-
-        if command
-          ui.error "Unknown command: #{command}"
-          exit 1
-        end
       end
     rescue OptionParser::InvalidOption => e
       ui.error e.message
@@ -204,9 +196,10 @@ module Flipper
       block.call(@commands[name])
     end
 
-    def missing_feature!(command)
-      ui.info command.help
-      ui.error "Missing feature name"
+    # Print usage to stdout, the error to stderr, and exit non-zero.
+    def usage_error!(usage, message)
+      ui.info usage
+      ui.error message
       exit 1
     end
 
