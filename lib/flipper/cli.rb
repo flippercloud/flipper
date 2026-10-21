@@ -42,7 +42,7 @@ module Flipper
           c.on('-t NUM', '--percentage-of-time=NUM', Numeric, "#{action} for a percentage of time") do |num|
             values << Types::PercentageOfTime.new(num)
           end
-          c.on('-x expressions', '--expression=NUM', "#{action} for the given expression") do |expression|
+          c.on('-x expressions', '--expression=JSON', "#{action} for the given expression") do |expression|
             begin
               values << Flipper::Expression.build(JSON.parse(expression))
             rescue JSON::ParserError => e
@@ -57,6 +57,7 @@ module Flipper
           end
 
           c.action do |feature|
+            missing_feature!(c) unless feature
             f = Flipper.feature(feature)
 
             if values.empty?
@@ -80,6 +81,7 @@ module Flipper
       command 'show' do |c|
         c.description = "Show a defined feature"
         c.action do |feature|
+          missing_feature!(c) unless feature
           ui.info feature_details(Flipper.feature(feature))
         end
       end
@@ -131,6 +133,11 @@ module Flipper
             ui.info "Commands:"
             ui.info "  migrate  Migrate features to a new Flipper Cloud account"
             ui.info "  push     Push features to an existing Flipper Cloud project"
+
+            if subcommand
+              ui.error "Unknown command: cloud #{subcommand}"
+              exit 1
+            end
           end
         end
       end
@@ -138,7 +145,13 @@ module Flipper
       command 'help' do |c|
         c.load_environment = false
         c.action do |command = nil|
-          ui.info command ? @commands[command].help : help
+          if command.nil? || @commands[command]
+            ui.info command ? @commands[command].help : help
+          else
+            ui.info help
+            ui.error "Unknown command: #{command}"
+            exit 1
+          end
         end
       end
 
@@ -189,6 +202,12 @@ module Flipper
     def command(name, &block)
       @commands[name] = Command.new(program_name: "#{program_name} #{name}")
       block.call(@commands[name])
+    end
+
+    def missing_feature!(command)
+      ui.info command.help
+      ui.error "Missing feature name"
+      exit 1
     end
 
     def load_environment!
