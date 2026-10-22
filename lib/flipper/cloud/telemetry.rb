@@ -19,11 +19,11 @@ module Flipper
         instances.each { |_, instance| instance.stop }.clear
       end
 
-      # Internal: Fetch an instance of telemetry once per process per url +
-      # token (aka cloud endpoint). Should only ever be one instance unless you
+      # Internal: Fetch an instance of telemetry once per process per cloud
+      # endpoint. Should only ever be one instance unless you
       # are doing some funky stuff.
       def self.instance_for(cloud_configuration)
-        instances.compute_if_absent(cloud_configuration.url + cloud_configuration.token) do
+        instances.compute_if_absent(cloud_configuration.endpoint_key) do
           new(cloud_configuration)
         end
       end
