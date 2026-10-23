@@ -1,7 +1,9 @@
 require 'logger'
+require 'monitor'
 require 'concurrent/utility/monotonic_time'
 require 'concurrent/map'
 require 'concurrent/atomic/atomic_fixnum'
+require 'concurrent/atomic/atomic_boolean'
 
 module Flipper
   class Poller
@@ -17,23 +19,28 @@ module Flipper
     end
 
     def self.reset
-      instances.each do |_, instance|
+      instances.each do |key, instance|
         instance.stop
-        instance.thread&.join(1)
-      end.clear
+        instances.delete(key) unless instance.thread&.alive?
+      end
     end
 
     MINIMUM_POLL_INTERVAL = 10
+    STOP_JOIN_TIMEOUT = 1
 
     def initialize(options = {})
       @thread = nil
       @pid = Process.pid
       @mutex = Mutex.new
+      @lifecycle_mutex = Monitor.new
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
       @remote_adapter = options.fetch(:remote_adapter)
       @last_synced_at = Concurrent::AtomicFixnum.new(0)
       @adapter = Adapters::Memory.new(nil, threadsafe: true)
       @shutdown_requested = false
+      @stop_requested = Concurrent::AtomicBoolean.new(false)
+      @stop_mutex = Mutex.new
+      @stop_condition = ConditionVariable.new
 
       self.interval = options.fetch(:interval, 10)
       @initial_interval = @interval
@@ -53,21 +60,44 @@ module Flipper
       @instrumenter.instrument("poller.#{InstrumentationNamespace}", {
         operation: :stop,
       })
-      @thread&.kill
+
+      thread_to_stop = @lifecycle_mutex.synchronize do
+        @stop_mutex.synchronize do
+          @stop_requested.make_true
+          @stop_condition.broadcast
+          if @thread
+            @thread
+          else
+            @stop_requested.make_false
+            nil
+          end
+        end
+      end
+
+      return unless thread_to_stop
+      return if thread_to_stop.equal?(Thread.current)
+
+      thread_to_stop.join(STOP_JOIN_TIMEOUT)
+      clear_thread_if_current(thread_to_stop) unless thread_to_stop.alive?
     end
 
     def run
       loop do
-        sleep jitter
+        break if stop_requested?
+
+        break if wait_for_stop(jitter)
 
         begin
           sync
         rescue
           # you can instrument these using poller.flipper
         end
+        break if stop_requested?
 
-        sleep interval
+        break if wait_for_stop(interval)
       end
+    ensure
+      clear_thread_if_current(Thread.current)
     end
 
     def sync
@@ -111,8 +141,11 @@ module Flipper
         reset_if_forked
         return if @shutdown_requested
         return if thread_alive?
-        @thread = Thread.new { run }
-        @thread&.report_on_exception = false
+        thread = @lifecycle_mutex.synchronize do
+          clear_thread_if_current(@thread) if @thread
+          @thread = Thread.new { run }
+        end
+        thread&.report_on_exception = false
         @instrumenter.instrument("poller.#{InstrumentationNamespace}", {
           operation: :thread_start,
         })
@@ -125,11 +158,45 @@ module Flipper
       @thread && @thread.alive?
     end
 
+    def stop_requested?
+      @stop_requested.true? || @shutdown_requested
+    end
+
+    def clear_thread_if_current(thread)
+      @lifecycle_mutex.synchronize do
+        return unless @thread.equal?(thread)
+
+        @thread = nil
+        @stop_mutex.synchronize do
+          @stop_requested.make_false unless @shutdown_requested
+        end
+      end
+    end
+
+    def wait_for_stop(timeout)
+      return true if stop_requested?
+
+      deadline = Concurrent.monotonic_time + timeout
+      @stop_mutex.synchronize do
+        until stop_requested?
+          remaining = deadline - Concurrent.monotonic_time
+          break if remaining <= 0
+
+          # ConditionVariable#wait can return early (spurious wakeups on
+          # JRuby/TruffleRuby), so keep waiting the remaining time until the
+          # deadline passes to preserve the configured poll spacing.
+          @stop_condition.wait(@stop_mutex, remaining)
+        end
+        stop_requested?
+      end
+    end
+
     def reset_if_forked
       return if @pid == Process.pid
 
       @pid = Process.pid
       @shutdown_requested = false
+      @stop_requested.make_false
     end
 
     def request_shutdown
