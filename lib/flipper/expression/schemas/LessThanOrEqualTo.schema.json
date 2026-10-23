@@ -1,0 +1,8 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://www.flippercloud.io/expressions/LessThanOrEqualTo.schema.json",
+  "title": "LessThanOrEqualTo",
+  "description": "Compare if the first argument is < the second argument.",
+  "symbol": "≤",
+  "$ref": "schema.json#/definitions/operation"
+}

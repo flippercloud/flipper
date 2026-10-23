@@ -15,6 +15,8 @@ module Flipper
 
             begin
               expression = Flipper::Expression.build(expression_hash)
+              raise ArgumentError unless expression.valid?
+
               feature.enable_expression expression
               decorated_feature = Decorators::Feature.new(feature)
               json_response(decorated_feature.as_json, 200)

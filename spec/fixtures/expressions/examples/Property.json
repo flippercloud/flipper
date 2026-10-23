@@ -1,0 +1,27 @@
+{
+  "valid": [
+    {
+      "expression": { "Property": "name" },
+      "context": { "properties": { "name": "value" } },
+      "result": { "enum": ["value"] }
+    },
+    {
+      "expression": { "Property": ["flipper_id"] },
+      "context": { "properties": { "flipper_id": "User;1" } },
+      "result": { "enum": ["User;1"] }
+    },
+    {
+      "expression": { "Property": ["flipper_id"] },
+      "context": { "properties": { } },
+      "result": { "enum": [null] }
+    },
+    {
+      "expression": { "Property": ["flipper_id"] },
+      "result": { "enum": [null] }
+    }
+  ],
+  "invalid": [
+    { "Property": [] },
+    { "Property": null }
+  ]
+}
