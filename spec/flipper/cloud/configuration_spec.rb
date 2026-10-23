@@ -1,5 +1,9 @@
 require 'flipper/cloud/configuration'
+require 'flipper/cloud/dsl'
 require 'flipper/adapters/instrumented'
+require 'flipper/adapters/sync/interval_synchronizer'
+require 'flipper/instrumenters/memory'
+require 'timeout'
 
 RSpec.describe Flipper::Cloud::Configuration do
   let(:required_options) do
@@ -75,6 +79,22 @@ RSpec.describe Flipper::Cloud::Configuration do
     instance = described_class.new(required_options.merge(sync_interval: 20))
     poller = instance.send(:poller)
     expect(poller.interval).to eq(20)
+  end
+
+  it "uses the supplied local adapter without changing its composition" do
+    memory = Flipper::Adapters::Memory.new
+    persistent = Flipper::Adapters::Memory.new
+    mirrored = Flipper::Adapters::DualWrite.new(memory, persistent)
+    adapter = Flipper::Adapters::Strict.new(mirrored, :warn)
+    Flipper.new(mirrored).add(:search)
+    instance = described_class.new(required_options.merge(local_adapter: adapter, sync_secret: "secret"))
+
+    flipper = Flipper::Cloud::DSL.new(instance)
+    expect(instance.local_adapter).to be(adapter)
+    expect(adapter).to receive(:get).with(flipper[:search]).and_call_original
+    expect(flipper.enabled?(:search)).to be(false)
+    expect(instance).not_to respond_to(:local_memory)
+    expect(instance).not_to respond_to(:local_adapter_memory_backed)
   end
 
   it "can set debug_output" do
@@ -298,5 +318,166 @@ RSpec.describe Flipper::Cloud::Configuration do
     expect(all.keys).to eq(["search", "history"])
     expect(all["search"][:boolean]).to eq("true")
     expect(all["history"][:boolean]).to eq(nil)
+  end
+
+  it "polls in the background and applies changes to local on the calling thread" do
+    local_adapter = Flipper::Adapters::OperationLogger.new(Flipper::Adapters::Memory.new)
+    Flipper.new(local_adapter).add(:search)
+
+    body = JSON.generate({
+      features: [
+        {
+          key: "search",
+          gates: [
+            {key: "boolean", value: true},
+          ],
+        },
+      ],
+    })
+    stub_request(:get, "https://www.flippercloud.io/adapter/features?exclude_gate_names=true").
+      to_return(status: 200, body: body)
+
+    configuration = described_class.new(required_options.merge(local_adapter: local_adapter))
+    flipper = Flipper::Cloud::DSL.new(configuration)
+    local_adapter.reset
+
+    polling_thread = Thread.new { configuration.send(:poller).sync }
+    expect(polling_thread.join(1)).to be(polling_thread)
+
+    expect(local_adapter.count).to be(0)
+
+    calling_thread = Thread.current
+    mutation_threads = []
+    allow(local_adapter).to receive(:enable).and_wrap_original do |original, *args|
+      mutation_threads << Thread.current
+      original.call(*args)
+    end
+
+    expect(flipper.enabled?(:search)).to be(true)
+    expect(local_adapter.count(:get_all)).to be(1)
+    expect(local_adapter.count(:get)).to be(1)
+    expect(local_adapter.count(:enable)).to be(1)
+    expect(mutation_threads).to contain_exactly(calling_thread)
+  end
+
+  it "reports polling persistence failures while keeping reads available and explicit sync strict" do
+    memory = Flipper::Adapters::Memory.new(threadsafe: true)
+    persistent = Flipper::Adapters::Memory.new(threadsafe: true)
+    local = Flipper::Adapters::DualWrite.new(memory, persistent)
+    Flipper.new(local).disable(:search)
+    instrumenter = Flipper::Instrumenters::Memory.new
+    state = Flipper::Adapters::Sync::IntervalSynchronizer::State.new(synced: true)
+    configuration = described_class.new(required_options.merge(
+      local_adapter: local,
+      synchronization_state: state,
+      instrumenter: instrumenter,
+    ))
+    body = Flipper::Typecast.to_json(features: [{key: "search", gates: [{key: "boolean", value: true}]}])
+    stub_request(:get, %r{\Ahttps://www\.flippercloud\.io/adapter/features\?}).
+      to_return(status: 200, body: body)
+    poller = configuration.send(:poller)
+    allow(poller).to receive(:start)
+    poller.sync
+    failure = StandardError.new("database unavailable")
+    allow(persistent).to receive(:enable).and_raise(failure)
+
+    expect(Flipper::Cloud::DSL.new(configuration).enabled?(:search)).to be(false)
+    expect(instrumenter.events_by_name("synchronizer_exception.flipper").size).to eq(1)
+    expect { configuration.sync(cache_bust: true) }.to raise_error(failure)
+    expect(state.last_poll_at).to eq(0)
+  end
+
+  it "does not let an older persistence refresh overwrite a forced sync" do
+    memory = Flipper::Adapters::Memory.new(threadsafe: true)
+    persistent = Flipper::Adapters::Memory.new(threadsafe: true)
+    Flipper.new(memory).disable(:search)
+    Flipper.new(persistent).disable(:search)
+    state = Flipper::Adapters::Sync::IntervalSynchronizer::State.new(synced: true)
+    local_adapter = Flipper::Adapters::DualWrite.new(memory, persistent)
+    configuration = described_class.new(required_options.merge(
+      local_adapter: local_adapter,
+      synchronization_state: state,
+    ))
+    body = Flipper::Typecast.to_json({
+      features: [
+        {
+          key: "search",
+          gates: [
+            {key: "boolean", value: true},
+          ],
+        },
+      ],
+    })
+    stub_request(:get, %r{\Ahttps://www\.flippercloud\.io/adapter/features\?}).
+      to_return(status: 200, body: body)
+    refresh_started = Queue.new
+    release_refresh = Queue.new
+    refresh = Flipper::Adapters::Sync::IntervalSynchronizer.new(-> {
+      old_snapshot = Flipper::Adapters::Memory.new(persistent.get_all)
+      refresh_started << true
+      release_refresh.pop
+      memory.import(old_snapshot)
+    }, interval: 10, state: state)
+    allow(refresh).to receive(:now).and_return(Process.clock_gettime(Process::CLOCK_MONOTONIC, :second) + 11)
+
+    refresh_thread = Thread.new { refresh.call }
+    Timeout.timeout(1) { refresh_started.pop }
+    webhook_thread = Thread.new { configuration.sync(cache_bust: true) }
+    release_refresh << true
+    expect(refresh_thread.join(1)).to be(refresh_thread)
+    expect(webhook_thread.join(1)).to be(webhook_thread)
+
+    expect(Flipper.new(memory).enabled?(:search)).to be(true)
+    expect(Flipper.new(persistent).enabled?(:search)).to be(true)
+  ensure
+    release_refresh << true if refresh_thread&.alive?
+    refresh_thread&.join(1)
+    webhook_thread&.join(1)
+  end
+
+  it "does not apply a buffered poll after a forced sync" do
+    state = Flipper::Adapters::Sync::IntervalSynchronizer::State.new(synced: true)
+    local = Flipper::Adapters::Memory.new(threadsafe: true)
+    Flipper.new(local).disable(:search)
+    buffered = Flipper::Adapters::Memory.new(threadsafe: true)
+    Flipper.new(buffered).disable(:search)
+    poller = double(
+      "Poller",
+      adapter: buffered,
+      last_synced_at: Concurrent::AtomicFixnum.new(1),
+    )
+    allow(poller).to receive(:start)
+    state.poll_started
+    configuration = described_class.new(required_options.merge(
+      local_adapter: local,
+      synchronization_state: state,
+    ))
+    allow(configuration).to receive(:poller).and_return(poller)
+    body = Flipper::Typecast.to_json({
+      features: [
+        {
+          key: "search",
+          gates: [
+            {key: "boolean", value: true},
+          ],
+        },
+      ],
+    })
+    stub_request(:get, %r{\Ahttps://www\.flippercloud\.io/adapter/features\?}).
+      to_return(status: 200, body: body)
+
+    configuration.sync(cache_bust: true)
+    flipper = Flipper::Cloud::DSL.new(configuration)
+
+    expect(flipper.enabled?(:search)).to be(true)
+    expect(state.last_poll_at).to eq(1)
+  end
+
+  it "does not share a poller across synchronization states" do
+    uncoordinated = described_class.new(required_options)
+    state = Flipper::Adapters::Sync::IntervalSynchronizer::State.new(synced: true)
+    coordinated = described_class.new(required_options.merge(synchronization_state: state))
+
+    expect(coordinated.send(:poller)).not_to be(uncoordinated.send(:poller))
   end
 end
