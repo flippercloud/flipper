@@ -25,27 +25,7 @@ RSpec.describe Flipper::Adapters::Mongo do
   end
 
   it_should_behave_like 'a flipper adapter'
-
-  it 'refuses writes to a feature named flipper_features' do
-    subject.add(Flipper::Feature.new(:search, subject))
-    feature = Flipper::Feature.new(:flipper_features, subject)
-    boolean = feature.gate(:boolean)
-    actor = feature.gate(:actor)
-
-    [
-      -> { subject.add(feature) },
-      -> { subject.enable(feature, boolean, Flipper::Types::Boolean.new(true)) },
-      -> { subject.enable(feature, actor, Flipper::Types::Actor.new(Flipper::Actor.new("User;1"))) },
-      -> { subject.disable(feature, boolean, Flipper::Types::Boolean.new(false)) },
-      -> { subject.clear(feature) },
-      -> { subject.remove(feature) },
-    ].each do |write|
-      expect(write).to raise_error(ArgumentError, /"flipper_features" is reserved/)
-    end
-
-    expect(subject.features).to eq(Set["search"])
-    expect(subject.get_all.keys).to eq(["search"])
-  end
+  it_should_behave_like 'an adapter that protects its feature list'
 
   it 'configures itself on load' do
     Flipper.configuration = nil
