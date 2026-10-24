@@ -9,6 +9,22 @@ module Flipper
     # Private: The name of feature instrumentation events.
     InstrumentationName = "feature_operation.#{InstrumentationNamespace}".freeze
 
+    # Private: Gates hold no state, so every feature shares the same instances
+    # instead of allocating six per feature (adapters build throwaway features
+    # on every get_all).
+    GATES_HASH = {
+      boolean: Gates::Boolean.new,
+      expression: Gates::Expression.new,
+      actor: Gates::Actor.new,
+      percentage_of_actors: Gates::PercentageOfActors.new,
+      percentage_of_time: Gates::PercentageOfTime.new,
+      group: Gates::Group.new,
+    }.freeze
+    private_constant :GATES_HASH
+
+    GATES = GATES_HASH.values.freeze
+    private_constant :GATES
+
     # Public: The name of the feature.
     attr_reader :name
 
@@ -406,18 +422,11 @@ module Flipper
     #
     # Returns an array of gates
     def gates
-      @gates ||= gates_hash.values.freeze
+      GATES
     end
 
     def gates_hash
-      @gates_hash ||= {
-        boolean: Gates::Boolean.new,
-        expression: Gates::Expression.new,
-        actor: Gates::Actor.new,
-        percentage_of_actors: Gates::PercentageOfActors.new,
-        percentage_of_time: Gates::PercentageOfTime.new,
-        group: Gates::Group.new,
-      }.freeze
+      GATES_HASH
     end
 
     # Public: Find a gate by name.
