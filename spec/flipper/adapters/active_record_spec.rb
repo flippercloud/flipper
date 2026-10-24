@@ -35,7 +35,7 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
     {
       "adapter" => "postgresql",
       "encoding" => "unicode",
-      "host" => "127.0.0.1",
+      "host" => ENV["POSTGRES_HOST"] || "127.0.0.1",
       "username" => ENV["POSTGRES_USER"] || "",
       "password" => ENV["POSTGRES_PASSWORD"] || "",
       "database" => ENV["POSTGRES_DATABASE"] || "flipper_test",

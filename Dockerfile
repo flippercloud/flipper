@@ -1,24 +1,16 @@
-FROM ruby:3.0
+# Matches the newest Ruby in CI (.github/workflows/ci.yml).
+FROM ruby:3.3
 
-RUN apt-get update && apt-get install -y \
-  # build-essential \
+# chromium runs the Rails system test (test_rails/system) through cuprite.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    chromium \
+    vim \
+  && rm -rf /var/lib/apt/lists/*
 
-  # for postgres
-  # libpq-dev \
-  # postgresql-client-9.4 \
+ENV APP_HOME=/srv/app
 
-  # for nokogiri
-  # libxml2-dev \
-  # libxslt1-dev \
-
-  # for a JS runtime
-  # imagemagick \
-  # ghostscript \
-
-  # debug tools
-  vim
-
-ENV APP_HOME /srv/app
+# Chromium refuses to run as root without --no-sandbox; this tells Ferrum to add it.
+ENV FERRUM_CHROME_DOCKERIZE=true
 
 ENV BUNDLE_GEMFILE=$APP_HOME/Gemfile \
     BUNDLE_JOBS=8 \
