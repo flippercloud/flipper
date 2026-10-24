@@ -50,13 +50,13 @@ module Flipper
 
       # Public: Removes a feature from the set of known features.
       def remove(feature)
-        ensure_not_features_key!(feature)
         if redis_sadd_returns_boolean?
           with_connection { |conn| conn.srem? features_key, feature.key }
         else
           with_connection { |conn| conn.srem features_key, feature.key }
         end
-        with_connection { |conn| conn.del key_for(feature.key) }
+        # Removing a reserved name left in the list must not delete the list.
+        with_connection { |conn| conn.del key_for(feature.key) } unless features_key?(feature)
         true
       end
 
@@ -141,8 +141,12 @@ module Flipper
 
       # Private: The feature list is stored at features_key, so writing a
       # feature whose key is the same would overwrite or delete it.
+      def features_key?(feature)
+        key_for(feature.key) == features_key
+      end
+
       def ensure_not_features_key!(feature)
-        return unless key_for(feature.key) == features_key
+        return unless features_key?(feature)
 
         raise ArgumentError, "#{feature.key.inspect} is reserved by the Redis adapter and cannot be used as a feature name"
       end

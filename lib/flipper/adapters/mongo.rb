@@ -29,9 +29,9 @@ module Flipper
 
       # Public: Removes a feature from the set of known features.
       def remove(feature)
-        ensure_not_features_key!(feature)
         update @features_key, '$pull' => { 'features' => feature.key }
-        clear feature
+        # Removing a reserved name left in the list must not delete the list.
+        clear feature unless features_key?(feature)
         true
       end
 
@@ -129,8 +129,12 @@ module Flipper
       # Private: The feature list is stored in the document with the
       # features key as its id, so writing a feature with that key would
       # overwrite or delete it.
+      def features_key?(feature)
+        feature.key == @features_key.to_s
+      end
+
       def ensure_not_features_key!(feature)
-        return unless feature.key == @features_key.to_s
+        return unless features_key?(feature)
 
         raise ArgumentError, "#{feature.key.inspect} is reserved by the Mongo adapter and cannot be used as a feature name"
       end
