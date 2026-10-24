@@ -102,21 +102,6 @@ module Flipper
         end
       end
 
-      # Public: Runs another action from within the request method of a
-      # different action.
-      #
-      # action_class - The class of the other action to run.
-      #
-      # Examples
-      #
-      #   run_other_action Home
-      #   # => result of running Home action
-      #
-      # Returns result of other action.
-      def run_other_action(action_class)
-        action_class.new(flipper, request).run
-      end
-
       # Public: Call this with a response to immediately stop the current action
       # and respond however you want.
       #
