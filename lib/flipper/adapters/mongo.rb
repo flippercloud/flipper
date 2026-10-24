@@ -22,12 +22,14 @@ module Flipper
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
+        ensure_not_features_key!(feature)
         update @features_key, '$addToSet' => { 'features' => feature.key }
         true
       end
 
       # Public: Removes a feature from the set of known features.
       def remove(feature)
+        ensure_not_features_key!(feature)
         update @features_key, '$pull' => { 'features' => feature.key }
         clear feature
         true
@@ -35,6 +37,7 @@ module Flipper
 
       # Public: Clears all the gate values for a feature.
       def clear(feature)
+        ensure_not_features_key!(feature)
         delete feature.key
         true
       end
@@ -64,6 +67,7 @@ module Flipper
       #
       # Returns true.
       def enable(feature, gate, thing)
+        ensure_not_features_key!(feature)
         case gate.data_type
         when :boolean
           clear(feature)
@@ -97,6 +101,7 @@ module Flipper
       #
       # Returns true.
       def disable(feature, gate, thing)
+        ensure_not_features_key!(feature)
         case gate.data_type
         when :boolean
           delete feature.key
@@ -120,6 +125,15 @@ module Flipper
       end
 
       private
+
+      # Private: The feature list is stored in the document with the
+      # features key as its id, so writing a feature with that key would
+      # overwrite or delete it.
+      def ensure_not_features_key!(feature)
+        return unless feature.key == @features_key.to_s
+
+        raise ArgumentError, "#{feature.key.inspect} is reserved by the Mongo adapter and cannot be used as a feature name"
+      end
 
       def read_feature_keys
         find(@features_key).fetch('features') { Set.new }.to_set

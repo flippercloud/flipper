@@ -39,6 +39,7 @@ module Flipper
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
+        ensure_not_features_key!(feature)
         if redis_sadd_returns_boolean?
           with_connection { |conn| conn.sadd? features_key, feature.key }
         else
@@ -49,6 +50,7 @@ module Flipper
 
       # Public: Removes a feature from the set of known features.
       def remove(feature)
+        ensure_not_features_key!(feature)
         if redis_sadd_returns_boolean?
           with_connection { |conn| conn.srem? features_key, feature.key }
         else
@@ -60,6 +62,7 @@ module Flipper
 
       # Public: Clears the gate values for a feature.
       def clear(feature)
+        ensure_not_features_key!(feature)
         with_connection { |conn| conn.del key_for(feature.key) }
         true
       end
@@ -89,6 +92,7 @@ module Flipper
       #
       # Returns true.
       def enable(feature, gate, thing)
+        ensure_not_features_key!(feature)
         feature_key = key_for(feature.key)
         case gate.data_type
         when :boolean
@@ -115,6 +119,7 @@ module Flipper
       #
       # Returns true.
       def disable(feature, gate, thing)
+        ensure_not_features_key!(feature)
         feature_key = key_for(feature.key)
         case gate.data_type
         when :boolean
@@ -133,6 +138,14 @@ module Flipper
       end
 
       private
+
+      # Private: The feature list is stored at features_key, so writing a
+      # feature whose key is the same would overwrite or delete it.
+      def ensure_not_features_key!(feature)
+        return unless key_for(feature.key) == features_key
+
+        raise ArgumentError, "#{feature.key.inspect} is reserved by the Redis adapter and cannot be used as a feature name"
+      end
 
       def redis_sadd_returns_boolean?
         @sadd_returns_boolean
