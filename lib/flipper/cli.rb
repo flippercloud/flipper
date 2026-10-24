@@ -115,7 +115,7 @@ module Flipper
             end
           when 'push'
             token = args.first || prompt_for_cloud_token
-            if token.nil? || token.empty?
+            if token.to_s.empty?
               ui.error "Usage: flipper cloud push [token]"
               exit 1
             end
