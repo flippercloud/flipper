@@ -21,6 +21,7 @@ module Flipper
         @memoize = false
         @features_key = :flipper_features
         @get_all_key = :all_memoized
+        @cache_key_by_feature_key = Hash.new { |hash, key| hash[key] = "feature/#{key}".freeze }
       end
 
       # Public
@@ -156,7 +157,7 @@ module Flipper
       private
 
       def key_for(key)
-        "feature/#{key}"
+        @cache_key_by_feature_key[key]
       end
 
       def expire_feature(feature)
