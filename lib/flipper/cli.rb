@@ -114,9 +114,9 @@ module Flipper
               exit 1
             end
           when 'push'
-            token = args.first
-            unless token
-              ui.error "Usage: flipper cloud push <token>"
+            token = args.first || prompt_for_cloud_token
+            if token.nil? || token.empty?
+              ui.error "Usage: flipper cloud push [token]"
               exit 1
             end
             result = Flipper::Cloud.push(token, Flipper)
@@ -133,7 +133,7 @@ module Flipper
             ui.info ""
             ui.info "Commands:"
             ui.info "  migrate  Migrate features to a new Flipper Cloud account"
-            ui.info "  push     Push features to an existing Flipper Cloud project"
+            ui.info "  push     Push features to an existing Flipper Cloud project (asks for the token)"
 
             if subcommand
               ui.error "Unknown command: cloud #{subcommand}"
@@ -202,6 +202,18 @@ module Flipper
       ui.info usage
       ui.error message
       exit 1
+    end
+
+    # Ask for the Cloud token without echoing it, so it stays out of shell
+    # history and the process list. Returns nil when stdin isn't a terminal.
+    def prompt_for_cloud_token
+      return unless $stdin.tty?
+
+      require "io/console"
+      shell.stderr.print "Flipper Cloud token: "
+      token = $stdin.noecho(&:gets)
+      shell.stderr.puts
+      token&.strip
     end
 
     def load_environment!
