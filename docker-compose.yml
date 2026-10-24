@@ -19,11 +19,23 @@ services:
       retries: 30
   redis:
     image: redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      retries: 30
   mongo:
     # CI asks for `mongodb-version: 4.0`, which YAML reads as 4, so CI gets mongo:4 (4.4).
     image: mongo:4.4
+    healthcheck:
+      test: ["CMD", "mongo", "--quiet", "--eval", "db.runCommand({ ping: 1 }).ok"]
+      interval: 2s
+      retries: 30
   memcached:
     image: memcached
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/11211"]
+      interval: 2s
+      retries: 30
   app:
     build: .
     volumes:
@@ -35,11 +47,11 @@ services:
       mysql:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
       mongo:
-        condition: service_started
+        condition: service_healthy
       memcached:
-        condition: service_started
+        condition: service_healthy
     environment:
       - REDIS_URL=redis://redis:6379
       - MONGODB_HOST=mongo
