@@ -20,7 +20,8 @@ services:
   redis:
     image: redis
   mongo:
-    image: mongo:4.0
+    # CI asks for `mongodb-version: 4.0`, which YAML reads as 4, so CI gets mongo:4 (4.4).
+    image: mongo:4.4
   memcached:
     image: memcached
   app:
