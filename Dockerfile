@@ -9,6 +9,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ENV APP_HOME=/srv/app
 
+# Chromium refuses to run as root without --no-sandbox; this tells Ferrum to add it.
+ENV FERRUM_CHROME_DOCKERIZE=true
+
 ENV BUNDLE_GEMFILE=$APP_HOME/Gemfile \
     BUNDLE_JOBS=8 \
     BUNDLE_PATH=/bundle_cache
