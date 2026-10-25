@@ -131,8 +131,11 @@ RSpec.describe Flipper::Api do
   end
 
   it "loads without Bundler, as in a plain Rack app" do
+    # RUBYLIB finds the bundled gems (CI installs them outside GEM_HOME)
+    # without loading Bundler, which would load pathname for us.
+    env = { "RUBYLIB" => $LOAD_PATH.join(File::PATH_SEPARATOR) }
     _, stderr, status = Bundler.with_unbundled_env do
-      Open3.capture3(RbConfig.ruby, "-Ilib", "-e", "require 'flipper/api'", chdir: File.expand_path("../..", __dir__))
+      Open3.capture3(env, RbConfig.ruby, "-Ilib", "-e", "require 'flipper/api'", chdir: File.expand_path("../..", __dir__))
     end
 
     expect(status).to be_success, stderr
