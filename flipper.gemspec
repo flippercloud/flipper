@@ -3,22 +3,13 @@ require File.expand_path('../lib/flipper/version', __FILE__)
 require File.expand_path('../lib/flipper/metadata', __FILE__)
 
 plugin_files = []
-plugin_test_files = []
 
 Dir['flipper-*.gemspec'].map do |gemspec|
   spec = Gem::Specification.load(gemspec)
   plugin_files << spec.files
-  plugin_test_files << spec.files
 end
 
-ignored_files = plugin_files
-ignored_files << Dir['script/*']
-ignored_files << '.gitignore'
-ignored_files << 'Guardfile'
-ignored_files.flatten!.uniq!
-
-ignored_test_files = plugin_test_files
-ignored_test_files.flatten!.uniq!
+plugin_files.flatten!.uniq!
 
 Gem::Specification.new do |gem|
   gem.authors       = ['John Nunemaker']
@@ -29,8 +20,8 @@ Gem::Specification.new do |gem|
 
   gem.bindir = "exe"
   gem.executables   = `git ls-files -- exe/*`.split("\n").map { |f| File.basename(f) }
-  gem.files         = `git ls-files`.split("\n") - ignored_files + ['lib/flipper/version.rb']
-  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n") - ignored_test_files
+  # Ship only what apps load at runtime, not specs, examples, or dev tooling.
+  gem.files         = `git ls-files -- lib exe README.md LICENSE Changelog.md`.split("\n") - plugin_files + ['lib/flipper/version.rb']
   gem.name          = 'flipper'
   gem.require_paths = ['lib']
   gem.version       = Flipper::VERSION
