@@ -2,14 +2,7 @@
 require File.expand_path('../lib/flipper/version', __FILE__)
 require File.expand_path('../lib/flipper/metadata', __FILE__)
 
-plugin_files = []
-
-Dir['flipper-*.gemspec'].map do |gemspec|
-  spec = Gem::Specification.load(gemspec)
-  plugin_files << spec.files
-end
-
-plugin_files.flatten!.uniq!
+plugin_files = Dir['flipper-*.gemspec'].flat_map { |gemspec| Gem::Specification.load(gemspec).files }
 
 Gem::Specification.new do |gem|
   gem.authors       = ['John Nunemaker']
