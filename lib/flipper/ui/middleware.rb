@@ -1,3 +1,4 @@
+require 'pathname'
 require 'rack'
 require 'flipper/ui/action_collection'
 
