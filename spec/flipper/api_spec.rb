@@ -1,3 +1,5 @@
+require "open3"
+
 RSpec.describe Flipper::Api do
   describe 'Initializing middleware with flipper instance' do
     let(:app) { build_api(flipper) }
@@ -126,5 +128,13 @@ RSpec.describe Flipper::Api do
     it 'returns a String' do
       expect(build_api(flipper).inspect).to eq("Flipper::Api")
     end
+  end
+
+  it "loads without Bundler, as in a plain Rack app" do
+    _, stderr, status = Bundler.with_unbundled_env do
+      Open3.capture3(RbConfig.ruby, "-Ilib", "-e", "require 'flipper/api'", chdir: File.expand_path("../..", __dir__))
+    end
+
+    expect(status).to be_success, stderr
   end
 end
