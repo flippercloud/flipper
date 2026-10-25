@@ -6,7 +6,6 @@ require "set"
 # Files that should exist in main flipper gem.
 main_flipper_active_record_files = Set[
   "lib/flipper/model/active_record.rb",
-  "spec/flipper/model/active_record_spec.rb",
 ]
 
 flipper_active_record_files = lambda do |file|
@@ -24,8 +23,7 @@ Gem::Specification.new do |gem|
     'lib/generators/flipper/templates/migration.erb',
     'lib/flipper/version.rb',
   ]
-  gem.files         = `git ls-files`.split("\n").select(&flipper_active_record_files) + extra_files
-  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n").select(&flipper_active_record_files)
+  gem.files         = `git ls-files -- lib`.split("\n").select(&flipper_active_record_files) + extra_files
   gem.name          = 'flipper-active_record'
   gem.require_paths = ['lib']
   gem.version       = Flipper::VERSION

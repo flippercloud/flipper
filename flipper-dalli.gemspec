@@ -13,8 +13,7 @@ Gem::Specification.new do |gem|
   gem.license       = 'MIT'
   gem.homepage      = 'https://www.flippercloud.io/docs/adapters'
 
-  gem.files         = `git ls-files`.split("\n").select(&flipper_dalli_files) + ['lib/flipper/version.rb']
-  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n").select(&flipper_dalli_files)
+  gem.files         = `git ls-files -- lib`.split("\n").select(&flipper_dalli_files) + ['lib/flipper/version.rb']
   gem.name          = 'flipper-dalli'
   gem.require_paths = ['lib']
   gem.version       = Flipper::VERSION
