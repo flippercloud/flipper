@@ -18,7 +18,7 @@ Dir[File.expand_path("../../flipper-*.gemspec", __dir__)].sort.each do |path|
 
     it "packages only lib files" do
       expect(spec.files).not_to be_empty
-      expect(spec.files.reject { |file| file.start_with?("lib/") }).to eq([])
+      expect(spec.files).to all(start_with("lib/"))
     end
   end
 end
