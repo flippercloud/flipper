@@ -219,7 +219,8 @@ module Flipper
         path = views_path.join("#{name}.erb")
         raise "Template does not exist: #{path}" unless path.exist?
 
-        eval(Erubi::Engine.new(path.read, escape: true).src)
+        # Views are UTF-8 (layout.erb has "‹"), whatever Ruby's default encoding is.
+        eval(Erubi::Engine.new(path.read(encoding: Encoding::UTF_8), escape: true).src)
       end
 
       # Internal: The path the app is mounted at.
