@@ -28,6 +28,14 @@ RSpec.describe Flipper::UI::Actions::Features do
       end
     end
 
+    it "renders when Ruby's default external encoding is US-ASCII (LANG=C)" do
+      flipper[:search].enable
+      with_default_external(Encoding::US_ASCII) { get '/features' }
+
+      expect(last_response.status).to be(200)
+      expect(last_response.body).to include('search')
+    end
+
     it "escapes keys that are junky" do
       flipper.add("../../../../blah")
       flipper.add("this that")
@@ -294,5 +302,13 @@ RSpec.describe Flipper::UI::Actions::Features do
         expect(last_response.body).to include('Feature creation is disabled.')
       end
     end
+  end
+
+  def with_default_external(encoding)
+    original = Encoding.default_external
+    Encoding.default_external = encoding
+    yield
+  ensure
+    Encoding.default_external = original
   end
 end
