@@ -14,7 +14,7 @@ RSpec.shared_examples 'an adapter that protects its feature list' do
       -> { subject.disable(feature, boolean, Flipper::Types::Boolean.new(false)) },
       -> { subject.clear(feature) },
     ].each do |write|
-      expect(write).to raise_error(ArgumentError, /"flipper_features" is reserved/)
+      expect(&write).to raise_error(ArgumentError, /"flipper_features" is reserved/)
     end
 
     expect(subject.features).to eq(Set["search"])
