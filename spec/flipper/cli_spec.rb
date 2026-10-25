@@ -223,6 +223,49 @@ RSpec.describe Flipper::CLI do
 
     it "prints success message" do
       expect(subject).to have_attributes(status: 0, stdout: /Successfully pushed/)
+      expect(Flipper::Cloud).to have_received(:push).with("test-token", Flipper)
+    end
+  end
+
+  describe "cloud push" do
+    let(:argv) { %w[cloud push] }
+    let(:stdin) { StringIO.new }
+
+    around do |example|
+      original, $stdin = $stdin, stdin
+      example.run
+    ensure
+      $stdin = original
+    end
+
+    before do
+      require 'flipper/cloud/migrate'
+      allow(Flipper::Cloud).to receive(:push).and_return(
+        Flipper::Cloud::MigrateResult.new(code: 204, url: nil)
+      )
+    end
+
+    context "from a terminal" do
+      let(:stdin) { StringIO.new("secret-token\n") }
+
+      before do
+        allow(stdin).to receive(:tty?).and_return(true)
+        allow(stdin).to receive(:noecho) { |&block| block.call(stdin) }
+      end
+
+      it "asks for the token without echoing it" do
+        expect(subject).to have_attributes(status: 0, stdout: /Successfully pushed/, stderr: /Flipper Cloud token: /)
+        expect(stdin).to have_received(:noecho)
+        expect(Flipper::Cloud).to have_received(:push).with("secret-token", Flipper)
+        expect(subject.stdout + subject.stderr).not_to include("secret-token")
+      end
+    end
+
+    context "without a terminal" do
+      it "prints usage and does not push" do
+        expect(subject).to have_attributes(status: 1, stderr: /Usage: flipper cloud push \[token\]/)
+        expect(Flipper::Cloud).not_to have_received(:push)
+      end
     end
   end
 
