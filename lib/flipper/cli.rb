@@ -1,5 +1,4 @@
 require 'optparse'
-require 'bundler'
 require 'bundler/vendored_thor'
 require 'bundler/ui/shell'
 
