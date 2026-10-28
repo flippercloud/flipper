@@ -78,6 +78,16 @@ RSpec.describe Flipper::Instrumentation::StatsdSubscriber do
     assert_timer 'flipper.adapter.memory.disable'
   end
 
+  # Events the gem instruments that have no metrics of their own.
+  %w(synchronizer_call synchronizer_exception poller telemetry_error telemetry_retry).each do |operation|
+    it "ignores #{operation} events without printing" do
+      expect {
+        ActiveSupport::Notifications.instrument("#{operation}.flipper", {})
+      }.not_to output.to_stdout
+      expect(socket.buffer).to be_empty
+    end
+  end
+
   context 'when client is nil' do
     before do
       described_class.client = nil
