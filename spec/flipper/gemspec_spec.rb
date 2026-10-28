@@ -11,3 +11,14 @@ RSpec.describe "flipper.gemspec" do
     expect(spec.files).not_to include("lib/flipper/adapters/redis.rb")
   end
 end
+
+Dir[File.expand_path("../../flipper-*.gemspec", __dir__)].sort.each do |path|
+  RSpec.describe File.basename(path) do
+    let(:spec) { Gem::Specification.load(path) }
+
+    it "packages only lib files" do
+      expect(spec.files).not_to be_empty
+      expect(spec.files).to all(start_with("lib/"))
+    end
+  end
+end

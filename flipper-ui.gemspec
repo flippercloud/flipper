@@ -3,7 +3,7 @@ require File.expand_path('../lib/flipper/version', __FILE__)
 require File.expand_path('../lib/flipper/metadata', __FILE__)
 
 flipper_ui_files = lambda do |file|
-  file =~ %r{(docs|examples|flipper)[\/-]ui}
+  file =~ %r{flipper[\/-]ui}
 end
 
 Gem::Specification.new do |gem|
@@ -13,8 +13,7 @@ Gem::Specification.new do |gem|
   gem.license       = 'MIT'
   gem.homepage      = 'https://www.flippercloud.io/docs/ui'
 
-  gem.files         = `git ls-files`.split("\n").select(&flipper_ui_files) + ['lib/flipper/version.rb']
-  gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n").select(&flipper_ui_files)
+  gem.files         = `git ls-files -- lib`.split("\n").select(&flipper_ui_files) + ['lib/flipper/version.rb']
   gem.name          = 'flipper-ui'
   gem.require_paths = ['lib']
   gem.version       = Flipper::VERSION
