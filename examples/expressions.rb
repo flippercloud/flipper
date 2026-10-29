@@ -49,6 +49,7 @@ admin_user = User.new(2, {
   "id" => 2,
   "admin" => true,
   "team_user" => true,
+  "roles" => ["admin", "support"],
 })
 
 other_user = User.new(3, {
@@ -138,6 +139,41 @@ Flipper.enable :something, set_of_actors_expression
 assert Flipper.enabled?(:something, user)
 assert Flipper.enabled?(:something, other_user)
 refute Flipper.enabled?(:something, admin_user)
+reset
+
+puts "\n\nInclude Expression (array property includes value)"
+include_expression = Flipper.property(:roles).include("admin")
+Flipper.enable :something, include_expression
+assert Flipper.enabled?(:something, admin_user)
+refute Flipper.enabled?(:something, user) # no roles property
+reset
+
+puts "\n\nInclude Expression (string property includes substring)"
+substring_expression = Flipper.property(:plan).include("bas")
+Flipper.enable :something, substring_expression
+assert Flipper.enabled?(:something, user) # plan is "basic"
+refute Flipper.enabled?(:something, other_user) # plan is "plus"
+reset
+
+puts "\n\nExclude Expression (array property does not include value)"
+exclude_expression = Flipper.property(:roles).exclude("admin")
+Flipper.enable :something, exclude_expression
+assert Flipper.enabled?(:something, user) # no roles property
+refute Flipper.enabled?(:something, admin_user) # roles includes "admin"
+reset
+
+puts "\n\nIn Expression (property value is one of a static list)"
+in_expression = Flipper.property(:plan).in(["basic", "premium"])
+Flipper.enable :something, in_expression
+assert Flipper.enabled?(:something, user) # plan is "basic"
+refute Flipper.enabled?(:something, other_user) # plan is "plus"
+reset
+
+puts "\n\nNotIn Expression (property value is not one of a static list)"
+not_in_expression = Flipper.property(:plan).not_in(["plus", "premium"])
+Flipper.enable :something, not_in_expression
+assert Flipper.enabled?(:something, user) # plan is "basic"
+refute Flipper.enabled?(:something, other_user) # plan is "plus"
 reset
 
 puts "\n\n% of Actors Expression"
