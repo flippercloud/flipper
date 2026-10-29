@@ -54,9 +54,9 @@ module Flipper
       #  configuration.instrumenter = ActiveSupport::Notifications
       attr_accessor :instrumenter
 
-      # Public: Local adapter that all reads should go to in order to ensure
-      # latency is low and resiliency is high. This adapter is automatically
-      # kept in sync with cloud.
+      # Public: Local adapter that is automatically kept in sync with Cloud.
+      # When Cloud is configured as Flipper's default, its storage adapter is
+      # wrapped so reads are served from process-local Memory.
       #
       #  # for example, to use active record you could do:
       #  configuration = Flipper::Cloud::Configuration.new
@@ -113,10 +113,13 @@ module Flipper
 
       # Public: Force a sync.
       def sync(cache_bust: false)
-        Flipper::Adapters::Sync::Synchronizer.new(local_adapter, http_adapter, {
-          instrumenter: instrumenter,
-          cache_bust: cache_bust,
-        }).call
+        if @synchronization_state
+          @synchronization_state.lock.synchronize do
+            sync_with_cloud(cache_bust: cache_bust)
+          end
+        else
+          sync_with_cloud(cache_bust: cache_bust)
+        end
       end
 
       # Public: The method that will be used to synchronize local adapter with
@@ -151,21 +154,37 @@ module Flipper
 
       private
 
+      def sync_with_cloud(cache_bust: false)
+        result = Flipper::Adapters::Sync::Synchronizer.new(local_adapter, http_adapter, {
+          instrumenter: instrumenter,
+          cache_bust: cache_bust,
+        }).call
+        @synchronization_state.consume_pending_polls if @synchronization_state && sync_method == :poll
+        result
+      end
+
       def app_adapter
         read_adapter = sync_method == :webhook ? local_adapter : poll_adapter
-        Flipper::Adapters::DualWrite.new(read_adapter, http_adapter)
+        Flipper::Adapters::DualWrite.new(
+          read_adapter,
+          http_adapter,
+          synchronization_state: @synchronization_state,
+        )
       end
 
       def poller
-        Flipper::Poller.get(@url + @token, {
+        key = @url + @token
+        key = [key, @synchronization_state.object_id] if @synchronization_state
+        Flipper::Poller.get(key, {
           interval: sync_interval,
           remote_adapter: http_adapter,
           instrumenter: instrumenter,
+          synchronization_state: @synchronization_state,
         }).tap(&:start)
       end
 
       def poll_adapter
-        Flipper::Adapters::Poll.new(poller, local_adapter)
+        Flipper::Adapters::Poll.new(poller, local_adapter, state: @synchronization_state, instrumenter: instrumenter)
       end
 
       def http_adapter
@@ -214,6 +233,7 @@ module Flipper
       def setup_sync(options)
         set_option :sync_interval, options, default: 10, typecast: :float, minimum: 10
         set_option :sync_secret, options
+        @synchronization_state = options[:synchronization_state]
       end
 
       def setup_adapter(options)
