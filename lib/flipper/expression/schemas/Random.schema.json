@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://www.flippercloud.io/expressions/Random.schema.json",
+  "title": "Random",
+  "description": "Return a random number",
+  "category": "Value",
+  "type": "array",
+  "items": {
+    "title": "Maximum",
+    "description": "When max is an Integer, returns a random integer greater than or equal to zero and less than max.",
+    "anyOf": [
+      { "type": "number" },
+      { "$ref": "schema.json#/definitions/function" }
+    ]
+  },
+  "maxItems": 1
+}

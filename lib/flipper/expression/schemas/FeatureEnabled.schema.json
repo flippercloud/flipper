@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://www.flippercloud.io/expressions/FeatureEnabled.schema.json",
+  "title": "FeatureEnabled",
+  "description": "Returns true if the named feature is enabled for the current actor.",
+  "category": "Value",
+  "type": "array",
+  "items": { "$ref": "schema.json#/definitions/string" },
+  "minItems": 1,
+  "maxItems": 1
+}

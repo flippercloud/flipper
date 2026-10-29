@@ -1,0 +1,15 @@
+{
+  "valid": [
+    {
+      "expression": { "FeatureEnabled": ["other_feature"] }
+    },
+    {
+      "expression": { "FeatureEnabled": [{ "Property": ["feature_name"] }] }
+    }
+  ],
+  "invalid": [
+    { "FeatureEnabled": [] },
+    { "FeatureEnabled": ["a", "b"] },
+    { "FeatureEnabled": ["a"], "Any": [] }
+  ]
+}

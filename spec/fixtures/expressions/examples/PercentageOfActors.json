@@ -1,0 +1,48 @@
+{
+  "valid": [
+    {
+      "expression": { "PercentageOfActors": ["User;1", 42] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "PercentageOfActors": ["User;1", 0] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "PercentageOfActors": ["string", 99.99] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "PercentageOfActors": ["string", 100] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "PercentageOfActors": [{ "Property": ["flipper_id"] }, { "Property": ["probability"] }] },
+      "context": { "properties": {"flipper_id": "User;1", "probability": 100} },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "PercentageOfActors": ["User;1", 70] },
+      "context": { "feature_name": "a" },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "PercentageOfActors": ["User;1", 70] },
+      "context": { "feature_name": "b" },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "PercentageOfActors": ["string", -1] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "PercentageOfActors": ["string", 101] },
+      "result": { "enum": [true] }
+    }
+  ],
+  "invalid": [
+    { "PercentageOfActors": ["string"] },
+    { "PercentageOfActors": [100] },
+    { "PercentageOfActors": [{ "Property": ["flipper_id"] }]}
+  ]
+}
