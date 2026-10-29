@@ -75,6 +75,18 @@ module Flipper
         # noop
       end
 
+      def update_synchronizer_exception_metrics
+        # noop
+      end
+
+      def update_telemetry_error_metrics
+        # noop
+      end
+
+      def update_telemetry_retry_metrics
+        # noop
+      end
+
       QUESTION_MARK = '?'.freeze
 
       # Private
