@@ -245,6 +245,14 @@
             </div>
           <% end %>
         </div>
+
+        <% if @feature.expression_value %>
+          <%# Expression (read only, set with the Ruby or HTTP API) %>
+          <div class="card-body border-bottom">
+            <h6><strong>Enabled for an expression</strong></h6>
+            <code class="text-break"><%= JSON.generate(@feature.expression_value) %></code>
+          </div>
+        <% end %>
       <% end %>
 
       <% if write_allowed? %>

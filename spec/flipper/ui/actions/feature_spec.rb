@@ -196,6 +196,25 @@ RSpec.describe Flipper::UI::Actions::Feature do
     end
   end
 
+  describe 'GET /features/:feature with an expression' do
+    it 'shows the expression, escaped' do
+      flipper[:search].enable_expression Flipper.property(:plan).eq("<b>basic</b>")
+
+      get '/features/search'
+
+      expect(last_response.status).to be(200)
+      expect(last_response.body).to include('Enabled for an expression')
+      expect(last_response.body).to include('&lt;b&gt;basic&lt;/b&gt;')
+      expect(last_response.body).not_to include('<b>basic</b>')
+    end
+
+    it 'leaves the section out when there is no expression' do
+      get '/features/search'
+
+      expect(last_response.body).not_to include('Enabled for an expression')
+    end
+  end
+
   describe 'GET /features/:feature with _features in feature name' do
     before do
       get '/features/search_features'
