@@ -246,11 +246,11 @@
           <% end %>
         </div>
 
-        <% if @feature.expression_value %>
+        <% if (expression = @feature.expression_value) %>
           <%# Expression (read only, set with the Ruby or HTTP API) %>
           <div class="card-body border-bottom">
             <h6><strong>Enabled for an expression</strong></h6>
-            <code class="text-break"><%= JSON.generate(@feature.expression_value) %></code>
+            <code class="text-break"><%= Flipper::Typecast.to_json(expression) %></code>
           </div>
         <% end %>
       <% end %>
