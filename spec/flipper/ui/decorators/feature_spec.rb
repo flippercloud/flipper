@@ -20,6 +20,19 @@ RSpec.describe Flipper::UI::Decorators::Feature do
       expect(subject.gates_in_words).to include('>1 actor</span>')
       expect(subject.gates_in_words).not_to include('title="x" onmouseover="alert(document.domain)"')
     end
+
+    it 'mentions an expression' do
+      feature.enable_expression Flipper.property(:plan).eq("basic")
+
+      expect(subject.gates_in_words).to eq('an expression')
+    end
+
+    it 'lists an expression after the other gates' do
+      feature.enable_percentage_of_time 5
+      feature.enable_expression Flipper.property(:plan).eq("basic")
+
+      expect(subject.gates_in_words).to eq('5% of time and an expression')
+    end
   end
 
   describe '#<=>' do

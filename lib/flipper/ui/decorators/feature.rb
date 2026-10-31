@@ -52,6 +52,8 @@ module Flipper
             statuses << "#{feature.percentage_of_time_value}% of time"
           end
 
+          statuses << "an expression" if feature.expression_value
+
           Util.to_sentence(statuses)
         end
 
