@@ -4,7 +4,8 @@ on: [push]
 jobs:
   rack-2-minimum:
     name: Test flipper-api on Rack 2.0.9.4
-    runs-on: ubuntu-latest
+    # ruby/setup-ruby has no Ruby < 3.2 for ubuntu-26.04, which ubuntu-latest now points to
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - name: Check out repository code
@@ -25,7 +26,8 @@ jobs:
 
   test:
     name: Test on ruby ${{ matrix.ruby }} and rails ${{ matrix.rails }}
-    runs-on: ubuntu-latest
+    # ruby/setup-ruby has no Ruby < 3.2 for ubuntu-26.04, which ubuntu-latest now points to
+    runs-on: ${{ matrix.ruby < 3.2 && 'ubuntu-24.04' || 'ubuntu-latest' }}
     timeout-minutes: 20
     # rails main is an early-warning canary; failures don't block the build
     continue-on-error: ${{ matrix.rails == 'main' }}
