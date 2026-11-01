@@ -80,6 +80,29 @@ RSpec.describe Flipper::CLI do
       end
     end
 
+    describe "feature -p nope" do
+      it { should have_attributes(status: 1, stderr: /invalid argument: -p nope/) }
+    end
+
+    describe "feature -p" do
+      it { should have_attributes(status: 1, stderr: /missing argument: -p/) }
+    end
+
+    describe "feature -p 150" do
+      it do
+        expect(subject).to have_attributes(status: 1, stderr: /invalid argument.*less than or equal to 100/)
+        expect(Flipper.features).to be_empty
+      end
+    end
+
+    describe "feature -t -1" do
+      it { should have_attributes(status: 1, stderr: /invalid argument.*positive number/) }
+    end
+
+    describe %|feature -x '{"Nope":[]}'| do
+      it { should have_attributes(status: 1, stderr: /Invalid expression.*Nope/m) }
+    end
+
     describe %|feature -x invalid_json| do
       it do
         expect(subject).to have_attributes(status: 1, stderr: /JSON parse error/m)
