@@ -1,6 +1,6 @@
-[![Flipper Mark](docs/images/banner.jpg)](https://www.flippercloud.io)
+[![Flipper Mark](https://raw.githubusercontent.com/flippercloud/flipper/main/docs/images/banner.jpg)](https://www.flippercloud.io)
 
-[Website](https://flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=website_link) | [Documentation](https://flippercloud.io/docs?utm_source=oss&utm_medium=readme&utm_campaign=docs_link) | [Examples](examples) | [Chat](https://chat.flippercloud.io/join/xjHq-aJsA-BeZH) | [Twitter](https://twitter.com/flipper_cloud) | [Ruby.social](https://ruby.social/@flipper)
+[Website](https://flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=website_link) | [Documentation](https://flippercloud.io/docs?utm_source=oss&utm_medium=readme&utm_campaign=docs_link) | [Examples](https://github.com/flippercloud/flipper/tree/main/examples) | [Chat](https://chat.flippercloud.io/join/xjHq-aJsA-BeZH) | [Twitter](https://twitter.com/flipper_cloud) | [Ruby.social](https://ruby.social/@flipper)
 
 # Flipper
 
@@ -104,7 +104,7 @@ Like Flipper and want more? Check out [Flipper Cloud](https://www.flippercloud.i
 - **maintenance** &mdash; we'll keep the lights on for you. We also have handy webhooks and background polling for keeping your app in sync with Cloud, so **our availability won't affect yours**. All your feature flag reads are local to your app.
 - **everything in one place** &mdash; no need to bounce around from different application UIs or IRB consoles.
 
-[![Flipper Cloud Screenshot](docs/images/flipper_cloud.png)](https://www.flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=screenshot)
+[![Flipper Cloud Screenshot](https://raw.githubusercontent.com/flippercloud/flipper/main/docs/images/flipper_cloud.png)](https://www.flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=screenshot)
 
 Cloud is super simple to integrate with Rails ([demo app](https://github.com/flippercloud/flipper-rails-demo)), Sinatra or any other framework.
 
@@ -114,7 +114,7 @@ We also have a [free plan](https://www.flippercloud.io?utm_source=oss&utm_medium
 
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Run the tests (`bundle exec rake`). Check out [Docker-Compose](docs/DockerCompose.md) if you need help getting all the adapters running.
+3. Run the tests (`bundle exec rake`). Check out [Docker-Compose](https://github.com/flippercloud/flipper/blob/main/docs/DockerCompose.md) if you need help getting all the adapters running.
 4. Commit your changes (`git commit -am 'Added some feature'`)
 5. Push to the branch (`git push origin my-new-feature`)
 6. Create new Pull Request
