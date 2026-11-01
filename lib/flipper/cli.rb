@@ -39,10 +39,10 @@ module Flipper
             values << Types::Group.new(name)
           end
           c.on('-p NUM', '--percentage-of-actors=NUM', Numeric, "#{action} for a percentage of actors") do |num|
-            values << Types::PercentageOfActors.new(num)
+            values << percentage(Types::PercentageOfActors, num)
           end
           c.on('-t NUM', '--percentage-of-time=NUM', Numeric, "#{action} for a percentage of time") do |num|
-            values << Types::PercentageOfTime.new(num)
+            values << percentage(Types::PercentageOfTime, num)
           end
           c.on('-x expressions', '--expression=JSON', "#{action} for the given expression") do |expression|
             begin
@@ -51,7 +51,7 @@ module Flipper
               ui.error "JSON parse error #{e.message}"
               ui.trace(e)
               exit 1
-            rescue ArgumentError => e
+            rescue ArgumentError, NameError => e
               ui.error "Invalid expression: #{e.message}"
               ui.trace(e)
               exit 1
@@ -188,7 +188,7 @@ module Flipper
       else
         ui.info help
       end
-    rescue OptionParser::InvalidOption => e
+    rescue OptionParser::ParseError => e
       ui.error e.message
       exit 1
     end
@@ -197,6 +197,13 @@ module Flipper
     def command(name, &block)
       @commands[name] = Command.new(program_name: "#{program_name} #{name}")
       block.call(@commands[name])
+    end
+
+    # Build a percentage type, reporting an out of range value as a bad argument.
+    def percentage(type, value)
+      type.new(value)
+    rescue ArgumentError => e
+      raise OptionParser::InvalidArgument, e.message
     end
 
     # Print usage to stdout, the error to stderr, and exit non-zero.
