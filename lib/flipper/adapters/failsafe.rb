@@ -14,6 +14,10 @@ module Flipper
         @errors = options.fetch(:errors, [StandardError])
       end
 
+      def read_only?
+        @adapter.read_only?
+      end
+
       def features
         @adapter.features
       rescue *@errors
