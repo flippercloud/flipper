@@ -24,16 +24,12 @@ else
   gem 'rails', "~> #{ENV['RAILS_VERSION'] || '8.0'}"
 end
 gem 'minitest', '~> 5.18'
-gem 'minitest-documentation'
 gem 'pstore'
 gem 'webmock'
 gem 'ice_age'
-gem 'redis-namespace'
 gem 'webrick'
 gem 'stackprof'
 gem 'benchmark-ips'
-gem 'stackprof-webnav'
-gem 'flamegraph'
 gem 'mysql2'
 gem 'pg'
 gem 'cuprite'
