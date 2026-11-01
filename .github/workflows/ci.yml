@@ -98,10 +98,24 @@ jobs:
           - ruby: "3.3"
             rails: "6.1.0"
         include:
+          - ruby: "3.2"
+            rails: "8.1.0"
+          - ruby: "3.3"
+            rails: "8.1.0"
+          - ruby: "3.4"
+            rails: "7.2.0"
+          - ruby: "3.4"
+            rails: "8.0.0"
+          - ruby: "3.4"
+            rails: "8.1.0"
+          - ruby: "4.0"
+            rails: "8.0.0"
+          - ruby: "4.0"
+            rails: "8.1.0"
           - ruby: "3.3"
             rails: "main"
     env:
-      SQLITE3_VERSION: ${{ (matrix.rails == '8.0.0' || matrix.rails == 'main') && '2.1.0' || '1.4.1' }}
+      SQLITE3_VERSION: ${{ (matrix.rails == '8.0.0' || matrix.rails == '8.1.0' || matrix.rails == 'main') && '2.1.0' || '1.4.1' }}
       REDIS_URL: redis://localhost:6379/0
       CI: true
       RAILS_VERSION: ${{ matrix.rails }}
