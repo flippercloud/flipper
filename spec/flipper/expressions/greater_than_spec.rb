@@ -20,6 +20,7 @@ RSpec.describe Flipper::Expressions::GreaterThan do
     it "returns false when operands are not type-compatible" do
       expect(described_class.call("25", 21)).to be(false)
       expect(described_class.call(21, "25")).to be(false)
+      expect(described_class.call({}, 21)).to be(false)
     end
 
     it "raises ArgumentError with no arguments" do
