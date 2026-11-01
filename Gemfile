@@ -6,7 +6,10 @@ Dir['flipper-*.gemspec'].each do |gemspec|
   gemspec(name: "flipper-#{plugin}", development_group: plugin)
 end
 
-gem 'concurrent-ruby', '1.3.4'
+# Rails < 7.1 doesn't load logger itself, which concurrent-ruby 1.3.5 stopped doing for it.
+if ENV['RAILS_VERSION'] && ENV['RAILS_VERSION'] != 'main' && Gem::Version.new(ENV['RAILS_VERSION']) < Gem::Version.new('7.1')
+  gem 'concurrent-ruby', '1.3.4'
+end
 gem 'connection_pool'
 gem 'debug'
 gem 'rake'
