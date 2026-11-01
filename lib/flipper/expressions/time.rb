@@ -13,8 +13,8 @@ module Flipper
           ::Time.parse(value).utc
         when ::Time
           value.getutc
-        else
-          value.to_time.getutc if value.respond_to?(:to_time)
+        when ::Date
+          ::Time.parse(value.iso8601).utc
         end
       rescue ArgumentError
         nil
