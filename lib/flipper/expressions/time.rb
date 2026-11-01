@@ -11,8 +11,10 @@ module Flipper
           ::Time.at(value).utc
         when ::String
           ::Time.parse(value).utc
+        when ::Time
+          value.getutc
         else
-          value.to_time.utc if value.respond_to?(:to_time)
+          value.to_time.getutc if value.respond_to?(:to_time)
         end
       rescue ArgumentError
         nil

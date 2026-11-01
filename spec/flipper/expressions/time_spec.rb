@@ -32,6 +32,16 @@ RSpec.describe Flipper::Expressions::Time do
       expect(result.utc?).to be(true)
     end
 
+    it "leaves the Time it was given in its own zone" do
+      value = time.getlocal("+09:00")
+      described_class.call(value)
+      expect(value.utc_offset).to eq(9 * 3600)
+    end
+
+    it "returns time for DateTime input" do
+      expect(described_class.call(time.to_datetime)).to eq(time)
+    end
+
     it "returns time for Date input" do
       expect(described_class.call(Date.new(2026, 11, 1))).to eq(Date.new(2026, 11, 1).to_time)
     end
