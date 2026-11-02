@@ -1,3 +1,21 @@
+RSpec.shared_examples "a gemspec declaring the bundled gems it requires" do
+  # Ruby moved these out of its default gems, so under Bundler `require` only finds
+  # them when a gem in the bundle declares them.
+  bundled_gems = %w[
+    abbrev base64 benchmark bigdecimal csv drb fiddle getoptlong irb logger mutex_m
+    nkf observer ostruct pstore racc rdoc readline reline resolv-replace rinda syslog
+  ]
+
+  it "declares the bundled gems its files require" do
+    required = spec.files.grep(/\.rb\z/).flat_map do |file|
+      FlipperRoot.join(file).read.scan(/^\s*require ['"]([\w-]+)['"]/).flatten
+    end
+    undeclared = bundled_gems - spec.runtime_dependencies.map(&:name)
+
+    expect(required & undeclared).to eq([])
+  end
+end
+
 RSpec.describe "flipper.gemspec" do
   let(:spec) { Gem::Specification.load(File.expand_path("../../flipper.gemspec", __dir__)) }
 
@@ -10,6 +28,8 @@ RSpec.describe "flipper.gemspec" do
     expect(spec.files).to include("lib/flipper.rb", "lib/flipper/version.rb", "exe/flipper")
     expect(spec.files).not_to include("lib/flipper/adapters/redis.rb")
   end
+
+  it_behaves_like "a gemspec declaring the bundled gems it requires"
 end
 
 Dir[File.expand_path("../../flipper-*.gemspec", __dir__)].sort.each do |path|
@@ -20,5 +40,7 @@ Dir[File.expand_path("../../flipper-*.gemspec", __dir__)].sort.each do |path|
       expect(spec.files).not_to be_empty
       expect(spec.files).to all(start_with("lib/"))
     end
+
+    it_behaves_like "a gemspec declaring the bundled gems it requires"
   end
 end
