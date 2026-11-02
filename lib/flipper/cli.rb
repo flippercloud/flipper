@@ -1,6 +1,7 @@
 require 'optparse'
 require 'bundler/vendored_thor'
 require 'bundler/ui/shell'
+require 'flipper/version'
 
 module Flipper
   class CLI < OptionParser
@@ -18,6 +19,7 @@ module Flipper
 
       # Program is always flipper, no matter how it's invoked
       @program_name = 'flipper'
+      self.version = Flipper::VERSION
       @require = ENV.fetch("FLIPPER_REQUIRE", DEFAULT_REQUIRE)
       @commands = {}
 
@@ -160,6 +162,11 @@ module Flipper
       # Options available on all commands
       on_tail('-h', '--help', 'Print help message') do
         ui.info help
+        exit
+      end
+
+      on_tail('-v', '--version', 'Print version') do
+        ui.info ver
         exit
       end
 
