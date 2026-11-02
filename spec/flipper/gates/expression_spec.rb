@@ -53,6 +53,7 @@ RSpec.describe Flipper::Gates::Expression do
       [
         ["a hash as a number", { "GreaterThan" => [{ "Number" => [{ "Property" => ["x"] }] }, 1] }, { "x" => { "a" => 1 } }],
         ["an array as a percentage", { "GreaterThan" => [{ "Percentage" => [{ "Property" => ["x"] }] }, 1] }, { "x" => [1] }],
+        ["an array as a percentage under a limit", { "LessThan" => [{ "Percentage" => [{ "Property" => ["x"] }] }, 1] }, { "x" => [1] }],
         ["a missing percentage", { "PercentageOfActors" => [{ "Property" => ["flipper_id"] }, { "Property" => ["x"] }] }, {}],
         ["a string percentage", { "PercentageOfActors" => [{ "Property" => ["flipper_id"] }, { "Property" => ["x"] }] }, { "x" => "50" }],
         ["a string as a random max", { "LessThan" => [{ "Random" => [{ "Property" => ["x"] }] }, 1] }, { "x" => "abc" }],

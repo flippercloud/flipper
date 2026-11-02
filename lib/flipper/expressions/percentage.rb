@@ -4,7 +4,7 @@ module Flipper
       def self.call(value)
         Flipper::Typecast.to_float(value).clamp(0, 100)
       rescue ArgumentError
-        0
+        nil
       end
     end
   end

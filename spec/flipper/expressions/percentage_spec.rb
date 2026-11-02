@@ -12,9 +12,9 @@ RSpec.describe Flipper::Expressions::Percentage do
       expect(described_class.call(101)).to be(100)
     end
 
-    it "returns 0 for values that can't be numbers" do
+    it "returns nil for values that can't be numbers" do
       [{}, [], true, Float::NAN].each do |value|
-        expect(described_class.call(value)).to be(0)
+        expect(described_class.call(value)).to be_nil
       end
     end
   end
