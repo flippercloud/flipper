@@ -338,7 +338,6 @@ module Flipper
       def initialize(program_name: nil)
         super()
         @program_name = program_name
-        self.version = Flipper::VERSION
         @load_environment = true
         @action = lambda { }
       end
