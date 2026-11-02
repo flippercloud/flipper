@@ -3,6 +3,8 @@ module Flipper
     class Percentage
       def self.call(value)
         value.to_f.clamp(0, 100)
+      rescue NoMethodError, ArgumentError
+        0
       end
     end
   end

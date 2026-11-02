@@ -47,7 +47,7 @@ RSpec.describe Flipper::Expressions::Time do
     end
 
     it "returns nil for values that aren't times" do
-      [nil, true, {}, [], "", "not a time", "2026-13-45"].each do |value|
+      [nil, true, {}, [], "", "not a time", "2026-13-45", Float::INFINITY, Float::NAN].each do |value|
         expect(described_class.call(value)).to be_nil
       end
     end

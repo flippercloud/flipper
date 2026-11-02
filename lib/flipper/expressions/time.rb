@@ -16,7 +16,7 @@ module Flipper
         when ::Date
           ::Time.parse(value.iso8601).utc
         end
-      rescue ArgumentError
+      rescue ArgumentError, RangeError
         nil
       end
     end

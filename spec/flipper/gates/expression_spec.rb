@@ -49,6 +49,21 @@ RSpec.describe Flipper::Gates::Expression do
       end
     end
 
+    context 'for expressions on property values of the wrong type' do
+      [
+        ["a hash as a number", { "GreaterThan" => [{ "Number" => [{ "Property" => ["x"] }] }, 1] }, { "x" => { "a" => 1 } }],
+        ["an array as a percentage", { "GreaterThan" => [{ "Percentage" => [{ "Property" => ["x"] }] }, 1] }, { "x" => [1] }],
+        ["a missing percentage", { "PercentageOfActors" => [{ "Property" => ["flipper_id"] }, { "Property" => ["x"] }] }, {}],
+        ["a string percentage", { "PercentageOfActors" => [{ "Property" => ["flipper_id"] }, { "Property" => ["x"] }] }, { "x" => "50" }],
+        ["a string as a random max", { "LessThan" => [{ "Random" => [{ "Property" => ["x"] }] }, 1] }, { "x" => "abc" }],
+        ["infinity as a time", { "GreaterThan" => [{ "Now" => [] }, { "Time" => [{ "Property" => ["x"] }] }] }, { "x" => Float::INFINITY }],
+      ].each do |description, expression, properties|
+        it "returns false for #{description}" do
+          expect(subject.open?(context(expression, properties: properties))).to be(false)
+        end
+      end
+    end
+
     context 'for expression that evaluates to false' do
       it 'returns false' do
         expression = Flipper.boolean(true).eq(false)
