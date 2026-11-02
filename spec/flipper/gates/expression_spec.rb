@@ -41,6 +41,14 @@ RSpec.describe Flipper::Gates::Expression do
       end
     end
 
+    context 'for a time expression on a property the actor does not have' do
+      it 'returns false' do
+        time = Flipper.time(Flipper.property(:trial_ends_at))
+        expression = Flipper.now.gt(time)
+        expect(subject.open?(context(expression.value))).to be(false)
+      end
+    end
+
     context 'for expression that evaluates to false' do
       it 'returns false' do
         expression = Flipper.boolean(true).eq(false)
