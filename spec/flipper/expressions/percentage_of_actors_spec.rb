@@ -16,5 +16,11 @@ RSpec.describe Flipper::Expressions::PercentageOfActors do
       expect(described_class.call("User;1", 70, context: {feature_name: "a"})).to be(true)
       expect(described_class.call("User;1", 70, context: {feature_name: "b"})).to be(false)
     end
+
+    it "returns false for percentages that aren't numbers" do
+      [nil, "50", {}, []].each do |value|
+        expect(described_class.call("User;1", value)).to be(false)
+      end
+    end
   end
 end

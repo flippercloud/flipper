@@ -4,6 +4,8 @@ module Flipper
       SCALING_FACTOR = 1_000
 
       def self.call(text, percentage, context: {})
+        return false unless percentage.is_a?(Numeric)
+
         prefix = context[:feature_name] || ""
         # NOTE: `crc32 % 100_000` has a tiny modulo bias (2**32 is not a
         # multiple of 100_000, so buckets 0..67_295 are ~0.0023% over-
