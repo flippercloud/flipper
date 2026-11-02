@@ -1,18 +1,18 @@
-# Ruby moved these out of its default gems, so under Bundler `require` only finds
-# them when a gem in the bundle declares them.
-BUNDLED_GEM_LIBRARIES = %w[
-  abbrev base64 benchmark bigdecimal csv drb fiddle getoptlong irb logger mutex_m
-  nkf observer ostruct pstore racc rdoc readline reline resolv-replace rinda syslog
-].freeze
-
 RSpec.shared_examples "a gemspec declaring the bundled gems it requires" do
-  it "declares the bundled gems its files require" do
-    root = File.expand_path("../..", __dir__)
-    required = spec.files.grep(/\.rb\z/).flat_map do |file|
-      File.read(File.join(root, file)).scan(/^\s*require ['"]([\w-]+)['"]/).flatten
-    end
+  # Ruby moved these out of its default gems, so under Bundler `require` only finds
+  # them when a gem in the bundle declares them.
+  bundled_gems = %w[
+    abbrev base64 benchmark bigdecimal csv drb fiddle getoptlong irb logger mutex_m
+    nkf observer ostruct pstore racc rdoc readline reline resolv-replace rinda syslog
+  ]
 
-    expect(required.uniq & BUNDLED_GEM_LIBRARIES - spec.runtime_dependencies.map(&:name)).to eq([])
+  it "declares the bundled gems its files require" do
+    required = spec.files.grep(/\.rb\z/).flat_map do |file|
+      FlipperRoot.join(file).read.scan(/^\s*require ['"]([\w-]+)['"]/).flatten
+    end
+    undeclared = bundled_gems - spec.runtime_dependencies.map(&:name)
+
+    expect(required & undeclared).to eq([])
   end
 end
 
