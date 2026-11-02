@@ -21,6 +21,9 @@ Gem::Specification.new do |gem|
   gem.metadata      = Flipper::METADATA
 
   gem.add_dependency 'concurrent-ruby', '< 2'
+  # Bundled gems since Ruby 4.0, so a bundle only has them if something declares them.
+  gem.add_dependency 'logger', '< 2'
+  gem.add_dependency 'pstore', '< 1'
 
   gem.required_ruby_version = ">= #{Flipper::REQUIRED_RUBY_VERSION}"
 end

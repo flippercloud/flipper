@@ -24,7 +24,6 @@ else
   gem 'rails', "~> #{ENV['RAILS_VERSION'] || '8.0'}"
 end
 gem 'minitest', '~> 5.18'
-gem 'pstore'
 gem 'webmock'
 gem 'ice_age'
 gem 'webrick'
