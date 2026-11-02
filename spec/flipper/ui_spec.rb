@@ -1,3 +1,5 @@
+require "open3"
+
 RSpec.describe Flipper::UI do
   let(:token) do
     if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
@@ -193,5 +195,18 @@ RSpec.describe Flipper::UI do
         end
       end
     end
+  end
+
+  it "loads rack/session, since the examples and docs tell you to use its cookie middleware" do
+    # A child process so nothing else has loaded it. RUBYLIB finds the bundled gems
+    # (CI installs them outside GEM_HOME) without loading Bundler or Rails. The check
+    # is on the file because Rack 2, which this bundle uses, defines the constant itself.
+    env = { "RUBYLIB" => $LOAD_PATH.join(File::PATH_SEPARATOR) }
+    script = "require 'flipper/ui'; exit $LOADED_FEATURES.grep(%r{/rack/session\\.rb\\z}).any?"
+    _, stderr, status = Bundler.with_unbundled_env do
+      Open3.capture3(env, RbConfig.ruby, "-Ilib", "-e", script, chdir: FlipperRoot.to_s)
+    end
+
+    expect(status).to be_success, stderr
   end
 end

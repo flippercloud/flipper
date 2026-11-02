@@ -7,6 +7,7 @@ rescue LoadError
   require 'rack/methodoverride'
 end
 require 'rack/protection'
+require 'rack/session'
 
 require 'flipper'
 require 'flipper/ui/middleware'
