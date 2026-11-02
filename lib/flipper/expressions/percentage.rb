@@ -2,8 +2,8 @@ module Flipper
   module Expressions
     class Percentage
       def self.call(value)
-        value.to_f.clamp(0, 100)
-      rescue NoMethodError, ArgumentError
+        Flipper::Typecast.to_float(value).clamp(0, 100)
+      rescue ArgumentError
         0
       end
     end
