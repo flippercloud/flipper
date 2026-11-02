@@ -311,6 +311,18 @@ RSpec.describe Flipper::CLI do
     end
   end
 
+  describe "--version" do
+    it { should have_attributes(status: 0, stdout: "flipper #{Flipper::VERSION}\n", stderr: "") }
+  end
+
+  describe "-v" do
+    it { should have_attributes(status: 0, stdout: "flipper #{Flipper::VERSION}\n", stderr: "") }
+  end
+
+  describe "list --version" do
+    it { expect { subject }.to output("flipper list #{Flipper::VERSION}\n").to_stdout }
+  end
+
   it "runs without Bundler loaded, as after gem install flipper" do
     _, stderr, status = Bundler.with_unbundled_env do
       Open3.capture3(RbConfig.ruby, "-Ilib", "exe/flipper", "--help", chdir: File.expand_path("../..", __dir__))
