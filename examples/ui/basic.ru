@@ -67,5 +67,5 @@ use Rack::Reloader
 
 run Flipper::UI.app { |builder|
   builder.use Rack::Reloader, 1
-  builder.use Rack::Session::Cookie, secret: "_super_secret"
+  builder.use Rack::Session::Cookie, secret: "_super_secret" * 5
 }
