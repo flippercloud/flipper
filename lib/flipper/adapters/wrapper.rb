@@ -38,6 +38,11 @@ module Flipper
         end
       end
 
+      # Wrapping an adapter doesn't make it writable.
+      def read_only?
+        @adapter.read_only?
+      end
+
       # Override this method to customize the behavior of all delegated methods, and just yield to
       # the block to call the wrapped adapter.
       if RUBY_VERSION >= '3.0'

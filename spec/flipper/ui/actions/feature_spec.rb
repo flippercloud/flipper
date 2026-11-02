@@ -1,3 +1,5 @@
+require 'flipper/adapters/read_only'
+
 RSpec.describe Flipper::UI::Actions::Feature do
   let(:token) do
     if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
@@ -121,6 +123,19 @@ RSpec.describe Flipper::UI::Actions::Feature do
       before { get '/features' }
 
       it 'renders template with no buttons or ways to modify a feature' do
+        expect(last_response.body).not_to include("Fully Enable")
+      end
+    end
+
+    context "when a read only adapter is wrapped by another adapter" do
+      let(:flipper) do
+        read_only = Flipper::Adapters::ReadOnly.new(build_memory_adapter)
+        build_flipper(Flipper::Adapters::ActorLimit.new(read_only))
+      end
+
+      it 'renders template with no buttons or ways to modify a feature' do
+        get '/features/search'
+        expect(last_response.status).to be(200)
         expect(last_response.body).not_to include("Fully Enable")
       end
     end

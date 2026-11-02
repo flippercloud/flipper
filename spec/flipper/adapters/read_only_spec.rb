@@ -1,4 +1,5 @@
 require 'flipper/adapters/read_only'
+require 'flipper/adapters/failsafe'
 
 RSpec.describe Flipper::Adapters::ReadOnly do
   let(:adapter) { Flipper::Adapters::Memory.new }
@@ -106,5 +107,19 @@ RSpec.describe Flipper::Adapters::ReadOnly do
     expect { subject.import(source) }
       .to raise_error(Flipper::Adapters::ReadOnly::WriteAttempted)
     expect(adapter.features).to eq(Set['stats'])
+  end
+
+  context 'when wrapped by another adapter' do
+    {
+      'ActorLimit' => ->(adapter) { Flipper::Adapters::ActorLimit.new(adapter) },
+      'Strict' => ->(adapter) { Flipper::Adapters::Strict.new(adapter, :warn) },
+      'Failsafe' => ->(adapter) { Flipper::Adapters::Failsafe.new(adapter) },
+      'Instrumented' => ->(adapter) { Flipper::Adapters::Instrumented.new(adapter) },
+    }.each do |name, wrap|
+      it "is still read only inside #{name}" do
+        expect(wrap.call(subject).read_only?).to be(true)
+        expect(wrap.call(adapter).read_only?).to be(false)
+      end
+    end
   end
 end

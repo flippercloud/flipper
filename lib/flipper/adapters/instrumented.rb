@@ -26,6 +26,11 @@ module Flipper
       end
 
       # Public
+      def read_only?
+        @adapter.read_only?
+      end
+
+      # Public
       def features
         default_payload = {
           operation: :features,
