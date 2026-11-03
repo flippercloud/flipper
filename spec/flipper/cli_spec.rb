@@ -209,6 +209,19 @@ RSpec.describe Flipper::CLI do
     end
   end
 
+  cloud_help = /Usage: flipper cloud <command>\n\nCommands:\n  migrate +Migrate features.*\n  push +Push features/
+
+  describe "help cloud" do
+    it { should have_attributes(status: 0, stdout: cloud_help) }
+  end
+
+  # OptionParser prints --help straight to $stdout
+  ["cloud --help", "cloud push --help"].each do |command|
+    describe command do
+      it { expect { subject }.to output(cloud_help).to_stdout }
+    end
+  end
+
   describe "cloud migrate" do
     before do
       Flipper.enable :search
