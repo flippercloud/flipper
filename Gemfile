@@ -16,7 +16,7 @@ gem 'rake'
 gem 'statsd-ruby', '~> 1.2.1'
 gem 'rspec', '~> 3.0'
 gem 'rack-test'
-gem 'rackup', '= 1.0.0'
+gem 'rackup'
 gem 'sqlite3', "~> #{ENV['SQLITE3_VERSION'] || '2.1.0'}"
 if ENV['RAILS_VERSION'] == 'main'
   gem 'rails', github: 'rails/rails', branch: 'main'

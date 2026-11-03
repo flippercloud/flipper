@@ -13,9 +13,9 @@ use Rack::Reloader
 
 run Rack::URLMap.new(
   "/" => lambda { |env|
-    [302, {"Location" => "/flipper"}, [] ]
+    [302, {"location" => "/flipper"}, [] ]
   },
   "/flipper" => Flipper::UI.app { |builder|
-    builder.use Rack::Session::Cookie, secret: "_super_secret"
+    builder.use Rack::Session::Cookie, secret: "_super_secret" * 5
   }
 )
