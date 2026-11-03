@@ -1,3 +1,5 @@
+require "open3"
+require "rbconfig"
 SpecHelpers.silence { require 'flipper/adapters/active_record' }
 require 'active_record/connection_adapters/sqlite3_adapter'
 
@@ -393,6 +395,23 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
         end
       end
     end
+  end
+
+  it "builds before anything else has loaded ActiveRecord::Base" do
+    # The flipper CLI and rake tasks can reach the adapter before the app
+    # touches a model, so ActiveRecord::Base may not be loaded yet.
+    script = <<~RUBY
+      require "active_record"
+      require "flipper/adapters/active_record"
+      abort "requiring the adapter loaded ActiveRecord::Base" unless ActiveRecord.autoload?(:Base)
+
+      adapter = Flipper::Adapters::ActiveRecord.new
+      abort "wrong feature class" unless adapter.instance_variable_get(:@feature_class) == Flipper::Adapters::ActiveRecord::Feature
+    RUBY
+
+    _, stderr, status = Open3.capture3(RbConfig.ruby, "-Ilib", "-e", script, chdir: File.expand_path("../../..", __dir__))
+
+    expect(status).to be_success, stderr
   end
 
   def active_connections?
