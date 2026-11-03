@@ -202,17 +202,12 @@ RSpec.describe Flipper::CLI do
     end
   end
 
-  describe "cloud" do
-    it "shows help when no subcommand given" do
-      expect(subject).to have_attributes(status: 0, stdout: /migrate/)
-      expect(subject.stdout).to match(/push/)
-    end
-  end
-
   cloud_help = /Usage: flipper cloud <command>\n\nCommands:\n  migrate +Migrate features.*\n  push +Push features/
 
-  describe "help cloud" do
-    it { should have_attributes(status: 0, stdout: cloud_help) }
+  ["cloud", "help cloud"].each do |command|
+    describe command do
+      it { should have_attributes(status: 0, stdout: cloud_help) }
+    end
   end
 
   # OptionParser prints --help straight to $stdout
