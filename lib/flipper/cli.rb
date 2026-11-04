@@ -101,6 +101,11 @@ module Flipper
 
       command 'cloud' do |c|
         c.description = "Flipper Cloud commands"
+        c.banner = "Usage: #{c.program_name} <command>"
+        c.separator ""
+        c.separator "Commands:"
+        c.separator "  migrate  Migrate features to a new Flipper Cloud account"
+        c.separator "  push     Push features to an existing Flipper Cloud project (asks for the token)"
         c.action do |subcommand = nil, *args|
           require 'flipper/cloud/migrate'
 
@@ -132,17 +137,10 @@ module Flipper
               ui.error message
               exit 1
             end
+          when nil
+            ui.info c.help
           else
-            ui.info "Usage: flipper cloud <command>"
-            ui.info ""
-            ui.info "Commands:"
-            ui.info "  migrate  Migrate features to a new Flipper Cloud account"
-            ui.info "  push     Push features to an existing Flipper Cloud project (asks for the token)"
-
-            if subcommand
-              ui.error "Unknown command: cloud #{subcommand}"
-              exit 1
-            end
+            usage_error!(c.help, "Unknown command: cloud #{subcommand}")
           end
         end
       end
