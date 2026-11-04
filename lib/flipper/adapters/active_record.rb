@@ -33,6 +33,11 @@ module Flipper
       # Allowing the overriding of the default feature/gate classes means you
       # can roll your own tables and what not, if you so desire.
       def initialize(options = {})
+        # The default models are defined when ActiveRecord::Base loads (see
+        # on_load above). Load it now in case nothing else has yet, like in
+        # the flipper CLI or a rake task.
+        require "active_record/base"
+
         @name = options.fetch(:name, :active_record)
         table_prefix = options[:table_prefix]
         @feature_class = options.fetch(:feature_class) do
