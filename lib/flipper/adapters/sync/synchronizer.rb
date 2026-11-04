@@ -19,12 +19,14 @@ module Flipper
         #           :instrumenter - The instrumenter used to instrument.
         #           :raise - Should errors be raised (default: true).
         #           :cache_bust - Should cache busting be used for remote get_all (default: false).
+        #           :local_get_all - Optional pre-fetched local adapter state.
         def initialize(local, remote, options = {})
           @local = local
           @remote = remote
           @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
           @raise = options.fetch(:raise, true)
           @cache_bust = options.fetch(:cache_bust, false)
+          @local_get_all = options[:local_get_all]
         end
 
         # Public: Forces a sync.
@@ -39,7 +41,7 @@ module Flipper
         private
 
         def sync
-          local_get_all = @local.get_all
+          local_get_all = @local_get_all || @local.get_all
           remote_get_all = @remote.get_all(cache_bust: @cache_bust)
 
           # Sync all the gate values.
