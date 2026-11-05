@@ -232,8 +232,14 @@ RSpec.describe Flipper::CLI do
       end
     end
 
-    it "treats --help after -- as an argument" do
-      expect(run_cli(%w[enable -- --help])).to have_attributes(status: 1, stderr: /cannot load such file/)
+    [%w[enable -- --help], %w[enable -a --help feature], %w[enable --actor -h feature], %w[disable -g --help feature]].each do |argv|
+      it "treats --help as an argument in #{argv.join(" ")}" do
+        expect(run_cli(argv)).to have_attributes(status: 1, stderr: /cannot load such file/)
+      end
+    end
+
+    it "still prints help after an option with an attached value" do
+      expect(run_cli(%w[enable --actor=User;1 --help])).to have_attributes(status: 0, stdout: enable_help)
     end
   end
 

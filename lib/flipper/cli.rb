@@ -187,7 +187,7 @@ module Flipper
 
       if (cmd = @commands[command])
         # Print help before loading the app, so it works outside one too.
-        if help_requested?(args)
+        if cmd.help_requested?(args)
           ui.info cmd.help
           exit
         end
@@ -208,11 +208,6 @@ module Flipper
     def command(name, &block)
       @commands[name] = Command.new(program_name: "#{program_name} #{name}")
       block.call(@commands[name])
-    end
-
-    # Whether -h or --help comes before any -- in the command's arguments.
-    def help_requested?(args)
-      args.take_while { |arg| arg != "--" }.any? { |arg| arg == "-h" || arg == "--help" }
     end
 
     # Build a percentage type, reporting an out of range value as a bad argument.
@@ -358,6 +353,26 @@ module Flipper
 
       def action(&block)
         @action = block
+      end
+
+      # Whether argv asks for help: -h or --help before any --, and not the
+      # value of an option that takes one (enable -a --help is an actor).
+      # Abbreviated (--act) and bundled (-ah) options aren't followed.
+      def help_requested?(argv)
+        argv = argv.take_while { |arg| arg != "--" }
+
+        until argv.empty?
+          arg = argv.shift
+          return true if arg == "-h" || arg == "--help"
+
+          switch = case arg
+          when /\A--([^=]+)\z/ then search(:long, $1)
+          when /\A-(\w)\z/ then search(:short, $1)
+          end
+          argv.shift if switch.is_a?(OptionParser::Switch::RequiredArgument)
+        end
+
+        false
       end
     end
   end
