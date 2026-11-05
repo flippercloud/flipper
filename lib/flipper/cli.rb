@@ -186,6 +186,12 @@ module Flipper
       command, *args = order(argv)
 
       if @commands[command]
+        # Print help before loading the app, so it works outside one too.
+        if help_requested?(args)
+          ui.info @commands[command].help
+          exit
+        end
+
         load_environment! if @commands[command].load_environment
         @commands[command].run(args)
       elsif command
@@ -202,6 +208,11 @@ module Flipper
     def command(name, &block)
       @commands[name] = Command.new(program_name: "#{program_name} #{name}")
       block.call(@commands[name])
+    end
+
+    # Whether -h or --help comes before any -- in the command's arguments.
+    def help_requested?(args)
+      args.take_while { |arg| arg != "--" }.any? { |arg| arg == "-h" || arg == "--help" }
     end
 
     # Build a percentage type, reporting an out of range value as a bad argument.

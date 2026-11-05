@@ -204,16 +204,43 @@ RSpec.describe Flipper::CLI do
 
   cloud_help = /Usage: flipper cloud <command>\n\nCommands:\n  migrate +Migrate features.*\n  push +Push features/
 
-  ["cloud", "help cloud"].each do |command|
+  ["cloud", "help cloud", "cloud --help", "cloud push --help"].each do |command|
     describe command do
       it { should have_attributes(status: 0, stdout: cloud_help) }
     end
   end
 
-  # OptionParser prints --help straight to $stdout
-  ["cloud --help", "cloud push --help"].each do |command|
-    describe command do
-      it { expect { subject }.to output(cloud_help).to_stdout }
+  # Help never loads the app, so it also works outside one.
+  context "outside an app" do
+    before { ENV["FLIPPER_REQUIRE"] = "./spec/fixtures/missing_environment" }
+
+    {
+      "enable --help" => /Usage: flipper enable \[options\] <feature>\n.*--expression=JSON/m,
+      "enable -h" => /Usage: flipper enable \[options\] <feature>\n.*--expression=JSON/m,
+      "enable search --help" => /Usage: flipper enable \[options\] <feature>/,
+      "show -h" => /Usage: flipper show \[options\] <feature>/,
+      "list --help" => /Usage: flipper list/,
+      "cloud --help" => cloud_help,
+      "cloud push --help" => cloud_help,
+    }.each do |command, usage|
+      it "prints help for #{command}" do
+        result = run_cli(command)
+        expect(result).to have_attributes(status: 0, stdout: usage, stderr: "")
+      end
+    end
+
+    it "treats --help after -- as an argument" do
+      expect(run_cli("enable -- --help")).to have_attributes(status: 1, stderr: /cannot load such file/)
+    end
+
+    def run_cli(command)
+      status = 0
+      begin
+        cli.run(Shellwords.split(command))
+      rescue SystemExit => e
+        status = e.status
+      end
+      Result.new(status: status, stdout: stdout.string, stderr: stderr.string)
     end
   end
 
