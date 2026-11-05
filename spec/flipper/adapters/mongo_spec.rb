@@ -31,7 +31,7 @@ RSpec.describe Flipper::Adapters::Mongo do
     end
   end
 
-  it 'configures itself on load' do
+  it 'configures itself on load and shares one client per process' do
     Flipper.configuration = nil
     Flipper.instance = nil
 
@@ -39,15 +39,7 @@ RSpec.describe Flipper::Adapters::Mongo do
 
     ENV["MONGO_URL"] = ENV.fetch("MONGO_URL", "mongodb://127.0.0.1:27017/testing")
     expect(Flipper.adapter.adapter).to be_a(Flipper::Adapters::Mongo)
-  end
 
-  it 'shares one client per process when configured on load' do
-    Flipper.configuration = nil
-    Flipper.instance = nil
-
-    silence { load 'flipper/adapters/mongo.rb' }
-
-    ENV["MONGO_URL"] = ENV.fetch("MONGO_URL", "mongodb://127.0.0.1:27017/testing")
     client = Flipper.adapter.adapter.collection.client
     expect(Thread.new { Flipper.adapter.adapter.collection.client }.value).to be(client)
 
