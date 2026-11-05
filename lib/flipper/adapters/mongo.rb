@@ -205,6 +205,12 @@ module Flipper
 end
 
 Flipper.configure do |config|
+  # Each thread builds its own adapter, but Mongo::Client is thread safe and
+  # pools its connections, so share one per process. A client per thread keeps
+  # its monitor threads and connections open after the thread is gone.
+  clients = {}
+  clients_lock = Mutex.new
+
   config.adapter do
     url = ENV["FLIPPER_MONGO_URL"] || ENV["MONGO_URL"]
     collection = ENV["FLIPPER_MONGO_COLLECTION"] || "flipper"
@@ -213,6 +219,7 @@ Flipper.configure do |config|
       raise ArgumentError, "The MONGO_URL environment variable must be set. For example: mongodb://127.0.0.1:27017/flipper"
     end
 
-    Flipper::Adapters::Mongo.new(Mongo::Client.new(url)[collection])
+    client = clients_lock.synchronize { clients[[Process.pid, url]] ||= Mongo::Client.new(url) }
+    Flipper::Adapters::Mongo.new(client[collection])
   end
 end
