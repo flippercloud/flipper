@@ -185,9 +185,15 @@ module Flipper
     def run(argv)
       command, *args = order(argv)
 
-      if @commands[command]
-        load_environment! if @commands[command].load_environment
-        @commands[command].run(args)
+      if (cmd = @commands[command])
+        # Print help before loading the app, so it works outside one too.
+        if cmd.help_requested?(args)
+          ui.info cmd.help
+          exit
+        end
+
+        load_environment! if cmd.load_environment
+        cmd.run(args)
       elsif command
         usage_error!(help, "Unknown command: #{command}")
       else
@@ -347,6 +353,26 @@ module Flipper
 
       def action(&block)
         @action = block
+      end
+
+      # Whether argv asks for help: -h or --help before any --, and not the
+      # value of an option that takes one (enable -a --help is an actor).
+      # Abbreviated (--act) and bundled (-ah) options aren't followed.
+      def help_requested?(argv)
+        argv = argv.take_while { |arg| arg != "--" }
+
+        until argv.empty?
+          arg = argv.shift
+          return true if arg == "-h" || arg == "--help"
+
+          switch = case arg
+          when /\A--([^=]+)\z/ then search(:long, $1)
+          when /\A-(\w)\z/ then search(:short, $1)
+          end
+          argv.shift if switch.is_a?(OptionParser::Switch::RequiredArgument)
+        end
+
+        false
       end
     end
   end
