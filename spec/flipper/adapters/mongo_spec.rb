@@ -31,7 +31,7 @@ RSpec.describe Flipper::Adapters::Mongo do
     end
   end
 
-  it 'configures itself on load and shares one client per process' do
+  it 'configures itself on load' do
     Flipper.configuration = nil
     Flipper.instance = nil
 
