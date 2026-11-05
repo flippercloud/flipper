@@ -194,8 +194,11 @@ RSpec.describe Flipper::Adapters::Sync do
 
   it 'does not raise sync exceptions' do
     exception = StandardError.new
-    expect(remote_adapter).to receive(:get_all).and_raise(exception)
+    allow(remote_adapter).to receive(:get_all).and_raise(exception)
     expect { subject.get_all }.not_to raise_error
+    # The interval clock ticks in whole seconds, so `get_all` can sync a second
+    # time if it runs just after a second boundary. Only require that it synced.
+    expect(remote_adapter).to have_received(:get_all).at_least(:once)
   end
 
   describe '#adapter_stack' do
