@@ -185,15 +185,15 @@ module Flipper
     def run(argv)
       command, *args = order(argv)
 
-      if @commands[command]
+      if (cmd = @commands[command])
         # Print help before loading the app, so it works outside one too.
         if help_requested?(args)
-          ui.info @commands[command].help
+          ui.info cmd.help
           exit
         end
 
-        load_environment! if @commands[command].load_environment
-        @commands[command].run(args)
+        load_environment! if cmd.load_environment
+        cmd.run(args)
       elsif command
         usage_error!(help, "Unknown command: #{command}")
       else

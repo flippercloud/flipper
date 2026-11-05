@@ -21,7 +21,9 @@ RSpec.describe Flipper::CLI do
     descriptions.map { |arg| Shellwords.split(arg) }.flatten
   end
 
-  subject do
+  subject { run_cli(argv) }
+
+  def run_cli(argv)
     status = 0
 
     begin
@@ -204,7 +206,7 @@ RSpec.describe Flipper::CLI do
 
   cloud_help = /Usage: flipper cloud <command>\n\nCommands:\n  migrate +Migrate features.*\n  push +Push features/
 
-  ["cloud", "help cloud", "cloud --help", "cloud push --help"].each do |command|
+  ["cloud", "help cloud"].each do |command|
     describe command do
       it { should have_attributes(status: 0, stdout: cloud_help) }
     end
@@ -214,33 +216,24 @@ RSpec.describe Flipper::CLI do
   context "outside an app" do
     before { ENV["FLIPPER_REQUIRE"] = "./spec/fixtures/missing_environment" }
 
+    enable_help = /Usage: flipper enable \[options\] <feature>\n.*--expression=JSON/m
+
     {
-      "enable --help" => /Usage: flipper enable \[options\] <feature>\n.*--expression=JSON/m,
-      "enable -h" => /Usage: flipper enable \[options\] <feature>\n.*--expression=JSON/m,
-      "enable search --help" => /Usage: flipper enable \[options\] <feature>/,
+      "enable --help" => enable_help,
+      "enable -h" => enable_help,
+      "enable search --help" => enable_help,
       "show -h" => /Usage: flipper show \[options\] <feature>/,
       "list --help" => /Usage: flipper list/,
       "cloud --help" => cloud_help,
       "cloud push --help" => cloud_help,
     }.each do |command, usage|
       it "prints help for #{command}" do
-        result = run_cli(command)
-        expect(result).to have_attributes(status: 0, stdout: usage, stderr: "")
+        expect(run_cli(Shellwords.split(command))).to have_attributes(status: 0, stdout: usage, stderr: "")
       end
     end
 
     it "treats --help after -- as an argument" do
-      expect(run_cli("enable -- --help")).to have_attributes(status: 1, stderr: /cannot load such file/)
-    end
-
-    def run_cli(command)
-      status = 0
-      begin
-        cli.run(Shellwords.split(command))
-      rescue SystemExit => e
-        status = e.status
-      end
-      Result.new(status: status, stdout: stdout.string, stderr: stderr.string)
+      expect(run_cli(%w[enable -- --help])).to have_attributes(status: 1, stderr: /cannot load such file/)
     end
   end
 
