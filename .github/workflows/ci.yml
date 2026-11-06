@@ -26,8 +26,9 @@ jobs:
 
   test:
     name: Test on ruby ${{ matrix.ruby }} and rails ${{ matrix.rails }}
-    # ruby/setup-ruby has no Ruby < 3.2 for ubuntu-26.04, which ubuntu-latest now points to
-    runs-on: ${{ matrix.ruby < 3.2 && 'ubuntu-24.04' || 'ubuntu-latest' }}
+    # ubuntu-26.04 (ubuntu-latest) has no Ruby < 3.2 in ruby/setup-ruby and no
+    # preinstalled MySQL, which the "Set up MySQL" step starts
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     # rails main is an early-warning canary; failures don't block the build
     continue-on-error: ${{ matrix.rails == 'main' }}
