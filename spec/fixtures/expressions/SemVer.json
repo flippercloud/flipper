@@ -1,0 +1,123 @@
+{
+  "valid": [
+    {
+      "expression": { "GreaterThan": [{ "SemVer": "2.10.0" }, { "SemVer": "2.9.0" }] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "Equal": [{ "SemVer": "2.3.1" }, { "SemVer": "2.3.1" }] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "NotEqual": [{ "SemVer": "2.3.1" }, { "SemVer": "2.3.2" }] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "LessThan": [{ "SemVer": "1.9.9" }, { "SemVer": "2.0.0" }] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "LessThan": [{ "SemVer": "1.0.0-alpha" }, { "SemVer": "1.0.0" }] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "LessThan": [{ "SemVer": "1.0.0-alpha" }, { "SemVer": "1.0.0-alpha.1" }] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "LessThan": [{ "SemVer": "1.0.0-alpha.1" }, { "SemVer": "1.0.0-alpha.beta" }] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "LessThan": [{ "SemVer": "1.0.0-alpha.beta" }, { "SemVer": "1.0.0-beta" }] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "LessThan": [{ "SemVer": "1.0.0-beta" }, { "SemVer": "1.0.0-beta.2" }] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "LessThan": [{ "SemVer": "1.0.0-beta.2" }, { "SemVer": "1.0.0-beta.11" }] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "LessThan": [{ "SemVer": "1.0.0-beta.11" }, { "SemVer": "1.0.0-rc.1" }] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "LessThan": [{ "SemVer": "1.0.0-rc.1" }, { "SemVer": "1.0.0" }] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "LessThan": [{ "SemVer": "1.0.0-RC" }, { "SemVer": "1.0.0-rc" }] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "Equal": [{ "SemVer": "1.0.0+build.1" }, { "SemVer": "1.0.0+build.2" }] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "Equal": [{ "SemVer": "v2.3.1" }, { "SemVer": "2.3.1" }] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "Equal": [{ "SemVer": "2.3" }, { "SemVer": "2.3.0" }] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "Equal": [{ "SemVer": "2" }, { "SemVer": "2.0.0" }] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "Equal": [{ "SemVer": 2 }, { "SemVer": "2.0.0" }] },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "GreaterThanOrEqualTo": [{ "SemVer": { "Property": "app_version" } }, { "SemVer": "2.3.1" }] },
+      "context": { "properties": { "app_version": "2.10.0" } },
+      "result": { "enum": [true] }
+    },
+    {
+      "expression": { "GreaterThanOrEqualTo": [{ "SemVer": { "Property": "app_version" } }, { "SemVer": "2.3.1" }] },
+      "context": { "properties": { "app_version": "2.3.1-beta.1" } },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "GreaterThanOrEqualTo": [{ "SemVer": { "Property": "app_version" } }, { "SemVer": "2.3.1" }] },
+      "context": { "properties": {} },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "LessThan": [{ "SemVer": { "Property": "app_version" } }, { "SemVer": "2.3.1" }] },
+      "context": { "properties": { "app_version": "not a version" } },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "GreaterThan": [{ "SemVer": "01.2.3" }, { "SemVer": "0.0.0" }] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "GreaterThan": [{ "SemVer": "1.2.3.4" }, { "SemVer": "0.0.0" }] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "GreaterThan": [{ "SemVer": "1.2.3-01" }, { "SemVer": "0.0.0" }] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "GreaterThan": [{ "SemVer": "2.3.1" }, "2.3.0"] },
+      "result": { "enum": [false] }
+    },
+    {
+      "expression": { "Equal": [{ "SemVer": "2.3.1" }, "2.3.1"] },
+      "result": { "enum": [false] }
+    }
+  ],
+  "invalid": [
+    { "SemVer": [] },
+    { "SemVer": null },
+    { "SemVer": true },
+    { "SemVer": ["1.0.0", "2.0.0"] },
+    { "SemVer": "1.0.0", "Any": [] }
+  ]
+}

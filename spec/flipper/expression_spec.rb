@@ -144,6 +144,25 @@ RSpec.describe Flipper::Expression do
       expect(expression.function).to be(Flipper::Expressions::Property)
       expect(expression.args).to eq([Flipper.constant("flipper_id")])
     end
+
+    it "can build SemVer" do
+      expression = described_class.build({
+        "SemVer" => ["2.3.1"]
+      })
+
+      expect(expression).to be_instance_of(Flipper::Expression)
+      expect(expression.function).to be(Flipper::Expressions::SemVer)
+      expect(expression.args).to eq([Flipper.constant("2.3.1")])
+    end
+
+    it "can build a single function argument without an array" do
+      expression = described_class.build({
+        "Number" => { "Property" => "age" }
+      })
+
+      expect(expression).to eq(described_class.build({ "Number" => [{ "Property" => ["age"] }] }))
+      expect(expression.value).to eq({ "Number" => [{ "Property" => ["age"] }] })
+    end
   end
 
   describe "#eql?" do

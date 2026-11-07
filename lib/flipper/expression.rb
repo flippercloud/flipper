@@ -19,6 +19,11 @@ module Flipper
           raise ArgumentError, "#{object.inspect} cannot be converted into an expression"
         end
 
+        # A single function argument can skip the array, like
+        # { "Number" => { "Property" => "age" } }. Array() would split the
+        # hash into key/value pairs, so wrap it instead.
+        args = [args] if args.is_a?(Hash)
+
         new(name, Array(args).map { |o| build(o) })
       when String, Numeric, FalseClass, TrueClass
         Expression::Constant.new(object)
