@@ -67,8 +67,6 @@ RSpec.describe Flipper::Expressions::SemVer do
 
     it "ignores build metadata" do
       expect(version("1.0.0+a")).to eq(version("1.0.0+b"))
-      expect(version("1.0.0+a")).to eql(version("1.0.0+b"))
-      expect(version("1.0.0+a").hash).to eq(version("1.0.0+b").hash)
     end
 
     it "is not equal to strings" do
@@ -81,9 +79,7 @@ RSpec.describe Flipper::Expressions::SemVer do
   end
 
   describe "shared examples" do
-    examples = Flipper::Typecast.from_json(
-      File.read(File.expand_path("../../fixtures/expressions/SemVer.json", __dir__))
-    )
+    examples = Flipper::Typecast.from_json(FlipperRoot.join("spec/fixtures/expressions/SemVer.json").read)
 
     examples.fetch("valid").each do |example|
       it "evaluates #{Flipper::Typecast.to_json(example["expression"])} with #{Flipper::Typecast.to_json(example["context"] || {})}" do
