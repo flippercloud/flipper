@@ -19,6 +19,10 @@ module Flipper
         "#{key_prefix}#{feature_name}"
       end
 
+      def sync_version_key
+        "#{features_key}:sync_version"
+      end
+
       # Public: Initializes a Redis flipper adapter.
       #
       # client - The Redis client to use.
@@ -82,6 +86,17 @@ module Flipper
       def get_all(**kwargs)
         features = read_feature_keys.map { |key| Flipper::Feature.new(key, self) }
         read_many_features(features)
+      end
+
+      # Public: The Flipper::SyncVersion of the flags last synced into this
+      # adapter, shared by every process using the same Redis.
+      def sync_version
+        SyncVersion.parse(with_connection { |conn| conn.get(sync_version_key) })
+      end
+
+      # Public: Records the Flipper::SyncVersion of the flags just synced.
+      def sync_version=(version)
+        with_connection { |conn| conn.set(sync_version_key, version.to_s) }
       end
 
       # Public: Enables a gate for a given thing.

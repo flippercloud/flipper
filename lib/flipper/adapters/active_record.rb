@@ -19,6 +19,11 @@ module Flipper
         Run `rails generate flipper:update` and `rails db:migrate`.
       EOS
 
+      # Private: The sync version lives in the gates table under a feature key
+      # with no row in the features table, so features and get_all never see it.
+      SYNC_VERSION_FEATURE_KEY = "__flipper_sync_version__".freeze
+      SYNC_VERSION_GATE_KEY = "sync_version".freeze
+
       # Public: Initialize a new ActiveRecord adapter instance.
       #
       # name - The Symbol name for this adapter. Optional (default :active_record)
@@ -139,6 +144,33 @@ module Flipper
           end
           result.default_proc = nil
           result
+        end
+      end
+
+      # Public: The Flipper::SyncVersion of the flags last synced into this
+      # adapter, shared by every process using the same tables.
+      def sync_version
+        value = with_connection(@gate_class) do
+          @gate_class.where(feature_key: SYNC_VERSION_FEATURE_KEY).pluck(:value).first
+        end
+        SyncVersion.parse(value)
+      end
+
+      # Public: Records the Flipper::SyncVersion of the flags just synced.
+      def sync_version=(version)
+        with_write_connection(@gate_class) do
+          @gate_class.transaction(requires_new: true) do
+            @gate_class.where(feature_key: SYNC_VERSION_FEATURE_KEY).delete_all
+            begin
+              @gate_class.create! do |g|
+                g.feature_key = SYNC_VERSION_FEATURE_KEY
+                g.key = SYNC_VERSION_GATE_KEY
+                g.value = version.to_s
+              end
+            rescue ::ActiveRecord::RecordNotUnique
+              # another process recorded the same version at the same time
+            end
+          end
         end
       end
 

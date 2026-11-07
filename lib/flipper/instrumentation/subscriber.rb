@@ -79,6 +79,10 @@ module Flipper
         # noop
       end
 
+      def update_synchronizer_stale_metrics
+        # noop
+      end
+
       def update_telemetry_error_metrics
         # noop
       end

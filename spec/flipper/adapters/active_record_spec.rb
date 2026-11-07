@@ -66,6 +66,26 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
         end
 
         it_should_behave_like 'a flipper adapter'
+        it_should_behave_like 'an adapter that stores its sync version'
+
+        it "does not let another process sync older flags over newer ones" do
+          remote = lambda do |enabled, number|
+            adapter = Flipper::Adapters::Memory.new
+            Flipper.new(adapter).enable(:search) if enabled
+            adapter.sync_version = Flipper::SyncVersion.new("scope", number)
+            adapter
+          end
+
+          # Each process has its own adapter instance over the same tables.
+          process_a = described_class.new
+          process_b = described_class.new
+
+          Flipper::Adapters::Sync::Synchronizer.new(process_a, remote.call(true, 10)).call
+          Flipper::Adapters::Sync::Synchronizer.new(process_b, remote.call(false, 8)).call
+
+          expect(Flipper.new(described_class.new).enabled?(:search)).to be(true)
+          expect(described_class.new.sync_version.number).to eq(10)
+        end
 
         it "should load actor ids fine" do
           flipper.enable_percentage_of_time(:foo, 1)

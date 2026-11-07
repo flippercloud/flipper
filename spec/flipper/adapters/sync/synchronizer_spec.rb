@@ -172,4 +172,82 @@ RSpec.describe Flipper::Adapters::Sync::Synchronizer do
       }.to raise_error(Flipper::Adapters::ActorLimit::LimitExceeded)
     end
   end
+
+  describe "sync versions" do
+    let(:newer) { Flipper::SyncVersion.new("scope", 10) }
+    let(:older) { Flipper::SyncVersion.new("scope", 8) }
+
+    before do
+      local_flipper.enable(:search)
+    end
+
+    it "skips remote flags older than the ones local last synced" do
+      local.sync_version = newer
+      remote.sync_version = older
+
+      expect(local).not_to receive(:get_all)
+      subject.call
+
+      expect(local_flipper[:search].boolean_value).to be(true)
+      expect(local.sync_version).to eq(newer)
+
+      events = instrumenter.events_by_name("synchronizer_stale.flipper")
+      expect(events.size).to be(1)
+      expect(events[0].payload).to eq(local_version: newer, remote_version: older)
+    end
+
+    it "syncs remote flags with a newer sync version and records it" do
+      local.sync_version = older
+      remote.sync_version = newer
+
+      subject.call
+
+      expect(local_flipper[:search].boolean_value).to be(false)
+      expect(local.sync_version).to eq(newer)
+    end
+
+    it "syncs remote flags with the same sync version without recording it again" do
+      local.sync_version = newer
+      remote.sync_version = newer
+
+      expect(local).not_to receive(:sync_version=)
+      subject.call
+
+      expect(local_flipper[:search].boolean_value).to be(false)
+    end
+
+    it "syncs remote flags from another scope and records their version" do
+      other = Flipper::SyncVersion.new("other", 1)
+      local.sync_version = newer
+      remote.sync_version = other
+
+      subject.call
+
+      expect(local_flipper[:search].boolean_value).to be(false)
+      expect(local.sync_version).to eq(other)
+    end
+
+    it "syncs remote flags without a sync version and keeps local's" do
+      local.sync_version = newer
+
+      subject.call
+
+      expect(local_flipper[:search].boolean_value).to be(false)
+      expect(local.sync_version).to eq(newer)
+    end
+
+    it "reads and records the sync version through wrapping adapters" do
+      wrapped_local = Flipper::Adapters::Memoizable.new(local)
+      local.sync_version = newer
+      remote.sync_version = older
+
+      described_class.new(wrapped_local, remote).call
+      expect(local_flipper[:search].boolean_value).to be(true)
+
+      remote.sync_version = Flipper::SyncVersion.new("scope", 12)
+      described_class.new(wrapped_local, remote).call
+      expect(local_flipper[:search].boolean_value).to be(false)
+      expect(local.sync_version).to eq(remote.sync_version)
+    end
+  end
 end

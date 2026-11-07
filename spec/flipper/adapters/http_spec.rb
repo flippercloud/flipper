@@ -291,6 +291,64 @@ RSpec.describe Flipper::Adapters::Http do
       expect(second_result).to have_key("search")
     end
 
+    describe "sync version" do
+      let(:url) { "http://app.com/flipper/features?exclude_gate_names=true" }
+      let(:body) { JSON.generate(features: []) }
+
+      it "is nil before get_all and when the header is missing" do
+        stub_request(:get, url).to_return(status: 200, body: body)
+        adapter = described_class.new(url: 'http://app.com/flipper')
+        expect(adapter.sync_version).to be_nil
+
+        adapter.get_all
+        expect(adapter.sync_version).to be_nil
+      end
+
+      it "comes from the flipper-sync-version header of the last get_all" do
+        stub_request(:get, url)
+          .to_return(status: 200, body: body, headers: { "flipper-sync-version" => "10" })
+          .then.to_return(status: 200, body: body)
+        adapter = described_class.new(url: 'http://app.com/flipper')
+
+        adapter.get_all
+        expect(adapter.sync_version.number).to eq(10)
+
+        adapter.get_all
+        expect(adapter.sync_version).to be_nil
+      end
+
+      it "stays with the cached result on 304 Not Modified" do
+        stub_request(:get, url)
+          .to_return(status: 200, body: body, headers: { "ETag" => '"abc"', "flipper-sync-version" => "10" })
+        adapter = described_class.new(url: 'http://app.com/flipper')
+        adapter.get_all
+        version = adapter.sync_version
+
+        stub_request(:get, url).with(headers: { 'If-None-Match' => '"abc"' })
+          .to_return(status: 304, headers: { "flipper-sync-version" => "12" })
+        adapter.get_all
+
+        expect(adapter.sync_version).to eq(version)
+      end
+
+      it "is scoped to the url and headers" do
+        stub_request(:get, url).to_return(status: 200, body: body, headers: { "flipper-sync-version" => "10" })
+        stub_request(:get, "http://other.com/flipper/features?exclude_gate_names=true")
+          .to_return(status: 200, body: body, headers: { "flipper-sync-version" => "10" })
+
+        versions = [
+          described_class.new(url: 'http://app.com/flipper', headers: { "flipper-cloud-token" => "a" }),
+          described_class.new(url: 'http://app.com/flipper', headers: { "Flipper-Cloud-Token" => "a" }),
+          described_class.new(url: 'http://app.com/flipper', headers: { "flipper-cloud-token" => "b" }),
+          described_class.new(url: 'http://other.com/flipper', headers: { "flipper-cloud-token" => "a" }),
+        ].map { |adapter| adapter.get_all; adapter.sync_version }
+
+        expect(versions[0]).to eq(versions[1])
+        expect(versions[0].scope).not_to eq(versions[2].scope)
+        expect(versions[0].scope).not_to eq(versions[3].scope)
+      end
+    end
+
     it "raises error when 304 received without cached result" do
       # Server returns 304 without any prior request
       stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")

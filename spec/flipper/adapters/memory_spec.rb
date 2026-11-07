@@ -8,12 +8,50 @@ RSpec.describe Flipper::Adapters::Memory do
     subject { described_class.new(source, threadsafe: true) }
 
     it_should_behave_like 'a flipper adapter'
+    it_should_behave_like 'an adapter that stores its sync version'
   end
 
   context 'threadsafe: false' do
     subject { described_class.new(source, threadsafe: false) }
 
     it_should_behave_like 'a flipper adapter'
+    it_should_behave_like 'an adapter that stores its sync version'
+  end
+
+  describe "#import" do
+    def source_with(enabled, version)
+      adapter = described_class.new
+      Flipper.new(adapter).enable(:search) if enabled
+      adapter.sync_version = version
+      adapter
+    end
+
+    let(:newer) { Flipper::SyncVersion.new("scope", 10) }
+    let(:older) { Flipper::SyncVersion.new("scope", 8) }
+
+    it "keeps current flags when the source has an older sync version" do
+      subject.import(source_with(true, newer))
+      subject.import(source_with(false, older))
+
+      expect(subject.features).to eq(Set["search"])
+      expect(subject.sync_version).to eq(newer)
+    end
+
+    it "imports flags with the same or a newer sync version" do
+      subject.import(source_with(true, older))
+      subject.import(source_with(false, newer))
+
+      expect(subject.features).to eq(Set.new)
+      expect(subject.sync_version).to eq(newer)
+    end
+
+    it "imports flags without a sync version and keeps the recorded one" do
+      subject.import(source_with(true, newer))
+      subject.import(source_with(false, nil))
+
+      expect(subject.features).to eq(Set.new)
+      expect(subject.sync_version).to eq(newer)
+    end
   end
 
   it "can initialize from big hash" do

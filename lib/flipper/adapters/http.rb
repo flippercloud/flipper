@@ -2,6 +2,7 @@ require 'net/http'
 require 'uri'
 require 'json'
 require 'set'
+require 'digest'
 require 'flipper'
 require 'flipper/adapters/http/error'
 require 'flipper/adapters/http/client'
@@ -26,7 +27,15 @@ module Flipper
         @last_get_all_etag = nil
         @last_get_all_result = nil
         @last_get_all_response = nil
+        @last_get_all_sync_version = nil
         @get_all_mutex = Mutex.new
+        @sync_version_scope = sync_version_scope(options)
+      end
+
+      # Public: The Flipper::SyncVersion of the flags get_all last returned, or
+      # nil if the server didn't send one.
+      def sync_version
+        @get_all_mutex.synchronize { @last_get_all_sync_version }
       end
 
       def get(feature)
@@ -100,6 +109,7 @@ module Flipper
         @get_all_mutex.synchronize do
           @last_get_all_etag = response['etag'] if response['etag']
           @last_get_all_result = result
+          @last_get_all_sync_version = SyncVersion.from_header(@sync_version_scope, response[SyncVersion::HEADER])
         end
 
         result
@@ -166,6 +176,13 @@ module Flipper
       end
 
       private
+
+      # Versions only compare between responses from the same server and
+      # credentials, such as one Cloud environment's token.
+      def sync_version_scope(options)
+        headers = (options[:headers] || {}).map { |key, value| [key.to_s.downcase, value.to_s] }.sort
+        Digest::SHA256.hexdigest([options.fetch(:url).to_s, headers].inspect)[0, 16]
+      end
 
       def path_escape(key)
         URI::DEFAULT_PARSER.escape(key.to_s, /[^A-Za-z0-9_.~-]/)
