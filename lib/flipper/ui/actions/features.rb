@@ -48,6 +48,11 @@ module Flipper
             redirect_to("/features/new?error=#{Flipper::UI::Util.escape error}")
           end
 
+          if Flipper.reserved_key?(value)
+            error = "#{value.inspect} is reserved for Flipper's internal use."
+            redirect_to("/features/new?error=#{Flipper::UI::Util.escape error}")
+          end
+
           feature = flipper[value]
           feature.add
 

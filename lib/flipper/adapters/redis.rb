@@ -20,7 +20,7 @@ module Flipper
       end
 
       def sync_version_key
-        "#{features_key}:sync_version"
+        key_for(SyncVersion::KEY)
       end
 
       # Public: Initializes a Redis flipper adapter.
@@ -158,11 +158,11 @@ module Flipper
       # feature data, so a feature with the same key would overwrite or
       # delete them.
       def reserved_key?(feature)
-        key = key_for(feature.key)
-        key == features_key || key == sync_version_key
+        Flipper.reserved_key?(feature.key) || key_for(feature.key) == features_key
       end
 
       def ensure_not_reserved_key!(feature)
+        raise ReservedKeyError.new(feature.key) if Flipper.reserved_key?(feature.key)
         return unless reserved_key?(feature)
 
         raise ArgumentError, "#{feature.key.inspect} is reserved by the Redis adapter and cannot be used as a feature name"

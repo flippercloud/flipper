@@ -9,6 +9,10 @@ module Flipper
   class SyncVersion
     HEADER = "flipper-sync-version".freeze
 
+    # Public: The key adapters store the sync version under. It starts with
+    # Flipper::RESERVED_KEY_PREFIX, so no feature can use it.
+    KEY = "__flipper_sync_version__".freeze
+
     attr_reader :scope, :number
 
     # Public: Builds a version from a header value. Returns nil when the value

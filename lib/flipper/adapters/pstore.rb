@@ -187,7 +187,7 @@ module Flipper
 
       # Private
       def sync_version_key
-        "#{@features_key}:sync_version"
+        SyncVersion::KEY
       end
 
       # Private

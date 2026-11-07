@@ -56,7 +56,7 @@ module Flipper
 
       # Private: The sync version lives in the gates table under a feature key
       # with no row in the features table, so features and get_all never see it.
-      SYNC_VERSION_FEATURE_KEY = "__flipper_sync_version__".freeze
+      SYNC_VERSION_FEATURE_KEY = SyncVersion::KEY
       SYNC_VERSION_GATE_KEY = "sync_version".freeze
 
       # Public: The set of known features.
@@ -203,16 +203,13 @@ module Flipper
         raise "#{data_type} is not supported by this adapter"
       end
 
-      # The sync version is stored as a gate row under this feature key, so
-      # it can't be a feature.
+      # The sync version is stored as a gate row under a reserved feature key.
       def reserved_key?(feature)
-        feature.key == SYNC_VERSION_FEATURE_KEY
+        Flipper.reserved_key?(feature.key)
       end
 
       def ensure_not_reserved_key!(feature)
-        return unless reserved_key?(feature)
-
-        raise ArgumentError, "#{feature.key.inspect} is reserved by the Sequel adapter and cannot be used as a feature name"
+        raise ReservedKeyError.new(feature.key) if reserved_key?(feature)
       end
 
       def sync_version_dataset

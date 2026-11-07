@@ -9,6 +9,15 @@ module Flipper
     end
   end
 
+  # Raised when writing a feature whose key starts with
+  # Flipper::RESERVED_KEY_PREFIX. An ArgumentError, like the adapters' other
+  # reserved name errors.
+  class ReservedKeyError < ArgumentError
+    def initialize(key)
+      super "#{key.to_s.inspect} is reserved for Flipper's internal use and cannot be used as a feature name"
+    end
+  end
+
   # Raised when attempting to declare a group name that has already been used.
   class DuplicateGroup < Error; end
 

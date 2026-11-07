@@ -138,20 +138,19 @@ module Flipper
 
       private
 
-      # Private: The feature list is stored in the document with the
-      # features key as its id, so writing a feature with that key would
-      # overwrite or delete it.
       def sync_version_key
-        "#{@features_key}:sync_version"
+        SyncVersion::KEY
       end
 
-      # The feature list and sync version documents share the namespace with
-      # feature documents, so those names can't be features.
+      # Private: The feature list and sync version live in documents next to
+      # the feature documents, so a feature with the same key would overwrite
+      # or delete them.
       def reserved_key?(feature)
-        feature.key == @features_key.to_s || feature.key == sync_version_key
+        Flipper.reserved_key?(feature.key) || feature.key == @features_key.to_s
       end
 
       def ensure_not_reserved_key!(feature)
+        raise ReservedKeyError.new(feature.key) if Flipper.reserved_key?(feature.key)
         return unless reserved_key?(feature)
 
         raise ArgumentError, "#{feature.key.inspect} is reserved by the Mongo adapter and cannot be used as a feature name"

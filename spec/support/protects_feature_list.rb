@@ -32,9 +32,11 @@ RSpec.shared_examples 'an adapter that protects its feature list' do
   end
 end
 
-# For adapters that store the sync version next to the feature data. Including
-# specs define `reserved_name`, the feature key the sync version is stored at.
+# For adapters that store the sync version next to the feature data, under
+# Flipper::SyncVersion::KEY. Writes to that name or any other __flipper name
+# are refused.
 RSpec.shared_examples 'an adapter that protects its sync version key' do
+  let(:reserved_name) { Flipper::SyncVersion::KEY }
   let(:feature) { Flipper::Feature.new(reserved_name, subject) }
   let(:boolean) { feature.gate(:boolean) }
   let(:version) { Flipper::SyncVersion.new("scope", 10) }
@@ -48,8 +50,9 @@ RSpec.shared_examples 'an adapter that protects its sync version key' do
       -> { subject.disable(feature, boolean, Flipper::Types::Boolean.new(false)) },
       -> { subject.clear(feature) },
     ].each do |write|
-      expect(&write).to raise_error(ArgumentError, /#{Regexp.escape(reserved_name.inspect)} is reserved/)
+      expect(&write).to raise_error(Flipper::ReservedKeyError, /#{Regexp.escape(reserved_name.inspect)} is reserved/)
     end
+    expect { subject.add(Flipper::Feature.new("__flipper_other", subject)) }.to raise_error(Flipper::ReservedKeyError)
 
     expect(subject.features).to eq(Set.new)
     expect(subject.sync_version).to eq(version)

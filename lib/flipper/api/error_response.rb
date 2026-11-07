@@ -30,6 +30,7 @@ module Flipper
         import_invalid: Error.new(6, 'Import invalid.', 422),
         expression_invalid: Error.new(7, 'The provided expression was not valid.', 422),
         request_invalid: Error.new(8, 'Request invalid.', 400),
+        name_reserved: Error.new(9, 'Feature names starting with __flipper are reserved for Flipper.', 422),
       }.freeze
     end
   end

@@ -18,7 +18,7 @@ module Flipper
       include ::Flipper::Adapter
 
       FEATURES_KEY = :flipper_features
-      SYNC_VERSION_KEY = "#{FEATURES_KEY}:sync_version".freeze
+      SYNC_VERSION_KEY = SyncVersion::KEY
 
       # Public
       def initialize(moneta)

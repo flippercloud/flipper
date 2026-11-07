@@ -7,6 +7,15 @@ module Flipper
   # Private: The namespace for all instrumented events.
   InstrumentationNamespace = :flipper
 
+  # Public: Feature keys starting with this are reserved for data Flipper
+  # stores next to features, like the sync version.
+  RESERVED_KEY_PREFIX = "__flipper".freeze
+
+  # Public: Is this feature key reserved for Flipper's own data?
+  def reserved_key?(key)
+    key.to_s.start_with?(RESERVED_KEY_PREFIX)
+  end
+
   # Public: Start here. Given an adapter returns a handy DSL to all the flipper
   # goodness. To see supported options, check out dsl.rb.
   def new(adapter, options = {})

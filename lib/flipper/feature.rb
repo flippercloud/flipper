@@ -63,6 +63,7 @@ module Flipper
     #
     # Returns the result of Adapter#disable.
     def disable(thing = false)
+      ensure_not_reserved!
       instrument(:disable) do |payload|
         adapter.add self
 
@@ -79,6 +80,7 @@ module Flipper
     #
     # Returns the result of Adapter#add.
     def add
+      ensure_not_reserved!
       instrument(:add) { adapter.add(self) }
     end
 
@@ -100,6 +102,7 @@ module Flipper
     #
     # Returns the result of Adapter#clear.
     def clear
+      ensure_not_reserved!
       instrument(:clear) { adapter.clear(self) }
     end
 
@@ -457,6 +460,7 @@ module Flipper
     end
 
     def enable_thing(thing, validate_expression:)
+      ensure_not_reserved!
       instrument(:enable) do |payload|
         gate = gate_for(thing)
         wrapped_thing = gate.wrap(thing)
@@ -510,6 +514,10 @@ module Flipper
     end
 
     # Private: Instrument a feature operation.
+    def ensure_not_reserved!
+      raise ReservedKeyError.new(key) if Flipper.reserved_key?(key)
+    end
+
     def instrument(operation, initial_payload = {})
       @instrumenter.instrument(InstrumentationName, initial_payload) do |payload|
         payload[:feature] = self

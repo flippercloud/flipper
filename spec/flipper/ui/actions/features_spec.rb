@@ -259,6 +259,19 @@ RSpec.describe Flipper::UI::Actions::Features do
           end
         end
 
+        context 'reserved feature name' do
+          let(:feature_name) { '__flipper_thing' }
+
+          it 'does not add feature' do
+            expect(flipper.features.map(&:key)).to eq([])
+          end
+
+          it 'redirects back with an error' do
+            expect(last_response.status).to be(302)
+            expect(last_response.headers['location']).to eq('/features/new?error=%22__flipper_thing%22+is+reserved+for+Flipper%27s+internal+use.')
+          end
+        end
+
         context 'feature name that normalizes to empty' do
           let(:feature_name) { "\u3164\u115F\u1160\uFFA0\u2800\u17B4" }
 
