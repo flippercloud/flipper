@@ -7,8 +7,9 @@ module Flipper
     #
     #   { "GreaterThanOrEqualTo" => [{ "SemVer" => [{ "Property" => ["app_version"] }] }, { "SemVer" => ["2.3.1"] }] }
     #
-    # Returns nil for anything that isn't a version so a missing or malformed
-    # property fails comparisons instead of the check.
+    # Returns nil for anything that isn't a version, like Time and Number. A
+    # missing or malformed property then fails the ordering comparisons (<, <=,
+    # >, >=) instead of raising, while Equal and NotEqual compare it as nil.
     class SemVer
       def self.call(value)
         case value

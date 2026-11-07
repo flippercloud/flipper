@@ -93,6 +93,11 @@
       "result": { "enum": [false] }
     },
     {
+      "expression": { "NotEqual": [{ "SemVer": { "Property": "app_version" } }, { "SemVer": "2.3.1" }] },
+      "context": { "properties": {} },
+      "result": { "enum": [true] }
+    },
+    {
       "expression": { "GreaterThan": [{ "SemVer": "01.2.3" }, { "SemVer": "0.0.0" }] },
       "result": { "enum": [false] }
     },
