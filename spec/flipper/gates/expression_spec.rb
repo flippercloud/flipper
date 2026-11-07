@@ -41,6 +41,13 @@ RSpec.describe Flipper::Gates::Expression do
       end
     end
 
+    context 'for an expression this version of flipper does not know' do
+      it 'returns false' do
+        expression = {"GreaterThan" => [{"Unreleased" => [{"Property" => ["age"]}]}, 21]}
+        expect(subject.open?(context(expression, properties: {age: 30}))).to be(false)
+      end
+    end
+
     context 'for a time expression on a property the actor does not have' do
       it 'returns false' do
         time = Flipper.time(Flipper.property(:trial_ends_at))
@@ -121,6 +128,33 @@ RSpec.describe Flipper::Gates::Expression do
         expression = Flipper.property(:type).eq("User")
         context = context(expression.value, properties: {type: "Org"})
         expect(subject.open?(context)).to be(false)
+      end
+    end
+
+    context 'for semver expressions' do
+      let(:expression) do
+        Flipper.semver(Flipper.property(:app_version)).gte(Flipper.semver("2.3.1"))
+      end
+
+      it 'enables for versions at or above the minimum' do
+        ["2.3.1", "2.10.0", "v3"].each do |app_version|
+          context = context(expression.value, properties: {app_version: app_version})
+          expect(subject.open?(context)).to be(true), "expected #{app_version} to be enabled"
+        end
+      end
+
+      it 'does not enable for versions below the minimum' do
+        ["2.3.0", "2.3.1-beta.1", "1.99.99"].each do |app_version|
+          context = context(expression.value, properties: {app_version: app_version})
+          expect(subject.open?(context)).to be(false), "expected #{app_version} to be disabled"
+        end
+      end
+
+      it 'does not enable for missing or malformed versions' do
+        [nil, "", "not a version", 2.3].each do |app_version|
+          properties = app_version.nil? ? {} : {app_version: app_version}
+          expect(subject.open?(context(expression.value, properties: properties))).to be(false)
+        end
       end
     end
 

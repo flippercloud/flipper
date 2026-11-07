@@ -36,6 +36,11 @@ module Flipper
             !!expression.evaluate(feature_name: context.feature_name, properties: properties(actor), actor: actor)
           end
         end
+      rescue Flipper::Expression::UnknownFunction
+        # The expression uses a function from a newer Flipper (e.g. one Cloud
+        # synced before this app upgraded). Keep the gate closed instead of
+        # raising on every check.
+        false
       end
 
       def protects?(thing)

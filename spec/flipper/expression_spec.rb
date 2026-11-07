@@ -2,6 +2,14 @@ require 'flipper/expression'
 
 RSpec.describe Flipper::Expression do
   describe "#build" do
+    it "raises UnknownFunction, a NameError, for an expression it does not know" do
+      expect {
+        described_class.build({"Unreleased" => [1]})
+      }.to raise_error(Flipper::Expression::UnknownFunction, /uninitialized constant Flipper::Expressions::Unreleased/) { |error|
+        expect(error).to be_a(NameError)
+      }
+    end
+
     it "can build Equal" do
       expression = described_class.build({
         "Equal" => [
@@ -143,6 +151,25 @@ RSpec.describe Flipper::Expression do
       expect(expression).to be_instance_of(Flipper::Expression)
       expect(expression.function).to be(Flipper::Expressions::Property)
       expect(expression.args).to eq([Flipper.constant("flipper_id")])
+    end
+
+    it "can build SemVer" do
+      expression = described_class.build({
+        "SemVer" => ["2.3.1"]
+      })
+
+      expect(expression).to be_instance_of(Flipper::Expression)
+      expect(expression.function).to be(Flipper::Expressions::SemVer)
+      expect(expression.args).to eq([Flipper.constant("2.3.1")])
+    end
+
+    it "can build a single function argument without an array" do
+      expression = described_class.build({
+        "Number" => { "Property" => "age" }
+      })
+
+      expect(expression).to eq(described_class.build({ "Number" => [{ "Property" => ["age"] }] }))
+      expect(expression.value).to eq({ "Number" => [{ "Property" => ["age"] }] })
     end
   end
 

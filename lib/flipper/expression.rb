@@ -8,6 +8,11 @@ module Flipper
     PruneResult = Struct.new(:expression, :constant_value, keyword_init: true)
     private_constant :PruneResult
 
+    # Raised by .build for a function this version of Flipper doesn't have,
+    # like one added in a newer release. A NameError, so existing rescues of
+    # NameError keep working.
+    class UnknownFunction < NameError; end
+
     def self.build(object)
       return object if object.is_a?(self) || object.is_a?(Constant)
 
@@ -18,6 +23,11 @@ module Flipper
         unless name
           raise ArgumentError, "#{object.inspect} cannot be converted into an expression"
         end
+
+        # A single function argument can skip the array, like
+        # { "Number" => { "Property" => "age" } }. Array() would split the
+        # hash into key/value pairs, so wrap it instead.
+        args = [args] if args.is_a?(Hash)
 
         new(name, Array(args).map { |o| build(o) })
       when String, Numeric, FalseClass, TrueClass
@@ -36,7 +46,11 @@ module Flipper
 
     def initialize(name, args = [])
       @name = name.to_s
-      @function = Expressions.const_get(name)
+      @function = begin
+        Expressions.const_get(name)
+      rescue NameError => error
+        raise UnknownFunction.new(error.message, error.name)
+      end
       @args = args
     end
 

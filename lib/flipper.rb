@@ -108,6 +108,10 @@ module Flipper
     Expression.build({ Time: value })
   end
 
+  def semver(value)
+    Expression.build({ SemVer: value })
+  end
+
   def feature_enabled(name)
     Expression.build({ FeatureEnabled: name })
   end

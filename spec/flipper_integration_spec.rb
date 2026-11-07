@@ -573,6 +573,19 @@ RSpec.describe Flipper do
       expect(feature.enabled?(admin_actor)).to be(false)
     end
 
+    it "is disabled instead of raising for an expression this version does not know" do
+      # Like an expression synced from a newer Flipper (e.g. Cloud) that this
+      # version doesn't have yet.
+      unknown = {"GreaterThan" => [{"Unreleased" => [{"Property" => ["plan"]}]}, "basic"]}
+      export = Flipper::Typecast.to_json("version" => 1, "features" => {
+        "search" => {"boolean" => nil, "groups" => [], "actors" => [], "expression" => unknown, "percentage_of_actors" => nil, "percentage_of_time" => nil},
+      })
+      adapter.import(Flipper::Exporters::Json::Export.new(contents: export))
+
+      expect(feature.enabled?(basic_plan_actor)).to be(false)
+      expect(feature.enabled?).to be(false)
+    end
+
     it "works for true expression with no actor" do
       feature.enable Flipper.boolean(true)
       expect(feature.enabled?).to be(true)
