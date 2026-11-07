@@ -2,6 +2,14 @@ require 'flipper/expression'
 
 RSpec.describe Flipper::Expression do
   describe "#build" do
+    it "raises UnknownFunction, a NameError, for an expression it does not know" do
+      expect {
+        described_class.build({"Unreleased" => [1]})
+      }.to raise_error(Flipper::Expression::UnknownFunction, /uninitialized constant Flipper::Expressions::Unreleased/) { |error|
+        expect(error).to be_a(NameError)
+      }
+    end
+
     it "can build Equal" do
       expression = described_class.build({
         "Equal" => [

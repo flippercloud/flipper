@@ -41,6 +41,13 @@ RSpec.describe Flipper::Gates::Expression do
       end
     end
 
+    context 'for an expression this version of flipper does not know' do
+      it 'returns false' do
+        expression = {"GreaterThan" => [{"Unreleased" => [{"Property" => ["age"]}]}, 21]}
+        expect(subject.open?(context(expression, properties: {age: 30}))).to be(false)
+      end
+    end
+
     context 'for a time expression on a property the actor does not have' do
       it 'returns false' do
         time = Flipper.time(Flipper.property(:trial_ends_at))
