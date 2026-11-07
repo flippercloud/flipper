@@ -104,6 +104,34 @@ RSpec.describe "Sync version guard" do
   end
 
   describe "webhook" do
+    it "keeps webhook flags when a backup poll returns an older version" do
+      allow_any_instance_of(Flipper::Poller).to receive(:start)
+      configuration = Flipper::Cloud::Configuration.new(
+        token: "asdf",
+        url: url,
+        sync_secret: "secret",
+        telemetry_enabled: false,
+      )
+
+      # Building the adapter polls once because the local adapter is empty.
+      respond_with [false, 5]
+      adapter = configuration.adapter
+      expect(enabled?(adapter)).to be(false)
+
+      respond_with [true, 10]
+      configuration.sync(cache_bust: true)
+      expect(enabled?(adapter)).to be(true)
+
+      poller = adapter.local.poller
+      respond_with [false, 8]
+      poller.sync
+      expect(enabled?(adapter)).to be(true)
+
+      respond_with [false, 11]
+      poller.sync
+      expect(enabled?(adapter)).to be(false)
+    end
+
     it "keeps newer flags when a later sync returns an older version" do
       configuration = Flipper::Cloud::Configuration.new(token: "asdf", url: url, telemetry_enabled: false)
 

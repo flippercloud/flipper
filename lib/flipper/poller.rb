@@ -95,8 +95,10 @@ module Flipper
 
     private
 
+    # Spreads out polls from processes that started together. Grows with the
+    # interval, capped at 30 seconds.
     def jitter
-      rand
+      rand * [interval * 0.1, 30].min
     end
 
     def ensure_worker_running
