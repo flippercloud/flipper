@@ -34,7 +34,7 @@ module Flipper
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
-        ensure_not_features_key!(feature)
+        ensure_not_reserved_key!(feature)
         update @features_key, '$addToSet' => { 'features' => feature.key }
         true
       end
@@ -43,13 +43,13 @@ module Flipper
       def remove(feature)
         update @features_key, '$pull' => { 'features' => feature.key }
         # Removing a reserved name left in the list must not delete the list.
-        clear feature unless features_key?(feature)
+        clear feature unless reserved_key?(feature)
         true
       end
 
       # Public: Clears all the gate values for a feature.
       def clear(feature)
-        ensure_not_features_key!(feature)
+        ensure_not_reserved_key!(feature)
         delete feature.key
         true
       end
@@ -79,7 +79,7 @@ module Flipper
       #
       # Returns true.
       def enable(feature, gate, thing)
-        ensure_not_features_key!(feature)
+        ensure_not_reserved_key!(feature)
         case gate.data_type
         when :boolean
           clear(feature)
@@ -113,7 +113,7 @@ module Flipper
       #
       # Returns true.
       def disable(feature, gate, thing)
-        ensure_not_features_key!(feature)
+        ensure_not_reserved_key!(feature)
         case gate.data_type
         when :boolean
           delete feature.key
@@ -145,12 +145,14 @@ module Flipper
         "#{@features_key}:sync_version"
       end
 
-      def features_key?(feature)
-        feature.key == @features_key.to_s
+      # The feature list and sync version documents share the namespace with
+      # feature documents, so those names can't be features.
+      def reserved_key?(feature)
+        feature.key == @features_key.to_s || feature.key == sync_version_key
       end
 
-      def ensure_not_features_key!(feature)
-        return unless features_key?(feature)
+      def ensure_not_reserved_key!(feature)
+        return unless reserved_key?(feature)
 
         raise ArgumentError, "#{feature.key.inspect} is reserved by the Mongo adapter and cannot be used as a feature name"
       end

@@ -67,13 +67,13 @@ module Flipper
       # Public: The Flipper::SyncVersion of the flags last synced into this
       # adapter, shared by every process using the same tables.
       def sync_version
-        SyncVersion.parse(@gate_class.where(feature_key: SYNC_VERSION_FEATURE_KEY).get(:value))
+        SyncVersion.parse(sync_version_dataset.get(:value))
       end
 
       # Public: Records the Flipper::SyncVersion of the flags just synced.
       def sync_version=(version)
         @gate_class.db.transaction do
-          @gate_class.where(feature_key: SYNC_VERSION_FEATURE_KEY).delete
+          sync_version_dataset.delete
           @gate_class.create(
             feature_key: SYNC_VERSION_FEATURE_KEY,
             key: SYNC_VERSION_GATE_KEY,
@@ -196,6 +196,12 @@ module Flipper
 
       def unsupported_data_type(data_type)
         raise "#{data_type} is not supported by this adapter"
+      end
+
+      # Only the sync version row, so a feature that happens to use the
+      # reserved key keeps its own gate rows.
+      def sync_version_dataset
+        @gate_class.where(feature_key: SYNC_VERSION_FEATURE_KEY, key: SYNC_VERSION_GATE_KEY)
       end
 
       def set(feature, gate, thing, options = {})

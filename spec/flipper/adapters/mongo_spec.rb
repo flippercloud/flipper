@@ -31,6 +31,7 @@ RSpec.describe Flipper::Adapters::Mongo do
       collection.find(_id: "flipper_features").update_one({ "$addToSet" => { "features" => "flipper_features" } })
     end
   end
+  it_should_behave_like 'an adapter that protects its sync version key'
 
   it 'configures itself on load' do
     Flipper.configuration = nil

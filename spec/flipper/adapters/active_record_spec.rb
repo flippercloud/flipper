@@ -67,6 +67,7 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
 
         it_should_behave_like 'a flipper adapter'
         it_should_behave_like 'an adapter that stores its sync version'
+        it_should_behave_like 'an adapter that keeps its sync version apart from features'
 
         it "does not let another process sync older flags over newer ones" do
           remote = lambda do |enabled, number|

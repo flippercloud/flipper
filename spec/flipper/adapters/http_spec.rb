@@ -48,12 +48,15 @@ RSpec.describe Flipper::Adapters::Http do
         @server = WEBrick::HTTPServer.new(server_options)
         @server.mount '/', rack_handler, app
 
-        Thread.new { @server.start }
-        Timeout.timeout(1) { :wait until @started }
+        @server_thread = Thread.new { @server.start }
+        # Sleep while waiting so the server thread gets to run.
+        Timeout.timeout(10) { sleep 0.01 until @started }
       end
 
       after :all do
         @server.shutdown if @server
+        # Wait for the port to be released before the next context binds it.
+        @server_thread.join(5) if @server_thread
       end
 
       before(:each) do

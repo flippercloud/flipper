@@ -151,7 +151,7 @@ module Flipper
       # adapter, shared by every process using the same tables.
       def sync_version
         value = with_connection(@gate_class) do
-          @gate_class.where(feature_key: SYNC_VERSION_FEATURE_KEY).pluck(:value).first
+          sync_version_scope.pluck(:value).first
         end
         SyncVersion.parse(value)
       end
@@ -160,7 +160,7 @@ module Flipper
       def sync_version=(version)
         with_write_connection(@gate_class) do
           @gate_class.transaction(requires_new: true) do
-            @gate_class.where(feature_key: SYNC_VERSION_FEATURE_KEY).delete_all
+            sync_version_scope.delete_all
             begin
               @gate_class.create! do |g|
                 g.feature_key = SYNC_VERSION_FEATURE_KEY
@@ -232,6 +232,12 @@ module Flipper
       end
 
       private
+
+      # Only the sync version row, so a feature that happens to use the
+      # reserved key keeps its own gate rows.
+      def sync_version_scope
+        @gate_class.where(feature_key: SYNC_VERSION_FEATURE_KEY, key: SYNC_VERSION_GATE_KEY)
+      end
 
       def model_class(default_class, table_prefix, table_name)
         return default_class if table_prefix.nil?

@@ -27,6 +27,7 @@ RSpec.describe Flipper::Adapters::Sequel do
 
   it_should_behave_like 'a flipper adapter'
   it_should_behave_like 'an adapter that stores its sync version'
+  it_should_behave_like 'an adapter that keeps its sync version apart from features'
 
   context 'requiring "flipper-sequel"' do
     before do
