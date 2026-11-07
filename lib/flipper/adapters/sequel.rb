@@ -84,6 +84,7 @@ module Flipper
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
+        ensure_not_reserved_key!(feature)
         # race condition, but add is only used by enable/disable which happen
         # super rarely, so it shouldn't matter in practice
         @feature_class.find_or_create(key: feature.key.to_s)
@@ -94,13 +95,15 @@ module Flipper
       def remove(feature)
         @feature_class.db.transaction do
           @feature_class.where(key: feature.key.to_s).delete
-          clear(feature)
+          # Removing the reserved name must not delete the sync version.
+          clear(feature) unless reserved_key?(feature)
         end
         true
       end
 
       # Public: Clears the gate values for a feature.
       def clear(feature)
+        ensure_not_reserved_key!(feature)
         @gate_class.where(feature_key: feature.key.to_s).delete
         true
       end
@@ -152,6 +155,7 @@ module Flipper
       #
       # Returns true.
       def enable(feature, gate, thing)
+        ensure_not_reserved_key!(feature)
         case gate.data_type
         when :boolean
           set(feature, gate, thing, clear: true)
@@ -176,6 +180,7 @@ module Flipper
       #
       # Returns true.
       def disable(feature, gate, thing)
+        ensure_not_reserved_key!(feature)
         case gate.data_type
         when :boolean
           clear(feature)
@@ -198,8 +203,18 @@ module Flipper
         raise "#{data_type} is not supported by this adapter"
       end
 
-      # Only the sync version row, so a feature that happens to use the
-      # reserved key keeps its own gate rows.
+      # The sync version is stored as a gate row under this feature key, so
+      # it can't be a feature.
+      def reserved_key?(feature)
+        feature.key == SYNC_VERSION_FEATURE_KEY
+      end
+
+      def ensure_not_reserved_key!(feature)
+        return unless reserved_key?(feature)
+
+        raise ArgumentError, "#{feature.key.inspect} is reserved by the Sequel adapter and cannot be used as a feature name"
+      end
+
       def sync_version_dataset
         @gate_class.where(feature_key: SYNC_VERSION_FEATURE_KEY, key: SYNC_VERSION_GATE_KEY)
       end

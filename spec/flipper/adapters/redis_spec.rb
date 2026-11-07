@@ -21,7 +21,9 @@ RSpec.describe Flipper::Adapters::Redis do
     it_should_behave_like 'an adapter that protects its feature list' do
       let(:add_reserved_name_to_list) { client.call("SADD", subject.features_key, "flipper_features") }
     end
-    it_should_behave_like 'an adapter that protects its sync version key'
+    it_should_behave_like 'an adapter that protects its sync version key' do
+      let(:reserved_name) { "flipper_features:sync_version" }
+    end
 
     it 'configures itself on load' do
       Flipper.configuration = nil
@@ -40,7 +42,9 @@ RSpec.describe Flipper::Adapters::Redis do
       it_should_behave_like 'an adapter that protects its feature list' do
         let(:add_reserved_name_to_list) { client.call("SADD", subject.features_key, "flipper_features") }
       end
-      it_should_behave_like 'an adapter that protects its sync version key'
+      it_should_behave_like 'an adapter that protects its sync version key' do
+        let(:reserved_name) { "flipper_features:sync_version" }
+      end
 
       it 'namespaces feature-keys' do
         subject.add(feature)

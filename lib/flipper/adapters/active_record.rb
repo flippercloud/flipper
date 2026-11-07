@@ -60,6 +60,7 @@ module Flipper
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
+        ensure_not_reserved_key!(feature)
         with_write_connection(@feature_class) do
           @feature_class.transaction(requires_new: true) do
             begin
@@ -82,7 +83,8 @@ module Flipper
         with_write_connection(@feature_class) do
           @feature_class.transaction do
             @feature_class.where(key: feature.key).destroy_all
-            clear(feature)
+            # Removing the reserved name must not delete the sync version.
+            clear(feature) unless reserved_key?(feature)
           end
         end
         true
@@ -90,6 +92,7 @@ module Flipper
 
       # Public: Clears the gate values for a feature.
       def clear(feature)
+        ensure_not_reserved_key!(feature)
         with_write_connection(@gate_class) { @gate_class.where(feature_key: feature.key).destroy_all }
         true
       end
@@ -182,6 +185,7 @@ module Flipper
       #
       # Returns true.
       def enable(feature, gate, thing)
+        ensure_not_reserved_key!(feature)
         case gate.data_type
         when :boolean
           set(feature, gate, thing, clear: true)
@@ -206,6 +210,7 @@ module Flipper
       #
       # Returns true.
       def disable(feature, gate, thing)
+        ensure_not_reserved_key!(feature)
         case gate.data_type
         when :boolean
           clear(feature)
@@ -233,8 +238,18 @@ module Flipper
 
       private
 
-      # Only the sync version row, so a feature that happens to use the
-      # reserved key keeps its own gate rows.
+      # The sync version is stored as a gate row under this feature key, so
+      # it can't be a feature.
+      def reserved_key?(feature)
+        feature.key == SYNC_VERSION_FEATURE_KEY
+      end
+
+      def ensure_not_reserved_key!(feature)
+        return unless reserved_key?(feature)
+
+        raise ArgumentError, "#{feature.key.inspect} is reserved by the ActiveRecord adapter and cannot be used as a feature name"
+      end
+
       def sync_version_scope
         @gate_class.where(feature_key: SYNC_VERSION_FEATURE_KEY, key: SYNC_VERSION_GATE_KEY)
       end

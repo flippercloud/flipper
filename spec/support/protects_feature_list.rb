@@ -32,10 +32,10 @@ RSpec.shared_examples 'an adapter that protects its feature list' do
   end
 end
 
-# For adapters that store the sync version under flipper_features:sync_version,
-# next to the feature data.
+# For adapters that store the sync version next to the feature data. Including
+# specs define `reserved_name`, the feature key the sync version is stored at.
 RSpec.shared_examples 'an adapter that protects its sync version key' do
-  let(:feature) { Flipper::Feature.new("flipper_features:sync_version", subject) }
+  let(:feature) { Flipper::Feature.new(reserved_name, subject) }
   let(:boolean) { feature.gate(:boolean) }
   let(:version) { Flipper::SyncVersion.new("scope", 10) }
 
@@ -48,36 +48,15 @@ RSpec.shared_examples 'an adapter that protects its sync version key' do
       -> { subject.disable(feature, boolean, Flipper::Types::Boolean.new(false)) },
       -> { subject.clear(feature) },
     ].each do |write|
-      expect(&write).to raise_error(ArgumentError, /"flipper_features:sync_version" is reserved/)
+      expect(&write).to raise_error(ArgumentError, /#{Regexp.escape(reserved_name.inspect)} is reserved/)
     end
 
+    expect(subject.features).to eq(Set.new)
     expect(subject.sync_version).to eq(version)
   end
 
   it 'keeps the sync version when that feature is removed' do
     expect(subject.remove(feature)).to be(true)
     expect(subject.sync_version).to eq(version)
-  end
-end
-
-# For adapters that store the sync version as a gate row of a reserved feature
-# key. A real feature with that key keeps its gates and doesn't change the
-# stored version.
-RSpec.shared_examples 'an adapter that keeps its sync version apart from features' do
-  let(:feature) { Flipper::Feature.new("__flipper_sync_version__", subject) }
-  let(:version) { Flipper::SyncVersion.new("scope", 10) }
-
-  it 'keeps the sync version and the feature separate' do
-    flipper = Flipper.new(subject)
-    flipper.enable(feature.key)
-    flipper.enable_actor(feature.key, Flipper::Actor.new("User;1"))
-
-    subject.sync_version = version
-    subject.sync_version = Flipper::SyncVersion.new("scope", 11)
-
-    expect(subject.sync_version).to eq(Flipper::SyncVersion.new("scope", 11))
-    expect(flipper.enabled?(feature.key)).to be(true)
-    expect(flipper[feature.key].actors_value).to eq(Set["User;1"])
-    expect(subject.get(feature).keys).not_to include(:sync_version)
   end
 end
