@@ -1,5 +1,6 @@
 SpecHelpers.silence { require 'flipper/adapters/active_record' }
 require 'active_record/connection_adapters/sqlite3_adapter'
+require 'timeout'
 
 # Turn off migration logging for specs
 ActiveRecord::Migration.verbose = false
@@ -79,71 +80,184 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
           flipper.preload([:foo])
         end
 
-        describe 'read_integer / set_integer_if_greater' do
-          it 'returns nil for unknown keys' do
-            expect(subject.read_integer(:sync_version)).to be_nil
+        describe 'atomic snapshot installation' do
+          let(:state_class) { Flipper::Adapters::ActiveRecord::SyncState }
+
+          it 'installs revision zero when the state is unknown' do
+            expect(subject.apply_snapshot(snapshot_with(version: 0, enabled: true))).to eq(:applied)
+            expect(Flipper.new(subject)[:search]).to be_enabled
+            expect(state_class.first.version).to eq(0)
           end
 
-          it 'sets a new value when none exists' do
-            expect(subject.set_integer_if_greater(:sync_version, 100)).to eq(true)
-            expect(subject.read_integer(:sync_version)).to eq(100)
+          it 'rejects older data across adapter instances' do
+            subject.apply_snapshot(snapshot_with(version: 20, enabled: true))
+            another = described_class.new
+
+            expect(another.apply_snapshot(snapshot_with(version: 10, enabled: false))).to eq(:stale)
+            expect(Flipper.new(another)[:search]).to be_enabled
+            expect(state_class.first.version).to eq(20)
           end
 
-          it 'rejects a lower value' do
-            subject.set_integer_if_greater(:sync_version, 100)
-            expect(subject.set_integer_if_greater(:sync_version, 99)).to eq(false)
-            expect(subject.read_integer(:sync_version)).to eq(100)
+          it 'reconciles equal revisions after an ordinary local mutation' do
+            snapshot = snapshot_with(version: 20, enabled: true)
+            subject.apply_snapshot(snapshot)
+            Flipper.new(subject)[:search].disable
+
+            expect(subject.apply_snapshot(snapshot)).to eq(:applied)
+            expect(Flipper.new(subject)[:search]).to be_enabled
+            expect(state_class.first.version).to eq(20)
           end
 
-          it 'rejects an equal value' do
-            subject.set_integer_if_greater(:sync_version, 100)
-            expect(subject.set_integer_if_greater(:sync_version, 100)).to eq(false)
-            expect(subject.read_integer(:sync_version)).to eq(100)
+          it 'avoids gate writes for an identical snapshot' do
+            snapshot = snapshot_with(version: 20, enabled: true)
+            subject.apply_snapshot(snapshot)
+            expect(subject).not_to receive(:enable)
+            expect(subject).not_to receive(:disable)
+            expect(subject).not_to receive(:add)
+            expect(subject).not_to receive(:remove)
+
+            expect(subject.apply_snapshot(snapshot)).to eq(:unchanged)
           end
 
-          it 'accepts a strictly greater value' do
-            subject.set_integer_if_greater(:sync_version, 100)
-            expect(subject.set_integer_if_greater(:sync_version, 200)).to eq(true)
-            expect(subject.read_integer(:sync_version)).to eq(200)
+          it 'installs a newer revision and advances its floor' do
+            subject.apply_snapshot(snapshot_with(version: 20, enabled: true))
+
+            expect(subject.apply_snapshot(snapshot_with(version: 30, enabled: false))).to eq(:applied)
+            expect(Flipper.new(subject)[:search]).not_to be_enabled
+            expect(state_class.first.version).to eq(30)
           end
 
-          it 'tracks separate keys independently' do
-            subject.set_integer_if_greater(:foo, 100)
-            subject.set_integer_if_greater(:bar, 50)
-            expect(subject.read_integer(:foo)).to eq(100)
-            expect(subject.read_integer(:bar)).to eq(50)
-          end
-
-          context 'when flipper_kv_integers table is missing' do
-            before do
-              silence { ActiveRecord::Base.connection.drop_table(:flipper_kv_integers) }
+          it 'rolls back every feature write and the revision when an installation fails' do
+            subject.apply_snapshot(snapshot_with(version: 20, enabled: false))
+            before = subject.get_all
+            features = snapshot_with(version: 30, enabled: true).features
+            features['other'] = features.fetch('search').dup
+            allow(subject).to receive(:enable).and_wrap_original do |original, feature, *args|
+              result = original.call(feature, *args)
+              raise 'interrupted installation' if feature.key == 'other'
+              result
             end
 
-            it 'read_integer returns nil' do
-              fresh = described_class.new
-              expect(fresh.read_integer(:sync_version)).to be_nil
-            end
+            expect do
+              subject.apply_snapshot(Flipper::Snapshot.new(features: features, version: 30))
+            end.to raise_error('interrupted installation')
 
-            it 'set_integer_if_greater returns false' do
-              fresh = described_class.new
-              expect(fresh.set_integer_if_greater(:sync_version, 100)).to eq(false)
-            end
+            expect(subject.get_all).to eq(before)
+            expect(state_class.first.version).to eq(20)
           end
 
-          it 'recovers from a transient StatementInvalid on the table presence check' do
+          it 'keeps explicit imports unconditional and clears the previous floor' do
+            subject.apply_snapshot(snapshot_with(version: 20, enabled: true))
+            replacement = Flipper::Adapters::Memory.new(snapshot_with(version: nil, enabled: false).features)
+
+            expect(subject.import(replacement)).to eq(true)
+            expect(Flipper.new(subject)[:search]).not_to be_enabled
+            expect(state_class.first.version).to be_nil
+            expect(subject.apply_snapshot(snapshot_with(version: 10, enabled: true))).to eq(:applied)
+          end
+
+          it 'rejects versioned installation in an ambient transaction without changing data' do
+            subject.apply_snapshot(snapshot_with(version: 20, enabled: true))
+            ActiveRecord::Base.transaction do
+              subject.get_all # Establish an ambient database snapshot before installation.
+              expect do
+                subject.apply_snapshot(snapshot_with(version: 30, enabled: false))
+              end.to raise_error(ArgumentError, /transaction/)
+            end
+
+            expect(Flipper.new(subject)[:search]).to be_enabled
+            expect(state_class.first.version).to eq(20)
+          end
+
+          it 'keeps unversioned import part of the callers transaction' do
+            subject.apply_snapshot(snapshot_with(version: 20, enabled: true))
+            replacement = Flipper::Adapters::Memory.new(snapshot_with(version: nil, enabled: false).features)
+            ActiveRecord::Base.transaction do
+              subject.import(replacement)
+              expect(Flipper.new(subject)[:search]).not_to be_enabled
+              raise ActiveRecord::Rollback
+            end
+
+            expect(Flipper.new(subject)[:search]).to be_enabled
+            expect(state_class.first.version).to eq(20)
+          end
+
+          it 'does not advertise atomic installation when sync state storage is missing' do
+            silence { ActiveRecord::Base.connection.drop_table(:flipper_sync_states) }
             fresh = described_class.new
-            kv_class = fresh.instance_variable_get(:@kv_integer_class)
 
-            call_count = 0
-            allow(kv_class).to receive(:table_exists?).and_wrap_original do |original, *args|
-              call_count += 1
-              raise ::ActiveRecord::StatementInvalid, 'transient blip' if call_count == 1
-              original.call(*args)
+            expect(fresh.supports?(:atomic_snapshot_install)).to eq(false)
+            expect { fresh.apply_snapshot(snapshot_with(version: 20, enabled: true)) }.to raise_error(NotImplementedError)
+            expect(fresh.import(Flipper::Adapters::Memory.new)).to eq(true)
+          end
+
+          it 'does not advertise atomic installation across different connection pools' do
+            separate_model = Class.new(ActiveRecord::Base) { self.abstract_class = true }
+            stub_const('SeparateSyncRecord', separate_model)
+            separate_model.establish_connection(config)
+            separate_state = Class.new(separate_model) { self.table_name = 'flipper_sync_states' }
+            stub_const('SeparateSyncState', separate_state)
+            adapter = described_class.new(sync_state_class: separate_state)
+
+            expect(adapter.supports?(:atomic_snapshot_install)).to eq(false)
+          ensure
+            separate_model&.connection_pool&.disconnect!
+          end
+
+          [false, true].each do |cold_start|
+            it "serializes independent connections (cold start: #{cold_start})" do
+              skip 'SQLite in-memory databases are separate per connection' if config['adapter'] == 'sqlite3'
+
+              subject.apply_snapshot(snapshot_with(version: 5, enabled: false)) if !cold_start
+              newer = described_class.new
+              older = described_class.new
+              locked = Queue.new
+              attempted = Queue.new
+              release = Queue.new
+              connections = Queue.new
+              allow(newer).to receive(:enable).and_wrap_original do |original, *args|
+                result = original.call(*args)
+                locked << true
+                release.pop
+                result
+              end
+              allow(older).to receive(:lock_sync_state).and_wrap_original do |original|
+                attempted << true
+                original.call
+              end
+
+              newer_writer = Thread.new do
+                ActiveRecord::Base.connection_pool.with_connection do |connection|
+                  connections << connection.object_id
+                  newer.apply_snapshot(snapshot_with(version: 20, enabled: true))
+                end
+              end
+              newer_writer.report_on_exception = false
+              Timeout.timeout(5) { locked.pop }
+              older_writer = Thread.new do
+                ActiveRecord::Base.connection_pool.with_connection do |connection|
+                  connections << connection.object_id
+                  older.apply_snapshot(snapshot_with(version: 10, enabled: false))
+                end
+              end
+              older_writer.report_on_exception = false
+              Timeout.timeout(5) { attempted.pop }
+              expected_before = cold_start ? {} : snapshot_with(version: 5, enabled: false).features
+              expect(subject.get_all).to eq(expected_before)
+              release << true
+
+              expect(Timeout.timeout(5) { newer_writer.value }).to eq(:applied)
+              expect(Timeout.timeout(5) { older_writer.value }).to eq(:stale)
+              expect([connections.pop, connections.pop].uniq.size).to eq(2)
+              expect(Flipper.new(subject)[:search]).to be_enabled
+              expect(state_class.first.version).to eq(20)
+            ensure
+              release << true if release
+              [newer_writer, older_writer].compact.each do |writer|
+                writer.kill if writer.alive?
+                writer.join(1)
+              end
             end
-
-            expect(fresh.read_integer(:sync_version)).to be_nil
-            expect(fresh.set_integer_if_greater(:sync_version, 100)).to eq(true)
-            expect(fresh.read_integer(:sync_version)).to eq(100)
           end
         end
 
@@ -361,8 +475,28 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
             let(:adapter_with_roles) do
               described_class.new(
                 feature_class: feature_class,
-                gate_class: gate_class
+                gate_class: gate_class,
+                sync_state_class: sync_state_class
               )
+            end
+
+            let(:sync_state_class) do
+              klass = Class.new(abstract_class) do
+                self.table_name = 'flipper_sync_states'
+              end
+              stub_const('TestSyncState', klass)
+              klass
+            end
+
+            it 'installs snapshots on the writer connection while the caller uses the reading role' do
+              abstract_class.connected_to(role: :reading) do
+                expect(adapter_with_roles.supports?(:atomic_snapshot_install)).to eq(true)
+                snapshot = snapshot_with(version: 20, enabled: true)
+                expect(adapter_with_roles.apply_snapshot(snapshot)).to eq(:applied)
+                expect(adapter_with_roles.get_all).to eq(snapshot.features)
+                expect(sync_state_class.first.version).to eq(20)
+                expect(abstract_class.current_role).to eq(:reading)
+              end
             end
 
             it 'can perform write operations when forced to reading role' do
@@ -466,6 +600,11 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
   def active_connections?
     method = ActiveRecord::Base.connection_handler.method(:active_connections?)
     method.arity == 0 ? method.call : method.call(:all)
+  end
+
+  def snapshot_with(version:, enabled:)
+    features = { 'search' => described_class.default_config.merge(boolean: enabled ? 'true' : nil) }
+    Flipper::Snapshot.new(features: features, version: version)
   end
 
   def clear_active_connections!

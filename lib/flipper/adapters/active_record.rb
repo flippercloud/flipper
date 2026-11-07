@@ -7,7 +7,7 @@ ActiveSupport.on_load(:active_record) do
   require_relative 'active_record/model'
   require_relative 'active_record/feature'
   require_relative 'active_record/gate'
-  require_relative 'active_record/kv_integer'
+  require_relative 'active_record/sync_state'
 end
 
 module Flipper
@@ -25,7 +25,8 @@ module Flipper
       # name - The Symbol name for this adapter. Optional (default :active_record)
       # feature_class - The AR class responsible for the features table.
       # gate_class - The AR class responsible for the gates table.
-      # table_prefix - The prefix for the default features and gates tables.
+      # sync_state_class - The AR class for private snapshot revision metadata.
+      # table_prefix - The prefix for the default feature, gate, and sync tables.
       #
       # Allowing the overriding of name is so you can differentiate multiple
       # instances of this adapter from each other, if, for some reason, that is
@@ -42,8 +43,8 @@ module Flipper
         @gate_class = options.fetch(:gate_class) do
           model_class(Flipper::Adapters::ActiveRecord::Gate, table_prefix, "flipper_gates")
         end
-        @kv_integer_class = options.fetch(:kv_integer_class) do
-          model_class(Flipper::Adapters::ActiveRecord::KvInteger, table_prefix, "flipper_kv_integers")
+        @sync_state_class = options.fetch(:sync_state_class) do
+          model_class(Flipper::Adapters::ActiveRecord::SyncState, table_prefix, "flipper_sync_states")
         end
       end
 
@@ -193,42 +194,46 @@ module Flipper
         true
       end
 
-      def read_integer(key)
-        return nil unless kv_integer_table_present?
-        with_connection(@kv_integer_class) do
-          @kv_integer_class.where(key: key.to_s).limit(1).pluck(:value).first
-        end
-      end
-
       def supports?(feature)
-        feature.to_sym == :versioned_integers ? kv_integer_table_present? : super
+        return super unless feature.to_sym == :atomic_snapshot_install
+
+        with_write_connection(@feature_class) do |connection|
+          same_pool = [@gate_class, @sync_state_class].all? do |model|
+            model.connection_pool.equal?(@feature_class.connection_pool)
+          end
+          same_pool && %w[PostgreSQL Mysql2 SQLite].include?(connection.adapter_name) &&
+            @sync_state_class.table_exists?
+        end
       end
 
-      def set_integer_if_greater(key, value)
-        return false unless kv_integer_table_present?
-        value = value.to_i
-        key = key.to_s
-        with_write_connection(@kv_integer_class) do
-          updated = @kv_integer_class
-            .where(key: key)
-            .where("value < ?", value)
-            .update_all(value: value, updated_at: Time.current)
-          return true if updated > 0
+      def apply_snapshot(snapshot, instrumenter: Instrumenters::Noop)
+        return super unless supports?(:atomic_snapshot_install)
 
-          begin
-            @kv_integer_class.create!(key: key, value: value)
-            return true
-          rescue ::ActiveRecord::RecordNotUnique
-            # Row exists. Either stored >= ours (steady-state rejection) or a
-            # concurrent insert raced us with a lower value. Retry UPDATE once;
-            # if it still matches nothing, stored is provably >= ours.
+        with_write_connection(@feature_class) do |connection|
+          if snapshot.version && connection.transaction_open?
+            raise ArgumentError, "versioned snapshot installation requires its own transaction"
           end
+          @feature_class.uncached do
+            @feature_class.transaction(requires_new: true) do
+              state = lock_sync_state
+              if snapshot.version && state.version && snapshot.version < state.version
+                next :stale
+              end
 
-          @kv_integer_class
-            .where(key: key)
-            .where("value < ?", value)
-            .update_all(value: value, updated_at: Time.current) > 0
+              result = Sync::SnapshotApplier.new(self, snapshot.features, instrumenter: instrumenter).call
+              state.update!(version: snapshot.version) if state.version != snapshot.version
+              result
+            end
+          end
         end
+      end
+
+      # Explicit imports keep the released unconditional replacement semantics.
+      # Their unversioned snapshot also clears the synchronization floor.
+      def import(source)
+        remote = Memory.new(self.class.from(source).get_all)
+        Sync::Synchronizer.new(self, remote).call
+        true
       end
 
       # Private
@@ -238,11 +243,19 @@ module Flipper
 
       private
 
-      def kv_integer_table_present?
-        return @kv_integer_table_present if defined?(@kv_integer_table_present)
-        @kv_integer_table_present = with_connection(@kv_integer_class) { @kv_integer_class.table_exists? }
-      rescue ::ActiveRecord::StatementInvalid
-        false
+      def lock_sync_state
+        # Scope the floor to the feature/gate tables even when applications
+        # share a metadata table between multiple adapter configurations.
+        scope = @sync_state_class.where(key: "#{@feature_class.table_name}/#{@gate_class.table_name}")
+        begin
+          @sync_state_class.transaction(requires_new: true) { scope.create! }
+        rescue ::ActiveRecord::RecordNotUnique
+          # Roll back the savepoint before using the outer transaction again.
+        end
+        # SQLite has no row locks. A write before any state read serializes its
+        # transactions too; PostgreSQL/MySQL take the same row lock here.
+        scope.update_all(version: @sync_state_class.arel_table[:version])
+        scope.lock.first!
       end
 
       def model_class(default_class, table_prefix, table_name)

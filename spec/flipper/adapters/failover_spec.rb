@@ -20,12 +20,6 @@ RSpec.describe Flipper::Adapters::Failover do
       subject.features
     end
 
-    it 'preserves primary snapshot versions' do
-      primary.set_integer_if_greater(:sync_version, 42)
-
-      expect(subject.get_all_snapshot.version).to eq(42)
-    end
-
     it 'should not write to secondary' do
       expect(secondary).not_to receive(:add)
       expect(secondary).not_to receive(:enable)
@@ -63,13 +57,6 @@ RSpec.describe Flipper::Adapters::Failover do
       flipper[:flag].enable
       expect(secondary).to receive(:get).and_call_original
       flipper[:flag].enabled?
-    end
-
-    it 'preserves secondary snapshot versions' do
-      secondary.set_integer_if_greater(:sync_version, 99)
-      allow(primary).to receive(:get_all_snapshot).and_raise(Redis::ConnectionError)
-
-      expect(subject.get_all_snapshot.version).to eq(99)
     end
 
     context 'when dual_write is enabled' do
@@ -136,41 +123,6 @@ RSpec.describe Flipper::Adapters::Failover do
       it 'fails over to secondary adapter' do
         expect(secondary).to receive(:features)
         subject.features
-      end
-    end
-  end
-
-  describe '#read_integer / #set_integer_if_greater' do
-    it 'reads from primary and writes only to primary by default' do
-      expect(subject.set_integer_if_greater(:sync_version, 42)).to eq(true)
-      expect(subject.read_integer(:sync_version)).to eq(42)
-      expect(primary.read_integer(:sync_version)).to eq(42)
-      expect(secondary.read_integer(:sync_version)).to be_nil
-    end
-
-    context 'with dual_write enabled' do
-      let(:options) { { dual_write: true } }
-
-      it 'writes to both primary and secondary' do
-        expect(subject.set_integer_if_greater(:sync_version, 42)).to eq(true)
-        expect(primary.read_integer(:sync_version)).to eq(42)
-        expect(secondary.read_integer(:sync_version)).to eq(42)
-      end
-
-      it 'does not write a rejected primary version to secondary' do
-        primary.set_integer_if_greater(:sync_version, 200)
-
-        expect(subject.set_integer_if_greater(:sync_version, 100)).to eq(false)
-        expect(primary.read_integer(:sync_version)).to eq(200)
-        expect(secondary.read_integer(:sync_version)).to be_nil
-      end
-    end
-
-    context 'when primary raises' do
-      it 'falls back to secondary for reads' do
-        secondary.set_integer_if_greater(:sync_version, 99)
-        allow(primary).to receive(:read_integer).and_raise(StandardError)
-        expect(subject.read_integer(:sync_version)).to eq(99)
       end
     end
   end

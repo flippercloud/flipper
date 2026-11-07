@@ -33,19 +33,12 @@ module Flipper
       false
     end
 
-    # Public: Read a named integer value from the adapter, or nil if absent.
-    # Adapters that support typed integer storage override this; the default
-    # is a no-op so unaware adapters degrade to today's behavior.
-    def read_integer(key)
-      nil
-    end
-
-    # Public: Atomically set a named integer to value if and only if the new
-    # value is strictly greater than the currently stored value. Returns true
-    # if the write happened, false if rejected or unsupported. Adapters that
-    # support typed integer storage override this.
-    def set_integer_if_greater(key, value)
-      false
+    # Public: Atomically reconcile a snapshot, rejecting only older revisions.
+    # Supported adapters return :applied, :unchanged, or :stale. A nil revision
+    # reconciles unconditionally and clears the previous revision floor.
+    # Check supports?(:atomic_snapshot_install) before calling this method.
+    def apply_snapshot(snapshot, instrumenter: Instrumenters::Noop)
+      raise NotImplementedError, "#{self.class} does not support atomic snapshot installation"
     end
 
     # Public: Get all features and gate values in one call. Defaults to one call
@@ -59,7 +52,7 @@ module Flipper
     # Public: Get all features and the version that describes that exact result.
     # Adapters with native snapshot/version support should override this. The
     # default is intentionally unversioned because independent get_all and
-    # read_integer calls cannot prove the version describes the returned data.
+    # revision reads cannot prove the version describes the returned data.
     def get_all_snapshot(**kwargs)
       Flipper::Snapshot.new(features: get_all(**kwargs))
     end

@@ -34,6 +34,83 @@ RSpec.describe Flipper::Poller do
   end
 
   describe "#sync" do
+    it "retains the upstream revision independently of mutable adapter data" do
+      source = Flipper::Adapters::Memory.new
+      Flipper.new(source).enable_actor(:search, Flipper::Actor.new('User;1'))
+      features = source.get_all
+      allow(remote_adapter).to receive(:get_all_snapshot).and_return(
+        Flipper::Snapshot.new(features: features, version: 0)
+      )
+
+      subject.sync
+      features['search'][:actors].clear
+      subject.adapter.clear(Flipper::Feature.new(:search, subject.adapter))
+
+      snapshot = subject.get_all_snapshot
+      expect(snapshot.version).to eq(0)
+      expect(snapshot.features['search'][:actors]).to eq(Set['User;1'])
+      expect(subject.adapter.get_all_snapshot.version).to be_nil
+      expect { snapshot.features['search'][:actors].clear }.to raise_error(FrozenError)
+    end
+
+    it "owns nested expression data in published snapshots" do
+      expression = { 'Property' => ['plan'] }
+      allow(remote_adapter).to receive(:get_all_snapshot).and_return(
+        Flipper::Snapshot.new(features: { 'search' => { expression: expression } }, version: 1)
+      )
+      subject.sync
+      expression['Property'].first.replace('changed')
+      snapshot = subject.get_all_snapshot
+      expect(snapshot.features['search'][:expression]).to eq('Property' => ['plan'])
+      expect { snapshot.features['search'][:expression]['Property'] << 'other' }.to raise_error(FrozenError)
+    end
+
+    it "preserves the previous pair and timestamp after a failed publication" do
+      allow(remote_adapter).to receive(:get_all_snapshot).and_return(
+        Flipper::Snapshot.new(features: {}, version: 1)
+      )
+      subject.sync
+      snapshot = subject.get_all_snapshot
+      timestamp = subject.last_synced_at.value
+      allow(subject.adapter).to receive(:import).and_raise('import failed')
+      expect { subject.sync }.to raise_error('import failed')
+      expect(subject.get_all_snapshot).to equal(snapshot)
+      expect(subject.last_synced_at.value).to eq(timestamp)
+    end
+
+    it "does not publish a delayed older fetch after a newer fetch" do
+      allow(Thread).to receive(:new).and_call_original
+      fetched = Queue.new
+      release = Queue.new
+      old_snapshot = Flipper::Snapshot.new(features: { 'old' => {} }, version: 1)
+      new_snapshot = Flipper::Snapshot.new(features: { 'new' => {} }, version: 2)
+      older_thread = nil
+      allow(remote_adapter).to receive(:get_all_snapshot) do
+        if Thread.current == older_thread
+          fetched << true
+          release.pop
+          old_snapshot
+        else
+          new_snapshot
+        end
+      end
+      start = Queue.new
+      older_thread = Thread.new { start.pop; subject.sync }
+      start << true
+      Timeout.timeout(2) { fetched.pop }
+      subject.sync
+      release << true
+      Timeout.timeout(2) { older_thread.value }
+
+      expect(subject.get_all_snapshot.version).to eq(2)
+      expect(subject.get_all_snapshot.features.keys).to eq(['new'])
+      expect(subject.adapter.features).to eq(Set['new'])
+    ensure
+      release << true if release
+      older_thread&.join(1)
+      older_thread&.kill if older_thread&.alive?
+    end
+
     it "syncs remote adapter to local adapter" do
       stub_request(:get, "#{url}/features?exclude_gate_names=true")
         .to_return(status: 200, body: JSON.generate(

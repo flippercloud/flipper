@@ -1,5 +1,6 @@
 require "helper"
 require "generators/flipper/update_generator"
+require "generators/flipper/active_record_generator"
 
 class UpdateGeneratorTest < Rails::Generators::TestCase
   tests Flipper::Generators::UpdateGenerator
@@ -38,11 +39,19 @@ class UpdateGeneratorTest < Rails::Generators::TestCase
       end
     end
 
+    assert_migration "db/migrate/create_flipper_sync_states.rb"
+
     require_migrations
 
     silence { CreateFlipperTables.migrate(:up) }
     assert ActiveRecord::Base.connection.table_exists?(:flipper_features)
     assert ActiveRecord::Base.connection.table_exists?(:flipper_gates)
+
+    silence { CreateFlipperSyncStates.migrate(:up) }
+    connection = ActiveRecord::Base.connection
+    assert connection.table_exists?(:flipper_sync_states)
+    assert connection.columns(:flipper_sync_states).find { |column| column.name == "version" }.null
+    assert connection.index_exists?(:flipper_sync_states, :key, unique: true)
 
     assert ActiveRecord::Base.connection.column_exists?(:flipper_gates, :value, :string)
     silence { ChangeFlipperGatesValueToText.migrate(:up) }
@@ -85,10 +94,10 @@ class UpdateGeneratorTest < Rails::Generators::TestCase
   test "generates migrations with a table prefix" do
     run_generator ["--table-prefix=cross_product_"]
 
-    assert_migration "db/migrate/create_cross_product_flipper_kv_integers.rb" do |migration|
-      assert_match(/class CreateCrossProductFlipperKvIntegers/, migration)
-      assert_match(/create_table :cross_product_flipper_kv_integers/, migration)
-      assert_match(/drop_table :cross_product_flipper_kv_integers/, migration)
+    assert_migration "db/migrate/create_cross_product_flipper_sync_states.rb" do |migration|
+      assert_match(/class CreateCrossProductFlipperSyncStates/, migration)
+      assert_match(/create_table :cross_product_flipper_sync_states/, migration)
+      assert_match(/raise ActiveRecord::IrreversibleMigration/, migration)
     end
 
     assert_migration "db/migrate/create_cross_product_flipper_tables.rb" do |migration|
@@ -116,17 +125,70 @@ class UpdateGeneratorTest < Rails::Generators::TestCase
 
     silence { ChangeCrossProductFlipperGatesValueToText.migrate(:up) }
     assert ActiveRecord::Base.connection.column_exists?(:cross_product_flipper_gates, :value, :text)
-    silence { CreateCrossProductFlipperKvIntegers.migrate(:up) }
-    assert ActiveRecord::Base.connection.table_exists?(:cross_product_flipper_kv_integers)
-    refute ActiveRecord::Base.connection.table_exists?(:flipper_kv_integers)
+    silence { CreateCrossProductFlipperSyncStates.migrate(:up) }
+    assert ActiveRecord::Base.connection.table_exists?(:cross_product_flipper_sync_states)
+    refute ActiveRecord::Base.connection.table_exists?(:flipper_sync_states)
+  end
+
+  test "sync state migration preserves an existing table when rolled back in a new instance" do
+    self.class.generator_class = Flipper::Generators::ActiveRecordGenerator
+    run_generator
+    self.class.generator_class = Flipper::Generators::UpdateGenerator
+    run_generator
+    require_migrations
+
+    silence { CreateFlipperTables.migrate(:up) }
+    connection = ActiveRecord::Base.connection
+    connection.execute <<~SQL
+      INSERT INTO flipper_sync_states (key, version, created_at, updated_at)
+      VALUES ('cloud', 42, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    SQL
+    connection.execute <<~SQL
+      INSERT INTO flipper_features (key, created_at, updated_at)
+      VALUES ('search', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    SQL
+
+    silence { CreateFlipperSyncStates.new.migrate(:up) }
+    silence do
+      assert_raises(ActiveRecord::IrreversibleMigration) do
+        CreateFlipperSyncStates.new.migrate(:down)
+      end
+    end
+
+    assert_equal 42, connection.select_value("SELECT version FROM flipper_sync_states WHERE key = 'cloud'")
+    assert_equal "search", connection.select_value("SELECT key FROM flipper_features")
+    assert connection.table_exists?(:flipper_gates)
+  end
+
+  test "initial migration creates and reverses its own sync state table" do
+    self.class.generator_class = Flipper::Generators::ActiveRecordGenerator
+    run_generator
+    self.class.generator_class = Flipper::Generators::UpdateGenerator
+    require_migrations
+
+    silence { CreateFlipperTables.migrate(:up) }
+    connection = ActiveRecord::Base.connection
+    connection.execute <<~SQL
+      INSERT INTO flipper_sync_states (key, created_at, updated_at)
+      VALUES ('cloud', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    SQL
+    assert_nil connection.select_value("SELECT version FROM flipper_sync_states WHERE key = 'cloud'")
+    assert connection.index_exists?(:flipper_sync_states, :key, unique: true)
+
+    silence { CreateFlipperTables.migrate(:down) }
+    refute connection.table_exists?(:flipper_sync_states)
+    refute connection.table_exists?(:flipper_features)
+    refute connection.table_exists?(:flipper_gates)
   end
 
   def require_migrations
     # If these are not reloaded, then test order can cause failures
     Object.send(:remove_const, :CreateFlipperTables) if defined?(::CreateFlipperTables)
     Object.send(:remove_const, :ChangeFlipperGatesValueToText) if defined?(::ChangeFlipperGatesValueToText)
+    Object.send(:remove_const, :CreateFlipperSyncStates) if defined?(::CreateFlipperSyncStates)
     Object.send(:remove_const, :CreateCrossProductFlipperTables) if defined?(::CreateCrossProductFlipperTables)
     Object.send(:remove_const, :ChangeCrossProductFlipperGatesValueToText) if defined?(::ChangeCrossProductFlipperGatesValueToText)
+    Object.send(:remove_const, :CreateCrossProductFlipperSyncStates) if defined?(::CreateCrossProductFlipperSyncStates)
 
     Dir.glob("#{ROOT}/db/migrate/*.rb").each do |file|
       assert_nothing_raised do

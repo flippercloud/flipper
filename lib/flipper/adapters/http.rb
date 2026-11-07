@@ -124,14 +124,6 @@ module Flipper
         @get_all_mutex.synchronize { @last_get_all_response }
       end
 
-      def read_integer(key)
-        return nil unless key.to_sym == :sync_version
-        # HTTP exposes sync_version as metadata on /features. This returns the
-        # last observed value from get_all_snapshot rather than making a second
-        # remote read that could race the feature snapshot.
-        @get_all_mutex.synchronize { @last_sync_version }
-      end
-
       def features
         response = @client.get('/features?exclude_gate_names=true')
         raise Error, response unless response.is_a?(Net::HTTPOK)
@@ -192,7 +184,8 @@ module Flipper
 
       def sync_version_from(response)
         header = response['flipper-sync-version']
-        Integer(header) if header
+        version = Integer(header) if header
+        version if version && version >= 0
       rescue ArgumentError
         nil
       end

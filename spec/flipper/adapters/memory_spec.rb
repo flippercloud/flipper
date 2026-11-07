@@ -16,70 +16,141 @@ RSpec.describe Flipper::Adapters::Memory do
     it_should_behave_like 'a flipper adapter'
   end
 
-  describe 'read_integer / set_integer_if_greater' do
+  describe 'atomic snapshot installation' do
     subject { described_class.new }
 
-    it 'returns nil for unknown keys' do
-      expect(subject.read_integer(:sync_version)).to be_nil
+    it 'does not advertise an atomic boundary without its mutex' do
+      adapter = described_class.new({}, threadsafe: false)
+      expect(adapter.supports?(:atomic_snapshot_install)).to eq(false)
+      expect { adapter.apply_snapshot(Flipper::Snapshot.new(features: {})) }.to raise_error(NotImplementedError)
     end
 
-    it 'sets a new value when none exists' do
-      expect(subject.set_integer_if_greater(:sync_version, 100)).to eq(true)
-      expect(subject.read_integer(:sync_version)).to eq(100)
+    it 'owns nested input data and keeps its private floor out of exported snapshots' do
+      data = {"search" => subject.default_config.merge(actors: Set["User;1"])}
+      subject.apply_snapshot(Flipper::Snapshot.new(features: data, version: 10))
+      data["search"][:actors].delete("User;1")
+      data["search"][:actors].add("User;3")
+      expect(subject.get_all["search"][:actors]).to eq(Set["User;1"])
+      expect(subject.get_all_snapshot.version).to be_nil
     end
 
-    it 'rejects a lower value' do
-      subject.set_integer_if_greater(:sync_version, 100)
-      expect(subject.set_integer_if_greater(:sync_version, 99)).to eq(false)
-      expect(subject.read_integer(:sync_version)).to eq(100)
+    it 'publishes neither partial data nor a floor after a failed reconciliation' do
+      Flipper.new(subject).enable(:original)
+      original = subject.get_all
+      fail_install = true
+      allow_any_instance_of(Flipper::Adapters::Sync::SnapshotApplier).to receive(:call).and_wrap_original do |method|
+        result = method.call
+        raise "failed after staging" if fail_install
+        result
+      end
+      snapshot = Flipper::Snapshot.new(features: {}, version: 10)
+      expect { subject.apply_snapshot(snapshot) }.to raise_error("failed after staging")
+      expect(subject.get_all).to eq(original)
+      fail_install = false
+      expect(subject.apply_snapshot(Flipper::Snapshot.new(features: {}, version: 1))).to eq(:applied)
     end
 
-    it 'rejects an equal value' do
-      subject.set_integer_if_greater(:sync_version, 100)
-      expect(subject.set_integer_if_greater(:sync_version, 100)).to eq(false)
-      expect(subject.read_integer(:sync_version)).to eq(100)
+    it 'explicitly imports unconditionally and resets the floor' do
+      subject.apply_snapshot(Flipper::Snapshot.new(features: {}, version: 10))
+      source = described_class.new
+      Flipper.new(source).enable(:search)
+      expect(subject.import(source)).to eq(true)
+      expect(subject.get_all).to eq(source.get_all)
+      expect(subject.apply_snapshot(Flipper::Snapshot.new(features: {}, version: 1))).to eq(:applied)
     end
 
-    it 'accepts a strictly greater value' do
-      subject.set_integer_if_greater(:sync_version, 100)
-      expect(subject.set_integer_if_greater(:sync_version, 200)).to eq(true)
-      expect(subject.read_integer(:sync_version)).to eq(200)
+    it 'lets instrumentation read the complete previous snapshot without re-locking' do
+      Flipper.new(subject).enable(:original)
+      previous = subject.get_all
+      feature = Flipper::Feature.new(:original, subject)
+      instrumenter = Flipper::Instrumenters::Memory.new
+      allow(instrumenter).to receive(:instrument).and_wrap_original do |method, *args, &block|
+        result = method.call(*args, &block)
+        expect(subject.features).to eq(Set["original"])
+        expect(subject.get(feature)).to eq(previous["original"])
+        expect(subject.get_multi([feature])).to eq(previous)
+        expect(subject.get_all_snapshot.features).to eq(previous)
+        result
+      end
+      expect(subject.apply_snapshot(Flipper::Snapshot.new(features: {}, version: 10), instrumenter: instrumenter)).to eq(:applied)
+      expect(subject.get_all).to eq({})
     end
 
-    it 'tracks separate keys independently' do
-      subject.set_integer_if_greater(:foo, 100)
-      subject.set_integer_if_greater(:bar, 50)
-      expect(subject.read_integer(:foo)).to eq(100)
-      expect(subject.read_integer(:bar)).to eq(50)
+    it 'rolls back when instrumentation raises before publication' do
+      Flipper.new(subject).enable(:original)
+      previous = subject.get_all
+      instrumenter = Flipper::Instrumenters::Memory.new
+      allow(instrumenter).to receive(:instrument).and_raise("subscriber failed")
+      expect do
+        subject.apply_snapshot(Flipper::Snapshot.new(features: {}, version: 10), instrumenter: instrumenter)
+      end.to raise_error("subscriber failed")
+      expect(subject.get_all).to eq(previous)
+      expect(subject.apply_snapshot(Flipper::Snapshot.new(features: {}, version: 1))).to eq(:applied)
     end
 
-    it 'is isolated from get_all and clear' do
+    it 'rejects reentrant subscriber writes without changing the published state' do
       flipper = Flipper.new(subject)
-      flipper.enable(:my_feature)
-      subject.set_integer_if_greater(:sync_version, 100)
-
-      flipper[:my_feature].clear
-      expect(subject.read_integer(:sync_version)).to eq(100)
+      flipper.enable(:original)
+      previous = subject.get_all
+      instrumenter = Flipper::Instrumenters::Memory.new
+      allow(instrumenter).to receive(:instrument) { flipper.enable(:subscriber_write) }
+      expect do
+        subject.apply_snapshot(Flipper::Snapshot.new(features: {}, version: 10), instrumenter: instrumenter)
+      end.to raise_error(ThreadError)
+      expect(subject.get_all).to eq(previous)
+      expect(subject.apply_snapshot(Flipper::Snapshot.new(features: {}, version: 1))).to eq(:applied)
     end
 
-    it 'imports sync_version from the source adapter' do
-      source = described_class.new
-      source.set_integer_if_greater(:sync_version, 42)
-      Flipper.new(source).enable(:search)
-
-      subject.import(source)
-
-      expect(subject.read_integer(:sync_version)).to eq(42)
+    it 'rejects a delayed older response after a newer response has installed' do
+      older_ready = Queue.new
+      release_older = Queue.new
+      older = Thread.new do
+        snapshot = Flipper::Snapshot.new(features: {}, version: 9)
+        older_ready << true
+        release_older.pop
+        subject.apply_snapshot(snapshot)
+      end
+      older_ready.pop
+      data = {"search" => subject.default_config.merge(boolean: "true")}
+      subject.apply_snapshot(Flipper::Snapshot.new(features: data, version: 10))
+      release_older << true
+      expect(older.value).to eq(:stale)
+      expect(subject.get_all).to eq(data)
+    ensure
+      older&.kill if older&.alive?
+      older&.join
     end
 
-    it 'clears sync_version when the source has none' do
-      subject.set_integer_if_greater(:sync_version, 100)
-      source = described_class.new
-      Flipper.new(source).enable(:search)
-
-      subject.import(source)
-
-      expect(subject.read_integer(:sync_version)).to be_nil
+    it 'serializes overlapping installations through publication' do
+      entered = Queue.new
+      release = Queue.new
+      newer_started = Queue.new
+      allow_any_instance_of(Flipper::Adapters::Sync::SnapshotApplier).to receive(:call).and_wrap_original do |method|
+        if Thread.current[:pause_install]
+          entered << true
+          release.pop
+        end
+        method.call
+      end
+      older = Thread.new do
+        Thread.current[:pause_install] = true
+        subject.apply_snapshot(Flipper::Snapshot.new(features: {}, version: 9))
+      end
+      entered.pop
+      data = {"search" => subject.default_config.merge(boolean: "true")}
+      newer = Thread.new do
+        newer_started << true
+        subject.apply_snapshot(Flipper::Snapshot.new(features: data, version: 10))
+      end
+      newer_started.pop
+      release << true
+      older.value
+      expect(newer.value).to eq(:applied)
+      expect(subject.get_all).to eq(data)
+      expect(subject.apply_snapshot(Flipper::Snapshot.new(features: {}, version: 9))).to eq(:stale)
+    ensure
+      [older, newer].compact.each { |thread| thread.kill if thread.alive? }
+      [older, newer].compact.each(&:join)
     end
   end
 

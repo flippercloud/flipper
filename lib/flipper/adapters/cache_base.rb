@@ -33,13 +33,11 @@ module Flipper
         @namespace = @namespace.prepend(prefix) if prefix
         @features_cache_key = "#{@namespace}/features"
         @get_all_cache_key = "#{@namespace}/get_all"
-        @get_all_snapshot_cache_key = "#{@namespace}/get_all_snapshot"
       end
 
       # Public: Expire the cache for the set of all features with gates.
       def expire_get_all_cache
         cache_delete @get_all_cache_key
-        cache_delete @get_all_snapshot_cache_key
       end
 
       # Public: Expire the cache for the set of known feature names.
@@ -100,22 +98,6 @@ module Flipper
         }
       end
 
-      def get_all_snapshot(**kwargs)
-        if kwargs[:cache_bust]
-          snapshot = @adapter.get_all_snapshot(**kwargs)
-          write_snapshot_caches(snapshot)
-        else
-          cache_fetch(@get_all_snapshot_cache_key) {
-            snapshot = @adapter.get_all_snapshot(**kwargs)
-            write_snapshot_caches(snapshot)
-          }
-        end
-      end
-
-      def supports?(feature)
-        @adapter.supports?(feature)
-      end
-
       # Public
       def import(source)
         feature_keys = @adapter.features
@@ -127,6 +109,10 @@ module Flipper
         feature_keys.each { |key| cache_delete feature_cache_key(key) }
         expire_features_cache
         result
+      end
+
+      def get_all_snapshot(**kwargs)
+        @adapter.get_all_snapshot(**kwargs)
       end
 
       # Public
@@ -143,19 +129,6 @@ module Flipper
         result
       end
 
-      # Public
-      def read_integer(key)
-        cache_fetch(integer_cache_key(key)) { @adapter.read_integer(key) }
-      end
-
-      # Public
-      def set_integer_if_greater(key, value)
-        @adapter.set_integer_if_greater(key, value).tap do
-          cache_delete(integer_cache_key(key))
-          cache_delete(@get_all_snapshot_cache_key)
-        end
-      end
-
       # Public: Generate the cache key for a given feature.
       #
       # key - The String or Symbol feature key.
@@ -163,27 +136,7 @@ module Flipper
         "#{@namespace}/feature/#{key}"
       end
 
-      # Public: Generate the cache key for a given integer.
-      #
-      # key - The String or Symbol integer key.
-      def integer_cache_key(key)
-        "#{@namespace}/integer/#{key}"
-      end
-
       private
-
-      def write_snapshot_caches(snapshot)
-        cacheable_snapshot = Flipper::Snapshot.new(features: snapshot.features, version: snapshot.version)
-        cache_write @get_all_snapshot_cache_key, cacheable_snapshot
-        cache_write @get_all_cache_key, snapshot.features
-        cache_write @features_cache_key, snapshot.features.keys.to_set
-        if snapshot.version
-          cache_write integer_cache_key(:sync_version), snapshot.version
-        else
-          cache_delete integer_cache_key(:sync_version)
-        end
-        cacheable_snapshot
-      end
 
       def read_all_features(**kwargs)
         @adapter.get_all(**kwargs)

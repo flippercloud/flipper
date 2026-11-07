@@ -7,7 +7,7 @@ module Flipper
         generator.class_option :table_prefix,
                                type: :string,
                                default: '',
-                               desc: 'Prefix for the flipper_features and flipper_gates tables'
+                               desc: 'Prefix for the Flipper feature, gate, and sync state tables'
       end
 
       private
@@ -20,8 +20,8 @@ module Flipper
         :"#{table_prefix}flipper_gates"
       end
 
-      def kv_integer_table_name
-        :"#{table_prefix}flipper_kv_integers"
+      def sync_state_table_name
+        :"#{table_prefix}flipper_sync_states"
       end
 
       def prefixed_migration_file_name(file_name)

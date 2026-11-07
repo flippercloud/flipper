@@ -30,16 +30,16 @@ class FlipperActiveRecordGeneratorTest < Rails::Generators::TestCase
           end
           add_index :flipper_gates, [:feature_key, :key, :value], unique: true, length: { value: 255 }
 
-          create_table :flipper_kv_integers do |t|
+          create_table :flipper_sync_states do |t|
             t.string :key, null: false
-            t.bigint :value, null: false, default: 0
+            t.bigint :version
             t.timestamps null: false
           end
-          add_index :flipper_kv_integers, :key, unique: true
+          add_index :flipper_sync_states, :key, unique: true
         end
 
         def down
-          drop_table :flipper_kv_integers
+          drop_table :flipper_sync_states
           drop_table :flipper_gates
           drop_table :flipper_features
         end
@@ -71,16 +71,16 @@ class FlipperActiveRecordGeneratorTest < Rails::Generators::TestCase
           end
           add_index :cross_product_flipper_gates, [:feature_key, :key, :value], unique: true, length: { value: 255 }, name: :index_cross_product_flipper_gates_on_keys
 
-          create_table :cross_product_flipper_kv_integers do |t|
+          create_table :cross_product_flipper_sync_states do |t|
             t.string :key, null: false
-            t.bigint :value, null: false, default: 0
+            t.bigint :version
             t.timestamps null: false
           end
-          add_index :cross_product_flipper_kv_integers, :key, unique: true
+          add_index :cross_product_flipper_sync_states, :key, unique: true
         end
 
         def down
-          drop_table :cross_product_flipper_kv_integers
+          drop_table :cross_product_flipper_sync_states
           drop_table :cross_product_flipper_gates
           drop_table :cross_product_flipper_features
         end

@@ -199,54 +199,24 @@ RSpec.describe Flipper::Adapters::Http do
     end
   end
 
-  describe "#read_integer" do
-    it "returns nil before any get_all has happened" do
-      adapter = described_class.new(url: 'http://app.com/flipper')
-      expect(adapter.read_integer(:sync_version)).to be_nil
-    end
-
-    it "returns the version from the flipper-sync-version response header" do
-      stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
-        .to_return(status: 200, body: JSON.generate(features: []), headers: { 'Flipper-Sync-Version' => '12345' })
-
-      adapter = described_class.new(url: 'http://app.com/flipper')
-      adapter.get_all
-      expect(adapter.read_integer(:sync_version)).to eq(12345)
-    end
-
-    it "returns nil when the server response omits the header (older server)" do
-      stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
-        .to_return(status: 200, body: JSON.generate(features: []))
-
-      adapter = described_class.new(url: 'http://app.com/flipper')
-      adapter.get_all
-      expect(adapter.read_integer(:sync_version)).to be_nil
-    end
-
-    it "preserves the cached version across 304 Not Modified responses" do
-      stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
-        .to_return(status: 200, body: JSON.generate(features: []),
-          headers: { 'ETag' => '"abc"', 'Flipper-Sync-Version' => '12345' })
-
-      adapter = described_class.new(url: 'http://app.com/flipper')
-      adapter.get_all
-      expect(adapter.read_integer(:sync_version)).to eq(12345)
-
-      stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
-        .with(headers: { 'If-None-Match' => '"abc"' })
-        .to_return(status: 304, headers: { 'ETag' => '"abc"' })
-
-      adapter.get_all
-      expect(adapter.read_integer(:sync_version)).to eq(12345)
-    end
-
-    it "returns nil for keys other than :sync_version" do
-      adapter = described_class.new(url: 'http://app.com/flipper')
-      expect(adapter.read_integer(:other_key)).to be_nil
-    end
-  end
-
   describe "#get_all_snapshot" do
+    it "preserves revision zero" do
+      stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
+        .to_return(status: 200, body: Flipper::Typecast.to_json(features: []), headers: { 'Flipper-Sync-Version' => '0' })
+      adapter = described_class.new(url: 'http://app.com/flipper')
+      expect(adapter.get_all_snapshot.version).to eq(0)
+    end
+
+    [nil, '-1', 'invalid'].each do |version|
+      it "returns an unversioned snapshot for header #{version.inspect}" do
+        headers = version ? { 'Flipper-Sync-Version' => version } : {}
+        stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
+          .to_return(status: 200, body: Flipper::Typecast.to_json(features: []), headers: headers)
+        adapter = described_class.new(url: 'http://app.com/flipper')
+        expect(adapter.get_all_snapshot.version).to be_nil
+      end
+    end
+
     it "returns features and sync version from the same response" do
       stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
         .to_return(status: 200, body: JSON.generate(features: []), headers: { 'Flipper-Sync-Version' => '12345' })
@@ -256,7 +226,6 @@ RSpec.describe Flipper::Adapters::Http do
 
       expect(snapshot.features).to eq({})
       expect(snapshot.version).to eq(12345)
-      expect(adapter.read_integer(:sync_version)).to eq(12345)
     end
 
     it "reuses the cached features and version for 304 Not Modified responses" do
@@ -274,13 +243,6 @@ RSpec.describe Flipper::Adapters::Http do
       snapshot = adapter.get_all_snapshot
       expect(snapshot.features).to eq({})
       expect(snapshot.version).to eq(12345)
-    end
-  end
-
-  describe "#set_integer_if_greater" do
-    it "returns false (writes never go server-side via this method)" do
-      adapter = described_class.new(url: 'http://app.com/flipper')
-      expect(adapter.set_integer_if_greater(:sync_version, 100)).to eq(false)
     end
   end
 

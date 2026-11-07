@@ -4,7 +4,7 @@ module Flipper
   module Adapters
     # Public: Adapter that wraps another adapter and raises for any writes.
     class ReadOnly < Wrapper
-      WRITE_METHODS = %i[import add remove clear enable disable set_integer_if_greater]
+      WRITE_METHODS = %i[import add remove clear enable disable apply_snapshot]
 
       class WriteAttempted < Error
         def initialize(message = nil)
@@ -14,6 +14,11 @@ module Flipper
 
       def read_only?
         true
+      end
+
+      def supports?(feature)
+        return false if feature.to_sym == :atomic_snapshot_install
+        super
       end
 
       private

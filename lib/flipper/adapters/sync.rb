@@ -57,6 +57,11 @@ module Flipper
         @local.get_all(**kwargs)
       end
 
+      def get_all_snapshot(**kwargs)
+        synchronize
+        @local.get_all_snapshot(**kwargs)
+      end
+
       def add(feature)
         @remote.add(feature).tap { @local.add(feature) }
       end
@@ -79,21 +84,6 @@ module Flipper
         @remote.disable(feature, gate, thing).tap do
           @local.disable(feature, gate, thing)
         end
-      end
-
-      def supports?(feature)
-        @local.supports?(feature) && @remote.supports?(feature)
-      end
-
-      def read_integer(key)
-        synchronize
-        @local.read_integer(key)
-      end
-
-      def set_integer_if_greater(key, value)
-        accepted = @remote.set_integer_if_greater(key, value)
-        @local.set_integer_if_greater(key, value) if accepted
-        accepted
       end
 
       private

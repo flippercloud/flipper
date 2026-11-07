@@ -12,7 +12,7 @@ module Flipper
 
       attr_reader :adapter, :poller
 
-      def_delegators :synced_adapter, :features, :get, :get_multi, :get_all, :get_all_snapshot, :supports?, :add, :remove, :clear, :enable, :disable, :read_integer, :set_integer_if_greater
+      def_delegators :synced_adapter, :features, :get, :get_multi, :get_all, :get_all_snapshot, :add, :remove, :clear, :enable, :disable
 
       def initialize(poller, adapter)
         @adapter = adapter
@@ -42,7 +42,7 @@ module Flipper
         @poller.start
         poller_last_synced_at = @poller.last_synced_at.value
         if poller_last_synced_at > @last_synced_at
-          Flipper::Adapters::Sync::Synchronizer.new(@adapter, @poller.adapter).call
+          Flipper::Adapters::Sync::Synchronizer.new(@adapter, @poller).call
           @last_synced_at = poller_last_synced_at
         end
         @adapter

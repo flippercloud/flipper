@@ -1,0 +1,22 @@
+# frozen_string_literal: true
+
+<%
+migration_class = migration_class_name('CreateFlipperSyncStates')
+sync_state_table = sync_state_table_name
+%>class <%= migration_class %> < ActiveRecord::Migration<%= migration_version %>
+  def up
+    return if table_exists? <%= sync_state_table.inspect %>
+
+    create_table <%= sync_state_table.inspect %> do |t|
+      t.string :key, null: false
+      t.bigint :version
+      t.timestamps null: false
+    end
+    add_index <%= sync_state_table.inspect %>, :key, unique: true
+  end
+
+  def down
+    # This table may have been created by the initial Flipper migration.
+    raise ActiveRecord::IrreversibleMigration, "Preserve the existing Flipper sync state table"
+  end
+end

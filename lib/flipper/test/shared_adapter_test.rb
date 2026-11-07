@@ -319,58 +319,44 @@ module Flipper
         assert_equal expected, @adapter.get_all
       end
 
-      def test_returns_nil_for_unknown_versioned_integers_when_supported
-        assert_nil @adapter.read_integer(:sync_version)
+      def test_returns_a_snapshot_of_current_features
+        @flipper.enable(:stats)
+        assert_equal @adapter.get_all, @adapter.get_all_snapshot.features
       end
 
-      def test_sets_a_versioned_integer_when_none_exists_if_supported
-        if @adapter.supports?(:versioned_integers)
-          assert_equal true, @adapter.set_integer_if_greater(:sync_version, 100)
-          assert_equal 100, @adapter.read_integer(:sync_version)
+      def test_rejects_only_strictly_older_snapshots_when_supported
+        if @adapter.supports?(:atomic_snapshot_install)
+          data = {"stats" => @adapter.default_config.merge(boolean: "true")}
+          assert_equal :applied, @adapter.apply_snapshot(Flipper::Snapshot.new(features: data, version: 10))
+          assert_equal :stale, @adapter.apply_snapshot(Flipper::Snapshot.new(features: {}, version: 9))
+          assert_equal data, @adapter.get_all
+          assert_equal :unchanged, @adapter.apply_snapshot(Flipper::Snapshot.new(features: data, version: 10))
+          assert_equal :applied, @adapter.apply_snapshot(Flipper::Snapshot.new(features: {}, version: 11))
+          assert_empty @adapter.get_all
         else
-          assert_equal false, @adapter.set_integer_if_greater(:sync_version, 100)
-          assert_nil @adapter.read_integer(:sync_version)
+          refute @adapter.supports?(:atomic_snapshot_install)
         end
       end
 
-      def test_rejects_equal_or_lower_versioned_integers_if_supported
-        if @adapter.supports?(:versioned_integers)
-          @adapter.set_integer_if_greater(:sync_version, 100)
-          assert_equal false, @adapter.set_integer_if_greater(:sync_version, 99)
-          assert_equal false, @adapter.set_integer_if_greater(:sync_version, 100)
-          assert_equal 100, @adapter.read_integer(:sync_version)
-        else
-          assert_equal false, @adapter.set_integer_if_greater(:sync_version, 99)
-          assert_equal false, @adapter.set_integer_if_greater(:sync_version, 100)
-          assert_nil @adapter.read_integer(:sync_version)
+      def test_reconciles_local_edits_at_equal_revision_when_supported
+        if @adapter.supports?(:atomic_snapshot_install)
+          snapshot = Flipper::Snapshot.new(features: {}, version: 10)
+          @adapter.apply_snapshot(snapshot)
+          @flipper.enable(:stats)
+          assert_equal :applied, @adapter.apply_snapshot(snapshot)
+          assert_empty @adapter.get_all
         end
       end
 
-      def test_accepts_strictly_greater_versioned_integers_if_supported
-        if @adapter.supports?(:versioned_integers)
-          @adapter.set_integer_if_greater(:sync_version, 100)
-          assert_equal true, @adapter.set_integer_if_greater(:sync_version, 200)
-          assert_equal 200, @adapter.read_integer(:sync_version)
-        else
-          assert_equal false, @adapter.set_integer_if_greater(:sync_version, 200)
-          assert_nil @adapter.read_integer(:sync_version)
+      def test_unversioned_install_resets_floor_when_supported
+        if @adapter.supports?(:atomic_snapshot_install)
+          @adapter.apply_snapshot(Flipper::Snapshot.new(features: {}, version: 10))
+          @adapter.apply_snapshot(Flipper::Snapshot.new(features: {}))
+          data = {"stats" => @adapter.default_config.merge(boolean: "true")}
+          assert_equal :applied, @adapter.apply_snapshot(Flipper::Snapshot.new(features: data, version: 1))
+          assert_equal data, @adapter.get_all
         end
       end
-
-      def test_tracks_versioned_integer_keys_independently_if_supported
-        if @adapter.supports?(:versioned_integers)
-          @adapter.set_integer_if_greater(:foo, 100)
-          @adapter.set_integer_if_greater(:bar, 50)
-          assert_equal 100, @adapter.read_integer(:foo)
-          assert_equal 50, @adapter.read_integer(:bar)
-        else
-          assert_equal false, @adapter.set_integer_if_greater(:foo, 100)
-          assert_equal false, @adapter.set_integer_if_greater(:bar, 50)
-          assert_nil @adapter.read_integer(:foo)
-          assert_nil @adapter.read_integer(:bar)
-        end
-      end
-
       def test_clears_other_gate_values_on_enable
         actor = Flipper::Actor.new('Flipper::Actor;22')
         assert_equal true, @adapter.enable(@feature, @actors_gate, Flipper::Types::PercentageOfActors.new(25))

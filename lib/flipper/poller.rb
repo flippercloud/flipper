@@ -33,6 +33,8 @@ module Flipper
       @remote_adapter = options.fetch(:remote_adapter)
       @last_synced_at = Concurrent::AtomicFixnum.new(0)
       @adapter = Adapters::Memory.new(nil, threadsafe: true)
+      @snapshot_mutex = Mutex.new
+      @snapshot = Snapshot.new(features: {}.freeze)
       @shutdown_requested = false
 
       self.interval = options.fetch(:interval, 10)
@@ -73,12 +75,26 @@ module Flipper
     def sync
       @instrumenter.instrument("poller.#{InstrumentationNamespace}", operation: :poll) do
         begin
-          @adapter.import @remote_adapter
-          @last_synced_at.update { |time| Concurrent.monotonic_time }
+          incoming = @remote_adapter.get_all_snapshot
+          snapshot = Snapshot.new(features: copy_snapshot_value(incoming.features), version: incoming.version)
+          @snapshot_mutex.synchronize do
+            if snapshot.version && @snapshot.version && snapshot.version < @snapshot.version
+              next
+            end
+
+            @adapter.import Adapters::Memory.new(snapshot.features)
+            @snapshot = snapshot
+            @last_synced_at.update { |time| Concurrent.monotonic_time }
+          end
         ensure
           apply_response_headers
         end
       end
+    end
+
+    # Internal: The owned remote pair, independent of mutable adapter reads.
+    def get_all_snapshot(**kwargs)
+      @snapshot_mutex.synchronize { @snapshot }
     end
 
     # Internal: Sets the interval in seconds for how often to poll.
@@ -94,6 +110,24 @@ module Flipper
     end
 
     private
+
+    def copy_snapshot_value(value)
+      copy = case value
+      when Hash
+        value.each_with_object({}) do |(key, item), result|
+          result[copy_snapshot_value(key)] = copy_snapshot_value(item)
+        end
+      when Set
+        Set.new(value.map { |item| copy_snapshot_value(item) })
+      when Array
+        value.map { |item| copy_snapshot_value(item) }
+      when String
+        value.dup
+      else
+        value
+      end
+      copy.freeze
+    end
 
     def jitter
       rand

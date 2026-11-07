@@ -35,12 +35,6 @@ RSpec.describe Flipper::Adapters::DualWrite do
     subject.get_all
   end
 
-  it 'uses local for #get_all_snapshot and preserves the version' do
-    local_adapter.set_integer_if_greater(:sync_version, 42)
-
-    expect(subject.get_all_snapshot.version).to eq(42)
-  end
-
   it 'updates remote and local for #add' do
     subject.add sync[:search]
     expect(remote_adapter.count(:add)).to be(1)
@@ -71,23 +65,6 @@ RSpec.describe Flipper::Adapters::DualWrite do
     subject.disable feature, feature.gate(:boolean), Flipper::Types::Boolean.new(false)
     expect(remote_adapter.count(:disable)).to be(1)
     expect(local_adapter.count(:disable)).to be(1)
-  end
-
-  describe '#read_integer / #set_integer_if_greater' do
-    it 'reads from local and writes to both adapters' do
-      expect(subject.set_integer_if_greater(:sync_version, 42)).to eq(true)
-      expect(subject.read_integer(:sync_version)).to eq(42)
-      expect(local_adapter.read_integer(:sync_version)).to eq(42)
-      expect(remote_adapter.read_integer(:sync_version)).to eq(42)
-    end
-
-    it 'does not write a rejected remote version to local' do
-      remote_adapter.set_integer_if_greater(:sync_version, 200)
-
-      expect(subject.set_integer_if_greater(:sync_version, 100)).to eq(false)
-      expect(local_adapter.read_integer(:sync_version)).to be_nil
-      expect(remote_adapter.read_integer(:sync_version)).to eq(200)
-    end
   end
 
   describe '#adapter_stack' do

@@ -21,7 +21,6 @@ module Flipper
         @memoize = false
         @features_key = :flipper_features
         @get_all_key = :all_memoized
-        @get_all_snapshot_key = :all_snapshot_memoized
       end
 
       # Public
@@ -108,22 +107,6 @@ module Flipper
         end
       end
 
-      def get_all_snapshot(**kwargs)
-        if memoizing?
-          if kwargs[:cache_bust]
-            snapshot = @adapter.get_all_snapshot(**kwargs)
-            memoize_snapshot(snapshot)
-          else
-            cache.fetch(@get_all_snapshot_key) do
-              snapshot = @adapter.get_all_snapshot(**kwargs)
-              memoize_snapshot(snapshot)
-            end
-          end
-        else
-          @adapter.get_all_snapshot(**kwargs)
-        end
-      end
-
       # Public
       def enable(feature, gate, thing)
         @adapter.enable(feature, gate, thing).tap { expire_feature(feature) }
@@ -143,26 +126,16 @@ module Flipper
         @adapter.import(source).tap { cache.clear if memoizing? }
       end
 
+      def get_all_snapshot(**kwargs)
+        @adapter.get_all_snapshot(**kwargs)
+      end
+
       def supports?(feature)
         @adapter.supports?(feature)
       end
 
-      def read_integer(key)
-        if memoizing?
-          cache_key = integer_key_for(key)
-          cache.fetch(cache_key) { cache[cache_key] = @adapter.read_integer(key) }
-        else
-          @adapter.read_integer(key)
-        end
-      end
-
-      def set_integer_if_greater(key, value)
-        @adapter.set_integer_if_greater(key, value).tap do
-          if memoizing?
-            cache.delete(integer_key_for(key))
-            cache.delete(@get_all_snapshot_key)
-          end
-        end
+      def apply_snapshot(snapshot, **kwargs)
+        @adapter.apply_snapshot(snapshot, **kwargs).tap { cache.clear if memoizing? }
       end
 
       def export(format: :json, version: 1)
@@ -194,40 +167,16 @@ module Flipper
 
       private
 
-      def memoize_snapshot(snapshot)
-        snapshot.features.each do |key, value|
-          cache[key_for(key)] = value
-        end
-        cache[@features_key] = snapshot.features.keys.to_set
-        cache[@get_all_key] = true
-        if snapshot.version
-          cache[integer_key_for(:sync_version)] = snapshot.version
-        else
-          cache.delete(integer_key_for(:sync_version))
-        end
-        cache[@get_all_snapshot_key] = snapshot
-      end
-
       def key_for(key)
         "feature/#{key}"
       end
 
-      def integer_key_for(key)
-        "integer/#{key}"
-      end
-
       def expire_feature(feature)
-        if memoizing?
-          cache.delete(key_for(feature.key))
-          cache.delete(@get_all_snapshot_key)
-        end
+        cache.delete(key_for(feature.key)) if memoizing?
       end
 
       def expire_features_set
-        if memoizing?
-          cache.delete(@features_key)
-          cache.delete(@get_all_snapshot_key)
-        end
+        cache.delete(@features_key) if memoizing?
       end
     end
   end

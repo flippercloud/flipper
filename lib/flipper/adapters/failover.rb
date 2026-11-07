@@ -57,10 +57,6 @@ module Flipper
         @secondary.get_all_snapshot(**kwargs)
       end
 
-      def supports?(feature)
-        @primary.supports?(feature)
-      end
-
       def add(feature)
         @primary.add(feature).tap do
           @secondary.add(feature) if @dual_write
@@ -89,18 +85,6 @@ module Flipper
         @primary.disable(feature, gate, thing).tap do
           @secondary.disable(feature, gate, thing) if @dual_write
         end
-      end
-
-      def read_integer(key)
-        @primary.read_integer(key)
-      rescue *@errors
-        @secondary.read_integer(key)
-      end
-
-      def set_integer_if_greater(key, value)
-        accepted = @primary.set_integer_if_greater(key, value)
-        @secondary.set_integer_if_greater(key, value) if accepted && @dual_write
-        accepted
       end
     end
   end

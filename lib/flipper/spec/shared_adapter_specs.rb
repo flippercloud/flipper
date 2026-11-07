@@ -322,63 +322,44 @@ RSpec.shared_examples_for 'a flipper adapter' do
     expect(subject.get_all).to eq({})
   end
 
-  it 'returns nil for unknown versioned integers when supported' do
-    if subject.supports?(:versioned_integers)
-      expect(subject.read_integer(:sync_version)).to be_nil
+  it 'returns a snapshot of current features' do
+    flipper.enable(:stats)
+    expect(subject.get_all_snapshot.features).to eq(subject.get_all)
+  end
+
+  it 'rejects only strictly older snapshots when atomic installation is supported' do
+    if subject.supports?(:atomic_snapshot_install)
+      data = {"stats" => subject.default_config.merge(boolean: "true")}
+      expect(subject.apply_snapshot(Flipper::Snapshot.new(features: data, version: 10))).to eq(:applied)
+      expect(subject.apply_snapshot(Flipper::Snapshot.new(features: {}, version: 9))).to eq(:stale)
+      expect(subject.get_all).to eq(data)
+      expect(subject.apply_snapshot(Flipper::Snapshot.new(features: data, version: 10))).to eq(:unchanged)
+      expect(subject.apply_snapshot(Flipper::Snapshot.new(features: {}, version: 11))).to eq(:applied)
+      expect(subject.get_all).to eq({})
     else
-      expect(subject.read_integer(:sync_version)).to be_nil
-      expect(subject.set_integer_if_greater(:sync_version, 100)).to eq(false)
+      expect(subject.supports?(:atomic_snapshot_install)).to eq(false)
     end
   end
 
-  it 'sets a versioned integer when none exists if supported' do
-    if subject.supports?(:versioned_integers)
-      expect(subject.set_integer_if_greater(:sync_version, 100)).to eq(true)
-      expect(subject.read_integer(:sync_version)).to eq(100)
-    else
-      expect(subject.set_integer_if_greater(:sync_version, 100)).to eq(false)
-      expect(subject.read_integer(:sync_version)).to be_nil
+  it 'reconciles local edits at an equal revision when atomic installation is supported' do
+    if subject.supports?(:atomic_snapshot_install)
+      snapshot = Flipper::Snapshot.new(features: {}, version: 10)
+      subject.apply_snapshot(snapshot)
+      flipper.enable(:stats)
+      expect(subject.apply_snapshot(snapshot)).to eq(:applied)
+      expect(subject.get_all).to eq({})
     end
   end
 
-  it 'rejects equal or lower versioned integers if supported' do
-    if subject.supports?(:versioned_integers)
-      subject.set_integer_if_greater(:sync_version, 100)
-      expect(subject.set_integer_if_greater(:sync_version, 99)).to eq(false)
-      expect(subject.set_integer_if_greater(:sync_version, 100)).to eq(false)
-      expect(subject.read_integer(:sync_version)).to eq(100)
-    else
-      expect(subject.set_integer_if_greater(:sync_version, 99)).to eq(false)
-      expect(subject.set_integer_if_greater(:sync_version, 100)).to eq(false)
-      expect(subject.read_integer(:sync_version)).to be_nil
+  it 'clears the revision floor on unversioned installation when supported' do
+    if subject.supports?(:atomic_snapshot_install)
+      subject.apply_snapshot(Flipper::Snapshot.new(features: {}, version: 10))
+      subject.apply_snapshot(Flipper::Snapshot.new(features: {}))
+      data = {"stats" => subject.default_config.merge(boolean: "true")}
+      expect(subject.apply_snapshot(Flipper::Snapshot.new(features: data, version: 1))).to eq(:applied)
+      expect(subject.get_all).to eq(data)
     end
   end
-
-  it 'accepts strictly greater versioned integers if supported' do
-    if subject.supports?(:versioned_integers)
-      subject.set_integer_if_greater(:sync_version, 100)
-      expect(subject.set_integer_if_greater(:sync_version, 200)).to eq(true)
-      expect(subject.read_integer(:sync_version)).to eq(200)
-    else
-      expect(subject.set_integer_if_greater(:sync_version, 200)).to eq(false)
-      expect(subject.read_integer(:sync_version)).to be_nil
-    end
-  end
-
-  it 'tracks versioned integer keys independently if supported' do
-    if subject.supports?(:versioned_integers)
-      subject.set_integer_if_greater(:foo, 100)
-      subject.set_integer_if_greater(:bar, 50)
-      expect(subject.read_integer(:foo)).to eq(100)
-      expect(subject.read_integer(:bar)).to eq(50)
-    else
-      expect(subject.set_integer_if_greater(:foo, 100)).to eq(false)
-      expect(subject.set_integer_if_greater(:bar, 50)).to eq(false)
-      expect(subject.read_integer(:foo)).to be_nil
-      expect(subject.read_integer(:bar)).to be_nil
-    end
-  end
-
   it 'clears other gate values on enable' do
     actor = Flipper::Actor.new('Flipper::Actor;22')
     subject.enable(feature, actors_gate, Flipper::Types::PercentageOfActors.new(25))

@@ -89,23 +89,6 @@ module Flipper
         true
       end
 
-      def read_integer(key)
-        doc = @collection.find(_id: integer_id_for(key)).limit(1).first
-        doc && doc['value']
-      end
-
-      def supports?(feature)
-        feature.to_sym == :versioned_integers || super
-      end
-
-      def set_integer_if_greater(key, value)
-        result = @collection.find(_id: integer_id_for(key)).update_one(
-          { '$max' => { 'value' => value.to_i } },
-          upsert: true
-        )
-        result.modified_count.to_i > 0 || result.upserted_count.to_i > 0
-      end
-
       # Public: Disables a gate for a given thing.
       #
       # feature - The Flipper::Feature for the gate.
@@ -154,11 +137,6 @@ module Flipper
       # Private
       def unsupported_data_type(data_type)
         raise "#{data_type} is not supported by this adapter"
-      end
-
-      # Private
-      def integer_id_for(key)
-        "flipper_int:#{key}"
       end
 
       # Private

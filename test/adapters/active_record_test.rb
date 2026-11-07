@@ -35,12 +35,20 @@ class ActiveRecordTest < MiniTest::Test
       CREATE UNIQUE INDEX index_gates_on_keys_and_value on flipper_gates (feature_key, key, value)
     SQL
 
+    ActiveRecord::Base.connection.create_table(:flipper_sync_states) do |table|
+      table.string :key, null: false
+      table.bigint :version
+      table.timestamps null: false
+    end
+    ActiveRecord::Base.connection.add_index(:flipper_sync_states, :key, unique: true)
+
     @adapter = Flipper::Adapters::ActiveRecord.new
   end
 
   def teardown
     ActiveRecord::Base.connection.execute("DROP table IF EXISTS `flipper_features`")
     ActiveRecord::Base.connection.execute("DROP table IF EXISTS `flipper_gates`")
+    ActiveRecord::Base.connection.execute("DROP table IF EXISTS `flipper_sync_states`")
     ActiveRecord::Base.connection.execute("DROP table IF EXISTS `cross_product_flipper_features`")
     ActiveRecord::Base.connection.execute("DROP table IF EXISTS `cross_product_flipper_gates`")
   end
@@ -69,13 +77,14 @@ class ActiveRecordTest < MiniTest::Test
     adapter = Flipper::Adapters::ActiveRecord.new(table_prefix: "cross_product_")
     feature_class = adapter.instance_variable_get(:@feature_class)
     gate_class = adapter.instance_variable_get(:@gate_class)
-    kv_integer_class = adapter.instance_variable_get(:@kv_integer_class)
+    sync_state_class = adapter.instance_variable_get(:@sync_state_class)
 
     assert_operator feature_class, :<, Flipper::Adapters::ActiveRecord::Feature
     assert_operator gate_class, :<, Flipper::Adapters::ActiveRecord::Gate
     assert_equal "cross_product_flipper_features", feature_class.table_name
     assert_equal "cross_product_flipper_gates", gate_class.table_name
-    assert_equal "cross_product_flipper_kv_integers", kv_integer_class.table_name
+    assert_operator sync_state_class, :<, Flipper::Adapters::ActiveRecord::SyncState
+    assert_equal "cross_product_flipper_sync_states", sync_state_class.table_name
 
     flipper = Flipper.new(adapter)
     flipper[:search].enable
@@ -93,18 +102,18 @@ class ActiveRecordTest < MiniTest::Test
     Flipper::Adapters::ActiveRecord.send(:remove_const, :Model) if Flipper::Adapters::ActiveRecord.const_defined?(:Model)
     Flipper::Adapters::ActiveRecord.send(:remove_const, :Feature) if Flipper::Adapters::ActiveRecord.const_defined?(:Feature)
     Flipper::Adapters::ActiveRecord.send(:remove_const, :Gate) if Flipper::Adapters::ActiveRecord.const_defined?(:Gate)
-    Flipper::Adapters::ActiveRecord.send(:remove_const, :KvInteger) if Flipper::Adapters::ActiveRecord.const_defined?(:KvInteger)
+    Flipper::Adapters::ActiveRecord.send(:remove_const, :SyncState) if Flipper::Adapters::ActiveRecord.const_defined?(:SyncState)
     Flipper::Adapters.send(:remove_const, :ActiveRecord)
 
     load("flipper/adapters/active_record.rb")
     load("flipper/adapters/active_record/model.rb")
     load("flipper/adapters/active_record/feature.rb")
     load("flipper/adapters/active_record/gate.rb")
-    load("flipper/adapters/active_record/kv_integer.rb")
+    load("flipper/adapters/active_record/sync_state.rb")
 
     assert_equal "foo_flipper_features_bar", Flipper::Adapters::ActiveRecord::Feature.table_name
     assert_equal "foo_flipper_gates_bar", Flipper::Adapters::ActiveRecord::Gate.table_name
-    assert_equal "foo_flipper_kv_integers_bar", Flipper::Adapters::ActiveRecord::KvInteger.table_name
+    assert_equal "foo_flipper_sync_states_bar", Flipper::Adapters::ActiveRecord::SyncState.table_name
 
   ensure
     ActiveRecord::Base.table_name_prefix = ""
@@ -114,13 +123,13 @@ class ActiveRecordTest < MiniTest::Test
     Flipper::Adapters::ActiveRecord.send(:remove_const, :Model) if Flipper::Adapters::ActiveRecord.const_defined?(:Model)
     Flipper::Adapters::ActiveRecord.send(:remove_const, :Feature) if Flipper::Adapters::ActiveRecord.const_defined?(:Feature)
     Flipper::Adapters::ActiveRecord.send(:remove_const, :Gate) if Flipper::Adapters::ActiveRecord.const_defined?(:Gate)
-    Flipper::Adapters::ActiveRecord.send(:remove_const, :KvInteger) if Flipper::Adapters::ActiveRecord.const_defined?(:KvInteger)
+    Flipper::Adapters::ActiveRecord.send(:remove_const, :SyncState) if Flipper::Adapters::ActiveRecord.const_defined?(:SyncState)
     Flipper::Adapters.send(:remove_const, :ActiveRecord)
 
     load("flipper/adapters/active_record.rb")
     load("flipper/adapters/active_record/model.rb")
     load("flipper/adapters/active_record/feature.rb")
     load("flipper/adapters/active_record/gate.rb")
-    load("flipper/adapters/active_record/kv_integer.rb")
+    load("flipper/adapters/active_record/sync_state.rb")
   end
 end

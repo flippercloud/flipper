@@ -62,12 +62,6 @@ module Flipper
         Flipper::Snapshot.new(features: {})
       end
 
-      def supports?(feature)
-        @adapter.supports?(feature)
-      rescue *@errors
-        false
-      end
-
       def enable(feature, gate, thing)
         @adapter.enable(feature, gate, thing)
       rescue *@errors
@@ -76,18 +70,6 @@ module Flipper
 
       def disable(feature, gate, thing)
         @adapter.disable(feature, gate, thing)
-      rescue *@errors
-        false
-      end
-
-      def read_integer(key)
-        @adapter.read_integer(key)
-      rescue *@errors
-        nil
-      end
-
-      def set_integer_if_greater(key, value)
-        @adapter.set_integer_if_greater(key, value)
       rescue *@errors
         false
       end

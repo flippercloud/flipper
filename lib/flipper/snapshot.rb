@@ -7,6 +7,9 @@ module Flipper
     attr_reader :features, :version, :metadata
 
     def initialize(features:, version: nil, metadata: {})
+      if !version.nil? && (!version.is_a?(Integer) || version < 0)
+        raise ArgumentError, "snapshot version must be a nonnegative integer or nil"
+      end
       @features = features
       @version = version
       @metadata = metadata.freeze

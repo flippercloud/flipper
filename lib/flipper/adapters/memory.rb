@@ -15,13 +15,13 @@ module Flipper
       # Public
       def initialize(source = nil, threadsafe: true)
         @source = Typecast.features_hash(source)
-        @integers = {}
+        @sync_version = nil
         @lock = Mutex.new if threadsafe
       end
 
       # Public: The set of known features.
       def features
-        synchronize { @source.keys }.to_set
+        synchronize_read { @source.keys }.to_set
       end
 
       # Public: Adds a feature to the set of known features.
@@ -45,11 +45,11 @@ module Flipper
 
       # Public
       def get(feature)
-        synchronize { @source[feature.key] } || DEFAULT_CONFIG
+        synchronize_read { @source[feature.key] } || DEFAULT_CONFIG
       end
 
       def get_multi(features)
-        synchronize do
+        synchronize_read do
           result = {}
           features.each do |feature|
             result[feature.key] = @source[feature.key] || DEFAULT_CONFIG
@@ -59,16 +59,7 @@ module Flipper
       end
 
       def get_all(**kwargs)
-        synchronize { Typecast.features_hash(@source) }
-      end
-
-      def get_all_snapshot(**kwargs)
-        synchronize do
-          Flipper::Snapshot.new(
-            features: Typecast.features_hash(@source),
-            version: @integers["sync_version"]
-          )
-        end
+        synchronize_read { Typecast.features_hash(@source) }
       end
 
       # Public
@@ -128,41 +119,62 @@ module Flipper
       # Public: a more efficient implementation of import for this adapter
       def import(source)
         adapter = self.class.from(source)
-        snapshot = adapter.get_all_snapshot
-        get_all = Typecast.features_hash(snapshot.features)
+        get_all = copy_features(adapter.get_all)
         synchronize do
           @source.replace(get_all)
-          if snapshot.version
-            @integers["sync_version"] = snapshot.version
-          else
-            @integers.delete("sync_version")
-          end
+          @sync_version = nil
         end
         true
       end
 
       def supports?(feature)
-        feature.to_sym == :versioned_integers || super
+        feature.to_sym == :atomic_snapshot_install ? !@lock.nil? : super
       end
 
-      def read_integer(key)
-        synchronize { @integers[key.to_s] }
-      end
-
-      def set_integer_if_greater(key, value)
-        value = value.to_i
+      def apply_snapshot(snapshot, instrumenter: Instrumenters::Noop)
+        return super unless supports?(:atomic_snapshot_install)
+        features = copy_features(snapshot.features)
         synchronize do
-          current = @integers[key.to_s]
-          if current.nil? || value > current
-            @integers[key.to_s] = value
-            true
-          else
-            false
+          if snapshot.version && @sync_version && snapshot.version < @sync_version
+            next :stale
           end
+
+          # Stage the diff so exceptions cannot expose partially updated gates.
+          staged = Memory.new(copy_features(@source), threadsafe: false)
+          result = Sync::SnapshotApplier.new(staged, features, instrumenter: instrumenter).call
+          @source.replace(staged.get_all) if result == :applied
+          @sync_version = snapshot.version
+          result
         end
       end
 
       private
+
+      def copy_features(features)
+        copy_value(Typecast.features_hash(features))
+      end
+
+      def copy_value(value)
+        case value
+        when Hash
+          value.each_with_object({}) { |(key, item), result| result[key] = copy_value(item) }
+        when Set
+          Set.new(value.map { |item| copy_value(item) })
+        when Array
+          value.map { |item| copy_value(item) }
+        when String
+          value.dup
+        else
+          value
+        end
+      end
+
+      # A sync instrumenter may evaluate flags on this thread. It already owns
+      # the mutex and sees the complete pre-install state, not staged writes.
+      # Mutations still use synchronize and cannot re-enter installation.
+      def synchronize_read(&block)
+        @lock&.owned? ? yield : synchronize(&block)
+      end
 
       def synchronize(&block)
         if @lock
