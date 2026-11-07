@@ -108,7 +108,14 @@ module Flipper
       # Returns whatever the request method returns in the action.
       def run
         if valid_request_method? && respond_to?(request_method_name)
-          catch(:halt) { send(request_method_name) }
+          catch(:halt) do
+            begin
+              send(request_method_name)
+            rescue ReservedKeyError => error
+              message = "#{error.key.inspect} is reserved for Flipper's internal use."
+              redirect_to("/features/#{Util.escape error.key}?error=#{Util.escape message}")
+            end
+          end
         else
           raise UI::RequestMethodNotSupported,
                 "#{self.class} does not support request method #{request_method_name.inspect}"

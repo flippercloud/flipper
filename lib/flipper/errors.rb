@@ -13,7 +13,10 @@ module Flipper
   # Flipper::RESERVED_KEY_PREFIX. An ArgumentError, like the adapters' other
   # reserved name errors.
   class ReservedKeyError < ArgumentError
+    attr_reader :key
+
     def initialize(key)
+      @key = key.to_s
       super "#{key.to_s.inspect} is reserved for Flipper's internal use and cannot be used as a feature name"
     end
   end
