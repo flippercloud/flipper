@@ -15,6 +15,19 @@ RSpec.describe Flipper::Adapters::Instrumented do
   end
 
   it_should_behave_like 'a flipper adapter'
+  it_should_behave_like 'an adapter that stores its sync version'
+
+  describe '#sync_version' do
+    it 'records the instrumentation' do
+      version = Flipper::SyncVersion.new("scope", 10)
+      subject.sync_version = version
+      expect(subject.sync_version).to eq(version)
+
+      write, read = instrumenter.events.last(2)
+      expect(write.payload).to include(operation: :set_sync_version, adapter_name: :memory, version: version)
+      expect(read.payload).to include(operation: :sync_version, adapter_name: :memory, result: version)
+    end
+  end
 
   describe '#name' do
     it 'is instrumented' do

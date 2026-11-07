@@ -6,6 +6,10 @@ RSpec.describe Flipper::Adapters::Strict do
     subject { described_class.new(Flipper::Adapters::Memory.new, :noop) }
   end
 
+  it_should_behave_like 'an adapter that stores its sync version' do
+    subject { described_class.new(Flipper::Adapters::Memory.new, :noop) }
+  end
+
   [true, :raise].each do |handler|
     context "handler = #{handler}" do
       subject { described_class.new(Flipper::Adapters::Memory.new, handler) }

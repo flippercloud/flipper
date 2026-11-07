@@ -21,6 +21,17 @@ module Flipper
         read_feature_keys
       end
 
+      # Public: The Flipper::SyncVersion of the flags last synced into this
+      # adapter, shared by every process using the same collection.
+      def sync_version
+        SyncVersion.parse(find(sync_version_key)['value'])
+      end
+
+      # Public: Records the Flipper::SyncVersion of the flags just synced.
+      def sync_version=(version)
+        update sync_version_key, '$set' => { 'value' => version.to_s }
+      end
+
       # Public: Adds a feature to the set of known features.
       def add(feature)
         ensure_not_features_key!(feature)
@@ -130,6 +141,10 @@ module Flipper
       # Private: The feature list is stored in the document with the
       # features key as its id, so writing a feature with that key would
       # overwrite or delete it.
+      def sync_version_key
+        "#{@features_key}:sync_version"
+      end
+
       def features_key?(feature)
         feature.key == @features_key.to_s
       end

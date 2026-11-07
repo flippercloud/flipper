@@ -16,6 +16,10 @@ module Flipper
         true
       end
 
+      def sync_version=(_version)
+        raise WriteAttempted
+      end
+
       private
 
       def wrap(method, *args, **kwargs)

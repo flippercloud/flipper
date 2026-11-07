@@ -1,6 +1,10 @@
 require "flipper/adapters/actor_limit"
 
 RSpec.describe Flipper::Adapters::ActorLimit do
+  it_should_behave_like 'an adapter that stores its sync version' do
+    subject { Flipper::Adapters::ActorLimit.new(Flipper::Adapters::Memory.new, 5) }
+  end
+
   it_should_behave_like 'a flipper adapter' do
     let(:limit) { 5 }
     let(:adapter) { Flipper::Adapters::ActorLimit.new(Flipper::Adapters::Memory.new, limit) }

@@ -25,6 +25,7 @@ RSpec.describe Flipper::Adapters::Mongo do
   end
 
   it_should_behave_like 'a flipper adapter'
+  it_should_behave_like 'an adapter that stores its sync version'
   it_should_behave_like 'an adapter that protects its feature list' do
     let(:add_reserved_name_to_list) do
       collection.find(_id: "flipper_features").update_one({ "$addToSet" => { "features" => "flipper_features" } })

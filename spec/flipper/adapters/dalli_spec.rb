@@ -20,6 +20,7 @@ RSpec.describe Flipper::Adapters::Dalli do
   end
 
   it_should_behave_like 'a flipper adapter'
+  it_should_behave_like 'an adapter that stores its sync version'
 
   it "knows ttl" do
     expect(adapter.ttl).to eq(10)

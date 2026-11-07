@@ -54,9 +54,32 @@ module Flipper
         warn VALUE_TO_TEXT_WARNING if value_not_text?
       end
 
+      # Private: The sync version lives in the gates table under a feature key
+      # with no row in the features table, so features and get_all never see it.
+      SYNC_VERSION_FEATURE_KEY = "__flipper_sync_version__".freeze
+      SYNC_VERSION_GATE_KEY = "sync_version".freeze
+
       # Public: The set of known features.
       def features
         @feature_class.all.map(&:key).to_set
+      end
+
+      # Public: The Flipper::SyncVersion of the flags last synced into this
+      # adapter, shared by every process using the same tables.
+      def sync_version
+        SyncVersion.parse(@gate_class.where(feature_key: SYNC_VERSION_FEATURE_KEY).get(:value))
+      end
+
+      # Public: Records the Flipper::SyncVersion of the flags just synced.
+      def sync_version=(version)
+        @gate_class.db.transaction do
+          @gate_class.where(feature_key: SYNC_VERSION_FEATURE_KEY).delete
+          @gate_class.create(
+            feature_key: SYNC_VERSION_FEATURE_KEY,
+            key: SYNC_VERSION_GATE_KEY,
+            value: version.to_s,
+          )
+        end
       end
 
       # Public: Adds a feature to the set of known features.

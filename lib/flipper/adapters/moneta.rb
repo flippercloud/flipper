@@ -18,6 +18,7 @@ module Flipper
       include ::Flipper::Adapter
 
       FEATURES_KEY = :flipper_features
+      SYNC_VERSION_KEY = "#{FEATURES_KEY}:sync_version".freeze
 
       # Public
       def initialize(moneta)
@@ -27,6 +28,17 @@ module Flipper
       # Public:  The set of known features
       def features
         moneta[FEATURES_KEY] || Set.new
+      end
+
+      # Public: The Flipper::SyncVersion of the flags last synced into this
+      # adapter.
+      def sync_version
+        SyncVersion.parse(moneta[SYNC_VERSION_KEY])
+      end
+
+      # Public: Records the Flipper::SyncVersion of the flags just synced.
+      def sync_version=(version)
+        moneta[SYNC_VERSION_KEY] = version.to_s
       end
 
       # Public: Adds a feature to the set of known features.

@@ -27,6 +27,21 @@ module Flipper
         end
       end
 
+      # Public: The Flipper::SyncVersion of the flags last synced into this
+      # adapter, shared by every process using the same file.
+      def sync_version
+        @store.transaction do
+          SyncVersion.parse(read(sync_version_key))
+        end
+      end
+
+      # Public: Records the Flipper::SyncVersion of the flags just synced.
+      def sync_version=(version)
+        @store.transaction do
+          write sync_version_key, version
+        end
+      end
+
       # Public: Adds a feature to the set of known features.
       def add(feature)
         @store.transaction do
@@ -168,6 +183,11 @@ module Flipper
         end
 
         result
+      end
+
+      # Private
+      def sync_version_key
+        "#{@features_key}:sync_version"
       end
 
       # Private
