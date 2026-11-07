@@ -49,8 +49,7 @@ module Flipper
           end
 
           if Flipper.reserved_key?(value)
-            error = "#{value.inspect} is reserved for Flipper's internal use."
-            redirect_to("/features/new?error=#{Flipper::UI::Util.escape error}")
+            redirect_to("/features/new?error=#{Flipper::UI::Util.escape reserved_name_error(value)}")
           end
 
           feature = flipper[value]

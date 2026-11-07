@@ -54,9 +54,9 @@ module Flipper
         warn VALUE_TO_TEXT_WARNING if value_not_text?
       end
 
-      # Private: The sync version lives in the gates table under a feature key
-      # with no row in the features table, so features and get_all never see it.
-      SYNC_VERSION_FEATURE_KEY = SyncVersion::KEY
+      # Private: The sync version lives in the gates table under the reserved
+      # feature key SyncVersion::KEY, which has no row in the features table, so
+      # features and get_all never see it.
       SYNC_VERSION_GATE_KEY = "sync_version".freeze
 
       # Public: The set of known features.
@@ -75,7 +75,7 @@ module Flipper
         @gate_class.db.transaction do
           sync_version_dataset.delete
           @gate_class.create(
-            feature_key: SYNC_VERSION_FEATURE_KEY,
+            feature_key: SyncVersion::KEY,
             key: SYNC_VERSION_GATE_KEY,
             value: version.to_s,
           )
@@ -96,7 +96,7 @@ module Flipper
         @feature_class.db.transaction do
           @feature_class.where(key: feature.key.to_s).delete
           # Removing the reserved name must not delete the sync version.
-          clear(feature) unless reserved_key?(feature)
+          clear(feature) unless Flipper.reserved_key?(feature.key)
         end
         true
       end
@@ -203,17 +203,8 @@ module Flipper
         raise "#{data_type} is not supported by this adapter"
       end
 
-      # The sync version is stored as a gate row under a reserved feature key.
-      def reserved_key?(feature)
-        Flipper.reserved_key?(feature.key)
-      end
-
-      def ensure_not_reserved_key!(feature)
-        raise ReservedKeyError.new(feature.key) if reserved_key?(feature)
-      end
-
       def sync_version_dataset
-        @gate_class.where(feature_key: SYNC_VERSION_FEATURE_KEY, key: SYNC_VERSION_GATE_KEY)
+        @gate_class.where(feature_key: SyncVersion::KEY, key: SYNC_VERSION_GATE_KEY)
       end
 
       def set(feature, gate, thing, options = {})

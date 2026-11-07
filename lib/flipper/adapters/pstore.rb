@@ -31,14 +31,14 @@ module Flipper
       # adapter, shared by every process using the same file.
       def sync_version
         @store.transaction do
-          SyncVersion.parse(read(sync_version_key))
+          SyncVersion.parse(read(SyncVersion::KEY))
         end
       end
 
       # Public: Records the Flipper::SyncVersion of the flags just synced.
       def sync_version=(version)
         @store.transaction do
-          write sync_version_key, version
+          write SyncVersion::KEY, version
         end
       end
 
@@ -183,11 +183,6 @@ module Flipper
         end
 
         result
-      end
-
-      # Private
-      def sync_version_key
-        SyncVersion::KEY
       end
 
       # Private

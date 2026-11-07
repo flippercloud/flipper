@@ -131,7 +131,7 @@ module Flipper
       def import(source)
         adapter = self.class.from(source)
         get_all = Typecast.features_hash(adapter.get_all)
-        version = adapter.sync_version if adapter.respond_to?(:sync_version)
+        version = adapter.sync_version
 
         synchronize do
           unless version&.older_than?(@sync_version)

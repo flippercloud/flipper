@@ -24,12 +24,12 @@ module Flipper
       # Public: The Flipper::SyncVersion of the flags last synced into this
       # adapter, shared by every process using the same collection.
       def sync_version
-        SyncVersion.parse(find(sync_version_key)['value'])
+        SyncVersion.parse(find(SyncVersion::KEY)['value'])
       end
 
       # Public: Records the Flipper::SyncVersion of the flags just synced.
       def sync_version=(version)
-        update sync_version_key, '$set' => { 'value' => version.to_s }
+        update SyncVersion::KEY, '$set' => { 'value' => version.to_s }
       end
 
       # Public: Adds a feature to the set of known features.
@@ -138,10 +138,6 @@ module Flipper
 
       private
 
-      def sync_version_key
-        SyncVersion::KEY
-      end
-
       # Private: The feature list and sync version live in documents next to
       # the feature documents, so a feature with the same key would overwrite
       # or delete them.
@@ -150,8 +146,8 @@ module Flipper
       end
 
       def ensure_not_reserved_key!(feature)
-        raise ReservedKeyError.new(feature.key) if Flipper.reserved_key?(feature.key)
-        return unless reserved_key?(feature)
+        super
+        return unless feature.key == @features_key.to_s
 
         raise ArgumentError, "#{feature.key.inspect} is reserved by the Mongo adapter and cannot be used as a feature name"
       end

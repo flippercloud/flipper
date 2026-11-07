@@ -18,6 +18,8 @@ module Flipper
         :get_all,
         :enable,
         :disable,
+        :sync_version,
+        :sync_version=,
       ].freeze
 
       attr_reader :adapter

@@ -18,7 +18,7 @@ module Flipper
     # Public: Builds a version from a header value. Returns nil when the value
     # is missing or not an integer.
     def self.from_header(scope, value)
-      number = Integer(value.to_s, 10) rescue nil
+      number = Integer(value.to_s, 10, exception: false)
       new(scope, number) if number
     end
 

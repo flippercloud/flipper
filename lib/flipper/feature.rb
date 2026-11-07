@@ -513,11 +513,12 @@ module Flipper
       wrapped.empty? ? nil : wrapped
     end
 
-    # Private: Instrument a feature operation.
+    # Private: Raises for names reserved for Flipper's own data.
     def ensure_not_reserved!
       raise ReservedKeyError.new(key) if Flipper.reserved_key?(key)
     end
 
+    # Private: Instrument a feature operation.
     def instrument(operation, initial_payload = {})
       @instrumenter.instrument(InstrumentationName, initial_payload) do |payload|
         payload[:feature] = self

@@ -40,7 +40,23 @@ module Flipper
 
         def sync
           remote_get_all = @remote.get_all(cache_bust: @cache_bust)
-          return if stale?
+
+          # Never replace flags with older ones from a stale remote response.
+          remote_version = @remote.sync_version
+          local_version = @local.sync_version if remote_version
+          if remote_version&.older_than?(local_version)
+            @instrumenter.instrument("synchronizer_stale.flipper", {
+              local_version: local_version,
+              remote_version: remote_version,
+            })
+            return
+          end
+
+          # Record before writing flags so a concurrent sync of older flags
+          # into a shared adapter sees this version as soon as possible.
+          if remote_version && remote_version != local_version
+            @local.sync_version = remote_version
+          end
 
           local_get_all = @local.get_all
 
@@ -66,31 +82,6 @@ module Flipper
         rescue => exception
           @instrumenter.instrument("synchronizer_exception.flipper", exception: exception)
           raise if @raise
-        end
-
-        # Returns true if the remote's flags are older than the ones last
-        # synced into local, so syncing them would flip flags back. Otherwise
-        # records the remote's version with local and returns false.
-        def stale?
-          remote_version = @remote.sync_version if @remote.respond_to?(:sync_version)
-          return false unless remote_version
-
-          local_version = @local.sync_version if @local.respond_to?(:sync_version)
-          if remote_version.older_than?(local_version)
-            @instrumenter.instrument("synchronizer_stale.flipper", {
-              local_version: local_version,
-              remote_version: remote_version,
-            })
-            return true
-          end
-
-          # Record before writing flags so a concurrent sync of older flags
-          # into a shared adapter sees this version as soon as possible.
-          if remote_version != local_version && @local.respond_to?(:sync_version=)
-            @local.sync_version = remote_version
-          end
-
-          false
         end
       end
     end

@@ -105,6 +105,14 @@ module Flipper
         name.to_s
       end
     end
+
+    private
+
+    # Internal: Raises for feature names reserved for Flipper's own data. Adapters
+    # that store that data next to features call it before every write.
+    def ensure_not_reserved_key!(feature)
+      raise ReservedKeyError.new(feature.key) if Flipper.reserved_key?(feature.key)
+    end
   end
 end
 

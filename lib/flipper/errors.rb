@@ -17,7 +17,7 @@ module Flipper
 
     def initialize(key)
       @key = key.to_s
-      super "#{key.to_s.inspect} is reserved for Flipper's internal use and cannot be used as a feature name"
+      super "#{@key.inspect} is reserved for Flipper's internal use and cannot be used as a feature name"
     end
   end
 
