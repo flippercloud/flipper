@@ -16,6 +16,16 @@ RSpec.describe Flipper::Adapters::ActorLimit do
         }.to raise_error(Flipper::Adapters::ActorLimit::LimitExceeded)
       end
 
+      it "allows enabling an existing actor when the limit is reached" do
+        5.times { |i| feature.enable Flipper::Actor.new("User;#{i}") }
+
+        expect {
+          feature.enable Flipper::Actor.new("User;0")
+        }.not_to raise_error
+        expect(feature.actors_value.size).to eq(5)
+        expect(feature.enabled?(Flipper::Actor.new("User;0"))).to be(true)
+      end
+
       it "allows exceeding limit when in sync mode" do
         5.times { |i| feature.enable Flipper::Actor.new("User;#{i}") }
 
