@@ -190,10 +190,11 @@ module Flipper
       end
 
       # The sync skips a snapshot older than the local adapter, which another
-      # process synced, so memory takes the local adapter's flags instead.
+      # process synced, so memory takes the stored flags instead. It reads the
+      # storage itself, because a use adapter such as a cache can be behind.
       def import_memory(snapshot)
-        if snapshot.sync_version&.older_than?(local_adapter.sync_version)
-          @memory.import(local_adapter)
+        if snapshot.sync_version&.older_than?(@store.sync_version)
+          @memory.import(@store)
         else
           @memory.import(snapshot)
         end
@@ -205,7 +206,7 @@ module Flipper
       # storage for reads. Syncs go to the storage, and the adapters added with
       # use wrap both.
       def memory_adapter
-        store = @adapter_builder.build_store
+        store = @store = @adapter_builder.build_store
         self.local_adapter = @adapter_builder.wrap(store)
         fill_memory(store)
         # In webhook mode, other processes pick up a webhook's sync from the

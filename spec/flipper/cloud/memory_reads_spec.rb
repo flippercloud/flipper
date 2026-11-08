@@ -1,3 +1,4 @@
+require "active_support"
 require "active_support/cache"
 require "flipper/adapters/active_support_cache_store"
 require "flipper/cloud"
@@ -186,6 +187,24 @@ RSpec.describe "Flipper::Cloud memory reads" do
     cloud_has(2, true)
     poller.sync
     expect(cloud.enabled?(:search)).to be(true)
+  end
+
+  it "takes newer stored flags from storage, not a cache in front of it" do
+    cache = ActiveSupport::Cache::MemoryStore.new
+    behind, behind_poller = start_process do |config|
+      config.use Flipper::Adapters::ActiveSupportCacheStore, cache, 60
+    end
+    ahead, ahead_poller = start_process
+    behind_poller.sync
+    behind.adapter.adapter.local.adapter.get_all # fill the cache
+
+    cloud_has(3, true)
+    ahead_poller.sync
+    expect(ahead.enabled?(:search)).to be(true)
+
+    cloud_has(2, false) # an older cached response
+    behind_poller.sync
+    expect(behind.enabled?(:search)).to be(true)
   end
 
   context "webhook mode" do
