@@ -33,7 +33,6 @@ RSpec.describe "Flipper::Cloud memory reads" do
       sync_secret: sync_secret,
       instrumenter: instrumenter,
       telemetry_enabled: false,
-      local_adapter: flipper_configuration.adapter,
       memory: Flipper::Adapters::Memory.new,
       adapter_builder: flipper_configuration,
     )
@@ -54,7 +53,7 @@ RSpec.describe "Flipper::Cloud memory reads" do
     poller.sync
     expect(cloud.enabled?(:search)).to be(true)
 
-    store = cloud.adapter.adapter.local.adapter.adapter
+    store = cloud.adapter.adapter.local.adapter.remote
     expect(store).to be_a(Flipper::Adapters::OperationLogger)
     store.reset
     10.times { cloud.enabled?(:search) }
@@ -216,7 +215,7 @@ RSpec.describe "Flipper::Cloud memory reads" do
       expect(other.enabled?(:search)).to be(true)
     end
 
-    it "does not reload from a Memory local adapter, which isn't shared" do
+    it "keeps flags when reloading from a Memory local adapter" do
       now = [100.0]
       allow(Concurrent).to receive(:monotonic_time) { now.first }
       cloud, poller = start_process(sync_secret: "secret", store: nil) do |config|

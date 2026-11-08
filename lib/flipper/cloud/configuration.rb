@@ -174,34 +174,30 @@ module Flipper
         Flipper::Adapters::DualWrite.new(poll_adapter, http_adapter)
       end
 
-      def synchronize(remote, cache_bust: false)
+      def synchronize(remote, options = {})
         Flipper::Adapters::Sync::Synchronizer.new(local_adapter, remote, {
           instrumenter: instrumenter,
-          cache_bust: cache_bust,
-        }).call
+        }.merge(options)).call
       end
 
       # Syncs the local adapter, where the version check uses the version other
       # processes share, then memory. Memory is updated even if the local
       # adapter fails, and the next sync writes the local adapter again.
-      def sync_memory(snapshot, raise_errors: true)
-        synchronize(snapshot)
-      rescue StandardError
-        raise if raise_errors
+      def sync_memory(snapshot, options = {})
+        synchronize(snapshot, options)
       ensure
         @memory.import(snapshot)
       end
 
-      # Reads go to memory in front of a second copy of the local adapter,
-      # so adapters added with Flipper.configure's use still wrap them.
+      # Reads go to memory in front of the adapter Flipper.configure builds,
+      # which becomes the local adapter, so its use wrappers still wrap them.
       def memory_adapter
         @adapter_builder.build_adapter do |store|
+          self.local_adapter = store
           fill_memory(store)
           # In webhook mode, other processes pick up a webhook's sync from the
-          # local adapter. A Memory store isn't shared, so there's nothing to get.
-          if sync_method == :webhook && !store.is_a?(Flipper::Adapters::Memory)
-            refresh_interval = DEFAULT_POLL_SYNC_INTERVAL
-          end
+          # local adapter.
+          refresh_interval = DEFAULT_POLL_SYNC_INTERVAL if sync_method == :webhook
           MemoryAdapter.new(store, @memory, refresh_interval: refresh_interval)
         end
       end
@@ -229,7 +225,7 @@ module Flipper
 
         Flipper::Adapters::Poll.new(poller, memory_adapter, synchronizer: -> {
           # Reads keep working from memory if the local adapter is down.
-          sync_memory(poller.adapter, raise_errors: false)
+          sync_memory(poller.adapter, raise: false)
         })
       end
 

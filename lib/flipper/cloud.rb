@@ -50,7 +50,6 @@ module Flipper
           memory = Flipper::Adapters::Memory.new
           config.default do
             self.new((options ? options.call : {}).merge(
-              local_adapter: config.adapter,
               memory: memory,
               adapter_builder: config,
             ))

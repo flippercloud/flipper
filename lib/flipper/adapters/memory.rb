@@ -75,23 +75,24 @@ module Flipper
       # Public
       def enable(feature, gate, thing)
         synchronize do
-          @source[feature.key] ||= default_config
+          # Write a copy, because get hands out the stored hash and its sets.
+          gates = (@source[feature.key] || default_config).dup
 
           case gate.data_type
           when :boolean
-            @source[feature.key] = default_config
-            @source[feature.key][gate.key] = thing.value.to_s
+            gates = default_config
+            gates[gate.key] = thing.value.to_s
           when :integer
-            @source[feature.key][gate.key] = thing.value.to_s
+            gates[gate.key] = thing.value.to_s
           when :set
-            # Replace rather than change the set, which a reader may hold.
-            @source[feature.key][gate.key] = @source[feature.key][gate.key] | [thing.value.to_s]
+            gates[gate.key] = gates[gate.key] | [thing.value.to_s]
           when :json
-            @source[feature.key][gate.key] = thing.value
+            gates[gate.key] = thing.value
           else
             raise "#{gate} is not supported by this adapter yet"
           end
 
+          @source[feature.key] = gates
           true
         end
       end
@@ -99,21 +100,22 @@ module Flipper
       # Public
       def disable(feature, gate, thing)
         synchronize do
-          @source[feature.key] ||= default_config
+          gates = (@source[feature.key] || default_config).dup
 
           case gate.data_type
           when :boolean
-            @source[feature.key] = default_config
+            gates = default_config
           when :integer
-            @source[feature.key][gate.key] = thing.value.to_s
+            gates[gate.key] = thing.value.to_s
           when :set
-            @source[feature.key][gate.key] = @source[feature.key][gate.key] - [thing.value.to_s]
+            gates[gate.key] = gates[gate.key] - [thing.value.to_s]
           when :json
-            @source[feature.key].delete(gate.key)
+            gates.delete(gate.key)
           else
             raise "#{gate} is not supported by this adapter yet"
           end
 
+          @source[feature.key] = gates
           true
         end
       end

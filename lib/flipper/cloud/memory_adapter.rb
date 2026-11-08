@@ -1,4 +1,5 @@
 require "concurrent/utility/monotonic_time"
+require "flipper/adapters/dual_write"
 require "flipper/adapters/memory"
 
 module Flipper
@@ -7,80 +8,58 @@ module Flipper
     # process shares, so checking a feature never queries the local adapter.
     # Writes go to the local adapter, then to Memory. The sync version is the
     # local adapter's, because that is the one other processes share.
-    class MemoryAdapter
-      include ::Flipper::Adapter
-
-      attr_reader :adapter, :memory
-
+    class MemoryAdapter < Adapters::DualWrite
       # adapter - The local adapter, such as ActiveRecord.
       # memory - The shared Flipper::Adapters::Memory.
       # refresh_interval - Seconds between reloads of memory from adapter, or
       #                    nil to never reload. Webhook mode sets it, because
       #                    only the process that gets a webhook syncs it.
       def initialize(adapter, memory, refresh_interval: nil)
-        @adapter = adapter
-        @memory = memory
+        super(memory, adapter)
         @refresh_interval = refresh_interval
         @refresh_at = Concurrent.monotonic_time + refresh_interval if refresh_interval
       end
 
       def features
-        refresh if @refresh_interval
-        @memory.features
+        refresh
+        super
       end
 
       def get(feature)
-        refresh if @refresh_interval
-        @memory.get(feature)
+        refresh
+        super
       end
 
       def get_multi(features)
-        refresh if @refresh_interval
-        @memory.get_multi(features)
+        refresh
+        super
       end
 
       def get_all(**kwargs)
-        refresh if @refresh_interval
-        @memory.get_all(**kwargs)
+        refresh
+        super
       end
 
       def sync_version
-        @adapter.sync_version
+        @remote.sync_version
       end
 
       def sync_version=(version)
-        @adapter.sync_version = version
-        @memory.sync_version = version
-      end
-
-      def add(feature)
-        @adapter.add(feature).tap { @memory.add(feature) }
-      end
-
-      def remove(feature)
-        @adapter.remove(feature).tap { @memory.remove(feature) }
-      end
-
-      def clear(feature)
-        @adapter.clear(feature).tap { @memory.clear(feature) }
-      end
-
-      def enable(feature, gate, thing)
-        @adapter.enable(feature, gate, thing).tap { @memory.enable(feature, gate, thing) }
-      end
-
-      def disable(feature, gate, thing)
-        @adapter.disable(feature, gate, thing).tap { @memory.disable(feature, gate, thing) }
+        @remote.sync_version = version
+        @local.sync_version = version
       end
 
       private
 
       def refresh
+        return unless @refresh_at
+
         now = Concurrent.monotonic_time
         return if now < @refresh_at
 
         @refresh_at = now + @refresh_interval
-        @memory.import(@adapter)
+        # An adapter that was never synced has nothing newer than memory.
+        @local.import(@remote) if @remote.sync_version
       rescue StandardError
         # Keep serving memory while the local adapter is down.
       end
