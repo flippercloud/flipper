@@ -157,7 +157,7 @@ RSpec.describe Flipper::Adapters::Memoizable do
         expect(subject.get_all.fetch(feature.key)[:boolean]).to eq('true')
 
         subject.disable(feature, gate, Flipper::Types::Boolean.new)
-        expect(subject.get_all.fetch(feature.key)[:boolean]).to eq('false')
+        expect(subject.get_all.fetch(feature.key)[:boolean]).to be_nil
 
         subject.clear(feature)
         expect(subject.get_all.fetch(feature.key)).to eq(subject.default_config)
