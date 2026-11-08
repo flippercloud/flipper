@@ -28,7 +28,30 @@ RSpec.describe 'Missing features after preloading' do
   it 'still reads flags changed locally after preloading' do
     flipper.enable(:missing)
     expect(flipper.enabled?(:missing)).to be(true)
+    expect(source.count(:get)).to eq(1)
+  end
+
+  it 'reloads a known feature cleared after the complete preload' do
     flipper[:known].clear
     expect(flipper.enabled?(:known)).to be(false)
+    expect(source.count(:get)).to eq(1)
+  end
+
+  it 'recognizes a feature removed after the complete preload' do
+    flipper.remove(:known)
+    expect(flipper.enabled?(:known)).to be(false)
+  end
+
+  it 'resets the snapshot after importing flags' do
+    imported = Flipper::Adapters::Memory.new
+    Flipper.new(imported).enable(:missing)
+    flipper.import(imported)
+    expect(flipper.enabled?(:missing)).to be(true)
+  end
+
+  it 'reads the adapter when memoization is disabled' do
+    flipper.memoize = false
+    expect(flipper.enabled?(:missing)).to be(false)
+    expect(source.count(:get)).to eq(1)
   end
 end
