@@ -54,7 +54,9 @@ module Flipper
       # Public
       def get(feature)
         if memoizing?
-          cache.fetch(key_for(feature.key)) { cache[key_for(feature.key)] = @adapter.get(feature) }
+          cache.fetch(key_for(feature.key)) do
+            cache[key_for(feature.key)] = preloaded_missing?(feature) ? default_config : @adapter.get(feature)
+          end
         else
           @adapter.get(feature)
         end
@@ -63,7 +65,10 @@ module Flipper
       # Public
       def get_multi(features)
         if memoizing?
-          uncached_features = features.reject { |feature| cache[key_for(feature.key)] }
+          uncached_features = features.reject do |feature|
+            cache[key_for(feature.key)] ||= default_config if preloaded_missing?(feature)
+            cache[key_for(feature.key)]
+          end
 
           if uncached_features.any?
             response = @adapter.get_multi(uncached_features)
@@ -155,6 +160,10 @@ module Flipper
       end
 
       private
+
+      def preloaded_missing?(feature)
+        cache[@get_all_key] && cache[@features_key] && !cache[@features_key].include?(feature.key)
+      end
 
       def key_for(key)
         @cache_key_by_feature_key[key]
