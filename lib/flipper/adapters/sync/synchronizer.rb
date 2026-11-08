@@ -39,8 +39,26 @@ module Flipper
         private
 
         def sync
-          local_get_all = @local.get_all
           remote_get_all = @remote.get_all(cache_bust: @cache_bust)
+
+          # Never replace flags with older ones from a stale remote response.
+          remote_version = @remote.sync_version
+          local_version = @local.sync_version if remote_version
+          if remote_version&.older_than?(local_version)
+            @instrumenter.instrument("synchronizer_stale.flipper", {
+              local_version: local_version,
+              remote_version: remote_version,
+            })
+            return
+          end
+
+          # Record before writing flags so a concurrent sync of older flags
+          # into a shared adapter sees this version as soon as possible.
+          if remote_version && remote_version != local_version
+            @local.sync_version = remote_version
+          end
+
+          local_get_all = @local.get_all
 
           # Sync all the gate values.
           remote_get_all.each do |feature_key, remote_gates_hash|

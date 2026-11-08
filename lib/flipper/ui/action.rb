@@ -108,7 +108,13 @@ module Flipper
       # Returns whatever the request method returns in the action.
       def run
         if valid_request_method? && respond_to?(request_method_name)
-          catch(:halt) { send(request_method_name) }
+          catch(:halt) do
+            begin
+              send(request_method_name)
+            rescue ReservedKeyError => error
+              redirect_to("/features/#{Util.escape error.key}?error=#{Util.escape reserved_name_error(error.key)}")
+            end
+          end
         else
           raise UI::RequestMethodNotSupported,
                 "#{self.class} does not support request method #{request_method_name.inspect}"
@@ -259,6 +265,11 @@ module Flipper
 
       def write_allowed?
         !read_only?
+      end
+
+      # Internal: The error shown for a feature name reserved for Flipper.
+      def reserved_name_error(key)
+        "#{key.inspect} is reserved for Flipper's internal use."
       end
 
       def bootstrap_css

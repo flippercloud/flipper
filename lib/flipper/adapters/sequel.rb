@@ -54,13 +54,37 @@ module Flipper
         warn VALUE_TO_TEXT_WARNING if value_not_text?
       end
 
+      # Private: The sync version lives in the gates table under the reserved
+      # feature key SyncVersion::KEY, which has no row in the features table, so
+      # features and get_all never see it.
+      SYNC_VERSION_GATE_KEY = "sync_version".freeze
+
       # Public: The set of known features.
       def features
         @feature_class.all.map(&:key).to_set
       end
 
+      # Public: The Flipper::SyncVersion of the flags last synced into this
+      # adapter, shared by every process using the same tables.
+      def sync_version
+        SyncVersion.parse(sync_version_dataset.get(:value))
+      end
+
+      # Public: Records the Flipper::SyncVersion of the flags just synced.
+      def sync_version=(version)
+        @gate_class.db.transaction do
+          sync_version_dataset.delete
+          @gate_class.create(
+            feature_key: SyncVersion::KEY,
+            key: SYNC_VERSION_GATE_KEY,
+            value: version.to_s,
+          )
+        end
+      end
+
       # Public: Adds a feature to the set of known features.
       def add(feature)
+        ensure_not_reserved_key!(feature)
         # race condition, but add is only used by enable/disable which happen
         # super rarely, so it shouldn't matter in practice
         @feature_class.find_or_create(key: feature.key.to_s)
@@ -71,13 +95,15 @@ module Flipper
       def remove(feature)
         @feature_class.db.transaction do
           @feature_class.where(key: feature.key.to_s).delete
-          clear(feature)
+          # Removing the reserved name must not delete the sync version.
+          clear(feature) unless Flipper.reserved_key?(feature.key)
         end
         true
       end
 
       # Public: Clears the gate values for a feature.
       def clear(feature)
+        ensure_not_reserved_key!(feature)
         @gate_class.where(feature_key: feature.key.to_s).delete
         true
       end
@@ -129,6 +155,7 @@ module Flipper
       #
       # Returns true.
       def enable(feature, gate, thing)
+        ensure_not_reserved_key!(feature)
         case gate.data_type
         when :boolean
           set(feature, gate, thing, clear: true)
@@ -153,6 +180,7 @@ module Flipper
       #
       # Returns true.
       def disable(feature, gate, thing)
+        ensure_not_reserved_key!(feature)
         case gate.data_type
         when :boolean
           clear(feature)
@@ -173,6 +201,10 @@ module Flipper
 
       def unsupported_data_type(data_type)
         raise "#{data_type} is not supported by this adapter"
+      end
+
+      def sync_version_dataset
+        @gate_class.where(feature_key: SyncVersion::KEY, key: SYNC_VERSION_GATE_KEY)
       end
 
       def set(feature, gate, thing, options = {})

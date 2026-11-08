@@ -69,6 +69,22 @@ module Flipper
       self.class.default_config
     end
 
+    # Public: The Flipper::SyncVersion of the synced flags this adapter holds,
+    # or nil if it doesn't know. Syncs use it to never replace newer flags with
+    # older ones. Adapters that wrap another adapter delegate to it. Storage
+    # adapters that can keep it override this and #sync_version=.
+    def sync_version
+      wrapped = respond_to?(:adapter) ? adapter : nil
+      wrapped.sync_version if wrapped.respond_to?(:sync_version)
+    end
+
+    # Public: Records the Flipper::SyncVersion of the flags just synced into
+    # this adapter. Does nothing for adapters that can't keep it.
+    def sync_version=(version)
+      wrapped = respond_to?(:adapter) ? adapter : nil
+      wrapped.sync_version = version if wrapped.respond_to?(:sync_version=)
+    end
+
     # Public: default name of the adapter
     def name
       @name ||= self.class.name.split('::').last.split(/(?=[A-Z])/).join('_').downcase.to_sym
@@ -88,6 +104,14 @@ module Flipper
       else
         name.to_s
       end
+    end
+
+    private
+
+    # Internal: Raises for feature names reserved for Flipper's own data. Adapters
+    # that store that data next to features call it before every write.
+    def ensure_not_reserved_key!(feature)
+      raise ReservedKeyError.new(feature.key) if Flipper.reserved_key?(feature.key)
     end
   end
 end

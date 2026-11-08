@@ -29,6 +29,17 @@ module Flipper
         moneta[FEATURES_KEY] || Set.new
       end
 
+      # Public: The Flipper::SyncVersion of the flags last synced into this
+      # adapter.
+      def sync_version
+        SyncVersion.parse(moneta[SyncVersion::KEY])
+      end
+
+      # Public: Records the Flipper::SyncVersion of the flags just synced.
+      def sync_version=(version)
+        moneta[SyncVersion::KEY] = version.to_s
+      end
+
       # Public: Adds a feature to the set of known features.
       def add(feature)
         moneta[FEATURES_KEY] = features << feature.key.to_s

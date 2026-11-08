@@ -147,6 +147,29 @@ module Flipper
         end
       end
 
+      def sync_version
+        default_payload = {
+          operation: :sync_version,
+          adapter_name: @adapter.name,
+        }
+
+        @instrumenter.instrument(InstrumentationName, default_payload) do |payload|
+          payload[:result] = @adapter.sync_version
+        end
+      end
+
+      def sync_version=(version)
+        default_payload = {
+          operation: :set_sync_version,
+          adapter_name: @adapter.name,
+          version: version,
+        }
+
+        @instrumenter.instrument(InstrumentationName, default_payload) do |payload|
+          payload[:result] = @adapter.sync_version = version
+        end
+      end
+
       def import(source)
         default_payload = {
           operation: :import,

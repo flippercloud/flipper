@@ -365,6 +365,18 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
   end
 
   describe 'post' do
+    context 'with a reserved name' do
+      before do
+        post '/features', name: '__flipper_thing'
+      end
+
+      it 'responds 422 without adding the feature' do
+        expect(last_response.status).to eq(422)
+        expect(json_response).to include('code' => 9, 'message' => 'Feature names starting with __flipper are reserved for Flipper.')
+        expect(flipper.features).to be_empty
+      end
+    end
+
     context 'succesful request' do
       before do
         post '/features', name: 'my_feature'

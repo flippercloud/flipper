@@ -8,6 +8,7 @@ RSpec.describe Flipper::Adapters::Failsafe do
   let(:flipper) { Flipper.new(subject) }
 
   it_should_behave_like 'a flipper adapter'
+  it_should_behave_like 'an adapter that stores its sync version'
 
   context 'when disaster strikes' do
     before do
@@ -29,6 +30,8 @@ RSpec.describe Flipper::Adapters::Failsafe do
     it { expect(subject.get_all).to eq({}) }
     it { expect(feature.enable).to eq(false) }
     it { expect(feature.disable).to eq(false) }
+    it { expect(subject.sync_version).to be_nil }
+    it { expect(subject.sync_version = Flipper::SyncVersion.new("scope", 10)).to be_a(Flipper::SyncVersion) }
 
     context 'when used via Flipper' do
       it { expect(flipper.features).to eq(Set.new) }

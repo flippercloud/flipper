@@ -10,6 +10,7 @@ RSpec.describe Flipper::Adapters::Memoizable do
   subject { described_class.new(adapter, cache) }
 
   it_should_behave_like 'a flipper adapter'
+  it_should_behave_like 'an adapter that stores its sync version'
 
   describe '#name' do
     it 'is instrumented' do

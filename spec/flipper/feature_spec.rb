@@ -159,6 +159,28 @@ RSpec.describe Flipper::Feature do
     end
   end
 
+  describe 'with a reserved key' do
+    let(:reserved) { described_class.new(:__flipper_thing, adapter) }
+
+    it 'refuses writes' do
+      [
+        -> { reserved.enable },
+        -> { reserved.enable_actor(Flipper::Actor.new("User;1")) },
+        -> { reserved.disable },
+        -> { reserved.add },
+        -> { reserved.clear },
+      ].each do |write|
+        expect(&write).to raise_error(Flipper::ReservedKeyError, /"__flipper_thing" is reserved/)
+      end
+      expect(adapter.features).to be_empty
+    end
+
+    it 'still reads and removes' do
+      expect(reserved.enabled?).to be(false)
+      expect(reserved.remove).to be(true)
+    end
+  end
+
   describe '#add' do
     it 'adds feature to adapter' do
       expect(adapter.features).to eq(Set.new)

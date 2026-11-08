@@ -21,6 +21,13 @@ module Flipper
 
       DEFAULT_URL = "https://www.flippercloud.io/adapter".freeze
 
+      # Seconds between polls when syncing by poll.
+      DEFAULT_POLL_SYNC_INTERVAL = 10
+
+      # Seconds between polls when syncing by webhook. Webhooks keep the local
+      # adapter current; this slow poll only catches missed webhooks.
+      DEFAULT_WEBHOOK_SYNC_INTERVAL = 300
+
       # Public: The token corresponding to an environment on flippercloud.io.
       attr_accessor :token
 
@@ -63,9 +70,9 @@ module Flipper
       #  configuration.local_adapter = Flipper::Adapters::ActiveRecord.new
       attr_accessor :local_adapter
 
-      # Public: The Integer or Float number of seconds between attempts to bring
-      # the local in sync with cloud (default: 10).
-      attr_accessor :sync_interval
+      # Public: Sets the Integer or Float number of seconds between attempts to
+      # bring the local in sync with cloud.
+      attr_writer :sync_interval
 
       # Public: The secret used to verify if syncs in the middleware should
       # occur or not.
@@ -111,6 +118,13 @@ module Flipper
         end
       end
 
+      # Public: The Integer or Float number of seconds between attempts to bring
+      # the local in sync with cloud (default: 10 when syncing by poll, 300
+      # when syncing by webhook).
+      def sync_interval
+        @sync_interval || (sync_method == :webhook ? DEFAULT_WEBHOOK_SYNC_INTERVAL : DEFAULT_POLL_SYNC_INTERVAL)
+      end
+
       # Public: Force a sync.
       def sync(cache_bust: false)
         Flipper::Adapters::Sync::Synchronizer.new(local_adapter, http_adapter, {
@@ -152,8 +166,7 @@ module Flipper
       private
 
       def app_adapter
-        read_adapter = sync_method == :webhook ? local_adapter : poll_adapter
-        Flipper::Adapters::DualWrite.new(read_adapter, http_adapter)
+        Flipper::Adapters::DualWrite.new(poll_adapter, http_adapter)
       end
 
       def poller
@@ -212,8 +225,13 @@ module Flipper
       end
 
       def setup_sync(options)
-        set_option :sync_interval, options, default: 10, typecast: :float, minimum: 10
         set_option :sync_secret, options
+
+        # Left unset, sync_interval follows sync_method, which can change if
+        # sync_secret is set after initialize.
+        if options.key?(:sync_interval) || ENV.key?("FLIPPER_CLOUD_SYNC_INTERVAL")
+          set_option :sync_interval, options, typecast: :float, minimum: 10
+        end
       end
 
       def setup_adapter(options)

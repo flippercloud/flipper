@@ -24,6 +24,18 @@ module Flipper
         Set.new
       end
 
+      def sync_version
+        @adapter.sync_version
+      rescue *@errors
+        nil
+      end
+
+      def sync_version=(version)
+        @adapter.sync_version = version
+      rescue *@errors
+        nil
+      end
+
       def add(feature)
         @adapter.add(feature)
       rescue *@errors

@@ -48,6 +48,10 @@ module Flipper
             redirect_to("/features/new?error=#{Flipper::UI::Util.escape error}")
           end
 
+          if Flipper.reserved_key?(value)
+            redirect_to("/features/new?error=#{Flipper::UI::Util.escape reserved_name_error(value)}")
+          end
+
           feature = flipper[value]
           feature.add
 

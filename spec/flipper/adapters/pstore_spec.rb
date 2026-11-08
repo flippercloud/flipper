@@ -9,6 +9,7 @@ RSpec.describe Flipper::Adapters::PStore do
   end
 
   it_should_behave_like 'a flipper adapter'
+  it_should_behave_like 'an adapter that stores its sync version'
 
   it 'defaults path to flipper.pstore' do
     expect(described_class.new.path).to eq('flipper.pstore')

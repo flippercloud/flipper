@@ -158,4 +158,8 @@ RSpec.describe Flipper::Adapters::Rollout do
         .to raise_error(Flipper::Adapters::Rollout::AdapterMethodNotSupportedError)
     end
   end
+
+  it 'has no sync version' do
+    expect(source_adapter.sync_version).to be_nil
+  end
 end

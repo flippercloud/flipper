@@ -8,6 +8,7 @@ RSpec.describe Flipper::Adapters::OperationLogger do
   subject { described_class.new(adapter, operations) }
 
   it_should_behave_like 'a flipper adapter'
+  it_should_behave_like 'an adapter that stores its sync version'
 
   it 'shows itself when inspect' do
     subject.features

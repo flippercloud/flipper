@@ -18,6 +18,13 @@ RSpec.describe Flipper::Adapters::Sync do
   end
 
   it_should_behave_like 'a flipper adapter'
+  it_should_behave_like 'an adapter that stores its sync version'
+
+  it 'keeps the sync version in the local adapter only' do
+    subject.sync_version = Flipper::SyncVersion.new("scope", 10)
+    expect(local_adapter.sync_version).to eq(subject.sync_version)
+    expect(remote_adapter.sync_version).to be_nil
+  end
 
   context 'when local has never been synced' do
     it 'syncs boolean' do

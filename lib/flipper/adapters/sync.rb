@@ -57,6 +57,14 @@ module Flipper
         @local.get_all(**kwargs)
       end
 
+      def sync_version
+        @local.sync_version
+      end
+
+      def sync_version=(version)
+        @local.sync_version = version
+      end
+
       def add(feature)
         @remote.add(feature).tap { @local.add(feature) }
       end

@@ -19,6 +19,11 @@ module Flipper
         Run `rails generate flipper:update` and `rails db:migrate`.
       EOS
 
+      # Private: The sync version lives in the gates table under the reserved
+      # feature key SyncVersion::KEY, which has no row in the features table, so
+      # features and get_all never see it.
+      SYNC_VERSION_GATE_KEY = "sync_version".freeze
+
       # Public: Initialize a new ActiveRecord adapter instance.
       #
       # name - The Symbol name for this adapter. Optional (default :active_record)
@@ -55,6 +60,7 @@ module Flipper
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
+        ensure_not_reserved_key!(feature)
         with_write_connection(@feature_class) do
           @feature_class.transaction(requires_new: true) do
             begin
@@ -77,7 +83,8 @@ module Flipper
         with_write_connection(@feature_class) do
           @feature_class.transaction do
             @feature_class.where(key: feature.key).destroy_all
-            clear(feature)
+            # Removing the reserved name must not delete the sync version.
+            clear(feature) unless Flipper.reserved_key?(feature.key)
           end
         end
         true
@@ -85,6 +92,7 @@ module Flipper
 
       # Public: Clears the gate values for a feature.
       def clear(feature)
+        ensure_not_reserved_key!(feature)
         with_write_connection(@gate_class) { @gate_class.where(feature_key: feature.key).destroy_all }
         true
       end
@@ -142,6 +150,33 @@ module Flipper
         end
       end
 
+      # Public: The Flipper::SyncVersion of the flags last synced into this
+      # adapter, shared by every process using the same tables.
+      def sync_version
+        value = with_connection(@gate_class) do
+          sync_version_scope.pluck(:value).first
+        end
+        SyncVersion.parse(value)
+      end
+
+      # Public: Records the Flipper::SyncVersion of the flags just synced.
+      def sync_version=(version)
+        with_write_connection(@gate_class) do
+          @gate_class.transaction(requires_new: true) do
+            sync_version_scope.delete_all
+            begin
+              @gate_class.create! do |g|
+                g.feature_key = SyncVersion::KEY
+                g.key = SYNC_VERSION_GATE_KEY
+                g.value = version.to_s
+              end
+            rescue ::ActiveRecord::RecordNotUnique
+              # another process recorded the same version at the same time
+            end
+          end
+        end
+      end
+
       # Public: Enables a gate for a given thing.
       #
       # feature - The Flipper::Feature for the gate.
@@ -150,6 +185,7 @@ module Flipper
       #
       # Returns true.
       def enable(feature, gate, thing)
+        ensure_not_reserved_key!(feature)
         case gate.data_type
         when :boolean
           set(feature, gate, thing, clear: true)
@@ -174,6 +210,7 @@ module Flipper
       #
       # Returns true.
       def disable(feature, gate, thing)
+        ensure_not_reserved_key!(feature)
         case gate.data_type
         when :boolean
           clear(feature)
@@ -200,6 +237,10 @@ module Flipper
       end
 
       private
+
+      def sync_version_scope
+        @gate_class.where(feature_key: SyncVersion::KEY, key: SYNC_VERSION_GATE_KEY)
+      end
 
       def model_class(default_class, table_prefix, table_name)
         return default_class if table_prefix.nil?

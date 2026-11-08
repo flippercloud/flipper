@@ -51,6 +51,17 @@ module Flipper
         @secondary.get_all(**kwargs)
       end
 
+      def sync_version
+        @primary.sync_version
+      rescue *@errors
+        @secondary.sync_version
+      end
+
+      def sync_version=(version)
+        @primary.sync_version = version
+        @secondary.sync_version = version if @dual_write
+      end
+
       def add(feature)
         @primary.add(feature).tap do
           @secondary.add(feature) if @dual_write

@@ -17,6 +17,8 @@ module Flipper
 
           begin
             feature.enable_percentage_of_actors params['value']
+          rescue ReservedKeyError
+            raise
           rescue ArgumentError => exception
             error = "Invalid percentage of actors value: #{exception.message}"
             redirect_to("/features/#{Flipper::UI::Util.escape @feature.key}?error=#{Flipper::UI::Util.escape error}")

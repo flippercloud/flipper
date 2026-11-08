@@ -94,7 +94,11 @@ module Flipper
             if mutation_request? && params_invalid?
               json_error_response(:request_invalid)
             end
-            send(request_method_name)
+            begin
+              send(request_method_name)
+            rescue ReservedKeyError
+              json_error_response(:name_reserved)
+            end
           end
         else
           raise Api::RequestMethodNotSupported,

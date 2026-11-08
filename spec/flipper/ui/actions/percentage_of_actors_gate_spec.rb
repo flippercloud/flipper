@@ -11,6 +11,24 @@ RSpec.describe Flipper::UI::Actions::PercentageOfActorsGate do
   end
 
   describe 'POST /features/:feature/percentage_of_actors' do
+    # Regression: ISSUE-001, reserved names showed an invalid percentage error.
+    context 'with a reserved feature name' do
+      before do
+        post 'features/__flipper_thing/percentage_of_actors',
+             { 'value' => '24', 'authenticity_token' => token },
+             'rack.session' => session
+      end
+
+      it 'does not enable the feature' do
+        expect(flipper.features).to be_empty
+      end
+
+      it 'redirects back to the feature with the reserved name error' do
+        expect(last_response.status).to be(302)
+        expect(last_response.headers['location']).to eq('/features/__flipper_thing?error=%22__flipper_thing%22+is+reserved+for+Flipper%27s+internal+use.')
+      end
+    end
+
     context 'with valid value' do
       before do
         post 'features/search/percentage_of_actors',

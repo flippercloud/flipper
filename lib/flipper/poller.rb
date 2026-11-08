@@ -32,6 +32,7 @@ module Flipper
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
       @remote_adapter = options.fetch(:remote_adapter)
       @last_synced_at = Concurrent::AtomicFixnum.new(0)
+      @synced_at = 0
       @adapter = Adapters::Memory.new(nil, threadsafe: true)
       @shutdown_requested = false
 
@@ -46,7 +47,16 @@ module Flipper
     end
 
     def start
+      # Fast path: Poll calls this on every adapter read.
+      return if @thread && @thread.alive?
       ensure_worker_running
+    end
+
+    # Internal: The monotonic time of the last successful sync, or 0. Same as
+    # last_synced_at.value but readable without a lock, since Poll checks it
+    # on every adapter read.
+    def synced_at
+      @synced_at
     end
 
     def stop
@@ -59,6 +69,11 @@ module Flipper
     def run
       loop do
         sleep jitter
+
+        # Poll syncs on boot when the local adapter is empty. Wait out the
+        # rest of the interval so that sync and this one stay an interval apart.
+        remaining = interval - (Concurrent.monotonic_time - @synced_at)
+        sleep remaining if remaining > 0
 
         begin
           sync
@@ -74,7 +89,9 @@ module Flipper
       @instrumenter.instrument("poller.#{InstrumentationNamespace}", operation: :poll) do
         begin
           @adapter.import @remote_adapter
-          @last_synced_at.update { |time| Concurrent.monotonic_time }
+          now = Concurrent.monotonic_time
+          @last_synced_at.update { now }
+          @synced_at = now
         ensure
           apply_response_headers
         end
@@ -95,8 +112,10 @@ module Flipper
 
     private
 
+    # Spreads out polls from processes that started together. Grows with the
+    # interval, capped at 30 seconds.
     def jitter
-      rand
+      rand * [interval * 0.1, 30].min
     end
 
     def ensure_worker_running

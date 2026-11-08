@@ -122,4 +122,14 @@ RSpec.describe Flipper::Adapters::ReadOnly do
       end
     end
   end
+
+  it 'reads the sync version from the wrapped adapter' do
+    adapter.sync_version = Flipper::SyncVersion.new("scope", 10)
+    expect(subject.sync_version).to eq(adapter.sync_version)
+  end
+
+  it 'raises when recording a sync version' do
+    expect { subject.sync_version = Flipper::SyncVersion.new("scope", 10) }.to raise_error(Flipper::Adapters::ReadOnly::WriteAttempted)
+    expect(adapter.sync_version).to be_nil
+  end
 end

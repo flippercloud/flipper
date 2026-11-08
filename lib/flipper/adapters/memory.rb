@@ -16,6 +16,17 @@ module Flipper
       def initialize(source = nil, threadsafe: true)
         @source = Typecast.features_hash(source)
         @lock = Mutex.new if threadsafe
+        @sync_version = nil
+      end
+
+      # Public
+      def sync_version
+        synchronize { @sync_version }
+      end
+
+      # Public
+      def sync_version=(version)
+        synchronize { @sync_version = version }
       end
 
       # Public: The set of known features.
@@ -115,11 +126,20 @@ module Flipper
         "#<#{self.class.name}:#{object_id} #{attributes.join(', ')}>"
       end
 
-      # Public: a more efficient implementation of import for this adapter
+      # Public: a more efficient implementation of import for this adapter.
+      # Keeps the current flags if the source's are an older sync version.
       def import(source)
         adapter = self.class.from(source)
         get_all = Typecast.features_hash(adapter.get_all)
-        synchronize { @source.replace(get_all) }
+        version = adapter.sync_version
+
+        synchronize do
+          unless version&.older_than?(@sync_version)
+            @source.replace(get_all)
+            @sync_version = version if version
+          end
+        end
+
         true
       end
 

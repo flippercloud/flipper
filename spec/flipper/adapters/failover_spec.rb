@@ -14,6 +14,23 @@ RSpec.describe Flipper::Adapters::Failover do
 
   context 'when the primary is a functioning adapter' do
     it_should_behave_like 'a flipper adapter'
+    it_should_behave_like 'an adapter that stores its sync version'
+
+    it 'records the sync version in the primary only' do
+      subject.sync_version = Flipper::SyncVersion.new("scope", 10)
+      expect(primary.sync_version).to eq(subject.sync_version)
+      expect(secondary.sync_version).to be_nil
+    end
+
+    context 'when dual_write is enabled for the sync version' do
+      let(:options) { { dual_write: true } }
+
+      it 'records the sync version in both adapters' do
+        subject.sync_version = Flipper::SyncVersion.new("scope", 10)
+        expect(primary.sync_version).to eq(subject.sync_version)
+        expect(secondary.sync_version).to eq(subject.sync_version)
+      end
+    end
 
     it 'should not call the secondary' do
       expect(secondary).not_to receive(:features)
@@ -48,6 +65,12 @@ RSpec.describe Flipper::Adapters::Failover do
     before do
       allow(primary).to receive(:features).and_raise(Redis::ConnectionError)
       allow(primary).to receive(:get).and_raise(Dalli::NetworkError)
+    end
+
+    it 'fails over to the secondary adapter for the sync version' do
+      allow(primary).to receive(:sync_version).and_raise(Redis::ConnectionError)
+      secondary.sync_version = Flipper::SyncVersion.new("scope", 10)
+      expect(subject.sync_version).to eq(secondary.sync_version)
     end
 
     it 'fails over to the secondary adapter for reads' do

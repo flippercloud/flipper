@@ -359,6 +359,26 @@ RSpec.describe Flipper::Poller do
       subject.start
     end
 
+    it "waits out the interval after a recent sync before polling again" do
+      subject.sync
+      allow(subject).to receive(:jitter).and_return(0)
+
+      expect(subject).to receive(:sleep).with(0).ordered
+      expect(subject).to receive(:sleep).with(be_within(1).of(3600)).ordered
+      expect(subject).to receive(:sync).ordered
+      expect(subject).to receive(:sleep).with(3600.0).ordered
+      subject.start
+    end
+
+    it "polls right away when it has never synced" do
+      allow(subject).to receive(:jitter).and_return(0)
+
+      expect(subject).to receive(:sleep).with(0).ordered
+      expect(subject).to receive(:sync).ordered
+      expect(subject).to receive(:sleep).with(3600.0).ordered
+      subject.start
+    end
+
     it "keeps using its Mutex after a fork" do
       mutex = subject.instance_variable_get(:@mutex)
       allow(Process).to receive(:pid).and_return(Process.pid + 1)
