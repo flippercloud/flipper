@@ -27,6 +27,10 @@ module Flipper
         "#{name}(primary: #{@primary.adapter_stack}, secondary: #{@secondary.adapter_stack})"
       end
 
+      def read_only?
+        @primary.read_only? || (@dual_write && @secondary.read_only?)
+      end
+
       def features
         @primary.features
       rescue *@errors
