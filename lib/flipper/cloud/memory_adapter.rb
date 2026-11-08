@@ -58,8 +58,11 @@ module Flipper
         return if now < @refresh_at
 
         @refresh_at = now + @refresh_interval
-        # An adapter that was never synced has nothing newer than memory.
-        @local.import(@remote) if @remote.sync_version
+        # Only another process's sync changes the version. At the same version
+        # memory already has the flags, even if a failed sync left the adapter
+        # with only some of them.
+        version = @remote.sync_version
+        @local.import(@remote) if version && version != @local.sync_version
       rescue StandardError
         # Keep serving memory while the local adapter is down.
       end

@@ -186,6 +186,18 @@ module Flipper
       def sync_memory(snapshot, options = {})
         synchronize(snapshot, options)
       ensure
+        import_memory(snapshot)
+      end
+
+      # The sync skips a snapshot older than the local adapter, which another
+      # process synced, so memory takes the local adapter's flags instead.
+      def import_memory(snapshot)
+        if snapshot.sync_version&.older_than?(local_adapter.sync_version)
+          @memory.import(local_adapter)
+        else
+          @memory.import(snapshot)
+        end
+      rescue StandardError
         @memory.import(snapshot)
       end
 

@@ -99,8 +99,8 @@ RSpec.describe "Flipper::Cloud memory reads" do
 
     cloud_has(2, false) # an older cached response
     behind_poller.sync
-    behind.enabled?(:search)
 
+    expect(behind.enabled?(:search)).to be(true)
     expect(database.get_all["search"][:boolean]).to eq("true")
     expect(database.sync_version).to eq(version(3))
     expect(instrumenter.events_by_name("synchronizer_stale.flipper").size).to eq(1)
