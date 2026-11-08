@@ -19,6 +19,10 @@ module Flipper
         "#{name}(local: #{@local.adapter_stack}, remote: #{@remote.adapter_stack})"
       end
 
+      def read_only?
+        @remote.read_only? || @local.read_only?
+      end
+
       def features
         @local.features
       end
