@@ -54,6 +54,18 @@ RSpec.describe Flipper::Adapters::Memory do
     end
   end
 
+  it "replaces a set on write instead of changing one a reader holds" do
+    flipper = Flipper.new(subject)
+    flipper.enable_actor(:search, Flipper::Actor.new("User;1"))
+    actors = subject.get(flipper[:search])[:actors]
+
+    flipper.enable_actor(:search, Flipper::Actor.new("User;2"))
+    flipper.disable_actor(:search, Flipper::Actor.new("User;1"))
+
+    expect(actors).to eq(Set["User;1"])
+    expect(subject.get(flipper[:search])[:actors]).to eq(Set["User;2"])
+  end
+
   it "can initialize from big hash" do
     flipper = Flipper.new(subject)
     flipper.enable :subscriptions

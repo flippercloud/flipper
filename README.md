@@ -101,12 +101,23 @@ Like Flipper and want more? Check out [Flipper Cloud](https://www.flippercloud.i
 - **permissions** &mdash; grant access to everyone in your organization or lockdown each project to particular people. You can even limit access to a particular environment (like production) to specific people.
 - **audit history** &mdash; every feature change and who made it.
 - **rollbacks** &mdash; enable or disable a feature accidentally? No problem. You can roll back to any point in the audit history with a single click.
-- **maintenance** &mdash; we'll keep the lights on for you. We also have handy webhooks and background polling for keeping your app in sync with Cloud, so **our availability won't affect yours**. All your feature flag reads are local to your app.
+- **maintenance** &mdash; we'll keep the lights on for you. We also have handy webhooks and background polling for keeping your app in sync with Cloud, so **our availability won't affect yours**. All your feature flag reads are served from memory in your app.
 - **everything in one place** &mdash; no need to bounce around from different application UIs or IRB consoles.
 
 [![Flipper Cloud Screenshot](https://raw.githubusercontent.com/flippercloud/flipper/main/docs/images/flipper_cloud.png)](https://www.flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=screenshot)
 
 Cloud is super simple to integrate with Rails ([demo app](https://github.com/flippercloud/flipper-rails-demo)), Sinatra or any other framework.
+
+### How Cloud reads work
+
+When Cloud is your default (`FLIPPER_CLOUD_TOKEN` is set, with Rails or `Flipper::Cloud.set_default`), feature checks are served from one Memory adapter that every thread in the process shares. Checking a feature doesn't query your adapter (ActiveRecord, Redis, etc.).
+
+- Memory is filled from your adapter when the process boots, so flags are there even if Cloud isn't reachable.
+- Changes you make in your app go to Cloud, your adapter, and Memory.
+- **Polling** (the default): every process polls Cloud every 10 seconds, and each change is written to your adapter and Memory on the next feature check.
+- **Webhooks** (`FLIPPER_CLOUD_SYNC_SECRET` set): the process that gets the webhook updates your adapter and its Memory right away. Other processes reload Memory from your adapter every 10 seconds, and every process polls Cloud every 5 minutes in case a webhook is missed.
+- If your adapter is down, feature checks keep working from Memory. A sync that can't be written to your adapter is written again on the next sync.
+- Adapters added with `config.use` (like `Strict` and `ActorLimit`) still wrap reads and writes.
 
 We also have a [free plan](https://www.flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=free_plan) that you can use forever.
 

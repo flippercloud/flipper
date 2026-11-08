@@ -40,12 +40,20 @@ module Flipper
       app
     end
 
-    # Private: Configure Flipper to use Cloud by default
-    def self.set_default
+    # Private: Configure Flipper to use Cloud by default. Reads are served
+    # from one Memory adapter that every thread in the process shares.
+    #
+    # options - A block that returns more options for each new instance.
+    def self.set_default(&options)
       if ENV["FLIPPER_CLOUD_TOKEN"]
         Flipper.configure do |config|
+          memory = Flipper::Adapters::Memory.new
           config.default do
-            self.new(local_adapter: config.adapter)
+            self.new((options ? options.call : {}).merge(
+              local_adapter: config.adapter,
+              memory: memory,
+              adapter_builder: config,
+            ))
           end
         end
       end

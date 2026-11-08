@@ -1,6 +1,7 @@
 require 'flipper/cloud'
 require 'flipper/adapters/instrumented'
 require 'flipper/instrumenters/memory'
+require 'flipper/adapters/operation_logger'
 
 RSpec.describe Flipper::Cloud do
   before do
@@ -182,5 +183,47 @@ RSpec.describe Flipper::Cloud do
     expect(flipper.adapter.get_all).to eq(get_all)
     expect { cloud_flipper.import(flipper) }.to raise_error(Net::OpenTimeout)
     expect(flipper.adapter.get_all).to eq(get_all)
+  end
+
+  describe ".set_default" do
+    around do |example|
+      original_token = ENV["FLIPPER_CLOUD_TOKEN"]
+      ENV["FLIPPER_CLOUD_TOKEN"] = "asdf"
+      example.run
+    ensure
+      ENV["FLIPPER_CLOUD_TOKEN"] = original_token
+      Flipper.instance = nil
+      Flipper.configuration = nil
+    end
+
+    it "serves every thread from one Memory filled once from the local adapter" do
+      database = Flipper::Adapters::Memory.new
+      Flipper.new(database).enable(:search)
+      stores = Queue.new
+      Flipper.configure do |config|
+        config.adapter do
+          Flipper::Adapters::OperationLogger.new(database).tap { |store| stores << store }
+        end
+      end
+      described_class.set_default
+
+      instances = 2.times.map { Thread.new { Flipper.instance }.value }
+      logged = Array.new(stores.size) { stores.pop }
+      expect(logged.sum { |store| store.count(:get_all) }).to eq(1)
+
+      logged.each(&:reset)
+      instances.each { |instance| expect(instance.enabled?(:search)).to be(true) }
+      expect(logged.sum { |store| store.operations.size }).to eq(0)
+
+      memories = instances.map { |instance| instance.cloud_configuration.instance_variable_get(:@memory) }
+      expect(memories.uniq.size).to eq(1)
+    end
+
+    it "passes more options from the block to each instance" do
+      instrumenter = Flipper::Instrumenters::Memory.new
+      described_class.set_default { { instrumenter: instrumenter } }
+
+      expect(Flipper.instance.instrumenter.instrumenter).to be(instrumenter)
+    end
   end
 end

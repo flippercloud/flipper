@@ -84,7 +84,8 @@ module Flipper
           when :integer
             @source[feature.key][gate.key] = thing.value.to_s
           when :set
-            @source[feature.key][gate.key] << thing.value.to_s
+            # Replace rather than change the set, which a reader may hold.
+            @source[feature.key][gate.key] = @source[feature.key][gate.key] | [thing.value.to_s]
           when :json
             @source[feature.key][gate.key] = thing.value
           else
@@ -106,7 +107,7 @@ module Flipper
           when :integer
             @source[feature.key][gate.key] = thing.value.to_s
           when :set
-            @source[feature.key][gate.key].delete thing.value.to_s
+            @source[feature.key][gate.key] = @source[feature.key][gate.key] - [thing.value.to_s]
           when :json
             @source[feature.key].delete(gate.key)
           else

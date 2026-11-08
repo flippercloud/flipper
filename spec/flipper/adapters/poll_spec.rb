@@ -46,4 +46,14 @@ RSpec.describe Flipper::Adapters::Poll do
 
     expect(local_adapter.features).to eq(remote_adapter.features)
   end
+
+  it "calls the synchronizer instead of syncing into the adapter" do
+    calls = 0
+    instance = described_class.new(poller, local_adapter, synchronizer: -> { calls += 1 })
+    instance.features
+    instance.features
+
+    expect(calls).to eq(1)
+    expect(local_adapter.features).to be_empty
+  end
 end
