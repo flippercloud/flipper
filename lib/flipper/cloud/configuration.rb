@@ -189,17 +189,17 @@ module Flipper
         @memory.import(snapshot)
       end
 
-      # Reads go to memory in front of the adapter Flipper.configure builds,
-      # which becomes the local adapter, so its use wrappers still wrap them.
+      # Builds the adapter Flipper.configure would, with memory in front of its
+      # storage for reads. Syncs go to the storage, and the adapters added with
+      # use wrap both.
       def memory_adapter
-        @adapter_builder.build_adapter do |store|
-          self.local_adapter = store
-          fill_memory(store)
-          # In webhook mode, other processes pick up a webhook's sync from the
-          # local adapter.
-          refresh_interval = DEFAULT_POLL_SYNC_INTERVAL if sync_method == :webhook
-          MemoryAdapter.new(store, @memory, refresh_interval: refresh_interval)
-        end
+        store = @adapter_builder.build_store
+        self.local_adapter = @adapter_builder.wrap(store)
+        fill_memory(store)
+        # In webhook mode, other processes pick up a webhook's sync from the
+        # local adapter.
+        refresh_interval = DEFAULT_POLL_SYNC_INTERVAL if sync_method == :webhook
+        @adapter_builder.wrap(MemoryAdapter.new(store, @memory, refresh_interval: refresh_interval))
       end
 
       # Memory starts empty in each process. Fill it from the local adapter

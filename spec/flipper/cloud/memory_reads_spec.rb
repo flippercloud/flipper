@@ -1,3 +1,5 @@
+require "active_support/cache"
+require "flipper/adapters/active_support_cache_store"
 require "flipper/cloud"
 require "flipper/adapters/operation_logger"
 require "flipper/instrumenters/memory"
@@ -169,6 +171,21 @@ RSpec.describe "Flipper::Cloud memory reads" do
 
     expect(cloud.enabled?(:search)).to be(false)
     expect { cloud.enabled?(:typo) }.to raise_error(Flipper::Adapters::Strict::NotFound)
+  end
+
+  # Regression: syncs skipped use wrappers, so a cache wrapper served stale flags.
+  # Found by /qa on 2026-11-08
+  it "sends syncs through adapters added with use" do
+    cache = ActiveSupport::Cache::MemoryStore.new
+    cloud, poller = start_process do |config|
+      config.use Flipper::Adapters::ActiveSupportCacheStore, cache, 60
+    end
+    poller.sync
+    expect(cloud.enabled?(:search)).to be(false)
+
+    cloud_has(2, true)
+    poller.sync
+    expect(cloud.enabled?(:search)).to be(true)
   end
 
   context "webhook mode" do

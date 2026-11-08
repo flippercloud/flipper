@@ -57,15 +57,17 @@ RSpec.describe Flipper::AdapterBuilder do
     end
   end
 
-  describe "#to_adapter" do
-    it "wraps what the block returns for the store with the adapters added with use" do
+  describe "#wrap" do
+    it "wraps an adapter with the adapters added with use" do
       subject.use(Flipper::Adapters::Strict, :warn)
+      store = subject.build_store
 
-      adapter = subject.to_adapter { |store| Flipper::Adapters::OperationLogger.new(store) }
+      adapter = subject.wrap(Flipper::Adapters::OperationLogger.new(store))
 
+      expect(store).to be_instance_of(Flipper::Adapters::Memory)
       expect(adapter).to be_instance_of(Flipper::Adapters::Strict)
       expect(adapter.adapter).to be_instance_of(Flipper::Adapters::OperationLogger)
-      expect(adapter.adapter.adapter).to be_instance_of(Flipper::Adapters::Memory)
+      expect(adapter.adapter.adapter).to be(store)
     end
   end
 
