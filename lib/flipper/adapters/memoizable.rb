@@ -161,11 +161,17 @@ module Flipper
       end
 
       def expire_feature(feature)
-        cache.delete(key_for(feature.key)) if memoizing?
+        if memoizing?
+          cache.delete(key_for(feature.key))
+          cache.delete(@get_all_key)
+        end
       end
 
       def expire_features_set
-        cache.delete(@features_key) if memoizing?
+        if memoizing?
+          cache.delete(@features_key)
+          cache.delete(@get_all_key)
+        end
       end
     end
   end
