@@ -206,20 +206,18 @@ module Flipper
       # storage for reads. Syncs go to the storage, and the adapters added with
       # use wrap both.
       def memory_adapter
-        store = @store = @adapter_builder.build_store
-        self.local_adapter = @adapter_builder.wrap(store)
-        fill_memory(store)
+        fill_memory
         # In webhook mode, other processes pick up a webhook's sync from the
         # local adapter.
         refresh_interval = DEFAULT_POLL_SYNC_INTERVAL if sync_method == :webhook
-        @adapter_builder.wrap(MemoryAdapter.new(store, @memory, refresh_interval: refresh_interval))
+        @adapter_builder.wrap(MemoryAdapter.new(@store, @memory, refresh_interval: refresh_interval))
       end
 
       # Memory starts empty in each process. Fill it from the local adapter
       # until it has flags, so a Cloud outage at boot still has flags to read.
-      def fill_memory(store)
+      def fill_memory
         return unless @memory.sync_version.nil? && @memory.features.empty?
-        @memory.import(store)
+        @memory.import(@store)
       rescue StandardError
         # The local adapter is down. Poll fills memory from Cloud instead.
       end
@@ -301,6 +299,12 @@ module Flipper
         # every thread shares and the Flipper::Configuration to build reads with.
         @memory = options[:memory]
         @adapter_builder = options[:adapter_builder]
+        if @adapter_builder
+          # One storage adapter: wrapped by the use adapters for syncs here,
+          # and behind memory for reads in memory_adapter.
+          @store = @adapter_builder.build_store
+          self.local_adapter = @adapter_builder.wrap(@store)
+        end
         @adapter_block = ->(adapter) { adapter }
       end
 

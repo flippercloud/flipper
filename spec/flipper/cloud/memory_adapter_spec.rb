@@ -48,12 +48,13 @@ RSpec.describe Flipper::Cloud::MemoryAdapter do
   end
 
   describe "with refresh_interval" do
-    let(:now) { [100.0] }
+    let(:now) { [100] }
 
     subject { described_class.new(store, memory, refresh_interval: 10) }
 
     before do
-      allow(Concurrent).to receive(:monotonic_time) { now.first }
+      allow(Process).to receive(:clock_gettime).and_call_original
+      allow(Process).to receive(:clock_gettime).with(Process::CLOCK_MONOTONIC, :second) { now.first }
       subject
       Flipper.new(store).enable(:search)
       store.sync_version = version
@@ -62,7 +63,7 @@ RSpec.describe Flipper::Cloud::MemoryAdapter do
     it "reloads memory from the adapter once the interval passes" do
       expect(subject.get_all).to eq({})
 
-      now[0] = 110.0
+      now[0] = 110
       expect(subject.get_all.keys).to eq(["search"])
       expect(memory.features).to eq(Set["search"])
     end
@@ -71,7 +72,7 @@ RSpec.describe Flipper::Cloud::MemoryAdapter do
       Flipper.new(memory).enable(:analytics)
       allow(store).to receive(:get_all).and_raise("down")
 
-      now[0] = 110.0
+      now[0] = 110
       expect(subject.features).to eq(Set["analytics"])
     end
 
@@ -79,7 +80,7 @@ RSpec.describe Flipper::Cloud::MemoryAdapter do
       store.sync_version = nil
       Flipper.new(memory).enable(:analytics)
 
-      now[0] = 110.0
+      now[0] = 110
       expect(subject.features).to eq(Set["analytics"])
     end
 
@@ -88,14 +89,14 @@ RSpec.describe Flipper::Cloud::MemoryAdapter do
       memory.sync_version = version
       Flipper.new(memory).enable(:analytics)
 
-      now[0] = 110.0
+      now[0] = 110
       expect(subject.features).to eq(Set["analytics"])
     end
 
     it "keeps newer flags in memory than the adapter's" do
       memory.sync_version = Flipper::SyncVersion.new("scope", 11)
 
-      now[0] = 110.0
+      now[0] = 110
       expect(subject.features).to be_empty
     end
   end

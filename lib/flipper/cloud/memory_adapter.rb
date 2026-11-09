@@ -1,6 +1,5 @@
-require "concurrent/utility/monotonic_time"
-require "flipper/adapters/dual_write"
 require "flipper/adapters/memory"
+require "flipper/adapters/sync"
 
 module Flipper
   module Cloud
@@ -8,36 +7,19 @@ module Flipper
     # process shares, so checking a feature never queries the local adapter.
     # Writes go to the local adapter, then to Memory. The sync version is the
     # local adapter's, because that is the one other processes share.
-    class MemoryAdapter < Adapters::DualWrite
+    class MemoryAdapter < Adapters::Sync
       # adapter - The local adapter, such as ActiveRecord.
       # memory - The shared Flipper::Adapters::Memory.
       # refresh_interval - Seconds between reloads of memory from adapter, or
       #                    nil to never reload. Webhook mode sets it, because
       #                    only the process that gets a webhook syncs it.
       def initialize(adapter, memory, refresh_interval: nil)
-        super(memory, adapter)
-        @refresh_interval = refresh_interval
-        @refresh_at = Concurrent.monotonic_time + refresh_interval if refresh_interval
-      end
-
-      def features
-        refresh
-        super
-      end
-
-      def get(feature)
-        refresh
-        super
-      end
-
-      def get_multi(features)
-        refresh
-        super
-      end
-
-      def get_all(**kwargs)
-        refresh
-        super
+        synchronizer = if refresh_interval
+          Adapters::Sync::IntervalSynchronizer.new(method(:refresh), interval: refresh_interval)
+        else
+          -> {}
+        end
+        super(memory, adapter, synchronizer: synchronizer)
       end
 
       def sync_version
@@ -52,12 +34,6 @@ module Flipper
       private
 
       def refresh
-        return unless @refresh_at
-
-        now = Concurrent.monotonic_time
-        return if now < @refresh_at
-
-        @refresh_at = now + @refresh_interval
         # Only another process's sync changes the version. At the same version
         # memory already has the flags, even if a failed sync left the adapter
         # with only some of them.

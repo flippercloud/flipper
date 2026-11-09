@@ -26,23 +26,25 @@ RSpec.describe "Flipper::Cloud memory reads" do
     remote.sync_version = version(number)
   end
 
-  def start_process(sync_secret: nil, store: database)
+  # Returns the Cloud DSL, its poller and its memory.
+  def start_process(sync_secret: nil)
     flipper_configuration = Flipper::Configuration.new
-    flipper_configuration.adapter { Flipper::Adapters::OperationLogger.new(store) }
+    flipper_configuration.adapter { Flipper::Adapters::OperationLogger.new(database) }
     yield flipper_configuration if block_given?
+    memory = Flipper::Adapters::Memory.new
 
     configuration = Flipper::Cloud::Configuration.new(
       token: "asdf",
       sync_secret: sync_secret,
       instrumenter: instrumenter,
       telemetry_enabled: false,
-      memory: Flipper::Adapters::Memory.new,
+      memory: memory,
       adapter_builder: flipper_configuration,
     )
     poller = Flipper::Poller.new(remote_adapter: remote, shutdown_automatically: false)
     allow(poller).to receive(:start)
     allow(configuration).to receive(:poller).and_return(poller)
-    [Flipper::Cloud::DSL.new(configuration), poller]
+    [Flipper::Cloud::DSL.new(configuration), poller, memory]
   end
 
   before do
@@ -127,8 +129,7 @@ RSpec.describe "Flipper::Cloud memory reads" do
 
     it "recovers a sync that failed partway" do
       Flipper.new(database).add(:analytics)
-      cloud, poller = start_process
-      Flipper.new(remote).enable(:analytics)
+      cloud, poller, memory = start_process
       cloud_has(2, true)
       Flipper.new(remote).enable(:analytics)
       allow(database).to receive(:enable).and_wrap_original do |original, feature, *args|
@@ -144,7 +145,7 @@ RSpec.describe "Flipper::Cloud memory reads" do
       allow(database).to receive(:enable).and_call_original
       poller.sync
       cloud.enabled?(:search)
-      expect(database.get_all).to eq(cloud.cloud_configuration.instance_variable_get(:@memory).get_all)
+      expect(database.get_all).to eq(memory.get_all)
     end
 
     it "fills memory from Cloud when it is down at boot" do
@@ -208,6 +209,13 @@ RSpec.describe "Flipper::Cloud memory reads" do
   end
 
   context "webhook mode" do
+    let(:now) { [100] }
+
+    def freeze_clock
+      allow(Process).to receive(:clock_gettime).and_call_original
+      allow(Process).to receive(:clock_gettime).with(Process::CLOCK_MONOTONIC, :second) { now.first }
+    end
+
     def stub_cloud(number, enabled)
       body = JSON.generate(features: [{ key: "search", gates: [{ key: "boolean", value: enabled }] }])
       stub_request(:get, %r{\Ahttps://www\.flippercloud\.io/adapter/features\?_cb=\d+&exclude_gate_names=true\z}).
@@ -236,8 +244,7 @@ RSpec.describe "Flipper::Cloud memory reads" do
     end
 
     it "reloads memory from the local adapter so other processes see a webhook" do
-      now = [100.0]
-      allow(Concurrent).to receive(:monotonic_time) { now.first }
+      freeze_clock
       receiver, _poller = start_process(sync_secret: "secret")
       other, _other_poller = start_process(sync_secret: "secret")
       expect(other.enabled?(:search)).to be(false)
@@ -247,21 +254,20 @@ RSpec.describe "Flipper::Cloud memory reads" do
       expect(receiver.enabled?(:search)).to be(true)
       expect(other.enabled?(:search)).to be(false)
 
-      now[0] = 110.0
+      now[0] = 110
       expect(other.enabled?(:search)).to be(true)
     end
 
     it "keeps flags when reloading from a Memory local adapter" do
-      now = [100.0]
-      allow(Concurrent).to receive(:monotonic_time) { now.first }
-      cloud, poller = start_process(sync_secret: "secret", store: nil) do |config|
+      freeze_clock
+      cloud, poller = start_process(sync_secret: "secret") do |config|
         config.adapter { Flipper::Adapters::Memory.new }
       end
       cloud_has(2, true)
       poller.sync
       expect(cloud.enabled?(:search)).to be(true)
 
-      now[0] = 110.0
+      now[0] = 110
       expect(cloud.enabled?(:search)).to be(true)
     end
   end
