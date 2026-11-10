@@ -98,6 +98,12 @@ RSpec.describe Flipper::DSL do
     end
   end
 
+  describe '#preload?' do
+    it 'is true, because preloading saves adapter reads' do
+      expect(subject.preload?).to be(true)
+    end
+  end
+
   describe '#preload_all' do
     let(:instrumenter) { double('Instrumentor', instrument: nil) }
     let(:dsl) do

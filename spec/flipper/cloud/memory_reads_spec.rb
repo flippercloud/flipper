@@ -66,6 +66,18 @@ RSpec.describe "Flipper::Cloud memory reads" do
     expect(store.operations).to be_empty
   end
 
+  it "skips preloading in the memoizer middleware" do
+    cloud, poller, memory = start_process
+    cloud_has(2, true)
+    poller.sync
+    expect(cloud.preload?).to be(false)
+
+    expect(memory).not_to receive(:get_all)
+    app = ->(_env) { [200, {}, [cloud.enabled?(:search).to_s]] }
+    _, _, body = Flipper::Middleware::Memoizer.new(app, preload: true).call("flipper" => cloud)
+    expect(body).to eq(["true"])
+  end
+
   it "syncs Cloud's flags into the local adapter and memory" do
     cloud, poller = start_process
     cloud_has(2, true)

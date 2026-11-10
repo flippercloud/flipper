@@ -148,6 +148,12 @@ module Flipper
         end
       end
 
+      # Internal: Returns true when reads are served from the Memory adapter
+      # that every thread in the process shares.
+      def memory_reads?
+        !@memory.nil?
+      end
+
       # Internal: The http client used by the http adapter. Exposed so we can
       # use the same client for posting telemetry.
       def http_client

@@ -19,6 +19,10 @@ RSpec.describe Flipper::Cloud do
       expect(@instance).to be_instance_of(Flipper::Cloud::DSL)
     end
 
+    it 'preloads, because reads go to the local adapter' do
+      expect(@instance.preload?).to be(true)
+    end
+
     it 'can read the cloud configuration' do
       expect(@instance.cloud_configuration).to be_instance_of(Flipper::Cloud::Configuration)
     end
@@ -217,6 +221,11 @@ RSpec.describe Flipper::Cloud do
 
       memories = instances.map { |instance| instance.cloud_configuration.instance_variable_get(:@memory) }
       expect(memories.uniq.size).to eq(1)
+    end
+
+    it "skips preloading, because reads come from memory" do
+      described_class.set_default
+      expect(Flipper.preload?).to be(false)
     end
 
     it "passes more options from the block to each instance" do
