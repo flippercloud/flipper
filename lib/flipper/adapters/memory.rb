@@ -29,27 +29,37 @@ module Flipper
         synchronize { @sync_version = version }
       end
 
-      # Public: The set of known features.
+      # Public: The set of known features. It's frozen and reused until a
+      # write, because Strict checks it on every read.
       def features
-        synchronize { @source.keys }.to_set
+        synchronize { @features ||= @source.keys.to_set.freeze }
       end
 
       # Public: Adds a feature to the set of known features.
       def add(feature)
-        synchronize { @source[feature.key] ||= default_config }
+        synchronize do
+          @features = nil
+          @source[feature.key] ||= default_config
+        end
         true
       end
 
       # Public: Removes a feature from the set of known features and clears
       # all the values for the feature.
       def remove(feature)
-        synchronize { @source.delete(feature.key) }
+        synchronize do
+          @features = nil
+          @source.delete(feature.key)
+        end
         true
       end
 
       # Public: Clears all the gate values for a feature.
       def clear(feature)
-        synchronize { @source[feature.key] = default_config }
+        synchronize do
+          @features = nil
+          @source[feature.key] = default_config
+        end
         true
       end
 
@@ -92,6 +102,7 @@ module Flipper
             raise "#{gate} is not supported by this adapter yet"
           end
 
+          @features = nil
           @source[feature.key] = gates
           true
         end
@@ -115,6 +126,7 @@ module Flipper
             raise "#{gate} is not supported by this adapter yet"
           end
 
+          @features = nil
           @source[feature.key] = gates
           true
         end
@@ -138,6 +150,7 @@ module Flipper
 
         synchronize do
           unless version&.older_than?(@sync_version)
+            @features = nil
             @source.replace(get_all)
             @sync_version = version if version
           end
