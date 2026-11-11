@@ -124,20 +124,14 @@ RSpec.describe "Flipper::Cloud memory reads" do
   it "skips a poll that changed nothing once one thread synced it" do
     cloud, poller, memory = start_process
     threads = [cloud] + 2.times.map { start_process(memory: memory, poller: poller).first }
-    full_reads = 0
-    allow(database).to receive(:get_all).and_wrap_original do |original, **kwargs|
-      full_reads += 1
-      original.call(**kwargs)
-    end
+    expect(database).to receive(:get_all).once.and_call_original
 
     cloud_has(2, true)
     poller.sync
     threads.each { |thread| expect(thread.enabled?(:search)).to be(true) }
-    expect(full_reads).to eq(1)
 
     poller.sync # unchanged
     threads.each { |thread| expect(thread.enabled?(:search)).to be(true) }
-    expect(full_reads).to eq(1)
   end
 
   it "takes newer stored flags when its own poll has not changed" do

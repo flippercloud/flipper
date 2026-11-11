@@ -190,8 +190,8 @@ module Flipper
       # Syncs the local adapter, where the version check uses the version other
       # processes share, then memory. Memory is updated even if the local
       # adapter fails, and the next sync writes the local adapter again.
-      def sync_memory(snapshot, options = {})
-        synchronize(snapshot, options)
+      def sync_memory(snapshot)
+        synchronize(snapshot)
       ensure
         import_memory(snapshot)
       end
@@ -246,10 +246,8 @@ module Flipper
         })
       end
 
-      # Every thread's Poll calls this after each poll. Once a version is
-      # synced, the rest skip it unless another process has stored a different
-      # version since. Threads that read while a new version is still syncing
-      # sync it too, rather than wait on the local adapter or drop the poll.
+      # Every thread's Poll calls this after each poll. Threads don't wait on
+      # each other, so ones that read while a new version syncs sync it too.
       def sync_poll(snapshot)
         version = snapshot.sync_version
         return if @memory.synced?(version) && @store.sync_version == version
