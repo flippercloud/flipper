@@ -6,6 +6,7 @@ require "flipper/poller"
 require "flipper/adapters/dual_write"
 require "flipper/adapters/sync/synchronizer"
 require "flipper/cloud/memory_adapter"
+require "flipper/cloud/shared_memory"
 require "flipper/cloud/url_validator"
 require "flipper/cloud/telemetry"
 require "flipper/cloud/telemetry/instrumenter"
@@ -241,9 +242,22 @@ module Flipper
         return Flipper::Adapters::Poll.new(poller, local_adapter) unless @memory
 
         Flipper::Adapters::Poll.new(poller, memory_adapter, synchronizer: -> {
-          # Reads keep working from memory if the local adapter is down.
-          sync_memory(poller.adapter, raise: false)
+          sync_poll(poller.adapter)
         })
+      end
+
+      # Every thread's Poll calls this after each poll. Once a version is
+      # synced, the rest skip it unless another process has stored a different
+      # version since. Threads that read while a new version is still syncing
+      # sync it too, rather than wait on the local adapter or drop the poll.
+      def sync_poll(snapshot)
+        version = snapshot.sync_version
+        return if @memory.synced?(version) && @store.sync_version == version
+
+        sync_memory(snapshot)
+        @memory.synced(version)
+      rescue StandardError
+        # Reads keep working from memory if the local adapter is down.
       end
 
       def http_adapter

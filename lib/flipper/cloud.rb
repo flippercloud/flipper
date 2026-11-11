@@ -47,7 +47,7 @@ module Flipper
     def self.set_default(&options)
       if ENV["FLIPPER_CLOUD_TOKEN"]
         Flipper.configure do |config|
-          memory = Flipper::Adapters::Memory.new
+          memory = Flipper::Cloud::SharedMemory.new
           config.default do
             self.new((options ? options.call : {}).merge(
               memory: memory,

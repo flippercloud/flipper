@@ -26,12 +26,12 @@ RSpec.describe "Flipper::Cloud memory reads" do
     remote.sync_version = version(number)
   end
 
-  # Returns the Cloud DSL, its poller and its memory.
-  def start_process(sync_secret: nil)
+  # Returns the Cloud DSL, its poller and its memory. Pass another process's
+  # memory and poller to start one of its threads instead.
+  def start_process(sync_secret: nil, memory: Flipper::Cloud::SharedMemory.new, poller: nil)
     flipper_configuration = Flipper::Configuration.new
     flipper_configuration.adapter { Flipper::Adapters::OperationLogger.new(database) }
     yield flipper_configuration if block_given?
-    memory = Flipper::Adapters::Memory.new
 
     configuration = Flipper::Cloud::Configuration.new(
       token: "asdf",
@@ -41,7 +41,7 @@ RSpec.describe "Flipper::Cloud memory reads" do
       memory: memory,
       adapter_builder: flipper_configuration,
     )
-    poller = Flipper::Poller.new(remote_adapter: remote, shutdown_automatically: false)
+    poller ||= Flipper::Poller.new(remote_adapter: remote, shutdown_automatically: false)
     allow(poller).to receive(:start)
     allow(configuration).to receive(:poller).and_return(poller)
     [Flipper::Cloud::DSL.new(configuration), poller, memory]
@@ -119,6 +119,41 @@ RSpec.describe "Flipper::Cloud memory reads" do
     expect(database.get_all["search"][:boolean]).to eq("true")
     expect(database.sync_version).to eq(version(3))
     expect(instrumenter.events_by_name("synchronizer_stale.flipper").size).to eq(1)
+  end
+
+  it "skips a poll that changed nothing once one thread synced it" do
+    cloud, poller, memory = start_process
+    threads = [cloud] + 2.times.map { start_process(memory: memory, poller: poller).first }
+    full_reads = 0
+    allow(database).to receive(:get_all).and_wrap_original do |original, **kwargs|
+      full_reads += 1
+      original.call(**kwargs)
+    end
+
+    cloud_has(2, true)
+    poller.sync
+    threads.each { |thread| expect(thread.enabled?(:search)).to be(true) }
+    expect(full_reads).to eq(1)
+
+    poller.sync # unchanged
+    threads.each { |thread| expect(thread.enabled?(:search)).to be(true) }
+    expect(full_reads).to eq(1)
+  end
+
+  it "takes newer stored flags when its own poll has not changed" do
+    behind, behind_poller = start_process
+    ahead, ahead_poller = start_process
+    cloud_has(2, false)
+    behind_poller.sync
+    expect(behind.enabled?(:search)).to be(false)
+
+    cloud_has(3, true)
+    ahead_poller.sync
+    expect(ahead.enabled?(:search)).to be(true)
+
+    cloud_has(2, false) # behind's cached response has not changed
+    behind_poller.sync
+    expect(behind.enabled?(:search)).to be(true)
   end
 
   context "when the local adapter is down" do

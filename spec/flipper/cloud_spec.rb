@@ -221,6 +221,7 @@ RSpec.describe Flipper::Cloud do
 
       memories = instances.map { |instance| instance.cloud_configuration.instance_variable_get(:@memory) }
       expect(memories.uniq.size).to eq(1)
+      expect(memories.first).to be_a(Flipper::Cloud::SharedMemory)
     end
 
     it "skips preloading, because reads come from memory" do
