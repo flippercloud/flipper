@@ -252,8 +252,7 @@ module Flipper
         version = snapshot.sync_version
         return if @memory.synced?(version) && @store.sync_version == version
 
-        sync_memory(snapshot)
-        @memory.synced(version)
+        @memory.sync(version) { sync_memory(snapshot) }
       rescue StandardError
         # Reads keep working from memory if the local adapter is down.
       end
