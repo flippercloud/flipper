@@ -81,7 +81,8 @@ RSpec.describe Flipper::Cloud::Middleware do
     end
 
     it "reports groups owned by the named instance" do
-      stub = stub_request_for_token("regular")
+      stub_request_for_token("regular")
+      webhook_stub = stub_request_for_token("regular", from_webhook: true)
 
       post "/", request_body, {
         "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
@@ -91,7 +92,7 @@ RSpec.describe Flipper::Cloud::Middleware do
       expect(JSON.parse(last_response.body)).to eq({
         "groups" => [{"name" => "cross_app_group"}],
       })
-      expect(stub).to have_been_requested
+      expect(webhook_stub).to have_been_requested.once
     end
   end
 
