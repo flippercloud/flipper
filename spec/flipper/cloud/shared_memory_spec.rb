@@ -101,6 +101,22 @@ RSpec.describe Flipper::Cloud::SharedMemory do
       expect(subject.features).to eq(Set["search", "analytics"])
     end
 
+    it "copies again on #recopy only when a copy is pending" do
+      expect(store).not_to receive(:get_all)
+      now[0] = 110
+      subject.recopy(store)
+      expect(subject.features).to be_empty
+    end
+
+    it "copies a pending copy again on #recopy" do
+      subject.reload(store)
+      Flipper.new(store).enable(:analytics) # the sync finishes
+
+      now[0] = 101
+      subject.recopy(store)
+      expect(subject.features).to eq(Set["search", "analytics"])
+    end
+
     it "keeps complete flags imported after a copy of the store" do
       subject.import(store, recopy: true)
       complete = Flipper::Adapters::Memory.new

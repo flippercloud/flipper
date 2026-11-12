@@ -8,7 +8,7 @@ module Flipper
     class SharedMemory < Adapters::Memory
       # Seconds a copy of the local adapter must match memory's last change
       # from one to show that no sync was still writing it.
-      RECOPY_INTERVAL = 10
+      RECOPY_INTERVAL = 1
 
       def initialize(source = nil, threadsafe: true)
         super
@@ -37,6 +37,12 @@ module Flipper
         return if version.nil?
 
         import(store, recopy: true) if version != sync_version || recopy_due?
+      end
+
+      # Public: Imports the local adapter again only if the last copy may have
+      # caught a sync partway. Reads nothing from it otherwise.
+      def recopy(store)
+        import(store, recopy: true) if recopy_due?
       end
 
       # Public: Returns true if a sync of version finished in this process.

@@ -48,6 +48,26 @@ RSpec.describe Flipper::Cloud::MemoryAdapter do
     expect(memory.sync_version).to eq(version)
   end
 
+  it "reads the adapter again only after a copy that may have caught a sync" do
+    now = [100]
+    allow(Process).to receive(:clock_gettime).and_call_original
+    allow(Process).to receive(:clock_gettime).with(Process::CLOCK_MONOTONIC, :second) { now.first }
+    Flipper.new(store).enable(:search)
+    store.sync_version = version
+    memory.import(store, recopy: true)
+    Flipper.new(store).enable(:analytics) # the sync finishes
+    subject
+    store.reset
+
+    now[0] = 101
+    expect(subject.features).to eq(Set["search", "analytics"])
+    now[0] = 102
+    expect(subject.features).to eq(Set["search", "analytics"])
+    now[0] = 110
+    subject.features
+    expect(store.operations.map(&:type)).to eq([:get_all, :sync_version, :get_all, :sync_version])
+  end
+
   describe "with refresh_interval" do
     let(:now) { [100] }
 

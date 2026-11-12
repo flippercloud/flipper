@@ -18,6 +18,13 @@ RSpec.describe "Flipper::Cloud memory reads" do
     Flipper::SyncVersion.new("scope", number)
   end
 
+  let(:now) { [100] }
+
+  def freeze_clock
+    allow(Process).to receive(:clock_gettime).and_call_original
+    allow(Process).to receive(:clock_gettime).with(Process::CLOCK_MONOTONIC, :second) { now.first }
+  end
+
   # Sets what Cloud returns on the next poll.
   def cloud_has(number, enabled)
     remote.features.each { |key| remote.remove(Flipper::Feature.new(key, remote)) }
@@ -150,6 +157,24 @@ RSpec.describe "Flipper::Cloud memory reads" do
     expect(behind.enabled?(:search)).to be(true)
   end
 
+  # A sync writes its version before its flags, so a process whose poll is
+  # behind, such as a worker that just forked, can copy the local adapter
+  # while another process is still writing it.
+  it "copies newer stored flags again after catching another process's sync" do
+    freeze_clock
+    behind, behind_poller = start_process
+    database.sync_version = version(5) # another process's sync has started
+    Flipper.new(database).enable(:search)
+
+    behind_poller.sync # its poll still has version 1
+    expect(behind.enabled?(:search)).to be(true)
+    expect(behind.enabled?(:analytics)).to be(false)
+
+    Flipper.new(database).enable(:analytics) # and finished
+    now[0] = 101
+    expect(behind.enabled?(:analytics)).to be(true)
+  end
+
   context "when the local adapter is down" do
     it "serves new flags from memory and writes them once it is back" do
       cloud, poller = start_process
@@ -250,13 +275,6 @@ RSpec.describe "Flipper::Cloud memory reads" do
   end
 
   context "webhook mode" do
-    let(:now) { [100] }
-
-    def freeze_clock
-      allow(Process).to receive(:clock_gettime).and_call_original
-      allow(Process).to receive(:clock_gettime).with(Process::CLOCK_MONOTONIC, :second) { now.first }
-    end
-
     def stub_cloud(number, enabled)
       body = JSON.generate(features: [{ key: "search", gates: [{ key: "boolean", value: enabled }] }])
       stub_request(:get, %r{\Ahttps://www\.flippercloud\.io/adapter/features\?_cb=\d+&exclude_gate_names=true\z}).

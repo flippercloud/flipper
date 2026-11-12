@@ -1,5 +1,6 @@
 require "flipper/adapters/memory"
 require "flipper/adapters/sync"
+require "flipper/cloud/shared_memory"
 
 module Flipper
   module Cloud
@@ -11,14 +12,13 @@ module Flipper
       # adapter - The local adapter, such as ActiveRecord.
       # memory - The Flipper::Cloud::SharedMemory.
       # refresh_interval - Seconds between reloads of memory from adapter, or
-      #                    nil to never reload. Webhook mode sets it, because
-      #                    only the process that gets a webhook syncs it.
+      #                    nil to only copy adapter again after a copy that may
+      #                    have caught a sync partway. Webhook mode sets it,
+      #                    because only the process that gets a webhook syncs it.
       def initialize(adapter, memory, refresh_interval: nil)
-        synchronizer = if refresh_interval
-          Adapters::Sync::IntervalSynchronizer.new(method(:refresh), interval: refresh_interval)
-        else
-          -> {}
-        end
+        @reload = !refresh_interval.nil?
+        synchronizer = Adapters::Sync::IntervalSynchronizer.new(method(:refresh),
+          interval: refresh_interval || SharedMemory::RECOPY_INTERVAL)
         super(memory, adapter, synchronizer: synchronizer)
       end
 
@@ -34,7 +34,7 @@ module Flipper
       private
 
       def refresh
-        @local.reload(@remote)
+        @reload ? @local.reload(@remote) : @local.recopy(@remote)
       rescue StandardError
         # Keep serving memory while the local adapter is down.
       end
