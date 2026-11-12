@@ -215,6 +215,22 @@ RSpec.describe Flipper::Engine do
       expect(Flipper.cross_app.adapter_stack).to include("actor_limit")
     end
 
+    it "does not preload a named instance unless it opts in" do
+      initializer do
+        config.preload = true
+        Flipper.configure do |flipper_config|
+          flipper_config.named(:cross_app)
+        end
+      end
+
+      memoizer = subject.middleware.detect do |entry|
+        entry.klass == Flipper::Middleware::Memoizer && entry.args.first[:env_key] == "flipper_cross_app"
+      end
+
+      expect(Flipper.configuration.named_configuration(:cross_app).preload).to be(false)
+      expect(memoizer.args.first[:preload]).to be(false)
+    end
+
     it "memoizes and preloads the default and named instances during the same request" do
       adapter_class = Class.new(Flipper::Adapters::Memory) do
         attr_reader :get_all_calls

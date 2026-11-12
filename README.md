@@ -126,6 +126,10 @@ bin/rails generate flipper:active_record --table-prefix=cross_app_
 bin/rails generate flipper:update --table-prefix=cross_app_
 ```
 
+In Rails, named instances are memoized per request like the default instance but do
+not preload, so a request that never checks a named flag makes no query for it. Set
+`cross_app.preload = true` (or an array of feature names) to preload.
+
 Any custom default factory must return a DSL dedicated to that instance. Reusing one
 DSL for the top-level instance or another named instance raises an error.
 
@@ -147,6 +151,20 @@ For that example, Rails credentials can be stored under
 through `FLIPPER_CLOUD_CROSS_APP_TOKEN` and
 `FLIPPER_CLOUD_CROSS_APP_SYNC_SECRET`. Named instances never inherit the default
 `FLIPPER_CLOUD_TOKEN` or `FLIPPER_CLOUD_SYNC_SECRET`.
+
+If a named instance calls `cloud` without its token, the app fails to boot rather than
+quietly reading the wrong project. In environments without that token, such as
+development, only call `cloud` when the token is present:
+
+```ruby
+config.named(:cross_app) do |cross_app|
+  if ENV["FLIPPER_CLOUD_CROSS_APP_TOKEN"] || Rails.application.credentials.dig(:flipper, :cross_app, :cloud_token)
+    cross_app.cloud(path: "_flipper/cross_app")
+  else
+    cross_app.adapter { Flipper::Adapters::ActiveRecord.new(table_prefix: "cross_app_") }
+  end
+end
+```
 
 Applications sharing a Cloud project must register the same named group predicates
 and return the same `flipper_id` for shared actors. Cloud synchronizes group names and

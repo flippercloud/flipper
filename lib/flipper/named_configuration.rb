@@ -122,10 +122,11 @@ module Flipper
     end
 
     # Internal: Apply app-wide Rails settings that were not overridden by the
-    # named configuration.
+    # named configuration. Preload is not inherited: it would add a query per
+    # named instance to every request, even ones that never check its flags.
     def inherit_rails_configuration(flipper)
       @memoize = flipper.memoize if @memoize.nil?
-      @preload = flipper.preload if @preload.nil?
+      @preload = false if @preload.nil?
       @strict = flipper.strict if @strict.nil?
       @actor_limit = flipper.actor_limit if @actor_limit.nil?
       self.instrumenter = flipper.instrumenter if @instrumenter.nil?
