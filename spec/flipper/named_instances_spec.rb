@@ -1,4 +1,8 @@
 RSpec.describe "named Flipper instances" do
+  before do
+    stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
+  end
+
   def with_env(values)
     original = values.to_h { |key, _| [key, ENV[key]] }
     values.each { |key, value| value.nil? ? ENV.delete(key) : ENV[key] = value }
@@ -501,7 +505,7 @@ RSpec.describe "named Flipper instances" do
   end
 
   it "honors an instrumenter configured through named Cloud options" do
-    instrumenter = Object.new
+    instrumenter = Flipper::Instrumenters::Memory.new
     Flipper.configure do |config|
       config.named(:cross_app) do |named|
         named.cloud(token: "cloud-token", sync_secret: "cloud-secret", instrumenter: instrumenter)
