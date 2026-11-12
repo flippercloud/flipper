@@ -17,6 +17,13 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
     eval migration.result_with_hash(migration_version: migration_version) # defines CreateFlipperTables
   end
 
+  # Loading the adapter configures Flipper to use it. Clear that so the next
+  # spec's flipper_reset doesn't query a database that has been dropped.
+  after(:each) do
+    Flipper.instance = nil
+    Flipper.configuration = nil
+  end
+
   [
     {
       "adapter" => "sqlite3",
