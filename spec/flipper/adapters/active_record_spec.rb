@@ -17,6 +17,13 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
     eval migration.result_with_hash(migration_version: migration_version) # defines CreateFlipperTables
   end
 
+  # Loading the adapter configures Flipper to use it. Clear that so the next
+  # spec's flipper_reset doesn't query a database that has been dropped.
+  after(:each) do
+    Flipper.instance = nil
+    Flipper.configuration = nil
+  end
+
   [
     {
       "adapter" => "sqlite3",
@@ -59,6 +66,11 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
             ActiveRecord::Tasks::DatabaseTasks.purge(config)
             CreateFlipperTables.migrate(:up)
           end
+
+          # Rails main caches columns per model, so drop columns cached
+          # from the previous database's adapter.
+          Flipper::Adapters::ActiveRecord::Feature.reset_column_information
+          Flipper::Adapters::ActiveRecord::Gate.reset_column_information
         end
 
         after(:all) do

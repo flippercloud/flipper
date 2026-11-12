@@ -11,7 +11,7 @@ Flipper gives you control over who has access to features in your app.
 - Enable or disable features for everyone, specific actors, groups of actors, a percentage of actors, or a percentage of time.
 - Configure your feature flags from the console or a web UI.
 - Regardless of what data store you are using, Flipper can performantly store your feature flags.
-- Use [Flipper Cloud](#flipper-cloud) to cascade features from multiple environments, share settings with your team, control permissions, keep an audit history, and rollback.
+- Use [Flipper Cloud](#flipper-cloud) to cascade features from multiple environments, share settings with your team, control permissions, keep an audit history, rollback, and let AI assistants find flags ready to remove.
 
 Control your software &mdash; don't let it control you.
 
@@ -101,6 +101,7 @@ Like Flipper and want more? Check out [Flipper Cloud](https://www.flippercloud.i
 - **permissions** &mdash; grant access to everyone in your organization or lockdown each project to particular people. You can even limit access to a particular environment (like production) to specific people.
 - **audit history** &mdash; every feature change and who made it.
 - **rollbacks** &mdash; enable or disable a feature accidentally? No problem. You can roll back to any point in the audit history with a single click.
+- **MCP server** &mdash; connect Claude Code, Codex, Cursor, or any other AI assistant to your flags with our [MCP server](https://www.flippercloud.io/docs/cloud/mcp?utm_source=oss&utm_medium=readme&utm_campaign=mcp). Ask "Which Flipper flags can we remove?" and it checks every environment, your telemetry, and your audit history, then tells you which flags are done and why.
 - **maintenance** &mdash; we'll keep the lights on for you. We also have handy webhooks and background polling for keeping your app in sync with Cloud, so **our availability won't affect yours**. All your feature flag reads are local to your app.
 - **everything in one place** &mdash; no need to bounce around from different application UIs or IRB consoles.
 
