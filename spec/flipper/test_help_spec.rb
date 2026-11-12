@@ -57,10 +57,28 @@ RSpec.describe Flipper::TestHelp do
     Flipper.cross_app.register(:beta) { true }
     described_class.flipper_configure
     Flipper.cross_app.enable(:chat)
+    retained = Flipper.cross_app.instance
 
     described_class.flipper_reset
 
+    expect(retained.enabled?(:chat)).to be(false)
     expect(Flipper.cross_app.enabled?(:chat)).to be(false)
     expect(Flipper.cross_app.group_exists?(:beta)).to be(true)
+  end
+
+  it "clears the previous test adapter when a named configuration changes" do
+    Flipper.configure { |config| config.named(:cross_app) }
+    described_class.flipper_configure
+    Flipper.cross_app.enable(:chat)
+    retained = Flipper.cross_app.instance
+    named = Flipper.configuration.named_configuration(:cross_app)
+    named.cloud(token: "cloud-token", sync_secret: "")
+
+    described_class.flipper_reset
+
+    expect(retained.enabled?(:chat)).to be(false)
+    expect(Flipper.cross_app.instance).to be_a(Flipper::DSL)
+    expect(Flipper.cross_app.enabled?(:chat)).to be(false)
+    expect(a_request(:any, /flippercloud/)).not_to have_been_made
   end
 end

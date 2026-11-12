@@ -35,12 +35,28 @@ module Flipper
 
     # Internal: Assign ownership for a DSL created by a named configuration.
     def instance_owner=(configuration)
-      @group_resolver = configuration
-      @feature_resolver = self
-      @instance_key = configuration.name
-      @memoized_features.clear
+      Flipper.send(:claim_instance_owner, self, configuration)
+    end
+
+    # Internal: Claim this DSL for the default or one named instance. Called
+    # while Flipper's named-instance lifecycle lock is held.
+    def claim_instance_owner(configuration)
+      return self if @instance_owner.equal?(configuration)
+
+      if @instance_owner
+        raise InvalidConfigurationValue, "A Flipper DSL cannot be shared by multiple Flipper instances"
+      end
+
+      @instance_owner = configuration
+      unless configuration.equal?(Flipper)
+        @group_resolver = configuration
+        @feature_resolver = self
+        @instance_key = configuration.name
+        @memoized_features.clear
+      end
       self
     end
+    private :claim_instance_owner
 
     # Public: Check if a feature is enabled.
     #

@@ -1,6 +1,6 @@
 # Named Flipper Instances
 
-Status: Implemented locally; pending review
+Status: Implemented; pending merge
 
 ## Motivation
 
@@ -128,6 +128,8 @@ concept while adding only the metadata needed for named instances. Existing
 
 - Store named configurations in the root `Flipper::Configuration`.
 - Create one DSL per name per thread, analogous to the existing default instance.
+- Reject a DSL object reused by the default or another named instance; ownership
+  changes its group and expression resolution and therefore cannot be shared safely.
 - Version named configurations so replacement is observed by DSL caches in every
   thread; clearing only the thread that performed the replacement is insufficient.
 - Use a collision-resistant internal thread-local container rather than creating one

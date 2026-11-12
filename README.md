@@ -97,6 +97,8 @@ Read more about [getting started with Flipper](https://flippercloud.io/docs?utm_
 Applications that need independent sets of feature flags can configure named
 instances. Each name has its own adapter stack, features, groups, request cache, and
 preload behavior, while the existing top-level `Flipper` instance is unchanged.
+Rails applications should declare named instances in an initializer. Names registered
+after initialization require explicit middleware and route mounts.
 
 ```ruby
 Flipper.configure do |config|
@@ -123,6 +125,9 @@ Active Record, generate and update the prefixed tables separately:
 bin/rails generate flipper:active_record --table-prefix=cross_app_
 bin/rails generate flipper:update --table-prefix=cross_app_
 ```
+
+Any custom default factory must return a DSL dedicated to that instance. Reusing one
+DSL for the top-level instance or another named instance raises an error.
 
 A named instance can optionally use a separate Cloud project and webhook:
 
