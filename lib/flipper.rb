@@ -1,8 +1,10 @@
 require "forwardable"
+require "flipper/groups"
 
 module Flipper
   extend self
   extend Forwardable
+  extend Groups
 
   # Private: The namespace for all instrumented events.
   InstrumentationNamespace = :flipper
@@ -44,24 +46,21 @@ module Flipper
   def configuration
     return @configuration if @configuration
 
-    named_instance_lifecycle_mutex.synchronize do
+    @named_instance_lifecycle_mutex.synchronize do
       @configuration ||= Configuration.new
     end
   end
 
   # Public: Sets Flipper::Configuration instance.
   def configuration=(configuration)
-    named_instance_lifecycle_mutex.synchronize do
+    @named_instance_lifecycle_mutex.synchronize do
       previous_configuration = @configuration
       previous_instance = Thread.current[:flipper_instance]
       previous_named_instances = Thread.current[:__flipper_named_instances__]
-      started = false
+      validate_named_instance_accessors!(configuration)
       committed = false
 
       begin
-        validate_named_instance_accessors!(configuration)
-
-        started = true
         # need to reset flipper instances if configuration changes
         Thread.current[:flipper_instance] = nil
         Thread.current[:__flipper_named_instances__] = nil
@@ -70,7 +69,7 @@ module Flipper
         refresh_named_instance_accessors_without_lock(configuration)
         committed = true
       ensure
-        if started && !committed
+        unless committed
           begin
             remove_named_instance_accessors_without_lock
             @configuration = previous_configuration
@@ -95,7 +94,7 @@ module Flipper
   def instance
     Thread.current[:flipper_instance] ||= begin
       flipper = configuration.default
-      claim_default_instance_owner(flipper)
+      claim_instance_owner(flipper, Flipper)
       flipper
     end
   end
@@ -104,7 +103,7 @@ module Flipper
   # Configuration#default to set this instance, but for things like the test
   # environment, this writer is actually useful.
   def instance=(flipper)
-    claim_default_instance_owner(flipper) if flipper
+    claim_instance_owner(flipper, Flipper) if flipper
     Thread.current[:flipper_instance] = flipper
   end
 
@@ -112,8 +111,8 @@ module Flipper
   def named(name)
     name = normalize_named_instance_name(name)
     named_configuration(name)
-    named_instance_proxies_mutex.synchronize do
-      named_instance_proxies[name] ||= NamedProxy.new(name)
+    @named_instance_proxies_mutex.synchronize do
+      @named_instance_proxies[name] ||= NamedProxy.new(name)
     end
   end
 
@@ -124,6 +123,12 @@ module Flipper
     return configured if configured
 
     raise NamedInstanceNotFound, "Named instance #{name.inspect} has not been configured"
+  end
+
+  # Internal: Named configurations, or none for custom configuration objects
+  # that don't support named instances.
+  def named_configurations(config = configuration)
+    config.respond_to?(:named_configurations) ? config.named_configurations : []
   end
 
   # Internal: Returns the per-thread DSL for a configured named instance.
@@ -171,12 +176,12 @@ module Flipper
 
   # Internal: Reject names that would replace Flipper's existing API.
   def validate_named_instance_name!(name)
-    named_instance_lifecycle_mutex.synchronize do
+    @named_instance_lifecycle_mutex.synchronize do
       validate_named_instance_name_without_lock!(name)
     end
   end
 
-  private :named_configuration, :named_instance, :reset_named_instances,
+  private :named_configuration, :named_configurations, :named_instance, :reset_named_instances,
           :normalize_named_instance_name, :validate_named_instance_name!
 
   # Public: All the methods delegated to instance. These should match the
@@ -246,67 +251,6 @@ module Flipper
     feature_enabled(name).eq(false)
   end
 
-  # Public: Use this to register a group by name.
-  #
-  # name - The Symbol name of the group.
-  # block - The block that should be used to determine if the group matches a
-  #         given actor.
-  #
-  # Examples
-  #
-  #   Flipper.register(:admins) { |actor|
-  #     actor.respond_to?(:admin?) && actor.admin?
-  #   }
-  #
-  # Returns a Flipper::Group.
-  # Raises Flipper::DuplicateGroup if the group is already registered.
-  def register(name, &block)
-    group = Types::Group.new(name, &block)
-    groups_registry.add(group.name, group)
-    group
-  rescue Registry::DuplicateKey
-    raise DuplicateGroup, "Group #{name.inspect} has already been registered"
-  end
-
-  # Public: Returns a Set of registered Types::Group instances.
-  def groups
-    groups_registry.values.to_set
-  end
-
-  # Public: Returns a Set of symbols where each symbol is a registered
-  # group name. If you just want the names, this is more efficient than doing
-  # `Flipper.groups.map(&:name)`.
-  def group_names
-    groups_registry.keys.to_set
-  end
-
-  # Public: Clears the group registry.
-  #
-  # Returns nothing.
-  def unregister_groups
-    groups_registry.clear
-  end
-
-  # Public: Check if a group exists
-  #
-  # Returns boolean
-  def group_exists?(name)
-    groups_registry.key?(name)
-  end
-
-  # Public: Fetches a group by name.
-  #
-  # name - The Symbol name of the group.
-  #
-  # Examples
-  #
-  #   Flipper.group(:admins)
-  #
-  # Returns Flipper::Group.
-  def group(name)
-    groups_registry.get(name) || Types::Group.new(name)
-  end
-
   # Internal: Registry of all groups_registry.
   def groups_registry
     @groups_registry ||= Registry.new
@@ -360,35 +304,14 @@ require 'flipper/version'
 module Flipper
   @named_instance_proxies = {}
   @named_instance_proxies_mutex = Mutex.new
-  @named_instance_accessor_names = Set.new
   @named_instance_accessor_methods = {}
   @named_instance_lifecycle_mutex = Mutex.new
 
   class << self
     private
 
-    def named_instance_proxies
-      @named_instance_proxies
-    end
-
-    def named_instance_proxies_mutex
-      @named_instance_proxies_mutex
-    end
-
-    def named_instance_accessor_names
-      @named_instance_accessor_names
-    end
-
-    def named_instance_accessor_methods
-      @named_instance_accessor_methods
-    end
-
-    def named_instance_lifecycle_mutex
-      @named_instance_lifecycle_mutex
-    end
-
-    def refresh_named_instance_accessors(configuration = @configuration)
-      named_instance_lifecycle_mutex.synchronize do
+    def refresh_named_instance_accessors(configuration)
+      @named_instance_lifecycle_mutex.synchronize do
         return unless @configuration.equal?(configuration)
 
         refresh_named_instance_accessors_without_lock(configuration)
@@ -396,50 +319,33 @@ module Flipper
     end
 
     def refresh_named_instance_accessors_without_lock(configuration)
-      return unless configuration.respond_to?(:named_instance_names)
+      validate_named_instance_accessors!(configuration)
 
-      names = configuration.named_instance_names
-      names.each { |name| validate_named_instance_name_without_lock!(name) }
-
-      names.each do |name|
+      named_configurations(configuration).map(&:name).each do |name|
         next if generated_named_instance_accessor?(name)
 
         proxy = named(name)
         Thread.handle_interrupt(Exception => :never) do
           define_singleton_method(name) { proxy }
-          named_instance_accessor_names.add(name)
-          named_instance_accessor_methods[name] = method(name)
+          @named_instance_accessor_methods[name] = method(name)
         end
       end
     end
 
-    def remove_named_instance_accessors
-      named_instance_lifecycle_mutex.synchronize do
-        remove_named_instance_accessors_without_lock
-      end
-    end
-
     def remove_named_instance_accessors_without_lock
-      named_instance_accessor_names.to_a.each do |name|
+      @named_instance_accessor_methods.keys.each do |name|
         remove_named_instance_accessor_without_lock(name)
       end
     end
 
     def remove_named_instance_accessor_without_lock(name)
-      generated_method = named_instance_accessor_methods[name]
-      current_method = method(name) if respond_to?(name, true)
-      if current_method == generated_method && singleton_class.instance_methods(false).include?(name)
-        singleton_class.send(:remove_method, name)
-      end
-      named_instance_accessor_names.delete(name)
-      named_instance_accessor_methods.delete(name)
+      singleton_class.send(:remove_method, name) if generated_named_instance_accessor?(name)
+      @named_instance_accessor_methods.delete(name)
     end
 
     def validate_named_instance_accessors!(configuration)
-      return unless configuration.respond_to?(:named_instance_names)
-
-      configuration.named_instance_names.each do |name|
-        validate_named_instance_name_without_lock!(name)
+      named_configurations(configuration).each do |named|
+        validate_named_instance_name_without_lock!(named.name)
       end
     end
 
@@ -457,27 +363,25 @@ module Flipper
     end
 
     def generated_named_instance_accessor?(name)
-      return false unless named_instance_accessor_names.include?(name)
+      generated_method = @named_instance_accessor_methods[name]
+      return false unless generated_method
 
-      generated_method = named_instance_accessor_methods[name]
       current_method = method(name) if respond_to?(name, true)
       current_method == generated_method
     end
 
     def publish_named_configuration(configuration, name, named_configuration)
-      named_instance_lifecycle_mutex.synchronize do
+      @named_instance_lifecycle_mutex.synchronize do
         active = @configuration.equal?(configuration)
         validate_named_instance_name_without_lock!(name) if active
-        started = false
         committed = false
 
         begin
-          started = true
           configuration.send(:publish_named_configuration, name, named_configuration)
           refresh_named_instance_accessors_without_lock(configuration) if active
           committed = true
         ensure
-          if started && !committed
+          unless committed
             configuration.send(:remove_named_configuration, name, named_configuration)
             remove_named_instance_accessor_without_lock(name) if active
           end
@@ -485,17 +389,16 @@ module Flipper
       end
     end
 
-    def claim_default_instance_owner(instance)
-      dsl = unwrap_flipper_dsl(instance)
-      return unless dsl
-
-      claim_instance_owner(dsl, Flipper)
-    end
-
+    # Claims a DSL for the default instance (owner Flipper) or a named
+    # configuration. Returns false when the instance isn't a Flipper DSL.
     def claim_instance_owner(instance, owner)
-      named_instance_lifecycle_mutex.synchronize do
-        instance.send(:claim_instance_owner, owner)
+      dsl = unwrap_flipper_dsl(instance)
+      return false unless dsl
+
+      @named_instance_lifecycle_mutex.synchronize do
+        dsl.send(:claim_instance_owner, owner)
       end
+      true
     end
 
     def unwrap_flipper_dsl(instance)

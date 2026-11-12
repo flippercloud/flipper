@@ -69,7 +69,7 @@ module Flipper
       ensure_not_reserved!
       instrument(:disable) do |payload|
         gate = gate_for(thing)
-        wrapped_thing = gate.wrap(thing)
+        wrapped_thing = wrap_for(gate, thing)
 
         adapter.add self
 
@@ -122,6 +122,7 @@ module Flipper
           feature_name: @name,
           values: gate_values,
           actors: actors,
+          group_resolver: @group_resolver,
           feature_resolver: @feature_resolver,
           instance_key: @instance_key
         )
@@ -431,19 +432,11 @@ module Flipper
     #
     # Returns an array of gates
     def gates
-      return GATES if @group_resolver.equal?(Flipper)
-
-      @gates ||= gates_hash.values.freeze
+      GATES
     end
 
     def gates_hash
-      return GATES_HASH if @group_resolver.equal?(Flipper)
-
-      # Named instances resolve groups through their own registry, so the
-      # group gate can't be shared. The other gates are stateless.
-      @gates_hash ||= GATES_HASH.merge(
-        group: Gates::Group.new(group_resolver: @group_resolver)
-      ).freeze
+      GATES_HASH
     end
 
     # Public: Find a gate by name.
@@ -471,6 +464,12 @@ module Flipper
       @group_resolver.group(group)
     end
 
+    # Private: Groups resolve through the instance that owns this feature, so
+    # a named instance's groups are found in its own registry.
+    def wrap_for(gate, thing)
+      gate.name == :group ? wrap_group(thing) : gate.wrap(thing)
+    end
+
     # Internal: Mirrors a trusted remote expression during adapter sync,
     # including legacy expressions that predate empty-group validation.
     #
@@ -483,7 +482,7 @@ module Flipper
       ensure_not_reserved!
       instrument(:enable) do |payload|
         gate = gate_for(thing)
-        wrapped_thing = gate.wrap(thing)
+        wrapped_thing = wrap_for(gate, thing)
         validate_expression!(wrapped_thing) if validate_expression
 
         adapter.add self

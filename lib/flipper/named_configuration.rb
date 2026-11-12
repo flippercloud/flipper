@@ -1,5 +1,7 @@
 module Flipper
   class NamedConfiguration < Configuration
+    include Groups
+
     attr_reader :name, :groups_registry
     attr_accessor :memoize, :preload, :env_key, :strict, :actor_limit, :cloud_path
     attr_reader :instrumenter
@@ -25,28 +27,8 @@ module Flipper
       }
     end
 
-    def adapter(&block)
-      result = super
-      changed! if block_given?
-      result
-    end
-
     def named(*)
       raise InvalidConfigurationValue, "Named Flipper instances cannot be nested"
-    end
-
-    if RUBY_VERSION >= '3.0'
-      def use(klass, *args, **kwargs, &block)
-        result = super
-        changed!
-        result
-      end
-    else
-      def use(klass, *args, &block)
-        result = super
-        changed!
-        result
-      end
     end
 
     def default(&block)
@@ -55,16 +37,13 @@ module Flipper
         @cloud_options = {}
         @resolved_cloud_options = nil
         self.cloud_path = nil
-        result = super
-        changed!
-        result
+        super
       else
         instance = super
-        unless instance.respond_to?(:instance_owner=)
+        unless Flipper.send(:claim_instance_owner, instance, self)
           raise InvalidConfigurationValue, "Named instance #{name.inspect} must return a Flipper DSL"
         end
 
-        instance.instance_owner = self
         instance
       end
     end
@@ -131,6 +110,17 @@ module Flipper
       resolved
     end
 
+    # Internal: Where to mount this instance's Cloud webhook, or nil when it
+    # has nothing to mount (not Cloud, no path, or no sync secret).
+    def cloud_webhook_path
+      return unless cloud? && cloud_path
+
+      sync_secret = resolve_cloud_credentials[:sync_secret]
+      return if sync_secret.nil? || sync_secret == false || sync_secret.empty?
+
+      cloud_path
+    end
+
     # Internal: Apply app-wide Rails settings that were not overridden by the
     # named configuration.
     def inherit_rails_configuration(flipper)
@@ -140,34 +130,6 @@ module Flipper
       @actor_limit = flipper.actor_limit if @actor_limit.nil?
       self.instrumenter = flipper.instrumenter if @instrumenter.nil?
       self
-    end
-
-    def register(name, &block)
-      group = Types::Group.new(name, &block)
-      groups_registry.add(group.name, group)
-      group
-    rescue Registry::DuplicateKey
-      raise DuplicateGroup, "Group #{name.inspect} has already been registered"
-    end
-
-    def groups
-      groups_registry.values.to_set
-    end
-
-    def group_names
-      groups_registry.keys.to_set
-    end
-
-    def group_exists?(name)
-      groups_registry.key?(name)
-    end
-
-    def group(name)
-      groups_registry.get(name) || Types::Group.new(name)
-    end
-
-    def unregister_groups
-      groups_registry.clear
     end
 
     private

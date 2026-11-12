@@ -79,19 +79,16 @@ module Flipper
         Flipper::TestHelp.flipper_configure_named_instances
       end
 
-      if Flipper.configuration.respond_to?(:named_instance_names)
-        Flipper.configuration.named_instance_names.each do |name|
-          named = Flipper.configuration.named_configuration(name)
-          named.inherit_rails_configuration(flipper)
-          if named.cloud? && !flipper.test_help
-            named.resolve_cloud_credentials({
-              token: app.credentials.dig(:flipper, name, :cloud_token),
-              sync_secret: app.credentials.dig(:flipper, name, :cloud_sync_secret),
-            })
-          end
-          named.use Flipper::Adapters::Strict, named.strict if named.strict
-          named.use Flipper::Adapters::ActorLimit, named.actor_limit if named.actor_limit
+      Flipper.send(:named_configurations).each do |named|
+        named.inherit_rails_configuration(flipper)
+        if named.cloud? && !flipper.test_help
+          named.resolve_cloud_credentials({
+            token: app.credentials.dig(:flipper, named.name, :cloud_token),
+            sync_secret: app.credentials.dig(:flipper, named.name, :cloud_sync_secret),
+          })
         end
+        named.use Flipper::Adapters::Strict, named.strict if named.strict
+        named.use Flipper::Adapters::ActorLimit, named.actor_limit if named.actor_limit
       end
     end
 
@@ -106,50 +103,36 @@ module Flipper
         }
       end
 
-      if Flipper.configuration.respond_to?(:named_instance_names)
-        named_configurations = Flipper.configuration.named_instance_names.map do |name|
-          Flipper.configuration.named_configuration(name)
-        end
+      named_configurations = Flipper.send(:named_configurations)
+      env_keys = [flipper.env_key] + named_configurations.map(&:env_key)
+      if env_keys.uniq.length != env_keys.length
+        raise InvalidConfigurationValue, "Flipper Rack environment keys must be unique"
+      end
 
-        env_keys = [flipper.env_key] + named_configurations.map(&:env_key)
-        if env_keys.uniq.length != env_keys.length
-          raise InvalidConfigurationValue, "Flipper Rack environment keys must be unique"
-        end
+      named_configurations.each do |named|
+        next unless named.memoize
 
-        named_configurations.each do |named|
-          next unless named.memoize
-
-          app.middleware.use Flipper::Middleware::SetupEnv, Flipper.named(named.name), {
-            env_key: named.env_key,
-          }
-          app.middleware.use Flipper::Middleware::Memoizer, {
-            env_key: named.env_key,
-            preload: named.preload,
-            if: named.memoize.respond_to?(:call) ? named.memoize : nil,
-          }
-        end
+        app.middleware.use Flipper::Middleware::SetupEnv, Flipper.named(named.name), {
+          env_key: named.env_key,
+        }
+        app.middleware.use Flipper::Middleware::Memoizer, {
+          env_key: named.env_key,
+          preload: named.preload,
+          if: named.memoize.respond_to?(:call) ? named.memoize : nil,
+        }
       end
     end
 
     initializer "flipper.named_cloud_paths", after: :load_config_initializers do |app|
       next if app.config.flipper.test_help
-      next unless Flipper.configuration.respond_to?(:named_instance_names)
 
-      named_paths = Flipper.configuration.named_instance_names.map do |name|
-        named = Flipper.configuration.named_configuration(name)
-        next unless named.cloud? && named.cloud_path
-
-        sync_secret = named.resolve_cloud_credentials[:sync_secret]
-        named.cloud_path if sync_secret && !sync_secret.empty?
-      end.compact
+      named_paths = Flipper.send(:named_configurations).map(&:cloud_webhook_path).compact
       default_paths = if cloud? && !ENV.fetch("FLIPPER_CLOUD_SYNC_SECRET", "").empty?
         [app.config.flipper.cloud_path]
       else
         []
       end
-      paths = (default_paths + named_paths).map do |path|
-        path.to_s.sub(%r{\A/+}, "").sub(%r{/+\z}, "")
-      end
+      paths = (default_paths + named_paths).map { |path| Engine.normalize_cloud_path(path) }
       endpoints = paths.flat_map do |path|
         [path, [path, "webhooks"].reject(&:empty?).join("/")]
       end
@@ -164,6 +147,11 @@ module Flipper
 
     def cloud?
       !!ENV["FLIPPER_CLOUD_TOKEN"]
+    end
+
+    # Internal: Cloud mount path without leading or trailing slashes.
+    def self.normalize_cloud_path(path)
+      path.to_s.sub(%r{\A/+}, "").sub(%r{/+\z}, "")
     end
 
     def self.deprecated_rails_version?
