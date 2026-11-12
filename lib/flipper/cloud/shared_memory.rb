@@ -10,6 +10,39 @@ module Flipper
         super
         @syncing = 0
         @overlaps = 0
+        @recopy = false
+      end
+
+      # Public: Imports flags that are complete, such as a Cloud response.
+      def import(source)
+        result = super
+        synchronize { @recopy = false }
+        result
+      end
+
+      # Public: Imports the local adapter, which another process may be
+      # syncing. A sync writes its version before its flags, so this copy can
+      # have only some of them under the new version. reload copies it again.
+      def import_store(store)
+        result = import(store)
+        synchronize { @recopy = true }
+        result
+      end
+
+      # Public: Imports the local adapter if another process synced a new
+      # version, or again if the last copy may have caught a sync partway.
+      # Copies until two match, a reload interval apart, so the sync finished.
+      def reload(store)
+        version = store.sync_version
+        return if version.nil?
+
+        if version != sync_version
+          import_store(store)
+        elsif synchronize { @recopy }
+          before = get_all
+          import_store(store)
+          synchronize { @recopy = false } if get_all == before
+        end
       end
 
       # Public: Returns true if a sync of version finished in this process.

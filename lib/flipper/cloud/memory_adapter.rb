@@ -9,7 +9,7 @@ module Flipper
     # local adapter's, because that is the one other processes share.
     class MemoryAdapter < Adapters::Sync
       # adapter - The local adapter, such as ActiveRecord.
-      # memory - The shared Flipper::Adapters::Memory.
+      # memory - The Flipper::Cloud::SharedMemory.
       # refresh_interval - Seconds between reloads of memory from adapter, or
       #                    nil to never reload. Webhook mode sets it, because
       #                    only the process that gets a webhook syncs it.
@@ -34,11 +34,7 @@ module Flipper
       private
 
       def refresh
-        # Only another process's sync changes the version. At the same version
-        # memory already has the flags, even if a failed sync left the adapter
-        # with only some of them.
-        version = @remote.sync_version
-        @local.import(@remote) if version && version != @local.sync_version
+        @local.reload(@remote)
       rescue StandardError
         # Keep serving memory while the local adapter is down.
       end

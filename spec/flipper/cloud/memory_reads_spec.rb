@@ -299,6 +299,39 @@ RSpec.describe "Flipper::Cloud memory reads" do
       expect(other.enabled?(:search)).to be(true)
     end
 
+    # A sync writes its version before its flags, so a reload can copy the
+    # local adapter while another process is still writing it.
+    it "copies the local adapter again after a reload during another process's sync" do
+      freeze_clock
+      other, _poller = start_process(sync_secret: "secret")
+      expect(other.enabled?(:search)).to be(false)
+
+      database.sync_version = version(5) # another process's sync has started
+      Flipper.new(database).enable(:search)
+      now[0] = 110
+      expect(other.enabled?(:search)).to be(true)
+      expect(other.enabled?(:analytics)).to be(false)
+
+      Flipper.new(database).enable(:analytics) # and finished
+      now[0] = 120
+      expect(other.enabled?(:analytics)).to be(true)
+    end
+
+    it "copies the local adapter again after a poll found it ahead mid-sync" do
+      freeze_clock
+      other, poller = start_process(sync_secret: "secret")
+      database.sync_version = version(5) # another process's sync has started
+      Flipper.new(database).enable(:search)
+
+      poller.sync # this process's backstop poll still has version 1
+      expect(other.enabled?(:search)).to be(true)
+      expect(other.enabled?(:analytics)).to be(false)
+
+      Flipper.new(database).enable(:analytics) # and finished
+      now[0] = 110
+      expect(other.enabled?(:analytics)).to be(true)
+    end
+
     it "keeps flags when reloading from a Memory local adapter" do
       freeze_clock
       cloud, poller = start_process(sync_secret: "secret") do |config|

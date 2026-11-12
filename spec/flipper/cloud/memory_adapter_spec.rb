@@ -1,9 +1,10 @@
 require "flipper/cloud/memory_adapter"
+require "flipper/cloud/shared_memory"
 require "flipper/adapters/operation_logger"
 
 RSpec.describe Flipper::Cloud::MemoryAdapter do
   let(:store) { Flipper::Adapters::OperationLogger.new(Flipper::Adapters::Memory.new) }
-  let(:memory) { Flipper::Adapters::Memory.new }
+  let(:memory) { Flipper::Cloud::SharedMemory.new }
   let(:version) { Flipper::SyncVersion.new("scope", 10) }
 
   subject { described_class.new(store, memory) }

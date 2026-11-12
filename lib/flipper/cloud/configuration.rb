@@ -201,7 +201,7 @@ module Flipper
       # storage itself, because a use adapter such as a cache can be behind.
       def import_memory(snapshot)
         if snapshot.sync_version&.older_than?(@store.sync_version)
-          @memory.import(@store)
+          @memory.import_store(@store)
         else
           @memory.import(snapshot)
         end
@@ -224,7 +224,7 @@ module Flipper
       # until it has flags, so a Cloud outage at boot still has flags to read.
       def fill_memory
         return unless @memory.sync_version.nil? && @memory.features.empty?
-        @memory.import(@store)
+        @memory.import_store(@store)
       rescue StandardError
         # The local adapter is down. Poll fills memory from Cloud instead.
       end
