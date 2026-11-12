@@ -28,6 +28,18 @@ RSpec.describe "named Flipper instances" do
     expect(Flipper.instance).to be(default)
   end
 
+  it "does not change feature memoization for the default instance" do
+    default = Flipper.new(Flipper::Adapters::Memory.new)
+    feature = default.feature(:chat)
+    Flipper.configure { |config| config.default { default } }
+
+    expect(Flipper.instance.feature(:chat)).to be(feature)
+
+    Flipper.instance = nil
+
+    expect(Flipper.instance.feature(:chat)).to be(feature)
+  end
+
   it "configures a named child and exposes dynamic and direct access" do
     named_configuration = nil
     Flipper.configure do |config|
@@ -216,6 +228,125 @@ RSpec.describe "named Flipper instances" do
     expect(retained.instance).not_to be(original)
   end
 
+  it "keeps configuration replacement and generated accessors atomic" do
+    alpha_configuration = Flipper::Configuration.new
+    alpha_configuration.named(:alpha)
+    beta_configuration = Flipper::Configuration.new
+    beta_configuration.named(:beta)
+    refreshing_alpha = Queue.new
+    continue = Queue.new
+
+    allow(Flipper).to receive(:refresh_named_instance_accessors_without_lock).
+      and_wrap_original do |method, configuration|
+        if configuration.equal?(alpha_configuration)
+          refreshing_alpha << true
+          continue.pop
+        end
+        method.call(configuration)
+      end
+
+    alpha_thread = Thread.new { Flipper.configuration = alpha_configuration }
+    refreshing_alpha.pop
+    beta_started = Queue.new
+    beta_thread = Thread.new do
+      beta_started << true
+      Flipper.configuration = beta_configuration
+    end
+    beta_started.pop
+    continue << true
+    alpha_thread.join
+    beta_thread.join
+
+    expect(Flipper.configuration).to be(beta_configuration)
+    expect(Flipper).to respond_to(:beta)
+    expect(Flipper).not_to respond_to(:alpha)
+  ensure
+    continue << true if alpha_thread&.alive?
+    alpha_thread&.join
+    beta_thread&.join
+  end
+
+  it "rolls back configuration replacement when its thread is cancelled" do
+    configure_named(:alpha)
+    original_configuration = Flipper.configuration
+    replacement_configuration = Flipper::Configuration.new
+    replacement_configuration.named(:beta)
+    refreshing_beta = Queue.new
+    continue = Queue.new
+
+    allow(Flipper).to receive(:refresh_named_instance_accessors_without_lock).
+      and_wrap_original do |method, configuration|
+        if configuration.equal?(replacement_configuration)
+          method.call(configuration)
+          refreshing_beta << true
+          continue.pop
+        else
+          method.call(configuration)
+        end
+      end
+
+    thread = Thread.new { Flipper.configuration = replacement_configuration }
+    refreshing_beta.pop
+    expect(Flipper).to respond_to(:beta)
+    thread.kill
+    thread.join
+
+    expect(Flipper.configuration).to be(original_configuration)
+    expect(Flipper).to respond_to(:alpha)
+    expect(Flipper).not_to respond_to(:beta)
+  ensure
+    continue << true if thread&.alive?
+    thread&.join
+  end
+
+  it "rolls back named publication when its thread is cancelled" do
+    active_configuration = Flipper.configuration
+    publishing = Queue.new
+    continue = Queue.new
+
+    allow(Flipper).to receive(:refresh_named_instance_accessors_without_lock).
+      and_wrap_original do |method, configuration|
+        if configuration.equal?(active_configuration) && configuration.named_instance_names.include?(:cross_app)
+          method.call(configuration)
+          publishing << true
+          continue.pop
+        else
+          method.call(configuration)
+        end
+      end
+
+    thread = Thread.new { active_configuration.named(:cross_app) }
+    publishing.pop
+    expect(Flipper).to respond_to(:cross_app)
+    thread.kill
+    thread.join
+
+    expect(active_configuration.named_instance_names).not_to include(:cross_app)
+    expect(Flipper).not_to respond_to(:cross_app)
+  ensure
+    continue << true if thread&.alive?
+    thread&.join
+  end
+
+  it "preserves the active configuration when replacement accessor validation fails" do
+    configure_named(:alpha)
+    original_configuration = Flipper.configuration
+    original_default = Flipper.instance
+    original_named = Flipper.alpha.instance
+    replacement_configuration = Flipper::Configuration.new
+    replacement_configuration.named(:beta)
+    Flipper.define_singleton_method(:beta) { :existing }
+
+    expect { Flipper.configuration = replacement_configuration }.
+      to raise_error(Flipper::InvalidNamedInstanceName, /existing Flipper method/)
+    expect(Flipper.configuration).to be(original_configuration)
+    expect(Flipper).to respond_to(:alpha)
+    expect(Flipper.instance).to be(original_default)
+    expect(Flipper.alpha.instance).to be(original_named)
+  ensure
+    Flipper.singleton_class.send(:remove_method, :beta) if Flipper.singleton_class.instance_methods(false).include?(:beta)
+  end
+
   it "removes generated accessors when configuration is cleared" do
     configure_named
     expect(Flipper).to respond_to(:cross_app)
@@ -248,6 +379,70 @@ RSpec.describe "named Flipper instances" do
 
     expect(Flipper.configuration.named_instance_names).not_to include(:cross_app)
     expect(Flipper).not_to respond_to(:cross_app)
+  end
+
+  it "does not publish a named registration when its accessor becomes unavailable" do
+    expect do
+      Flipper.configuration.named(:cross_app) do
+        Flipper.define_singleton_method(:cross_app) { :existing }
+      end
+    end.to raise_error(Flipper::InvalidNamedInstanceName, /existing Flipper method/)
+
+    expect(Flipper.configuration.named_instance_names).not_to include(:cross_app)
+  ensure
+    if Flipper.singleton_class.instance_methods(false).include?(:cross_app)
+      Flipper.singleton_class.send(:remove_method, :cross_app)
+    end
+  end
+
+  it "rejects sharing a DSL between the default and a named instance" do
+    shared = Flipper.new(Flipper::Adapters::Memory.new)
+    Flipper.configure { |config| config.default { shared } }
+    Flipper.instance
+    Flipper.configuration.named(:cross_app) { |named| named.default { shared } }
+
+    expect { Flipper.cross_app.instance }.
+      to raise_error(Flipper::InvalidConfigurationValue, /cannot be shared/)
+  end
+
+  it "rejects sharing a delegated DSL between the default and a named instance" do
+    require "delegate"
+    shared = SimpleDelegator.new(Flipper.new(Flipper::Adapters::Memory.new))
+    Flipper.configure { |config| config.default { shared } }
+    Flipper.instance
+    Flipper.configuration.named(:cross_app) { |named| named.default { shared } }
+
+    expect { Flipper.cross_app.instance }.
+      to raise_error(Flipper::InvalidConfigurationValue, /cannot be shared/)
+  end
+
+  it "rejects sharing a DSL with the default after a named instance claims it" do
+    shared = Flipper.new(Flipper::Adapters::Memory.new)
+    Flipper.configuration.named(:cross_app) { |named| named.default { shared } }
+    Flipper.cross_app.instance
+    Flipper.configuration.default { shared }
+
+    expect { Flipper.instance }.
+      to raise_error(Flipper::InvalidConfigurationValue, /cannot be shared/)
+  end
+
+  it "rejects sharing a DSL between named instances" do
+    shared = Flipper.new(Flipper::Adapters::Memory.new)
+    Flipper.configuration.named(:people) { |named| named.default { shared } }
+    Flipper.configuration.named(:services) { |named| named.default { shared } }
+    Flipper.people.instance
+
+    expect { Flipper.services.instance }.
+      to raise_error(Flipper::InvalidConfigurationValue, /cannot be shared/)
+  end
+
+  it "does not clear feature memoization when the same named instance reuses its DSL" do
+    shared = Flipper.new(Flipper::Adapters::Memory.new)
+    Flipper.configuration.named(:cross_app) { |named| named.default { shared } }
+    feature = Flipper.cross_app.feature(:chat)
+    Flipper.send(:reset_named_instances)
+
+    expect(Flipper.cross_app.feature(:chat)).to be(feature)
   end
 
   it "rejects duplicate names" do

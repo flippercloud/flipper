@@ -91,13 +91,10 @@ module Flipper
       begin
         named_configuration = NamedConfiguration.new(name)
         yield named_configuration if block_given?
-        @named_configurations_mutex.synchronize do
-          @named_configurations[name] = named_configuration
-        end
+        Flipper.send(:publish_named_configuration, self, name, named_configuration)
       ensure
         @named_configurations_mutex.synchronize { @pending_named_instance_names.delete(name) }
       end
-      Flipper.send(:refresh_named_instance_accessors) if Flipper.configuration.equal?(self)
       named_configuration
     end
 
@@ -120,6 +117,20 @@ module Flipper
     def statsd=(client)
       require "flipper/instrumentation/statsd"
       Flipper::Instrumentation::StatsdSubscriber.client = client
+    end
+
+    private
+
+    def publish_named_configuration(name, named_configuration)
+      @named_configurations_mutex.synchronize do
+        @named_configurations[name] = named_configuration
+      end
+    end
+
+    def remove_named_configuration(name, named_configuration)
+      @named_configurations_mutex.synchronize do
+        @named_configurations.delete(name) if @named_configurations[name].equal?(named_configuration)
+      end
     end
   end
 end

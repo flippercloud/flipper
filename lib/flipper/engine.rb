@@ -150,7 +150,10 @@ module Flipper
       paths = (default_paths + named_paths).map do |path|
         path.to_s.sub(%r{\A/+}, "").sub(%r{/+\z}, "")
       end
-      if paths.uniq.length != paths.length
+      endpoints = paths.flat_map do |path|
+        [path, [path, "webhooks"].reject(&:empty?).join("/")]
+      end
+      if endpoints.uniq.length != endpoints.length
         raise InvalidConfigurationValue, "Flipper Cloud webhook paths must be unique"
       end
     end

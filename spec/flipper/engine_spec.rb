@@ -451,6 +451,21 @@ RSpec.describe Flipper::Engine do
         end
       end
 
+      context "when the path matches the default webhook alias" do
+        let(:named_cloud_path) { "_flipper/webhooks" }
+
+        it "rejects the effective endpoint collision" do
+          ENV["FLIPPER_CLOUD_TOKEN"] = "default-token"
+          ENV["FLIPPER_CLOUD_SYNC_SECRET"] = "default-secret"
+
+          expect { silence { application.initialize! } }.
+            to raise_error(Flipper::InvalidConfigurationValue, /webhook paths must be unique/)
+        ensure
+          ENV.delete("FLIPPER_CLOUD_TOKEN")
+          ENV.delete("FLIPPER_CLOUD_SYNC_SECRET")
+        end
+      end
+
       context "with an empty sync secret" do
         let(:named_sync_secret) { "" }
 
@@ -478,6 +493,22 @@ RSpec.describe Flipper::Engine do
           expect(last_response.status).to eq(404)
         end
       end
+    end
+
+    it "rejects effective webhook endpoint collisions between named instances" do
+      initializer do
+        Flipper.configure do |flipper_config|
+          flipper_config.named(:people) do |named|
+            named.cloud(token: "people-token", sync_secret: "people-secret", path: "_shared")
+          end
+          flipper_config.named(:services) do |named|
+            named.cloud(token: "services-token", sync_secret: "services-secret", path: "_shared/webhooks")
+          end
+        end
+      end
+
+      expect { silence { application.initialize! } }.
+        to raise_error(Flipper::InvalidConfigurationValue, /webhook paths must be unique/)
     end
 
     it "loads named Cloud credentials from the matching Rails credential scope" do
