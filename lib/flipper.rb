@@ -64,16 +64,14 @@ module Flipper
         # need to reset flipper instances if configuration changes
         Thread.current[:flipper_instance] = nil
         Thread.current[:__flipper_named_instances__] = nil
-        remove_named_instance_accessors_without_lock
         @configuration = configuration
-        refresh_named_instance_accessors_without_lock(configuration)
+        sync_named_instance_accessors_without_lock(configuration)
         committed = true
       ensure
         unless committed
           begin
-            remove_named_instance_accessors_without_lock
             @configuration = previous_configuration
-            refresh_named_instance_accessors_without_lock(previous_configuration)
+            sync_named_instance_accessors_without_lock(previous_configuration)
           ensure
             Thread.current[:flipper_instance] = previous_instance
             Thread.current[:__flipper_named_instances__] = previous_named_instances
@@ -332,10 +330,14 @@ module Flipper
       end
     end
 
-    def remove_named_instance_accessors_without_lock
-      @named_instance_accessor_methods.keys.each do |name|
+    # Accessors for names in both configurations stay defined, so threads
+    # calling Flipper.<name> during a replacement never see it missing.
+    def sync_named_instance_accessors_without_lock(configuration)
+      names = named_configurations(configuration).map(&:name)
+      (@named_instance_accessor_methods.keys - names).each do |name|
         remove_named_instance_accessor_without_lock(name)
       end
+      refresh_named_instance_accessors_without_lock(configuration)
     end
 
     def remove_named_instance_accessor_without_lock(name)
