@@ -143,6 +143,8 @@ module Flipper
 
       # Public: a more efficient implementation of import for this adapter.
       # Keeps the current flags if the source's are an older sync version.
+      # Otherwise yields the new flags and version inside the lock, before
+      # replacing the current ones.
       def import(source)
         adapter = self.class.from(source)
         get_all = Typecast.features_hash(adapter.get_all)
@@ -150,6 +152,7 @@ module Flipper
 
         synchronize do
           unless version&.older_than?(@sync_version)
+            yield get_all, version if block_given?
             @features = nil
             @source.replace(get_all)
             @sync_version = version if version

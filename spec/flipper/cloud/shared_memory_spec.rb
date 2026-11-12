@@ -48,8 +48,11 @@ RSpec.describe Flipper::Cloud::SharedMemory do
 
   describe "#reload" do
     let(:store) { Flipper::Adapters::Memory.new }
+    let(:now) { [100] }
 
     before do
+      allow(Process).to receive(:clock_gettime).and_call_original
+      allow(Process).to receive(:clock_gettime).with(Process::CLOCK_MONOTONIC, :second) { now.first }
       Flipper.new(store).enable(:search)
       store.sync_version = version(2)
     end
@@ -68,25 +71,44 @@ RSpec.describe Flipper::Cloud::SharedMemory do
 
     # A sync writes its version before its flags, so the first copy can have
     # only some of them.
-    it "copies again until two copies match" do
+    it "copies again until a copy changes nothing an interval after the last change" do
       subject.reload(store)
       Flipper.new(store).enable(:analytics) # the sync finishes
 
+      subject.reload(store) # too soon to copy again
+      expect(subject.features).to eq(Set["search"])
+
+      now[0] = 110
       subject.reload(store)
       expect(subject.features).to eq(Set["search", "analytics"])
 
-      subject.reload(store) # matches the last copy
+      now[0] = 120
+      subject.reload(store) # changes nothing
+      now[0] = 130
       expect(store).not_to receive(:get_all)
       subject.reload(store)
     end
 
+    # Threads reload on their own clocks, so a copy right after another one
+    # shows nothing about whether a sync was still writing.
+    it "keeps copying when a copy matches one made moments before" do
+      subject.reload(store)
+      subject.import(store, recopy: true) # another thread, moments later
+      Flipper.new(store).enable(:analytics) # the sync finishes
+
+      now[0] = 110
+      subject.reload(store)
+      expect(subject.features).to eq(Set["search", "analytics"])
+    end
+
     it "keeps complete flags imported after a copy of the store" do
-      subject.import_store(store)
+      subject.import(store, recopy: true)
       complete = Flipper::Adapters::Memory.new
       Flipper.new(complete).enable(:analytics)
       complete.sync_version = version(2)
       subject.import(complete)
 
+      now[0] = 110
       expect(store).not_to receive(:get_all)
       subject.reload(store)
       expect(subject.features).to eq(Set["analytics"])
