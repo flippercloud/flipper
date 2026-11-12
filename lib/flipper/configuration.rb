@@ -27,7 +27,9 @@ module Flipper
     #
     def adapter(&block)
       if block_given?
-        @builder.store(block)
+        result = @builder.store(block)
+        changed!
+        result
       else
         @builder.to_adapter
       end
@@ -36,11 +38,15 @@ module Flipper
     # An adapter to use to augment the primary storage adapter. See `AdapterBuilder#use`
     if RUBY_VERSION >= '3.0'
       def use(klass, *args, **kwargs, &block)
-        @builder.use(klass, *args, **kwargs, &block)
+        result = @builder.use(klass, *args, **kwargs, &block)
+        changed!
+        result
       end
     else
       def use(klass, *args, &block)
-        @builder.use(klass, *args, &block)
+        result = @builder.use(klass, *args, &block)
+        changed!
+        result
       end
     end
 
@@ -64,6 +70,8 @@ module Flipper
     def default(&block)
       if block_given?
         @default = block
+        changed!
+        block
       else
         @default.call
       end
@@ -106,7 +114,12 @@ module Flipper
 
     # Public: Returns the configured named instance names.
     def named_instance_names
-      @named_configurations_mutex.synchronize { @named_configurations.keys.dup }
+      @named_configurations_mutex.synchronize { @named_configurations.keys }
+    end
+
+    # Public: Returns the configured named configurations.
+    def named_configurations
+      @named_configurations_mutex.synchronize { @named_configurations.values }
     end
 
     def statsd
@@ -120,6 +133,11 @@ module Flipper
     end
 
     private
+
+    # Internal: Called after the adapter, adapter stack or default changes.
+    # NamedConfiguration uses it to invalidate cached instances.
+    def changed!
+    end
 
     def publish_named_configuration(name, named_configuration)
       @named_configurations_mutex.synchronize do

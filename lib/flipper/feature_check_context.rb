@@ -10,16 +10,20 @@ module Flipper
     # Public: The actors we want to know if a feature is enabled for.
     attr_reader :actors
 
+    # Internal: Resolves group names for the instance that owns the feature.
+    attr_reader :group_resolver
+
     # Internal: Resolver used by expressions that reference another feature.
     attr_reader :feature_resolver
 
     # Internal: Identity used to isolate circular expression tracking.
     attr_reader :instance_key
 
-    def initialize(feature_name:, values:, actors:, feature_resolver: Flipper, instance_key: nil)
+    def initialize(feature_name:, values:, actors:, group_resolver: Flipper, feature_resolver: Flipper, instance_key: nil)
       @feature_name = feature_name
       @values = values
       @actors = actors
+      @group_resolver = group_resolver
       @feature_resolver = feature_resolver
       @instance_key = instance_key
     end

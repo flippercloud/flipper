@@ -1,5 +1,7 @@
 module Flipper
   class NamedProxy
+    extend Forwardable
+
     attr_reader :name
 
     def initialize(name)
@@ -10,29 +12,9 @@ module Flipper
       Flipper.send(:named_instance, name)
     end
 
-    def register(name, &block)
-      configuration.register(name, &block)
-    end
-
-    def groups
-      configuration.groups
-    end
-
-    def group_names
-      configuration.group_names
-    end
-
-    def group_exists?(name)
-      configuration.group_exists?(name)
-    end
-
-    def group(name)
-      configuration.group(name)
-    end
-
-    def unregister_groups
-      configuration.unregister_groups
-    end
+    # Public: Group registration for this named instance.
+    def_delegators :configuration,
+                   :register, :groups, :group_names, :group_exists?, :group, :unregister_groups
 
     def inspect
       "#<#{self.class.name} name=#{name.inspect}>"

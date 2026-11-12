@@ -21,9 +21,9 @@ module Flipper
     #           :memoize - Should adapter be wrapped by memoize adapter or not.
     def initialize(adapter, options = {})
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
-      @group_resolver = options.fetch(:group_resolver, Flipper)
-      @feature_resolver = options.fetch(:feature_resolver, Flipper)
-      @instance_key = options[:instance_key]
+      @group_resolver = Flipper
+      @feature_resolver = Flipper
+      @instance_key = nil
       memoize = options.fetch(:memoize, true)
       adapter = Adapters::Memoizable.new(adapter) if memoize
       @adapter = adapter
@@ -31,11 +31,6 @@ module Flipper
       # Flipper.new(adapter) or Flipper::Cloud.new held in a constant) can
       # memoize features without a non-atomic Hash mutation racing.
       @memoized_features = Concurrent::Map.new
-    end
-
-    # Internal: Assign ownership for a DSL created by a named configuration.
-    def instance_owner=(configuration)
-      Flipper.send(:claim_instance_owner, self, configuration)
     end
 
     # Internal: Claim this DSL for the default or one named instance. Called
@@ -294,30 +289,10 @@ module Flipper
       @group_resolver.group(name)
     end
 
-    # Public: Register a group for this DSL's owning instance.
-    def register(name, &block)
-      @group_resolver.register(name, &block)
-    end
-
-    # Public: Returns registered groups for this DSL's owning instance.
-    def groups
-      @group_resolver.groups
-    end
-
-    # Public: Returns registered group names for this DSL's owning instance.
-    def group_names
-      @group_resolver.group_names
-    end
-
-    # Public: Check if a group exists for this DSL's owning instance.
-    def group_exists?(name)
-      @group_resolver.group_exists?(name)
-    end
-
-    # Public: Clear registered groups for this DSL's owning instance.
-    def unregister_groups
-      @group_resolver.unregister_groups
-    end
+    # Public: Group registration for this DSL's owning instance (Flipper for
+    # the default instance, the named configuration for a named one).
+    def_delegators :@group_resolver,
+                   :register, :groups, :group_names, :group_exists?, :unregister_groups
 
     # Public: Gets the expression for the feature.
     #

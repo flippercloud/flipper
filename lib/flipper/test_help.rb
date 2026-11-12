@@ -15,51 +15,23 @@ module Flipper
     end
 
     def flipper_configure_named_instances(config = Flipper.configuration)
-      return unless config.respond_to?(:named_instance_names)
-
-      named_configurations = config.named_instance_names.map do |name|
-        config.named_configuration(name)
-      end
-      named_test_adapters.select! { |named, _| named_configurations.include?(named) }
-
-      named_configurations.each do |named|
-        named_adapter = Flipper::Adapters::Memory.new
-        named.adapter { named_adapter }
-        named.default { Flipper.new(named.adapter) }
-        named_test_adapters[named] = {
-          adapter: named_adapter,
-          version: named.version,
-        }
-      end
+      named_configurations = prune_named_test_adapters(config)
+      named_configurations.each { |named| install_named_test_adapter(named) }
     end
 
     def flipper_reset
       # Remove all features
       Flipper.features.each(&:remove) rescue nil
 
-      if Flipper.configuration.respond_to?(:named_instance_names)
-        named_configurations = Flipper.configuration.named_instance_names.map do |name|
-          Flipper.configuration.named_configuration(name)
-        end
-        named_test_adapters.select! { |named, _| named_configurations.include?(named) }
-
-        named_configurations.each do |named|
-          test_adapter = named_test_adapters[named]
-          if test_adapter && test_adapter[:version] == named.version
-            Flipper.named(named.name).features.each(&:remove) rescue nil
-          elsif test_adapter
-            Flipper.new(test_adapter[:adapter]).features.each(&:remove)
-          end
-
-          if !test_adapter || test_adapter[:version] != named.version
-            named_adapter = Flipper::Adapters::Memory.new
-            named.adapter { named_adapter }
-            named.default { Flipper.new(named.adapter) }
-            named_test_adapters[named] = {
-              adapter: named_adapter,
-              version: named.version,
-            }
-          end
+      prune_named_test_adapters(Flipper.configuration).each do |named|
+        test_adapter = named_test_adapters[named]
+        if test_adapter && test_adapter[:version] == named.version
+          Flipper.named(named.name).features.each(&:remove) rescue nil
+        else
+          # The named configuration changed since we installed the test
+          # adapter (or we never did), so clean up and install a fresh one.
+          Flipper.new(test_adapter[:adapter]).features.each(&:remove) if test_adapter
+          install_named_test_adapter(named)
         end
       end
 
@@ -72,6 +44,24 @@ module Flipper
 
     def named_test_adapters
       @named_test_adapters ||= {}
+    end
+
+    # Forget test adapters for named configurations that no longer exist and
+    # return the current ones.
+    def prune_named_test_adapters(config)
+      named_configurations = Flipper.send(:named_configurations, config)
+      named_test_adapters.select! { |named, _| named_configurations.include?(named) }
+      named_configurations
+    end
+
+    def install_named_test_adapter(named)
+      named_adapter = Flipper::Adapters::Memory.new
+      named.adapter { named_adapter }
+      named.default { Flipper.new(named.adapter) }
+      named_test_adapters[named] = {
+        adapter: named_adapter,
+        version: named.version,
+      }
     end
   end
 end
