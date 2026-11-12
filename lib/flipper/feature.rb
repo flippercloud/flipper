@@ -37,6 +37,15 @@ module Flipper
     # Private: What is being used to instrument all the things.
     attr_reader :instrumenter
 
+    # Internal: Resolves group names for the instance that owns this feature.
+    attr_reader :group_resolver
+
+    # Internal: Resolves features referenced by expressions.
+    attr_reader :feature_resolver
+
+    # Internal: Identity used to isolate circular expression tracking.
+    attr_reader :instance_key
+
     # Internal: Initializes a new feature instance.
     #
     # name - The Symbol or String name of the feature.
@@ -121,9 +130,7 @@ module Flipper
           feature_name: @name,
           values: gate_values,
           actors: actors,
-          group_resolver: @group_resolver,
-          feature_resolver: @feature_resolver,
-          instance_key: @instance_key
+          feature: self
         )
 
         if open_gate = gates.detect { |gate| gate.open?(context) }
