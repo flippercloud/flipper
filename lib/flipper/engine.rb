@@ -76,7 +76,7 @@ module Flipper
 
       if flipper.test_help
         require "flipper/test_help"
-        Flipper::TestHelp.flipper_configure_named_instances
+        Flipper::TestHelp.send(:flipper_configure_named_instances)
       end
 
       Flipper.send(:named_configurations).each do |named|
