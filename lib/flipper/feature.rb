@@ -548,6 +548,9 @@ module Flipper
       @instrumenter.instrument(InstrumentationName, initial_payload) do |payload|
         payload[:feature] = self
         payload[:feature_name] = name
+        # Named instances say which instance the event came from; the
+        # default instance's payload is unchanged.
+        payload[:instance] = @instance_key if @instance_key
         payload[:operation] = operation
         payload[:result] = yield(payload) if block_given?
       end
