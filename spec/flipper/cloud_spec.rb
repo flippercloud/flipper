@@ -224,11 +224,6 @@ RSpec.describe Flipper::Cloud do
       expect(memories.first).to be_a(Flipper::Cloud::SharedMemory)
     end
 
-    it "skips preloading, because reads come from memory" do
-      described_class.set_default
-      expect(Flipper.preload?).to be(false)
-    end
-
     it "passes more options from the block to each instance" do
       instrumenter = Flipper::Instrumenters::Memory.new
       described_class.set_default { { instrumenter: instrumenter } }

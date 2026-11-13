@@ -249,6 +249,8 @@ RSpec.describe Flipper::Engine do
       expect(Flipper.instance).to be_a(Flipper::Cloud::DSL)
       expect(Flipper.instance.instrumenter).to be_a(Flipper::Cloud::Telemetry::Instrumenter)
       expect(Flipper.instance.instrumenter.instrumenter).to be(ActiveSupport::Notifications)
+      expect(Flipper.instance.cloud_configuration.memory_reads?).to be(true)
+      expect(Flipper.instance.preload?).to be(false)
     end
 
     context "with CLOUD_SYNC_SECRET" do
