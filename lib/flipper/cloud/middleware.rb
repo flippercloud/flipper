@@ -42,7 +42,7 @@ module Flipper
               begin
                 flipper.sync(cache_bust: true)
                 body = JSON.generate({
-                  groups: Flipper.group_names.map { |name| {name: name}}
+                  groups: flipper.group_names.map { |name| {name: name}}
                 })
               rescue Flipper::Adapters::Http::Error => error
                 status = error.response.code.to_i == 402 ? 402 : 500

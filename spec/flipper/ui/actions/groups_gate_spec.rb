@@ -141,4 +141,22 @@ RSpec.describe Flipper::UI::Actions::GroupsGate do
       end
     end
   end
+
+  context "with a named Flipper instance" do
+    let(:app) { build_app(Flipper.cross_app, env_key: "flipper_cross_app") }
+
+    before do
+      Flipper.configure { |config| config.named(:cross_app) }
+      Flipper.cross_app.register(:named_group) { true }
+      post 'features/search/groups',
+           { 'value' => 'named_group', 'operation' => 'enable', 'authenticity_token' => token },
+           'rack.session' => session
+    end
+
+    it "validates and enables groups from the named registry" do
+      expect(last_response.status).to be(302)
+      expect(Flipper.cross_app[:search].groups_value).to include("named_group")
+      expect(Flipper.group_exists?(:named_group)).to be(false)
+    end
+  end
 end
