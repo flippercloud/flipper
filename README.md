@@ -116,6 +116,28 @@ end
 Flipper.enabled?(:product_feature, current_user)
 Flipper.cross_app.enabled?(:shared_feature, current_user)
 Flipper.named(:cross_app).enabled?(:shared_feature, current_user)
+
+# Or give it a name of your own. The object stays valid if configuration changes.
+CrossAppFlipper = Flipper.named(:cross_app)
+CrossAppFlipper.enabled?(:shared_feature, current_user)
+```
+
+`Flipper.cross_app` returns a proxy that forwards to the instance's `Flipper::DSL` (use
+`Flipper.cross_app.instance` for the DSL itself). Calling `config.named(:cross_app)`
+again reopens that instance's settings, the same way calling `config.adapter` again
+replaces the adapter.
+
+Groups belong to one instance: `Flipper.register(:admins)` is not visible to
+`Flipper.cross_app`, so register shared groups on the named instance. Instrumented
+events from a named instance include `instance: :cross_app`, the log subscriber prints
+`Flipper[cross_app] feature(...)`, and statsd counters use `flipper.cross_app.feature.*`.
+
+To manage a named instance in the UI, mount another UI with a banner that says which
+one it is:
+
+```ruby
+# config/routes.rb
+mount Flipper::UI.app(Flipper.cross_app, banner_text: "Cross-app flags", banner_class: "warning") => "/flipper/cross_app"
 ```
 
 Named instances work with any adapter and do not require Flipper Cloud. When using

@@ -14,11 +14,6 @@ module Flipper
       end
     end
 
-    def flipper_configure_named_instances(config = Flipper.configuration)
-      named_configurations = prune_named_test_adapters(config)
-      named_configurations.each { |named| install_named_test_adapter(named) }
-    end
-
     def flipper_reset
       # Remove all features
       Flipper.features.each(&:remove) rescue nil
@@ -41,6 +36,14 @@ module Flipper
     end
 
     private
+
+    # Gives every named instance its own Memory adapter, so tests never build
+    # a named instance's real (Cloud, database) adapter. The Rails engine
+    # calls it after initializers have declared their named instances.
+    def flipper_configure_named_instances(config = Flipper.configuration)
+      named_configurations = prune_named_test_adapters(config)
+      named_configurations.each { |named| install_named_test_adapter(named) }
+    end
 
     def named_test_adapters
       @named_test_adapters ||= {}
