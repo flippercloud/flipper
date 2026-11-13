@@ -75,6 +75,22 @@ RSpec.describe Flipper::UI do
           get '/features'
           expect(last_response.body).to include('Production Environment')
         end
+
+        it 'prefers the banner given to the app' do
+          app = build_app(flipper, banner_text: 'Cross-app project', banner_class: 'warning')
+          status, _, body = app.call(Rack::MockRequest.env_for('/features'))
+          html = body.each.to_a.join
+
+          expect(status).to be(200)
+          expect(html).to include('Cross-app project')
+          expect(html).to include('alert-warning')
+          expect(html).not_to include('Production Environment')
+        end
+      end
+
+      it 'rejects an unknown banner_class for the app' do
+        expect { build_app(flipper, banner_class: 'nope').call(Rack::MockRequest.env_for('/features')) }.
+          to raise_error(Flipper::InvalidConfigurationValue, /banner_class/)
       end
     end
 

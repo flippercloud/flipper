@@ -43,7 +43,8 @@ module Flipper
 
       builder.use Rack::MethodOverride
       builder.use Flipper::Middleware::SetupEnv, flipper, env_key: env_key
-      builder.use Flipper::UI::Middleware, flipper: flipper, env_key: env_key
+      builder.use Flipper::UI::Middleware, flipper: flipper, env_key: env_key,
+        banner_text: options[:banner_text], banner_class: options[:banner_class]
       builder.run app
       klass = self
       app = builder.to_app
