@@ -5,6 +5,8 @@ require "flipper/adapters/poll"
 require "flipper/poller"
 require "flipper/adapters/dual_write"
 require "flipper/adapters/sync/synchronizer"
+require "flipper/cloud/memory_adapter"
+require "flipper/cloud/shared_memory"
 require "flipper/cloud/url_validator"
 require "flipper/cloud/telemetry"
 require "flipper/cloud/telemetry/instrumenter"
@@ -61,9 +63,10 @@ module Flipper
       #  configuration.instrumenter = ActiveSupport::Notifications
       attr_accessor :instrumenter
 
-      # Public: Local adapter that all reads should go to in order to ensure
-      # latency is low and resiliency is high. This adapter is automatically
-      # kept in sync with cloud.
+      # Public: Local adapter that is automatically kept in sync with cloud.
+      # Reads go to it to keep latency low and resiliency high. When Cloud is
+      # Flipper's default (Flipper::Cloud.set_default or the Rails engine),
+      # reads go to a Memory adapter in front of it instead.
       #
       #  # for example, to use active record you could do:
       #  configuration = Flipper::Cloud::Configuration.new
@@ -127,10 +130,13 @@ module Flipper
 
       # Public: Force a sync.
       def sync(cache_bust: false)
-        Flipper::Adapters::Sync::Synchronizer.new(local_adapter, http_adapter, {
-          instrumenter: instrumenter,
-          cache_bust: cache_bust,
-        }).call
+        remote = http_adapter
+        return synchronize(remote, cache_bust: cache_bust) unless @memory
+
+        # Fetch once for both the local adapter and memory.
+        snapshot = Flipper::Adapters::Memory.new(remote.get_all(cache_bust: cache_bust))
+        snapshot.sync_version = remote.sync_version
+        sync_memory(snapshot)
       end
 
       # Public: The method that will be used to synchronize local adapter with
@@ -141,6 +147,12 @@ module Flipper
         else
           :webhook
         end
+      end
+
+      # Internal: Returns true when reads are served from the Memory adapter
+      # that every thread in the process shares.
+      def memory_reads?
+        !@memory.nil?
       end
 
       # Internal: The http client used by the http adapter. Exposed so we can
@@ -169,6 +181,54 @@ module Flipper
         Flipper::Adapters::DualWrite.new(poll_adapter, http_adapter)
       end
 
+      def synchronize(remote, options = {})
+        Flipper::Adapters::Sync::Synchronizer.new(local_adapter, remote, {
+          instrumenter: instrumenter,
+        }.merge(options)).call
+      end
+
+      # Syncs the local adapter, where the version check uses the version other
+      # processes share, then memory. Memory is updated even if the local
+      # adapter fails, and the next sync writes the local adapter again.
+      def sync_memory(snapshot)
+        synchronize(snapshot)
+      ensure
+        import_memory(snapshot)
+      end
+
+      # The sync skips a snapshot older than the local adapter, which another
+      # process synced, so memory takes the stored flags instead. It reads the
+      # storage itself, because a use adapter such as a cache can be behind.
+      def import_memory(snapshot)
+        if snapshot.sync_version&.older_than?(@store.sync_version)
+          @memory.import(@store, recopy: true)
+        else
+          @memory.import(snapshot)
+        end
+      rescue StandardError
+        @memory.import(snapshot)
+      end
+
+      # Builds the adapter Flipper.configure would, with memory in front of its
+      # storage for reads. Syncs go to the storage, and the adapters added with
+      # use wrap both.
+      def memory_adapter
+        fill_memory
+        # In webhook mode, other processes pick up a webhook's sync from the
+        # local adapter.
+        refresh_interval = DEFAULT_POLL_SYNC_INTERVAL if sync_method == :webhook
+        @adapter_builder.wrap(MemoryAdapter.new(@store, @memory, refresh_interval: refresh_interval))
+      end
+
+      # Memory starts empty in each process. Fill it from the local adapter
+      # until it has flags, so a Cloud outage at boot still has flags to read.
+      def fill_memory
+        return unless @memory.sync_version.nil? && @memory.features.empty?
+        @memory.import(@store, recopy: true)
+      rescue StandardError
+        # The local adapter is down. Poll fills memory from Cloud instead.
+      end
+
       def poller
         Flipper::Poller.get(@url + @token, {
           interval: sync_interval,
@@ -178,7 +238,23 @@ module Flipper
       end
 
       def poll_adapter
-        Flipper::Adapters::Poll.new(poller, local_adapter)
+        poller = poller()
+        return Flipper::Adapters::Poll.new(poller, local_adapter) unless @memory
+
+        Flipper::Adapters::Poll.new(poller, memory_adapter, synchronizer: -> {
+          sync_poll(poller.adapter)
+        })
+      end
+
+      # Every thread's Poll calls this after each poll. Threads don't wait on
+      # each other, so ones that read while a new version syncs sync it too.
+      def sync_poll(snapshot)
+        version = snapshot.sync_version
+        return if @memory.synced?(version) && @store.sync_version == version
+
+        @memory.sync(version) { sync_memory(snapshot) }
+      rescue StandardError
+        # Reads keep working from memory if the local adapter is down.
       end
 
       def http_adapter
@@ -236,6 +312,16 @@ module Flipper
 
       def setup_adapter(options)
         set_option :local_adapter, options, default: -> { Adapters::Memory.new }, from_env: false
+        # Internal: Flipper::Cloud.set_default passes the Memory adapter that
+        # every thread shares and the Flipper::Configuration to build reads with.
+        @memory = options[:memory]
+        @adapter_builder = options[:adapter_builder]
+        if @adapter_builder
+          # One storage adapter: wrapped by the use adapters for syncs here,
+          # and behind memory for reads in memory_adapter.
+          @store = @adapter_builder.build_store
+          self.local_adapter = @adapter_builder.wrap(@store)
+        end
         @adapter_block = ->(adapter) { adapter }
       end
 

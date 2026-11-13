@@ -54,6 +54,7 @@ module Flipper
 
           # Record before writing flags so a concurrent sync of older flags
           # into a shared adapter sees this version as soon as possible.
+          # Flipper::Cloud::SharedMemory#reload copies again for this reason.
           if remote_version && remote_version != local_version
             @local.sync_version = remote_version
           end

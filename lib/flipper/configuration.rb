@@ -30,6 +30,17 @@ module Flipper
       end
     end
 
+    # Internal: Builds a new storage adapter, without the adapters added with
+    # #use. Flipper::Cloud uses it and #wrap to put Memory in front of storage.
+    def build_store
+      @builder.build_store
+    end
+
+    # Internal: Wraps adapter with the adapters added with #use.
+    def wrap(adapter)
+      @builder.wrap(adapter)
+    end
+
     # An adapter to use to augment the primary storage adapter. See `AdapterBuilder#use`
     if RUBY_VERSION >= '3.0'
       def use(klass, *args, **kwargs, &block)

@@ -140,6 +140,37 @@ RSpec.describe Flipper::Middleware::Memoizer do
     end
   end
 
+  context 'when the instance does not need preloading' do
+    before { allow(flipper).to receive(:preload?).and_return(false) }
+
+    it 'skips preload: true and still memoizes' do
+      flipper[:stats].enable
+      adapter.reset
+
+      app = lambda do |_env|
+        flipper[:stats].enabled?
+        flipper[:stats].enabled?
+        [200, {}, []]
+      end
+
+      described_class.new(app, preload: true).call(env)
+
+      expect(adapter.count(:get_all)).to be(0)
+      expect(adapter.count(:get)).to be(1)
+    end
+
+    it 'skips preloading specific features' do
+      adapter.reset
+      described_class.new(->(_env) { [200, {}, []] }, preload: %i(stats)).call(env)
+      expect(adapter.operations).to be_empty
+    end
+
+    it 'does not call a preload block' do
+      preload = ->(_request) { raise 'preload block called' }
+      described_class.new(->(_env) { [200, {}, []] }, preload: preload).call(env)
+    end
+  end
+
   context 'with preload specific' do
     let(:app) do
       # ensure scoped for builder block, annoying...

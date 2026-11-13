@@ -1,3 +1,5 @@
+require "flipper/adapters/operation_logger"
+
 RSpec.describe Flipper::AdapterBuilder do
   describe "#initialize" do
     it "instance_eval's block with no arg" do
@@ -52,6 +54,20 @@ RSpec.describe Flipper::AdapterBuilder do
 
       expect(adapter_class).to receive(:new) { |&block| expect(block).to be(expected_block) }.and_return(:adapter)
       expect(subject.to_adapter).to be(:adapter)
+    end
+  end
+
+  describe "#wrap" do
+    it "wraps an adapter with the adapters added with use" do
+      subject.use(Flipper::Adapters::Strict, :warn)
+      store = subject.build_store
+
+      adapter = subject.wrap(Flipper::Adapters::OperationLogger.new(store))
+
+      expect(store).to be_instance_of(Flipper::Adapters::Memory)
+      expect(adapter).to be_instance_of(Flipper::Adapters::Strict)
+      expect(adapter.adapter).to be_instance_of(Flipper::Adapters::OperationLogger)
+      expect(adapter.adapter.adapter).to be(store)
     end
   end
 
