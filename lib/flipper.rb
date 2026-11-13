@@ -2,9 +2,15 @@ require "forwardable"
 require "flipper/groups"
 
 module Flipper
+  # Included before `extend self` so Flipper.register and friends exist on
+  # Rubies that don't propagate later includes, and `include Flipper` keeps
+  # providing the group methods.
+  include Groups
   extend self
   extend Forwardable
-  extend Groups
+
+  # Private: Valid named instance names (they double as Flipper.<name>).
+  NAMED_INSTANCE_NAME = /\A[a-z_][a-z0-9_]*\z/
 
   # Private: The namespace for all instrumented events.
   InstrumentationNamespace = :flipper
@@ -32,55 +38,20 @@ module Flipper
   #
   # Yields Flipper::Configuration instance.
   def configure
-    return unless block_given?
-
-    configured = configuration
-    begin
-      yield configured
-    ensure
-      refresh_named_instance_accessors(configured)
-    end
+    yield configuration if block_given?
   end
 
   # Public: Returns Flipper::Configuration instance.
   def configuration
-    return @configuration if @configuration
-
-    @named_instance_lifecycle_mutex.synchronize do
-      @configuration ||= Configuration.new
-    end
+    @configuration ||= Configuration.new
   end
 
   # Public: Sets Flipper::Configuration instance.
   def configuration=(configuration)
-    @named_instance_lifecycle_mutex.synchronize do
-      previous_configuration = @configuration
-      previous_instance = Thread.current[:flipper_instance]
-      previous_named_instances = Thread.current[:__flipper_named_instances__]
-      validate_named_instance_accessors!(configuration)
-      committed = false
-
-      begin
-        # need to reset flipper instances if configuration changes
-        Thread.current[:flipper_instance] = nil
-        Thread.current[:__flipper_named_instances__] = nil
-        @configuration = configuration
-        sync_named_instance_accessors_without_lock(configuration)
-        committed = true
-      ensure
-        unless committed
-          begin
-            @configuration = previous_configuration
-            sync_named_instance_accessors_without_lock(previous_configuration)
-          ensure
-            Thread.current[:flipper_instance] = previous_instance
-            Thread.current[:__flipper_named_instances__] = previous_named_instances
-          end
-        end
-      end
-
-      configuration
-    end
+    # need to reset flipper instances if configuration changes
+    self.instance = nil
+    Thread.current[:__flipper_named_instances__] = nil
+    @configuration = configuration
   end
 
   # Public: Default per thread flipper instance if configured. You should not
@@ -105,22 +76,26 @@ module Flipper
     Thread.current[:flipper_instance] = flipper
   end
 
-  # Public: Returns a stable proxy for a configured named instance.
+  # Public: Returns a stable proxy for a configured named instance. Each
+  # configured name is also available as Flipper.<name>.
+  #
+  #   CrossAppFlipper = Flipper.named(:cross_app)
+  #   CrossAppFlipper.enabled?(:chat, person)
   def named(name)
     name = normalize_named_instance_name(name)
     named_configuration(name)
-    @named_instance_proxies_mutex.synchronize do
+    @named_instance_proxies[name] || @named_instance_proxies_mutex.synchronize do
       @named_instance_proxies[name] ||= NamedProxy.new(name)
     end
   end
 
   # Internal: Returns the current named configuration or raises if missing.
   def named_configuration(name)
-    name = normalize_named_instance_name(name)
-    configured = configuration.respond_to?(:named_configuration) && configuration.named_configuration(name)
+    config = configuration
+    configured = config.respond_to?(:named_configuration) && config.named_configuration(name)
     return configured if configured
 
-    raise NamedInstanceNotFound, "Named instance #{name.inspect} has not been configured"
+    raise NamedInstanceNotFound, "Named instance #{normalize_named_instance_name(name).inspect} has not been configured"
   end
 
   # Internal: Named configurations, or none for custom configuration objects
@@ -165,18 +140,21 @@ module Flipper
     end
 
     normalized = name.to_s
-    unless normalized.match?(/\A[a-z_][a-z0-9_]*\z/)
+    unless NAMED_INSTANCE_NAME.match?(normalized)
       raise InvalidNamedInstanceName, "Named instance #{name.inspect} must use lowercase snake case"
     end
 
     normalized.to_sym
   end
 
-  # Internal: Reject names that would replace Flipper's existing API.
+  # Internal: Reject names that Flipper.<name> could never reach because
+  # Flipper already responds to them.
   def validate_named_instance_name!(name)
-    @named_instance_lifecycle_mutex.synchronize do
-      validate_named_instance_name_without_lock!(name)
+    if singleton_class.method_defined?(name) || singleton_class.private_method_defined?(name)
+      raise InvalidNamedInstanceName, "Named instance #{name.inspect} conflicts with an existing Flipper method"
     end
+
+    name
   end
 
   private :named_configuration, :named_configurations, :named_instance, :reset_named_instances,
@@ -302,93 +280,29 @@ require 'flipper/version'
 module Flipper
   @named_instance_proxies = {}
   @named_instance_proxies_mutex = Mutex.new
-  @named_instance_accessor_methods = {}
-  @named_instance_lifecycle_mutex = Mutex.new
+  @instance_owner_mutex = Mutex.new
 
   class << self
+    # Flipper.<name> returns the proxy for a configured named instance, the
+    # same object as Flipper.named(:<name>). It is resolved on each call, so
+    # it follows configuration changes without defining or removing methods.
+    def respond_to_missing?(method_name, include_private = false)
+      !named_accessor(method_name).nil? || super
+    end
+
     private
 
-    def refresh_named_instance_accessors(configuration)
-      @named_instance_lifecycle_mutex.synchronize do
-        return unless @configuration.equal?(configuration)
-
-        refresh_named_instance_accessors_without_lock(configuration)
-      end
+    def method_missing(method_name, *args, &block)
+      proxy = named_accessor(method_name) if args.empty? && block.nil?
+      proxy || super
     end
 
-    def refresh_named_instance_accessors_without_lock(configuration)
-      validate_named_instance_accessors!(configuration)
+    def named_accessor(method_name)
+      config = configuration
+      return unless config.respond_to?(:named_configuration)
+      return unless NAMED_INSTANCE_NAME.match?(method_name) && config.named_configuration(method_name)
 
-      named_configurations(configuration).map(&:name).each do |name|
-        next if generated_named_instance_accessor?(name)
-
-        proxy = named(name)
-        Thread.handle_interrupt(Exception => :never) do
-          define_singleton_method(name) { proxy }
-          @named_instance_accessor_methods[name] = method(name)
-        end
-      end
-    end
-
-    # Accessors for names in both configurations stay defined, so threads
-    # calling Flipper.<name> during a replacement never see it missing.
-    def sync_named_instance_accessors_without_lock(configuration)
-      names = named_configurations(configuration).map(&:name)
-      (@named_instance_accessor_methods.keys - names).each do |name|
-        remove_named_instance_accessor_without_lock(name)
-      end
-      refresh_named_instance_accessors_without_lock(configuration)
-    end
-
-    def remove_named_instance_accessor_without_lock(name)
-      singleton_class.send(:remove_method, name) if generated_named_instance_accessor?(name)
-      @named_instance_accessor_methods.delete(name)
-    end
-
-    def validate_named_instance_accessors!(configuration)
-      named_configurations(configuration).each do |named|
-        validate_named_instance_name_without_lock!(named.name)
-      end
-    end
-
-    def validate_named_instance_name_without_lock!(name)
-      name = normalize_named_instance_name(name)
-      return name if generated_named_instance_accessor?(name)
-
-      if singleton_class.public_method_defined?(name) ||
-          singleton_class.protected_method_defined?(name) ||
-          singleton_class.private_method_defined?(name)
-        raise InvalidNamedInstanceName, "Named instance #{name.inspect} conflicts with an existing Flipper method"
-      end
-
-      name
-    end
-
-    def generated_named_instance_accessor?(name)
-      generated_method = @named_instance_accessor_methods[name]
-      return false unless generated_method
-
-      current_method = method(name) if respond_to?(name, true)
-      current_method == generated_method
-    end
-
-    def publish_named_configuration(configuration, name, named_configuration)
-      @named_instance_lifecycle_mutex.synchronize do
-        active = @configuration.equal?(configuration)
-        validate_named_instance_name_without_lock!(name) if active
-        committed = false
-
-        begin
-          configuration.send(:publish_named_configuration, name, named_configuration)
-          refresh_named_instance_accessors_without_lock(configuration) if active
-          committed = true
-        ensure
-          unless committed
-            configuration.send(:remove_named_configuration, name, named_configuration)
-            remove_named_instance_accessor_without_lock(name) if active
-          end
-        end
-      end
+      @named_instance_proxies[method_name] || named(method_name)
     end
 
     # Claims a DSL for the default instance (owner Flipper) or a named
@@ -397,7 +311,7 @@ module Flipper
       dsl = unwrap_flipper_dsl(instance)
       return false unless dsl
 
-      @named_instance_lifecycle_mutex.synchronize do
+      @instance_owner_mutex.synchronize do
         dsl.send(:claim_instance_owner, owner)
       end
       true

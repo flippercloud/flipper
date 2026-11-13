@@ -34,7 +34,7 @@ module Flipper
     end
 
     # Internal: Claim this DSL for the default or one named instance. Called
-    # while Flipper's named-instance lifecycle lock is held.
+    # while Flipper's instance owner lock is held.
     def claim_instance_owner(configuration)
       return self if @instance_owner.equal?(configuration)
 
