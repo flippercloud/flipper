@@ -98,10 +98,14 @@ module Flipper
       end
 
       # A new name is only registered once its block finishes, so a block that
-      # raises leaves no half-configured instance behind.
+      # raises leaves no half-configured instance behind. No lock is held
+      # while the block runs; if another thread registered the name first,
+      # reopen theirs with this block so neither thread's settings are lost.
       created = NamedConfiguration.new(name)
       yield created if block_given?
-      @named_configurations_mutex.synchronize { @named_configurations[name] ||= created }
+      published = @named_configurations_mutex.synchronize { @named_configurations[name] ||= created }
+      yield published if block_given? && !published.equal?(created)
+      published
     end
 
     # Public: Returns a configured named child without creating it.
