@@ -329,6 +329,41 @@ RSpec.describe "named Flipper instances" do
     expect(adapter.get(Flipper.cross_app.feature(:chat))[:boolean]).to eq("true")
   end
 
+  it "keeps both threads' settings when they register the same name at once" do
+    first_in_block = Queue.new
+    release = Queue.new
+    first = Thread.new do
+      Flipper.configuration.named(:cross_app) do |named|
+        named.memoize = false
+        first_in_block << true
+        release.pop if release.empty? && !named.env_key.eql?("cross")
+      end
+    end
+    first_in_block.pop
+    # The second registration finishes while the first block is still running.
+    second = Thread.new { Flipper.configuration.named(:cross_app) { |named| named.env_key = "cross" } }
+    expect(second.join(2)).to be(second)
+    release << true
+    expect(first.join(2)).to be(first)
+
+    named = Flipper.configuration.named_configuration(:cross_app)
+    expect(named.memoize).to be(false)
+    expect(named.env_key).to eq("cross")
+  ensure
+    release << true
+    [first, second].compact.each { |thread| thread.join(2) }
+  end
+
+  it "does not make other registrations wait while a named block runs" do
+    inner = nil
+    Flipper.configuration.named(:outer) do
+      inner = Thread.new { Flipper.configuration.named(:inner) }
+      expect(inner.join(2)).to be(inner)
+    end
+
+    expect(Flipper.configuration.named_instance_names).to include(:outer, :inner)
+  end
+
   it "resolves Flipper.<name> from the current configuration" do
     expect(Flipper).not_to respond_to(:cross_app)
     expect { Flipper.cross_app }.to raise_error(NoMethodError)
