@@ -37,7 +37,7 @@ module Flipper
       end
 
       def enable(feature, gate, resource)
-        if gate.is_a?(Flipper::Gates::Actor) && !self.class.sync_mode && over_limit?(feature)
+        if gate.is_a?(Flipper::Gates::Actor) && !self.class.sync_mode && over_limit?(feature, resource)
           raise LimitExceeded, "Actor limit of #{@limit} exceeded for feature #{feature.key}. See https://www.flippercloud.io/docs/features/actors#limitations"
         else
           super
@@ -46,8 +46,9 @@ module Flipper
 
       private
 
-      def over_limit?(feature)
-        feature.actors_value.size >= @limit
+      def over_limit?(feature, resource)
+        actors = feature.actors_value
+        actors.size >= @limit && !actors.include?(resource.value)
       end
     end
   end
