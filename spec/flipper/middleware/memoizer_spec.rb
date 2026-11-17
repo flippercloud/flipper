@@ -126,17 +126,19 @@ RSpec.describe Flipper::Middleware::Memoizer do
       # clear the log of operations
       adapter.reset
 
+      results = []
       app = lambda do |_env|
-        flipper[:other].enabled?
-        flipper[:other].enabled?
+        results << flipper[:other].enabled?
+        results << flipper[:other].enabled?
         [200, {}, []]
       end
 
       middleware = described_class.new(app, preload: true)
       middleware.call(env)
 
-      expect(adapter.count(:get)).to be(1)
-      expect(adapter.last(:get).args).to eq([flipper[:other]])
+      expect(results).to eq([false, false])
+      expect(adapter.count(:get_all)).to eq(1)
+      expect(adapter.count(:get)).to eq(0)
     end
   end
 
