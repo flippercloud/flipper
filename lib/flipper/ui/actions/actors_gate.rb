@@ -1,6 +1,7 @@
 require 'flipper/ui/action'
 require 'flipper/ui/decorators/feature'
 require 'flipper/ui/util'
+require 'flipper/adapters/actor_limit'
 
 module Flipper
   module UI
@@ -28,15 +29,19 @@ module Flipper
             redirect_to("/features/#{Flipper::UI::Util.escape feature.key}/actors?error=#{Flipper::UI::Util.escape error}")
           end
 
-          values.each do |value|
-            actor = Flipper::Actor.new(value)
+          begin
+            values.each do |value|
+              actor = Flipper::Actor.new(value)
 
-            case params['operation']
-            when 'enable'
-              feature.enable_actor actor
-            when 'disable'
-              feature.disable_actor actor
+              case params['operation']
+              when 'enable'
+                feature.enable_actor actor
+              when 'disable'
+                feature.disable_actor actor
+              end
             end
+          rescue Flipper::Adapters::ActorLimit::LimitExceeded => exception
+            redirect_to("/features/#{Flipper::UI::Util.escape feature.key}/actors?error=#{Flipper::UI::Util.escape exception.message}")
           end
 
           redirect_to("/features/#{Flipper::UI::Util.escape feature.key}")

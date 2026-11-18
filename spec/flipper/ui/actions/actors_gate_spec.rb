@@ -129,6 +129,36 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
       end
     end
 
+    context "when the feature is at the actor limit" do
+      let(:flipper) { build_flipper(Flipper::Adapters::ActorLimit.new(build_memory_adapter, 2)) }
+
+      before do
+        flipper[:search].enable_actor Flipper::Actor.new('User;1')
+        flipper[:search].enable_actor Flipper::Actor.new('User;2')
+      end
+
+      it "redirects back to the form with the limit error" do
+        post 'features/search/actors',
+             { 'value' => 'User;3', 'operation' => 'enable', 'authenticity_token' => token },
+             'rack.session' => session
+
+        expect(last_response.status).to be(302)
+        expect(last_response.headers['location']).to start_with('/features/search/actors?error=')
+        expect(Rack::Utils.parse_query(URI(last_response.headers['location']).query)['error']).to include('Actor limit of 2 exceeded')
+        expect(flipper[:search].actors_value).to eq(Set['User;1', 'User;2'])
+      end
+
+      it "still allows disabling actors" do
+        post 'features/search/actors',
+             { 'value' => 'User;1', 'operation' => 'disable', 'authenticity_token' => token },
+             'rack.session' => session
+
+        expect(last_response.status).to be(302)
+        expect(last_response.headers['location']).to eq('/features/search')
+        expect(flipper[:search].actors_value).to eq(Set['User;2'])
+      end
+    end
+
     context "when a readonly adapter is configured" do
       let(:value) { 'User;6' }
 
