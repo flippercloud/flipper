@@ -182,19 +182,6 @@ module Flipper
         @headers[name] = value
       end
 
-      class Breadcrumb
-        attr_reader :text, :href
-
-        def initialize(text, href = nil)
-          @text = text
-          @href = href
-        end
-
-        def active?
-          @href.nil?
-        end
-      end
-
       # Private
       def view_with_layout(&block)
         view :layout, &block
