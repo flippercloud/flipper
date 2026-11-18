@@ -111,6 +111,42 @@ RSpec.describe Flipper::Api::V1::Actions::Actors do
       end
     end
 
+    # PATH_INFO as a server hands it over: raw bytes, still percent-encoded.
+    def get_actor_path(path)
+      env = Rack::MockRequest.env_for('/actors/placeholder', 'QUERY_STRING' => 'keys=my_feature_4')
+      env['PATH_INFO'] = path.b
+      status, _headers, body = app.call(env)
+      [status, JSON.parse(body.each_with_object(+'') { |part, buffer| buffer << part })]
+    end
+
+    {
+      '/actors/User;1' => 'User;1',
+      '/actors/User%3B1' => 'User;1',
+      '/actors/John%20Doe' => 'John Doe',
+      '/actors/user+tag@example.com' => 'user+tag@example.com',
+      '/actors/user%2Btag%40example.com' => 'user+tag@example.com',
+      '/actors/caf%C3%A9' => 'café',
+      '/actors/café' => 'café',
+      '/actors/50%off' => '50%off',
+    }.each do |path, flipper_id|
+      it "reads #{path} as flipper id #{flipper_id.inspect}" do
+        flipper[:my_feature_4].enable_actor(Flipper::Actor.new(flipper_id))
+
+        status, body = get_actor_path(path)
+
+        expect(status).to eq(200)
+        expect(body['flipper_id']).to eq(flipper_id)
+        expect(body['features']['my_feature_4']['enabled']).to be(true)
+      end
+    end
+
+    it 'rejects a flipper id that is not valid UTF-8' do
+      status, body = get_actor_path('/actors/%FF')
+
+      expect(status).to eq(400)
+      expect(body['code']).to eq(8)
+    end
+
     context 'when flipper id is missing' do
       before do
         get "/actors"

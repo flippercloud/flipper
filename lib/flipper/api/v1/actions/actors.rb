@@ -28,9 +28,16 @@ module Flipper
 
           private
 
+          # Decodes %XX escapes so "User%3B1" means "User;1". Uses path
+          # decoding rather than form decoding so a "+" stays a "+", as in
+          # "user+tag@example.com".
           def flipper_id
             match = request.path_info.match(self.class.route_regex)
-            match ? match[:flipper_id] : nil
+            return unless match
+
+            value = Rack::Utils.unescape_path(match[:flipper_id]).force_encoding(Encoding::UTF_8)
+            json_error_response(:request_invalid) unless value.valid_encoding?
+            value
           end
         end
       end
