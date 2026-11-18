@@ -81,7 +81,9 @@ module Flipper
         def uri_for_path(path)
           uri = @uri.dup
           path_uri = URI(path)
-          uri.path += path_uri.path
+          # Drop a trailing slash on the configured url so "/api/" doesn't
+          # turn "/features" into "/api//features".
+          uri.path = uri.path.sub(%r{/+\z}, "") + path_uri.path
           uri.query = [uri.query, path_uri.query].compact.join('&') if path_uri.query
           uri
         end
