@@ -491,5 +491,12 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
         expect(json_response).to eq(expected)
       end
     end
+
+    it 'responds to a multipart request without rack.input like a missing name' do
+      status, _headers, body = call_without_rack_input('/features', method: 'POST', 'CONTENT_TYPE' => 'multipart/form-data; boundary=x')
+
+      expect(status).to eq(422)
+      expect(JSON.parse(body)['code']).to eq(5)
+    end
   end
 end

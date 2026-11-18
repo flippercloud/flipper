@@ -32,7 +32,7 @@ module Flipper
             Rack::CONTENT_TYPE => "application/json",
           }
           body = "{}"
-          payload = request.body ? request.body.read : "" # optional since Rack 3.1
+          payload = request.body&.read || "" # rack.input is optional since Rack 3.1
           signature = request.env["HTTP_FLIPPER_CLOUD_SIGNATURE"]
           flipper = env.fetch(@env_key)
 

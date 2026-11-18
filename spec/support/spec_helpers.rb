@@ -38,21 +38,20 @@ module SpecHelpers
   end
 
   def raw_api_get(path, query_string)
-    env = Rack::MockRequest.env_for(path, 'QUERY_STRING' => query_string)
-    status, headers, body = app.call(env)
-    response_body = body.each_with_object(+'') { |part, buffer| buffer << part }
-    [status, headers, JSON.parse(response_body)]
-  ensure
-    body.close if body.respond_to?(:close)
+    status, headers, body = call_app(Rack::MockRequest.env_for(path, 'QUERY_STRING' => query_string))
+    [status, headers, JSON.parse(body)]
   end
 
-  # Rack 3.1 made rack.input optional, and Rack::MockRequest leaves it out of
-  # requests without a body. Earlier versions require it.
+  # Rack 3.1 made rack.input optional; older Rack requires it.
   def call_without_rack_input(path, options = {})
     skip 'rack.input is required before Rack 3.1' if Gem::Version.new(Rack.release) < Gem::Version.new('3.1')
 
     env = Rack::MockRequest.env_for(path, options)
     env.delete('rack.input')
+    call_app(env)
+  end
+
+  def call_app(env)
     status, headers, body = app.call(env)
     response_body = body.each_with_object(+'') { |part, buffer| buffer << part }
     [status, headers, response_body]
