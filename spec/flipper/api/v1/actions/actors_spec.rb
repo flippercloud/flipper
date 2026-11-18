@@ -111,6 +111,18 @@ RSpec.describe Flipper::Api::V1::Actions::Actors do
       end
     end
 
+    # PATH_INFO as a server hands it over: raw bytes, still percent-encoded.
+    # Separate from raw_api_get so this file doesn't touch the shared helper
+    # that #1107 also changes.
+    def get_actor_path(path, query_string)
+      env = Rack::MockRequest.env_for('/actors/placeholder', 'QUERY_STRING' => query_string)
+      env['PATH_INFO'] = path.b
+      status, _headers, body = app.call(env)
+      [status, JSON.parse(body.each_with_object(+'') { |part, buffer| buffer << part })]
+    ensure
+      body.close if body.respond_to?(:close)
+    end
+
     {
       '/actors/User;1' => 'User;1',
       '/actors/User%3B1' => 'User;1',
@@ -124,7 +136,7 @@ RSpec.describe Flipper::Api::V1::Actions::Actors do
       it "reads #{path} as flipper id #{flipper_id.inspect}" do
         flipper[:my_feature_4].enable_actor(Flipper::Actor.new(flipper_id))
 
-        status, _headers, body = raw_api_get('/actors/placeholder', 'keys=my_feature_4', path_info: path)
+        status, body = get_actor_path(path, 'keys=my_feature_4')
 
         expect(status).to eq(200)
         expect(body['flipper_id']).to eq(flipper_id)
@@ -133,7 +145,7 @@ RSpec.describe Flipper::Api::V1::Actions::Actors do
     end
 
     it 'rejects a flipper id that is not valid UTF-8' do
-      status, _headers, body = raw_api_get('/actors/placeholder', '', path_info: '/actors/%FF')
+      status, body = get_actor_path('/actors/%FF', '')
 
       expect(status).to eq(400)
       expect(body['code']).to eq(8)
