@@ -26,6 +26,13 @@ RSpec.describe Flipper::Adapters::Http::Client do
     end
   end
 
+  it "leaves a URI passed as the url untouched" do
+    url = URI("http://example.com/flipper/api/").freeze
+    client = described_class.new(url: url)
+    expect(client.uri.path).to eq("/flipper/api")
+    expect(url.path).to eq("/flipper/api/")
+  end
+
   describe "#add_header" do
     it "can add string header" do
       client = described_class.new(url: "http://example.com")
