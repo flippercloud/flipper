@@ -61,29 +61,16 @@ RSpec.describe Flipper::Adapters::Http::Client do
 
   describe "#get" do
     [
-      "http://example.com/flipper/api",
-      "http://example.com/flipper/api/",
-    ].each do |url|
-      it "requests the path under #{url}" do
-        stub = stub_request(:get, "http://example.com/flipper/api/features?exclude_gate_names=true")
-        client = described_class.new(url: url)
-        client.get("/features?exclude_gate_names=true")
+      ["http://example.com/flipper/api", "/features", "http://example.com/flipper/api/features"],
+      ["http://example.com/flipper/api/", "/features", "http://example.com/flipper/api/features"],
+      ["http://example.com/", "/features", "http://example.com/features"],
+      ["http://example.com/flipper/api?token=abc", "/features?keys=a", "http://example.com/flipper/api/features?token=abc&keys=a"],
+    ].each do |url, path, expected|
+      it "requests #{expected} for #{path} under #{url}" do
+        stub = stub_request(:get, expected)
+        described_class.new(url: url).get(path)
         expect(stub).to have_been_requested
       end
-    end
-
-    it "requests the path under a url with only a trailing slash" do
-      stub = stub_request(:get, "http://example.com/features")
-      client = described_class.new(url: "http://example.com/")
-      client.get("/features")
-      expect(stub).to have_been_requested
-    end
-
-    it "keeps the url's query string" do
-      stub = stub_request(:get, "http://example.com/flipper/api/features?token=abc&keys=a")
-      client = described_class.new(url: "http://example.com/flipper/api?token=abc")
-      client.get("/features?keys=a")
-      expect(stub).to have_been_requested
     end
   end
 end

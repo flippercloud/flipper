@@ -30,6 +30,9 @@ module Flipper
 
         def initialize(options = {})
           @uri = URI(options.fetch(:url))
+          # Request paths start with "/", so a trailing slash here would
+          # turn "/api/" + "/features" into "/api//features".
+          @uri.path = @uri.path.sub(%r{/+\z}, "")
           @basic_auth_username = options[:basic_auth_username]
           @basic_auth_password = options[:basic_auth_password]
           @read_timeout = options[:read_timeout]
@@ -81,9 +84,7 @@ module Flipper
         def uri_for_path(path)
           uri = @uri.dup
           path_uri = URI(path)
-          # Drop a trailing slash on the configured url so "/api/" doesn't
-          # turn "/features" into "/api//features".
-          uri.path = uri.path.sub(%r{/+\z}, "") + path_uri.path
+          uri.path += path_uri.path
           uri.query = [uri.query, path_uri.query].compact.join('&') if path_uri.query
           uri
         end
