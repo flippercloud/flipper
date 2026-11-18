@@ -86,6 +86,20 @@ RSpec.describe Flipper::Cloud::Middleware do
     end
   end
 
+  context 'when the request has no rack.input' do
+    let(:app) { Flipper::Cloud.app(flipper) }
+
+    it 'does not perform webhook sync' do
+      webhook_regular_stub = stub_request_for_token('regular', from_webhook: true)
+      stub_request_for_token('regular', from_webhook: false)
+
+      status, _headers, _body = call_without_rack_input('/', method: 'POST', "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value)
+
+      expect(status).to eq(400)
+      expect(webhook_regular_stub).not_to have_been_requested
+    end
+  end
+
   context 'when signature timestamp is outside the tolerance' do
     let(:app) { Flipper::Cloud.app(flipper) }
     let(:timestamp) { Time.now - (60 * 60) }

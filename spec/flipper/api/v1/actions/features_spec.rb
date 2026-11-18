@@ -99,6 +99,16 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
       end
     end
 
+    it 'responds to a json request without rack.input' do
+      flipper[:my_feature].enable
+      expected_response = raw_api_get('/features', '')
+
+      status, _headers, body = call_without_rack_input('/features', 'CONTENT_TYPE' => 'application/json')
+
+      expect(status).to eq(200)
+      expect(JSON.parse(body)).to eq(expected_response.last)
+    end
+
     context 'with flipper features' do
       before do
         flipper[:my_feature].enable

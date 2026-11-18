@@ -93,6 +93,8 @@ module Flipper
 
       def self.read_bounded(input, limit)
         body = ''.b
+        return body unless input # optional since Rack 3.1
+
         while body.bytesize < limit
           chunk = input.read(limit - body.bytesize)
           break if chunk.nil? || chunk.empty?

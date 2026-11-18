@@ -72,6 +72,22 @@ RSpec.describe Flipper::Api::V1::Actions::Import do
       end
     end
 
+    context 'request without rack.input' do
+      it 'responds like an empty body' do
+        flipper.enable(:search)
+
+        status, _headers, body = call_without_rack_input('/import', method: 'POST', 'CONTENT_TYPE' => 'application/json')
+
+        expect(status).to eq(422)
+        expect(JSON.parse(body)).to eq(
+          'code' => 6,
+          'message' => 'Import invalid.',
+          'more_info' => api_error_code_reference_url,
+        )
+        expect(flipper.features.map(&:key)).to eq(['search'])
+      end
+    end
+
     context 'body larger than the max import size' do
       before do
         stub_const("Flipper::Exporters::Json::Export::MAX_BYTES", 1)

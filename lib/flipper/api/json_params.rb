@@ -132,6 +132,8 @@ module Flipper
 
       def read_body(env, length)
         input = env[REQUEST_BODY]
+        return '' unless input # optional since Rack 3.1
+
         body = length ? ParameterParsing.read_bounded(input, length) : (input.read || '')
         if input.respond_to?(:rewind)
           input.rewind
