@@ -143,8 +143,9 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
              'rack.session' => session
 
         expect(last_response.status).to be(302)
-        expect(last_response.headers['location']).to start_with('/features/search/actors?error=')
-        expect(Rack::Utils.parse_query(URI(last_response.headers['location']).query)['error']).to include('Actor limit of 2 exceeded')
+        location = URI(last_response.headers['location'])
+        expect(location.path).to eq('/features/search/actors')
+        expect(Rack::Utils.parse_query(location.query)['error']).to include('Actor limit of 2 exceeded')
         expect(flipper[:search].actors_value).to eq(Set['User;1', 'User;2'])
       end
 
