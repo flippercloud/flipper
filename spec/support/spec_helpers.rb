@@ -37,8 +37,11 @@ module SpecHelpers
     JSON.parse(body)
   end
 
-  def raw_api_get(path, query_string)
+  # path_info - optional raw PATH_INFO, as a server passes it (bytes, still
+  #             percent-encoded), for paths Rack::MockRequest can't parse.
+  def raw_api_get(path, query_string, path_info: nil)
     env = Rack::MockRequest.env_for(path, 'QUERY_STRING' => query_string)
+    env['PATH_INFO'] = path_info.b if path_info
     status, headers, body = app.call(env)
     response_body = body.each_with_object(+'') { |part, buffer| buffer << part }
     [status, headers, JSON.parse(response_body)]

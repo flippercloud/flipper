@@ -9,6 +9,7 @@ module Flipper
           route %r{\A/actors/(?<flipper_id>.*)/?\Z}
 
           def get
+            actor = Flipper::Actor.new(flipper_id)
             keys = string_param('keys')
             features = if keys
                          names = keys.split(',')
@@ -21,7 +22,6 @@ module Flipper
                          flipper.features
                        end
 
-            actor = Flipper::Actor.new(flipper_id)
             decorated_actor = Decorators::Actor.new(actor, features)
             json_response(decorated_actor.as_json)
           end
