@@ -93,6 +93,8 @@ module Flipper
 
       def self.read_bounded(input, limit)
         body = ''.b
+        return body unless input # optional since Rack 3.1
+
         while body.bytesize < limit
           chunk = input.read(limit - body.bytesize)
           break if chunk.nil? || chunk.empty?
@@ -120,6 +122,8 @@ module Flipper
       # discarded because only field names matter to this validation pass.
       def self.validate_multipart_shapes(env)
         input = env['rack.input'.freeze]
+        return unless input # optional since Rack 3.1
+
         parser = RecordingQueryParser.new(Rack::Utils.default_query_parser)
         validation_env = env.dup
         validation_env.delete_if { |key, _| key.start_with?('rack.request.') }

@@ -57,6 +57,22 @@ RSpec.describe Flipper::Api::JsonParams do
     end
   end
 
+  describe 'json request without rack.input' do
+    it 'handles a get like an empty body' do
+      status, _headers, body = call_without_rack_input('/?language=ruby', 'CONTENT_TYPE' => 'application/json')
+
+      expect(status).to eq(200)
+      expect(JSON.parse(body)).to eq('language' => 'ruby')
+    end
+
+    it 'handles a post like an empty body' do
+      status, _headers, body = call_without_rack_input('/?language=ruby', method: 'POST', 'CONTENT_TYPE' => 'application/json')
+
+      expect(status).to eq(200)
+      expect(JSON.parse(body)).to eq('language' => 'ruby')
+    end
+  end
+
   describe 'url-encoded request' do
     it 'handles params the same as a json request' do
       response = post '/', flipper_id: 'User;2'
