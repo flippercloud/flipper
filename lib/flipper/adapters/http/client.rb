@@ -29,7 +29,10 @@ module Flipper
         attr_reader :max_retries, :debug_output
 
         def initialize(options = {})
-          @uri = URI(options.fetch(:url))
+          @uri = URI(options.fetch(:url)).dup
+          # Request paths start with "/", so a trailing slash here would
+          # turn "/api/" + "/features" into "/api//features".
+          @uri.path = @uri.path.sub(%r{/+\z}, "")
           @basic_auth_username = options[:basic_auth_username]
           @basic_auth_password = options[:basic_auth_password]
           @read_timeout = options[:read_timeout]

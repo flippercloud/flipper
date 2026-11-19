@@ -26,6 +26,13 @@ RSpec.describe Flipper::Adapters::Http::Client do
     end
   end
 
+  it "leaves a URI passed as the url untouched" do
+    url = URI("http://example.com/flipper/api/").freeze
+    client = described_class.new(url: url)
+    expect(client.uri.path).to eq("/flipper/api")
+    expect(url.path).to eq("/flipper/api/")
+  end
+
   describe "#add_header" do
     it "can add string header" do
       client = described_class.new(url: "http://example.com")
@@ -56,6 +63,21 @@ RSpec.describe Flipper::Adapters::Http::Client do
       client.add_header("key", "value 1")
       client.add_header("key", "value 2")
       expect(client.headers.fetch("key")).to eq("value 2")
+    end
+  end
+
+  describe "#get" do
+    [
+      ["http://example.com/flipper/api", "/features", "http://example.com/flipper/api/features"],
+      ["http://example.com/flipper/api/", "/features", "http://example.com/flipper/api/features"],
+      ["http://example.com/", "/features", "http://example.com/features"],
+      ["http://example.com/flipper/api?token=abc", "/features?keys=a", "http://example.com/flipper/api/features?token=abc&keys=a"],
+    ].each do |url, path, expected|
+      it "requests #{expected} for #{path} under #{url}" do
+        stub = stub_request(:get, expected)
+        described_class.new(url: url).get(path)
+        expect(stub).to have_been_requested
+      end
     end
   end
 end
