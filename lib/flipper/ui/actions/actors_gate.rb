@@ -1,6 +1,7 @@
 require 'flipper/ui/action'
 require 'flipper/ui/decorators/feature'
 require 'flipper/ui/util'
+require 'flipper/adapters/actor_limit'
 
 module Flipper
   module UI
@@ -24,8 +25,7 @@ module Flipper
           values = value.split(UI.configuration.actors_separator).map(&:strip).uniq
 
           if values.empty?
-            error = "#{value.inspect} is not a valid actor value."
-            redirect_to("/features/#{Flipper::UI::Util.escape feature.key}/actors?error=#{Flipper::UI::Util.escape error}")
+            redirect_to_form(feature, "#{value.inspect} is not a valid actor value.")
           end
 
           values.each do |value|
@@ -40,6 +40,14 @@ module Flipper
           end
 
           redirect_to("/features/#{Flipper::UI::Util.escape feature.key}")
+        rescue Flipper::Adapters::ActorLimit::LimitExceeded => exception
+          redirect_to_form(feature, exception.message)
+        end
+
+        private
+
+        def redirect_to_form(feature, error)
+          redirect_to("/features/#{Flipper::UI::Util.escape feature.key}/actors?error=#{Flipper::UI::Util.escape error}")
         end
       end
     end
