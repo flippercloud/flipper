@@ -31,8 +31,9 @@ module Flipper
             end
 
             redirect_to("/features/#{Flipper::UI::Util.escape feature.key}")
-          elsif params['operation'] == 'disable' && feature.groups_value.include?(value)
-            # A group enabled before it was unregistered can still be removed.
+          elsif params['operation'] == 'disable'
+            # Only enabling needs a registered group. Removing one that was
+            # unregistered after it was enabled has to work too.
             feature.disable_group value
             redirect_to("/features/#{Flipper::UI::Util.escape feature.key}")
           else
