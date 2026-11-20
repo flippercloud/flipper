@@ -140,5 +140,37 @@ RSpec.describe Flipper::UI::Actions::GroupsGate do
         end
       end
     end
+
+    context 'disabling a group that is no longer registered' do
+      before do
+        flipper[:search].enable_group :admins
+        Flipper.unregister_groups
+        post 'features/search/groups',
+             { 'value' => 'admins', 'operation' => 'disable', 'authenticity_token' => token },
+             'rack.session' => session
+      end
+
+      it 'removes item from members' do
+        expect(flipper[:search].groups_value).not_to include('admins')
+      end
+
+      it 'redirects back to feature' do
+        expect(last_response.status).to be(302)
+        expect(last_response.headers['location']).to eq('/features/search')
+      end
+    end
+
+    context 'disabling an unregistered group the feature does not have' do
+      before do
+        post 'features/search/groups',
+             { 'value' => 'not_here', 'operation' => 'disable', 'authenticity_token' => token },
+             'rack.session' => session
+      end
+
+      it 'redirects back to the form with an error' do
+        expect(last_response.status).to be(302)
+        expect(last_response.headers['location']).to eq('/features/search/groups?error=The+group+named+%22not_here%22+has+not+been+registered.')
+      end
+    end
   end
 end
