@@ -22,7 +22,13 @@ module Flipper
 
           feature = flipper[feature_name]
           value = params['value'].to_s.strip
-          values = value.split(UI.configuration.actors_separator).map(&:strip).uniq
+          # The Remove button posts one enabled actor, whose id may contain the
+          # separator (e.g. "OrderItem;[1, 2]" from a composite primary key).
+          values = if params['operation'] == 'disable' && feature.actors_value.include?(value)
+            [value]
+          else
+            value.split(UI.configuration.actors_separator).map(&:strip).uniq
+          end
 
           if values.empty?
             redirect_to_form(feature, "#{value.inspect} is not a valid actor value.")

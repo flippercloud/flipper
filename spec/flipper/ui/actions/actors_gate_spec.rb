@@ -228,5 +228,26 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
         end
       end
     end
+
+    context 'disabling an actor whose id contains the separator' do
+      let(:value) { 'OrderItem;[1, 2]' }
+
+      before do
+        flipper[:search].enable_actor Flipper::Actor.new(value)
+        flipper[:search].enable_actor Flipper::Actor.new('User;1')
+        post 'features/search/actors',
+             { 'value' => value, 'operation' => 'disable', 'authenticity_token' => token },
+             'rack.session' => session
+      end
+
+      it 'removes only that actor' do
+        expect(flipper[:search].actors_value).to eq(Set['User;1'])
+      end
+
+      it 'redirects back to feature' do
+        expect(last_response.status).to be(302)
+        expect(last_response.headers['location']).to eq('/features/search')
+      end
+    end
   end
 end
