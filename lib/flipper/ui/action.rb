@@ -227,8 +227,12 @@ module Flipper
       end
 
       # Private: Returns the request method converted to an action method.
+      # Converts head to get.
       def request_method_name
-        @request_method_name ||= @request.request_method.downcase
+        @request_method_name ||= begin
+          name = @request.request_method.downcase
+          name == "head" ? "get" : name
+        end
       end
 
       def csrf_input_tag

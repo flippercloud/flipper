@@ -30,6 +30,7 @@ module Flipper
       app = ->(_) { [200, { Rack::CONTENT_TYPE => 'text/html' }, ['']] }
       builder = Rack::Builder.new
       yield builder if block_given?
+      builder.use Rack::Head
 
       # Only use Rack::Protection::AuthenticityToken if no other options are
       # provided. Should avoid some pain for some people. If any options are
