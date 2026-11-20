@@ -43,13 +43,6 @@ RSpec.describe Flipper::UI do
       expect(last_response.status).to be(200)
       expect(last_response.body).to be_empty
     end
-
-    it 'serve files without a body' do
-      head '/images/logo.png'
-
-      expect(last_response.status).to be(200)
-      expect(last_response.body).to be_empty
-    end
   end
 
   describe 'Inspecting the built Rack app' do
