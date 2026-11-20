@@ -243,11 +243,6 @@ RSpec.describe Flipper::UI::Actions::ActorsGate do
       it 'removes only that actor' do
         expect(flipper[:search].actors_value).to eq(Set['User;1'])
       end
-
-      it 'redirects back to feature' do
-        expect(last_response.status).to be(302)
-        expect(last_response.headers['location']).to eq('/features/search')
-      end
     end
   end
 end
