@@ -27,8 +27,21 @@ RSpec.describe Flipper::UI do
   describe 'Request method unsupported by action' do
     it 'raises error' do
       expect do
-        head '/features'
+        options '/features'
       end.to raise_error(Flipper::UI::RequestMethodNotSupported)
+    end
+  end
+
+  describe 'Head requests' do
+    let(:app) { build_app(flipper) }
+
+    it 'are allowed but perform get and return no body' do
+      flipper.enable :some_great_feature
+
+      head '/features'
+
+      expect(last_response.status).to be(200)
+      expect(last_response.body).to be_empty
     end
   end
 

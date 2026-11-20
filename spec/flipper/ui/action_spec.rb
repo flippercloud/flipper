@@ -38,6 +38,12 @@ RSpec.describe Flipper::UI::Action do
       expect(action.run).to eq([200, {}, 'get'])
     end
 
+    it 'will run get for head' do
+      fake_request = Struct.new(:request_method, :env, :session).new('HEAD', {}, {})
+      action = action_subclass.new(flipper, fake_request)
+      expect(action.run).to eq([200, {}, 'get'])
+    end
+
     it 'will run post' do
       fake_request = Struct.new(:request_method, :env, :session).new('POST', {}, {})
       action = action_subclass.new(flipper, fake_request)
