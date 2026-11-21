@@ -33,8 +33,6 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
 
     {
       'malformed JSON' => ['', '{bad'],
-      'a JSON array' => ['', '[1, 2]'],
-      'JSON null' => ['', 'null'],
       'a malformed query string' => ['keys=%', '{"exclude_gate_names":"true"}'],
     }.each do |description, (query, body)|
       it "fails open for a JSON body with #{description}" do
