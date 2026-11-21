@@ -106,7 +106,8 @@ module Flipper
 
       def parse_query_string(data, strict:)
         parse_query(data)
-      rescue *ParameterParsing.errors
+      # Rack 2's parse_query raises ArgumentError for a bad %-escape.
+      rescue *ParameterParsing.errors, ArgumentError
         raise InvalidRequestBody if strict
 
         nil
