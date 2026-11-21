@@ -20,6 +20,12 @@ module Flipper
         other.is_a?(self.class) && other.value == value
       end
       alias_method :==, :eql?
+
+      # eql? uses ==, so 1 and 1.0 are equal. Hash numbers as floats so
+      # they hash the same too.
+      def hash
+        [self.class, value.is_a?(Numeric) && value.real? ? value.to_f : value].hash
+      end
     end
   end
 end

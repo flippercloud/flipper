@@ -120,6 +120,16 @@ RSpec.describe Flipper::Expression::Builder do
         expect(expression.args).to eq([first, second, third])
         expect(result.args).to eq([first])
       end
+
+      # Array#- switches to hash lookups once the other array has more than
+      # 16 elements, so this only passes when hash agrees with eql?.
+      it "removes equal copies when given more than 16 expressions" do
+        expression = Flipper.any((1..20).map { |i| Flipper.property(:n).eq(i) })
+        copies = (1..17).map { |i| Flipper.property(:n).eq(i) }
+
+        result = expression.remove(copies)
+        expect(result.args).to eq((18..20).map { |i| Flipper.property(:n).eq(i) })
+      end
     end
   end
 

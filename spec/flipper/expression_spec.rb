@@ -213,6 +213,27 @@ RSpec.describe Flipper::Expression do
     end
   end
 
+  describe "#hash" do
+    it "matches for equal expressions and constants" do
+      expect(Flipper.property(:plan).eq("basic").hash).to eq(Flipper.property(:plan).eq("basic").hash)
+      expect(described_class.build("foo").hash).to eq(described_class.build("foo").hash)
+    end
+
+    it "matches for equal integer and float constants" do
+      expect(described_class.build(1).hash).to eq(described_class.build(1.0).hash)
+    end
+
+    it "lets uniq collapse equal expressions" do
+      expressions = [
+        Flipper.property(:plan).eq("basic"),
+        Flipper.property(:plan).eq("basic"),
+        described_class.build("foo"),
+        described_class.build("foo"),
+      ]
+      expect(expressions.uniq.size).to eq(2)
+    end
+  end
+
   describe "#empty_groups?" do
     it "returns true for an empty group" do
       expect(described_class.build({"Any" => []}).empty_groups?).to be(true)
