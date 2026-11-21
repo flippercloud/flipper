@@ -28,12 +28,26 @@ RSpec.describe Flipper::Api::Action do
   end
 
   describe 'https verbs' do
-    it "won't run method that isn't whitelisted" do
+    it "answers 405 for a method that isn't whitelisted" do
       fake_request = Rack::Request.new(Rack::MockRequest.env_for('/', method: 'NOOOOPE'))
       action = action_subclass.new(flipper, fake_request)
-      expect do
-        action.run
-      end.to raise_error(Flipper::Api::RequestMethodNotSupported)
+      status, headers, body = action.run
+      expect(status).to eq(405)
+      expect(headers['allow']).to eq('HEAD, GET, POST, PUT, DELETE')
+      expect(headers[Rack::CONTENT_TYPE]).to eq('application/json')
+      expect(JSON.parse(body[0])).to include('code' => 10, 'message' => 'Request method not allowed.')
+    end
+
+    it "answers 405 for a whitelisted method the action doesn't define" do
+      post_only = Class.new(described_class) do
+        def post
+          [200, {}, 'post']
+        end
+      end
+      fake_request = Rack::Request.new(Rack::MockRequest.env_for('/', method: 'GET'))
+      status, headers, = post_only.new(flipper, fake_request).run
+      expect(status).to eq(405)
+      expect(headers['allow']).to eq('POST')
     end
 
     it 'will run get' do

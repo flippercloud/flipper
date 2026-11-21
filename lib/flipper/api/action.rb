@@ -89,20 +89,17 @@ module Flipper
       #
       # Returns whatever the request method returns in the action.
       def run
-        if valid_request_method? && respond_to?(request_method_name)
-          catch(:halt) do
-            if mutation_request? && params_invalid?
-              json_error_response(:request_invalid)
-            end
-            begin
-              send(request_method_name)
-            rescue ReservedKeyError
-              json_error_response(:name_reserved)
-            end
+        catch(:halt) do
+          method_not_allowed unless valid_request_method? && respond_to?(request_method_name)
+
+          if mutation_request? && params_invalid?
+            json_error_response(:request_invalid)
           end
-        else
-          raise Api::RequestMethodNotSupported,
-                "#{self.class} does not support request method #{request_method_name.inspect}"
+          begin
+            send(request_method_name)
+          rescue ReservedKeyError
+            json_error_response(:name_reserved)
+          end
         end
       end
 
@@ -153,6 +150,16 @@ module Flipper
       end
 
       private
+
+      # Private: Responds 405 with an Allow header listing the methods this
+      # action answers.
+      def method_not_allowed
+        allowed = VALID_REQUEST_METHOD_NAMES.select do |name|
+          respond_to?(action_method_name(name))
+        end
+        header 'allow', allowed.map(&:upcase).join(', ')
+        json_error_response(:method_not_allowed)
+      end
 
       # Private: Does a feature with this key exist?
       #
@@ -270,12 +277,14 @@ module Flipper
       end
 
       # Private: Returns the request method converted to an action method.
-      # Converts head to get.
       def request_method_name
-        @request_method_name ||= begin
-          name = @request.request_method.downcase
-          name == "head" ? "get" : name
-        end
+        @request_method_name ||= action_method_name(@request.request_method.downcase)
+      end
+
+      # Private: The action method that answers a request method. HEAD is
+      # answered by get.
+      def action_method_name(name)
+        name == "head" ? "get" : name
       end
 
       def valid_request_method?

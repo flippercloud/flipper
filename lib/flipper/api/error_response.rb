@@ -31,6 +31,7 @@ module Flipper
         expression_invalid: Error.new(7, 'The provided expression was not valid.', 422),
         request_invalid: Error.new(8, 'Request invalid.', 400),
         name_reserved: Error.new(9, "Feature names starting with #{Flipper::RESERVED_KEY_PREFIX} are reserved for Flipper.", 422),
+        method_not_allowed: Error.new(10, 'Request method not allowed.', 405),
       }.freeze
     end
   end

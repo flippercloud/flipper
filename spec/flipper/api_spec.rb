@@ -33,6 +33,33 @@ RSpec.describe Flipper::Api do
     end
   end
 
+  describe "Unsupported request methods" do
+    let(:app) { build_api(flipper) }
+
+    it "answer 405 with the methods the route allows" do
+      {
+        [:put, '/features/a'] => 'HEAD, GET, DELETE',
+        [:patch, '/features/a/boolean'] => 'POST, DELETE',
+        [:get, '/import'] => 'POST',
+        [:options, '/features'] => 'HEAD, GET, POST',
+      }.each do |(verb, path), allow|
+        send(verb, path)
+
+        expect(last_response.status).to eq(405), "#{verb} #{path}"
+        expect(last_response.headers['allow']).to eq(allow)
+        expect(json_response).to include('code' => 10, 'message' => 'Request method not allowed.')
+      end
+    end
+
+    it "answer 405 without a body for HEAD on a route without GET" do
+      head '/import'
+
+      expect(last_response.status).to eq(405)
+      expect(last_response.headers['allow']).to eq('POST')
+      expect(last_response.body).to be_empty
+    end
+  end
+
   describe 'Initializing middleware lazily with a block' do
     let(:app) { build_api(-> { flipper }) }
 
