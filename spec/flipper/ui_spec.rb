@@ -33,14 +33,7 @@ RSpec.describe Flipper::UI do
     end
 
     it 'answers 405 for PUT on a feature page' do
-      token = if Rack::Protection::AuthenticityToken.respond_to?(:random_token)
-        Rack::Protection::AuthenticityToken.random_token
-      else
-        'a'
-      end
-      put '/features/search',
-          { 'authenticity_token' => token },
-          'rack.session' => { :csrf => token, 'csrf' => token, '_csrf_token' => token }
+      put '/features/search', { 'authenticity_token' => token }, 'rack.session' => session
       expect(last_response.status).to be(405)
       expect(last_response.headers['allow']).to eq('HEAD, GET, DELETE')
     end
