@@ -20,5 +20,9 @@ module Flipper
       self.class.eql?(other.class) && @contents == other.contents && @format == other.format && @version == other.version
     end
     alias_method :==, :eql?
+
+    def hash
+      [self.class, contents, format, version].hash
+    end
   end
 end

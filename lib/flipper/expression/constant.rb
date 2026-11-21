@@ -20,6 +20,10 @@ module Flipper
         other.is_a?(self.class) && other.value == value
       end
       alias_method :==, :eql?
+
+      def hash
+        [self.class, value].hash
+      end
     end
   end
 end

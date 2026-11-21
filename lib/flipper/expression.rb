@@ -67,6 +67,10 @@ module Flipper
     end
     alias_method :==, :eql?
 
+    def hash
+      [self.class, function, args].hash
+    end
+
     # Public: Returns true if this expression contains an Any/All group with
     # no arguments anywhere in its tree. An empty All evaluates to true for
     # every actor and an empty Any to false for every actor, so persisting
