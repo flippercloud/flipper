@@ -65,10 +65,11 @@ module Flipper
     def disable(thing = false)
       ensure_not_reserved!
       instrument(:disable) do |payload|
-        adapter.add self
-
         gate = gate_for(thing)
         wrapped_thing = gate.wrap(thing)
+
+        adapter.add self
+
         payload[:gate_name] = gate.name
         payload[:thing] = wrapped_thing
 
