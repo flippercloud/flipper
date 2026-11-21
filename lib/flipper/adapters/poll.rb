@@ -11,9 +11,17 @@ module Flipper
 
       attr_reader :adapter, :poller
 
-      def initialize(poller, adapter)
+      # poller - The Flipper::Poller that fetches the remote flags.
+      # adapter - The adapter that serves reads and writes.
+      # options - The Hash of options.
+      #           :synchronizer - Internal: called instead of syncing the
+      #                           poller's flags into adapter.
+      def initialize(poller, adapter, options = {})
         @adapter = adapter
         @poller = poller
+        @synchronizer = options.fetch(:synchronizer) {
+          -> { Flipper::Adapters::Sync::Synchronizer.new(@adapter, @poller.adapter).call }
+        }
         @last_synced_at = 0
         # Flipper::Poller has a lock-free synced_at. Other pollers may only
         # have last_synced_at.
@@ -79,7 +87,7 @@ module Flipper
         @poller.start
         poller_last_synced_at = @poller_has_synced_at ? @poller.synced_at : @poller.last_synced_at.value
         if poller_last_synced_at > @last_synced_at
-          Flipper::Adapters::Sync::Synchronizer.new(@adapter, @poller.adapter).call
+          @synchronizer.call
           @last_synced_at = poller_last_synced_at
         end
         @adapter

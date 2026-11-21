@@ -72,8 +72,11 @@ module Flipper
         begin
           flipper.memoize = true
 
-          # Preloading is pointless without memoizing.
-          preload = if @opts[:preload].respond_to?(:call)
+          # Preloading is pointless without memoizing, or when the instance
+          # has no adapter reads for it to save.
+          preload = if !flipper.preload?
+            false
+          elsif @opts[:preload].respond_to?(:call)
             @opts[:preload].call(request)
           else
             @opts[:preload]
