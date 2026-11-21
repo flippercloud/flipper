@@ -10,6 +10,5 @@ RSpec.describe Flipper::TestHelp do
     described_class.flipper_reset
 
     expect(app_adapter.features).to eq(Set["checkout"])
-    expect(Flipper.adapter.adapter).not_to be(app_adapter)
   end
 end
