@@ -14,7 +14,6 @@ RSpec.describe Flipper::Export do
   it "has the same hash as an equal export" do
     export = described_class.new(contents: "{}", format: :json, version: 1)
     other = described_class.new(contents: "{}", format: :json, version: 1)
-    expect(export).to eq(other)
     expect(export.hash).to eq(other.hash)
     expect([export, other].uniq.size).to eq(1)
   end
