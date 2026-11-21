@@ -3,8 +3,8 @@ module Flipper
     # All flipper ui errors inherit from this.
     Error = Class.new(StandardError)
 
-    # Raised when a request method (get, post, etc.) is called for an action
-    # that does not know how to handle it.
+    # No longer raised: actions answer 405 for request methods they don't
+    # handle. Kept so code that rescues it still loads.
     RequestMethodNotSupported = Class.new(Error)
   end
 end

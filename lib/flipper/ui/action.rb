@@ -29,6 +29,7 @@ module Flipper
       extend Forwardable
 
       VALID_REQUEST_METHOD_NAMES = Set.new([
+                                             'head'.freeze,
                                              'get'.freeze,
                                              'post'.freeze,
                                              'put'.freeze,
@@ -107,17 +108,14 @@ module Flipper
       #
       # Returns whatever the request method returns in the action.
       def run
-        if valid_request_method? && respond_to?(request_method_name)
-          catch(:halt) do
-            begin
-              send(request_method_name)
-            rescue ReservedKeyError => error
-              redirect_to("/features/#{Util.escape error.key}?error=#{Util.escape reserved_name_error(error.key)}")
-            end
+        catch(:halt) do
+          method_not_allowed unless valid_request_method? && respond_to?(request_method_name)
+
+          begin
+            send(request_method_name)
+          rescue ReservedKeyError => error
+            redirect_to("/features/#{Util.escape error.key}?error=#{Util.escape reserved_name_error(error.key)}")
           end
-        else
-          raise UI::RequestMethodNotSupported,
-                "#{self.class} does not support request method #{request_method_name.inspect}"
         end
       end
 
@@ -227,12 +225,25 @@ module Flipper
       end
 
       # Private: Returns the request method converted to an action method.
-      # Converts head to get.
       def request_method_name
-        @request_method_name ||= begin
-          name = @request.request_method.downcase
-          name == "head" ? "get" : name
+        @request_method_name ||= action_method_name(@request.request_method.downcase)
+      end
+
+      # Private: The action method that answers a request method. HEAD is
+      # answered by get.
+      def action_method_name(name)
+        name == "head" ? "get" : name
+      end
+
+      # Private: Responds 405 with an Allow header listing the methods this
+      # action answers.
+      def method_not_allowed
+        allowed = VALID_REQUEST_METHOD_NAMES.select do |name|
+          respond_to?(action_method_name(name))
         end
+        status 405
+        header 'allow', allowed.map(&:upcase).join(', ')
+        halt [@code, @headers, ['Method Not Allowed']]
       end
 
       def csrf_input_tag

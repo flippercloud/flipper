@@ -25,10 +25,17 @@ RSpec.describe Flipper::UI do
   end
 
   describe 'Request method unsupported by action' do
-    it 'raises error' do
-      expect do
-        options '/features'
-      end.to raise_error(Flipper::UI::RequestMethodNotSupported)
+    it 'answers 405 with the methods the route allows' do
+      options '/features'
+      expect(last_response.status).to be(405)
+      expect(last_response.headers['allow']).to eq('HEAD, GET, POST')
+      expect(last_response.body).to eq('Method Not Allowed')
+    end
+
+    it 'answers 405 for PUT on a feature page' do
+      put '/features/search', { 'authenticity_token' => token }, 'rack.session' => session
+      expect(last_response.status).to be(405)
+      expect(last_response.headers['allow']).to eq('HEAD, GET, DELETE')
     end
   end
 
