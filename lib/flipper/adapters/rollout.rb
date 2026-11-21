@@ -31,7 +31,10 @@ module Flipper
         groups = Set.new(rollout_feature.groups.map(&:to_s))
         actors = Set.new(rollout_feature.users)
 
-        percentage_of_actors = case rollout_feature.percentage
+        # Rollout's built-in :all group is active for every user.
+        percentage = groups.include?("all") ? 100 : rollout_feature.percentage
+
+        percentage_of_actors = case percentage
                                when 100
                                  boolean = true
                                  groups = Set.new
