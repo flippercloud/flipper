@@ -219,6 +219,10 @@ RSpec.describe Flipper::Expression do
       expect(described_class.build("foo").hash).to eq(described_class.build("foo").hash)
     end
 
+    it "matches for equal integer and float constants" do
+      expect(described_class.build(1).hash).to eq(described_class.build(1.0).hash)
+    end
+
     it "lets uniq collapse equal expressions" do
       expressions = [
         Flipper.property(:plan).eq("basic"),
