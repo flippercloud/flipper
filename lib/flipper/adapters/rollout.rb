@@ -43,6 +43,10 @@ module Flipper
                                  rollout_feature.percentage
                                end
 
+        # Rollout's built-in :all group is on for every user, but off when
+        # there is no user, which is how 100% of actors behaves.
+        percentage_of_actors = 100 if groups.delete?("all")
+
         {
           boolean: boolean,
           groups: groups,
