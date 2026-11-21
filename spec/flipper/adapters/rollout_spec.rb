@@ -70,17 +70,17 @@ RSpec.describe Flipper::Adapters::Rollout do
       expect(source_adapter.get(feature)).to eq(expected)
     end
 
-    it 'returns fully flipper enabled for rollout all group' do
+    it 'returns 100 percent of actors for rollout all group' do
       rollout.activate_user(:chat, Struct.new(:id).new(1))
       rollout.activate_group(:chat, :admins)
       rollout.activate_group(:chat, :all)
       feature = source_flipper[:chat]
       expected = {
-        boolean: true,
-        groups: Set.new,
-        actors: Set.new,
+        boolean: nil,
+        groups: Set.new(["admins"]),
+        actors: Set.new(["1"]),
         expression: nil,
-        percentage_of_actors: nil,
+        percentage_of_actors: 100,
         percentage_of_time: nil,
       }
       expect(source_adapter.get(feature)).to eq(expected)
@@ -107,10 +107,13 @@ RSpec.describe Flipper::Adapters::Rollout do
     expect(destination_flipper.features.map(&:key)).to eq(["search"])
   end
 
-  it 'imports rollout all group as enabled for everyone' do
+  it 'imports rollout all group as enabled for every actor' do
     rollout.activate_group(:chat, :all)
     destination_flipper.import(source_flipper)
+    expect(rollout.active?(:chat, Struct.new(:id).new(5))).to be(true)
     expect(destination_flipper.enabled?(:chat, Flipper::Actor.new("5"))).to be(true)
+    expect(rollout.active?(:chat)).to be(false)
+    expect(destination_flipper.enabled?(:chat)).to be(false)
   end
 
   it 'can have multiple features imported' do

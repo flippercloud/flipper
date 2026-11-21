@@ -31,10 +31,7 @@ module Flipper
         groups = Set.new(rollout_feature.groups.map(&:to_s))
         actors = Set.new(rollout_feature.users)
 
-        # Rollout's built-in :all group is active for every user.
-        percentage = groups.include?("all") ? 100 : rollout_feature.percentage
-
-        percentage_of_actors = case percentage
+        percentage_of_actors = case rollout_feature.percentage
                                when 100
                                  boolean = true
                                  groups = Set.new
@@ -43,8 +40,12 @@ module Flipper
                                when 0
                                  nil
                                else
-                                 percentage
+                                 rollout_feature.percentage
                                end
+
+        # Rollout's built-in :all group is on for every user, but off when
+        # there is no user, which is how 100% of actors behaves.
+        percentage_of_actors = 100 if groups.delete?("all")
 
         {
           boolean: boolean,
