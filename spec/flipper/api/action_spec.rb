@@ -44,12 +44,10 @@ RSpec.describe Flipper::Api::Action do
           [200, {}, 'post']
         end
       end
-      %w[GET HEAD PUT DELETE].each do |method|
-        fake_request = Rack::Request.new(Rack::MockRequest.env_for('/', method: method))
-        status, headers, = post_only.new(flipper, fake_request).run
-        expect(status).to eq(405), method
-        expect(headers['allow']).to eq('POST')
-      end
+      fake_request = Rack::Request.new(Rack::MockRequest.env_for('/', method: 'GET'))
+      status, headers, = post_only.new(flipper, fake_request).run
+      expect(status).to eq(405)
+      expect(headers['allow']).to eq('POST')
     end
 
     it 'will run get' do

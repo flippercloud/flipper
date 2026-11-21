@@ -152,10 +152,10 @@ module Flipper
       private
 
       # Private: Responds 405 with an Allow header listing the methods this
-      # action answers. HEAD is answered by get.
+      # action answers.
       def method_not_allowed
         allowed = VALID_REQUEST_METHOD_NAMES.select do |name|
-          respond_to?(name == 'head' ? 'get' : name)
+          respond_to?(action_method_name(name))
         end
         header 'allow', allowed.map(&:upcase).join(', ')
         json_error_response(:method_not_allowed)
@@ -277,12 +277,14 @@ module Flipper
       end
 
       # Private: Returns the request method converted to an action method.
-      # Converts head to get.
       def request_method_name
-        @request_method_name ||= begin
-          name = @request.request_method.downcase
-          name == "head" ? "get" : name
-        end
+        @request_method_name ||= action_method_name(@request.request_method.downcase)
+      end
+
+      # Private: The action method that answers a request method. HEAD is
+      # answered by get.
+      def action_method_name(name)
+        name == "head" ? "get" : name
       end
 
       def valid_request_method?
