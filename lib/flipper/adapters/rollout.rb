@@ -43,7 +43,7 @@ module Flipper
                                when 0
                                  nil
                                else
-                                 rollout_feature.percentage
+                                 percentage
                                end
 
         {
