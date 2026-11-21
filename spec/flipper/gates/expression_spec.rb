@@ -46,6 +46,11 @@ RSpec.describe Flipper::Gates::Expression do
         expression = {"GreaterThan" => [{"Unreleased" => [{"Property" => ["age"]}]}, 21]}
         expect(subject.open?(context(expression, properties: {age: 30}))).to be(false)
       end
+
+      it 'returns false for a name that is only a top-level constant' do
+        expression = {"Integer" => [{"Property" => ["age"]}]}
+        expect(subject.open?(context(expression, properties: {age: 30}))).to be(false)
+      end
     end
 
     context 'for a time expression on a property the actor does not have' do
