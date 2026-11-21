@@ -189,6 +189,18 @@ RSpec.describe Flipper::Feature do
     end
   end
 
+  describe '#disable' do
+    context 'with argument that has no gate' do
+      it 'raises error and does not add feature' do
+        actor = Object.new
+        expect do
+          subject.disable(actor)
+        end.to raise_error(Flipper::GateNotFound, "Could not find gate for #{actor.inspect}")
+        expect(adapter.features).to eq(Set.new)
+      end
+    end
+  end
+
   describe '#exist?' do
     it 'returns true if feature is added in adapter' do
       subject.add
