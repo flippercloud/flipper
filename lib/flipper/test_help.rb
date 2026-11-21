@@ -11,6 +11,10 @@ module Flipper
         config.adapter { adapter }
         config.default { Flipper.new(config.adapter) }
       end
+
+      # Drop any instance memoized before this (e.g. a flag checked while the
+      # app booted) so it doesn't keep using the app's real adapter.
+      Flipper.instance = nil
     end
 
     def flipper_reset
