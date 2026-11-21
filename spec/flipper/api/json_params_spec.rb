@@ -57,6 +57,33 @@ RSpec.describe Flipper::Api::JsonParams do
     end
   end
 
+  describe 'json get request with a body it cannot use' do
+    {
+      'malformed JSON' => '{bad',
+      'null' => 'null',
+      'an array' => '[1, 2]',
+      'a string' => '"ruby"',
+      'invalid UTF-8' => "\xFF\xFE".b,
+    }.each do |description, body|
+      it "ignores a body of #{description}" do
+        status, _headers, response_body = call_app(
+          Rack::MockRequest.env_for('/?language=ruby', method: 'GET', input: body, 'CONTENT_TYPE' => 'application/json')
+        )
+
+        expect(status).to eq(200)
+        expect(JSON.parse(response_body)).to eq('language' => 'ruby')
+      end
+    end
+
+    it 'still rejects malformed JSON on a post' do
+      status, = call_app(
+        Rack::MockRequest.env_for('/', method: 'POST', input: '{bad', 'CONTENT_TYPE' => 'application/json')
+      )
+
+      expect(status).to eq(400)
+    end
+  end
+
   describe 'json request without rack.input' do
     it 'handles a get like an empty body' do
       status, _headers, body = call_without_rack_input('/?language=ruby', 'CONTENT_TYPE' => 'application/json')
