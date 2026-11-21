@@ -92,6 +92,106 @@ Flipper.enable_percentage_of_actors :search, 2
 
 Read more about [getting started with Flipper](https://flippercloud.io/docs?utm_source=oss&utm_medium=readme&utm_campaign=getting_started) and [enabling features](https://flippercloud.io/docs/features?utm_source=oss&utm_medium=readme&utm_campaign=enabling_features).
 
+## Named Instances
+
+Applications that need independent sets of feature flags can configure named
+instances. Each name has its own adapter stack, features, groups, request cache, and
+preload behavior, while the existing top-level `Flipper` instance is unchanged.
+Rails applications should declare named instances in an initializer. Names registered
+after initialization require explicit middleware and route mounts.
+
+```ruby
+Flipper.configure do |config|
+  config.named(:cross_app) do |cross_app|
+    cross_app.adapter do
+      Flipper::Adapters::ActiveRecord.new(table_prefix: "cross_app_")
+    end
+  end
+end
+
+Flipper.cross_app.register(:beta_organizations) do |actor|
+  actor.respond_to?(:beta_organization?) && actor.beta_organization?
+end
+
+Flipper.enabled?(:product_feature, current_user)
+Flipper.cross_app.enabled?(:shared_feature, current_user)
+Flipper.named(:cross_app).enabled?(:shared_feature, current_user)
+
+# Or give it a name of your own. The object stays valid if configuration changes.
+CrossAppFlipper = Flipper.named(:cross_app)
+CrossAppFlipper.enabled?(:shared_feature, current_user)
+```
+
+`Flipper.cross_app` returns a proxy that forwards to the instance's `Flipper::DSL` (use
+`Flipper.cross_app.instance` for the DSL itself). Calling `config.named(:cross_app)`
+again reopens that instance's settings, the same way calling `config.adapter` again
+replaces the adapter.
+
+Groups belong to one instance: `Flipper.register(:admins)` is not visible to
+`Flipper.cross_app`, so register shared groups on the named instance. Instrumented
+events from a named instance include `instance: :cross_app`, the log subscriber prints
+`Flipper[cross_app] feature(...)`, and statsd counters use `flipper.cross_app.feature.*`.
+
+To manage a named instance in the UI, mount another UI with a banner that says which
+one it is:
+
+```ruby
+# config/routes.rb
+mount Flipper::UI.app(Flipper.cross_app, banner_text: "Cross-app flags", banner_class: "warning") => "/flipper/cross_app"
+```
+
+Named instances work with any adapter and do not require Flipper Cloud. When using
+Active Record, generate and update the prefixed tables separately:
+
+```shell
+bin/rails generate flipper:active_record --table-prefix=cross_app_
+bin/rails generate flipper:update --table-prefix=cross_app_
+```
+
+In Rails, named instances are memoized per request like the default instance but do
+not preload, so a request that never checks a named flag makes no query for it. Set
+`cross_app.preload = true` (or an array of feature names) to preload.
+
+Any custom default factory must return a DSL dedicated to that instance. Reusing one
+DSL for the top-level instance or another named instance raises an error.
+
+A named instance can optionally use a separate Cloud project and webhook:
+
+```ruby
+Flipper.configure do |config|
+  config.named(:cross_app) do |cross_app|
+    cross_app.adapter do
+      Flipper::Adapters::ActiveRecord.new(table_prefix: "cross_app_")
+    end
+    cross_app.cloud(path: "_flipper/cross_app")
+  end
+end
+```
+
+For that example, Rails credentials can be stored under
+`flipper.cross_app.cloud_token` and `flipper.cross_app.cloud_sync_secret`, or provided
+through `FLIPPER_CLOUD_CROSS_APP_TOKEN` and
+`FLIPPER_CLOUD_CROSS_APP_SYNC_SECRET`. Named instances never inherit the default
+`FLIPPER_CLOUD_TOKEN` or `FLIPPER_CLOUD_SYNC_SECRET`.
+
+If a named instance calls `cloud` without its token, the app fails to boot rather than
+quietly reading the wrong project. In environments without that token, such as
+development, only call `cloud` when the token is present:
+
+```ruby
+config.named(:cross_app) do |cross_app|
+  if ENV["FLIPPER_CLOUD_CROSS_APP_TOKEN"] || Rails.application.credentials.dig(:flipper, :cross_app, :cloud_token)
+    cross_app.cloud(path: "_flipper/cross_app")
+  else
+    cross_app.adapter { Flipper::Adapters::ActiveRecord.new(table_prefix: "cross_app_") }
+  end
+end
+```
+
+Applications sharing a Cloud project must register the same named group predicates
+and return the same `flipper_id` for shared actors. Cloud synchronizes group names and
+actor identifiers, not Ruby group definitions or application identity mappings.
+
 ## Flipper Cloud
 
 Like Flipper and want more? Check out [Flipper Cloud](https://www.flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=check_out), which comes with:

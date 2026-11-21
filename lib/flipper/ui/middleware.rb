@@ -10,10 +10,22 @@ end
 module Flipper
   module UI
     class Middleware
+      # Internal: Where this app's own banner travels to the actions.
+      BANNER_ENV_KEY = 'flipper.ui.banner'.freeze
+
       def initialize(app, options = {})
         @app = app
         @env_key = options.fetch(:env_key, 'flipper')
         @flipper = options.fetch(:flipper) { Flipper }
+        @banner = {}
+        @banner[:text] = options[:banner_text] if options[:banner_text]
+        if (banner_class = options[:banner_class])
+          unless Configuration::VALID_BANNER_CLASS_VALUES.include?(banner_class)
+            raise InvalidConfigurationValue, "The banner_class provided '#{banner_class}' is " \
+              "not one of: #{Configuration::VALID_BANNER_CLASS_VALUES.join(', ')}"
+          end
+          @banner[:class] = banner_class
+        end
 
         @action_collection = ActionCollection.new
 
@@ -49,6 +61,7 @@ module Flipper
         if action_class.nil?
           @app.call(env)
         else
+          env[BANNER_ENV_KEY] = @banner unless @banner.empty?
           flipper = env.fetch(@env_key) { Flipper }
           action_class.run(flipper, request)
         end

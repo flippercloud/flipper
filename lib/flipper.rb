@@ -1,8 +1,16 @@
 require "forwardable"
+require "flipper/groups"
 
 module Flipper
+  # Included before `extend self` so Flipper.register and friends exist on
+  # Rubies that don't propagate later includes, and `include Flipper` keeps
+  # providing the group methods.
+  include Groups
   extend self
   extend Forwardable
+
+  # Private: Valid named instance names (they double as Flipper.<name>).
+  NAMED_INSTANCE_NAME = /\A[a-z_][a-z0-9_]*\z/
 
   # Private: The namespace for all instrumented events.
   InstrumentationNamespace = :flipper
@@ -40,8 +48,9 @@ module Flipper
 
   # Public: Sets Flipper::Configuration instance.
   def configuration=(configuration)
-    # need to reset flipper instance if configuration changes
+    # need to reset flipper instances if configuration changes
     self.instance = nil
+    Thread.current[:__flipper_named_instances__] = nil
     @configuration = configuration
   end
 
@@ -52,15 +61,104 @@ module Flipper
   #
   # Returns Flipper::DSL instance.
   def instance
-    Thread.current[:flipper_instance] ||= configuration.default
+    Thread.current[:flipper_instance] ||= begin
+      flipper = configuration.default
+      claim_instance_owner(flipper, Flipper)
+      flipper
+    end
   end
 
   # Public: Set the flipper instance. It is most common to use the
   # Configuration#default to set this instance, but for things like the test
   # environment, this writer is actually useful.
   def instance=(flipper)
+    claim_instance_owner(flipper, Flipper) if flipper
     Thread.current[:flipper_instance] = flipper
   end
+
+  # Public: Returns a stable proxy for a configured named instance. Each
+  # configured name is also available as Flipper.<name>.
+  #
+  #   CrossAppFlipper = Flipper.named(:cross_app)
+  #   CrossAppFlipper.enabled?(:chat, person)
+  def named(name)
+    name = normalize_named_instance_name(name)
+    named_configuration(name)
+    @named_instance_proxies[name] || @named_instance_proxies_mutex.synchronize do
+      @named_instance_proxies[name] ||= NamedProxy.new(name)
+    end
+  end
+
+  # Internal: Returns the current named configuration or raises if missing.
+  def named_configuration(name)
+    config = configuration
+    configured = config.respond_to?(:named_configuration) && config.named_configuration(name)
+    return configured if configured
+
+    raise NamedInstanceNotFound, "Named instance #{normalize_named_instance_name(name).inspect} has not been configured"
+  end
+
+  # Internal: Named configurations, or none for custom configuration objects
+  # that don't support named instances.
+  def named_configurations(config = configuration)
+    config.respond_to?(:named_configurations) ? config.named_configurations : []
+  end
+
+  # Internal: Returns the per-thread DSL for a configured named instance.
+  def named_instance(name)
+    configured = named_configuration(name)
+    instances = Thread.current[:__flipper_named_instances__] ||= {}
+    cached = instances[name]
+
+    if cached && cached[:configuration].equal?(configured) && cached[:version] == configured.version
+      cached[:instance]
+    else
+      loop do
+        version = configured.version
+        instance = configured.default
+        next unless version == configured.version
+
+        instances[name] = {
+          configuration: configured,
+          version: version,
+          instance: instance,
+        }
+        return instance
+      end
+    end
+  end
+
+  # Internal: Reset named DSL caches for the current thread.
+  def reset_named_instances
+    Thread.current[:__flipper_named_instances__] = nil
+  end
+
+  # Internal: Normalize and validate a named instance name.
+  def normalize_named_instance_name(name)
+    unless name.is_a?(String) || name.is_a?(Symbol)
+      raise InvalidNamedInstanceName, "Named instance name must be a String or Symbol"
+    end
+
+    normalized = name.to_s
+    unless NAMED_INSTANCE_NAME.match?(normalized)
+      raise InvalidNamedInstanceName, "Named instance #{name.inspect} must use lowercase snake case"
+    end
+
+    normalized.to_sym
+  end
+
+  # Internal: Reject names that Flipper.<name> could never reach because
+  # Flipper already responds to them.
+  def validate_named_instance_name!(name)
+    if singleton_class.method_defined?(name) || singleton_class.private_method_defined?(name)
+      raise InvalidNamedInstanceName, "Named instance #{name.inspect} conflicts with an existing Flipper method"
+    end
+
+    name
+  end
+
+  private :named_configuration, :named_configurations, :named_instance, :reset_named_instances,
+          :normalize_named_instance_name, :validate_named_instance_name!
 
   # Public: All the methods delegated to instance. These should match the
   # interface of Flipper::DSL.
@@ -129,67 +227,6 @@ module Flipper
     feature_enabled(name).eq(false)
   end
 
-  # Public: Use this to register a group by name.
-  #
-  # name - The Symbol name of the group.
-  # block - The block that should be used to determine if the group matches a
-  #         given actor.
-  #
-  # Examples
-  #
-  #   Flipper.register(:admins) { |actor|
-  #     actor.respond_to?(:admin?) && actor.admin?
-  #   }
-  #
-  # Returns a Flipper::Group.
-  # Raises Flipper::DuplicateGroup if the group is already registered.
-  def register(name, &block)
-    group = Types::Group.new(name, &block)
-    groups_registry.add(group.name, group)
-    group
-  rescue Registry::DuplicateKey
-    raise DuplicateGroup, "Group #{name.inspect} has already been registered"
-  end
-
-  # Public: Returns a Set of registered Types::Group instances.
-  def groups
-    groups_registry.values.to_set
-  end
-
-  # Public: Returns a Set of symbols where each symbol is a registered
-  # group name. If you just want the names, this is more efficient than doing
-  # `Flipper.groups.map(&:name)`.
-  def group_names
-    groups_registry.keys.to_set
-  end
-
-  # Public: Clears the group registry.
-  #
-  # Returns nothing.
-  def unregister_groups
-    groups_registry.clear
-  end
-
-  # Public: Check if a group exists
-  #
-  # Returns boolean
-  def group_exists?(name)
-    groups_registry.key?(name)
-  end
-
-  # Public: Fetches a group by name.
-  #
-  # name - The Symbol name of the group.
-  #
-  # Examples
-  #
-  #   Flipper.group(:admins)
-  #
-  # Returns Flipper::Group.
-  def group(name)
-    groups_registry.get(name) || Types::Group.new(name)
-  end
-
   # Internal: Registry of all groups_registry.
   def groups_registry
     @groups_registry ||= Registry.new
@@ -210,7 +247,10 @@ require 'flipper/adapters/memoizable'
 require 'flipper/adapters/memory'
 require 'flipper/adapters/strict'
 require 'flipper/adapter_builder'
+require 'flipper/registry'
 require 'flipper/configuration'
+require 'flipper/named_configuration'
+require 'flipper/named_proxy'
 require 'flipper/dsl'
 require 'flipper/errors'
 require 'flipper/feature'
@@ -221,7 +261,6 @@ require 'flipper/identifier'
 require 'flipper/middleware/memoizer'
 require 'flipper/middleware/setup_env'
 require 'flipper/poller'
-require 'flipper/registry'
 require 'flipper/sync_version'
 require 'flipper/expression'
 require 'flipper/type'
@@ -238,6 +277,63 @@ require 'flipper/version'
 # single-threaded (require/autoload hold a per-feature lock). This avoids a
 # check-then-set race on the `||=` memoization if two threads were to first
 # touch Flipper concurrently during a parallel boot.
+module Flipper
+  @named_instance_proxies = {}
+  @named_instance_proxies_mutex = Mutex.new
+  @instance_owner_mutex = Mutex.new
+
+  class << self
+    # Flipper.<name> returns the proxy for a configured named instance, the
+    # same object as Flipper.named(:<name>). It is resolved on each call, so
+    # it follows configuration changes without defining or removing methods.
+    def respond_to_missing?(method_name, include_private = false)
+      !named_accessor(method_name).nil? || super
+    end
+
+    private
+
+    def method_missing(method_name, *args, &block)
+      proxy = named_accessor(method_name) if args.empty? && block.nil?
+      proxy || super
+    end
+
+    def named_accessor(method_name)
+      config = configuration
+      return unless config.respond_to?(:named_configuration)
+      return unless NAMED_INSTANCE_NAME.match?(method_name) && config.named_configuration(method_name)
+
+      @named_instance_proxies[method_name] || named(method_name)
+    end
+
+    # Claims a DSL for the default instance (owner Flipper) or a named
+    # configuration. Returns false when the instance isn't a Flipper DSL.
+    def claim_instance_owner(instance, owner)
+      dsl = unwrap_flipper_dsl(instance)
+      return false unless dsl
+
+      @instance_owner_mutex.synchronize do
+        dsl.send(:claim_instance_owner, owner)
+      end
+      true
+    end
+
+    def unwrap_flipper_dsl(instance)
+      return instance if instance.is_a?(DSL)
+      return unless defined?(Delegator) && instance.is_a?(Delegator)
+
+      seen = Set.new
+      while instance.is_a?(Delegator)
+        return if seen.include?(instance.object_id)
+
+        seen.add(instance.object_id)
+        instance = instance.__getobj__
+      end
+
+      instance if instance.is_a?(DSL)
+    end
+  end
+end
+
 Flipper.configuration
 Flipper.groups_registry
 

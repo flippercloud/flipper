@@ -37,6 +37,15 @@ module Flipper
     # Private: What is being used to instrument all the things.
     attr_reader :instrumenter
 
+    # Internal: Resolves group names for the instance that owns this feature.
+    attr_reader :group_resolver
+
+    # Internal: Resolves features referenced by expressions.
+    attr_reader :feature_resolver
+
+    # Internal: Identity used to isolate circular expression tracking.
+    attr_reader :instance_key
+
     # Internal: Initializes a new feature instance.
     #
     # name - The Symbol or String name of the feature.
@@ -50,6 +59,9 @@ module Flipper
       @key = name.to_s
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
       @adapter = adapter
+      @group_resolver = options.fetch(:group_resolver, Flipper)
+      @feature_resolver = options.fetch(:feature_resolver, Flipper)
+      @instance_key = options[:instance_key]
     end
 
     # Public: Enable this feature for something.
@@ -68,7 +80,7 @@ module Flipper
         adapter.add self
 
         gate = gate_for(thing)
-        wrapped_thing = gate.wrap(thing)
+        wrapped_thing = wrap_for(gate, thing)
         payload[:gate_name] = gate.name
         payload[:thing] = wrapped_thing
 
@@ -117,7 +129,8 @@ module Flipper
         context = FeatureCheckContext.new(
           feature_name: @name,
           values: gate_values,
-          actors: actors
+          actors: actors,
+          feature: self
         )
 
         if open_gate = gates.detect { |gate| gate.open?(context) }
@@ -176,7 +189,7 @@ module Flipper
     #
     # Returns result of enable.
     def enable_group(group)
-      enable Types::Group.wrap(group)
+      enable wrap_group(group)
     end
 
     # Public: Enables a feature a percentage of time.
@@ -250,7 +263,7 @@ module Flipper
     #
     # Returns result of disable.
     def disable_group(group)
-      disable Types::Group.wrap(group)
+      disable wrap_group(group)
     end
 
     # Public: Disables a feature a percentage of time.
@@ -314,7 +327,7 @@ module Flipper
     #
     # Returns Set of Flipper::Types::Group instances.
     def enabled_groups
-      groups_value.map { |name| Flipper.group(name) }.to_set
+      groups_value.map { |name| @group_resolver.group(name) }.to_set
     end
     alias_method :groups, :enabled_groups
 
@@ -322,7 +335,7 @@ module Flipper
     #
     # Returns Set of Flipper::Types::Group instances.
     def disabled_groups
-      Flipper.groups - enabled_groups
+      @group_resolver.groups - enabled_groups
     end
 
     def expression
@@ -451,6 +464,18 @@ module Flipper
 
     private
 
+    def wrap_group(group)
+      return group if group.is_a?(Types::Group)
+
+      @group_resolver.group(group)
+    end
+
+    # Private: Groups resolve through the instance that owns this feature, so
+    # a named instance's groups are found in its own registry.
+    def wrap_for(gate, thing)
+      gate.name == :group ? wrap_group(thing) : gate.wrap(thing)
+    end
+
     # Internal: Mirrors a trusted remote expression during adapter sync,
     # including legacy expressions that predate empty-group validation.
     #
@@ -463,7 +488,7 @@ module Flipper
       ensure_not_reserved!
       instrument(:enable) do |payload|
         gate = gate_for(thing)
-        wrapped_thing = gate.wrap(thing)
+        wrapped_thing = wrap_for(gate, thing)
         validate_expression!(wrapped_thing) if validate_expression
 
         adapter.add self
@@ -523,6 +548,9 @@ module Flipper
       @instrumenter.instrument(InstrumentationName, initial_payload) do |payload|
         payload[:feature] = self
         payload[:feature_name] = name
+        # Named instances say which instance the event came from; the
+        # default instance's payload is unchanged.
+        payload[:instance] = @instance_key if @instance_key
         payload[:operation] = operation
         payload[:result] = yield(payload) if block_given?
       end

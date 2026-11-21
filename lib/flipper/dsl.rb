@@ -21,6 +21,9 @@ module Flipper
     #           :memoize - Should adapter be wrapped by memoize adapter or not.
     def initialize(adapter, options = {})
       @instrumenter = options.fetch(:instrumenter, Instrumenters::Noop)
+      @group_resolver = Flipper
+      @feature_resolver = Flipper
+      @instance_key = nil
       memoize = options.fetch(:memoize, true)
       adapter = Adapters::Memoizable.new(adapter) if memoize
       @adapter = adapter
@@ -29,6 +32,26 @@ module Flipper
       # memoize features without a non-atomic Hash mutation racing.
       @memoized_features = Concurrent::Map.new
     end
+
+    # Internal: Claim this DSL for the default or one named instance. Called
+    # while Flipper's instance owner lock is held.
+    def claim_instance_owner(configuration)
+      return self if @instance_owner.equal?(configuration)
+
+      if @instance_owner
+        raise InvalidConfigurationValue, "A Flipper DSL cannot be shared by multiple Flipper instances"
+      end
+
+      @instance_owner = configuration
+      unless configuration.equal?(Flipper)
+        @group_resolver = configuration
+        @feature_resolver = self
+        @instance_key = configuration.name
+        @memoized_features.clear
+      end
+      self
+    end
+    private :claim_instance_owner
 
     # Public: Check if a feature is enabled.
     #
@@ -223,7 +246,11 @@ module Flipper
       end
 
       @memoized_features.compute_if_absent(name.to_sym) do
-        Feature.new(name, @adapter, instrumenter: instrumenter)
+        Feature.new(name, @adapter,
+          instrumenter: instrumenter,
+          group_resolver: @group_resolver,
+          feature_resolver: @feature_resolver,
+          instance_key: @instance_key)
       end
     end
 
@@ -259,8 +286,13 @@ module Flipper
     #
     # Returns an instance of Flipper::Group.
     def group(name)
-      Flipper.group(name)
+      @group_resolver.group(name)
     end
+
+    # Public: Group registration for this DSL's owning instance (Flipper for
+    # the default instance, the named configuration for a named one).
+    def_delegators :@group_resolver,
+                   :register, :groups, :group_names, :group_exists?, :unregister_groups
 
     # Public: Gets the expression for the feature.
     #

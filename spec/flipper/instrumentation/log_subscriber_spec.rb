@@ -64,6 +64,22 @@ RSpec.describe Flipper::Instrumentation::LogSubscriber do
     end
   end
 
+  context 'feature enabled checks on a named instance' do
+    before do
+      Flipper.configure do |config|
+        config.named(:cross_app) do |named|
+          named.instrumenter = ActiveSupport::Notifications
+        end
+      end
+      clear_logs
+      Flipper.cross_app[:search].enabled?
+    end
+
+    it 'names the instance' do
+      expect(find_line('Flipper[cross_app] feature(search) enabled? false')).to include('[ actors=nil ]')
+    end
+  end
+
   context 'feature enabled checks with an actor' do
     let(:user) { Flipper::Types::Actor.new(Flipper::Actor.new('1')) }
 

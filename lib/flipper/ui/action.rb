@@ -103,6 +103,18 @@ module Flipper
         @headers = {Rack::CONTENT_TYPE => 'text/plain'}
       end
 
+      # Public: The banner text for this UI. An app built with
+      # Flipper::UI.app(flipper, banner_text: "...") uses its own, so two UIs
+      # (say, the default and a named instance) can be told apart.
+      def banner_text
+        request.env.fetch(Middleware::BANNER_ENV_KEY, {}).fetch(:text) { Flipper::UI.configuration.banner_text }
+      end
+
+      # Public: The banner's Bootstrap alert class for this UI.
+      def banner_class
+        request.env.fetch(Middleware::BANNER_ENV_KEY, {}).fetch(:class) { Flipper::UI.configuration.banner_class }
+      end
+
       # Public: Runs the request method for the provided request.
       #
       # Returns whatever the request method returns in the action.

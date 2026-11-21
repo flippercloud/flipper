@@ -13,6 +13,9 @@ module Flipper
       #   flipper[:search].enabled?(user)
       #   # Flipper feature(search) enabled? false (1.2ms)  [ actors=... ]
       #
+      #   # a named instance names itself
+      #   # Flipper[cross_app] feature(search) enabled? false (1.2ms)  [ actors=... ]
+      #
       # Returns nothing.
       def feature_operation(event)
         return unless logger.debug?
@@ -22,7 +25,9 @@ module Flipper
         operation = event.payload[:operation]
         result = event.payload[:result]
 
-        description = "Flipper feature(#{feature_name}) #{operation} #{result.inspect}"
+        instance = event.payload[:instance]
+        prefix = instance ? "Flipper[#{instance}]" : "Flipper"
+        description = "#{prefix} feature(#{feature_name}) #{operation} #{result.inspect}"
 
         details = if event.payload.key?(:actors)
           "actors=#{event.payload[:actors].inspect}"
