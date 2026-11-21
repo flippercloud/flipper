@@ -60,9 +60,15 @@ module Flipper
       def update_params(env, data, strict:)
         return if data.empty?
 
-        parsed_request_body = parse_json_body(data, strict: strict)
+        parsed_request_body = parse_json_body(data)
+        unless parsed_request_body.is_a?(Hash)
+          raise InvalidRequestBody if strict
+
+          # Reads ignore a body they can't use, as they do a malformed query.
+          return
+        end
+
         if strict
-          raise InvalidRequestBody unless parsed_request_body.is_a?(Hash)
           raise InvalidRequestBody unless ParameterParsing.valid_encoding?(parsed_request_body)
 
           query_params = parse_nested_query(env[QUERY_STRING].to_s, strict: strict)
@@ -71,20 +77,23 @@ module Flipper
           end
         end
 
-        env["parsed_request_body".freeze] = parsed_request_body
         parsed_query_string = parse_query_string(env[QUERY_STRING].to_s, strict: strict)
+        return unless parsed_query_string
+
         parsed_query_string.merge!(parsed_request_body)
-        env[QUERY_STRING] = build_query_string(parsed_query_string, strict: strict)
+        query_string = build_query_string(parsed_query_string, strict: strict)
+        return unless query_string
+
+        env["parsed_request_body".freeze] = parsed_request_body
+        env[QUERY_STRING] = query_string
         env.delete('rack.request.query_hash'.freeze)
         env.delete('rack.request.query_string'.freeze)
       end
 
-      def parse_json_body(data, strict:)
+      def parse_json_body(data)
         Typecast.from_json(data)
       rescue JSON::ParserError
-        raise InvalidRequestBody if strict
-
-        raise
+        nil
       end
 
       def parse_nested_query(data, strict:)
@@ -100,7 +109,7 @@ module Flipper
       rescue *ParameterParsing.errors
         raise InvalidRequestBody if strict
 
-        raise
+        nil
       end
 
       def build_query_string(params, strict:)
@@ -108,7 +117,7 @@ module Flipper
       rescue *ParameterParsing.errors
         raise InvalidRequestBody if strict
 
-        raise
+        nil
       end
 
       def compatible_parameter_shapes?(left, right)
