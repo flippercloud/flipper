@@ -40,7 +40,7 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
         expected_response = raw_api_get('/features', '')
 
         status, headers, response_body = call_app(
-          Rack::MockRequest.env_for("/features?#{query}", method: 'GET', input: body, 'CONTENT_TYPE' => 'application/json')
+          Rack::MockRequest.env_for('/features', method: 'GET', input: body, 'QUERY_STRING' => query, 'CONTENT_TYPE' => 'application/json')
         )
 
         expect([status, headers, JSON.parse(response_body)]).to eq(expected_response)
