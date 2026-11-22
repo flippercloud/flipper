@@ -1,3 +1,5 @@
+require "flipper/cloud"
+
 RSpec.describe "named Flipper instances" do
   before do
     stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")

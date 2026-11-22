@@ -1,5 +1,6 @@
 require 'rails'
 require 'flipper/engine'
+require 'flipper/cloud'
 
 RSpec.describe Flipper::Engine do
   let(:application) do
