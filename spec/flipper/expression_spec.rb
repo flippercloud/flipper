@@ -10,6 +10,16 @@ RSpec.describe Flipper::Expression do
       }
     end
 
+    ["Integer", "Object", "Kernel", "Flipper::Expressions::Equal"].each do |name|
+      it "raises UnknownFunction for #{name}, which is not defined on Flipper::Expressions" do
+        expect {
+          described_class.build({name => [1]})
+        }.to raise_error(Flipper::Expression::UnknownFunction) { |error|
+          expect(error.name).to eq(name.to_sym)
+        }
+      end
+    end
+
     it "can build Equal" do
       expression = described_class.build({
         "Equal" => [

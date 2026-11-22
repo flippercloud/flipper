@@ -54,6 +54,47 @@ RSpec.describe Flipper::Adapters::Memory do
     end
   end
 
+  it "replaces a set on write instead of changing one a reader holds" do
+    flipper = Flipper.new(subject)
+    flipper.enable_actor(:search, Flipper::Actor.new("User;1"))
+    actors = subject.get(flipper[:search])[:actors]
+
+    flipper.enable_actor(:search, Flipper::Actor.new("User;2"))
+    flipper.disable_actor(:search, Flipper::Actor.new("User;1"))
+
+    expect(actors).to eq(Set["User;1"])
+    expect(subject.get(flipper[:search])[:actors]).to eq(Set["User;2"])
+  end
+
+  describe "#features" do
+    let(:adapter) { described_class.new }
+    let(:flipper) { Flipper.new(adapter) }
+
+    it "returns one frozen set until a write changes the flags" do
+      flipper.add(:search)
+      features = adapter.features
+      expect(features).to be_frozen
+      expect(adapter.features).to be(features)
+      expect(adapter.get(flipper[:search])).to be_a(Hash)
+      expect(adapter.features).to be(features)
+    end
+
+    it "includes flags that any write adds or removes" do
+      flipper.enable(:a)
+      expect(adapter.features).to eq(Set["a"])
+      flipper.disable(:b)
+      expect(adapter.features).to eq(Set["a", "b"])
+      adapter.clear(flipper[:c])
+      expect(adapter.features).to eq(Set["a", "b", "c"])
+      flipper.add(:d)
+      expect(adapter.features).to eq(Set["a", "b", "c", "d"])
+      flipper.remove(:a)
+      expect(adapter.features).to eq(Set["b", "c", "d"])
+      adapter.import(described_class.new({ "e" => {} }))
+      expect(adapter.features).to eq(Set["e"])
+    end
+  end
+
   it "can initialize from big hash" do
     flipper = Flipper.new(subject)
     flipper.enable :subscriptions

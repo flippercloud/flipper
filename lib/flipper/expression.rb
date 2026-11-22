@@ -46,11 +46,13 @@ module Flipper
 
     def initialize(name, args = [])
       @name = name.to_s
-      @function = begin
-        Expressions.const_get(name)
-      rescue NameError => error
-        raise UnknownFunction.new(error.message, error.name)
+      # Only constants defined directly on Expressions are functions. A plain
+      # const_get would also find top-level ones like Integer or Object.
+      function_name = @name.to_sym
+      unless Expressions.constants(false).include?(function_name)
+        raise UnknownFunction.new("uninitialized constant Flipper::Expressions::#{@name}", function_name)
       end
+      @function = Expressions.const_get(function_name, false)
       @args = args
     end
 
