@@ -246,6 +246,12 @@ module Flipper
       keys.map { |key| feature(key) }
     end
 
+    # Internal: Returns false when preloading saves no adapter reads, so
+    # Flipper::Middleware::Memoizer skips it.
+    def preload?
+      true
+    end
+
     # Public: Shortcut access to a feature instance by name.
     #
     # name - The String or Symbol name of the feature.

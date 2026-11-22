@@ -74,7 +74,7 @@ module Flipper
                  :enable_percentage_of_time, :disable_percentage_of_time,
                  :features, :feature, :[], :preload, :preload_all,
                  :adapter, :adapter_stack, :add, :exist?, :remove, :import, :export,
-                 :memoize=, :memoizing?, :read_only?,
+                 :memoize=, :memoizing?, :preload?, :read_only?,
                  :sync, :sync_secret # For Flipper::Cloud. Will error for OSS Flipper.
 
   def any(*args)

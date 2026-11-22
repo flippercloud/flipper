@@ -37,8 +37,19 @@ module Flipper
       end
     end
 
+    # Public: Builds the adapter.
     def to_adapter
-      @stack.reverse.inject(@store.call) { |adapter, wrapper| wrapper.call(adapter) }
+      wrap(build_store)
+    end
+
+    # Internal: Builds a new storage adapter.
+    def build_store
+      @store.call
+    end
+
+    # Internal: Wraps adapter with the adapters added with #use.
+    def wrap(adapter)
+      @stack.reverse.inject(adapter) { |wrapped, wrapper| wrapper.call(wrapped) }
     end
   end
 end
