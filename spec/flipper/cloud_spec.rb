@@ -224,6 +224,23 @@ RSpec.describe Flipper::Cloud do
       expect(memories.first).to be_a(Flipper::Cloud::SharedMemory)
     end
 
+    it "reads the local adapter when FLIPPER_CLOUD_MEMORY_READS is false" do
+      database = Flipper::Adapters::Memory.new
+      Flipper.new(database).enable(:search)
+      store = Flipper::Adapters::OperationLogger.new(database)
+      Flipper.configure { |config| config.adapter { store } }
+      ENV["FLIPPER_CLOUD_MEMORY_READS"] = "false"
+      described_class.set_default
+
+      expect(Flipper.instance.cloud_configuration.memory_reads?).to be(false)
+      expect(Flipper.instance.preload?).to be(true)
+      store.reset
+      expect(Flipper.instance.enabled?(:search)).to be(true)
+      expect(store.count(:get)).to eq(1)
+    ensure
+      ENV.delete("FLIPPER_CLOUD_MEMORY_READS")
+    end
+
     it "passes more options from the block to each instance" do
       instrumenter = Flipper::Instrumenters::Memory.new
       described_class.set_default { { instrumenter: instrumenter } }

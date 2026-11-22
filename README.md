@@ -114,12 +114,13 @@ Cloud is super simple to integrate with Rails ([demo app](https://github.com/fli
 When Cloud is your default (`FLIPPER_CLOUD_TOKEN` is set, with Rails or `Flipper::Cloud.set_default`), feature checks are served from one Memory adapter that every thread in the process shares. Checking a feature doesn't query your adapter (ActiveRecord, Redis, etc.).
 
 - Memory is filled from your adapter when the process boots, so flags are there even if Cloud isn't reachable.
-- Changes you make in your app go to Cloud, your adapter, and Memory.
+- Changes you make in your app go to Cloud, your adapter, and that process's Memory. Other processes get them from Cloud like any other change, as described below.
 - **Polling** (the default): every process polls Cloud every 10 seconds, and each change is written to your adapter and Memory on the next feature check.
 - **Webhooks** (`FLIPPER_CLOUD_SYNC_SECRET` set): the process that gets the webhook updates your adapter and its Memory right away. Other processes reload Memory from your adapter every 10 seconds, and every process polls Cloud every 5 minutes in case a webhook is missed.
 - If your adapter is down, feature checks keep working from Memory. A sync that can't be written to your adapter is written again on the next sync.
 - Adapters added with `config.use` (like `Strict` and `ActorLimit`) still wrap reads and writes.
 - `Flipper::Middleware::Memoizer` still memoizes each request but skips its `preload` option, since there are no adapter reads left to save.
+- To read from your adapter on every check instead, as before, set `FLIPPER_CLOUD_MEMORY_READS=false` and restart.
 
 We also have a [free plan](https://www.flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=free_plan) that you can use forever.
 
