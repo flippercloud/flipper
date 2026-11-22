@@ -496,6 +496,22 @@ RSpec.describe Flipper::Engine do
         end
       end
 
+      context "without the named token" do
+        before { ENV.delete("FLIPPER_CLOUD_CROSS_APP_TOKEN") }
+
+        it "boots, mounts no named webhook and uses the named adapter" do
+          expect { silence { application.initialize! } }.not_to raise_error
+
+          post "/_cross_app", request_body, {
+            "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
+          }
+
+          expect(last_response.status).to eq(404)
+          expect { Flipper.cross_app.instance }.to output(/CROSS_APP_TOKEN/).to_stderr
+          expect(Flipper.cross_app.instance).to be_instance_of(Flipper::DSL)
+        end
+      end
+
       context "with a false sync secret" do
         let(:named_cloud_options) { {path: named_cloud_path, sync_secret: false} }
 

@@ -133,11 +133,13 @@ events from a named instance include `instance: :cross_app`, the log subscriber 
 `Flipper[cross_app] feature(...)`, and statsd counters use `flipper.cross_app.feature.*`.
 
 To manage a named instance in the UI, mount another UI with a banner that says which
-one it is:
+one it is. Mount it before the default UI, because `/flipper` also matches
+`/flipper/cross_app`:
 
 ```ruby
 # config/routes.rb
 mount Flipper::UI.app(Flipper.cross_app, banner_text: "Cross-app flags", banner_class: "warning") => "/flipper/cross_app"
+mount Flipper::UI.app(Flipper) => "/flipper"
 ```
 
 Named instances work with any adapter and do not require Flipper Cloud. When using
@@ -174,19 +176,10 @@ through `FLIPPER_CLOUD_CROSS_APP_TOKEN` and
 `FLIPPER_CLOUD_CROSS_APP_SYNC_SECRET`. Named instances never inherit the default
 `FLIPPER_CLOUD_TOKEN` or `FLIPPER_CLOUD_SYNC_SECRET`.
 
-If a named instance calls `cloud` without its token, the app fails to boot rather than
-quietly reading the wrong project. In environments without that token, such as
-development, only call `cloud` when the token is present:
-
-```ruby
-config.named(:cross_app) do |cross_app|
-  if ENV["FLIPPER_CLOUD_CROSS_APP_TOKEN"] || Rails.application.credentials.dig(:flipper, :cross_app, :cloud_token)
-    cross_app.cloud(path: "_flipper/cross_app")
-  else
-    cross_app.adapter { Flipper::Adapters::ActiveRecord.new(table_prefix: "cross_app_") }
-  end
-end
-```
+Where that token isn't set, such as development, CI or asset builds, the named
+instance uses its own adapter (the `cross_app_` tables above), mounts no webhook, and
+warns once that it isn't syncing with Cloud. That matches the default instance without
+`FLIPPER_CLOUD_TOKEN`.
 
 Applications sharing a Cloud project must register the same named group predicates
 and return the same `flipper_id` for shared actors. Cloud synchronizes group names and

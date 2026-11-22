@@ -22,9 +22,8 @@ module Flipper
       @cloud = false
       @cloud_options = {}
       @resolved_cloud_options = nil
-      @default = -> {
-        Flipper.new(adapter, instrumenter: instrumenter || Instrumenters::Noop)
-      }
+      @warned_missing_cloud_token = false
+      @default = -> { local_instance }
     end
 
     def named(*)
@@ -60,7 +59,9 @@ module Flipper
     # Public: Configure this named instance to use Flipper Cloud.
     #
     # Project credentials are resolved explicitly for this name and never
-    # fall back to the default FLIPPER_CLOUD_TOKEN or sync secret.
+    # fall back to the default FLIPPER_CLOUD_TOKEN or sync secret. Without a
+    # token (development, CI, asset builds), the instance uses its own adapter
+    # and warns once, like the default instance without FLIPPER_CLOUD_TOKEN.
     def cloud(options = {})
       options = options.dup
       if options.key?(:local_adapter)
@@ -73,8 +74,13 @@ module Flipper
       @cloud_options = options
       @resolved_cloud_options = nil
       @default = -> {
-        require "flipper/cloud"
         resolved = resolve_cloud_credentials
+        unless resolved
+          warn_missing_cloud_token
+          next local_instance
+        end
+
+        require "flipper/cloud"
         Flipper::Cloud.new(resolved.merge(
           local_adapter: adapter,
           instrumenter: instrumenter || Instrumenters::Noop
@@ -89,7 +95,7 @@ module Flipper
     end
 
     # Internal: Resolve named credentials with explicit isolation from the
-    # existing default Cloud environment variables.
+    # existing default Cloud environment variables. Returns nil without a token.
     def resolve_cloud_credentials(credentials = {}, env = ENV)
       return @resolved_cloud_options if @resolved_cloud_options
 
@@ -97,10 +103,7 @@ module Flipper
       token = cloud_value(:token, credentials, env["#{prefix}_TOKEN"])
       sync_secret = cloud_value(:sync_secret, credentials, env["#{prefix}_SYNC_SECRET"])
 
-      if token.nil? || token.empty?
-        raise InvalidConfigurationValue,
-          "Cloud token for named instance #{name.inspect} is missing; configure :token or #{prefix}_TOKEN"
-      end
+      return if token.nil? || token.empty?
 
       resolved = @cloud_options.merge(
         token: token,
@@ -111,11 +114,14 @@ module Flipper
     end
 
     # Internal: Where to mount this instance's Cloud webhook, or nil when it
-    # has nothing to mount (not Cloud, no path, or no sync secret).
+    # has nothing to mount (not Cloud, no path, no token, or no sync secret).
     def cloud_webhook_path
       return unless cloud? && cloud_path
 
-      sync_secret = resolve_cloud_credentials[:sync_secret]
+      credentials = resolve_cloud_credentials
+      return unless credentials
+
+      sync_secret = credentials[:sync_secret]
       return if sync_secret.nil? || sync_secret == false || sync_secret.empty?
 
       cloud_path
@@ -134,6 +140,19 @@ module Flipper
     end
 
     private
+
+    def local_instance
+      Flipper.new(adapter, instrumenter: instrumenter || Instrumenters::Noop)
+    end
+
+    def warn_missing_cloud_token
+      return if @warned_missing_cloud_token
+
+      @warned_missing_cloud_token = true
+      warn "Flipper named instance #{name.inspect} is configured for Cloud but has no " \
+        "token (FLIPPER_CLOUD_#{name.to_s.upcase}_TOKEN or flipper.#{name}.cloud_token " \
+        "credentials), so it is using its local adapter and not syncing with Cloud."
+    end
 
     def cloud_value(key, credentials, env_value)
       return @cloud_options[key] if @cloud_options.key?(key)

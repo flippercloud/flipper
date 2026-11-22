@@ -501,8 +501,32 @@ RSpec.describe "named Flipper instances" do
         config.named(:cross_app) { |named| named.cloud }
       end
 
-      expect { Flipper.cross_app.instance }.
-        to raise_error(Flipper::InvalidConfigurationValue, /CROSS_APP_TOKEN/)
+      expect { Flipper.cross_app.instance }.to output(/CROSS_APP_TOKEN/).to_stderr
+      expect(Flipper.cross_app.instance).not_to be_a(Flipper::Cloud::DSL)
+    end
+  end
+
+  it "uses the named adapter and warns once when the named Cloud token is missing" do
+    with_env("FLIPPER_CLOUD_CROSS_APP_TOKEN" => nil, "FLIPPER_CLOUD_CROSS_APP_SYNC_SECRET" => nil) do
+      adapter = Flipper::Adapters::Memory.new
+      Flipper.configure do |config|
+        config.named(:cross_app) do |named|
+          named.adapter { adapter }
+          named.cloud(path: "_flipper/cross_app")
+        end
+      end
+
+      named = Flipper.send(:named_configuration, :cross_app)
+      expect(named.cloud_webhook_path).to be_nil
+
+      expect {
+        Flipper.cross_app.enable(:search)
+        Thread.new { Flipper.cross_app.enabled?(:search) }.join
+      }.to output(/\A[^\n]*CROSS_APP_TOKEN[^\n]*\n\z/).to_stderr
+
+      expect(Flipper.cross_app.instance).to be_a(Flipper::DSL)
+      expect(adapter.get(Flipper.cross_app[:search])[:boolean]).to eq("true")
+      expect(Flipper.enabled?(:search)).to be(false)
     end
   end
 
