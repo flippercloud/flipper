@@ -20,11 +20,7 @@ module Flipper
         @banner = {}
         @banner[:text] = options[:banner_text] if options[:banner_text]
         if (banner_class = options[:banner_class])
-          unless Configuration::VALID_BANNER_CLASS_VALUES.include?(banner_class)
-            raise InvalidConfigurationValue, "The banner_class provided '#{banner_class}' is " \
-              "not one of: #{Configuration::VALID_BANNER_CLASS_VALUES.join(', ')}"
-          end
-          @banner[:class] = banner_class
+          @banner[:class] = Configuration.validate_banner_class(banner_class)
         end
 
         @action_collection = ActionCollection.new

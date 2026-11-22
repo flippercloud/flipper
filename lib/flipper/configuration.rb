@@ -1,10 +1,11 @@
+require 'concurrent/map'
+
 module Flipper
   class Configuration
     def initialize(options = {})
       @builder = AdapterBuilder.new { store Flipper::Adapters::Memory }
       @default = -> { Flipper.new(@builder.to_adapter) }
-      @named_configurations = {}
-      @named_configurations_mutex = Mutex.new
+      @named_configurations = Concurrent::Map.new
     end
 
     # The default adapter to use.
@@ -103,7 +104,7 @@ module Flipper
       # reopen theirs with this block so neither thread's settings are lost.
       created = NamedConfiguration.new(name)
       yield created if block_given?
-      published = @named_configurations_mutex.synchronize { @named_configurations[name] ||= created }
+      published = @named_configurations.put_if_absent(name, created) || created
       yield published if block_given? && !published.equal?(created)
       published
     end
@@ -113,22 +114,21 @@ module Flipper
       # Stored names are already normalized, so a Symbol hit needs no checks.
       # This is on the path of every Flipper.<name> call.
       if name.is_a?(Symbol)
-        found = @named_configurations_mutex.synchronize { @named_configurations[name] }
+        found = @named_configurations[name]
         return found if found
       end
 
-      name = Flipper.send(:normalize_named_instance_name, name)
-      @named_configurations_mutex.synchronize { @named_configurations[name] }
+      @named_configurations[Flipper.send(:normalize_named_instance_name, name)]
     end
 
     # Public: Returns the configured named instance names.
     def named_instance_names
-      @named_configurations_mutex.synchronize { @named_configurations.keys }
+      @named_configurations.keys
     end
 
     # Public: Returns the configured named configurations.
     def named_configurations
-      @named_configurations_mutex.synchronize { @named_configurations.values }
+      @named_configurations.values
     end
 
     def statsd

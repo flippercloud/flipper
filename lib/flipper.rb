@@ -84,15 +84,12 @@ module Flipper
   def named(name)
     name = normalize_named_instance_name(name)
     named_configuration(name)
-    @named_instance_proxies[name] || @named_instance_proxies_mutex.synchronize do
-      @named_instance_proxies[name] ||= NamedProxy.new(name)
-    end
+    @named_instance_proxies.compute_if_absent(name) { NamedProxy.new(name) }
   end
 
   # Internal: Returns the current named configuration or raises if missing.
   def named_configuration(name)
-    config = configuration
-    configured = config.respond_to?(:named_configuration) && config.named_configuration(name)
+    configured = find_named_configuration(name)
     return configured if configured
 
     raise NamedInstanceNotFound, "Named instance #{normalize_named_instance_name(name).inspect} has not been configured"
@@ -278,8 +275,7 @@ require 'flipper/version'
 # check-then-set race on the `||=` memoization if two threads were to first
 # touch Flipper concurrently during a parallel boot.
 module Flipper
-  @named_instance_proxies = {}
-  @named_instance_proxies_mutex = Mutex.new
+  @named_instance_proxies = Concurrent::Map.new
   @instance_owner_mutex = Mutex.new
 
   class << self
@@ -298,11 +294,16 @@ module Flipper
     end
 
     def named_accessor(method_name)
-      config = configuration
-      return unless config.respond_to?(:named_configuration)
-      return unless NAMED_INSTANCE_NAME.match?(method_name) && config.named_configuration(method_name)
+      return unless NAMED_INSTANCE_NAME.match?(method_name) && find_named_configuration(method_name)
 
       @named_instance_proxies[method_name] || named(method_name)
+    end
+
+    # Nil when the name isn't configured or the configuration object doesn't
+    # support named instances.
+    def find_named_configuration(name)
+      config = configuration
+      config.named_configuration(name) if config.respond_to?(:named_configuration)
     end
 
     # Claims a DSL for the default instance (owner Flipper) or a named

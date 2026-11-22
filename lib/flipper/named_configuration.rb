@@ -1,3 +1,5 @@
+require 'concurrent/atomic/atomic_fixnum'
+
 module Flipper
   class NamedConfiguration < Configuration
     include Groups
@@ -10,8 +12,7 @@ module Flipper
       super()
       @name = name
       @groups_registry = Registry.new
-      @version = 0
-      @version_mutex = Mutex.new
+      @version = Concurrent::AtomicFixnum.new(0)
       @memoize = nil
       @preload = nil
       @env_key = "flipper_#{name}"
@@ -48,7 +49,7 @@ module Flipper
     end
 
     def version
-      @version_mutex.synchronize { @version }
+      @version.value
     end
 
     def instrumenter=(instrumenter)
@@ -96,12 +97,12 @@ module Flipper
 
     # Internal: Resolve named credentials with explicit isolation from the
     # existing default Cloud environment variables. Returns nil without a token.
-    def resolve_cloud_credentials(credentials = {}, env = ENV)
+    def resolve_cloud_credentials(credentials = {})
       return @resolved_cloud_options if @resolved_cloud_options
 
       prefix = "FLIPPER_CLOUD_#{name.to_s.upcase}"
-      token = cloud_value(:token, credentials, env["#{prefix}_TOKEN"])
-      sync_secret = cloud_value(:sync_secret, credentials, env["#{prefix}_SYNC_SECRET"])
+      token = cloud_value(:token, credentials, ENV["#{prefix}_TOKEN"])
+      sync_secret = cloud_value(:sync_secret, credentials, ENV["#{prefix}_SYNC_SECRET"])
 
       return if token.nil? || token.empty?
 
@@ -164,7 +165,7 @@ module Flipper
     end
 
     def changed!
-      @version_mutex.synchronize { @version += 1 }
+      @version.increment
     end
   end
 end

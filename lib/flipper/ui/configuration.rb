@@ -152,11 +152,16 @@ module Flipper
       end
 
       def banner_class=(value)
+        @banner_class = self.class.validate_banner_class(value)
+      end
+
+      # Internal: Returns value, or raises if it isn't a valid banner class.
+      def self.validate_banner_class(value)
         unless VALID_BANNER_CLASS_VALUES.include?(value)
           raise InvalidConfigurationValue, "The banner_class provided '#{value}' is " \
             "not one of: #{VALID_BANNER_CLASS_VALUES.join(', ')}"
         end
-        @banner_class = value
+        value
       end
     end
   end

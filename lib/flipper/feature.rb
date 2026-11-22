@@ -190,7 +190,7 @@ module Flipper
     #
     # Returns result of enable.
     def enable_group(group)
-      enable wrap_group(group)
+      enable Types::Group.wrap(group, @group_resolver)
     end
 
     # Public: Enables a feature a percentage of time.
@@ -264,7 +264,7 @@ module Flipper
     #
     # Returns result of disable.
     def disable_group(group)
-      disable wrap_group(group)
+      disable Types::Group.wrap(group, @group_resolver)
     end
 
     # Public: Disables a feature a percentage of time.
@@ -465,16 +465,10 @@ module Flipper
 
     private
 
-    def wrap_group(group)
-      return group if group.is_a?(Types::Group)
-
-      @group_resolver.group(group)
-    end
-
     # Private: Groups resolve through the instance that owns this feature, so
     # a named instance's groups are found in its own registry.
     def wrap_for(gate, thing)
-      gate.name == :group ? wrap_group(thing) : gate.wrap(thing)
+      gate.name == :group ? Types::Group.wrap(thing, @group_resolver) : gate.wrap(thing)
     end
 
     # Internal: Mirrors a trusted remote expression during adapter sync,
