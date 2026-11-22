@@ -24,6 +24,9 @@ module Flipper
       @cloud_options = {}
       @resolved_cloud_options = nil
       @warned_missing_cloud_token = false
+      @cloud_memory = nil
+      @cloud_memory_version = nil
+      @cloud_memory_lock = Mutex.new
       @default = -> { local_instance }
     end
 
@@ -83,9 +86,8 @@ module Flipper
 
         require "flipper/cloud"
         Flipper::Cloud.new(resolved.merge(
-          local_adapter: adapter,
           instrumenter: instrumenter || Instrumenters::Noop
-        ))
+        ).merge(cloud_adapter_options))
       }
       changed!
       self
@@ -144,6 +146,27 @@ module Flipper
 
     def local_instance
       Flipper.new(adapter, instrumenter: instrumenter || Instrumenters::Noop)
+    end
+
+    # Reads come from one Memory adapter that every thread shares, like the
+    # default Cloud instance, unless FLIPPER_CLOUD_MEMORY_READS is false.
+    def cloud_adapter_options
+      return { local_adapter: adapter } unless Flipper::Cloud.memory_reads?
+
+      { memory: cloud_memory, adapter_builder: self }
+    end
+
+    # One Memory adapter per process for each version of this configuration,
+    # so a new adapter or cloud call doesn't read the old adapter's flags.
+    def cloud_memory
+      @cloud_memory_lock.synchronize do
+        current = version
+        if @cloud_memory.nil? || @cloud_memory_version != current
+          @cloud_memory = Flipper::Cloud::SharedMemory.new
+          @cloud_memory_version = current
+        end
+        @cloud_memory
+      end
     end
 
     def warn_missing_cloud_token

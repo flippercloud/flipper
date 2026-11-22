@@ -140,6 +140,7 @@ When Cloud is your default (`FLIPPER_CLOUD_TOKEN` is set, with Rails or `Flipper
 - **Webhooks** (`FLIPPER_CLOUD_SYNC_SECRET` set): the process that gets the webhook updates your adapter and its Memory right away. Other processes reload Memory from your adapter every 10 seconds, and every process polls Cloud every 5 minutes in case a webhook is missed.
 - If your adapter is down, feature checks keep working from Memory. A sync that can't be written to your adapter is written again on the next sync.
 - Adapters added with `config.use` (like `Strict` and `ActorLimit`) still wrap reads and writes.
+- [Named instances](#named-instances) that call `cloud` read the same way, each from its own Memory.
 - `Flipper::Middleware::Memoizer` still memoizes each request but skips its `preload` option, since there are no adapter reads left to save.
 - To read from your adapter on every check instead, as before, set `FLIPPER_CLOUD_MEMORY_READS=false` and restart.
 

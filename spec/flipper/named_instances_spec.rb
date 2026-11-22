@@ -1,4 +1,5 @@
 require "flipper/cloud"
+require "flipper/adapters/operation_logger"
 
 RSpec.describe "named Flipper instances" do
   before do
@@ -447,6 +448,82 @@ RSpec.describe "named Flipper instances" do
     cloud_instrumenter = Flipper.cross_app.instance.cloud_configuration.instrumenter
 
     expect(cloud_instrumenter.instrumenter).to be(instrumenter)
+  end
+
+  it "serves named Cloud reads from one Memory adapter every thread shares" do
+    database = Flipper::Adapters::Memory.new
+    Flipper.new(database).enable(:search)
+    stores = Queue.new
+    Flipper.configure do |config|
+      config.named(:cross_app) do |named|
+        named.adapter do
+          Flipper::Adapters::OperationLogger.new(database).tap { |store| stores << store }
+        end
+        named.cloud(token: "cloud-token", sync_secret: "cloud-secret")
+      end
+    end
+
+    instances = 2.times.map { Thread.new { Flipper.cross_app.instance }.value }
+    logged = Array.new(stores.size) { stores.pop }
+    expect(logged.sum { |store| store.count(:get_all) }).to eq(1)
+
+    logged.each(&:reset)
+    instances.each { |instance| expect(instance.enabled?(:search)).to be(true) }
+    expect(logged.sum { |store| store.operations.size }).to eq(0)
+
+    memories = instances.map { |instance| instance.cloud_configuration.instance_variable_get(:@memory) }
+    expect(memories.uniq.size).to eq(1)
+    expect(memories.first).to be_a(Flipper::Cloud::SharedMemory)
+    expect(instances.first.preload?).to be(false)
+    expect(Flipper.enabled?(:search)).to be(false)
+  end
+
+  it "gives each named Cloud instance its own Memory adapter" do
+    Flipper.configure do |config|
+      config.named(:cross_app) { |named| named.cloud(token: "cross-app-token") }
+      config.named(:internal) { |named| named.cloud(token: "internal-token") }
+    end
+
+    cross_app = Flipper.cross_app.instance.cloud_configuration.instance_variable_get(:@memory)
+    internal = Flipper.internal.instance.cloud_configuration.instance_variable_get(:@memory)
+
+    expect(cross_app).to be_a(Flipper::Cloud::SharedMemory)
+    expect(cross_app).not_to be(internal)
+  end
+
+  it "starts a new Memory adapter when the named adapter changes" do
+    first = Flipper::Adapters::Memory.new
+    Flipper.new(first).enable(:search)
+    named = Flipper.configuration.named(:cross_app) do |cross_app|
+      cross_app.adapter { first }
+      cross_app.cloud(token: "cloud-token", sync_secret: "cloud-secret")
+    end
+    expect(Flipper.cross_app.enabled?(:search)).to be(true)
+
+    named.adapter { Flipper::Adapters::Memory.new }
+
+    expect(Flipper.cross_app.enabled?(:search)).to be(false)
+  end
+
+  it "reads the named adapter when FLIPPER_CLOUD_MEMORY_READS is false" do
+    with_env("FLIPPER_CLOUD_MEMORY_READS" => "false") do
+      database = Flipper::Adapters::Memory.new
+      Flipper.new(database).enable(:search)
+      store = Flipper::Adapters::OperationLogger.new(database)
+      Flipper.configure do |config|
+        config.named(:cross_app) do |named|
+          named.adapter { store }
+          named.cloud(token: "cloud-token", sync_secret: "cloud-secret")
+        end
+      end
+
+      instance = Flipper.cross_app.instance
+      expect(instance.cloud_configuration.memory_reads?).to be(false)
+      expect(instance.preload?).to be(true)
+      store.reset
+      expect(instance.enabled?(:search)).to be(true)
+      expect(store.count(:get)).to eq(1)
+    end
   end
 
   it "isolates Cloud workers when endpoint strings overlap" do
