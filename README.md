@@ -92,6 +92,27 @@ Flipper.enable_percentage_of_actors :search, 2
 
 Read more about [getting started with Flipper](https://flippercloud.io/docs?utm_source=oss&utm_medium=readme&utm_campaign=getting_started) and [enabling features](https://flippercloud.io/docs/features?utm_source=oss&utm_medium=readme&utm_campaign=enabling_features).
 
+## Named Instances
+
+Need a second, independent set of flags in the same app, such as flags shared across
+several apps? Declare a named instance with its own adapter (and optionally its own
+Flipper Cloud project). The top-level `Flipper` is unchanged.
+
+```ruby
+# config/initializers/flipper.rb
+Flipper.configure do |config|
+  config.named(:cross_app) do |cross_app|
+    cross_app.adapter { Flipper::Adapters::ActiveRecord.new(table_prefix: "cross_app_") }
+    cross_app.cloud(path: "_flipper/cross_app") # optional; uses FLIPPER_CLOUD_CROSS_APP_TOKEN
+  end
+end
+
+CrossAppFlipper = Flipper.named(:cross_app)
+CrossAppFlipper.enabled?(:chat_in_topbar, current_user)
+```
+
+Read the [named instances guide](https://www.flippercloud.io/docs/guides/named-instances?utm_source=oss&utm_medium=readme&utm_campaign=named_instances) for Active Record tables, groups, Cloud credentials, the UI, instrumentation and testing.
+
 ## Flipper Cloud
 
 Like Flipper and want more? Check out [Flipper Cloud](https://www.flippercloud.io?utm_source=oss&utm_medium=readme&utm_campaign=check_out), which comes with:
@@ -119,6 +140,7 @@ When Cloud is your default (`FLIPPER_CLOUD_TOKEN` is set, with Rails or `Flipper
 - **Webhooks** (`FLIPPER_CLOUD_SYNC_SECRET` set): the process that gets the webhook updates your adapter and its Memory right away. Other processes reload Memory from your adapter every 10 seconds, and every process polls Cloud every 5 minutes in case a webhook is missed.
 - If your adapter is down, feature checks keep working from Memory. A sync that can't be written to your adapter is written again on the next sync.
 - Adapters added with `config.use` (like `Strict` and `ActorLimit`) still wrap reads and writes.
+- [Named instances](#named-instances) that call `cloud` read the same way, each from its own Memory.
 - `Flipper::Middleware::Memoizer` still memoizes each request but skips its `preload` option, since there are no adapter reads left to save.
 - To read from your adapter on every check instead, as before, set `FLIPPER_CLOUD_MEMORY_READS=false` and restart.
 

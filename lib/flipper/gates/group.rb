@@ -27,7 +27,7 @@ module Flipper
 
         context.values.groups.any? do |name|
           context.actors.any? do |actor|
-            Flipper.group(name).match?(actor, context)
+            context.group_resolver.group(name).match?(actor, context)
           end
         end
       end

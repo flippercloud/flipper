@@ -30,10 +30,10 @@ module Flipper
         expression = Flipper::Expression.build(data)
 
         if context.actors.nil? || context.actors.empty?
-          !!expression.evaluate(feature_name: context.feature_name, properties: DEFAULT_PROPERTIES, actor: nil)
+          evaluate(expression, context, DEFAULT_PROPERTIES, nil)
         else
           context.actors.any? do |actor|
-            !!expression.evaluate(feature_name: context.feature_name, properties: properties(actor), actor: actor)
+            evaluate(expression, context, properties(actor), actor)
           end
         end
       rescue Flipper::Expression::UnknownFunction
@@ -55,6 +55,16 @@ module Flipper
 
       # Internal
       DEFAULT_PROPERTIES = {}.freeze
+
+      def evaluate(expression, context, properties, actor)
+        !!expression.evaluate(
+          feature_name: context.feature_name,
+          properties: properties,
+          actor: actor,
+          feature_resolver: context.feature_resolver,
+          flipper_instance_key: context.instance_key
+        )
+      end
 
       def properties(actor)
         return DEFAULT_PROPERTIES if actor.nil?
