@@ -89,12 +89,15 @@ module Flipper
       end
     end
 
-    # Public: Adds this feature.
+    # Public: Adds this feature. Adding on purpose is allowed in strict mode;
+    # enable and disable still raise there for a feature that doesn't exist.
     #
     # Returns the result of Adapter#add.
     def add
       ensure_not_reserved!
-      instrument(:add) { adapter.add(self) }
+      instrument(:add) do
+        Adapters::Strict.adding(key) { adapter.add(self) }
+      end
     end
 
     # Public: Does this feature exist in the adapter.

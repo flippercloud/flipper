@@ -32,6 +32,22 @@ module Flipper
         ensure
           self.sync_mode = old_value
         end
+
+        # Internal: Runs the block while the feature with key is added on
+        # purpose (Feature#add), so add lets that one feature be created.
+        # Other features, and reads, stay strict inside the block.
+        def adding(key)
+          old_value = Thread.current[:flipper_strict_adding]
+          Thread.current[:flipper_strict_adding] = key
+          yield
+        ensure
+          Thread.current[:flipper_strict_adding] = old_value
+        end
+
+        # Internal: Whether the feature with key is being added on purpose.
+        def adding?(key)
+          Thread.current[:flipper_strict_adding] == key
+        end
       end
 
       def initialize(adapter, handler = nil, &block)
@@ -40,7 +56,7 @@ module Flipper
       end
 
       def add(feature)
-        assert_feature_exists(feature) unless self.class.sync_mode
+        assert_feature_exists(feature) unless self.class.adding?(feature.key)
         super
       end
 

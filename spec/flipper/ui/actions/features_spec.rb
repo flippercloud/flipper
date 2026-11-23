@@ -185,6 +185,15 @@ RSpec.describe Flipper::UI::Actions::Features do
         expect(last_response.headers['location']).to eq('/features/notifications_next')
       end
 
+      context 'with a strict adapter' do
+        let(:flipper) { build_flipper(Flipper::Adapters::Strict.new(build_memory_adapter, :raise)) }
+
+        it 'adds feature' do
+          expect(last_response.status).to be(302)
+          expect(flipper.features.map(&:key)).to include('notifications_next')
+        end
+      end
+
       context 'feature name has whitespace at beginning and end' do
         let(:feature_name) { '  notifications_next   ' }
 

@@ -461,6 +461,19 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
       end
     end
 
+    context 'with a strict adapter' do
+      let(:flipper) { build_flipper(Flipper::Adapters::Strict.new(build_memory_adapter, :raise)) }
+
+      before do
+        post '/features', name: 'my_feature'
+      end
+
+      it 'adds the feature' do
+        expect(last_response.status).to eq(200)
+        expect(flipper.features.map(&:key)).to include('my_feature')
+      end
+    end
+
     context 'feature name contains invisible characters' do
       before do
         post '/features', name: "my_\u3164\u115Ffeature\u1160\uFFA0\u2800\u17B4"
