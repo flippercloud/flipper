@@ -105,6 +105,23 @@ RSpec.describe Flipper::Adapters::RedisCache do
       stats = flipper[:stats]
       adapter.get(stats)
       expect(client.get("flipper/v1/feature/#{stats.key}")).not_to be_nil
+      expect(client.ttl("flipper/v1/feature/#{stats.key}")).to be_between(1, adapter.ttl)
+    end
+
+    [nil, 0].each do |ttl|
+      context "with a ttl of #{ttl.inspect}" do
+        let(:adapter) { described_class.new(memory_adapter, client, ttl) }
+
+        it 'caches until the feature changes' do
+          stats = flipper[:stats]
+          expect(stats.enabled?).to be(false)
+          expect(client.ttl(adapter.feature_cache_key(stats.key))).to eq(-1)
+
+          stats.enable
+
+          expect(stats.enabled?).to be(true)
+        end
+      end
     end
   end
 

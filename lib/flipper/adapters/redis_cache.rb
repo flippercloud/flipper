@@ -10,6 +10,7 @@ module Flipper
     class RedisCache < CacheBase
       include ::Flipper::Adapters::RedisShared
 
+      # Pass nil or 0 to cache entries without a time limit.
       def initialize(adapter, cache, ttl = 3600, prefix: nil)
         @client = cache
         super
@@ -39,7 +40,14 @@ module Flipper
       end
 
       def cache_write(key, value)
-        with_connection { |conn| conn.setex(key, @ttl, Marshal.dump(value)) }
+        payload = Marshal.dump(value)
+        with_connection do |conn|
+          if @ttl.nil? || @ttl == 0
+            conn.set(key, payload)
+          else
+            conn.setex(key, @ttl, payload)
+          end
+        end
       end
 
       def cache_delete(key)
