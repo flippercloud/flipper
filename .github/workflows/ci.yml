@@ -1,5 +1,11 @@
 name: CI
-on: [push]
+# PRs run once through pull_request, including PRs from forks, whose pushes
+# never reach this repo. Pushes only run for main, so a branch with a PR
+# doesn't run twice.
+on:
+  push:
+    branches: [main]
+  pull_request:
 
 jobs:
   rack-2-minimum:
