@@ -22,7 +22,7 @@ RSpec.describe Flipper::Engine do
   end
 
   before do
-    stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
+    stub_request(:get, /flippercloud\.io/).to_return(body: "{}")
     Rails.application = nil
     reset_frozen_inflections
     ActiveSupport::Dependencies.autoload_paths = ActiveSupport::Dependencies.autoload_paths.dup
@@ -410,7 +410,7 @@ RSpec.describe Flipper::Engine do
         silence { application.initialize! }
         stub = stub_request(:get, /features\?_cb=\d+&exclude_gate_names=true/).with({
           headers: { "flipper-cloud-token" => "named-token" },
-        }).to_return(status: 200, body: JSON.generate({features: {}}), headers: {})
+        }).to_return(body: JSON.generate({features: {}}))
 
         post "/_cross_app", request_body, {
           "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
@@ -442,7 +442,7 @@ RSpec.describe Flipper::Engine do
           silence { application.initialize! }
           stub = stub_request(:get, /features\?_cb=\d+&exclude_gate_names=true/).with({
             headers: { "flipper-cloud-token" => "named-token" },
-          }).to_return(status: 200, body: JSON.generate({features: {}}), headers: {})
+          }).to_return(body: JSON.generate({features: {}}))
 
           post "/_flipper/cross_app", request_body, {
             "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value,
@@ -625,7 +625,7 @@ RSpec.describe Flipper::Engine do
     end
 
     it "initializes cloud configuration" do
-      stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
+      stub_request(:get, /flippercloud\.io/).to_return(body: "{}")
 
       silence { application.initialize! }
 
@@ -663,7 +663,7 @@ RSpec.describe Flipper::Engine do
 
         stub = stub_request(:get, /https:\/\/www\.flippercloud\.io\/adapter\/features\?_cb=\d+&exclude_gate_names=true/).with({
           headers: { "flipper-cloud-token" => ENV["FLIPPER_CLOUD_TOKEN"] },
-        }).to_return(status: 200, body: JSON.generate({ features: {} }), headers: {})
+        }).to_return(body: JSON.generate({ features: {} }))
 
         post "/_flipper", request_body, { "HTTP_FLIPPER_CLOUD_SIGNATURE" => signature_header_value }
 

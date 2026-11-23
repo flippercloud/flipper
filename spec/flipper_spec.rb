@@ -261,7 +261,7 @@ RSpec.describe Flipper do
           headers: {
             'flipper-cloud-token'=>'asdf',
           },
-        }).to_return(status: 200, body: '{"features": {}}', headers: {})
+        }).to_return(body: '{"features": {}}')
       cloud_configuration = Flipper::Cloud::Configuration.new({
         token: "asdf",
         sync_secret: "tasty",

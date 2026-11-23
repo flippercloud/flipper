@@ -19,7 +19,7 @@ RSpec.describe Flipper::Poller do
 
   before do
     stub_request(:get, "#{url}/features?exclude_gate_names=true")
-      .to_return(status: 200, body: JSON.generate(features: []))
+      .to_return(body: JSON.generate(features: []))
 
     allow(subject).to receive(:loop).and_yield # Make loop just call once
     allow(subject).to receive(:sleep)          # Disable sleep
@@ -36,7 +36,7 @@ RSpec.describe Flipper::Poller do
   describe "#sync" do
     it "syncs remote adapter to local adapter" do
       stub_request(:get, "#{url}/features?exclude_gate_names=true")
-        .to_return(status: 200, body: JSON.generate(
+        .to_return(body: JSON.generate(
           features: [
             {
               key: "polling",
@@ -56,7 +56,6 @@ RSpec.describe Flipper::Poller do
       before do
         stub_request(:get, "#{url}/features?exclude_gate_names=true")
           .to_return(
-            status: 200,
             body: JSON.generate(
               features: [
                 {
@@ -130,7 +129,6 @@ RSpec.describe Flipper::Poller do
       before do
         stub_request(:get, "#{url}/features?exclude_gate_names=true")
           .to_return(
-            status: 200,
             body: JSON.generate(
               features: [
                 {
@@ -155,7 +153,6 @@ RSpec.describe Flipper::Poller do
       before do
         stub_request(:get, "#{url}/features?exclude_gate_names=true")
           .to_return(
-            status: 200,
             body: JSON.generate(
               features: [
                 {
@@ -179,7 +176,6 @@ RSpec.describe Flipper::Poller do
       before do
         stub_request(:get, "#{url}/features?exclude_gate_names=true")
           .to_return(
-            status: 200,
             body: JSON.generate(
               features: [
                 {
@@ -213,7 +209,6 @@ RSpec.describe Flipper::Poller do
       before do
         stub_request(:get, "#{url}/features?exclude_gate_names=true")
           .to_return(
-            status: 200,
             body: JSON.generate(
               features: [
                 {
@@ -248,7 +243,6 @@ RSpec.describe Flipper::Poller do
       before do
         stub_request(:get, "#{url}/features?exclude_gate_names=true")
           .to_return(
-            status: 200,
             body: JSON.generate(
               features: [
                 {
@@ -283,7 +277,6 @@ RSpec.describe Flipper::Poller do
         # First sync increases interval to 60
         stub_request(:get, "#{url}/features?exclude_gate_names=true")
           .to_return(
-            status: 200,
             body: JSON.generate(
               features: [
                 {
@@ -297,7 +290,6 @@ RSpec.describe Flipper::Poller do
             headers: { "poll-interval" => "60" }
           ).times(1).then
           .to_return(
-            status: 200,
             body: JSON.generate(
               features: [
                 {
@@ -329,7 +321,6 @@ RSpec.describe Flipper::Poller do
       before do
         stub_request(:get, "#{url}/features?exclude_gate_names=true")
           .to_return(
-            status: 200,
             body: JSON.generate(
               features: [
                 {
@@ -404,7 +395,6 @@ RSpec.describe Flipper::Poller do
       before do
         stub_request(:get, "#{url}/features?exclude_gate_names=true")
           .to_return(
-            status: 200,
             body: JSON.generate(features: []),
             headers: { "poll-shutdown" => "true" }
           )

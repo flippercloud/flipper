@@ -191,7 +191,7 @@ RSpec.describe Flipper::Adapters::Http do
 
     it "escapes special characters in the feature keys" do
       stub_request(:get, "http://app.com/flipper/features?keys%5B%5D=a%26b&keys%5B%5D=c%2Cd&exclude_gate_names=true")
-        .to_return(status: 200, body: JSON.generate("features" => []))
+        .to_return(body: JSON.generate("features" => []))
 
       adapter = described_class.new(url: 'http://app.com/flipper')
       adapter.get_multi([flipper["a&b"], flipper["c,d"]])
@@ -228,7 +228,6 @@ RSpec.describe Flipper::Adapters::Http do
       # First request - server returns ETag
       stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
         .to_return(
-          status: 200,
           body: JSON.generate(features_response),
           headers: { 'ETag' => '"abc123"' }
         )
@@ -242,7 +241,6 @@ RSpec.describe Flipper::Adapters::Http do
       stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
         .with(headers: { 'If-None-Match' => '"abc123"' })
         .to_return(
-          status: 200,
           body: JSON.generate(features_response),
           headers: { 'ETag' => '"abc123"' }
         )
@@ -272,7 +270,6 @@ RSpec.describe Flipper::Adapters::Http do
       # First request - server returns ETag
       stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
         .to_return(
-          status: 200,
           body: JSON.generate(features_response),
           headers: { 'ETag' => '"abc123"' }
         )
@@ -299,7 +296,7 @@ RSpec.describe Flipper::Adapters::Http do
       let(:body) { JSON.generate(features: []) }
 
       it "is nil before get_all and when the header is missing" do
-        stub_request(:get, url).to_return(status: 200, body: body)
+        stub_request(:get, url).to_return(body: body)
         adapter = described_class.new(url: 'http://app.com/flipper')
         expect(adapter.sync_version).to be_nil
 
@@ -309,8 +306,8 @@ RSpec.describe Flipper::Adapters::Http do
 
       it "comes from the flipper-sync-version header of the last get_all" do
         stub_request(:get, url)
-          .to_return(status: 200, body: body, headers: { "flipper-sync-version" => "10" })
-          .then.to_return(status: 200, body: body)
+          .to_return(body: body, headers: { "flipper-sync-version" => "10" })
+          .then.to_return(body: body)
         adapter = described_class.new(url: 'http://app.com/flipper')
 
         adapter.get_all
@@ -322,7 +319,7 @@ RSpec.describe Flipper::Adapters::Http do
 
       it "stays with the cached result on 304 Not Modified" do
         stub_request(:get, url)
-          .to_return(status: 200, body: body, headers: { "ETag" => '"abc"', "flipper-sync-version" => "10" })
+          .to_return(body: body, headers: { "ETag" => '"abc"', "flipper-sync-version" => "10" })
         adapter = described_class.new(url: 'http://app.com/flipper')
         adapter.get_all
         version = adapter.sync_version
@@ -335,9 +332,9 @@ RSpec.describe Flipper::Adapters::Http do
       end
 
       it "is scoped to the url and headers" do
-        stub_request(:get, url).to_return(status: 200, body: body, headers: { "flipper-sync-version" => "10" })
+        stub_request(:get, url).to_return(body: body, headers: { "flipper-sync-version" => "10" })
         stub_request(:get, "http://other.com/flipper/features?exclude_gate_names=true")
-          .to_return(status: 200, body: body, headers: { "flipper-sync-version" => "10" })
+          .to_return(body: body, headers: { "flipper-sync-version" => "10" })
 
         versions = [
           described_class.new(url: 'http://app.com/flipper', headers: { "flipper-cloud-token" => "a" }),
@@ -378,7 +375,6 @@ RSpec.describe Flipper::Adapters::Http do
       # First request - populate the ETag cache
       stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
         .to_return(
-          status: 200,
           body: JSON.generate(features_response),
           headers: { 'ETag' => '"abc123"' }
         )
@@ -389,7 +385,6 @@ RSpec.describe Flipper::Adapters::Http do
       # Second request with cache_bust - should NOT send If-None-Match
       cache_bust_stub = stub_request(:get, %r{/flipper/features\?_cb=\d+&exclude_gate_names=true})
         .to_return(
-          status: 200,
           body: JSON.generate(features_response),
           headers: { 'ETag' => '"def456"' }
         )
@@ -429,7 +424,6 @@ RSpec.describe Flipper::Adapters::Http do
       # First request - populate ETag cache with feature disabled
       stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
         .to_return(
-          status: 200,
           body: JSON.generate(stale_response),
           headers: { 'ETag' => '"abc123"' }
         )
@@ -442,7 +436,6 @@ RSpec.describe Flipper::Adapters::Http do
       # Cache bust request returns fresh data (feature now enabled)
       stub_request(:get, %r{/flipper/features\?_cb=\d+&exclude_gate_names=true})
         .to_return(
-          status: 200,
           body: JSON.generate(fresh_response),
           headers: { 'ETag' => '"def456"' }
         )
@@ -480,7 +473,6 @@ RSpec.describe Flipper::Adapters::Http do
 
       stub_request(:get, "http://app.com/flipper/features?exclude_gate_names=true")
         .to_return(
-          status: 200,
           body: JSON.generate(features_response),
           headers: { 'poll-shutdown' => 'true' }
         )
@@ -527,7 +519,7 @@ RSpec.describe Flipper::Adapters::Http do
   describe "#add" do
     it "raises error when not successful" do
       stub_request(:post, /app.com/)
-        .to_return(status: 503, body: "{}", headers: {})
+        .to_return(status: 503, body: "{}")
 
       adapter = described_class.new(url: 'http://app.com/flipper')
       expect {
@@ -539,7 +531,7 @@ RSpec.describe Flipper::Adapters::Http do
   describe "#remove" do
     it "raises error when not successful" do
       stub_request(:delete, /app.com/)
-        .to_return(status: 503, body: "{}", headers: {})
+        .to_return(status: 503, body: "{}")
 
       adapter = described_class.new(url: 'http://app.com/flipper')
       expect {
@@ -551,7 +543,7 @@ RSpec.describe Flipper::Adapters::Http do
   describe "#clear" do
     it "raises error when not successful" do
       stub_request(:delete, /app.com/)
-        .to_return(status: 503, body: "{}", headers: {})
+        .to_return(status: 503, body: "{}")
 
       adapter = described_class.new(url: 'http://app.com/flipper')
       expect {
@@ -563,7 +555,7 @@ RSpec.describe Flipper::Adapters::Http do
   describe "#enable" do
     it "raises error when not successful" do
       stub_request(:post, /app.com/)
-        .to_return(status: 503, body: "{}", headers: {})
+        .to_return(status: 503, body: "{}")
 
       adapter = described_class.new(url: 'http://app.com/flipper')
       feature = Flipper::Feature.new(:search, adapter)
@@ -576,7 +568,7 @@ RSpec.describe Flipper::Adapters::Http do
 
     it "doesn't raise json error if body cannot be parsed" do
       stub_request(:post, /app.com/)
-        .to_return(status: 503, body: "barf", headers: {})
+        .to_return(status: 503, body: "barf")
 
       adapter = described_class.new(url: 'http://app.com/flipper')
       feature = Flipper::Feature.new(:search, adapter)
@@ -596,7 +588,7 @@ RSpec.describe Flipper::Adapters::Http do
         "more_info" => "https://www.flippercloud.io/docs",
       }
       stub_request(:post, /app.com/)
-        .to_return(status: 503, body: JSON.dump(api_response), headers: {})
+        .to_return(status: 503, body: JSON.dump(api_response))
 
       adapter = described_class.new(url: 'http://app.com/flipper')
       feature = Flipper::Feature.new(:search, adapter)
@@ -615,7 +607,7 @@ RSpec.describe Flipper::Adapters::Http do
   describe "#disable" do
     it "raises error when not successful" do
       stub_request(:delete, /app.com/)
-        .to_return(status: 503, body: "{}", headers: {})
+        .to_return(status: 503, body: "{}")
 
       adapter = described_class.new(url: 'http://app.com/flipper')
       feature = Flipper::Feature.new(:search, adapter)

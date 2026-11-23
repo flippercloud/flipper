@@ -62,14 +62,14 @@ RSpec.describe Flipper::Cloud::Telemetry::Submitter do
           gunzipped = Flipper::Typecast.from_gzip(request.body)
           body = Flipper::Typecast.from_json(gunzipped)
           body == expected_body
-        }.to_return(status: 200, body: "{}")
+        }.to_return(body: "{}")
       subject.call(enabled_metrics)
     end
 
     it "defaults backoff_policy" do
       stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
         to_return(status: 429, body: "{}").
-        to_return(status: 200, body: "{}")
+        to_return(body: "{}")
       instance = described_class.new(cloud_configuration)
       expect(instance.backoff_policy.min_timeout_ms).to eq(30_000)
       expect(instance.backoff_policy.max_timeout_ms).to eq(120_000)
@@ -113,7 +113,7 @@ RSpec.describe Flipper::Cloud::Telemetry::Submitter do
       stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
         to_return(status: 429, body: "{}").
         to_return(status: 429, body: "{}").
-        to_return(status: 200, body: "{}")
+        to_return(body: "{}")
       subject.call(enabled_metrics)
       expect(subject.backoff_policy.retries).to eq(2)
     end
@@ -123,7 +123,7 @@ RSpec.describe Flipper::Cloud::Telemetry::Submitter do
         to_return(status: 500, body: "{}").
         to_return(status: 503, body: "{}").
         to_return(status: 502, body: "{}").
-        to_return(status: 200, body: "{}")
+        to_return(body: "{}")
       subject.call(enabled_metrics)
       expect(subject.backoff_policy.retries).to eq(3)
     end

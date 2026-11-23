@@ -27,7 +27,7 @@ RSpec.describe Flipper::Cloud, ".migrate" do
   describe ".migrate" do
     it "returns a MigrateResult with code and url on success" do
       stub_request(:post, "https://localhost:5555/api/migrate")
-        .to_return(status: 200, body: '{"url":"https://localhost:5555/cloud/setup/abc123"}', headers: {"Content-Type" => "application/json"})
+        .to_return(body: '{"url":"https://localhost:5555/cloud/setup/abc123"}', headers: {"Content-Type" => "application/json"})
 
       result = Flipper::Cloud.migrate(flipper)
 
@@ -38,7 +38,7 @@ RSpec.describe Flipper::Cloud, ".migrate" do
 
     it "sends export data and metadata in the request body" do
       stub = stub_request(:post, "https://localhost:5555/api/migrate")
-        .to_return(status: 200, body: '{"url":"https://localhost:5555/cloud/setup/abc123"}')
+        .to_return(body: '{"url":"https://localhost:5555/cloud/setup/abc123"}')
 
       Flipper::Cloud.migrate(flipper, app_name: "MyApp")
 
@@ -52,7 +52,7 @@ RSpec.describe Flipper::Cloud, ".migrate" do
     it "sends gzip-compressed request body" do
       stub = stub_request(:post, "https://localhost:5555/api/migrate")
         .with(headers: {"content-encoding" => "gzip"})
-        .to_return(status: 200, body: '{"url":"https://localhost:5555/cloud/setup/abc"}')
+        .to_return(body: '{"url":"https://localhost:5555/cloud/setup/abc"}')
 
       Flipper::Cloud.migrate(flipper)
 
@@ -83,7 +83,7 @@ RSpec.describe Flipper::Cloud, ".migrate" do
 
     it "uses FLIPPER_CLOUD_URL environment variable" do
       stub = stub_request(:post, "https://localhost:5555/api/migrate")
-        .to_return(status: 200, body: '{"url":"https://localhost:5555/cloud/setup/abc"}')
+        .to_return(body: '{"url":"https://localhost:5555/cloud/setup/abc"}')
 
       Flipper::Cloud.migrate(flipper)
 
@@ -96,7 +96,7 @@ RSpec.describe Flipper::Cloud, ".migrate" do
           "content-type" => "application/json",
           "accept" => "application/json",
         })
-        .to_return(status: 200, body: '{"url":"https://localhost:5555/cloud/setup/abc"}')
+        .to_return(body: '{"url":"https://localhost:5555/cloud/setup/abc"}')
 
       Flipper::Cloud.migrate(flipper)
 
