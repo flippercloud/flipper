@@ -123,4 +123,32 @@ RSpec.describe Flipper::Adapters::Strict do
       expect { subject.add(feature) }.to raise_error(Flipper::Adapters::Strict::NotFound)
     end
   end
+
+  describe ".adding" do
+    subject { described_class.new(Flipper::Adapters::Memory.new, :raise) }
+
+    it "lets add create the feature being added" do
+      described_class.adding(feature.key) do
+        expect { subject.add(feature) }.not_to raise_error
+      end
+      expect(subject.features).to eq(Set[feature.key])
+    end
+
+    it "keeps other features and reads strict" do
+      other = flipper[:other]
+      described_class.adding(feature.key) do
+        expect { subject.add(other) }.to raise_error(Flipper::Adapters::Strict::NotFound)
+        expect { subject.get(other) }.to raise_error(Flipper::Adapters::Strict::NotFound)
+        expect { subject.get_multi([other]) }.to raise_error(Flipper::Adapters::Strict::NotFound)
+      end
+    end
+
+    it "restores the previous key after the block, even on error" do
+      begin
+        described_class.adding(feature.key) { raise "boom" }
+      rescue RuntimeError
+      end
+      expect { subject.add(feature) }.to raise_error(Flipper::Adapters::Strict::NotFound)
+    end
+  end
 end

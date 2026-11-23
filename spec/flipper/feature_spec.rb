@@ -215,6 +215,18 @@ RSpec.describe Flipper::Feature do
         strict_flipper.add(:search)
         expect { strict_flipper.enabled?(:other) }.to raise_error(Flipper::Adapters::Strict::NotFound)
       end
+
+      it 'keeps other features strict while adding, such as in a subscriber' do
+        other_strict = Flipper.new(Flipper::Adapters::Strict.new(Flipper::Adapters::Memory.new, :raise))
+        checking = Class.new(Flipper::Adapters::Wrapper) do
+          define_method(:add) do |feature|
+            other_strict.enabled?(:other)
+            super(feature)
+          end
+        end
+
+        expect { Flipper.new(checking.new(adapter)).add(:search) }.to raise_error(Flipper::Adapters::Strict::NotFound)
+      end
     end
   end
 

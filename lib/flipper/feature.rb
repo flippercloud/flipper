@@ -96,7 +96,7 @@ module Flipper
     def add
       ensure_not_reserved!
       instrument(:add) do
-        Adapters::Strict.with_sync_mode { adapter.add(self) }
+        Adapters::Strict.adding(key) { adapter.add(self) }
       end
     end
 
