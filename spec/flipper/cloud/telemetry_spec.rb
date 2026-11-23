@@ -6,12 +6,12 @@ RSpec.describe Flipper::Cloud::Telemetry do
   before do
     # Stub polling for features.
     stub_request(:get, "https://www.flippercloud.io/adapter/features?exclude_gate_names=true").
-      to_return(status: 200, body: "{}")
+      to_return(body: "{}")
   end
 
   it "phones home and does not update telemetry interval if missing" do
     stub = stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
-      to_return(status: 200, body: "{}")
+      to_return(body: "{}")
 
     cloud_configuration = Flipper::Cloud::Configuration.new(token: "test")
 
@@ -31,7 +31,7 @@ RSpec.describe Flipper::Cloud::Telemetry do
 
   it "phones home and updates telemetry interval if present" do
     stub = stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
-      to_return(status: 200, body: "{}", headers: {"telemetry-interval" => "120"})
+      to_return(body: "{}", headers: {"telemetry-interval" => "120"})
 
     cloud_configuration = Flipper::Cloud::Configuration.new(token: "test")
 
@@ -74,7 +74,7 @@ RSpec.describe Flipper::Cloud::Telemetry do
 
   it "phones home and does not shutdown if telemetry shutdown header is missing" do
     stub = stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
-      to_return(status: 404, body: "{}", headers: {})
+      to_return(status: 404, body: "{}")
 
     output = StringIO.new
     cloud_configuration = Flipper::Cloud::Configuration.new(
@@ -160,7 +160,7 @@ RSpec.describe Flipper::Cloud::Telemetry do
   describe '#record' do
     it "only restarts once when many threads detect the same fork" do
       stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
-        to_return(status: 200, body: "{}")
+        to_return(body: "{}")
 
       config = Flipper::Cloud::Configuration.new(token: "test")
       telemetry = described_class.new(config)
@@ -210,7 +210,7 @@ RSpec.describe Flipper::Cloud::Telemetry do
 
     it "blocks records from writing to old storage while fork restart is in progress" do
       stub_request(:post, "https://www.flippercloud.io/adapter/telemetry").
-        to_return(status: 200, body: "{}")
+        to_return(body: "{}")
 
       config = Flipper::Cloud::Configuration.new(token: "test")
       telemetry = described_class.new(config)

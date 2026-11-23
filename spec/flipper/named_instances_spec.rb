@@ -3,7 +3,7 @@ require "flipper/adapters/operation_logger"
 
 RSpec.describe "named Flipper instances" do
   before do
-    stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
+    stub_request(:get, /flippercloud\.io/).to_return(body: "{}")
   end
 
   def with_env(values)
@@ -528,7 +528,7 @@ RSpec.describe "named Flipper instances" do
 
   it "isolates Cloud workers when endpoint strings overlap" do
     stub_request(:get, %r{\Ahttps://example\.test/a(?:b)?/features}).
-      to_return(status: 200, body: JSON.generate({features: {}}))
+      to_return(body: JSON.generate({features: {}}))
     Flipper.configure do |config|
       config.named(:people) do |named|
         named.cloud(token: "bc", url: "https://example.test/a")

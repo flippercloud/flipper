@@ -97,9 +97,9 @@ RSpec.describe "Flipper::Cloud memory reads" do
 
   it "writes explicit changes to Cloud, the local adapter and memory" do
     cloud, _poller = start_process
-    stub_request(:post, "https://www.flippercloud.io/adapter/features").to_return(status: 200, body: "{}")
+    stub_request(:post, "https://www.flippercloud.io/adapter/features").to_return(body: "{}")
     stub = stub_request(:post, "https://www.flippercloud.io/adapter/features/search/boolean").
-      to_return(status: 200, body: "{}")
+      to_return(body: "{}")
 
     cloud.enable(:search)
 
@@ -278,7 +278,7 @@ RSpec.describe "Flipper::Cloud memory reads" do
     def stub_cloud(number, enabled)
       body = JSON.generate(features: [{ key: "search", gates: [{ key: "boolean", value: enabled }] }])
       stub_request(:get, %r{\Ahttps://www\.flippercloud\.io/adapter/features\?_cb=\d+&exclude_gate_names=true\z}).
-        to_return(status: 200, body: body, headers: { "flipper-sync-version" => number.to_s })
+        to_return(body: body, headers: { "flipper-sync-version" => number.to_s })
     end
 
     it "syncs the local adapter and memory with one request" do

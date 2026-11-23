@@ -6,7 +6,7 @@ require 'flipper/adapters/instrumented'
 RSpec.describe Flipper::Cloud::DSL do
   it 'delegates everything to flipper instance' do
     # stub the initial sync of http to local
-    stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
+    stub_request(:get, /flippercloud\.io/).to_return(body: "{}")
 
     cloud_configuration = Flipper::Cloud::Configuration.new({
       token: "asdf",
@@ -23,7 +23,7 @@ RSpec.describe Flipper::Cloud::DSL do
         headers: {
           'flipper-cloud-token'=>'asdf',
         },
-      }).to_return(status: 200, body: '{"features": {}}', headers: {})
+      }).to_return(body: '{"features": {}}')
     cloud_configuration = Flipper::Cloud::Configuration.new({
       token: "asdf",
       sync_secret: "tasty",
@@ -35,7 +35,7 @@ RSpec.describe Flipper::Cloud::DSL do
 
   it 'delegates sync_secret to cloud configuration' do
     # stub the initial sync of http to local
-    stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
+    stub_request(:get, /flippercloud\.io/).to_return(body: "{}")
 
     cloud_configuration = Flipper::Cloud::Configuration.new({
       token: "asdf",
@@ -60,7 +60,7 @@ RSpec.describe Flipper::Cloud::DSL do
 
     subject do
       # stub the initial sync of http to local
-      stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
+      stub_request(:get, /flippercloud\.io/).to_return(body: "{}")
       described_class.new(cloud_configuration)
     end
 
@@ -74,10 +74,10 @@ RSpec.describe Flipper::Cloud::DSL do
     it "sends writes to cloud and local" do
       add_stub = stub_request(:post, "https://www.flippercloud.io/adapter/features").
         with({headers: {'flipper-cloud-token'=>'asdf'}}).
-        to_return(status: 200, body: '{}')
+        to_return(body: '{}')
       enable_stub = stub_request(:post, "https://www.flippercloud.io/adapter/features/foo/boolean").
         with(headers: {'flipper-cloud-token'=>'asdf'}).
-        to_return(status: 200, body: '{}')
+        to_return(body: '{}')
 
       subject.enable(:foo)
 

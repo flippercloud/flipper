@@ -5,7 +5,7 @@ require 'flipper/adapters/operation_logger'
 
 RSpec.describe Flipper::Cloud do
   before do
-    stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
+    stub_request(:get, /flippercloud\.io/).to_return(body: "{}")
   end
 
   context "initialize with token" do
@@ -48,7 +48,7 @@ RSpec.describe Flipper::Cloud do
 
   context 'initialize with token and options' do
     it 'sets correct url' do
-      stub_request(:any, %r{fakeflipper.com}).to_return(status: 200)
+      stub_request(:any, %r{fakeflipper.com}).to_return
       instance = described_class.new(token: 'asdf', url: 'https://www.fakeflipper.com/sadpanda')
       # pardon the nesting...
       memoized = instance.adapter
@@ -115,7 +115,7 @@ RSpec.describe Flipper::Cloud do
 
   it 'can import' do
     stub_request(:post, /www\.flippercloud\.io\/adapter\/features.*/).
-      with(headers: {'flipper-cloud-token'=>'asdf'}).to_return(status: 200, body: "{}", headers: {})
+      with(headers: {'flipper-cloud-token'=>'asdf'}).to_return(body: "{}")
 
     flipper = Flipper.new(Flipper::Adapters::Memory.new)
 

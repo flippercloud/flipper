@@ -344,7 +344,7 @@ RSpec.describe Flipper::Cloud::Middleware do
 
   describe 'Request method unsupported' do
     it 'skips middleware' do
-      stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
+      stub_request(:get, /flippercloud\.io/).to_return(body: "{}")
       get '/'
       expect(last_response.status).to eq(404)
       expect(last_response.content_type).to eq("application/json")
@@ -354,7 +354,7 @@ RSpec.describe Flipper::Cloud::Middleware do
 
   describe 'Inspecting the built Rack app' do
     it 'returns a String' do
-      stub_request(:get, /flippercloud\.io/).to_return(status: 200, body: "{}")
+      stub_request(:get, /flippercloud\.io/).to_return(body: "{}")
       expect(Flipper::Cloud.app(flipper).inspect).to eq("Flipper::Cloud")
     end
   end
