@@ -201,6 +201,12 @@ RSpec.describe Flipper::Cloud do
     end
 
     it "serves every thread from one Memory filled once from the local adapter" do
+      # On a slow runner, the poller's first Cloud fetch or the boot copy's
+      # recopy a second later can land before the checks below. Both have
+      # their own specs, so keep them out of this one.
+      allow_any_instance_of(Flipper::Poller).to receive(:start)
+      stub_const("Flipper::Cloud::SharedMemory::RECOPY_INTERVAL", 3600)
+
       database = Flipper::Adapters::Memory.new
       Flipper.new(database).enable(:search)
       stores = Queue.new
