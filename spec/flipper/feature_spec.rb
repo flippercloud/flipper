@@ -187,6 +187,35 @@ RSpec.describe Flipper::Feature do
       subject.add
       expect(adapter.features).to eq(Set[subject.key])
     end
+
+    context 'with a strict adapter' do
+      let(:strict_flipper) { Flipper.new(Flipper::Adapters::Strict.new(adapter, :raise)) }
+
+      it 'adds a new feature without a strict error' do
+        expect { strict_flipper[:search].add }.not_to raise_error
+        expect(adapter.features).to eq(Set['search'])
+      end
+
+      it 'adds through the DSL without a strict error' do
+        expect { strict_flipper.add(:search) }.not_to raise_error
+        expect(adapter.features).to eq(Set['search'])
+      end
+
+      it 'still raises when enable would create a feature' do
+        expect { strict_flipper.enable(:search) }.to raise_error(Flipper::Adapters::Strict::NotFound)
+        expect(adapter.features).to eq(Set.new)
+      end
+
+      it 'still raises when disable would create a feature' do
+        expect { strict_flipper.disable(:search) }.to raise_error(Flipper::Adapters::Strict::NotFound)
+        expect(adapter.features).to eq(Set.new)
+      end
+
+      it 'leaves strict checks on after adding' do
+        strict_flipper.add(:search)
+        expect { strict_flipper.enabled?(:other) }.to raise_error(Flipper::Adapters::Strict::NotFound)
+      end
+    end
   end
 
   describe '#disable' do
