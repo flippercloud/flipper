@@ -71,7 +71,9 @@ module Flipper
       # Records nothing if the block raises or a sync of another version ran at
       # the same time, because an older sync can write its flags after a newer
       # one. The next poll then syncs again and repairs them. Threads syncing
-      # the same version write the same flags, so they can still record it.
+      # the same version write the same flags, so they can still record it,
+      # but one that raises may have left flags half written, so it forgets
+      # its version and keeps syncs still running from recording.
       def sync(version)
         alone, overlaps = synchronize do
           other_version = @syncing.any? { |syncing_version, _| syncing_version != version }
@@ -86,7 +88,12 @@ module Flipper
         synchronize do
           @syncing[version] -= 1
           @syncing.delete(version) if @syncing[version] <= 0
-          @synced_version = version if finished && alone && overlaps == @overlaps
+          if finished
+            @synced_version = version if alone && overlaps == @overlaps
+          else
+            @overlaps += 1
+            @synced_version = nil if @synced_version == version
+          end
         end
       end
 

@@ -67,6 +67,48 @@ RSpec.describe Flipper::Cloud::SharedMemory do
     expect(subject.synced?(version(2))).to be(true)
   end
 
+  # A thread that fails may have cleared flags it never wrote back, so the
+  # version can't stay recorded or the next poll would skip the repair.
+  it "forgets a version when another sync of it fails after it was recorded" do
+    started = Queue.new
+    finish = Queue.new
+    failing = Thread.new do
+      subject.sync(version(2)) do
+        started << true
+        finish.pop
+        raise "database down"
+      end
+    rescue RuntimeError
+    end
+    started.pop
+
+    subject.sync(version(2)) {}
+    expect(subject.synced?(version(2))).to be(true)
+
+    finish << true
+    failing.join
+    expect(subject.synced?(version(2))).to be(false)
+  end
+
+  it "records nothing for a sync still running when another sync of its version fails" do
+    started = Queue.new
+    finish = Queue.new
+    running = Thread.new do
+      Thread.current.abort_on_exception = true
+      subject.sync(version(2)) do
+        started << true
+        finish.pop
+      end
+    end
+    started.pop
+
+    expect { subject.sync(version(2)) { raise "database down" } }.to raise_error("database down")
+    finish << true
+    running.join
+
+    expect(subject.synced?(version(2))).to be(false)
+  end
+
   it "records nothing when a sync of another version starts during one of the same version" do
     started = Queue.new
     finish = Queue.new
