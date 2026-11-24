@@ -320,7 +320,7 @@ RSpec.describe "Flipper::Cloud memory reads" do
       cloud, _poller = start_process(sync_secret: "secret")
       stub = stub_cloud(5, true)
 
-      cloud.sync(cache_bust: true)
+      expect(cloud.sync(cache_bust: true)).to be_nil
 
       expect(stub).to have_been_requested.once
       expect(cloud.enabled?(:search)).to be(true)

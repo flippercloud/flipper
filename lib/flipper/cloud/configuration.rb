@@ -138,6 +138,7 @@ module Flipper
         snapshot.sync_version = remote.sync_version
         # Tracked like a poll's sync, so one that fails partway is synced again.
         @memory.sync(snapshot.sync_version) { sync_memory(snapshot) }
+        nil
       end
 
       # Public: The method that will be used to synchronize local adapter with

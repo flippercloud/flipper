@@ -73,7 +73,7 @@ module Flipper
       # one. The next poll then syncs again and repairs them. Threads syncing
       # the same version write the same flags, so they can still record it,
       # but one that raises may have left flags half written, so it forgets
-      # its version and keeps syncs still running from recording.
+      # the recorded version and keeps syncs still running from recording.
       def sync(version)
         alone, overlaps = synchronize do
           other_version = @syncing.any? { |syncing_version, _| syncing_version != version }
@@ -92,7 +92,7 @@ module Flipper
             @synced_version = version if alone && overlaps == @overlaps
           else
             @overlaps += 1
-            @synced_version = nil if @synced_version == version
+            @synced_version = nil
           end
         end
       end

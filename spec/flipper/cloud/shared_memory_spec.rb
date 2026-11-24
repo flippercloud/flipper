@@ -90,6 +90,12 @@ RSpec.describe Flipper::Cloud::SharedMemory do
     expect(subject.synced?(version(2))).to be(false)
   end
 
+  it "forgets the recorded version when a sync without a version fails" do
+    subject.sync(version(2)) {}
+    expect { subject.sync(nil) { raise "database down" } }.to raise_error("database down")
+    expect(subject.synced?(version(2))).to be(false)
+  end
+
   it "records nothing for a sync still running when another sync of its version fails" do
     started = Queue.new
     finish = Queue.new
