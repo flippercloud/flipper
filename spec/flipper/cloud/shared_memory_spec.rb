@@ -46,6 +46,115 @@ RSpec.describe Flipper::Cloud::SharedMemory do
     expect(subject.synced?(version(3))).to be(true)
   end
 
+  # Every thread syncs a new version after the poll that brings it, so they
+  # overlap. They write the same flags, so one of them records it.
+  it "records a version that several threads synced at the same time" do
+    started = Queue.new
+    finish = Queue.new
+    first = Thread.new do
+      Thread.current.abort_on_exception = true
+      subject.sync(version(2)) do
+        started << true
+        finish.pop
+      end
+    end
+    started.pop
+
+    subject.sync(version(2)) {}
+    finish << true
+    first.join
+
+    expect(subject.synced?(version(2))).to be(true)
+  end
+
+  # A thread that fails may have cleared flags it never wrote back, so the
+  # version can't stay recorded or the next poll would skip the repair.
+  it "forgets a version when another sync of it fails after it was recorded" do
+    started = Queue.new
+    finish = Queue.new
+    failing = Thread.new do
+      subject.sync(version(2)) do
+        started << true
+        finish.pop
+        raise "database down"
+      end
+    rescue RuntimeError
+    end
+    started.pop
+
+    subject.sync(version(2)) {}
+    expect(subject.synced?(version(2))).to be(true)
+
+    finish << true
+    failing.join
+    expect(subject.synced?(version(2))).to be(false)
+  end
+
+  it "forgets the recorded version when a sync without a version fails" do
+    subject.sync(version(2)) {}
+    expect { subject.sync(nil) { raise "database down" } }.to raise_error("database down")
+    expect(subject.synced?(version(2))).to be(false)
+  end
+
+  it "records nothing for a sync still running when another sync of its version fails" do
+    started = Queue.new
+    finish = Queue.new
+    running = Thread.new do
+      Thread.current.abort_on_exception = true
+      subject.sync(version(2)) do
+        started << true
+        finish.pop
+      end
+    end
+    started.pop
+
+    expect { subject.sync(version(2)) { raise "database down" } }.to raise_error("database down")
+    finish << true
+    running.join
+
+    expect(subject.synced?(version(2))).to be(false)
+  end
+
+  it "records nothing when a sync of another version starts during one of the same version" do
+    started = Queue.new
+    finish = Queue.new
+    threads = 2.times.map do
+      Thread.new do
+        Thread.current.abort_on_exception = true
+        subject.sync(version(2)) do
+          started << true
+          finish.pop
+        end
+      end
+    end
+    2.times { started.pop }
+
+    subject.sync(version(3)) {}
+    2.times { finish << true }
+    threads.each(&:join)
+
+    expect(subject.synced?(version(2))).to be(false)
+    expect(subject.synced?(version(3))).to be(false)
+  end
+
+  it "lets one caller claim the store check for each poll" do
+    expect(subject.claim_store_check(10.0)).to be(true)
+    expect(subject.claim_store_check(10.0)).to be(false)
+    expect(subject.claim_store_check(20.0)).to be(true)
+  end
+
+  it "never lets an older poll take the store check back from a newer one" do
+    subject.claim_store_check(20.0)
+    expect(subject.claim_store_check(10.0)).to be(false)
+    expect(subject.claim_store_check(20.0)).to be(false)
+  end
+
+  it "lets another caller claim a poll whose check was given back" do
+    subject.claim_store_check(10.0)
+    subject.release_store_check(10.0)
+    expect(subject.claim_store_check(10.0)).to be(true)
+  end
+
   describe "#reload" do
     let(:store) { Flipper::Adapters::Memory.new }
     let(:now) { [100] }
