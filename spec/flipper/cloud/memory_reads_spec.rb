@@ -141,6 +141,41 @@ RSpec.describe "Flipper::Cloud memory reads" do
     threads.each { |thread| expect(thread.enabled?(:search)).to be(true) }
   end
 
+  it "checks the local adapter's version once per poll, not once per thread" do
+    cloud, poller, memory = start_process
+    threads = [cloud] + 2.times.map { start_process(memory: memory, poller: poller).first }
+    cloud_has(2, true)
+    poller.sync
+    threads.each { |thread| expect(thread.enabled?(:search)).to be(true) }
+
+    allow(database).to receive(:sync_version).and_call_original
+    poller.sync # unchanged
+    threads.each { |thread| expect(thread.enabled?(:search)).to be(true) }
+    expect(database).to have_received(:sync_version).once
+  end
+
+  it "lets another thread check the stored version when one thread's check fails" do
+    cloud, poller, memory = start_process
+    other = start_process(memory: memory, poller: poller).first
+    cloud_has(2, false)
+    poller.sync
+    expect(cloud.enabled?(:search)).to be(false)
+    expect(other.enabled?(:search)).to be(false)
+
+    database.sync_version = version(3) # another process synced newer flags
+    Flipper.new(database).enable(:search)
+    reads = 0
+    allow(database).to receive(:sync_version).and_wrap_original do |original|
+      reads += 1
+      raise "database is down" if reads == 1
+      original.call
+    end
+
+    poller.sync # unchanged
+    expect(cloud.enabled?(:search)).to be(false) # its check failed
+    expect(other.enabled?(:search)).to be(true)
+  end
+
   it "takes newer stored flags when its own poll has not changed" do
     behind, behind_poller = start_process
     ahead, ahead_poller = start_process
@@ -285,7 +320,7 @@ RSpec.describe "Flipper::Cloud memory reads" do
       cloud, _poller = start_process(sync_secret: "secret")
       stub = stub_cloud(5, true)
 
-      cloud.sync(cache_bust: true)
+      expect(cloud.sync(cache_bust: true)).to be_nil
 
       expect(stub).to have_been_requested.once
       expect(cloud.enabled?(:search)).to be(true)
@@ -300,6 +335,28 @@ RSpec.describe "Flipper::Cloud memory reads" do
 
       expect { cloud.sync(cache_bust: true) }.to raise_error("database down")
       expect(cloud.enabled?(:search)).to be(true)
+    end
+
+    it "syncs again on the next poll after a sync it was told to do fails partway" do
+      cloud, poller = start_process(sync_secret: "secret")
+      # Polls and webhook syncs both read Cloud's version over HTTP, so they
+      # share its scope.
+      scope = cloud.cloud_configuration.send(:http_adapter).instance_variable_get(:@sync_version_scope)
+      cloud_has(5, true)
+      remote.sync_version = Flipper::SyncVersion.new(scope, 5)
+      poller.sync
+      expect(cloud.enabled?(:search)).to be(true)
+      expect(database.get_all["search"][:boolean]).to eq("true")
+
+      Flipper.new(database).disable(:search) # cleared, then the restore fails
+      stub_cloud(5, true)
+      allow(database).to receive(:enable).and_raise("database down")
+      expect { cloud.sync(cache_bust: true) }.to raise_error("database down")
+      allow(database).to receive(:enable).and_call_original
+
+      poller.sync # unchanged
+      cloud.enabled?(:search)
+      expect(database.get_all["search"][:boolean]).to eq("true")
     end
 
     it "reloads memory from the local adapter so other processes see a webhook" do

@@ -136,7 +136,9 @@ module Flipper
         # Fetch once for both the local adapter and memory.
         snapshot = Flipper::Adapters::Memory.new(remote.get_all(cache_bust: cache_bust))
         snapshot.sync_version = remote.sync_version
-        sync_memory(snapshot)
+        # Tracked like a poll's sync, so one that fails partway is synced again.
+        @memory.sync(snapshot.sync_version) { sync_memory(snapshot) }
+        nil
       end
 
       # Public: The method that will be used to synchronize local adapter with
@@ -247,19 +249,28 @@ module Flipper
         return Flipper::Adapters::Poll.new(poller, local_adapter) unless @memory
 
         Flipper::Adapters::Poll.new(poller, memory_adapter, synchronizer: -> {
-          sync_poll(poller.adapter)
+          sync_poll(poller.adapter, poller.synced_at)
         })
       end
 
       # Every thread's Poll calls this after each poll. Threads don't wait on
       # each other, so ones that read while a new version syncs sync it too.
-      def sync_poll(snapshot)
+      # Once the version is synced, one thread per poll checks whether another
+      # process stored a different one, so the rest don't query the local
+      # adapter. A check that fails gives the poll back to the next thread.
+      def sync_poll(snapshot, polled_at)
         version = snapshot.sync_version
-        return if @memory.synced?(version) && @store.sync_version == version
+        claimed = false
+        if @memory.synced?(version)
+          claimed = @memory.claim_store_check(polled_at)
+          return unless claimed
+          return if @store.sync_version == version
+        end
 
         @memory.sync(version) { sync_memory(snapshot) }
       rescue StandardError
         # Reads keep working from memory if the local adapter is down.
+        @memory.release_store_check(polled_at) if claimed
       end
 
       def http_adapter
