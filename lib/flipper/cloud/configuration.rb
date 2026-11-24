@@ -136,7 +136,8 @@ module Flipper
         # Fetch once for both the local adapter and memory.
         snapshot = Flipper::Adapters::Memory.new(remote.get_all(cache_bust: cache_bust))
         snapshot.sync_version = remote.sync_version
-        sync_memory(snapshot)
+        # Tracked like a poll's sync, so one that fails partway is synced again.
+        @memory.sync(snapshot.sync_version) { sync_memory(snapshot) }
       end
 
       # Public: The method that will be used to synchronize local adapter with
