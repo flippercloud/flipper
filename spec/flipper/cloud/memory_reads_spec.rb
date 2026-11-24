@@ -141,6 +141,19 @@ RSpec.describe "Flipper::Cloud memory reads" do
     threads.each { |thread| expect(thread.enabled?(:search)).to be(true) }
   end
 
+  it "checks the local adapter's version once per poll, not once per thread" do
+    cloud, poller, memory = start_process
+    threads = [cloud] + 2.times.map { start_process(memory: memory, poller: poller).first }
+    cloud_has(2, true)
+    poller.sync
+    threads.each { |thread| expect(thread.enabled?(:search)).to be(true) }
+
+    allow(database).to receive(:sync_version).and_call_original
+    poller.sync # unchanged
+    threads.each { |thread| expect(thread.enabled?(:search)).to be(true) }
+    expect(database).to have_received(:sync_version).once
+  end
+
   it "takes newer stored flags when its own poll has not changed" do
     behind, behind_poller = start_process
     ahead, ahead_poller = start_process

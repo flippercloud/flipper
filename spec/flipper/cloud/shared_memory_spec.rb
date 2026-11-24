@@ -46,6 +46,12 @@ RSpec.describe Flipper::Cloud::SharedMemory do
     expect(subject.synced?(version(3))).to be(true)
   end
 
+  it "lets one caller claim the store check for each poll" do
+    expect(subject.claim_store_check(10.0)).to be(true)
+    expect(subject.claim_store_check(10.0)).to be(false)
+    expect(subject.claim_store_check(20.0)).to be(true)
+  end
+
   describe "#reload" do
     let(:store) { Flipper::Adapters::Memory.new }
     let(:now) { [100] }

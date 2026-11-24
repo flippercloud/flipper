@@ -50,6 +50,17 @@ module Flipper
         !version.nil? && synchronize { @synced_version == version }
       end
 
+      # Public: Returns true for the first thread to ask about the poll at
+      # polled_at, and false for the rest, so one thread per poll checks the
+      # local adapter's version.
+      def claim_store_check(polled_at)
+        synchronize do
+          return false if @store_checked_at == polled_at
+          @store_checked_at = polled_at
+          true
+        end
+      end
+
       # Public: Runs the block that syncs version, then records it as synced.
       # Records nothing if the block raises or another sync ran at the same
       # time, because an older sync can write its flags after a newer one. The
