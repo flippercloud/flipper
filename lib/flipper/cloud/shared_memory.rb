@@ -12,7 +12,7 @@ module Flipper
 
       def initialize(source = nil, threadsafe: true)
         super
-        @syncing = 0
+        @syncing = Hash.new(0)
         @overlaps = 0
         @recopy = false
         @changed_at = 0
@@ -68,21 +68,24 @@ module Flipper
       end
 
       # Public: Runs the block that syncs version, then records it as synced.
-      # Records nothing if the block raises or another sync ran at the same
-      # time, because an older sync can write its flags after a newer one. The
-      # next poll then syncs again and repairs them.
+      # Records nothing if the block raises or a sync of another version ran at
+      # the same time, because an older sync can write its flags after a newer
+      # one. The next poll then syncs again and repairs them. Threads syncing
+      # the same version write the same flags, so they can still record it.
       def sync(version)
         alone, overlaps = synchronize do
-          @syncing += 1
-          @overlaps += 1 if @syncing > 1
-          [@syncing == 1, @overlaps]
+          other_version = @syncing.any? { |syncing_version, _| syncing_version != version }
+          @overlaps += 1 if other_version
+          @syncing[version] += 1
+          [!other_version, @overlaps]
         end
         finished = false
         yield
         finished = true
       ensure
         synchronize do
-          @syncing -= 1
+          @syncing[version] -= 1
+          @syncing.delete(version) if @syncing[version] <= 0
           @synced_version = version if finished && alone && overlaps == @overlaps
         end
       end

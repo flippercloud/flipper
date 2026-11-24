@@ -46,6 +46,49 @@ RSpec.describe Flipper::Cloud::SharedMemory do
     expect(subject.synced?(version(3))).to be(true)
   end
 
+  # Every thread syncs a new version after the poll that brings it, so they
+  # overlap. They write the same flags, so one of them records it.
+  it "records a version that several threads synced at the same time" do
+    started = Queue.new
+    finish = Queue.new
+    first = Thread.new do
+      Thread.current.abort_on_exception = true
+      subject.sync(version(2)) do
+        started << true
+        finish.pop
+      end
+    end
+    started.pop
+
+    subject.sync(version(2)) {}
+    finish << true
+    first.join
+
+    expect(subject.synced?(version(2))).to be(true)
+  end
+
+  it "records nothing when a sync of another version starts during one of the same version" do
+    started = Queue.new
+    finish = Queue.new
+    threads = 2.times.map do
+      Thread.new do
+        Thread.current.abort_on_exception = true
+        subject.sync(version(2)) do
+          started << true
+          finish.pop
+        end
+      end
+    end
+    2.times { started.pop }
+
+    subject.sync(version(3)) {}
+    2.times { finish << true }
+    threads.each(&:join)
+
+    expect(subject.synced?(version(2))).to be(false)
+    expect(subject.synced?(version(3))).to be(false)
+  end
+
   it "lets one caller claim the store check for each poll" do
     expect(subject.claim_store_check(10.0)).to be(true)
     expect(subject.claim_store_check(10.0)).to be(false)
