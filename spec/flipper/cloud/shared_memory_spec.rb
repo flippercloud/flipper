@@ -52,6 +52,18 @@ RSpec.describe Flipper::Cloud::SharedMemory do
     expect(subject.claim_store_check(20.0)).to be(true)
   end
 
+  it "never lets an older poll take the store check back from a newer one" do
+    subject.claim_store_check(20.0)
+    expect(subject.claim_store_check(10.0)).to be(false)
+    expect(subject.claim_store_check(20.0)).to be(false)
+  end
+
+  it "lets another caller claim a poll whose check was given back" do
+    subject.claim_store_check(10.0)
+    subject.release_store_check(10.0)
+    expect(subject.claim_store_check(10.0)).to be(true)
+  end
+
   describe "#reload" do
     let(:store) { Flipper::Adapters::Memory.new }
     let(:now) { [100] }

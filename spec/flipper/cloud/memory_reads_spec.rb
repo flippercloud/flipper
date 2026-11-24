@@ -154,6 +154,28 @@ RSpec.describe "Flipper::Cloud memory reads" do
     expect(database).to have_received(:sync_version).once
   end
 
+  it "lets another thread check the stored version when one thread's check fails" do
+    cloud, poller, memory = start_process
+    other = start_process(memory: memory, poller: poller).first
+    cloud_has(2, false)
+    poller.sync
+    expect(cloud.enabled?(:search)).to be(false)
+    expect(other.enabled?(:search)).to be(false)
+
+    database.sync_version = version(3) # another process synced newer flags
+    Flipper.new(database).enable(:search)
+    reads = 0
+    allow(database).to receive(:sync_version).and_wrap_original do |original|
+      reads += 1
+      raise "database is down" if reads == 1
+      original.call
+    end
+
+    poller.sync # unchanged
+    expect(cloud.enabled?(:search)).to be(false) # its check failed
+    expect(other.enabled?(:search)).to be(true)
+  end
+
   it "takes newer stored flags when its own poll has not changed" do
     behind, behind_poller = start_process
     ahead, ahead_poller = start_process

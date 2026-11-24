@@ -255,17 +255,20 @@ module Flipper
       # each other, so ones that read while a new version syncs sync it too.
       # Once the version is synced, one thread per poll checks whether another
       # process stored a different one, so the rest don't query the local
-      # adapter.
+      # adapter. A check that fails gives the poll back to the next thread.
       def sync_poll(snapshot, polled_at)
         version = snapshot.sync_version
+        claimed = false
         if @memory.synced?(version)
-          return unless @memory.claim_store_check(polled_at)
+          claimed = @memory.claim_store_check(polled_at)
+          return unless claimed
           return if @store.sync_version == version
         end
 
         @memory.sync(version) { sync_memory(snapshot) }
       rescue StandardError
         # Reads keep working from memory if the local adapter is down.
+        @memory.release_store_check(polled_at) if claimed
       end
 
       def http_adapter
