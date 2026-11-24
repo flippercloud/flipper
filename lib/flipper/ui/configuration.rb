@@ -65,6 +65,9 @@ module Flipper
       # page. Defaults to empty block.
       attr_accessor :actor_names_source
 
+      # Public: Should the `features` list page have a search box. Default true.
+      attr_accessor :feature_search_enabled
+
       # Public: Should feature descriptions be show on the `features` list page.
       # Default false. Only works when using descriptions.
       attr_accessor :show_feature_description_in_list
@@ -117,6 +120,7 @@ module Flipper
         @banner_class = 'danger'
         @feature_creation_enabled = true
         @feature_removal_enabled = true
+        @feature_search_enabled = true
         @fun = true
         @cloud_recommendation = true
         @version_check_enabled = true

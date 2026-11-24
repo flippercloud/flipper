@@ -28,6 +28,12 @@
     <div class="list-group-item bg-light">
       <div class="row align-items-center">
         <h4 class="col m-0">Features</h4>
+        <%- if Flipper::UI.configuration.feature_search_enabled -%>
+          <div class="col-12 col-sm-5 col-lg-4 order-last order-sm-0 mt-2 mt-sm-0" data-feature-search hidden>
+            <input type="search" id="feature-search" class="form-control form-control-sm" value="<%= params["q"] %>" placeholder="Search features" aria-label="Search features" autocomplete="off" spellcheck="false">
+            <span class="visually-hidden" aria-live="polite" data-feature-search-status></span>
+          </div>
+        <%- end -%>
         <%- if write_allowed? && Flipper::UI.configuration.feature_creation_enabled -%>
           <div class="col-auto">
             <a class="btn btn-primary btn-sm" href="<%= script_name %>/features/new">Add Feature</a>
@@ -35,8 +41,11 @@
         <%- end -%>
       </div>
     </div>
+    <%- if Flipper::UI.configuration.feature_search_enabled -%>
+      <div class="list-group-item text-muted rounded-bottom" data-feature-search-empty hidden>No features match your search.</div>
+    <%- end -%>
     <% @features.each do |feature| %>
-      <a href="<%= "#{script_name}/features/#{Flipper::UI::Util.escape(feature.key)}" %>" class="list-group-item list-group-item-action">
+      <a href="<%= "#{script_name}/features/#{Flipper::UI::Util.escape(feature.key)}" %>" class="list-group-item list-group-item-action" data-feature-search-item>
         <div class="row align-items-center">
           <div class="col-1 text-center">
             <span class="status <%= feature.color_class %>" data-bs-toggle="tooltip" title=<%= feature.state.to_s.capitalize %>></span>

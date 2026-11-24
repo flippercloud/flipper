@@ -124,6 +124,54 @@ RSpec.describe Flipper::UI::Actions::Features do
       end
     end
 
+    context "feature search" do
+      before do
+        @original_feature_search_enabled = Flipper::UI.configuration.feature_search_enabled
+        flipper[:search].enable
+      end
+
+      after do
+        Flipper::UI.configuration.feature_search_enabled = @original_feature_search_enabled
+      end
+
+      it "renders the search box, hidden until application.js shows it" do
+        get '/features'
+
+        expect(last_response.body).to include('id="feature-search"')
+        expect(last_response.body).to include('data-feature-search hidden')
+        expect(last_response.body).to include('data-feature-search-item')
+        expect(last_response.body).to include('data-feature-search-empty hidden')
+      end
+
+      it "fills the search box from the q param" do
+        get '/features?q=search'
+
+        expect(last_response.body).to include('value="search"')
+      end
+
+      it "escapes the q param" do
+        get "/features?q=#{Rack::Utils.escape('"><script>alert(1)</script>')}"
+
+        expect(last_response.body).to include('value="&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;"')
+        expect(last_response.body).not_to include('<script>alert(1)</script>')
+      end
+
+      it "does not render the search box when disabled" do
+        Flipper::UI.configuration.feature_search_enabled = false
+        get '/features'
+
+        expect(last_response.body).not_to include('id="feature-search"')
+        expect(last_response.body).not_to include('data-feature-search-empty')
+      end
+
+      it "does not render the search box when there are no features" do
+        flipper.remove(:search)
+        get '/features'
+
+        expect(last_response.body).not_to include('id="feature-search"')
+      end
+    end
+
     context "when in read-only mode" do
       before { allow(flipper).to receive(:read_only?) { true } }
 
