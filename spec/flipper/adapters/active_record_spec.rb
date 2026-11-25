@@ -412,8 +412,8 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
             ActiveRecord::Base.connection.rename_table(:flipper_gates, :prefixed_flipper_gates)
           end
 
-          # Forget columns loaded from the unprefixed tables by other specs.
-          ActiveRecord::Base.connection.schema_cache.clear!
+          # Drop Feature/Gate columns cached by other specs so this fails if
+          # the prefixed models still read the unprefixed tables.
           Flipper::Adapters::ActiveRecord::Feature.reset_column_information
           Flipper::Adapters::ActiveRecord::Gate.reset_column_information
         end
