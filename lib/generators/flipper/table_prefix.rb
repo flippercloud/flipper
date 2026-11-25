@@ -27,12 +27,6 @@ module Flipper
         file_name.sub('flipper', "#{table_prefix}flipper")
       end
 
-      # Rails finds a migration's class by camelizing its file name, so derive
-      # the class name the same way to keep the two in agreement.
-      def migration_class_name(class_name)
-        prefixed_migration_file_name(class_name.underscore).camelize
-      end
-
       def feature_index_name
         :"index_#{table_prefix}flipper_features_on_key" unless table_prefix.empty?
       end
