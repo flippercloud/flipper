@@ -502,6 +502,19 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
       end
     end
 
+    context 'feature name sent in a non-utf-8 charset' do
+      before do
+        body = "--x\r\nContent-Disposition: form-data; name=\"name\"\r\n" \
+          "Content-Type: text/plain; charset=ISO-8859-1\r\n\r\ncaf\xE9\r\n--x--\r\n".b
+        post '/features', body, 'CONTENT_TYPE' => 'multipart/form-data; boundary=x'
+      end
+
+      it 'adds the feature with the name converted to utf-8' do
+        expect(last_response.status).to eq(200)
+        expect(flipper.features.map(&:key)).to eq(["café"])
+      end
+    end
+
     context 'bad request' do
       before do
         post '/features'

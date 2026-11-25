@@ -82,11 +82,24 @@ module Flipper
     # Returns a String.
     def self.to_feature_name(value)
       # U+2800 renders as a fixed-width blank but is not default-ignorable or whitespace.
-      value.to_s
+      to_utf8(value.to_s)
            .scrub('')
            .gsub(/[\p{Default_Ignorable_Code_Point}\p{Cc}\u2800]/, '')
            .gsub(/\A[[:space:]]+|[[:space:]]+\z/, '')
     end
+
+    # Private: Convert a string to UTF-8 so the unicode regexps above can
+    # match it. Binary strings, and encodings with no UTF-8 converter, keep
+    # their bytes and are read as UTF-8, leaving scrub to drop invalid ones.
+    def self.to_utf8(value)
+      return value if value.encoding == Encoding::UTF_8 || value.ascii_only?
+      return String.new(value, encoding: Encoding::UTF_8) if value.encoding == Encoding::BINARY
+
+      value.encode(Encoding::UTF_8, invalid: :replace, undef: :replace, replace: '')
+    rescue Encoding::ConverterNotFoundError
+      String.new(value, encoding: Encoding::UTF_8)
+    end
+    private_class_method :to_utf8
 
     def self.features_hash(source)
       normalized_source = {}
