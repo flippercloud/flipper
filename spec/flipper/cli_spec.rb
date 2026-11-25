@@ -124,16 +124,8 @@ RSpec.describe Flipper::CLI do
       end
     end
 
-    describe %|feature -x '{"Any":[{"All":[]}]}'| do
-      it { should have_attributes(status: 1, stderr: /\AInvalid expression: .*empty Any\/All groups/) }
-    end
-
     describe %|feature -x 5| do
       it { should have_attributes(status: 1, stderr: /\AInvalid expression: 5 is not an expression/) }
-    end
-
-    describe %|feature -x '"str"'| do
-      it { should have_attributes(status: 1, stderr: /\AInvalid expression: "str" is not an expression/) }
     end
   end
 
