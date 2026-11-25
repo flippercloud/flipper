@@ -23,8 +23,12 @@ module Flipper
     /x
     EMPTY = [].freeze
 
-    # Returns a SemVer, or nil when the string isn't a version.
+    # Returns a SemVer, or nil when the string isn't a version. Strings with
+    # invalid bytes or in encodings that aren't ASCII compatible (like UTF-16)
+    # return nil too, since PATTERN can't match them without raising.
     def self.parse(string)
+      return unless string.is_a?(::String) && string.valid_encoding? && string.encoding.ascii_compatible?
+
       match = PATTERN.match(string)
       return unless match
 

@@ -78,6 +78,32 @@ RSpec.describe Flipper::Expressions::SemVer do
     end
   end
 
+  describe "through Flipper.enabled?" do
+    let(:flipper) { Flipper.new(Flipper::Adapters::Memory.new) }
+
+    before do
+      flipper.enable_expression :new_ui,
+        Flipper.semver(Flipper.property(:app_version)).gte(Flipper.semver("2.0.0"))
+    end
+
+    def enabled_for(app_version)
+      flipper.enabled?(:new_ui, Flipper::Actor.new("User;1", "app_version" => app_version))
+    end
+
+    it "compares valid versions" do
+      expect(enabled_for("2.1.0")).to be(true)
+      expect(enabled_for("1.9.0")).to be(false)
+    end
+
+    it "returns false instead of raising for strings with invalid bytes" do
+      expect(enabled_for("2.1.0\xFF")).to be(false)
+    end
+
+    it "returns false instead of raising for strings in encodings that aren't ASCII compatible" do
+      expect(enabled_for("2.1.0".encode("UTF-16LE"))).to be(false)
+    end
+  end
+
   describe "shared examples" do
     examples = Flipper::Typecast.from_json(FlipperRoot.join("spec/fixtures/expressions/SemVer.json").read)
 
