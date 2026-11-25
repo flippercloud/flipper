@@ -24,12 +24,13 @@ module Flipper
 
       prune_named_test_adapters(Flipper.configuration).each do |named|
         test_adapter = named_test_adapters[named]
-        if test_adapter && test_adapter[:version] == named.version
-          Flipper.named(named.name).features.each(&:remove) rescue nil
-        else
-          # The named configuration changed since we installed the test
-          # adapter (or we never did), so clean up and install a fresh one.
-          Flipper.new(test_adapter[:adapter]).features.each(&:remove) if test_adapter
+        # Clear the Memory adapter directly, not through this thread's DSL,
+        # which may have memoized a stale feature list.
+        Flipper.new(test_adapter[:adapter]).features.each(&:remove) if test_adapter
+
+        # Install a fresh one if the named configuration changed since we
+        # installed the test adapter (or we never did).
+        if test_adapter.nil? || test_adapter[:version] != named.version
           install_named_test_adapter(named)
         end
       end

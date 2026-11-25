@@ -102,6 +102,21 @@ RSpec.describe Flipper::TestHelp do
     expect(Flipper.cross_app.enabled?(:shared)).to be(true)
   end
 
+  it "clears named features enabled in another thread while this one memoizes" do
+    Flipper.configure { |config| config.named(:cross_app) }
+    described_class.flipper_configure
+    example_class = Class.new { include Flipper::TestHelp }
+
+    example_class.new.flipper_reset
+    Flipper.cross_app.adapter.memoize = true
+    Flipper.cross_app.features
+    Thread.new { Flipper.cross_app.enable(:chat) }.join
+
+    example_class.new.flipper_reset
+
+    expect(Flipper.cross_app.enabled?(:chat)).to be(false)
+  end
+
   it "clears the previous test adapter when a named configuration changes" do
     Flipper.configure { |config| config.named(:cross_app) }
     described_class.flipper_configure
