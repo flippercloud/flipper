@@ -49,8 +49,13 @@ module Flipper
       named_configurations.each { |named| install_named_test_adapter(named) }
     end
 
+    # Kept on the module, not the object that includes it, so each test's
+    # flipper_reset sees the adapters flipper_configure installed at boot.
+    NAMED_TEST_ADAPTERS = {}
+    private_constant :NAMED_TEST_ADAPTERS
+
     def named_test_adapters
-      @named_test_adapters ||= {}
+      NAMED_TEST_ADAPTERS
     end
 
     # Forget test adapters for named configurations that no longer exist and
