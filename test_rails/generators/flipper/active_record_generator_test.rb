@@ -71,4 +71,25 @@ class FlipperActiveRecordGeneratorTest < Rails::Generators::TestCase
       end
     MIGRATION
   end
+
+  def test_generates_runnable_migration_with_table_prefix_without_trailing_underscore
+    run_generator ["--table-prefix=cross_app"]
+    assert_migration 'db/migrate/create_cross_appflipper_tables.rb', /class CreateCrossAppflipperTables /
+
+    ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
+    silence { run_migration_file(migration_file_name('db/migrate/create_cross_appflipper_tables.rb'), :up) }
+    assert ActiveRecord::Base.connection.table_exists?(:cross_appflipper_features)
+    assert ActiveRecord::Base.connection.table_exists?(:cross_appflipper_gates)
+  ensure
+    ActiveRecord::Base.remove_connection
+    Object.send(:remove_const, :CreateCrossAppflipperTables) if defined?(::CreateCrossAppflipperTables)
+  end
+
+  def test_rejects_table_prefix_that_cannot_name_a_migration
+    ["CrossApp_", "cross-app_"].each do |prefix|
+      error = assert_raises(Thor::Error) { run_generator ["--table-prefix=#{prefix}"], debug: true }
+      assert_match(/lowercase letters, numbers and underscores/, error.message)
+      assert_empty Dir.glob(File.join(destination_root, 'db/migrate/*.rb'))
+    end
+  end
 end

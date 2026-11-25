@@ -7,7 +7,7 @@ module Flipper
         generator.class_option :table_prefix,
                                type: :string,
                                default: '',
-                               desc: 'Prefix for the flipper_features and flipper_gates tables'
+                               desc: 'Prefix for the flipper_features and flipper_gates tables, such as cross_app_ (lowercase letters, numbers and underscores)'
       end
 
       private
@@ -24,8 +24,10 @@ module Flipper
         file_name.sub('flipper', "#{table_prefix}flipper")
       end
 
+      # Rails finds a migration's class by camelizing its file name, so derive
+      # the class name the same way to keep the two in agreement.
       def migration_class_name(class_name)
-        class_name.sub('Flipper', "#{table_prefix.camelize}Flipper")
+        prefixed_migration_file_name(class_name.underscore).camelize
       end
 
       def feature_index_name
@@ -37,7 +39,11 @@ module Flipper
       end
 
       def table_prefix
-        options[:table_prefix].to_s
+        prefix = options[:table_prefix].to_s
+        if prefix !~ /\A[a-z0-9_]*\z/
+          raise Thor::Error, "--table-prefix must contain only lowercase letters, numbers and underscores (got #{prefix.inspect})"
+        end
+        prefix
       end
     end
   end
