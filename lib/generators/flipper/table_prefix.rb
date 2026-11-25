@@ -3,6 +3,9 @@ require 'active_support/core_ext/string/inflections'
 module Flipper
   module Generators
     module TablePrefix
+      # Lowercase so the migration file name matches what Rails' migrator accepts.
+      FORMAT = /\A[a-z0-9_]*\z/
+
       def self.included(generator)
         generator.class_option :table_prefix,
                                type: :string,
@@ -40,7 +43,7 @@ module Flipper
 
       def table_prefix
         prefix = options[:table_prefix].to_s
-        if prefix !~ /\A[a-z0-9_]*\z/
+        unless FORMAT.match?(prefix)
           raise Thor::Error, "--table-prefix must contain only lowercase letters, numbers and underscores (got #{prefix.inspect})"
         end
         prefix
