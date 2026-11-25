@@ -117,28 +117,6 @@ RSpec.describe Flipper::TestHelp do
     expect(Flipper.cross_app.enabled?(:chat)).to be(false)
   end
 
-  it "clears a cache in front of a named test adapter across examples" do
-    require "active_support"
-    require "active_support/cache"
-    require "flipper/adapters/active_support_cache_store"
-    cache = ActiveSupport::Cache::MemoryStore.new
-    Flipper.configure do |config|
-      config.named(:cross_app) do |named|
-        named.use Flipper::Adapters::ActiveSupportCacheStore, cache
-      end
-    end
-    described_class.flipper_configure
-    example_class = Class.new { include Flipper::TestHelp }
-
-    example_class.new.flipper_reset
-    Flipper.cross_app.enable(:chat)
-    Flipper.cross_app.enabled?(:chat)
-
-    example_class.new.flipper_reset
-
-    expect(Flipper.cross_app.enabled?(:chat)).to be(false)
-  end
-
   it "clears the previous test adapter when a named configuration changes" do
     Flipper.configure { |config| config.named(:cross_app) }
     described_class.flipper_configure

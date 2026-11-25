@@ -24,16 +24,14 @@ module Flipper
 
       prune_named_test_adapters(Flipper.configuration).each do |named|
         test_adapter = named_test_adapters[named]
-        if test_adapter && test_adapter[:version] == named.version
-          # Read the keys from Memory, since this thread's DSL may have
-          # memoized a stale list, but remove them through the DSL so any
-          # cache in front of Memory is cleared too.
-          named_flipper = Flipper.named(named.name)
-          test_adapter[:adapter].features.each { |key| named_flipper.remove(key) } rescue nil
-        else
-          # The named configuration changed since we installed the test
-          # adapter (or we never did), so clean up and install a fresh one.
-          Flipper.new(test_adapter[:adapter]).features.each(&:remove) if test_adapter
+        # Clear the Memory adapter directly. Going through the named DSL can
+        # miss features a memoized list doesn't have, or reach the other store
+        # of a write-through adapter wrapping Memory.
+        Flipper.new(test_adapter[:adapter]).features.each(&:remove) if test_adapter
+
+        # Install a fresh one if the named configuration changed since we
+        # installed the test adapter (or we never did).
+        if test_adapter.nil? || test_adapter[:version] != named.version
           install_named_test_adapter(named)
         end
       end
