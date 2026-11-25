@@ -391,6 +391,41 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
         end
       end
 
+      context "with only prefixed tables created" do
+        subject { described_class.new(table_prefix: "prefixed_") }
+
+        before(:all) do
+          skip_on_error(ActiveRecord::ConnectionNotEstablished, "#{config['adapter']} not available") do
+            silence do
+              ActiveRecord::Tasks::DatabaseTasks.create(config)
+            end
+          end
+
+          Flipper.configuration = nil
+        end
+
+        before(:each) do
+          silence do
+            ActiveRecord::Tasks::DatabaseTasks.purge(config)
+            CreateFlipperTables.migrate(:up)
+            ActiveRecord::Base.connection.rename_table(:flipper_features, :prefixed_flipper_features)
+            ActiveRecord::Base.connection.rename_table(:flipper_gates, :prefixed_flipper_gates)
+          end
+
+          # Forget columns loaded from the unprefixed tables by other specs.
+          ActiveRecord::Base.connection.schema_cache.clear!
+          Flipper::Adapters::ActiveRecord::Feature.reset_column_information
+          Flipper::Adapters::ActiveRecord::Gate.reset_column_information
+        end
+
+        after(:all) do
+          silence { ActiveRecord::Tasks::DatabaseTasks.drop(config) } unless $skip
+        end
+
+        it_should_behave_like 'a flipper adapter'
+        it_should_behave_like 'an adapter that stores its sync version'
+      end
+
       context "without tables created" do
         before(:all) do
           skip_on_error(ActiveRecord::ConnectionNotEstablished, "#{config['adapter']} not available") do
