@@ -478,6 +478,23 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
     expect(status).to be_success, stderr
   end
 
+  it "builds prefixed models when ActiveRecord::Base has a record validator" do
+    script = <<~RUBY
+      require "active_record"
+      class AlwaysValid < ActiveModel::Validator
+        def validate(record); end
+      end
+      ActiveSupport.on_load(:active_record) { validates_with AlwaysValid }
+      require "flipper/adapters/active_record"
+
+      Flipper::Adapters::ActiveRecord.new(table_prefix: "prefixed_")
+    RUBY
+
+    _, stderr, status = Open3.capture3(RbConfig.ruby, "-Ilib", "-e", script, chdir: FlipperRoot.to_s)
+
+    expect(status).to be_success, stderr
+  end
+
   def active_connections?
     method = ActiveRecord::Base.connection_handler.method(:active_connections?)
     method.arity == 0 ? method.call : method.call(:all)

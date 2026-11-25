@@ -251,7 +251,8 @@ module Flipper
         Class.new(Model) do
           self.table_name = "#{table_prefix}#{table_name}"
 
-          default_class.validators.each do |validator|
+          # Validators declared on ActiveRecord::Base already come through Model.
+          (default_class.validators - Model.validators).each do |validator|
             validates_with validator.class, validator.options.merge(attributes: validator.attributes)
           end
         end
