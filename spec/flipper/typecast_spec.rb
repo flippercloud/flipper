@@ -270,8 +270,9 @@ RSpec.describe Flipper::Typecast do
       expect(described_class.to_feature_name("feature\xFF".b)).to eq("feature")
     end
 
-    it "reads strings in encodings without a utf-8 converter as utf-8" do
+    it "reads strings in encodings without a utf-8 converter as utf-8 when valid" do
       expect(described_class.to_feature_name("feature".dup.force_encoding(Encoding::UTF_7))).to eq("feature")
+      expect(described_class.to_feature_name("caf\xE9".dup.force_encoding(Encoding::Windows_1258))).to eq("")
     end
 
     it "returns empty string for nil" do
