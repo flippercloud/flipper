@@ -52,9 +52,9 @@ module Flipper
 
               # Check before anything is enabled, so a bad expression doesn't
               # leave the other values given with it half applied.
-              raise ArgumentError, "#{json} is not an expression" unless expression.is_a?(Flipper::Expression)
+              raise ArgumentError, "#{expression.value.inspect} is not an expression" unless expression.is_a?(Flipper::Expression)
               if action == "enable" && expression.empty_groups?
-                raise ArgumentError, "#{json} contains empty Any/All groups"
+                raise ArgumentError, "#{expression.value.inspect} contains empty Any/All groups"
               end
 
               values << expression
