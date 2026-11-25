@@ -161,7 +161,8 @@ RSpec.describe Flipper::Cloud::SharedMemory do
 
     before do
       allow(Process).to receive(:clock_gettime).and_call_original
-      allow(Process).to receive(:clock_gettime).with(Process::CLOCK_MONOTONIC, :second) { now.first }
+      allow(Process).to receive(:clock_gettime).with(Process::CLOCK_MONOTONIC, :second) { now.first.floor }
+      allow(Process).to receive(:clock_gettime).with(Process::CLOCK_MONOTONIC, :float_second) { now.first }
       Flipper.new(store).enable(:search)
       store.sync_version = version(2)
     end
@@ -207,6 +208,30 @@ RSpec.describe Flipper::Cloud::SharedMemory do
 
       now[0] = 110
       subject.reload(store)
+      expect(subject.features).to eq(Set["search", "analytics"])
+    end
+
+    it "keeps copying when a copy moments later falls in the next second" do
+      now[0] = 100.99
+      subject.reload(store)
+      now[0] = 101.01
+      subject.import(store, recopy: true) # another thread, moments later
+      Flipper.new(store).enable(:analytics) # the sync finishes
+
+      now[0] = 110
+      subject.reload(store)
+      expect(subject.features).to eq(Set["search", "analytics"])
+    end
+
+    it "waits a whole interval to copy again when the next second comes sooner" do
+      now[0] = 100.99
+      subject.reload(store)
+      now[0] = 101.01
+      subject.recopy(store) # too soon to copy again
+      Flipper.new(store).enable(:analytics) # the sync finishes
+
+      now[0] = 102
+      subject.recopy(store)
       expect(subject.features).to eq(Set["search", "analytics"])
     end
 
