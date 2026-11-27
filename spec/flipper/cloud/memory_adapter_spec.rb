@@ -51,7 +51,7 @@ RSpec.describe Flipper::Cloud::MemoryAdapter do
   it "reads the adapter again only after a copy that may have caught a sync" do
     now = [100]
     allow(Process).to receive(:clock_gettime).and_call_original
-    allow(Process).to receive(:clock_gettime).with(Process::CLOCK_MONOTONIC, :second) { now.first }
+    allow(Process).to receive(:clock_gettime).with(Process::CLOCK_MONOTONIC, any_args) { now.first }
     Flipper.new(store).enable(:search)
     store.sync_version = version
     memory.import(store, recopy: true)
@@ -75,7 +75,7 @@ RSpec.describe Flipper::Cloud::MemoryAdapter do
 
     before do
       allow(Process).to receive(:clock_gettime).and_call_original
-      allow(Process).to receive(:clock_gettime).with(Process::CLOCK_MONOTONIC, :second) { now.first }
+      allow(Process).to receive(:clock_gettime).with(Process::CLOCK_MONOTONIC, any_args) { now.first }
       subject
       Flipper.new(store).enable(:search)
       store.sync_version = version

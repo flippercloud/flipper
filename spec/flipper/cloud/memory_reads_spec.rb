@@ -22,7 +22,7 @@ RSpec.describe "Flipper::Cloud memory reads" do
 
   def freeze_clock
     allow(Process).to receive(:clock_gettime).and_call_original
-    allow(Process).to receive(:clock_gettime).with(Process::CLOCK_MONOTONIC, :second) { now.first }
+    allow(Process).to receive(:clock_gettime).with(Process::CLOCK_MONOTONIC, any_args) { now.first }
   end
 
   # Sets what Cloud returns on the next poll.

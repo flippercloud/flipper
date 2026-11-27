@@ -161,7 +161,7 @@ RSpec.describe Flipper::Cloud::SharedMemory do
 
     before do
       allow(Process).to receive(:clock_gettime).and_call_original
-      allow(Process).to receive(:clock_gettime).with(Process::CLOCK_MONOTONIC, :second) { now.first }
+      allow(Process).to receive(:clock_gettime).with(Process::CLOCK_MONOTONIC, :float_second) { now.first }
       Flipper.new(store).enable(:search)
       store.sync_version = version(2)
     end
@@ -201,12 +201,26 @@ RSpec.describe Flipper::Cloud::SharedMemory do
     # Threads reload on their own clocks, so a copy right after another one
     # shows nothing about whether a sync was still writing.
     it "keeps copying when a copy matches one made moments before" do
+      now[0] = 100.99
       subject.reload(store)
+      now[0] = 101.01
       subject.import(store, recopy: true) # another thread, moments later
       Flipper.new(store).enable(:analytics) # the sync finishes
 
       now[0] = 110
       subject.reload(store)
+      expect(subject.features).to eq(Set["search", "analytics"])
+    end
+
+    it "waits a whole interval to copy again, not just until the next second" do
+      now[0] = 100.99
+      subject.reload(store)
+      now[0] = 101.01
+      subject.recopy(store) # too soon to copy again
+      Flipper.new(store).enable(:analytics) # the sync finishes
+
+      now[0] = 102
+      subject.recopy(store)
       expect(subject.features).to eq(Set["search", "analytics"])
     end
 

@@ -104,7 +104,7 @@ module Flipper
       end
 
       def now
-        Process.clock_gettime(Process::CLOCK_MONOTONIC, :second)
+        Process.clock_gettime(Process::CLOCK_MONOTONIC, :float_second)
       end
     end
   end
