@@ -112,6 +112,30 @@ class UpdateGeneratorTest < Rails::Generators::TestCase
     assert ActiveRecord::Base.connection.column_exists?(:cross_product_flipper_gates, :value, :text)
   end
 
+  test "generates runnable migrations with a table prefix without a trailing underscore" do
+    run_generator ["--table-prefix=cross_app"]
+    assert_migration "db/migrate/create_cross_appflipper_tables.rb", /class CreateCrossAppflipperTables /
+    assert_migration "db/migrate/change_cross_appflipper_gates_value_to_text.rb", /class ChangeCrossAppflipperGatesValueToText /
+
+    silence { run_migration_file(migration_file_name("db/migrate/create_cross_appflipper_tables.rb"), :up) }
+    assert ActiveRecord::Base.connection.table_exists?(:cross_appflipper_features)
+    assert ActiveRecord::Base.connection.column_exists?(:cross_appflipper_gates, :value, :string)
+
+    silence { run_migration_file(migration_file_name("db/migrate/change_cross_appflipper_gates_value_to_text.rb"), :up) }
+    assert ActiveRecord::Base.connection.column_exists?(:cross_appflipper_gates, :value, :text)
+  ensure
+    Object.send(:remove_const, :CreateCrossAppflipperTables) if defined?(::CreateCrossAppflipperTables)
+    Object.send(:remove_const, :ChangeCrossAppflipperGatesValueToText) if defined?(::ChangeCrossAppflipperGatesValueToText)
+  end
+
+  test "rejects a table prefix that cannot name a migration" do
+    ["CrossApp_", "cross-app_"].each do |prefix|
+      error = assert_raises(Thor::Error) { run_generator ["--table-prefix=#{prefix}"], debug: true }
+      assert_match(/lowercase letters, numbers and underscores/, error.message)
+      assert_empty Dir.glob(File.join(destination_root, "db/migrate/*.rb"))
+    end
+  end
+
   def require_migrations
     # If these are not reloaded, then test order can cause failures
     Object.send(:remove_const, :CreateFlipperTables) if defined?(::CreateFlipperTables)
