@@ -70,8 +70,12 @@ class ActiveRecordTest < MiniTest::Test
     feature_class = adapter.instance_variable_get(:@feature_class)
     gate_class = adapter.instance_variable_get(:@gate_class)
 
-    assert_operator feature_class, :<, Flipper::Adapters::ActiveRecord::Feature
-    assert_operator gate_class, :<, Flipper::Adapters::ActiveRecord::Gate
+    assert_operator feature_class, :<, Flipper::Adapters::ActiveRecord::Model
+    assert_operator gate_class, :<, Flipper::Adapters::ActiveRecord::Model
+    assert_equal Flipper::Adapters::ActiveRecord::Feature.validators.map(&:attributes),
+      feature_class.validators.map(&:attributes)
+    assert_equal Flipper::Adapters::ActiveRecord::Gate.validators.map(&:attributes),
+      gate_class.validators.map(&:attributes)
     assert_equal "cross_product_flipper_features", feature_class.table_name
     assert_equal "cross_product_flipper_gates", gate_class.table_name
 

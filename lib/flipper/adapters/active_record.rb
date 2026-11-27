@@ -245,8 +245,16 @@ module Flipper
       def model_class(default_class, table_prefix, table_name)
         return default_class if table_prefix.nil?
 
-        Class.new(default_class) do
+        # Subclass the abstract Model, not default_class. A subclass of a
+        # concrete model loads its parent's columns too, which fails when
+        # only the prefixed tables exist.
+        Class.new(Model) do
           self.table_name = "#{table_prefix}#{table_name}"
+
+          # Validators declared on ActiveRecord::Base already come through Model.
+          (default_class.validators - Model.validators).each do |validator|
+            validates_with validator.class, validator.options.merge(attributes: validator.attributes)
+          end
         end
       end
 

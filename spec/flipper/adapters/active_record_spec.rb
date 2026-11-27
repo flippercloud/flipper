@@ -391,6 +391,41 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
         end
       end
 
+      context "with only prefixed tables created" do
+        subject { described_class.new(table_prefix: "prefixed_") }
+
+        before(:all) do
+          skip_on_error(ActiveRecord::ConnectionNotEstablished, "#{config['adapter']} not available") do
+            silence do
+              ActiveRecord::Tasks::DatabaseTasks.create(config)
+            end
+          end
+
+          Flipper.configuration = nil
+        end
+
+        before(:each) do
+          silence do
+            ActiveRecord::Tasks::DatabaseTasks.purge(config)
+            CreateFlipperTables.migrate(:up)
+            ActiveRecord::Base.connection.rename_table(:flipper_features, :prefixed_flipper_features)
+            ActiveRecord::Base.connection.rename_table(:flipper_gates, :prefixed_flipper_gates)
+          end
+
+          # Drop Feature/Gate columns cached by other specs so this fails if
+          # the prefixed models still read the unprefixed tables.
+          Flipper::Adapters::ActiveRecord::Feature.reset_column_information
+          Flipper::Adapters::ActiveRecord::Gate.reset_column_information
+        end
+
+        after(:all) do
+          silence { ActiveRecord::Tasks::DatabaseTasks.drop(config) } unless $skip
+        end
+
+        it_should_behave_like 'a flipper adapter'
+        it_should_behave_like 'an adapter that stores its sync version'
+      end
+
       context "without tables created" do
         before(:all) do
           skip_on_error(ActiveRecord::ConnectionNotEstablished, "#{config['adapter']} not available") do
@@ -436,6 +471,23 @@ RSpec.describe Flipper::Adapters::ActiveRecord do
       abort "requiring the adapter loaded ActiveRecord::Base" unless ActiveRecord.autoload?(:Base)
 
       Flipper::Adapters::ActiveRecord.new
+    RUBY
+
+    _, stderr, status = Open3.capture3(RbConfig.ruby, "-Ilib", "-e", script, chdir: FlipperRoot.to_s)
+
+    expect(status).to be_success, stderr
+  end
+
+  it "builds prefixed models when ActiveRecord::Base has a record validator" do
+    script = <<~RUBY
+      require "active_record"
+      class AlwaysValid < ActiveModel::Validator
+        def validate(record); end
+      end
+      ActiveSupport.on_load(:active_record) { validates_with AlwaysValid }
+      require "flipper/adapters/active_record"
+
+      Flipper::Adapters::ActiveRecord.new(table_prefix: "prefixed_")
     RUBY
 
     _, stderr, status = Open3.capture3(RbConfig.ruby, "-Ilib", "-e", script, chdir: FlipperRoot.to_s)
