@@ -46,9 +46,18 @@ module Flipper
           c.on('-t NUM', '--percentage-of-time=NUM', Numeric, "#{action} for a percentage of time") do |num|
             values << percentage(Types::PercentageOfTime, num)
           end
-          c.on('-x expressions', '--expression=JSON', "#{action} for the given expression") do |expression|
+          c.on('-x expressions', '--expression=JSON', "#{action} for the given expression") do |json|
             begin
-              values << Flipper::Expression.build(JSON.parse(expression))
+              expression = Flipper::Expression.build(JSON.parse(json))
+
+              # Check before anything is enabled, so a bad expression doesn't
+              # leave the other values given with it half applied.
+              raise ArgumentError, "#{expression.value.inspect} is not an expression" unless expression.is_a?(Flipper::Expression)
+              if action == "enable" && expression.empty_groups?
+                raise ArgumentError, "#{expression.value.inspect} contains empty Any/All groups"
+              end
+
+              values << expression
             rescue JSON::ParserError => e
               ui.error "JSON parse error #{e.message}"
               ui.trace(e)

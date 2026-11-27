@@ -116,6 +116,17 @@ RSpec.describe Flipper::CLI do
         expect(subject).to have_attributes(status: 1, stderr: /Invalid expression/m)
       end
     end
+
+    describe %|feature -a User;1 -x '{"All":[]}'| do
+      it do
+        expect(subject).to have_attributes(status: 1, stderr: /\AInvalid expression: .*empty Any\/All groups/)
+        expect(Flipper.features).to be_empty
+      end
+    end
+
+    describe %|feature -x 5| do
+      it { should have_attributes(status: 1, stderr: /\AInvalid expression: 5 is not an expression/) }
+    end
   end
 
   describe "disable" do
@@ -135,6 +146,19 @@ RSpec.describe Flipper::CLI do
         expect(subject).to have_attributes(status: 0, stdout: /feature.*disabled/)
         expect(Flipper.feature('feature').enabled_groups).to be_empty
       end
+    end
+
+    describe %|feature -x '{"All":[]}'| do
+      before { Flipper.enable_expression(:feature, Flipper.property(:plan).eq("basic")) }
+
+      it do
+        expect(subject).to have_attributes(status: 0, stdout: /feature.*disabled/)
+        expect(Flipper.feature('feature').expression).to be_nil
+      end
+    end
+
+    describe %|feature -x 5| do
+      it { should have_attributes(status: 1, stderr: /\AInvalid expression: 5 is not an expression/) }
     end
   end
 
