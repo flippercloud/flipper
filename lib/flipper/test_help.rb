@@ -24,12 +24,14 @@ module Flipper
 
       prune_named_test_adapters(Flipper.configuration).each do |named|
         test_adapter = named_test_adapters[named]
-        if test_adapter && test_adapter[:version] == named.version
-          Flipper.named(named.name).features.each(&:remove) rescue nil
-        else
-          # The named configuration changed since we installed the test
-          # adapter (or we never did), so clean up and install a fresh one.
-          Flipper.new(test_adapter[:adapter]).features.each(&:remove) if test_adapter
+        # Clear the Memory adapter directly. Going through the named DSL can
+        # miss features a memoized list doesn't have, or reach the other store
+        # of a write-through adapter wrapping Memory.
+        Flipper.new(test_adapter[:adapter]).features.each(&:remove) if test_adapter
+
+        # Install a fresh one if the named configuration changed since we
+        # installed the test adapter (or we never did).
+        if test_adapter.nil? || test_adapter[:version] != named.version
           install_named_test_adapter(named)
         end
       end
@@ -49,8 +51,13 @@ module Flipper
       named_configurations.each { |named| install_named_test_adapter(named) }
     end
 
+    # Kept on the module, not the object that includes it, so each test's
+    # flipper_reset sees the adapters flipper_configure installed at boot.
+    NAMED_TEST_ADAPTERS = {}
+    private_constant :NAMED_TEST_ADAPTERS
+
     def named_test_adapters
-      @named_test_adapters ||= {}
+      NAMED_TEST_ADAPTERS
     end
 
     # Forget test adapters for named configurations that no longer exist and

@@ -79,6 +79,44 @@ RSpec.describe Flipper::TestHelp do
     expect(Flipper.cross_app.group_exists?(:beta)).to be(true)
   end
 
+  it "reuses named test adapters across examples while clearing features" do
+    Flipper.configure { |config| config.named(:cross_app) }
+    described_class.flipper_configure
+    named = Flipper.configuration.named_configuration(:cross_app)
+    version = named.version
+    # RSpec and Minitest call flipper_reset on each example, not on the module.
+    example_class = Class.new { include Flipper::TestHelp }
+
+    example_class.new.flipper_reset
+    Flipper.enable(:search)
+    Flipper.cross_app.enable(:chat)
+    retained = Flipper.cross_app.instance
+
+    example_class.new.flipper_reset
+
+    expect(named.version).to eq(version)
+    expect(Flipper.enabled?(:search)).to be(false)
+    expect(retained.enabled?(:chat)).to be(false)
+    expect(Flipper.cross_app.enabled?(:chat)).to be(false)
+    retained.enable(:shared)
+    expect(Flipper.cross_app.enabled?(:shared)).to be(true)
+  end
+
+  it "clears named features enabled in another thread while this one memoizes" do
+    Flipper.configure { |config| config.named(:cross_app) }
+    described_class.flipper_configure
+    example_class = Class.new { include Flipper::TestHelp }
+
+    example_class.new.flipper_reset
+    Flipper.cross_app.adapter.memoize = true
+    Flipper.cross_app.features
+    Thread.new { Flipper.cross_app.enable(:chat) }.join
+
+    example_class.new.flipper_reset
+
+    expect(Flipper.cross_app.enabled?(:chat)).to be(false)
+  end
+
   it "clears the previous test adapter when a named configuration changes" do
     Flipper.configure { |config| config.named(:cross_app) }
     described_class.flipper_configure
