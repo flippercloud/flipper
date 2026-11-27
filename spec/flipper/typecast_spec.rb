@@ -259,6 +259,22 @@ RSpec.describe Flipper::Typecast do
       expect(described_class.to_feature_name("feature\xFF".dup.force_encoding(Encoding::UTF_8))).to eq("feature")
     end
 
+    it "converts other encodings to utf-8" do
+      expect(described_class.to_feature_name("caf\xE9".dup.force_encoding(Encoding::ISO_8859_1))).to eq("café")
+      expect(described_class.to_feature_name("日本".encode(Encoding::Shift_JIS))).to eq("日本")
+      expect(described_class.to_feature_name("f​eature ".encode(Encoding::UTF_16LE))).to eq("feature")
+    end
+
+    it "reads binary strings as utf-8" do
+      expect(described_class.to_feature_name("café".b)).to eq("café")
+      expect(described_class.to_feature_name("feature\xFF".b)).to eq("feature")
+    end
+
+    it "reads strings in encodings without a utf-8 converter as utf-8 when valid" do
+      expect(described_class.to_feature_name("feature".dup.force_encoding(Encoding::UTF_7))).to eq("feature")
+      expect(described_class.to_feature_name("caf\xE9".dup.force_encoding(Encoding::Windows_1258))).to eq("")
+    end
+
     it "returns empty string for nil" do
       expect(described_class.to_feature_name(nil)).to eq("")
     end
