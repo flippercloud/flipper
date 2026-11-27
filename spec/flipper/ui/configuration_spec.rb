@@ -95,6 +95,17 @@ RSpec.describe Flipper::UI::Configuration do
     end
   end
 
+  describe "#feature_search_enabled" do
+    it "has default value" do
+      expect(configuration.feature_search_enabled).to eq(true)
+    end
+
+    it "can be updated" do
+      configuration.feature_search_enabled = false
+      expect(configuration.feature_search_enabled).to eq(false)
+    end
+  end
+
   describe "#fun" do
     it "has default value" do
       expect(configuration.fun).to eq(true)

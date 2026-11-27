@@ -36,3 +36,10 @@ html {
   border-radius: 50%;
   display: inline-block;
 }
+
+.list-group-item mark {
+  padding: 0 1px;
+  border-radius: 2px;
+  background-color: #f0c14b;
+  color: #1c140c;
+}
