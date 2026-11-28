@@ -510,8 +510,14 @@ RSpec.describe Flipper::Api::V1::Actions::Features do
       end
 
       it 'adds the feature with the name converted to utf-8' do
+        # Once a Rails 8.2+ app boots in this process, Rails patches Rack's
+        # multipart parser to tag declared non-UTF-8 charsets as binary, so the
+        # \xE9 byte arrives as binary and is dropped as invalid UTF-8.
+        rails_tags_binary = defined?(ActionDispatch::CoreExt::RackMultipartParser) &&
+          Rack::Multipart::Parser.ancestors.include?(ActionDispatch::CoreExt::RackMultipartParser)
+
         expect(last_response.status).to eq(200)
-        expect(flipper.features.map(&:key)).to eq(["café"])
+        expect(flipper.features.map(&:key)).to eq([rails_tags_binary ? "caf" : "café"])
       end
     end
 
